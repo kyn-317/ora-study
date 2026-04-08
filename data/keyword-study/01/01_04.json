@@ -1,0 +1,1050 @@
+{
+  "studyId": "01_04",
+  "chapterId": "01",
+  "title": "아키텍처 기동 (Instance Startup and Shutdown)",
+  "keywords": {
+    "SGA": {
+      "definition": "System Global Area의 약자로, Oracle 인스턴스가 기동될 때 할당되는 공유 메모리 영역이다. 모든 서버 프로세스와 백그라운드 프로세스가 공유하며, 인스턴스의 핵심 구성요소이다.",
+      "keyPoints": [
+        "STARTUP NOMOUNT 단계에서 초기화 파라미터 파일의 설정값에 따라 할당됨",
+        "인스턴스 = SGA + 백그라운드 프로세스의 조합",
+        "멀티테넌트(CDB) 환경에서 모든 PDB가 동일한 SGA를 공유함",
+        "RAC 환경에서는 각 노드가 독립적인 SGA를 보유함",
+        "SHUTDOWN 시 SGA 메모리가 해제되어 인스턴스가 소멸됨"
+      ],
+      "relatedKeywords": ["NOMOUNT", "Instance", "STARTUP"],
+      "sourceSection": "s01"
+    },
+    "Dirty Buffer": {
+      "definition": "SGA의 Database Buffer Cache에 있는 블록 중 변경되었지만 아직 디스크의 데이터 파일에 기록되지 않은 버퍼를 의미한다.",
+      "keyPoints": [
+        "SHUTDOWN NORMAL/TRANSACTIONAL/IMMEDIATE 시 체크포인트를 통해 Dirty Buffer를 디스크에 기록함",
+        "SHUTDOWN ABORT 시에는 Dirty Buffer를 디스크에 기록하지 않아 인스턴스 복구가 필요함",
+        "DBWn 프로세스가 Dirty Buffer를 데이터 파일에 기록하는 역할을 담당함",
+        "Clean Shutdown의 핵심 기준은 Dirty Buffer가 모두 디스크에 기록되었는지 여부임"
+      ],
+      "relatedKeywords": ["DBWn", "Checkpoint", "SHUTDOWN ABORT"],
+      "sourceSection": "s03"
+    },
+    "LGWR": {
+      "definition": "Log Writer의 약자로, Redo Log Buffer의 내용을 온라인 Redo Log 파일에 기록하는 필수 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "NOMOUNT 단계에서 다른 필수 백그라운드 프로세스와 함께 기동됨",
+        "멀티테넌트 환경에서 모든 PDB의 Redo 데이터를 동일한 온라인 Redo Log에 기록함",
+        "SHUTDOWN 시(ABORT 제외) 미기록 Redo를 온라인 Redo Log에 기록한 후 종료함",
+        "인스턴스 레벨에서 1개만 기동되어 CDB 전체를 담당함"
+      ],
+      "relatedKeywords": ["Redo Log", "NOMOUNT", "CKPT"],
+      "sourceSection": "s03"
+    },
+    "DBWn": {
+      "definition": "Database Writer의 약자로, SGA의 Database Buffer Cache에 있는 변경된 블록(Dirty Buffer)을 디스크의 데이터 파일에 기록하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "NOMOUNT 단계에서 기동되는 필수 백그라운드 프로세스",
+        "체크포인트 발생 시 Dirty Buffer를 데이터 파일에 기록함",
+        "멀티테넌트 환경에서 모든 PDB의 Dirty Buffer를 처리함",
+        "n은 번호로 여러 DBW 프로세스가 병렬로 동작 가능함"
+      ],
+      "relatedKeywords": ["Dirty Buffer", "Checkpoint", "Data File"],
+      "sourceSection": "s03"
+    },
+    "CKPT": {
+      "definition": "Checkpoint Process의 약자로, 체크포인트 이벤트를 DBWn에게 알리고 데이터 파일 헤더와 컨트롤 파일에 체크포인트 정보를 기록하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "NOMOUNT 단계에서 기동되는 필수 백그라운드 프로세스",
+        "SHUTDOWN(ABORT 제외) 시 체크포인트를 수행하여 데이터 일관성을 보장함",
+        "체크포인트 수행 여부가 Clean Shutdown과 비정상 종료를 구분하는 핵심 기준",
+        "CDB 전체에서 1세트만 기동되어 모든 컨테이너를 담당함"
+      ],
+      "relatedKeywords": ["Checkpoint", "DBWn", "SCN"],
+      "sourceSection": "s03"
+    },
+    "Checkpoint": {
+      "definition": "메모리(Buffer Cache)에 있는 변경된 데이터를 디스크에 기록하고, 데이터 파일 헤더와 컨트롤 파일에 현재 SCN을 기록하는 동기화 이벤트이다.",
+      "keyPoints": [
+        "SHUTDOWN NORMAL/TRANSACTIONAL/IMMEDIATE에서는 체크포인트가 수행되어 Clean Shutdown이 됨",
+        "SHUTDOWN ABORT에서는 체크포인트가 수행되지 않아 다음 기동 시 인스턴스 복구가 필요함",
+        "OPEN 단계에서 컨트롤 파일의 체크포인트 SCN과 데이터 파일 헤더의 SCN을 비교하여 일관성 검증",
+        "체크포인트 정보는 컨트롤 파일에 기록되며 MOUNT 단계에서 읽힘"
+      ],
+      "relatedKeywords": ["SCN", "CKPT", "Clean Shutdown"],
+      "sourceSection": "s03"
+    },
+    "SCN": {
+      "definition": "System Change Number의 약자로, Oracle 데이터베이스에서 데이터 변경의 순서를 나타내는 논리적 타임스탬프이다. 데이터 일관성과 복구의 기준이 된다.",
+      "keyPoints": [
+        "OPEN 단계에서 컨트롤 파일의 체크포인트 SCN과 데이터 파일 헤더의 SCN을 비교하여 일관성 검증",
+        "SCN 불일치 시 SMON이 자동으로 인스턴스 복구(Roll Forward → Roll Back)를 수행함",
+        "체크포인트 수행 시 현재 SCN이 데이터 파일 헤더와 컨트롤 파일에 기록됨",
+        "SHUTDOWN ABORT 후 재기동 시 SCN 불일치가 발생하여 인스턴스 복구가 트리거됨"
+      ],
+      "relatedKeywords": ["Checkpoint", "Instance Recovery", "SMON"],
+      "sourceSection": "s03"
+    },
+    "CDB": {
+      "definition": "Container Database의 약자로, 멀티테넌트 아키텍처에서 여러 PDB(Pluggable Database)를 포함하는 상위 데이터베이스 컨테이너이다.",
+      "keyPoints": [
+        "CDB STARTUP 시 CDB$ROOT는 자동 OPEN, PDB$SEED는 READ ONLY, 사용자 PDB는 MOUNTED 상태",
+        "1개 인스턴스는 1개 CDB에만 연결됨 (1:1 관계)",
+        "CDB 내 모든 PDB는 동일한 SGA, 백그라운드 프로세스, 제어파일, Redo Log를 공유함",
+        "RAC 환경에서는 여러 노드의 인스턴스가 하나의 CDB를 공유함(N:1)"
+      ],
+      "relatedKeywords": ["PDB", "CDB$ROOT", "PDB$SEED", "멀티테넌트"],
+      "sourceSection": "s05"
+    },
+    "PDB": {
+      "definition": "Pluggable Database의 약자로, CDB 내에 존재하는 독립적인 데이터베이스 단위이다. 각 PDB는 고유한 데이터 파일과 애플리케이션 데이터를 가진다.",
+      "keyPoints": [
+        "CDB 기동 시 사용자 PDB는 기본적으로 MOUNTED 상태이며 별도로 OPEN해야 함",
+        "ALTER PLUGGABLE DATABASE ... OPEN/CLOSE로 개별 제어 가능",
+        "SAVE STATE 설정으로 CDB 재기동 시 PDB 상태를 자동 복원할 수 있음",
+        "PDB는 MOUNTED, READ WRITE, READ ONLY, MIGRATE 상태를 가짐",
+        "데이터 파일과 임시 파일은 PDB별 로컬이지만, Redo Log와 제어파일은 CDB 공유"
+      ],
+      "relatedKeywords": ["CDB", "ALTER PLUGGABLE DATABASE", "SAVE STATE"],
+      "sourceSection": "s05"
+    },
+    "STARTUP": {
+      "definition": "Oracle 인스턴스를 기동하는 명령으로, 기본적으로 NOMOUNT → MOUNT → OPEN의 3단계를 순차적으로 수행하여 데이터베이스를 사용 가능한 상태로 만든다.",
+      "keyPoints": [
+        "STARTUP만 실행하면 OPEN까지 자동 진행됨",
+        "STARTUP NOMOUNT, STARTUP MOUNT로 중간 단계에서 멈출 수 있음",
+        "STARTUP FORCE는 내부적으로 SHUTDOWN ABORT + STARTUP을 수행함",
+        "STARTUP RESTRICT는 RESTRICTED SESSION 권한자만 접속 가능하게 기동",
+        "SYSDBA 또는 SYSOPER 권한이 필요하며, 외부 인증(OS 인증 또는 Password File 인증) 사용"
+      ],
+      "relatedKeywords": ["NOMOUNT", "MOUNT", "OPEN", "SHUTDOWN"],
+      "sourceSection": "s03"
+    },
+    "MOUNT": {
+      "definition": "인스턴스 기동의 두 번째 단계로, 컨트롤 파일을 열어 데이터베이스 구조 정보(파일 위치, 체크포인트 등)를 읽고 인스턴스와 데이터베이스를 연결하는 상태이다.",
+      "keyPoints": [
+        "ALTER DATABASE MOUNT 또는 STARTUP MOUNT 명령으로 진입",
+        "컨트롤 파일에서 데이터 파일과 Redo Log 파일의 경로를 인식하지만 실제로 열지는 않음",
+        "ARCHIVELOG 모드 변경, 미디어 복구, 데이터 파일 RENAME은 MOUNT 단계에서만 가능",
+        "컨트롤 파일 오류 시 ORA-00205 발생",
+        "CONTROL_FILES 파라미터에 지정된 모든 컨트롤 파일이 정상이어야 진입 가능"
+      ],
+      "relatedKeywords": ["NOMOUNT", "OPEN", "CONTROL_FILES"],
+      "sourceSection": "s03"
+    },
+    "OPEN": {
+      "definition": "인스턴스 기동의 최종 단계로, 데이터 파일과 Redo Log 파일을 열고 일관성을 검증하여 일반 사용자가 접속 가능한 상태로 만드는 것이다.",
+      "keyPoints": [
+        "ALTER DATABASE OPEN 또는 STARTUP 명령으로 진입",
+        "데이터 파일과 Redo Log 파일을 열고 SCN 기반 일관성 검증 수행",
+        "SCN 불일치 시 SMON이 자동으로 인스턴스 복구(Roll Forward → Roll Back) 수행",
+        "READ WRITE(기본), READ ONLY, RESTRICTED, UPGRADE, DOWNGRADE, FORCE 등 다양한 모드 존재",
+        "데이터 파일 누락 시 ORA-01157, 복구 필요 시 ORA-01113 발생"
+      ],
+      "relatedKeywords": ["MOUNT", "SCN", "Instance Recovery", "READ WRITE"],
+      "sourceSection": "s03"
+    },
+    "Database": {
+      "definition": "디스크에 저장된 물리적 파일(데이터 파일, 컨트롤 파일, Redo Log 파일 등)의 집합으로, 인스턴스와 구분되는 영구적 저장 구조이다.",
+      "keyPoints": [
+        "인스턴스(메모리+프로세스)와 데이터베이스(물리적 파일)는 별개의 개념",
+        "데이터베이스는 영구적으로 존재하며, 인스턴스는 STARTUP 시 생성되고 SHUTDOWN 시 소멸됨",
+        "단일 인스턴스에서는 1:1, RAC 환경에서는 N:1(여러 인스턴스가 하나의 DB 공유) 관계",
+        "컨트롤 파일에 기록된 DB_NAME으로 식별됨"
+      ],
+      "relatedKeywords": ["Instance", "RAC", "Data File"],
+      "sourceSection": "s01"
+    },
+    "SPFILE": {
+      "definition": "Server Parameter File의 약자로, Oracle 인스턴스의 초기화 파라미터를 저장하는 바이너리 형식의 서버 측 파일이다. 기본 이름은 spfile<SID>.ora이다.",
+      "keyPoints": [
+        "기동 시 파라미터 파일 검색 순서에서 PFILE보다 우선순위가 높음 (1순위)",
+        "ALTER SYSTEM ... SCOPE=BOTH로 파라미터 변경을 영구 반영할 수 있음",
+        "바이너리 파일이므로 직접 편집하면 안 됨",
+        "RAC 환경에서는 공유 스토리지에 배치하여 모든 노드가 동일 SPFILE을 참조함",
+        "NOMOUNT 단계에서 가장 먼저 읽히는 파일"
+      ],
+      "relatedKeywords": ["PFILE", "NOMOUNT", "STARTUP"],
+      "sourceSection": "s02"
+    },
+    "PFILE": {
+      "definition": "Parameter File의 약자로, Oracle 인스턴스의 초기화 파라미터를 저장하는 텍스트 형식의 파일이다. 기본 이름은 init<SID>.ora이다.",
+      "keyPoints": [
+        "SPFILE이 없을 때 2순위로 사용됨",
+        "텍스트 파일이므로 직접 편집 가능하나, ALTER SYSTEM으로 영구 반영 불가",
+        "STARTUP PFILE='경로'로 명시적으로 지정하여 기동할 수 있음",
+        "SPFILE과 달리 동적 파라미터 변경이 파일에 자동 반영되지 않음"
+      ],
+      "relatedKeywords": ["SPFILE", "NOMOUNT", "STARTUP"],
+      "sourceSection": "s02"
+    },
+    "READ WRITE": {
+      "definition": "데이터베이스의 기본 OPEN 모드로, 데이터의 읽기와 쓰기가 모두 가능한 정상 운영 상태이다.",
+      "keyPoints": [
+        "ALTER DATABASE OPEN 명령의 기본 모드",
+        "DML(INSERT/UPDATE/DELETE)과 DDL이 모두 가능한 완전한 운영 모드",
+        "PDB도 READ WRITE 모드로 열 수 있음 (ALTER PLUGGABLE DATABASE ... OPEN)",
+        "READ ONLY 모드와의 차이점을 시험에서 자주 비교 출제"
+      ],
+      "relatedKeywords": ["READ ONLY", "OPEN", "ALTER DATABASE OPEN"],
+      "sourceSection": "s03"
+    },
+    "READ ONLY": {
+      "definition": "데이터베이스를 읽기 전용으로 여는 OPEN 모드로, 데이터 파일에 대한 쓰기가 불가하지만 조회는 가능한 상태이다.",
+      "keyPoints": [
+        "ALTER DATABASE OPEN READ ONLY 또는 STARTUP MOUNT 후 ALTER DATABASE OPEN READ ONLY로 설정",
+        "임시 테이블스페이스에는 쓰기가 가능함 (정렬, 임시 작업 등)",
+        "온라인 Redo Log에 쓰기가 발생하지 않음",
+        "주로 리포팅, 분석 목적 또는 Standby 데이터베이스에서 사용",
+        "PDB$SEED는 항상 READ ONLY 상태로 유지됨"
+      ],
+      "relatedKeywords": ["READ WRITE", "PDB$SEED", "OPEN"],
+      "sourceSection": "s03"
+    },
+    "DBA_PDB_SAVED_STATES": {
+      "definition": "PDB의 SAVE STATE 설정 정보를 저장하는 데이터 딕셔너리 뷰로, CDB 재기동 시 자동으로 복원할 PDB 상태 목록을 확인할 수 있다.",
+      "keyPoints": [
+        "ALTER PLUGGABLE DATABASE ... SAVE STATE 실행 후 이 뷰에서 저장된 상태 확인 가능",
+        "CON_NAME, INSTANCE_NAME, STATE 등의 컬럼으로 구성됨",
+        "DISCARD STATE 실행 시 해당 PDB의 저장 정보가 이 뷰에서 제거됨",
+        "CDB$ROOT의 데이터 딕셔너리에 저장되는 정보를 조회하는 뷰"
+      ],
+      "relatedKeywords": ["SAVE STATE", "DISCARD STATE", "PDB"],
+      "sourceSection": "s05"
+    },
+    "CDB$ROOT": {
+      "definition": "CDB(Container Database)의 루트 컨테이너로, 공통 메타데이터와 공통 사용자 정보를 관리하며 CON_ID가 항상 1인 필수 컨테이너이다.",
+      "keyPoints": [
+        "CDB STARTUP 시 자동으로 OPEN됨",
+        "공통 메타데이터, 공통 사용자(C## 접두사), 시스템 표영역을 보유",
+        "PDB 관리 명령(ALTER PLUGGABLE DATABASE)은 CDB$ROOT에서 실행",
+        "SAVE STATE 정보가 CDB$ROOT의 데이터 딕셔너리에 저장됨"
+      ],
+      "relatedKeywords": ["CDB", "PDB$SEED", "PDB"],
+      "sourceSection": "s05"
+    },
+    "PDB$SEED": {
+      "definition": "CDB 내의 필수 시드 컨테이너로, 새로운 PDB를 생성할 때 복제 원본(템플릿)으로 사용되며 CON_ID가 항상 2이다.",
+      "keyPoints": [
+        "항상 READ ONLY 상태로 유지되며 DBA가 직접 변경 불가",
+        "CREATE PLUGGABLE DATABASE 실행 시 PDB$SEED의 데이터 파일을 복제하여 새 PDB 생성",
+        "삭제할 수 없는 필수 컨테이너",
+        "SYSTEM, SYSAUX 등 기본 표영역을 포함하여 새 PDB의 초기 구성을 결정"
+      ],
+      "relatedKeywords": ["CDB$ROOT", "Pluggable Database", "CDB"],
+      "sourceSection": "s07"
+    },
+    "ALTER PLUGGABLE DATABASE": {
+      "definition": "PDB(Pluggable Database)의 상태를 제어하는 SQL 명령으로, PDB의 열기, 닫기, 상태 저장 등을 수행한다.",
+      "keyPoints": [
+        "ALTER PLUGGABLE DATABASE pdb_name OPEN으로 특정 PDB를 열 수 있음",
+        "ALTER PLUGGABLE DATABASE ALL OPEN으로 모든 PDB를 한 번에 열 수 있음",
+        "CLOSE IMMEDIATE로 PDB를 즉시 닫을 수 있음",
+        "SAVE STATE / DISCARD STATE로 CDB 재기동 시 PDB 자동 복원 설정",
+        "CDB$ROOT에서 실행하거나, PDB 컨텍스트에서 실행 가능"
+      ],
+      "relatedKeywords": ["PDB", "SAVE STATE", "CDB$ROOT"],
+      "sourceSection": "s05"
+    },
+    "SAVE STATE": {
+      "definition": "PDB의 현재 오픈 상태를 CDB$ROOT의 데이터 딕셔너리에 저장하여, CDB 재기동 시 해당 PDB가 자동으로 이전 상태로 복원되게 하는 기능이다.",
+      "keyPoints": [
+        "ALTER PLUGGABLE DATABASE ... SAVE STATE 명령으로 설정",
+        "SAVE STATE 미설정 시 CDB 재기동 후 모든 PDB는 MOUNTED 상태로 시작됨",
+        "DBA_PDB_SAVED_STATES 뷰에서 저장된 상태를 확인 가능",
+        "ALTER PLUGGABLE DATABASE ALL SAVE STATE로 모든 PDB를 한 번에 설정 가능",
+        "운영 환경에서 PDB를 매번 수동으로 열지 않아도 되는 핵심 기능"
+      ],
+      "relatedKeywords": ["DISCARD STATE", "DBA_PDB_SAVED_STATES", "PDB"],
+      "sourceSection": "s05"
+    },
+    "DISCARD STATE": {
+      "definition": "SAVE STATE로 저장된 PDB 상태 정보를 제거하는 명령으로, 이후 CDB 재기동 시 해당 PDB는 MOUNTED 상태로 시작된다.",
+      "keyPoints": [
+        "ALTER PLUGGABLE DATABASE ... DISCARD STATE 명령으로 실행",
+        "실행 후 DBA_PDB_SAVED_STATES 뷰에서 해당 PDB의 저장 정보가 제거됨",
+        "PDB를 CDB 재기동 시 자동으로 열고 싶지 않을 때 사용",
+        "SAVE STATE와 반대 역할로, 함께 이해해야 하는 쌍(pair) 개념"
+      ],
+      "relatedKeywords": ["SAVE STATE", "DBA_PDB_SAVED_STATES", "PDB"],
+      "sourceSection": "s05"
+    },
+    "RAC": {
+      "definition": "Real Application Clusters의 약자로, 복수의 서버(노드)에서 복수의 인스턴스가 하나의 데이터베이스를 동시에 공유하는 Oracle의 고가용성 및 확장성 아키텍처이다.",
+      "keyPoints": [
+        "N개 인스턴스 : 1개 데이터베이스의 N:1 관계 (단일 인스턴스는 1:1)",
+        "필수 3대 구성요소: 공유 스토리지(ASM), 인터커넥트, Oracle Clusterware",
+        "Cache Fusion으로 인터커넥트를 통해 노드 간 메모리 블록을 직접 전송",
+        "한 노드 장애 시 다른 노드에서 서비스 계속 가능 (고가용성)",
+        "RAC + 멀티테넌트 조합으로 여러 노드가 하나의 CDB를 공유하며 PDB 운영 가능"
+      ],
+      "relatedKeywords": ["Cache Fusion", "공유 스토리지", "Instance"],
+      "sourceSection": "s08"
+    },
+    "Redo Log": {
+      "definition": "데이터베이스의 모든 변경 사항을 순차적으로 기록하는 로그 파일로, 인스턴스 복구와 미디어 복구의 핵심 기반이 된다.",
+      "keyPoints": [
+        "OPEN 단계에서 온라인 Redo Log 파일을 열고 검증함",
+        "SHUTDOWN(ABORT 제외) 시 미기록 Redo를 디스크에 기록함",
+        "SHUTDOWN ABORT 시 Redo Log 기록을 하지 않아 다음 기동 시 인스턴스 복구가 필요함",
+        "멀티테넌트 환경에서 모든 PDB의 변경이 동일한 온라인 Redo Log에 기록됨",
+        "MOUNT 단계에서 컨트롤 파일로부터 Redo Log 파일 경로를 인식함"
+      ],
+      "relatedKeywords": ["LGWR", "Instance Recovery", "OPEN"],
+      "sourceSection": "s03"
+    },
+    "Pluggable Database": {
+      "definition": "멀티테넌트 아키텍처에서 CDB 내에 플러그인하여 운영되는 독립적인 데이터베이스 단위로, PDB라고도 한다. 각각 고유한 데이터 파일과 사용자, 스키마를 가진다.",
+      "keyPoints": [
+        "PDB$SEED를 템플릿으로 복제하여 CREATE PLUGGABLE DATABASE로 생성",
+        "ALTER PLUGGABLE DATABASE로 OPEN/CLOSE 상태를 독립적으로 제어",
+        "RAC 환경에서 PDB 서비스를 특정 노드에 매핑하여 워크로드 분산 가능",
+        "CDB 내 PDB 수에 아키텍처적 제한이 없음"
+      ],
+      "relatedKeywords": ["PDB", "CDB", "PDB$SEED"],
+      "sourceSection": "s07"
+    },
+    "컨테이너": {
+      "definition": "멀티테넌트 아키텍처에서 CDB를 구성하는 논리적 단위로, CDB$ROOT(루트), PDB$SEED(시드), 사용자 PDB를 포함하는 개념이다.",
+      "keyPoints": [
+        "각 컨테이너는 고유한 CON_ID를 가짐 (CDB$ROOT=1, PDB$SEED=2, 사용자 PDB=3 이상)",
+        "ALTER SESSION SET CONTAINER 명령으로 컨테이너 간 전환 가능",
+        "V$CONTAINERS 뷰에서 CDB 내 모든 컨테이너 정보를 조회할 수 있음",
+        "일부 자원은 CDB 레벨에서 공유되고, 일부는 컨테이너별로 로컬 보유됨"
+      ],
+      "relatedKeywords": ["CDB$ROOT", "PDB$SEED", "PDB"],
+      "sourceSection": "s07"
+    },
+    "SHUTDOWN": {
+      "definition": "Oracle 인스턴스를 종료하는 명령으로, NORMAL, TRANSACTIONAL, IMMEDIATE, ABORT의 4가지 모드를 제공하며 각 모드에 따라 데이터 일관성 보장 수준과 종료 속도가 다르다.",
+      "keyPoints": [
+        "SHUTDOWN만 입력하면 기본적으로 NORMAL 모드로 동작함",
+        "SYSDBA 또는 SYSOPER 권한이 필요함",
+        "ABORT를 제외한 모든 모드에서 체크포인트가 수행되어 Clean Shutdown이 됨",
+        "SHUTDOWN 시 SGA 메모리가 해제되고 백그라운드 프로세스가 종료되어 인스턴스가 소멸됨",
+        "4가지 모드의 동작 차이(세션 대기, 트랜잭션 롤백, 체크포인트 수행 여부)를 정확히 구분해야 함"
+      ],
+      "relatedKeywords": ["SHUTDOWN NORMAL", "SHUTDOWN IMMEDIATE", "SHUTDOWN ABORT", "STARTUP"],
+      "sourceSection": "s04"
+    },
+    "NOMOUNT": {
+      "definition": "인스턴스 기동의 첫 번째 단계로, 초기화 파라미터 파일을 읽어 SGA 메모리를 할당하고 백그라운드 프로세스를 기동하는 상태이다. 데이터베이스(물리적 파일)에는 아직 연결되지 않는다.",
+      "keyPoints": [
+        "STARTUP NOMOUNT 명령으로 진입하며, 컨트롤 파일을 읽지 않는 상태",
+        "SGA 할당 + 백그라운드 프로세스(SMON, PMON, DBWn, LGWR, CKPT, LREG) 기동",
+        "CREATE DATABASE, CREATE CONTROLFILE 등 데이터베이스 생성/재생성 작업이 이 단계에서만 가능",
+        "V$INSTANCE, V$PARAMETER, V$SGA 등 인스턴스 관련 동적 성능 뷰만 조회 가능",
+        "파라미터 파일 오류 시 ORA-01078, SGA 할당 실패 시 ORA-27102 발생"
+      ],
+      "relatedKeywords": ["STARTUP NOMOUNT", "SGA", "MOUNT", "OPEN"],
+      "sourceSection": "s03"
+    },
+    "Instance": {
+      "definition": "SGA(System Global Area) 메모리 구조와 백그라운드 프로세스의 조합으로, 데이터베이스에 대한 접근 경로(Access Path) 역할을 한다. STARTUP 시 생성되고 SHUTDOWN 시 소멸되는 일시적 존재이다.",
+      "keyPoints": [
+        "인스턴스 = SGA + 백그라운드 프로세스로 구성됨",
+        "단일 인스턴스 환경에서는 인스턴스:데이터베이스 = 1:1, RAC에서는 N:1 관계",
+        "ORACLE_SID 환경 변수로 식별됨",
+        "STARTUP 시 생성되고 SHUTDOWN 시 소멸되며 데이터베이스(물리적 파일)와는 생명주기가 다름",
+        "멀티테넌트 환경에서 1개 인스턴스는 1개 CDB에만 연결됨"
+      ],
+      "relatedKeywords": ["SGA", "Database", "ORACLE_SID", "STARTUP"],
+      "sourceSection": "s01"
+    },
+    "SYSDBA": {
+      "definition": "Oracle 데이터베이스의 최고 관리 권한으로, STARTUP/SHUTDOWN, CREATE DATABASE, DROP DATABASE 등 모든 관리 작업을 수행할 수 있으며 SYS 스키마로 접속된다.",
+      "keyPoints": [
+        "인스턴스 기동/종료 시 필수 권한 (SYSOPER로도 기동/종료 가능)",
+        "CREATE DATABASE, DROP DATABASE는 SYSDBA만 가능 (SYSOPER 불가)",
+        "접속 시 SYS 스키마로 연결되며 데이터 딕셔너리에 완전 접근 가능",
+        "데이터베이스가 열려 있지 않으므로 OS 인증 또는 Password File 인증으로 접속"
+      ],
+      "relatedKeywords": ["SYSOPER", "Password File", "SYS"],
+      "sourceSection": "s02"
+    },
+    "SYSOPER": {
+      "definition": "Oracle 데이터베이스의 운영 관리 권한으로, STARTUP/SHUTDOWN, ALTER DATABASE 등 기본 관리 작업을 수행할 수 있지만 SYSDBA보다 제한적이며 PUBLIC 스키마로 접속된다.",
+      "keyPoints": [
+        "STARTUP/SHUTDOWN, ALTER DATABASE OPEN/MOUNT, RECOVER 등 기본 관리 작업 수행 가능",
+        "CREATE DATABASE, DROP DATABASE는 수행 불가 (SYSDBA와의 핵심 차이)",
+        "접속 시 PUBLIC 스키마로 연결되며 데이터 딕셔너리 접근이 제한적",
+        "OS 인증 또는 Password File 인증으로 접속"
+      ],
+      "relatedKeywords": ["SYSDBA", "Password File", "STARTUP"],
+      "sourceSection": "s02"
+    },
+    "CONTROL_FILES": {
+      "definition": "Oracle 초기화 파라미터로, 컨트롤 파일의 경로를 지정하는 설정이다. MOUNT 단계에서 이 파라미터에 지정된 모든 컨트롤 파일을 열어 데이터베이스 구조 정보를 읽는다.",
+      "keyPoints": [
+        "MOUNT 단계에서 이 파라미터에 지정된 모든 컨트롤 파일이 정상이어야 진입 가능",
+        "다중화(Multiplexing)를 위해 여러 경로를 지정할 수 있음",
+        "지정된 컨트롤 파일을 찾을 수 없으면 ORA-00205 오류 발생",
+        "SPFILE에서 ALTER SYSTEM으로 변경 가능하지만 재기동 후 적용됨"
+      ],
+      "relatedKeywords": ["MOUNT", "V$CONTROLFILE", "SPFILE"],
+      "sourceSection": "s03"
+    },
+    "Alert Log": {
+      "definition": "Oracle 인스턴스의 기동, 종료, 오류, 구조 변경 등 주요 이벤트를 시간순으로 기록하는 진단 로그 파일이다. ADR(Automatic Diagnostic Repository) 구조 내에 위치한다.",
+      "keyPoints": [
+        "NOMOUNT 단계에서 Alert Log가 오픈되어 기동 과정의 모든 단계가 기록됨",
+        "파일 이름은 alert_<SID>.log 형식이며 V$DIAG_INFO에서 위치 확인 가능",
+        "기동/종료 시각, 파라미터 설정, 오류 메시지 등이 상세히 기록됨",
+        "DBA의 문제 진단 및 기동/종료 이력 확인에 필수적인 파일"
+      ],
+      "relatedKeywords": ["ADR", "V$DIAG_INFO", "NOMOUNT"],
+      "sourceSection": "s06"
+    },
+    "ADR": {
+      "definition": "Automatic Diagnostic Repository의 약자로, Oracle의 진단 정보(Alert Log, 트레이스 파일, 인시던트 등)를 체계적으로 저장하는 파일 기반 저장소이다.",
+      "keyPoints": [
+        "V$DIAG_INFO 뷰에서 ADR 경로(ADR Home, Diag Trace 등)를 확인할 수 있음",
+        "Alert Log 파일은 ADR의 trace 디렉토리 내에 위치함",
+        "NOMOUNT 이상에서 V$DIAG_INFO 조회 가능",
+        "Oracle 26ai에서 기동/종료 시 더 상세한 진단 정보가 기록되도록 개선됨"
+      ],
+      "relatedKeywords": ["Alert Log", "V$DIAG_INFO", "NOMOUNT"],
+      "sourceSection": "s06"
+    },
+    "SHUTDOWN NORMAL": {
+      "definition": "SHUTDOWN 명령의 기본 모드로, 모든 사용자가 자발적으로 로그아웃할 때까지 대기한 후 체크포인트를 수행하고 종료하는 가장 안전하지만 가장 느린 종료 방식이다.",
+      "keyPoints": [
+        "SHUTDOWN만 입력하면 기본적으로 NORMAL 모드로 동작",
+        "새 접속은 즉시 차단하지만 기존 사용자의 로그아웃을 무한정 대기함",
+        "체크포인트를 수행하므로 다음 기동 시 인스턴스 복구 불필요 (Clean Shutdown)",
+        "접속 중인 사용자가 있으면 무한정 대기하므로 실무에서는 잘 사용하지 않음"
+      ],
+      "relatedKeywords": ["SHUTDOWN", "Clean Shutdown", "Checkpoint"],
+      "sourceSection": "s04"
+    },
+    "SHUTDOWN TRANSACTIONAL": {
+      "definition": "현재 활성 트랜잭션이 COMMIT 또는 ROLLBACK으로 완료될 때까지 대기한 후 종료하는 모드로, NORMAL과 IMMEDIATE의 중간 성격을 가진다.",
+      "keyPoints": [
+        "새 접속을 차단하고 활성 트랜잭션의 완료만 대기함",
+        "트랜잭션이 없는 세션은 즉시 종료됨",
+        "체크포인트를 수행하므로 Clean Shutdown — 인스턴스 복구 불필요",
+        "데이터 일관성과 종료 속도 사이의 균형점을 제공"
+      ],
+      "relatedKeywords": ["SHUTDOWN", "SHUTDOWN IMMEDIATE", "Clean Shutdown"],
+      "sourceSection": "s04"
+    },
+    "SHUTDOWN IMMEDIATE": {
+      "definition": "현재 실행 중인 SQL을 즉시 중단하고 미완료 트랜잭션을 자동 ROLLBACK한 후 체크포인트를 수행하고 종료하는 모드로, 실무에서 가장 많이 사용되는 종료 방식이다.",
+      "keyPoints": [
+        "실무에서 가장 권장되는 종료 방법 — 안전하면서도 빠르게 종료 가능",
+        "미완료 트랜잭션을 자동 ROLLBACK하므로 데이터 손실 없음",
+        "체크포인트를 수행하므로 Clean Shutdown — 다음 기동 시 인스턴스 복구 불필요",
+        "롤백할 트랜잭션 양이 많으면 종료에 시간이 걸릴 수 있음",
+        "Oracle 26ai에서 병렬 트랜잭션 롤백이 적용되어 종료 시간이 단축됨"
+      ],
+      "relatedKeywords": ["SHUTDOWN", "SHUTDOWN ABORT", "Clean Shutdown"],
+      "sourceSection": "s04"
+    },
+    "SHUTDOWN ABORT": {
+      "definition": "인스턴스를 즉시 강제 종료하는 비상용 모드로, 트랜잭션 롤백과 체크포인트를 수행하지 않고 모든 프로세스를 즉시 종료한다. 전원을 끄는 것과 유사하다.",
+      "keyPoints": [
+        "트랜잭션 롤백, 체크포인트 모두 수행하지 않고 즉시 종료",
+        "다음 기동 시 SMON에 의한 인스턴스 복구(Instance Recovery)가 반드시 필요함",
+        "커밋된 데이터는 Redo Log 기반으로 복구되므로 데이터 손실은 없음",
+        "SHUTDOWN IMMEDIATE가 응답하지 않거나 인스턴스 Hang 상태 시 사용",
+        "STARTUP FORCE = SHUTDOWN ABORT + STARTUP의 결합"
+      ],
+      "relatedKeywords": ["SHUTDOWN", "Instance Recovery", "STARTUP FORCE", "SMON"],
+      "sourceSection": "s04"
+    },
+    "STARTUP FORCE": {
+      "definition": "내부적으로 SHUTDOWN ABORT를 수행한 후 STARTUP을 실행하는 기동 옵션으로, 인스턴스가 비정상 상태에서 재기동이 필요할 때 사용한다.",
+      "keyPoints": [
+        "SHUTDOWN ABORT + STARTUP을 한 번의 명령으로 수행",
+        "인스턴스가 Hang 상태이거나 정상 종료가 불가능할 때 유용",
+        "다음 기동 시 SMON이 자동으로 인스턴스 복구를 수행함",
+        "PDB 컨텍스트에서 STARTUP FORCE는 PDB를 CLOSE 후 다시 OPEN하는 동작"
+      ],
+      "relatedKeywords": ["SHUTDOWN ABORT", "STARTUP", "Instance Recovery"],
+      "sourceSection": "s03"
+    },
+    "STARTUP RESTRICT": {
+      "definition": "데이터베이스를 RESTRICTED 모드로 기동하는 옵션으로, RESTRICTED SESSION 시스템 권한을 가진 사용자만 접속할 수 있도록 제한한다.",
+      "keyPoints": [
+        "CREATE SESSION + RESTRICTED SESSION 시스템 권한이 있는 사용자만 접속 가능",
+        "유지보수, 마이그레이션, 대규모 데이터 로드 시 일반 사용자 접속 차단에 사용",
+        "OPEN 상태에서도 ALTER SYSTEM ENABLE/DISABLE RESTRICTED SESSION으로 전환 가능",
+        "RESTRICTED 활성화 시 기존 접속 세션은 끊기지 않고 새 접속만 제한됨"
+      ],
+      "relatedKeywords": ["RESTRICTED SESSION", "STARTUP", "ALTER SYSTEM"],
+      "sourceSection": "s03"
+    },
+    "STARTUP UPGRADE": {
+      "definition": "데이터베이스 업그레이드 스크립트를 실행하기 위한 특수 기동 모드로, 업그레이드 작업에 필요한 최소한의 기능만 활성화하여 기동한다.",
+      "keyPoints": [
+        "데이터베이스 버전 업그레이드 시 업그레이드 스크립트 실행을 위해 사용",
+        "Oracle 26ai에서 PDB별 업그레이드 수행이 가능하여 CDB 전체 업그레이드 없이 개별 PDB 업그레이드 지원",
+        "STARTUP DOWNGRADE와 쌍을 이루는 개념",
+        "일반 사용자 접속이 제한되는 특수 모드"
+      ],
+      "relatedKeywords": ["STARTUP", "OPEN", "PDB"],
+      "sourceSection": "s03"
+    },
+    "STARTUP MOUNT": {
+      "definition": "인스턴스를 MOUNT 단계까지만 기동하는 명령으로, 컨트롤 파일을 열지만 데이터 파일과 Redo Log 파일은 열지 않는 상태에서 멈춘다.",
+      "keyPoints": [
+        "ARCHIVELOG 모드 변경은 MOUNT 단계에서만 가능하므로 이 명령으로 진입",
+        "미디어 복구(RECOVER DATABASE), Flashback Database 수행 시 사용",
+        "데이터 파일 이름/위치 변경(RENAME FILE) 작업 시 필요",
+        "이후 ALTER DATABASE OPEN으로 OPEN 단계로 전환 가능"
+      ],
+      "relatedKeywords": ["MOUNT", "ALTER DATABASE OPEN", "ALTER DATABASE ARCHIVELOG"],
+      "sourceSection": "s03"
+    },
+    "STARTUP NOMOUNT": {
+      "definition": "인스턴스를 NOMOUNT 단계까지만 기동하는 명령으로, SGA 메모리를 할당하고 백그라운드 프로세스를 기동하지만 컨트롤 파일은 열지 않는 상태에서 멈춘다.",
+      "keyPoints": [
+        "CREATE DATABASE, CREATE CONTROLFILE 등 데이터베이스 생성/재생성 시 필요한 단계",
+        "RMAN에서 컨트롤 파일 복원(RESTORE CONTROLFILE) 시 사용",
+        "컨트롤 파일이 손상되었거나 존재하지 않을 때에도 이 단계까지는 진입 가능",
+        "이후 ALTER DATABASE MOUNT로 MOUNT 단계로 전환 가능"
+      ],
+      "relatedKeywords": ["NOMOUNT", "CREATE DATABASE", "CREATE CONTROLFILE"],
+      "sourceSection": "s03"
+    },
+    "RESTRICTED SESSION": {
+      "definition": "데이터베이스 접속을 제한하는 시스템 권한으로, RESTRICTED 모드가 활성화된 상태에서 이 권한을 가진 사용자만 새로 접속할 수 있다.",
+      "keyPoints": [
+        "STARTUP RESTRICT 또는 ALTER SYSTEM ENABLE RESTRICTED SESSION으로 활성화",
+        "CREATE SESSION + RESTRICTED SESSION 권한을 동시에 가져야 접속 가능",
+        "기존 접속 중인 세션은 영향을 받지 않으며 새 접속만 제한됨",
+        "V$INSTANCE.LOGINS 컬럼에서 RESTRICTED 또는 ALLOWED로 현재 상태 확인"
+      ],
+      "relatedKeywords": ["STARTUP RESTRICT", "ALTER SYSTEM", "V$INSTANCE"],
+      "sourceSection": "s03"
+    },
+    "Instance Recovery": {
+      "definition": "비정상 종료(SHUTDOWN ABORT 등) 후 재기동 시 SMON 백그라운드 프로세스가 자동으로 수행하는 복구 과정으로, Roll Forward(Redo 적용)와 Roll Back(UNDO 적용)의 2단계로 구성된다.",
+      "keyPoints": [
+        "OPEN 단계에서 SCN 불일치 감지 시 SMON이 자동으로 수행",
+        "Roll Forward: Redo Log를 적용하여 커밋된 변경을 재적용 (Cache Recovery)",
+        "Roll Back: UNDO 데이터를 사용하여 커밋되지 않은 변경을 롤백",
+        "커밋된 데이터는 반드시 복구되므로 데이터 손실이 없음",
+        "SHUTDOWN ABORT 후에만 필요하며 Clean Shutdown 후에는 불필요"
+      ],
+      "relatedKeywords": ["SMON", "Roll Forward", "Roll Back", "SHUTDOWN ABORT"],
+      "sourceSection": "s03"
+    },
+    "Roll Forward": {
+      "definition": "인스턴스 복구의 첫 번째 단계로, 온라인 Redo Log의 변경 내용을 데이터 파일에 재적용하여 커밋된 트랜잭션을 복구하는 과정이다. Cache Recovery라고도 한다.",
+      "keyPoints": [
+        "Redo Log에 기록된 변경 사항을 데이터 파일에 순차적으로 적용",
+        "커밋된 트랜잭션뿐만 아니라 커밋되지 않은 트랜잭션의 변경도 함께 적용됨",
+        "Roll Forward 완료 후 Roll Back 단계가 수행됨",
+        "SMON 백그라운드 프로세스가 자동으로 수행"
+      ],
+      "relatedKeywords": ["Instance Recovery", "Roll Back", "Redo Log", "SMON"],
+      "sourceSection": "s03"
+    },
+    "Roll Back": {
+      "definition": "인스턴스 복구의 두 번째 단계로, Roll Forward에서 적용된 변경 중 커밋되지 않은 트랜잭션의 변경을 UNDO 데이터를 사용하여 취소하는 과정이다.",
+      "keyPoints": [
+        "Roll Forward 완료 후 수행되는 두 번째 단계",
+        "UNDO 세그먼트의 데이터를 사용하여 미커밋 트랜잭션을 롤백",
+        "Roll Back이 완료되어야 데이터 일관성이 보장됨",
+        "SMON 백그라운드 프로세스가 자동으로 수행"
+      ],
+      "relatedKeywords": ["Instance Recovery", "Roll Forward", "UNDO", "SMON"],
+      "sourceSection": "s03"
+    },
+    "Clean Shutdown": {
+      "definition": "체크포인트를 수행하여 모든 Dirty Buffer를 디스크에 기록한 후 정상적으로 종료된 상태를 의미한다. 다음 기동 시 인스턴스 복구가 필요하지 않다.",
+      "keyPoints": [
+        "SHUTDOWN NORMAL, TRANSACTIONAL, IMMEDIATE가 Clean Shutdown에 해당",
+        "SHUTDOWN ABORT는 체크포인트를 수행하지 않으므로 Clean Shutdown이 아님",
+        "체크포인트 수행 여부가 Clean Shutdown과 비정상 종료를 구분하는 핵심 기준",
+        "Clean Shutdown 후에는 데이터 파일 헤더의 SCN과 컨트롤 파일의 SCN이 일치함"
+      ],
+      "relatedKeywords": ["Checkpoint", "SHUTDOWN ABORT", "Instance Recovery"],
+      "sourceSection": "s04"
+    },
+    "Password File": {
+      "definition": "원격에서 SYSDBA/SYSOPER 권한으로 접속하기 위해 필요한 인증 파일로, orapwd 유틸리티로 생성하며 특권 사용자의 비밀번호를 저장한다.",
+      "keyPoints": [
+        "원격 특권 접속(Remote Privileged Connection)에 필수적인 파일",
+        "orapwd 유틸리티로 생성하며 REMOTE_LOGIN_PASSWORDFILE 파라미터로 사용 모드 결정",
+        "Linux: $ORACLE_HOME/dbs/orapw<SID>, Windows: $ORACLE_HOME\\database\\PWD<SID>.ora",
+        "EXCLUSIVE 모드에서만 SYSDBA/SYSOPER 사용자 추가 가능"
+      ],
+      "relatedKeywords": ["orapwd", "REMOTE_LOGIN_PASSWORDFILE", "SYSDBA"],
+      "sourceSection": "s02"
+    },
+    "orapwd": {
+      "definition": "Oracle 비밀번호 파일(Password File)을 생성하는 명령줄 유틸리티로, SYSDBA/SYSOPER 원격 접속에 필요한 인증 정보를 설정한다.",
+      "keyPoints": [
+        "사용법: orapwd FILE=orapwSID PASSWORD=password ENTRIES=max_users FORMAT=12.2",
+        "비밀번호 파일이 없으면 원격에서 SYSDBA/SYSOPER로 접속 불가",
+        "Password File을 생성하거나 재생성할 때 사용",
+        "ASM에 비밀번호 파일을 저장할 수도 있음 (12c 이상)"
+      ],
+      "relatedKeywords": ["Password File", "SYSDBA", "REMOTE_LOGIN_PASSWORDFILE"],
+      "sourceSection": "s02"
+    },
+    "REMOTE_LOGIN_PASSWORDFILE": {
+      "definition": "비밀번호 파일의 사용 모드를 결정하는 초기화 파라미터로, EXCLUSIVE, SHARED, NONE의 3가지 값을 가진다.",
+      "keyPoints": [
+        "EXCLUSIVE(기본값): 단일 인스턴스만 사용하며 SYSDBA/SYSOPER 사용자 추가 가능",
+        "SHARED: 여러 인스턴스(RAC)에서 공유하지만 사용자 추가 불가",
+        "NONE: 비밀번호 파일을 사용하지 않으며 원격 특권 접속 불가",
+        "RAC 환경에서는 SHARED로 설정하여 여러 노드에서 공유"
+      ],
+      "relatedKeywords": ["Password File", "orapwd", "RAC"],
+      "sourceSection": "s02"
+    },
+    "ORACLE_SID": {
+      "definition": "Oracle System Identifier의 약자로, 서버에서 특정 인스턴스를 식별하는 환경 변수이다. 파라미터 파일 검색, Alert Log 명명 등에 사용된다.",
+      "keyPoints": [
+        "인스턴스를 식별하는 핵심 환경 변수로 기동 전에 설정되어야 함",
+        "파라미터 파일 기본 이름에 사용됨: spfile<SID>.ora, init<SID>.ora",
+        "Alert Log 파일 이름에 사용됨: alert_<SID>.log",
+        "하나의 서버에서 여러 인스턴스를 구분하는 식별자"
+      ],
+      "relatedKeywords": ["Instance", "SPFILE", "PFILE"],
+      "sourceSection": "s01"
+    },
+    "V$INSTANCE": {
+      "definition": "인스턴스의 현재 상태, 기동 시각, 호스트명, 버전 등의 정보를 제공하는 동적 성능 뷰로, NOMOUNT 이상에서 조회 가능하다.",
+      "keyPoints": [
+        "STATUS 컬럼으로 인스턴스 상태(STARTED/MOUNTED/OPEN) 확인",
+        "LOGINS 컬럼으로 RESTRICTED 모드 여부(ALLOWED/RESTRICTED) 확인",
+        "SHUTDOWN_PENDING 컬럼으로 종료 대기 여부 확인",
+        "STARTUP_TIME 컬럼으로 인스턴스 기동 시각 확인",
+        "NOMOUNT 단계에서도 조회 가능한 뷰"
+      ],
+      "relatedKeywords": ["V$DATABASE", "GV$INSTANCE", "NOMOUNT"],
+      "sourceSection": "s06"
+    },
+    "V$DATABASE": {
+      "definition": "데이터베이스의 이름, 오픈 모드, DBID, 로그 모드 등의 정보를 제공하는 동적 성능 뷰로, MOUNT 이상에서 조회 가능하다.",
+      "keyPoints": [
+        "OPEN_MODE 컬럼으로 오픈 모드(READ WRITE/READ ONLY/MOUNTED) 확인",
+        "LOG_MODE 컬럼으로 ARCHIVELOG/NOARCHIVELOG 모드 확인",
+        "DATABASE_ROLE 컬럼으로 PRIMARY/PHYSICAL STANDBY 역할 확인",
+        "MOUNT 이상에서만 조회 가능 — NOMOUNT에서는 조회 불가"
+      ],
+      "relatedKeywords": ["V$INSTANCE", "MOUNT", "OPEN"],
+      "sourceSection": "s06"
+    },
+    "V$PARAMETER": {
+      "definition": "현재 인스턴스에 설정된 초기화 파라미터의 값을 보여주는 동적 성능 뷰로, NOMOUNT 이상에서 조회 가능하다.",
+      "keyPoints": [
+        "현재 활성화된 파라미터 값을 확인하는 기본 뷰",
+        "name='spfile' 조건으로 SPFILE 사용 여부를 확인할 수 있음",
+        "name='control_files' 조건으로 컨트롤 파일 경로를 확인 가능",
+        "NOMOUNT 단계에서도 조회 가능하여 기동 직후 설정 확인에 유용"
+      ],
+      "relatedKeywords": ["V$SPPARAMETER", "SPFILE", "PFILE"],
+      "sourceSection": "s06"
+    },
+    "V$SPPARAMETER": {
+      "definition": "SPFILE(서버 파라미터 파일)에 저장된 파라미터 값을 보여주는 동적 성능 뷰로, V$PARAMETER와 달리 SPFILE에 명시적으로 설정된 값만 표시한다.",
+      "keyPoints": [
+        "SPFILE에 명시적으로 설정된 파라미터만 값이 표시됨",
+        "V$PARAMETER는 현재 활성값, V$SPPARAMETER는 SPFILE 저장값을 보여줌",
+        "ALTER SYSTEM ... SCOPE=SPFILE로 변경한 파라미터가 반영되었는지 확인 시 사용",
+        "NOMOUNT 이상에서 조회 가능"
+      ],
+      "relatedKeywords": ["V$PARAMETER", "SPFILE", "ALTER SYSTEM"],
+      "sourceSection": "s06"
+    },
+    "V$DIAG_INFO": {
+      "definition": "ADR(Automatic Diagnostic Repository)의 경로 정보를 제공하는 동적 성능 뷰로, Alert Log, 트레이스 파일 등의 위치를 확인할 수 있다.",
+      "keyPoints": [
+        "ADR Home, Diag Trace, Default Trace File 등의 경로 정보 제공",
+        "Alert Log 파일 위치를 확인할 때 사용하는 핵심 뷰",
+        "NOMOUNT 이상에서 조회 가능",
+        "기동/종료 시 문제 발생 시 진단 파일 위치를 빠르게 확인하는 데 유용"
+      ],
+      "relatedKeywords": ["ADR", "Alert Log", "NOMOUNT"],
+      "sourceSection": "s06"
+    },
+    "V$RECOVER_FILE": {
+      "definition": "복구가 필요한 데이터 파일의 목록을 보여주는 동적 성능 뷰로, MOUNT 이상에서 조회 가능하다.",
+      "keyPoints": [
+        "MOUNT 단계에서 OPEN 전에 복구 필요 파일을 미리 확인할 수 있음",
+        "결과가 없으면 복구가 필요한 파일이 없는 정상 상태",
+        "file#, status, error, change#, time 등의 컬럼으로 구성",
+        "인스턴스 복구 또는 미디어 복구 대상 파일을 식별하는 데 사용"
+      ],
+      "relatedKeywords": ["Instance Recovery", "MOUNT", "V$DATAFILE"],
+      "sourceSection": "s06"
+    },
+    "V$LOG": {
+      "definition": "온라인 Redo Log 그룹의 상태, 크기, 시퀀스 번호 등의 정보를 보여주는 동적 성능 뷰로, MOUNT 이상에서 조회 가능하다.",
+      "keyPoints": [
+        "group#, thread#, sequence#, bytes, status 등의 컬럼으로 구성",
+        "Redo Log 그룹의 상태(CURRENT, ACTIVE, INACTIVE 등)를 확인",
+        "MOUNT 이상에서 조회 가능",
+        "멀티테넌트 환경에서 모든 PDB의 Redo가 동일한 Redo Log에 기록됨을 확인 가능"
+      ],
+      "relatedKeywords": ["Redo Log", "LGWR", "MOUNT"],
+      "sourceSection": "s06"
+    },
+    "V$PDBS": {
+      "definition": "CDB 내 각 PDB의 상태, 오픈 모드, RESTRICTED 여부 등의 정보를 보여주는 동적 성능 뷰로, CDB가 OPEN 상태일 때 조회 가능하다.",
+      "keyPoints": [
+        "con_id, name, open_mode, restricted, total_size 등의 컬럼으로 구성",
+        "PDB의 오픈 모드(READ WRITE/READ ONLY/MOUNTED)를 확인하는 핵심 뷰",
+        "CDB$ROOT에서 실행해야 모든 PDB 정보를 조회 가능",
+        "RAC 환경에서는 GV$PDBS로 모든 노드의 PDB 상태 확인"
+      ],
+      "relatedKeywords": ["PDB", "V$CONTAINERS", "CDB"],
+      "sourceSection": "s06"
+    },
+    "V$SGA": {
+      "definition": "인스턴스에 할당된 SGA 메모리의 전체 요약 정보를 보여주는 동적 성능 뷰로, NOMOUNT 이상에서 조회 가능하다.",
+      "keyPoints": [
+        "SGA 전체 크기와 주요 구성요소별 크기를 요약 표시",
+        "NOMOUNT 단계에서 조회 가능하여 기동 직후 메모리 할당 확인에 유용",
+        "V$SGA_DYNAMIC_COMPONENTS와 함께 사용하여 상세 메모리 구성 확인",
+        "인스턴스 기동 시 SGA 할당이 정상적인지 검증하는 데 사용"
+      ],
+      "relatedKeywords": ["SGA", "V$SGA_DYNAMIC_COMPONENTS", "NOMOUNT"],
+      "sourceSection": "s06"
+    },
+    "V$SGA_DYNAMIC_COMPONENTS": {
+      "definition": "SGA의 각 동적 구성요소(Buffer Cache, Shared Pool 등)별 현재 크기, 최소/최대 크기 정보를 보여주는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "component, current_size, min_size, max_size 등의 컬럼으로 구성",
+        "각 SGA 구성요소의 크기를 개별적으로 확인 가능",
+        "SGA_TARGET 자동 메모리 관리에 의한 동적 크기 변경 이력을 확인",
+        "기동 직후 메모리 할당이 정상적인지 상세 검증 시 사용"
+      ],
+      "relatedKeywords": ["V$SGA", "SGA", "SGA_TARGET"],
+      "sourceSection": "s06"
+    },
+    "V$CONTROLFILE": {
+      "definition": "현재 사용 중인 컨트롤 파일의 경로, 상태, 크기 등의 정보를 보여주는 동적 성능 뷰로, MOUNT 이상에서 조회 가능하다.",
+      "keyPoints": [
+        "name, status, block_size, file_size_blks 등의 컬럼으로 구성",
+        "다중화된 컨트롤 파일의 경로와 상태를 확인하는 데 사용",
+        "MOUNT 단계에서 컨트롤 파일이 정상적으로 열렸는지 검증",
+        "CONTROL_FILES 파라미터에 지정된 파일들의 실제 상태를 확인"
+      ],
+      "relatedKeywords": ["CONTROL_FILES", "MOUNT", "V$PARAMETER"],
+      "sourceSection": "s06"
+    },
+    "V$DATAFILE": {
+      "definition": "컨트롤 파일에 기록된 데이터 파일의 경로, 상태, 체크포인트 SCN 등의 정보를 보여주는 동적 성능 뷰로, MOUNT 이상에서 조회 가능하다.",
+      "keyPoints": [
+        "file#, name, status, checkpoint_change#, checkpoint_time 등의 컬럼으로 구성",
+        "데이터 파일의 체크포인트 SCN을 확인하여 일관성 검증에 활용",
+        "멀티테넌트 환경에서 컨테이너별 데이터 파일 분포를 확인 가능",
+        "MOUNT 단계에서 데이터 파일 경로와 상태를 미리 확인하는 데 사용"
+      ],
+      "relatedKeywords": ["Data File", "SCN", "Checkpoint", "MOUNT"],
+      "sourceSection": "s06"
+    },
+    "V$CONTAINERS": {
+      "definition": "CDB 내 모든 컨테이너(CDB$ROOT, PDB$SEED, 사용자 PDB)의 CON_ID, 이름, 오픈 모드, 크기 등의 정보를 보여주는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "con_id, name, open_mode, restricted, total_size 등의 컬럼으로 구성",
+        "CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2), 사용자 PDB(CON_ID=3 이상)를 모두 조회",
+        "CDB 내 전체 컨테이너 구조를 한눈에 파악하는 핵심 뷰",
+        "V$PDBS는 PDB만 표시하지만 V$CONTAINERS는 CDB$ROOT와 PDB$SEED도 포함"
+      ],
+      "relatedKeywords": ["CDB", "PDB", "컨테이너", "V$PDBS"],
+      "sourceSection": "s06"
+    },
+    "CDB_PDBS": {
+      "definition": "CDB 내 모든 PDB의 정보를 보여주는 데이터 딕셔너리 뷰로, PDB의 이름, 상태, 생성 정보 등을 확인할 수 있다.",
+      "keyPoints": [
+        "데이터 딕셔너리 뷰이므로 OPEN 상태에서만 조회 가능",
+        "V$PDBS(동적 성능 뷰)와 유사하지만 딕셔너리 기반의 정적 정보를 제공",
+        "PDB의 생성 시각, 상태, 제한 사항 등의 메타데이터 확인 가능",
+        "CDB$ROOT에서 실행해야 모든 PDB 정보를 조회 가능"
+      ],
+      "relatedKeywords": ["V$PDBS", "CDB", "PDB", "DBA_PDB_SAVED_STATES"],
+      "sourceSection": "s06"
+    },
+    "ALTER SESSION SET CONTAINER": {
+      "definition": "현재 세션의 컨텍스트를 특정 컨테이너(CDB$ROOT, PDB 등)로 전환하는 SQL 명령으로, 전환 후 해당 컨테이너에서 작업을 수행할 수 있다.",
+      "keyPoints": [
+        "ALTER SESSION SET CONTAINER = pdb_name 형식으로 PDB 컨텍스트로 전환",
+        "PDB 컨텍스트에서 STARTUP은 ALTER PLUGGABLE DATABASE OPEN과 동일하게 동작",
+        "PDB 컨텍스트에서 SHUTDOWN은 ALTER PLUGGABLE DATABASE CLOSE와 동일하게 동작",
+        "SHOW CON_NAME으로 현재 컨테이너를 확인할 수 있음"
+      ],
+      "relatedKeywords": ["PDB", "CDB$ROOT", "ALTER PLUGGABLE DATABASE"],
+      "sourceSection": "s05"
+    },
+    "CREATE DATABASE": {
+      "definition": "새로운 Oracle 데이터베이스를 생성하는 DDL 명령으로, NOMOUNT 단계에서만 실행 가능하며 SYSDBA 권한이 필요하다.",
+      "keyPoints": [
+        "NOMOUNT 단계에서만 실행 가능 — 컨트롤 파일이 아직 없는 상태에서 수행",
+        "SYSDBA 권한이 필수이며 SYSOPER로는 실행 불가",
+        "실행 시 컨트롤 파일, 데이터 파일, Redo Log 파일 등이 생성됨",
+        "SYSDBA와 SYSOPER 권한 차이를 묻는 시험 문제에서 핵심 포인트"
+      ],
+      "relatedKeywords": ["NOMOUNT", "SYSDBA", "STARTUP NOMOUNT"],
+      "sourceSection": "s03"
+    },
+    "CREATE CONTROLFILE": {
+      "definition": "컨트롤 파일을 재생성하는 DDL 명령으로, 기존 컨트롤 파일이 손상되었거나 유실된 경우 NOMOUNT 단계에서 실행한다.",
+      "keyPoints": [
+        "NOMOUNT 단계에서만 실행 가능 — 컨트롤 파일 없이도 기동된 상태에서 수행",
+        "컨트롤 파일이 모두 손상된 긴급 상황에서 복구 수단으로 사용",
+        "데이터 파일과 Redo Log 파일의 경로를 명시하여 새 컨트롤 파일 생성",
+        "RMAN의 RESTORE CONTROLFILE과 함께 컨트롤 파일 복구의 대표적 방법"
+      ],
+      "relatedKeywords": ["NOMOUNT", "CONTROL_FILES", "STARTUP NOMOUNT"],
+      "sourceSection": "s03"
+    },
+    "ALTER DATABASE MOUNT": {
+      "definition": "NOMOUNT 상태의 인스턴스를 MOUNT 단계로 전환하는 SQL 명령으로, 컨트롤 파일을 열어 데이터베이스 구조 정보를 읽고 인스턴스와 데이터베이스를 연결한다.",
+      "keyPoints": [
+        "NOMOUNT 상태에서만 실행 가능한 명령",
+        "CONTROL_FILES 파라미터에 지정된 모든 컨트롤 파일을 열어 검증",
+        "컨트롤 파일에서 데이터 파일, Redo Log 파일의 경로를 인식",
+        "컨트롤 파일 오류 시 ORA-00205 발생"
+      ],
+      "relatedKeywords": ["MOUNT", "NOMOUNT", "ALTER DATABASE OPEN"],
+      "sourceSection": "s03"
+    },
+    "ALTER DATABASE OPEN": {
+      "definition": "MOUNT 상태의 데이터베이스를 OPEN 단계로 전환하는 SQL 명령으로, 데이터 파일과 Redo Log 파일을 열어 일반 사용자 접속이 가능한 상태로 만든다.",
+      "keyPoints": [
+        "MOUNT 상태에서만 실행 가능한 명령",
+        "기본적으로 READ WRITE 모드로 열리며, READ ONLY 지정 가능",
+        "SCN 일관성 검증을 수행하고 불일치 시 인스턴스 복구를 자동 수행",
+        "데이터 파일 누락 시 ORA-01157, 복구 필요 시 ORA-01113 발생"
+      ],
+      "relatedKeywords": ["OPEN", "MOUNT", "ALTER DATABASE MOUNT", "READ WRITE"],
+      "sourceSection": "s03"
+    },
+    "ALTER DATABASE ARCHIVELOG": {
+      "definition": "데이터베이스의 로그 모드를 ARCHIVELOG 모드로 변경하는 SQL 명령으로, 온라인 Redo Log가 덮어쓰기 전에 아카이브 로그로 보존되도록 설정한다.",
+      "keyPoints": [
+        "반드시 MOUNT 단계에서만 실행 가능 — OPEN 상태에서는 변경 불가",
+        "STARTUP MOUNT → ALTER DATABASE ARCHIVELOG → ALTER DATABASE OPEN 순서로 설정",
+        "미디어 복구(RMAN 등)를 위해서는 ARCHIVELOG 모드가 필수",
+        "V$DATABASE.LOG_MODE 컬럼으로 현재 로그 모드 확인 가능"
+      ],
+      "relatedKeywords": ["MOUNT", "STARTUP MOUNT", "Redo Log"],
+      "sourceSection": "s03"
+    },
+    "SMON": {
+      "definition": "System Monitor의 약자로, 인스턴스 복구, 임시 세그먼트 정리, 공간 병합 등을 담당하는 필수 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "NOMOUNT 단계에서 기동되는 필수 백그라운드 프로세스",
+        "OPEN 단계에서 SCN 불일치 감지 시 자동으로 인스턴스 복구(Roll Forward → Roll Back)를 수행",
+        "멀티테넌트 환경에서 CDB 전체의 인스턴스 복구와 공간 관리를 담당",
+        "임시 세그먼트 정리, 딕셔너리 관리 세그먼트의 공간 병합도 수행"
+      ],
+      "relatedKeywords": ["Instance Recovery", "PMON", "NOMOUNT"],
+      "sourceSection": "s07"
+    },
+    "PMON": {
+      "definition": "Process Monitor의 약자로, 비정상 종료된 사용자 프로세스를 정리하고 관련 리소스를 해제하는 필수 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "NOMOUNT 단계에서 기동되는 필수 백그라운드 프로세스",
+        "비정상 종료된 세션의 트랜잭션 롤백과 잠금(Lock) 해제를 수행",
+        "멀티테넌트 환경에서 CDB 전체의 프로세스 정리를 담당",
+        "리스너에 인스턴스 정보를 등록하는 역할도 수행"
+      ],
+      "relatedKeywords": ["SMON", "LREG", "NOMOUNT"],
+      "sourceSection": "s07"
+    },
+    "LREG": {
+      "definition": "Listener Registration의 약자로, 인스턴스 정보를 리스너에 등록하는 백그라운드 프로세스이다. Oracle 12c 이전에는 PMON이 이 역할을 수행했다.",
+      "keyPoints": [
+        "NOMOUNT 단계에서 기동되는 필수 백그라운드 프로세스",
+        "인스턴스와 서비스 정보를 리스너에 동적으로 등록",
+        "Oracle 12c부터 PMON에서 분리된 전용 프로세스",
+        "멀티테넌트 환경에서 PDB 서비스 정보도 리스너에 등록"
+      ],
+      "relatedKeywords": ["PMON", "NOMOUNT", "PDB Service"],
+      "sourceSection": "s03"
+    },
+    "Data File": {
+      "definition": "Oracle 데이터베이스의 실제 데이터(테이블, 인덱스 등)를 저장하는 물리적 파일로, 멀티테넌트 환경에서는 각 PDB별로 독립적인 데이터 파일을 보유한다.",
+      "keyPoints": [
+        "OPEN 단계에서 열리고 검증되며, MOUNT 단계에서는 경로만 인식됨",
+        "멀티테넌트 환경에서 데이터 파일은 PDB별 로컬 자원으로 분류됨",
+        "SHUTDOWN(ABORT 제외) 시 체크포인트를 통해 Dirty Buffer가 데이터 파일에 기록됨",
+        "V$DATAFILE 뷰에서 경로, 상태, 체크포인트 SCN을 확인 가능",
+        "데이터 파일 누락 시 OPEN 단계에서 ORA-01157 오류 발생"
+      ],
+      "relatedKeywords": ["V$DATAFILE", "Dirty Buffer", "OPEN", "로컬 자원"],
+      "sourceSection": "s03"
+    },
+    "멀티테넌트": {
+      "definition": "하나의 인스턴스(CDB)에서 여러 독립적인 데이터베이스(PDB)를 통합 운영할 수 있는 Oracle의 아키텍처로, Oracle 26ai에서 기본 아키텍처이다.",
+      "keyPoints": [
+        "CDB(Container Database) 내에 여러 PDB(Pluggable Database)를 배치하는 구조",
+        "모든 PDB가 동일한 SGA, 백그라운드 프로세스, 제어파일, Redo Log를 공유",
+        "1개 인스턴스 = 1개 CDB (1:1 관계)",
+        "데이터 파일과 임시 파일은 PDB별 로컬, 제어파일과 Redo Log는 CDB 공유",
+        "Oracle 26ai에서 PDB 단위 STARTUP/SHUTDOWN이 더욱 세분화됨"
+      ],
+      "relatedKeywords": ["CDB", "PDB", "Multitenant", "Container Database"],
+      "sourceSection": "s07"
+    },
+    "Multitenant": {
+      "definition": "Oracle 12c에서 도입된 아키텍처로, 하나의 CDB(Container Database) 내에 여러 PDB(Pluggable Database)를 통합하여 자원을 효율적으로 공유하는 데이터베이스 통합 기술이다.",
+      "keyPoints": [
+        "CDB$ROOT(루트), PDB$SEED(시드), 사용자 PDB로 구성되는 컨테이너 구조",
+        "인스턴스 레벨 자원(SGA, 프로세스, 제어파일, Redo Log)은 CDB 전체에서 공유",
+        "PDB별로 독립적인 데이터 파일, 임시 파일, 사용자/권한을 보유",
+        "RAC와 조합하여 여러 노드에서 하나의 CDB를 공유하며 PDB 운영 가능"
+      ],
+      "relatedKeywords": ["멀티테넌트", "CDB", "PDB", "Container Database"],
+      "sourceSection": "s07"
+    },
+    "Container Database": {
+      "definition": "멀티테넌트 아키텍처에서 여러 PDB를 포함하는 상위 데이터베이스 컨테이너로, CDB라고 약칭한다. CDB$ROOT, PDB$SEED, 사용자 PDB로 구성된다.",
+      "keyPoints": [
+        "CDB STARTUP 시 CDB$ROOT는 자동 OPEN, PDB$SEED는 READ ONLY, 사용자 PDB는 MOUNTED",
+        "1개 인스턴스는 1개 CDB에만 연결되며 CDB 내 모든 PDB가 동일한 인스턴스 자원을 공유",
+        "RAC 환경에서는 여러 인스턴스가 하나의 CDB를 공유 (N:1)",
+        "CDB 내 PDB 수에 아키텍처적 제한이 없음"
+      ],
+      "relatedKeywords": ["CDB", "PDB", "Pluggable Database", "멀티테넌트"],
+      "sourceSection": "s07"
+    },
+    "공유 자원": {
+      "definition": "멀티테넌트 아키텍처에서 CDB 레벨에서 모든 PDB가 공유하는 자원으로, 인스턴스(SGA + 프로세스), 제어파일, 온라인 Redo Log, 백그라운드 프로세스 등이 해당된다.",
+      "keyPoints": [
+        "인스턴스(SGA + 백그라운드 프로세스)는 CDB 전체에서 1세트만 기동",
+        "제어파일과 온라인 Redo Log는 CDB당 1세트로 모든 PDB가 공유",
+        "SMON, PMON, DBWn, LGWR 등 백그라운드 프로세스는 인스턴스 레벨에서 공유",
+        "UNDO 표영역은 기본적으로 공유이나 LOCAL_UNDO_ENABLED=TRUE 시 PDB별 로컬"
+      ],
+      "relatedKeywords": ["로컬 자원", "CDB", "SGA", "Redo Log"],
+      "sourceSection": "s07"
+    },
+    "로컬 자원": {
+      "definition": "멀티테넌트 아키텍처에서 각 PDB별로 독립적으로 보유하는 자원으로, 데이터 파일, 임시 파일, 로컬 사용자/권한 등이 해당된다.",
+      "keyPoints": [
+        "데이터 파일(SYSTEM, SYSAUX, 사용자 표영역)은 PDB별로 독립 보유",
+        "임시 파일(Temp File)은 PDB별로 독립된 임시 표영역에 속함",
+        "로컬 사용자는 해당 PDB 내에서만 유효하며 다른 PDB에서는 접근 불가",
+        "공유 자원과 로컬 자원의 구분은 시험에서 자주 출제되는 핵심 개념"
+      ],
+      "relatedKeywords": ["공유 자원", "Data File", "PDB"],
+      "sourceSection": "s07"
+    },
+    "Real Application Clusters": {
+      "definition": "Oracle의 고가용성 및 확장성 솔루션으로, 복수의 서버(노드)에서 복수의 인스턴스가 하나의 데이터베이스를 동시에 공유하는 아키텍처이다. RAC라고 약칭한다.",
+      "keyPoints": [
+        "N개 인스턴스 : 1개 데이터베이스의 N:1 관계",
+        "필수 3대 구성요소: 공유 스토리지(ASM), 인터커넥트, Oracle Clusterware",
+        "한 노드 장애 시 다른 노드에서 서비스 계속 가능 (고가용성)",
+        "멀티테넌트와 조합하여 여러 노드가 하나의 CDB를 공유하며 PDB 운영 가능"
+      ],
+      "relatedKeywords": ["RAC", "공유 스토리지", "Interconnect", "Oracle Clusterware"],
+      "sourceSection": "s08"
+    },
+    "공유 스토리지": {
+      "definition": "RAC 환경에서 모든 노드가 동일한 데이터베이스 파일에 접근할 수 있도록 하는 공유 저장소로, Oracle ASM이 대표적인 구현 기술이다.",
+      "keyPoints": [
+        "RAC의 3대 필수 구성요소 중 하나",
+        "데이터 파일, 제어파일, Redo Log, SPFILE 등 모든 데이터베이스 파일을 집중 배치",
+        "노드별로 분산 배치하는 것이 아니라 모든 노드가 접근 가능한 단일 공유 스토리지에 저장",
+        "Oracle ASM, 공유 파일 시스템, NFS 등으로 구현 가능"
+      ],
+      "relatedKeywords": ["ASM", "RAC", "Real Application Clusters"],
+      "sourceSection": "s08"
+    },
+    "ASM": {
+      "definition": "Automatic Storage Management의 약자로, Oracle이 제공하는 스토리지 관리 솔루션이다. RAC 환경에서 공유 스토리지의 대표적 구현 기술로 사용된다.",
+      "keyPoints": [
+        "Oracle 전용 볼륨 매니저 겸 파일 시스템 역할을 수행",
+        "RAC 환경에서 공유 스토리지의 표준 구현 기술",
+        "데이터 파일, 제어파일, Redo Log, SPFILE, 비밀번호 파일 등을 저장 가능",
+        "자동 미러링, 자동 리밸런싱 등 스토리지 관리 자동화 기능 제공"
+      ],
+      "relatedKeywords": ["공유 스토리지", "RAC", "Oracle Clusterware"],
+      "sourceSection": "s08"
+    },
+    "Interconnect": {
+      "definition": "RAC 환경에서 노드 간 캐시 데이터 전송(Cache Fusion)과 클러스터 통신을 담당하는 고속 사설 네트워크(Private Network)이다.",
+      "keyPoints": [
+        "RAC의 3대 필수 구성요소 중 하나",
+        "Cache Fusion 메커니즘을 통해 노드 간 메모리 블록을 직접 전송",
+        "10GbE 이상의 고속 네트워크 권장",
+        "GV$CLUSTER_INTERCONNECTS 뷰에서 인터커넥트 정보(IP 주소 등) 확인 가능"
+      ],
+      "relatedKeywords": ["인터커넥트", "Cache Fusion", "RAC"],
+      "sourceSection": "s08"
+    },
+    "인터커넥트": {
+      "definition": "RAC 환경에서 노드 간 통신을 담당하는 고속 사설 네트워크로, Interconnect의 한국어 표현이다. Cache Fusion에 의한 메모리 블록 전송이 이 네트워크를 통해 수행된다.",
+      "keyPoints": [
+        "RAC의 3대 필수 구성요소: 공유 스토리지, 인터커넥트, Oracle Clusterware",
+        "디스크 I/O 없이 노드 간 데이터 블록을 메모리에서 직접 전송하는 통로",
+        "대역폭과 지연 시간이 RAC 성능에 직접적으로 영향",
+        "GV$CLUSTER_INTERCONNECTS에서 인터커넥트 IP 및 상태 확인 가능"
+      ],
+      "relatedKeywords": ["Interconnect", "Cache Fusion", "RAC"],
+      "sourceSection": "s08"
+    },
+    "Oracle Clusterware": {
+      "definition": "RAC 환경에서 클러스터 멤버십 관리, 장애 감지, 자동 페일오버를 담당하는 클러스터 관리 소프트웨어로, Oracle Grid Infrastructure의 핵심 구성요소이다.",
+      "keyPoints": [
+        "RAC의 3대 필수 구성요소 중 하나",
+        "클러스터 노드의 멤버십 관리 및 장애 감지를 수행",
+        "노드 장애 시 자동 페일오버를 통해 서비스 연속성 보장",
+        "srvctl 명령으로 서비스, 인스턴스, PDB 등을 관리"
+      ],
+      "relatedKeywords": ["RAC", "공유 스토리지", "Interconnect"],
+      "sourceSection": "s08"
+    },
+    "GV$INSTANCE": {
+      "definition": "V$INSTANCE의 글로벌 버전으로, RAC 환경에서 모든 노드의 인스턴스 상태를 한 번에 조회할 수 있는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "INST_ID 컬럼으로 각 인스턴스(노드)를 식별",
+        "모든 노드의 STATUS, STARTUP_TIME, HOST_NAME 등을 한 번에 확인",
+        "단일 인스턴스 환경에서도 조회 가능하지만 RAC 환경에서 특히 유용",
+        "GV$ 뷰는 V$ 뷰에 INST_ID 컬럼이 추가된 글로벌 버전"
+      ],
+      "relatedKeywords": ["V$INSTANCE", "GV$", "RAC"],
+      "sourceSection": "s08"
+    },
+    "PDB Service": {
+      "definition": "RAC + 멀티테넌트 환경에서 각 PDB에 대해 생성되는 서비스로, Preferred/Available Instance 매핑을 통해 워크로드를 특정 노드에 분산할 수 있다.",
+      "keyPoints": [
+        "srvctl add service 명령으로 PDB 서비스를 생성하고 노드에 매핑",
+        "Preferred Instance는 평상시 서비스 실행 노드, Available Instance는 장애 시 페일오버 노드",
+        "GV$SERVICES 뷰에서 PDB 서비스가 어느 인스턴스에서 실행 중인지 확인",
+        "PDB 서비스 매핑으로 특정 PDB의 부하를 특정 노드에 집중시킬 수 있음"
+      ],
+      "relatedKeywords": ["워크로드 분산", "RAC", "PDB", "Oracle Clusterware"],
+      "sourceSection": "s09"
+    },
+    "워크로드 분산": {
+      "definition": "RAC + 멀티테넌트 환경에서 PDB 서비스를 특정 노드에 매핑하여 각 노드의 부하를 논리적으로 분리하고 균형 있게 배분하는 운영 전략이다.",
+      "keyPoints": [
+        "PDB 서비스를 Preferred/Available Instance로 매핑하여 구현",
+        "특정 PDB를 특정 노드에서 실행하여 부하를 분산하면서 장애 시 자동 페일오버 보장",
+        "GV$SESSION에서 서비스별 세션 분포를 확인하여 워크로드 균형 파악",
+        "모든 PDB가 모든 노드에서 실행되어야 하는 것은 아님 — 유연한 배치 가능"
+      ],
+      "relatedKeywords": ["PDB Service", "RAC", "Oracle Clusterware"],
+      "sourceSection": "s09"
+    },
+    "GV$": {
+      "definition": "Global V$의 약자로, V$ 동적 성능 뷰의 글로벌 버전이다. RAC 환경에서 모든 인스턴스(노드)의 정보를 INST_ID 컬럼과 함께 한 번에 조회할 수 있다.",
+      "keyPoints": [
+        "V$ 뷰에 INST_ID 컬럼이 추가된 글로벌 버전 (예: GV$INSTANCE, GV$SESSION)",
+        "RAC 환경에서 모든 노드의 정보를 통합 조회할 때 사용",
+        "단일 인스턴스에서도 조회 가능하지만 INST_ID가 항상 1",
+        "GV$INSTANCE, GV$SGA, GV$PDBS, GV$SERVICES 등 대부분의 V$ 뷰에 대응하는 GV$ 뷰 존재"
+      ],
+      "relatedKeywords": ["GV$INSTANCE", "RAC", "V$INSTANCE"],
+      "sourceSection": "s08"
+    },
+    "Cache Fusion": {
+      "definition": "RAC 환경에서 서로 다른 노드의 인스턴스가 동일한 데이터 블록에 접근할 때, 인터커넥트를 통해 디스크 I/O 없이 메모리 간 직접 블록을 전송하는 메커니즘이다.",
+      "keyPoints": [
+        "디스크 I/O 없이 노드 간 메모리 블록을 직접 전송하여 성능 보장",
+        "인터커넥트(고속 사설 네트워크)를 통해 데이터 블록이 전송됨",
+        "RAC 성능의 핵심 메커니즘으로 인터커넥트 대역폭이 중요",
+        "동일 블록에 대한 동시 접근 시 Global Cache 서비스에 의해 조율됨"
+      ],
+      "relatedKeywords": ["Interconnect", "인터커넥트", "RAC"],
+      "sourceSection": "s08"
+    }
+  }
+}

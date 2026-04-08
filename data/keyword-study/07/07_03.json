@@ -1,0 +1,396 @@
+{
+  "studyId": "07_03",
+  "chapterId": "07",
+  "title": "Data Pump (expdp / impdp)",
+  "keywords": {
+    "Data Pump": {
+      "definition": "Oracle Database 10g부터 도입된 서버 측(Server-Side) 고속 데이터 및 메타데이터 이동 유틸리티. 기존 exp/imp를 대체하며 Direct Path API를 활용한다.",
+      "keyPoints": [
+        "서버 측에서 동작하므로 덤프 파일은 데이터베이스 서버의 Directory Object 경로에 생성",
+        "기존 exp/imp 대비 대폭 향상된 성능, 병렬 처리, 네트워크 기반 Import 지원",
+        "expdp(Export)와 impdp(Import) 두 가지 커맨드 라인 유틸리티로 구성",
+        "내부적으로 DBMS_DATAPUMP, DBMS_METADATA PL/SQL 패키지를 호출"
+      ],
+      "relatedKeywords": ["expdp", "impdp", "DBMS_DATAPUMP", "Directory Object"],
+      "sourceSection": "s01"
+    },
+    "expdp": {
+      "definition": "Data Pump Export 커맨드 라인 클라이언트로, 데이터베이스의 데이터와 메타데이터를 덤프 파일(.dmp)로 추출한다.",
+      "keyPoints": [
+        "Export 모드: FULL, SCHEMAS, TABLES, TABLESPACES, TRANSPORTABLE",
+        "DUMPFILE, DIRECTORY, LOGFILE 등 필수 파라미터 지정",
+        "EXCLUDE/INCLUDE로 객체 필터링, COMPRESSION으로 덤프 파일 압축",
+        "FLASHBACK_SCN/FLASHBACK_TIME으로 특정 시점의 일관성 있는 Export 가능"
+      ],
+      "relatedKeywords": ["impdp", "Data Pump", "DUMPFILE", "EXCLUDE"],
+      "sourceSection": "s03"
+    },
+    "impdp": {
+      "definition": "Data Pump Import 커맨드 라인 클라이언트로, 덤프 파일의 데이터와 메타데이터를 데이터베이스에 적재한다.",
+      "keyPoints": [
+        "REMAP_SCHEMA, REMAP_TABLESPACE 등으로 소스/대상 환경 차이를 동적 변환",
+        "TABLE_EXISTS_ACTION으로 기존 테이블 존재 시 처리 방식 결정",
+        "SQLFILE 옵션으로 실제 Import 없이 DDL 스크립트만 추출 가능",
+        "NETWORK_LINK로 덤프 파일 없이 원격 DB에서 직접 Import 가능"
+      ],
+      "relatedKeywords": ["expdp", "REMAP_SCHEMA", "TABLE_EXISTS_ACTION", "NETWORK_LINK"],
+      "sourceSection": "s04"
+    },
+    "DBMS_DATAPUMP": {
+      "definition": "Data Pump의 핵심 PL/SQL 패키지로, expdp/impdp 커맨드 라인 유틸리티의 내부 엔진 역할을 수행한다.",
+      "keyPoints": [
+        "OPEN, ADD_FILE, DATA_FILTER, METADATA_FILTER, START_JOB 등의 프로시저 제공",
+        "PL/SQL 내에서 직접 호출하여 프로그래밍 방식으로 Data Pump 작업 자동화 가능",
+        "expdp/impdp가 내부적으로 이 패키지를 호출하여 동작",
+        "스케줄러(DBMS_SCHEDULER)와 연동하여 정기 백업 자동화에 활용"
+      ],
+      "relatedKeywords": ["Data Pump", "DBMS_METADATA", "expdp", "impdp"],
+      "sourceSection": "s01"
+    },
+    "DBMS_METADATA": {
+      "definition": "데이터베이스 객체의 DDL(메타데이터)을 XML 또는 SQL 형식으로 추출하는 PL/SQL 패키지. Data Pump가 메타데이터 처리에 내부적으로 사용한다.",
+      "keyPoints": [
+        "GET_DDL 함수로 테이블, 인덱스 등의 CREATE 문을 추출",
+        "Data Pump Export 시 메타데이터를 이 패키지로 추출하여 덤프에 저장",
+        "TRANSFORM 파라미터와 연동하여 Import 시 DDL 변환 가능"
+      ],
+      "relatedKeywords": ["DBMS_DATAPUMP", "TRANSFORM", "Data Pump"],
+      "sourceSection": "s01"
+    },
+    "Directory Object": {
+      "definition": "OS 파일 시스템 경로를 데이터베이스 레벨에서 추상화하는 객체. Data Pump는 서버 측에서 동작하므로 덤프/로그 파일 경로를 반드시 Directory Object로 지정해야 한다.",
+      "keyPoints": [
+        "Data Pump 사용의 필수 전제 조건",
+        "CREATE DIRECTORY 문으로 생성하며 READ/WRITE 권한을 별도 GRANT",
+        "DATA_PUMP_DIR은 Oracle이 기본 제공하는 디렉토리 객체",
+        "DBA_DIRECTORIES 뷰에서 전체 디렉토리 객체 조회 가능"
+      ],
+      "relatedKeywords": ["Data Pump", "DUMPFILE", "DBA_DIRECTORIES"],
+      "sourceSection": "s02"
+    },
+    "REMAP_SCHEMA": {
+      "definition": "Data Pump Import 시 소스 스키마를 대상 스키마로 변환하여 적재하는 파라미터. 스키마 간 데이터 이관에 핵심적으로 사용된다.",
+      "keyPoints": [
+        "구문: REMAP_SCHEMA=source_schema:target_schema",
+        "Export 시의 스키마와 다른 스키마로 Import할 때 필수",
+        "여러 REMAP_SCHEMA를 동시에 지정하여 다중 스키마 변환 가능",
+        "객체 소유자, 권한 등이 대상 스키마로 자동 변환됨"
+      ],
+      "relatedKeywords": ["REMAP_TABLESPACE", "REMAP_TABLE", "impdp"],
+      "sourceSection": "s07"
+    },
+    "REMAP_TABLESPACE": {
+      "definition": "Data Pump Import 시 소스 테이블스페이스를 대상 테이블스페이스로 변환하는 파라미터.",
+      "keyPoints": [
+        "구문: REMAP_TABLESPACE=source_ts:target_ts",
+        "소스 환경과 대상 환경의 테이블스페이스 구성이 다를 때 사용",
+        "여러 REMAP_TABLESPACE를 동시에 지정 가능",
+        "REMAP_SCHEMA와 함께 사용하면 스키마+테이블스페이스 동시 변환"
+      ],
+      "relatedKeywords": ["REMAP_SCHEMA", "REMAP_TABLE", "impdp"],
+      "sourceSection": "s07"
+    },
+    "REMAP_TABLE": {
+      "definition": "Data Pump Import 시 소스 테이블명을 다른 이름으로 변환하여 적재하는 파라미터.",
+      "keyPoints": [
+        "구문: REMAP_TABLE=source_table:target_table",
+        "동일 스키마 내에서 테이블명 변경이 필요한 경우 사용",
+        "REMAP_SCHEMA, REMAP_TABLESPACE와 함께 조합 가능"
+      ],
+      "relatedKeywords": ["REMAP_SCHEMA", "REMAP_TABLESPACE", "impdp"],
+      "sourceSection": "s07"
+    },
+    "TABLE_EXISTS_ACTION": {
+      "definition": "Data Pump Import 시 대상 테이블이 이미 존재할 경우의 처리 방식을 결정하는 파라미터.",
+      "keyPoints": [
+        "SKIP: 기존 테이블 건너뛰기 (기본값)",
+        "APPEND: 기존 데이터 유지하면서 추가 적재",
+        "TRUNCATE: 기존 데이터 삭제 후 적재",
+        "REPLACE: 테이블 DROP 후 재생성하여 적재",
+        "TRUNCATE와 REPLACE의 차이: TRUNCATE는 테이블 구조 유지, REPLACE는 DDL부터 재생성"
+      ],
+      "relatedKeywords": ["impdp", "REMAP_SCHEMA"],
+      "sourceSection": "s04"
+    },
+    "SQLFILE": {
+      "definition": "Data Pump Import에서 실제 Import를 수행하지 않고 덤프 파일의 DDL 스크립트만 SQL 파일로 추출하는 파라미터.",
+      "keyPoints": [
+        "구문: impdp ... SQLFILE=dir:filename.sql",
+        "Import 전에 DDL을 사전 검토하거나 수동 수정이 필요할 때 유용",
+        "데이터는 추출되지 않고 CREATE TABLE, CREATE INDEX 등 DDL만 포함"
+      ],
+      "relatedKeywords": ["impdp", "DBMS_METADATA", "TRANSFORM"],
+      "sourceSection": "s04"
+    },
+    "EXCLUDE": {
+      "definition": "Data Pump Export/Import에서 특정 객체 유형이나 이름 패턴을 제외하는 필터 파라미터.",
+      "keyPoints": [
+        "구문: EXCLUDE=object_type[:name_clause]",
+        "예: EXCLUDE=INDEX, EXCLUDE=TABLE:\"='EMP'\"",
+        "INCLUDE와 상호 배타적 — 동일 작업에서 둘 다 사용 불가",
+        "EXCLUDE=STATISTICS로 통계 정보 제외하면 Import 성능 향상"
+      ],
+      "relatedKeywords": ["INCLUDE", "expdp", "impdp"],
+      "sourceSection": "s08"
+    },
+    "INCLUDE": {
+      "definition": "Data Pump Export/Import에서 특정 객체 유형이나 이름 패턴만 포함하는 필터 파라미터.",
+      "keyPoints": [
+        "구문: INCLUDE=object_type[:name_clause]",
+        "예: INCLUDE=TABLE:\"IN('EMP','DEPT')\"",
+        "EXCLUDE와 상호 배타적 — 동일 작업에서 둘 다 사용 불가",
+        "지정한 객체와 그 종속 객체(인덱스, 제약조건 등)가 포함됨"
+      ],
+      "relatedKeywords": ["EXCLUDE", "expdp", "impdp"],
+      "sourceSection": "s08"
+    },
+    "PARALLEL": {
+      "definition": "Data Pump에서 병렬 Worker 프로세스 수를 지정하여 Export/Import 성능을 향상시키는 파라미터.",
+      "keyPoints": [
+        "구문: PARALLEL=N (Worker 프로세스 수)",
+        "DUMPFILE에 %U 대체 변수를 사용하여 병렬 덤프 파일 생성 필수",
+        "대화형 모드에서 실행 중 PARALLEL 값을 동적으로 변경 가능",
+        "CPU 코어 수와 I/O 대역폭을 고려하여 적절한 값 설정 필요"
+      ],
+      "relatedKeywords": ["Worker Process", "DUMPFILE", "Interactive Mode"],
+      "sourceSection": "s03"
+    },
+    "Interactive Mode": {
+      "definition": "Data Pump 실행 중 Ctrl+C로 진입하는 대화형 제어 모드. 작업 상태 확인, 일시 중지, 병렬도 변경 등을 수행할 수 있다.",
+      "keyPoints": [
+        "Ctrl+C를 누르면 작업이 중단되지 않고 대화형 프롬프트로 전환",
+        "STATUS 명령으로 진행 상황 확인, PARALLEL로 병렬도 변경",
+        "STOP_JOB, KILL_JOB, CONTINUE_CLIENT 등의 명령 사용 가능",
+        "Ctrl+C가 작업을 종료하지 않는다는 점이 시험 출제 포인트"
+      ],
+      "relatedKeywords": ["Ctrl+C", "STOP_JOB", "KILL_JOB", "ATTACH"],
+      "sourceSection": "s05"
+    },
+    "Ctrl+C": {
+      "definition": "Data Pump 실행 중 대화형 모드(Interactive Mode)로 진입하기 위한 키 입력. 작업을 종료하지 않고 제어 프롬프트로 전환한다.",
+      "keyPoints": [
+        "일반적인 OS 명령의 Ctrl+C(프로세스 종료)와 달리 Data Pump에서는 작업을 중단하지 않음",
+        "대화형 모드로 전환되어 STATUS, STOP_JOB, PARALLEL 등의 명령 입력 가능",
+        "시험에서 'Ctrl+C를 누르면 작업이 취소된다'는 오답 선지로 자주 출제"
+      ],
+      "relatedKeywords": ["Interactive Mode", "STOP_JOB", "KILL_JOB"],
+      "sourceSection": "s05"
+    },
+    "STOP_JOB": {
+      "definition": "Data Pump 대화형 모드에서 실행 중인 작업을 정상적으로 중지하는 명령. 나중에 ATTACH로 재개할 수 있다.",
+      "keyPoints": [
+        "작업 상태가 'NOT RUNNING'으로 전환되며 Master Table은 유지됨",
+        "ATTACH 명령으로 중지된 작업에 다시 연결하여 재개 가능",
+        "KILL_JOB과 달리 작업을 완전히 종료하지 않고 재개 가능한 상태로 유지"
+      ],
+      "relatedKeywords": ["KILL_JOB", "ATTACH", "Interactive Mode"],
+      "sourceSection": "s05"
+    },
+    "KILL_JOB": {
+      "definition": "Data Pump 대화형 모드에서 실행 중인 작업을 완전히 종료하고 Master Table을 삭제하는 명령. 재개 불가.",
+      "keyPoints": [
+        "작업이 완전히 종료되며 Master Table도 삭제됨",
+        "STOP_JOB과 달리 ATTACH로 재개할 수 없음",
+        "Export 중 KILL_JOB 시 이미 생성된 덤프 파일은 불완전 상태로 남음"
+      ],
+      "relatedKeywords": ["STOP_JOB", "ATTACH", "Master Table"],
+      "sourceSection": "s05"
+    },
+    "ATTACH": {
+      "definition": "Data Pump에서 중지된 작업이나 다른 세션의 작업에 연결하여 모니터링 또는 제어하는 명령/파라미터.",
+      "keyPoints": [
+        "구문: impdp/expdp ... ATTACH=job_name",
+        "STOP_JOB으로 중지된 작업에 재연결하여 재개 가능",
+        "다른 세션에서 실행 중인 작업의 상태를 모니터링하는 데도 사용",
+        "DBA_DATAPUMP_JOBS 뷰에서 작업명을 확인한 후 ATTACH"
+      ],
+      "relatedKeywords": ["STOP_JOB", "DBA_DATAPUMP_JOBS", "Interactive Mode"],
+      "sourceSection": "s05"
+    },
+    "Master Table": {
+      "definition": "Data Pump 작업의 진행 상태와 메타데이터를 저장하는 임시 테이블. 작업 재시작(Restart)의 핵심 메커니즘이다.",
+      "keyPoints": [
+        "Export/Import 작업 시작 시 사용자 스키마에 자동 생성",
+        "작업 정상 완료 시 자동 삭제, STOP_JOB 시 유지됨",
+        "KILL_JOB 시 Master Table도 삭제되어 재개 불가",
+        "Master Table이 남아있으면 DBA_DATAPUMP_JOBS에서 작업이 조회됨"
+      ],
+      "relatedKeywords": ["STOP_JOB", "KILL_JOB", "DBA_DATAPUMP_JOBS"],
+      "sourceSection": "s06"
+    },
+    "DBA_DATAPUMP_JOBS": {
+      "definition": "현재 실행 중이거나 중지된 Data Pump 작업의 상태 정보를 조회하는 딕셔너리 뷰.",
+      "keyPoints": [
+        "JOB_NAME, OPERATION(EXPORT/IMPORT), JOB_MODE, STATE 등 확인 가능",
+        "STATE 값: EXECUTING, NOT RUNNING, COMPLETING, IDLING 등",
+        "ATTACH할 작업명을 이 뷰에서 확인",
+        "Master Table이 삭제되지 않은 비정상 종료 작업도 조회됨"
+      ],
+      "relatedKeywords": ["Master Table", "ATTACH", "V$SESSION_LONGOPS"],
+      "sourceSection": "s06"
+    },
+    "V$SESSION_LONGOPS": {
+      "definition": "장시간 실행되는 Data Pump 작업의 진행률을 실시간으로 모니터링할 수 있는 동적 성능 뷰.",
+      "keyPoints": [
+        "SOFAR/TOTALWORK 열로 작업 진행률(%) 계산 가능",
+        "OPNAME 열에서 Data Pump 작업 식별",
+        "DBA_DATAPUMP_JOBS와 함께 Data Pump 모니터링의 핵심 뷰"
+      ],
+      "relatedKeywords": ["DBA_DATAPUMP_JOBS", "Data Pump"],
+      "sourceSection": "s06"
+    },
+    "NETWORK_LINK": {
+      "definition": "덤프 파일을 거치지 않고 Database Link를 통해 원격 데이터베이스에서 직접 Import하는 Data Pump 파라미터.",
+      "keyPoints": [
+        "구문: impdp ... NETWORK_LINK=dblink_name",
+        "덤프 파일 생성/전송 없이 소스 DB에서 대상 DB로 직접 데이터 전송",
+        "소스 DB에서 Export와 대상 DB에서 Import가 동시에 수행되는 효과",
+        "네트워크 대역폭에 따라 성능이 좌우되며 대용량 데이터 시 주의"
+      ],
+      "relatedKeywords": ["impdp", "Data Pump"],
+      "sourceSection": "s09"
+    },
+    "Transportable Tablespace": {
+      "definition": "테이블스페이스 단위로 데이터 파일을 복사하고 메타데이터만 Export/Import하여 초고속 데이터 이관을 수행하는 기능.",
+      "keyPoints": [
+        "데이터 파일을 직접 복사하므로 대용량 데이터에서 가장 빠른 이관 방식",
+        "expdp TRANSPORT_TABLESPACES=ts_name으로 메타데이터만 Export",
+        "소스와 대상의 블록 크기, 플랫폼 엔디안이 호환되어야 함",
+        "FULL TRANSPORTABLE로 전체 데이터베이스 이관도 가능"
+      ],
+      "relatedKeywords": ["FULL TRANSPORTABLE", "expdp", "impdp"],
+      "sourceSection": "s09"
+    },
+    "FLASHBACK_SCN": {
+      "definition": "Data Pump Export 시 특정 SCN(System Change Number) 시점의 일관된 데이터를 추출하는 파라미터.",
+      "keyPoints": [
+        "구문: expdp ... FLASHBACK_SCN=scn_number",
+        "Export 중 DML이 발생해도 지정된 SCN 시점의 일관된 스냅샷을 추출",
+        "FLASHBACK_TIME과 상호 배타적 — 동시 사용 불가",
+        "Undo 보존 기간 내의 SCN만 지정 가능"
+      ],
+      "relatedKeywords": ["FLASHBACK_TIME", "expdp"],
+      "sourceSection": "s03"
+    },
+    "FLASHBACK_TIME": {
+      "definition": "Data Pump Export 시 특정 타임스탬프 시점의 일관된 데이터를 추출하는 파라미터. 내부적으로 해당 시간의 SCN으로 변환된다.",
+      "keyPoints": [
+        "구문: expdp ... FLASHBACK_TIME=\"TO_TIMESTAMP('2026-04-08 10:00:00','YYYY-MM-DD HH24:MI:SS')\"",
+        "FLASHBACK_SCN보다 직관적이지만 내부적으로 SCN 변환이 필요",
+        "FLASHBACK_SCN과 상호 배타적",
+        "Undo 보존 기간 내의 시간만 지정 가능"
+      ],
+      "relatedKeywords": ["FLASHBACK_SCN", "expdp"],
+      "sourceSection": "s03"
+    },
+    "COMPRESSION": {
+      "definition": "Data Pump Export 시 덤프 파일의 압축 범위를 지정하는 파라미터. 디스크 공간 절약과 I/O 감소에 유용하다.",
+      "keyPoints": [
+        "옵션: NONE, METADATA_ONLY(기본값), DATA_ONLY, ALL",
+        "ALL 사용 시 Advanced Compression Option 라이선스 필요",
+        "METADATA_ONLY는 라이선스 없이 사용 가능 (기본 동작)",
+        "압축으로 덤프 파일 크기 감소 → 디스크 공간 절약, 네트워크 전송 시간 단축"
+      ],
+      "relatedKeywords": ["ENCRYPTION", "expdp", "DUMPFILE"],
+      "sourceSection": "s03"
+    },
+    "ENCRYPTION": {
+      "definition": "Data Pump Export 시 덤프 파일을 암호화하는 파라미터. 민감한 데이터의 보안 이관에 사용된다.",
+      "keyPoints": [
+        "ENCRYPTION 옵션: NONE, DATA_ONLY, METADATA_ONLY, ALL, ENCRYPTED_COLUMNS_ONLY",
+        "ENCRYPTION_PASSWORD로 암호 설정 (Import 시 동일 암호 필요)",
+        "Oracle Wallet과 연동하면 암호 없이도 투명 암호화 가능",
+        "Advanced Security Option 라이선스 필요"
+      ],
+      "relatedKeywords": ["COMPRESSION", "expdp"],
+      "sourceSection": "s09"
+    },
+    "CONTENT": {
+      "definition": "Data Pump Export/Import에서 데이터만, 메타데이터만, 또는 둘 다 처리할지를 지정하는 파라미터.",
+      "keyPoints": [
+        "옵션: ALL(기본값), DATA_ONLY, METADATA_ONLY",
+        "DATA_ONLY: 테이블 구조가 이미 존재할 때 데이터만 적재",
+        "METADATA_ONLY: DDL만 Export/Import (테이블 구조만 복제)",
+        "Transportable Tablespace와 함께 사용 시 METADATA_ONLY가 필수"
+      ],
+      "relatedKeywords": ["expdp", "impdp", "Transportable Tablespace"],
+      "sourceSection": "s03"
+    },
+    "DUMPFILE": {
+      "definition": "Data Pump Export/Import에서 덤프 파일의 이름과 위치(Directory Object)를 지정하는 파라미터.",
+      "keyPoints": [
+        "구문: DUMPFILE=dir_name:filename.dmp",
+        "병렬 처리 시 %U 대체 변수 사용으로 여러 덤프 파일 자동 생성 (예: exp_%U.dmp)",
+        "파일 크기 제한: FILESIZE 파라미터로 단일 파일 최대 크기 지정 가능",
+        "여러 DUMPFILE을 쉼표로 구분하여 다수의 파일 지정 가능"
+      ],
+      "relatedKeywords": ["Directory Object", "PARALLEL", "expdp"],
+      "sourceSection": "s03"
+    },
+    "Direct Path API": {
+      "definition": "Data Pump가 내부적으로 사용하는 고속 데이터 로드/언로드 인터페이스. Buffer Cache를 우회하여 직접 데이터를 읽고 쓴다.",
+      "keyPoints": [
+        "SQL 엔진을 우회하여 데이터를 직접 포맷팅/로드하므로 고속 처리",
+        "기존 exp/imp의 SQL INSERT 방식 대비 대폭 성능 향상",
+        "일부 데이터 타입(LONG, BFILE 등)은 Direct Path API 미지원 → External Table 방식으로 대체"
+      ],
+      "relatedKeywords": ["Data Pump", "Worker Process"],
+      "sourceSection": "s01"
+    },
+    "Worker Process": {
+      "definition": "Data Pump에서 실제 데이터 로드/언로드 작업을 수행하는 서버 프로세스. PARALLEL 파라미터로 Worker 수를 제어한다.",
+      "keyPoints": [
+        "Master Control Process가 Worker Process를 생성하고 작업을 분배",
+        "PARALLEL=N 설정 시 최대 N개의 Worker가 동시에 동작",
+        "각 Worker는 독립적으로 테이블/파티션 단위로 작업 수행",
+        "대화형 모드에서 PARALLEL 변경 시 Worker 수가 동적으로 조정됨"
+      ],
+      "relatedKeywords": ["Master Control Process", "PARALLEL", "Data Pump"],
+      "sourceSection": "s01"
+    },
+    "TRANSFORM": {
+      "definition": "Data Pump Import 시 DDL을 변환하는 파라미터. 스토리지 절 제거, 세그먼트 속성 변경 등에 사용된다.",
+      "keyPoints": [
+        "TRANSFORM=SEGMENT_ATTRIBUTES:N — 스토리지 절 제거 (다른 환경으로 이관 시 유용)",
+        "TRANSFORM=OID:N — OID 재생성",
+        "TRANSFORM=TABLE_COMPRESSION_CLAUSE:압축옵션 — 압축 방식 변경",
+        "DBMS_METADATA 패키지를 통해 DDL 변환 수행"
+      ],
+      "relatedKeywords": ["impdp", "DBMS_METADATA", "SQLFILE"],
+      "sourceSection": "s04"
+    },
+    "PARFILE": {
+      "definition": "Data Pump Export/Import의 파라미터를 별도 텍스트 파일에 기술하여 참조하는 파라미터. 복잡한 옵션 지정 시 유용하다.",
+      "keyPoints": [
+        "구문: expdp/impdp ... PARFILE=param_file.par",
+        "커맨드 라인이 길어질 때 가독성과 재사용성 향상",
+        "파라미터 파일은 클라이언트 측에 위치 (Directory Object 불필요)",
+        "SQL*Loader의 PARFILE과 동일한 개념"
+      ],
+      "relatedKeywords": ["expdp", "impdp"],
+      "sourceSection": "s03"
+    },
+    "FULL TRANSPORTABLE": {
+      "definition": "전체 데이터베이스를 Transportable Tablespace 방식으로 이관하는 Data Pump 기능. 대규모 마이그레이션에 최적화되어 있다.",
+      "keyPoints": [
+        "구문: expdp FULL=Y TRANSPORTABLE=ALWAYS",
+        "시스템 테이블스페이스의 메타데이터는 Export, 사용자 데이터 파일은 직접 복사",
+        "다른 플랫폼/엔디안으로의 데이터베이스 이관 시 RMAN CONVERT와 연계",
+        "Oracle 12c 이상에서 지원"
+      ],
+      "relatedKeywords": ["Transportable Tablespace", "expdp", "impdp"],
+      "sourceSection": "s09"
+    },
+    "Master Control Process": {
+      "definition": "Data Pump 작업의 전체 흐름을 제어하는 메인 서버 프로세스. Worker 프로세스 생성, 작업 분배, 상태 관리를 담당한다.",
+      "keyPoints": [
+        "expdp/impdp 실행 시 데이터베이스 서버에서 자동 생성",
+        "Master Table 관리, Worker 프로세스 조정, 상태 전이 제어",
+        "클라이언트 프로세스와는 별도로 서버에서 독립 실행",
+        "클라이언트 연결이 끊어져도 서버 측 작업은 계속 진행됨"
+      ],
+      "relatedKeywords": ["Worker Process", "Master Table", "Data Pump"],
+      "sourceSection": "s01"
+    }
+  }
+}

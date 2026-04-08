@@ -15,9 +15,12 @@ oracle-dba/                    ← 상위 디렉토리 (원본 데이터)
     │   ├── study/
     │   ├── custom/
     │   ├── questions/
-    │   └── manifest.json      ← 자동 생성 파일 목록
+    │   ├── keyword-study/     ← 키워드별 전용 학습자료
+    │   └── manifest.json      ← 자동 생성 파일 목록 + keywordIndex
     ├── scripts/
-    │   └── sync-data.js       ← 동기화 스크립트
+    │   ├── sync-data.js       ← 동기화 스크립트
+    │   ├── audit-keyword-study.js  ← keyword-study 전체 감사
+    │   └── audit-keyword-single.js ← 단일 파일 감사
     └── lib/
         └── data.ts            ← manifest 기반 데이터 로더
 ```
@@ -33,7 +36,7 @@ npm run sync-data
 
 이 명령은:
 1. `study/`, `customquestions_json/`, `questions_json/` 3개 폴더를 `data/`로 복사
-2. `data/manifest.json` 자동 생성 (모든 파일 목록)
+2. `data/manifest.json` 자동 생성 (파일 목록 + keywordIndex + hasKeywordStudy 플래그)
 
 ## Vercel 배포
 
@@ -52,10 +55,13 @@ vercel
 # 1. 데이터 동기화
 npm run sync-data
 
-# 2. 빌드 확인
+# 2. keyword-study 누락 확인 (Total missing: 0 확인 필수)
+node scripts/audit-keyword-study.js
+
+# 3. 빌드 확인
 npm run build
 
-# 3. git 커밋 & 푸시
+# 4. git 커밋 & 푸시
 git add -A
 git commit -m "sync: update study data"
 git push
@@ -81,3 +87,4 @@ npm run sync-data && npm run build && git add -A && git commit -m "sync: update 
 - `data/` 폴더는 `.gitignore`에 포함하지 마세요 (Vercel이 접근해야 함)
 - 데이터 변경 후 반드시 `npm run sync-data` 실행 필요
 - `manifest.json`은 수동 편집 금지 (스크립트가 자동 생성)
+- **study 파일의 keywords를 변경한 경우, keyword-study도 반드시 동시 갱신** (docs/KEYWORD_STUDY_GUIDE.md 참조)

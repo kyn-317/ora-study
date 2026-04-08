@@ -1,0 +1,303 @@
+{
+  "studyId": "04_02",
+  "chapterId": "04",
+  "title": "권한 계층 및 롤 (Privileges and Roles)",
+  "keywords": {
+    "시스템 권한 (System Privilege)": {
+      "definition": "데이터베이스 레벨에서 특정 유형의 SQL 문(DDL/DML 등)을 실행할 수 있는 권한으로, Oracle 26ai에는 300개 이상이 정의되어 있다.",
+      "keyPoints": [
+        "CREATE TABLE(자기 스키마) vs CREATE ANY TABLE(모든 스키마) — ANY 키워드로 범위 확대",
+        "WITH ADMIN OPTION으로 부여 시 재부여 가능하며, REVOKE 시 연쇄 취소 없음",
+        "O7_DICTIONARY_ACCESSIBILITY=FALSE(기본값)이면 ANY 권한으로도 SYS 딕셔너리 접근 불가",
+        "DBA_SYS_PRIVS로 부여 내역, SESSION_PRIVS로 현재 세션의 활성 권한 조회"
+      ],
+      "relatedKeywords": ["객체 권한 (Object Privilege)", "WITH ADMIN OPTION", "ANY 권한 (ANY Privilege)", "GRANT"],
+      "sourceSection": "s01"
+    },
+    "객체 권한 (Object Privilege)": {
+      "definition": "특정 데이터베이스 객체(테이블, 뷰, 시퀀스, 프로시저 등)에 대해 특정 작업을 수행할 수 있는 권한으로, 객체 소유자 또는 GRANT OPTION 보유자가 부여한다.",
+      "keyPoints": [
+        "테이블: SELECT, INSERT, UPDATE, DELETE, ALTER, INDEX, REFERENCES, FLASHBACK 부여 가능",
+        "INSERT, UPDATE, REFERENCES는 컬럼 레벨로 세분화 가능",
+        "WITH GRANT OPTION으로 부여 시 재부여 가능하며, REVOKE 시 연쇄 취소(Cascade) 발생",
+        "PUBLIC에 부여하면 현재 및 미래의 모든 사용자에게 적용되므로 보안 주의",
+        "DBA_TAB_PRIVS로 부여 내역, DBA_COL_PRIVS로 컬럼 레벨 권한 확인"
+      ],
+      "relatedKeywords": ["시스템 권한 (System Privilege)", "WITH GRANT OPTION", "GRANT", "PUBLIC"],
+      "sourceSection": "s01"
+    },
+    "GRANT": {
+      "definition": "Oracle에서 시스템 권한, 객체 권한, 롤을 사용자 또는 롤에 부여하는 SQL 명령이다.",
+      "keyPoints": [
+        "시스템 권한/롤: GRANT ... TO ... [WITH ADMIN OPTION]",
+        "객체 권한: GRANT ... ON object TO ... [WITH GRANT OPTION]",
+        "PUBLIC에 부여하면 모든 사용자에게 적용",
+        "GRANT ANY PRIVILEGE / GRANT ANY ROLE 권한이 있으면 모든 시스템 권한/롤 부여 가능"
+      ],
+      "relatedKeywords": ["REVOKE", "WITH ADMIN OPTION", "WITH GRANT OPTION"],
+      "sourceSection": "s04"
+    },
+    "REVOKE": {
+      "definition": "Oracle에서 이전에 부여한 시스템 권한, 객체 권한, 롤을 사용자 또는 롤로부터 회수하는 SQL 명령이다.",
+      "keyPoints": [
+        "시스템 권한/롤 REVOKE: 연쇄 취소 없음 (피부여자가 부여한 권한은 유지)",
+        "객체 권한 REVOKE: 연쇄 취소 발생 (부여 체인의 모든 하위 권한 자동 취소)",
+        "연쇄 취소로 인해 관련 뷰와 PL/SQL 객체가 INVALID 상태로 변경될 수 있음",
+        "컬럼 레벨 REVOKE는 지원되지 않으며, 전체 권한 취소 후 재부여 필요"
+      ],
+      "relatedKeywords": ["GRANT", "연쇄 취소 (Cascade Revoke)"],
+      "sourceSection": "s04"
+    },
+    "WITH ADMIN OPTION": {
+      "definition": "시스템 권한 또는 롤 부여 시 사용하는 옵션으로, 피부여자가 해당 권한/롤을 다른 사용자에게 재부여할 수 있게 하며, REVOKE 시 연쇄 취소가 발생하지 않는다.",
+      "keyPoints": [
+        "적용 대상: 시스템 권한 및 롤 (객체 권한은 WITH GRANT OPTION)",
+        "REVOKE 시 비연쇄 취소(No Cascade) — 피부여자가 부여한 권한은 유지됨",
+        "Oracle은 시스템 권한의 부여자(Grantor)를 추적하지 않음 — SYSAUTH$ 테이블에 부여자 정보 없음",
+        "DBA_SYS_PRIVS의 ADMIN_OPTION 컬럼으로 부여 여부 확인",
+        "시험 핵심: WITH GRANT OPTION과의 연쇄 취소 동작 차이를 정확히 구분해야 함"
+      ],
+      "relatedKeywords": ["WITH GRANT OPTION", "연쇄 취소 (Cascade Revoke)", "GRANT"],
+      "sourceSection": "s02"
+    },
+    "WITH GRANT OPTION": {
+      "definition": "객체 권한 부여 시 사용하는 옵션으로, 피부여자가 해당 객체 권한을 다른 사용자에게 재부여할 수 있게 하며, REVOKE 시 연쇄 취소(Cascade Revoke)가 발생한다.",
+      "keyPoints": [
+        "적용 대상: 객체 권한만 (시스템 권한/롤은 WITH ADMIN OPTION)",
+        "REVOKE 시 연쇄 취소 — 부여 체인의 모든 하위 사용자 권한이 자동 취소됨",
+        "Oracle은 OBJAUTH$ 테이블에서 부여자(GRANTOR)를 추적하여 부여 체인 관리",
+        "롤(Role)에는 부여 불가 — 사용자에게만 부여 가능",
+        "GRANT OPTION 기반으로 생성된 뷰는 권한 취소 시 INVALID 상태가 됨"
+      ],
+      "relatedKeywords": ["WITH ADMIN OPTION", "연쇄 취소 (Cascade Revoke)", "GRANT"],
+      "sourceSection": "s02"
+    },
+    "연쇄 취소 (Cascade Revoke)": {
+      "definition": "WITH GRANT OPTION으로 부여된 객체 권한을 REVOKE할 때, 피부여자가 다른 사용자에게 부여한 모든 권한도 자동으로 취소되는 동작이다.",
+      "keyPoints": [
+        "객체 권한에서만 발생 — 시스템 권한/롤(WITH ADMIN OPTION)에서는 발생하지 않음",
+        "부여 체인의 깊이 제한 없이 재귀적으로 모든 하위 권한 삭제",
+        "연쇄 취소로 관련 뷰/PL/SQL 객체가 INVALID 상태로 변경 가능",
+        "시험에서 ADMIN OPTION(비연쇄)과 GRANT OPTION(연쇄)의 차이가 핵심 출제 포인트"
+      ],
+      "relatedKeywords": ["WITH GRANT OPTION", "WITH ADMIN OPTION", "REVOKE"],
+      "sourceSection": "s02"
+    },
+    "롤 (Role)": {
+      "definition": "관련 권한들을 하나의 명명된 그룹으로 묶어서 관리하는 Oracle의 권한 관리 메커니즘으로, 권한 관리 간소화와 동적 권한 변경을 지원한다.",
+      "keyPoints": [
+        "권한을 롤에 추가/제거하면 해당 롤을 가진 모든 사용자에게 즉시 반영",
+        "롤에 다른 롤을 부여하여 계층적 권한 구조 구성 가능",
+        "DBA, CONNECT, RESOURCE 등 사전 정의 롤 제공",
+        "인증 없음/비밀번호/애플리케이션/외부/글로벌 5가지 인증 방식 지원",
+        "PL/SQL Definer's Rights에서는 롤 기반 권한이 무시되고 직접 부여 권한만 적용됨"
+      ],
+      "relatedKeywords": ["기본 롤 (Default Role)", "SET ROLE", "공통 롤 (Common Role)", "로컬 롤 (Local Role)"],
+      "sourceSection": "s03"
+    },
+    "공통 롤 (Common Role)": {
+      "definition": "CDB 루트에서 생성되어 CDB 전체에서 인식되는 롤로, 이름에 C## 접두사가 필수이며 CONTAINER=ALL로 권한 부여 시 모든 PDB에서 유효하다.",
+      "keyPoints": [
+        "CDB 루트에서만 생성 가능, C## 접두사 필수 (COMMON_USER_PREFIX로 제어)",
+        "공통 롤이라도 개별 권한이 CONTAINER=ALL로 부여되지 않으면 PDB에서 무효",
+        "CDB 루트의 딕셔너리에 저장, PDB에서 메타데이터 링크로 인식",
+        "CDB_ROLES 뷰에서 CON_ID로 각 컨테이너의 롤 확인"
+      ],
+      "relatedKeywords": ["로컬 롤 (Local Role)", "CONTAINER=ALL", "CONTAINER=CURRENT"],
+      "sourceSection": "s05"
+    },
+    "로컬 롤 (Local Role)": {
+      "definition": "특정 PDB 내에서만 유효한 롤로, C## 접두사 없이 PDB 관리자가 독립적으로 생성/관리한다.",
+      "keyPoints": [
+        "PDB를 unplug/plug 또는 clone할 때 로컬 롤도 함께 이동/복제",
+        "서로 다른 PDB에 동일 이름의 로컬 롤이 존재해도 충돌 없음",
+        "공통 사용자에게도 로컬 롤을 부여할 수 있으며, 해당 PDB에서만 유효"
+      ],
+      "relatedKeywords": ["공통 롤 (Common Role)", "롤 (Role)"],
+      "sourceSection": "s05"
+    },
+    "CONTAINER=ALL": {
+      "definition": "CDB 루트에서 권한/롤 부여 시 모든 컨테이너(루트 + 모든 PDB)에 적용되도록 하는 CONTAINER 절 옵션이다.",
+      "keyPoints": [
+        "CDB 루트에서만 사용 가능",
+        "공통 사용자/롤에 대한 전역 권한 부여 시 사용",
+        "CONTAINER=CURRENT(기본값)와의 차이를 정확히 이해해야 시험에서 출제 가능"
+      ],
+      "relatedKeywords": ["CONTAINER=CURRENT", "공통 롤 (Common Role)", "공통 사용자 (Common User)"],
+      "sourceSection": "s05"
+    },
+    "CONTAINER=CURRENT": {
+      "definition": "현재 접속된 컨테이너에서만 권한/롤이 유효하도록 하는 CONTAINER 절 옵션으로, CDB 루트와 PDB 모두에서 사용 가능하며 기본값이다.",
+      "keyPoints": [
+        "PDB에서는 CONTAINER=CURRENT만 사용 가능 (CONTAINER=ALL 사용 불가)",
+        "CDB 루트에서 생략 시 기본값 CURRENT 적용",
+        "공통 사용자라도 CONTAINER=CURRENT로 부여된 권한은 해당 컨테이너에서만 유효"
+      ],
+      "relatedKeywords": ["CONTAINER=ALL", "로컬 롤 (Local Role)"],
+      "sourceSection": "s05"
+    },
+    "기본 롤 (Default Role)": {
+      "definition": "사용자가 로그인할 때 자동으로 활성화되는 롤로, ALTER USER ... DEFAULT ROLE 명령으로 설정한다.",
+      "keyPoints": [
+        "DEFAULT ROLE ALL(기본값), NONE, 특정롤, ALL EXCEPT로 범위 지정 가능",
+        "비밀번호 인증 롤과 Secure Application Role은 DEFAULT ROLE로 설정 불가 (ORA-28046)",
+        "SET ROLE과 달리 영구적 설정이며, 해당 사용자의 모든 신규 세션에 적용"
+      ],
+      "relatedKeywords": ["SET ROLE", "롤 (Role)"],
+      "sourceSection": "s03"
+    },
+    "SET ROLE": {
+      "definition": "현재 세션에서 활성화된 롤을 동적으로 변경하는 SQL 명령으로, 세션 종료 시 초기화된다.",
+      "keyPoints": [
+        "SET ROLE ALL: 비밀번호 롤 제외 모든 롤 활성화",
+        "SET ROLE role IDENTIFIED BY pwd: 비밀번호 인증 롤 활성화",
+        "SET ROLE NONE: 모든 롤 비활성화",
+        "DEFAULT ROLE과 달리 현재 세션에만 영향, 세션 종료 시 초기화"
+      ],
+      "relatedKeywords": ["기본 롤 (Default Role)", "SESSION_ROLES"],
+      "sourceSection": "s03"
+    },
+    "ANY 권한 (ANY Privilege)": {
+      "definition": "ANY 키워드가 포함된 시스템 권한으로, SYS 스키마를 제외한 모든 스키마에서 해당 작업을 수행할 수 있는 매우 강력한 권한이다.",
+      "keyPoints": [
+        "SELECT ANY TABLE: 모든 스키마 테이블 조회, CREATE ANY TABLE: 모든 스키마에 테이블 생성",
+        "O7_DICTIONARY_ACCESSIBILITY=FALSE(기본값)이면 ANY 권한으로도 SYS 딕셔너리 접근 불가",
+        "보안 위험이 매우 높으므로 DBA 외에는 부여 최소화 — 최소 권한 원칙",
+        "스키마 레벨 권한(GRANT ... ON SCHEMA)이 ANY보다 범위가 제한적이어서 더 안전"
+      ],
+      "relatedKeywords": ["O7_DICTIONARY_ACCESSIBILITY", "스키마 레벨 권한 (Schema-Level Privilege)"],
+      "sourceSection": "s06"
+    },
+    "PUBLIC": {
+      "definition": "모든 데이터베이스 사용자를 대표하는 가상 그룹으로, PUBLIC에 권한을 부여하면 현재 및 미래의 모든 사용자에게 적용된다.",
+      "keyPoints": [
+        "보안 위험이 높으므로 운영 환경에서는 PUBLIC에 대한 권한 부여를 가능한 한 피해야 함",
+        "SYSOPER로 접속 시 PUBLIC 스키마로 연결됨",
+        "REVOKE ... FROM PUBLIC으로 PUBLIC에서 권한 회수 가능"
+      ],
+      "relatedKeywords": ["GRANT", "객체 권한 (Object Privilege)"],
+      "sourceSection": "s01"
+    },
+    "DBA_SYS_PRIVS": {
+      "definition": "사용자 및 롤에 부여된 시스템 권한을 조회하는 딕셔너리 뷰로, ADMIN_OPTION 컬럼으로 재부여 가능 여부를 확인한다.",
+      "keyPoints": [
+        "GRANTEE, PRIVILEGE, ADMIN_OPTION, COMMON 컬럼 포함",
+        "SESSION_PRIVS와 달리 부여 내역(비활성 롤 포함)을 보여줌",
+        "멀티테넌트에서 COMMON 컬럼으로 공통/로컬 부여 구분"
+      ],
+      "relatedKeywords": ["DBA_TAB_PRIVS", "SESSION_PRIVS", "DBA_ROLE_PRIVS"],
+      "sourceSection": "s06"
+    },
+    "DBA_TAB_PRIVS": {
+      "definition": "객체 권한 부여 내역을 조회하는 딕셔너리 뷰로, GRANTOR, GRANTEE, PRIVILEGE, GRANTABLE 등의 정보를 제공한다.",
+      "keyPoints": [
+        "GRANTABLE 컬럼으로 WITH GRANT OPTION 부여 여부 확인",
+        "GRANTOR 컬럼으로 권한 부여자 추적 가능 — 시스템 권한(DBA_SYS_PRIVS)과의 차이",
+        "DBA_COL_PRIVS 뷰로 컬럼 레벨 권한 부여 내역 조회"
+      ],
+      "relatedKeywords": ["DBA_SYS_PRIVS", "WITH GRANT OPTION"],
+      "sourceSection": "s06"
+    },
+    "DBA_ROLE_PRIVS": {
+      "definition": "사용자 및 롤에 부여된 롤 목록을 조회하는 딕셔너리 뷰로, DEFAULT_ROLE 컬럼으로 기본 롤 여부를 확인한다.",
+      "keyPoints": [
+        "GRANTEE, GRANTED_ROLE, ADMIN_OPTION, DEFAULT_ROLE, COMMON 컬럼 포함",
+        "롤의 계층 구조 확인 시 ROLE_ROLE_PRIVS 뷰 함께 활용",
+        "DEFAULT_ROLE 컬럼이 YES이면 로그인 시 자동 활성화"
+      ],
+      "relatedKeywords": ["DBA_SYS_PRIVS", "SESSION_ROLES", "기본 롤 (Default Role)"],
+      "sourceSection": "s06"
+    },
+    "SESSION_PRIVS": {
+      "definition": "현재 세션에서 활성화된 모든 시스템 권한(직접 부여 + 활성 롤을 통한 권한)을 조회하는 뷰이다.",
+      "keyPoints": [
+        "DBA_SYS_PRIVS와 달리 현재 세션에서 실제로 사용 가능한 권한만 표시",
+        "SET ROLE NONE 실행 후에는 직접 부여된 권한만 표시됨",
+        "SESSION_ROLES와 함께 사용하여 세션 상태 분석"
+      ],
+      "relatedKeywords": ["SESSION_ROLES", "DBA_SYS_PRIVS", "SET ROLE"],
+      "sourceSection": "s06"
+    },
+    "SESSION_ROLES": {
+      "definition": "현재 세션에서 활성화된 롤 목록을 조회하는 뷰로, SET ROLE 명령으로 변경된 상태가 반영된다.",
+      "keyPoints": [
+        "SET ROLE NONE 실행 시 모든 롤 비활성화 → SESSION_ROLES 결과 없음",
+        "기본 롤(Default Role) 설정에 따라 로그인 시 자동 활성화된 롤 표시",
+        "SESSION_PRIVS와 함께 사용하여 세션의 유효 권한 분석"
+      ],
+      "relatedKeywords": ["SESSION_PRIVS", "SET ROLE", "기본 롤 (Default Role)"],
+      "sourceSection": "s06"
+    },
+    "ROLE_SYS_PRIVS": {
+      "definition": "특정 롤에 부여된 시스템 권한을 조회하는 딕셔너리 뷰로, 롤에 포함된 세부 권한을 분석할 때 사용한다.",
+      "keyPoints": [
+        "ROLE, PRIVILEGE, ADMIN_OPTION 컬럼 포함",
+        "ROLE_TAB_PRIVS(객체 권한), ROLE_ROLE_PRIVS(하위 롤)와 함께 사용하여 롤 전체 분석",
+        "DBA 롤 등 사전 정의 롤에 포함된 시스템 권한을 확인할 때 유용"
+      ],
+      "relatedKeywords": ["DBA_ROLE_PRIVS", "롤 (Role)"],
+      "sourceSection": "s06"
+    },
+    "Secure Application Role": {
+      "definition": "PL/SQL 패키지를 통해 조건부로 활성화되는 롤로, 특정 조건(IP, 시간대, 접속 프로그램 등)을 만족할 때만 롤이 활성화된다.",
+      "keyPoints": [
+        "CREATE ROLE ... IDENTIFIED USING [schema.]package로 생성",
+        "패키지 내에서 DBMS_SESSION.SET_ROLE 호출로 롤 활성화",
+        "DEFAULT ROLE로 설정 불가 — 반드시 패키지를 통해서만 활성화",
+        "SYS_CONTEXT로 IP, 모듈 등 조건을 검사하여 세밀한 접근 제어 구현"
+      ],
+      "relatedKeywords": ["롤 (Role)", "롤 인증 (Role Authentication)", "SET ROLE"],
+      "sourceSection": "s03"
+    },
+    "O7_DICTIONARY_ACCESSIBILITY": {
+      "definition": "ANY 권한으로 SYS 소유 딕셔너리 객체에 접근할 수 있는지를 제어하는 초기화 파라미터로, 기본값은 FALSE이다.",
+      "keyPoints": [
+        "FALSE(기본값): ANY 권한으로 SYS 딕셔너리 객체 접근 불가 — 권장 설정",
+        "TRUE: ANY 권한으로 SYS 딕셔너리 객체 접근 가능 — 보안 위험",
+        "시험에서 ANY 권한의 범위를 물을 때 이 파라미터 설정이 핵심"
+      ],
+      "relatedKeywords": ["ANY 권한 (ANY Privilege)", "시스템 권한 (System Privilege)"],
+      "sourceSection": "s06"
+    },
+    "COMMON_USER_PREFIX": {
+      "definition": "공통 사용자 및 공통 롤 이름에 필요한 접두사를 제어하는 초기화 파라미터로, 기본값은 C##이다.",
+      "keyPoints": [
+        "변경 시 기존 공통 사용자/롤에는 영향 없으며, 새로 생성하는 것에만 적용",
+        "빈 문자열로 설정하면 접두사 제한 없이 공통 사용자/롤 생성 가능 (비권장)"
+      ],
+      "relatedKeywords": ["C## 접두사 (C## Prefix)", "공통 롤 (Common Role)"],
+      "sourceSection": "s05"
+    },
+    "DBMS_PRIVILEGE_CAPTURE": {
+      "definition": "Oracle의 권한 분석(Privilege Analysis) 패키지로, 실제 사용되는 권한과 미사용 권한을 식별하여 최소 권한 원칙을 구현한다.",
+      "keyPoints": [
+        "CREATE_CAPTURE → ENABLE_CAPTURE → DISABLE_CAPTURE → GENERATE_RESULT 워크플로우",
+        "DATABASE, ROLE, CONTEXT, ROLE_AND_CONTEXT 4가지 캡처 유형 지원",
+        "DBA_USED_PRIVS, DBA_UNUSED_PRIVS 뷰로 분석 결과 조회"
+      ],
+      "relatedKeywords": ["DBA_SYS_PRIVS", "DBA_TAB_PRIVS"],
+      "sourceSection": "s06"
+    },
+    "스키마 레벨 권한 (Schema-Level Privilege)": {
+      "definition": "Oracle 26ai에서 강화된 기능으로, 특정 스키마 내 현재 및 미래의 모든 객체에 대해 권한을 부여할 수 있는 시스템 권한이다.",
+      "keyPoints": [
+        "GRANT SELECT ANY TABLE ON SCHEMA hr TO user 형식으로 부여",
+        "ANY 권한(모든 스키마)보다 범위가 제한적이어서 최소 권한 원칙에 더 적합",
+        "미래에 생성될 객체에도 자동 적용됨"
+      ],
+      "relatedKeywords": ["ANY 권한 (ANY Privilege)", "객체 권한 (Object Privilege)"],
+      "sourceSection": "s06"
+    },
+    "롤 인증 (Role Authentication)": {
+      "definition": "롤 활성화 시 추가 보안을 적용하기 위한 인증 방식으로, 인증 없음/비밀번호/애플리케이션/외부/글로벌 5가지가 있다.",
+      "keyPoints": [
+        "NOT IDENTIFIED(기본값): 인증 없이 SET ROLE로 활성화",
+        "IDENTIFIED BY password: SET ROLE 시 비밀번호 입력 필요",
+        "IDENTIFIED USING package: Secure Application Role — 패키지가 조건부 활성화",
+        "비밀번호 인증 롤은 DEFAULT ROLE로 설정 불가"
+      ],
+      "relatedKeywords": ["롤 (Role)", "Secure Application Role", "SET ROLE"],
+      "sourceSection": "s03"
+    }
+  }
+}

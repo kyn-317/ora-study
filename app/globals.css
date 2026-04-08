@@ -172,6 +172,51 @@ a {
   cursor: default;
 }
 
+/* Quiz Layout with Study Panel */
+.quiz-layout-with-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1.5rem;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+/* 왼쪽: 문제 영역 — 우선 확보 */
+.quiz-layout-with-panel > div:first-child {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+/* 오른쪽: 학습 패널 — 드래그 리사이즈 가능 */
+.quiz-layout-with-panel > div:last-child {
+  flex: 0 0 auto;
+  min-width: 0;
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+/* 모바일: 세로 배치, 아래 누적 */
+@media (max-width: 767px) {
+  .quiz-layout-with-panel {
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .quiz-layout-with-panel > div:first-child {
+    flex: 1 1 auto;
+  }
+
+  .quiz-layout-with-panel > div:last-child {
+    flex: 0 0 auto;
+    position: static;
+    max-height: none;
+    width: 100%;
+  }
+}
+
 /* Quiz Progress Bar */
 .quiz-progress-bar {
   height: 4px;

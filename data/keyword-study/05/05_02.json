@@ -1,0 +1,405 @@
+{
+  "studyId": "05_02",
+  "chapterId": "05",
+  "title": "경로 및 블록 관리 (Datafile Relocation and Block Size Management)",
+  "keywords": {
+    "ALTER DATABASE MOVE DATAFILE / オンライン・データファイル移動": {
+      "definition": "Oracle 12c부터 도입된 명령으로, 데이터베이스를 중단하지 않고 데이터 파일의 물리적 위치를 온라인 상태에서 변경하는 기능이다. 이동 중에도 DML 작업이 계속 허용된다.",
+      "keyPoints": [
+        "섀도 복사(Shadow Copy) 메커니즘으로 동작: 대상에 섀도 파일 생성 → 블록 복사 → 경로 전환",
+        "복사 중 이중 쓰기(Dual Write)로 원본+섀도 양쪽에 DML 변경 기록 (약 10~20% I/O 오버헤드)",
+        "KEEP 미사용 시 원본 파일 자동 삭제, KEEP 사용 시 원본 유지",
+        "ASM↔파일 시스템 간 양방향 이동 지원",
+        "SYSTEM, UNDO TS도 온라인 이동 가능 (12.2 이상), TEMPFILE은 대상 아님"
+      ],
+      "relatedKeywords": [
+        "REUSE 옵션",
+        "KEEP 옵션",
+        "섀도 복사 메커니즘",
+        "V$SESSION_LONGOPS"
+      ],
+      "sourceSection": "s02"
+    },
+    "REUSE 옵션 / REUSE オプション": {
+      "definition": "ALTER DATABASE MOVE DATAFILE 명령에서 대상 경로에 이미 파일이 존재할 때 해당 파일을 덮어쓰기(Overwrite)하도록 허용하는 옵션이다.",
+      "keyPoints": [
+        "REUSE 없이 대상 경로에 파일이 있으면 ORA-01119 오류 발생",
+        "대상 경로에 파일이 없는 경우에는 REUSE 유무 관계없이 정상 이동",
+        "KEEP 옵션과 동시 사용 가능 (REUSE KEEP)"
+      ],
+      "relatedKeywords": [
+        "ALTER DATABASE MOVE DATAFILE",
+        "KEEP 옵션"
+      ],
+      "sourceSection": "s02"
+    },
+    "KEEP 옵션 / KEEP オプション": {
+      "definition": "ALTER DATABASE MOVE DATAFILE 명령에서 이동 완료 후 원본 파일을 삭제하지 않고 유지하는 옵션이다. 기본 동작은 원본 파일 자동 삭제이다.",
+      "keyPoints": [
+        "KEEP 미사용(기본): 이동 완료 후 원본 파일 자동 삭제",
+        "KEEP 사용: 원본 파일 유지 (백업/롤백 대비용)",
+        "REUSE 옵션과 동시 사용 가능"
+      ],
+      "relatedKeywords": [
+        "ALTER DATABASE MOVE DATAFILE",
+        "REUSE 옵션"
+      ],
+      "sourceSection": "s02"
+    },
+    "섀도 복사 메커니즘 / Shadow Copy Mechanism": {
+      "definition": "ALTER DATABASE MOVE DATAFILE의 내부 동작 방식으로, 대상 위치에 섀도 파일을 생성하고 블록 단위로 순차 복사한 뒤 경로를 전환하는 메커니즘이다.",
+      "keyPoints": [
+        "대상에 섀도 파일 생성 → 블록 순차 복사 → 컨트롤 파일 경로 갱신 → 원본 삭제",
+        "복사 중 이중 쓰기(Dual Write)로 데이터 일관성 보장",
+        "경로 전환 시 아주 짧은 순간의 파일 잠금 발생 (사실상 무중단)",
+        "V$SESSION_LONGOPS로 진행 상태 모니터링 가능"
+      ],
+      "relatedKeywords": [
+        "ALTER DATABASE MOVE DATAFILE",
+        "이중 쓰기"
+      ],
+      "sourceSection": "s02"
+    },
+    "이중 쓰기 / Dual Write": {
+      "definition": "데이터 파일 온라인 이동 중 발생하는 DML 변경 사항을 원본 파일과 섀도 파일 양쪽에 동시에 기록하는 메커니즘이다. 복사 완료 시 섀도 파일이 원본과 완전히 동일한 상태를 유지하도록 보장한다.",
+      "keyPoints": [
+        "복사 진행 중에만 발생하며, 약 10~20% 추가 I/O 오버헤드 유발",
+        "SELECT는 원본에서 읽기, DML은 양쪽에 쓰기",
+        "복사 완료 직후 경로 전환되면 이중 쓰기 종료"
+      ],
+      "relatedKeywords": [
+        "섀도 복사 메커니즘",
+        "ALTER DATABASE MOVE DATAFILE"
+      ],
+      "sourceSection": "s02"
+    },
+    "ALTER DATABASE RENAME FILE / データファイル名変更": {
+      "definition": "데이터베이스가 MOUNT 상태일 때 데이터 파일의 경로 정보를 컨트롤 파일에서 갱신하는 DDL 명령이다. 실제 파일을 이동하지 않고 경로 정보만 변경한다.",
+      "keyPoints": [
+        "반드시 OS 레벨에서 파일 복사를 먼저 완료한 후 실행해야 함",
+        "SYSTEM TS 포함 모든 데이터 파일의 경로 변경 가능 (MOUNT 상태 필요)",
+        "리두 로그 파일 경로 변경에도 동일 명령 사용 가능",
+        "원본 파일은 자동 삭제되지 않으므로 DBA가 수동 삭제 필요"
+      ],
+      "relatedKeywords": [
+        "ALTER TABLESPACE RENAME DATAFILE",
+        "ALTER DATABASE MOVE DATAFILE"
+      ],
+      "sourceSection": "s03"
+    },
+    "ALTER TABLESPACE RENAME DATAFILE / テーブルスペース・リネーム": {
+      "definition": "데이터베이스 OPEN 상태에서 특정 테이블스페이스의 데이터 파일 경로를 변경하는 DDL 명령이다. 해당 테이블스페이스를 먼저 오프라인으로 전환해야 한다.",
+      "keyPoints": [
+        "DB OPEN 상태에서 사용 가능하나 해당 TS 오프라인 필수",
+        "SYSTEM TS는 오프라인 불가이므로 이 방법으로 이동 불가",
+        "활성 UNDO TS도 오프라인 불가 → ALTER DATABASE RENAME FILE(MOUNT) 사용 필요",
+        "OS 레벨 파일 복사 완료 후 실행, 원본 파일 수동 삭제 필요"
+      ],
+      "relatedKeywords": [
+        "ALTER DATABASE RENAME FILE",
+        "ALTER DATABASE MOVE DATAFILE"
+      ],
+      "sourceSection": "s03"
+    },
+    "오프라인 데이터 파일 이동 / オフライン・データファイル移動": {
+      "definition": "테이블스페이스를 오프라인으로 전환하거나 DB를 MOUNT 상태로 기동한 뒤, OS 레벨에서 파일을 복사하고 컨트롤 파일의 경로 정보를 갱신하는 전통적인 데이터 파일 이동 방식이다.",
+      "keyPoints": [
+        "ALTER DATABASE RENAME FILE(MOUNT 상태) 또는 ALTER TABLESPACE RENAME DATAFILE(TS 오프라인) 사용",
+        "DBA가 OS 레벨에서 수동 파일 복사 → 경로 정보 갱신 → 원본 수동 삭제",
+        "온라인 이동(MOVE DATAFILE) 도입 전의 전통적 방식",
+        "서비스 중단 필요 (전체 DB 또는 해당 TS)"
+      ],
+      "relatedKeywords": [
+        "ALTER DATABASE RENAME FILE",
+        "ALTER TABLESPACE RENAME DATAFILE",
+        "ALTER DATABASE MOVE DATAFILE"
+      ],
+      "sourceSection": "s03"
+    },
+    "데이터 블록 / Data Block / データ・ブロック": {
+      "definition": "Oracle Database가 데이터를 읽고 쓰는 최소 I/O 단위이다. 블록 헤더(공통 헤더, ITL, 행 디렉토리), 프리 스페이스, 행 데이터로 구성된다.",
+      "keyPoints": [
+        "블록 헤더: 공통 헤더(DBA, SCN) + 트랜잭션 헤더(ITL) + 테이블 디렉토리 + 행 디렉토리",
+        "프리 스페이스: INSERT/UPDATE용 여유 공간, PCTFREE에 의해 예약 관리",
+        "행 데이터: 실제 행 헤더 + 컬럼 데이터가 블록 하단에 위치",
+        "DB_BLOCK_SIZE(기본 8KB)로 크기 결정, DB 생성 후 변경 불가"
+      ],
+      "relatedKeywords": [
+        "DB_BLOCK_SIZE",
+        "블록 헤더",
+        "ITL (Interested Transaction List)",
+        "PCTFREE / PCTUSED"
+      ],
+      "sourceSection": "s04"
+    },
+    "블록 헤더 / Block Header": {
+      "definition": "데이터 블록의 상단에 위치하며, 블록 관리에 필요한 메타데이터(블록 유형, DBA, SCN, ITL, 행 디렉토리 등)를 저장하는 영역이다.",
+      "keyPoints": [
+        "DBA(Data Block Address): 파일 번호 + 블록 번호로 블록을 고유 식별",
+        "SCN: 블록이 마지막으로 변경된 시점 기록",
+        "행 디렉토리: 각 행의 블록 내 오프셋을 2바이트 엔트리로 저장",
+        "DB_BLOCK_CHECKSUM 파라미터로 블록 체크섬 무결성 검증 가능"
+      ],
+      "relatedKeywords": [
+        "데이터 블록",
+        "ITL (Interested Transaction List)"
+      ],
+      "sourceSection": "s04"
+    },
+    "ITL (Interested Transaction List)": {
+      "definition": "데이터 블록의 트랜잭션 헤더에 위치하며, 블록 내 현재 활성 트랜잭션을 추적하는 목록이다. 각 ITL 엔트리(슬롯)에 하나의 트랜잭션 정보가 기록된다.",
+      "keyPoints": [
+        "INITRANS: 초기 ITL 슬롯 수 (테이블 기본 1, 인덱스 기본 2)",
+        "MAXTRANS: 최대 ITL 슬롯 수 (10g 이후 255 고정)",
+        "ITL 슬롯 부족 시 enq: TX - allocate ITL entry 대기 이벤트 발생",
+        "동시에 많은 트랜잭션이 같은 블록을 갱신하면 INITRANS 증가로 경합 완화"
+      ],
+      "relatedKeywords": [
+        "블록 헤더",
+        "데이터 블록"
+      ],
+      "sourceSection": "s04"
+    },
+    "PCTFREE / PCTUSED": {
+      "definition": "데이터 블록 내 공간 사용 전략을 제어하는 파라미터이다. PCTFREE는 UPDATE를 위해 예약하는 빈 공간 비율이고, PCTUSED는 블록이 프리 리스트에 다시 추가되는 기준 사용률이다.",
+      "keyPoints": [
+        "PCTFREE 기본값 10%: 블록 사용률이 90%에 도달하면 INSERT 불가",
+        "PCTUSED 기본값 40%: DELETE로 사용률이 40% 이하로 내려가면 INSERT 재허용",
+        "ASSM 환경에서는 PCTUSED 무시 (비트맵으로 자동 관리), PCTFREE만 유효",
+        "PCTFREE가 너무 낮으면 Row Migration 빈번, 너무 높으면 공간 낭비"
+      ],
+      "relatedKeywords": [
+        "행 마이그레이션",
+        "ASSM",
+        "데이터 블록"
+      ],
+      "sourceSection": "s04"
+    },
+    "행 체이닝 / Row Chaining / 行連鎖": {
+      "definition": "행의 크기가 블록 크기보다 커서 처음부터 여러 블록에 걸쳐 저장되는 현상이다. 해당 행 접근 시 항상 다중 블록 I/O가 필요하다.",
+      "keyPoints": [
+        "행 크기 > 블록 크기일 때 발생하며, PCTFREE 조정으로 해결 불가",
+        "해결 방법: 블록 크기를 키우거나(비표준 블록 사이즈), 테이블 재설계",
+        "V$SYSSTAT의 'table fetch continued row'로 발생 빈도 모니터링",
+        "Row Migration과 함께 ANALYZE TABLE ... LIST CHAINED ROWS로 탐지"
+      ],
+      "relatedKeywords": [
+        "행 마이그레이션",
+        "PCTFREE / PCTUSED",
+        "비표준 블록 사이즈"
+      ],
+      "sourceSection": "s04"
+    },
+    "행 마이그레이션 / Row Migration / 行移行": {
+      "definition": "UPDATE로 행 크기가 증가하여 원래 블록에 들어가지 않을 때 행 전체가 다른 블록으로 이동하는 현상이다. 원래 위치에 새 블록을 가리키는 포인터가 남아 추가 I/O가 발생한다.",
+      "keyPoints": [
+        "PCTFREE가 부족하면 빈번하게 발생 — PCTFREE 적절히 설정 필요",
+        "원래 ROWID는 변경되지 않음 (포인터가 남으므로)",
+        "SHRINK SPACE 또는 ALTER TABLE MOVE로 해결 가능",
+        "Row Chaining과 달리 PCTFREE 조정과 테이블 재구성으로 해결 가능"
+      ],
+      "relatedKeywords": [
+        "행 체이닝",
+        "PCTFREE / PCTUSED",
+        "SHRINK SPACE"
+      ],
+      "sourceSection": "s04"
+    },
+    "DB_BLOCK_SIZE / 標準ブロック・サイズ": {
+      "definition": "Oracle Database의 표준 데이터 블록 크기를 결정하는 초기화 파라미터이다. CREATE DATABASE 시 설정되며 데이터베이스 재생성 없이는 변경할 수 없다.",
+      "keyPoints": [
+        "기본값 8192(8KB), 허용값: 2KB, 4KB, 8KB, 16KB, 32KB",
+        "SYSTEM, SYSAUX, UNDO, 기본 TEMP TS는 반드시 표준 블록 사이즈 사용",
+        "OLTP 환경: 8KB 권장, DW/DSS: 16KB~32KB가 효율적",
+        "DB_CACHE_SIZE가 표준 블록 사이즈의 버퍼 캐시 크기를 제어"
+      ],
+      "relatedKeywords": [
+        "DB_nK_CACHE_SIZE",
+        "DB_CACHE_SIZE",
+        "데이터 블록"
+      ],
+      "sourceSection": "s05"
+    },
+    "DB_nK_CACHE_SIZE / 非標準ブロック・キャッシュ": {
+      "definition": "비표준 블록 사이즈(2K/4K/16K/32K) 테이블스페이스를 위한 SGA 내 전용 버퍼 캐시 크기를 설정하는 파라미터이다. n에 블록 크기(KB)가 들어간다.",
+      "keyPoints": [
+        "DB_BLOCK_SIZE와 동일한 사이즈의 DB_nK_CACHE_SIZE는 설정 불가 (예: 8KB 표준이면 DB_8K_CACHE_SIZE 불가)",
+        "SGA_TARGET/MEMORY_TARGET 자동 메모리 관리에서도 자동 조절되지 않음 — 명시적 설정 필수",
+        "할당된 크기는 SGA_TARGET에서 차감되어 기본 캐시 가용 공간이 줄어듦",
+        "비표준 캐시가 0이면 해당 블록 사이즈의 TS를 온라인으로 전환 불가"
+      ],
+      "relatedKeywords": [
+        "DB_BLOCK_SIZE",
+        "DB_CACHE_SIZE",
+        "비표준 블록 사이즈"
+      ],
+      "sourceSection": "s06"
+    },
+    "DB_CACHE_SIZE / デフォルト・バッファ・キャッシュ": {
+      "definition": "SGA 내에서 표준 블록 사이즈(DB_BLOCK_SIZE)의 데이터를 캐싱하는 기본 버퍼 캐시의 크기를 제어하는 파라미터이다.",
+      "keyPoints": [
+        "SGA_TARGET/MEMORY_TARGET 설정 시 자동 조절됨",
+        "ALTER SYSTEM SET으로 동적 변경 가능",
+        "비표준 블록 사이즈는 DB_nK_CACHE_SIZE로 별도 관리"
+      ],
+      "relatedKeywords": [
+        "DB_BLOCK_SIZE",
+        "DB_nK_CACHE_SIZE"
+      ],
+      "sourceSection": "s05"
+    },
+    "비표준 블록 사이즈 / Non-Standard Block Size / 非標準ブロック・サイズ": {
+      "definition": "DB_BLOCK_SIZE(표준)와 다른 블록 크기를 사용하는 테이블스페이스이다. CREATE TABLESPACE ... BLOCKSIZE nK로 생성하며, DB_nK_CACHE_SIZE 파라미터 설정이 선행되어야 한다.",
+      "keyPoints": [
+        "가장 대표적 사용 사례: Transportable Tablespace로 다른 DB에서 블록 사이즈가 다른 TS를 가져올 때",
+        "SYSTEM, SYSAUX, UNDO, 기본 TEMP TS는 반드시 표준 블록 사이즈만 사용 가능",
+        "대용량 LOB 저장, 행 체이닝 방지, DW/DSS Full Table Scan 효율 등에 활용",
+        "DBA_TABLESPACES의 BLOCK_SIZE 컬럼으로 각 TS의 블록 사이즈 확인"
+      ],
+      "relatedKeywords": [
+        "DB_nK_CACHE_SIZE",
+        "Transportable Tablespace",
+        "DB_BLOCK_SIZE"
+      ],
+      "sourceSection": "s06"
+    },
+    "Transportable Tablespace / トランスポータブル・テーブルスペース": {
+      "definition": "테이블스페이스 단위로 데이터를 다른 Oracle Database로 이동하는 기능이다. 소스 DB와 대상 DB의 블록 사이즈가 다르면 비표준 블록 사이즈 캐시 설정이 필요하다.",
+      "keyPoints": [
+        "소스 DB의 블록 사이즈가 대상 DB의 표준 블록 사이즈와 다르면 DB_nK_CACHE_SIZE 설정 필요",
+        "비표준 블록 사이즈 테이블스페이스의 가장 대표적인 사용 사례",
+        "Oracle 26ai에서 크로스 플랫폼 이동 시 블록 사이즈 검증이 자동화됨"
+      ],
+      "relatedKeywords": [
+        "비표준 블록 사이즈",
+        "DB_nK_CACHE_SIZE"
+      ],
+      "sourceSection": "s06"
+    },
+    "ROWID / 行識別子": {
+      "definition": "Oracle Database에서 테이블 내 각 행의 물리적 위치를 고유하게 식별하는 주소이다. Data Object Number + Relative File Number + Block Number + Row Number로 구성된 18자리 Base64 문자열이다.",
+      "keyPoints": [
+        "구성: OOOOOO(객체번호 6자리) + FFF(파일번호 3자리) + BBBBBB(블록번호 6자리) + RRR(행번호 3자리)",
+        "인덱스 스캔 후 ROWID로 직접 블록 접근 — 가장 빠른 행 접근 방법",
+        "ALTER DATABASE MOVE DATAFILE 시 ROWID 불변, ALTER TABLE MOVE 시 ROWID 변경",
+        "행 마이그레이션 발생 시 원래 ROWID 유지 (원래 위치에 포인터 남김)",
+        "IOT(Index-Organized Table)는 논리적 ROWID(Primary Key 기반) 사용"
+      ],
+      "relatedKeywords": [
+        "DBMS_ROWID 패키지",
+        "Data Object Number",
+        "Relative File Number"
+      ],
+      "sourceSection": "s07"
+    },
+    "DBMS_ROWID 패키지": {
+      "definition": "ROWID를 구성 요소(Data Object Number, File Number, Block Number, Row Number)로 분해하고 분석하는 유틸리티 패키지이다.",
+      "keyPoints": [
+        "ROWID_OBJECT(rowid): Data Object Number 추출",
+        "ROWID_RELATIVE_FNO(rowid): Relative File Number 추출",
+        "ROWID_BLOCK_NUMBER(rowid): Block Number 추출",
+        "ROWID_ROW_NUMBER(rowid): Row Number 추출"
+      ],
+      "relatedKeywords": [
+        "ROWID",
+        "Data Object Number",
+        "Relative File Number"
+      ],
+      "sourceSection": "s07"
+    },
+    "Data Object Number / データ・オブジェクト番号": {
+      "definition": "ROWID의 첫 번째 구성 요소로, 세그먼트(테이블/파티션)의 고유 번호이다. DBA_OBJECTS의 DATA_OBJECT_ID 컬럼으로 확인할 수 있다.",
+      "keyPoints": [
+        "ROWID에서 6자리(32비트) Base64로 인코딩",
+        "ALTER TABLE MOVE, 파티션 이동 등으로 세그먼트가 재생성되면 변경됨",
+        "DBMS_ROWID.ROWID_OBJECT(rowid)로 추출"
+      ],
+      "relatedKeywords": [
+        "ROWID",
+        "DBMS_ROWID 패키지"
+      ],
+      "sourceSection": "s07"
+    },
+    "Relative File Number / 相対ファイル番号": {
+      "definition": "ROWID의 두 번째 구성 요소로, 테이블스페이스 내에서 데이터 파일을 식별하는 상대적 파일 번호이다. SMALLFILE에서 10비트, BIGFILE에서는 사용하지 않는다.",
+      "keyPoints": [
+        "SMALLFILE: 10비트로 최대 1,022개 파일 식별",
+        "BIGFILE: 0비트(파일이 1개이므로 불필요) → 블록 번호에 재할당",
+        "ALTER DATABASE MOVE DATAFILE 시 Relative File Number 불변 → ROWID 변경 없음",
+        "DBA_DATA_FILES의 RELATIVE_FNO 컬럼으로 확인"
+      ],
+      "relatedKeywords": [
+        "ROWID",
+        "SMALLFILE 테이블스페이스",
+        "BIGFILE 테이블스페이스"
+      ],
+      "sourceSection": "s07"
+    },
+    "ASM (Automatic Storage Management) / 自動ストレージ管理": {
+      "definition": "Oracle이 제공하는 전용 볼륨 매니저 겸 파일 시스템으로, 디스크 관리(스트라이핑, 미러링, 리밸런싱)를 자동화한다. ASM↔파일 시스템 간 온라인 데이터 파일 이동을 지원한다.",
+      "keyPoints": [
+        "ASM으로 데이터 파일 이동 시 디스크 그룹 이름만 지정하면 OMF 형식으로 파일명 자동 생성",
+        "ALTER DATABASE MOVE DATAFILE로 ASM↔파일 시스템 간 온라인 이동 가능",
+        "V$ASM_DISKGROUP, V$ASM_DISK 등으로 상태 모니터링",
+        "ASM 간 이동(+DATA → +DATA2)도 지원"
+      ],
+      "relatedKeywords": [
+        "ALTER DATABASE MOVE DATAFILE",
+        "OMF"
+      ],
+      "sourceSection": "s01"
+    },
+    "V$SESSION_LONGOPS": {
+      "definition": "장시간 실행 작업의 진행 상태를 모니터링하는 동적 성능 뷰이다. 데이터 파일 이동, RMAN 백업 등의 진행률을 확인할 수 있다.",
+      "keyPoints": [
+        "ALTER DATABASE MOVE DATAFILE 작업의 진행 상태 실시간 모니터링 가능",
+        "SOFAR/TOTALWORK 컬럼으로 진행률(%) 계산",
+        "대용량 데이터 파일 이동 시 소요 시간 추정에 활용"
+      ],
+      "relatedKeywords": [
+        "ALTER DATABASE MOVE DATAFILE"
+      ],
+      "sourceSection": "s02"
+    },
+    "V$BUFFER_POOL_STATISTICS": {
+      "definition": "버퍼 풀별 히트율, 물리적/논리적 읽기 통계를 제공하는 동적 성능 뷰이다. 비표준 블록 사이즈 캐시의 효율을 모니터링할 수 있다.",
+      "keyPoints": [
+        "각 블록 사이즈별 버퍼 캐시의 히트율(Hit Ratio) 확인 가능",
+        "PHYSICAL_READS, DB_BLOCK_GETS, CONSISTENT_GETS 등 핵심 통계 제공",
+        "비표준 블록 사이즈 캐시의 크기 조정 근거 제공"
+      ],
+      "relatedKeywords": [
+        "DB_nK_CACHE_SIZE",
+        "DB_CACHE_SIZE"
+      ],
+      "sourceSection": "s06"
+    },
+    "DBA_DATA_FILES / DBA_TABLESPACES": {
+      "definition": "DBA_DATA_FILES는 모든 데이터 파일 정보를, DBA_TABLESPACES는 모든 테이블스페이스 속성을 조회하는 데이터 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "DBA_DATA_FILES: FILE_NAME, BYTES, AUTOEXTENSIBLE, MAXBYTES, RELATIVE_FNO 등",
+        "DBA_TABLESPACES: BIGFILE 여부, BLOCK_SIZE, SEGMENT_SPACE_MANAGEMENT 등",
+        "데이터 파일 이동 전후 경로 확인에 필수적으로 사용"
+      ],
+      "relatedKeywords": [
+        "V$DATAFILE",
+        "V$TABLESPACE"
+      ],
+      "sourceSection": "s01"
+    },
+    "ASSM (Automatic Segment Space Management) / 自動セグメント領域管理": {
+      "definition": "세그먼트 내 블록의 여유 공간을 비트맵(Bitmap)으로 자동 관리하는 방식이다. 프리리스트 방식보다 동시성이 우수하며 Oracle의 기본값이다.",
+      "keyPoints": [
+        "비트맵으로 블록의 가용 공간 상태 자동 추적 — PCTUSED 무시, PCTFREE만 유효",
+        "MANUAL(Freelist) 대비 높은 동시성, 공간 관리 효율 제공",
+        "SHRINK SPACE는 ASSM 환경에서만 지원됨",
+        "Low HWM과 High HWM 두 가지를 구분하여 관리"
+      ],
+      "relatedKeywords": [
+        "PCTFREE / PCTUSED",
+        "HWM"
+      ],
+      "sourceSection": "s04"
+    }
+  }
+}

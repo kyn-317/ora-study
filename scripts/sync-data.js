@@ -121,6 +121,66 @@ if (fs.existsSync(customDir)) {
   }
 }
 
+// keywordIndex: keyword → [{ studyId, chapterId, title, fileName, hasKeywordStudy }]
+// 모든 study 파일의 keywords 배열을 수집하여 역색인 생성
+console.log('Building keyword index ...');
+
+// keyword-study 파일을 미리 로드하여 hasKeywordStudy 판별에 사용
+const keywordStudyDir = path.join(DATA_DIR, 'keyword-study');
+const keywordStudyCache = {};
+if (fs.existsSync(keywordStudyDir)) {
+  for (const ch of fs.readdirSync(keywordStudyDir).filter(d => !d.startsWith('.'))) {
+    const chPath = path.join(keywordStudyDir, ch);
+    if (!fs.statSync(chPath).isDirectory()) continue;
+    for (const f of fs.readdirSync(chPath).filter(f => f.endsWith('.json'))) {
+      try {
+        const ksData = JSON.parse(fs.readFileSync(path.join(chPath, f), 'utf-8'));
+        const key = `${ksData.chapterId}/${ksData.studyId}`;
+        keywordStudyCache[key] = new Set(Object.keys(ksData.keywords || {}));
+      } catch (e) {
+        console.warn(`  ⚠ Failed to read keyword-study ${f}: ${e.message}`);
+      }
+    }
+  }
+}
+const ksFileCount = Object.keys(keywordStudyCache).length;
+if (ksFileCount > 0) console.log(`  ${ksFileCount} keyword-study files loaded.`);
+
+const keywordIndex = {};
+for (const [chId, files] of Object.entries(manifest.study)) {
+  for (const fileName of files) {
+    const filePath = path.join(studyDir, chId, `${fileName}.json`);
+    try {
+      const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      if (content.keywords && Array.isArray(content.keywords)) {
+        for (const kw of content.keywords) {
+          if (!keywordIndex[kw]) {
+            keywordIndex[kw] = [];
+          }
+          // 중복 방지
+          const exists = keywordIndex[kw].some(e => e.studyId === content.id && e.chapterId === chId);
+          if (!exists) {
+            const ksKey = `${chId}/${content.id}`;
+            const hasKS = keywordStudyCache[ksKey]?.has(kw) ?? false;
+            keywordIndex[kw].push({
+              studyId: content.id,
+              chapterId: chId,
+              title: content.title,
+              fileName,
+              hasKeywordStudy: hasKS,
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn(`  ⚠ Failed to read ${filePath}: ${e.message}`);
+    }
+  }
+}
+manifest.keywordIndex = keywordIndex;
+const keywordCount = Object.keys(keywordIndex).length;
+console.log(`  ${keywordCount} unique keywords indexed.\n`);
+
 const manifestPath = path.join(DATA_DIR, 'manifest.json');
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
 console.log(`  written: ${manifestPath}\n`);

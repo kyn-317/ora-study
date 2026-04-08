@@ -1,0 +1,332 @@
+{
+  "studyId": "03_02",
+  "chapterId": "03",
+  "title": "네트워크 진단 및 제어 툴 (Network Diagnostic & Control Tools)",
+  "keywords": {
+    "tnsping": {
+      "definition": "Oracle Net 리스너까지의 네트워크 경로가 유효한지 확인하는 커맨드라인 진단 유틸리티로, TNS 프로토콜 수준의 연결 테스트를 수행한다.",
+      "keyPoints": [
+        "리스너 도달 가능성만 확인. DB 인스턴스 구동 여부, 서비스 등록 여부, 사용자 인증 유효성은 확인 불가",
+        "tnsping 성공 ≠ DB 접속 성공. 실제 연결 테스트는 SQL*Plus 등으로 별도 확인 필요",
+        "출력에서 사용된 이름 해석 어댑터(TNSNAMES, LDAP, EZCONNECT) 확인 가능",
+        "TNS-12541(no listener), TNS-03505(name resolve fail) 등 오류 코드로 원인 파악",
+        "Easy Connect 문자열(host:port/service)로 tnsnames.ora 없이도 테스트 가능"
+      ],
+      "relatedKeywords": ["lsnrctl", "tnsnames.ora", "Net Service Name", "Easy Connect"],
+      "sourceSection": "s02"
+    },
+    "lsnrctl": {
+      "definition": "Listener Control Utility. Oracle Net Listener 프로세스를 시작/중지/상태 확인하는 핵심 커맨드라인 제어 도구이다.",
+      "keyPoints": [
+        "주요 명령: START, STOP, STATUS, SERVICES, RELOAD, SET, SHOW, SAVE_CONFIG",
+        "RELOAD: listener.ora 재읽기 (리스너 중지 없이 구성 변경 반영)",
+        "SERVICES: 등록된 서비스의 상세 정보(핸들러, 인스턴스, 접속 방식) 확인",
+        "리스너 프로세스 제어 도구이므로, 클라이언트 측 네이밍 구성(tnsnames.ora 편집)은 불가",
+        "다중 리스너 환경에서는 lsnrctl status LISTENER2 형식으로 리스너 이름 명시 필요"
+      ],
+      "relatedKeywords": ["listener.ora", "Oracle Net Listener", "NETCA", "tnsping"],
+      "sourceSection": "s03"
+    },
+    "NETCA": {
+      "definition": "Oracle Net Configuration Assistant. 리스너, 네이밍 메서드, 디렉토리 서비스 등 Oracle Net 구성 파일을 GUI 마법사로 생성/편집하는 구성 도구이다.",
+      "keyPoints": [
+        "listener.ora, tnsnames.ora, sqlnet.ora 등 구성 파일을 생성/편집하는 구성 도구",
+        "리스너 프로세스의 런타임 시작/중지는 불가 — lsnrctl의 역할",
+        "사일런트 모드(Silent Mode)를 지원하여 자동화 가능 (NETMGR은 Silent 미지원)",
+        "Oracle 소프트웨어 설치 후 네트워크 초기 구성 시 사용하는 것이 일반적",
+        "Oracle 26ai에서 mTLS 구성 마법사가 추가됨"
+      ],
+      "relatedKeywords": ["NETMGR", "lsnrctl", "listener.ora", "tnsnames.ora", "sqlnet.ora"],
+      "sourceSection": "s04"
+    },
+    "NETMGR": {
+      "definition": "Oracle Net Manager. Oracle Net 구성 파일을 편집하는 고급 GUI 관리 도구로, 프로파일, 네이밍, 리스너 구성을 통합적으로 관리한다.",
+      "keyPoints": [
+        "listener.ora, tnsnames.ora, sqlnet.ora 등 구성 파일 편집 도구 (NETCA와 유사)",
+        "리스너 프로세스의 런타임 시작/중지 불가 — lsnrctl의 역할",
+        "GUI 전용 도구로 Silent(비대화형) 모드를 지원하지 않음 (NETCA와의 차이점)",
+        "sqlnet.ora의 고급 보안 설정(암호화, 인증) 편집에 특히 유용"
+      ],
+      "relatedKeywords": ["NETCA", "lsnrctl", "sqlnet.ora"],
+      "sourceSection": "s05"
+    },
+    "Oracle Net Listener": {
+      "definition": "클라이언트의 네트워크 접속 요청을 수신하여 적절한 데이터베이스 서버 프로세스로 라우팅하는 서버 측 프로세스이다.",
+      "keyPoints": [
+        "기본 포트: TCP 1521, TCPS(TLS/SSL) 2484",
+        "클라이언트 접속 요청 수신 → 서버 프로세스 생성/할당 → 핸드오프",
+        "서비스 등록: 동적 등록(LREG 자동) + 정적 등록(listener.ora에 SID_LIST 기술)",
+        "기본 리스너 이름은 LISTENER. 다른 이름 사용 시 LOCAL_LISTENER 파라미터 설정 필요"
+      ],
+      "relatedKeywords": ["lsnrctl", "listener.ora", "동적 등록 (Dynamic Registration)", "정적 등록 (Static Registration)"],
+      "sourceSection": "s03"
+    },
+    "listener.ora": {
+      "definition": "Oracle Net Listener의 동작을 정의하는 서버 측 구성 파일로, 리스너가 수신 대기할 프로토콜 주소, 정적 서비스 등록, 보안 설정 등을 포함한다.",
+      "keyPoints": [
+        "위치: $ORACLE_HOME/network/admin (TNS_ADMIN 환경변수로 변경 가능)",
+        "주요 구성: LISTENER(프로토콜 주소), SID_LIST(정적 서비스 등록), ADR_BASE(진단 로그 경로)",
+        "동적 등록을 사용하면 SID_LIST 설정 없이도 서비스 자동 등록됨",
+        "lsnrctl reload로 리스너 중지 없이 변경 사항 반영 가능"
+      ],
+      "relatedKeywords": ["lsnrctl", "Oracle Net Listener", "SID_LIST", "tnsnames.ora", "sqlnet.ora"],
+      "sourceSection": "s03"
+    },
+    "tnsnames.ora": {
+      "definition": "클라이언트 측 네트워크 구성 파일로, 네트 서비스 이름(Net Service Name)을 접속 디스크립터(Connect Descriptor)로 매핑하는 로컬 네이밍 파일이다.",
+      "keyPoints": [
+        "위치: $ORACLE_HOME/network/admin (TNS_ADMIN 환경변수로 변경 가능)",
+        "net_service_name = (DESCRIPTION = (ADDRESS = ...)(CONNECT_DATA = ...)) 형식",
+        "NETCA 또는 NETMGR로 편집 가능. lsnrctl로는 편집 불가",
+        "클라이언트 측 파일이므로 각 클라이언트에 배포/관리 필요"
+      ],
+      "relatedKeywords": ["sqlnet.ora", "listener.ora", "Net Service Name", "Connection Descriptor", "NETCA"],
+      "sourceSection": "s01"
+    },
+    "sqlnet.ora": {
+      "definition": "Oracle Net의 클라이언트/서버 프로파일 설정 파일로, 네이밍 메서드 순서, 보안, 암호화, 로깅 등 네트워크 동작을 제어한다.",
+      "keyPoints": [
+        "위치: $ORACLE_HOME/network/admin (TNS_ADMIN 환경변수로 변경 가능)",
+        "NAMES.DIRECTORY_PATH: 네이밍 해석 순서 지정 (기본값: TNSNAMES, EZCONNECT)",
+        "SQLNET.AUTHENTICATION_SERVICES: 인증 방식 설정 (NTS, NONE, ALL 등)",
+        "NETCA 또는 NETMGR로 편집 가능"
+      ],
+      "relatedKeywords": ["tnsnames.ora", "listener.ora", "NAMES.DIRECTORY_PATH", "NETCA", "NETMGR"],
+      "sourceSection": "s01"
+    },
+    "TNS (Transparent Network Substrate)": {
+      "definition": "Oracle Net의 핵심 네트워크 전송 계층으로, 네이밍 해석, 접속 관리, 데이터 전송 등 투명한 네트워크 통신을 제공하는 기반 기술이다.",
+      "keyPoints": [
+        "클라이언트와 서버 간 네트워크 프로토콜 차이를 추상화(투명화)",
+        "TNS 접속 문자열 해석, 네트워크 연결 수립, 데이터 마샬링 등을 담당",
+        "TNS 오류 코드(TNS-XXXXX)로 네트워크 문제 원인 파악 가능",
+        "tnsping은 TNS 레이어에서 동작하는 진단 도구"
+      ],
+      "relatedKeywords": ["tnsping", "tnsnames.ora", "Oracle Net Listener"],
+      "sourceSection": "s01"
+    },
+    "서비스 등록 (Service Registration)": {
+      "definition": "데이터베이스 인스턴스가 자신이 제공하는 서비스 정보를 리스너에 등록하여, 클라이언트 접속 요청을 수신할 수 있도록 하는 메커니즘이다.",
+      "keyPoints": [
+        "동적 등록: LREG 프로세스가 자동으로 리스너에 등록 (권장 방식)",
+        "정적 등록: listener.ora의 SID_LIST에 수동 기술",
+        "동적 등록 상태는 lsnrctl status/services에서 status READY로 표시",
+        "DB 기동 직후 동적 등록이 완료되기까지 최대 60초 소요 가능 → ALTER SYSTEM REGISTER로 즉시 등록 가능"
+      ],
+      "relatedKeywords": ["동적 등록 (Dynamic Registration)", "정적 등록 (Static Registration)", "LREG 프로세스", "lsnrctl"],
+      "sourceSection": "s03"
+    },
+    "동적 등록 (Dynamic Registration)": {
+      "definition": "LREG 백그라운드 프로세스가 데이터베이스 인스턴스의 서비스 정보를 리스너에 자동으로 등록하는 방식으로, Oracle 권장 등록 방식이다.",
+      "keyPoints": [
+        "LREG 프로세스가 약 60초 간격으로 리스너에 서비스 정보 갱신",
+        "listener.ora에 SID_LIST 설정 불필요. 인스턴스가 기동되면 자동 등록",
+        "기본 리스너(LISTENER, 포트 1521)에 자동 등록. 다른 리스너는 LOCAL_LISTENER 파라미터 설정 필요",
+        "lsnrctl services에서 '동적으로 등록됨' 표시로 확인 가능"
+      ],
+      "relatedKeywords": ["정적 등록 (Static Registration)", "LREG 프로세스", "LOCAL_LISTENER"],
+      "sourceSection": "s03"
+    },
+    "정적 등록 (Static Registration)": {
+      "definition": "listener.ora의 SID_LIST 섹션에 서비스 정보를 수동으로 기술하여 리스너에 등록하는 방식이다.",
+      "keyPoints": [
+        "listener.ora에 SID_LIST_<listener_name> 섹션에 SID_NAME, GLOBAL_DBNAME, ORACLE_HOME 등을 기술",
+        "DB가 기동되지 않은 상태에서도 리스너가 서비스를 인식 — RMAN 원격 접속, Data Guard 구성 등에 필요",
+        "동적 등록과 병행 사용 가능. 동적 등록이 우선 적용됨",
+        "lsnrctl status에서 정적 등록 서비스는 status UNKNOWN으로 표시됨"
+      ],
+      "relatedKeywords": ["동적 등록 (Dynamic Registration)", "SID_LIST", "listener.ora"],
+      "sourceSection": "s03"
+    },
+    "LREG 프로세스": {
+      "definition": "Listener Registration. 데이터베이스 인스턴스의 서비스 정보를 리스너에 동적으로 등록하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "약 60초 간격으로 리스너에 서비스 정보(서비스명, 인스턴스명, 부하 정보 등) 등록/갱신",
+        "ALTER SYSTEM REGISTER 명령으로 즉시 등록을 강제할 수 있음",
+        "LOCAL_LISTENER/REMOTE_LISTENER 파라미터에 지정된 리스너에 등록",
+        "12c 이전에는 PMON이 이 역할을 수행했으나, 12c부터 LREG로 분리됨"
+      ],
+      "relatedKeywords": ["동적 등록 (Dynamic Registration)", "LOCAL_LISTENER", "REMOTE_LISTENER", "ALTER SYSTEM REGISTER"],
+      "sourceSection": "s03"
+    },
+    "LOCAL_LISTENER": {
+      "definition": "데이터베이스 인스턴스가 동적 서비스 등록을 수행할 로컬 리스너의 주소를 지정하는 초기화 파라미터이다.",
+      "keyPoints": [
+        "기본 리스너(LISTENER, 포트 1521)를 사용하면 설정 불필요 (자동 감지)",
+        "비표준 포트 또는 비기본 이름의 리스너 사용 시 반드시 설정 필요",
+        "TNS 접속 문자열 또는 tnsnames.ora의 네트 서비스 이름으로 값 지정",
+        "ALTER SYSTEM SET LOCAL_LISTENER로 동적 변경 가능"
+      ],
+      "relatedKeywords": ["REMOTE_LISTENER", "LREG 프로세스", "Oracle Net Listener"],
+      "sourceSection": "s03"
+    },
+    "REMOTE_LISTENER": {
+      "definition": "RAC 환경 등에서 원격 노드의 리스너에 서비스를 등록하기 위한 초기화 파라미터로, SCAN 리스너 주소를 지정할 때 주로 사용한다.",
+      "keyPoints": [
+        "RAC 환경에서 SCAN 리스너 주소를 지정하여 노드 간 서비스 등록에 사용",
+        "단일 인스턴스 환경에서는 일반적으로 설정 불필요",
+        "LOCAL_LISTENER와 함께 사용하여 로컬 + 원격 리스너 동시 등록 가능",
+        "ALTER SYSTEM SET REMOTE_LISTENER로 동적 변경 가능"
+      ],
+      "relatedKeywords": ["LOCAL_LISTENER", "LREG 프로세스"],
+      "sourceSection": "s03"
+    },
+    "ALTER SYSTEM REGISTER": {
+      "definition": "LREG 프로세스에 즉시 리스너 등록을 수행하도록 요청하는 명령으로, 60초 대기 없이 서비스를 즉시 등록할 때 사용한다.",
+      "keyPoints": [
+        "DB 기동 직후 동적 등록을 기다리지 않고 즉시 리스너에 서비스 등록",
+        "LOCAL_LISTENER/REMOTE_LISTENER 파라미터 변경 후 즉시 반영할 때 유용",
+        "LREG 프로세스가 기본 60초 간격으로 등록하므로, 즉시 등록이 필요한 경우 사용"
+      ],
+      "relatedKeywords": ["LREG 프로세스", "동적 등록 (Dynamic Registration)", "LOCAL_LISTENER"],
+      "sourceSection": "s03"
+    },
+    "ADR (Automatic Diagnostic Repository)": {
+      "definition": "Oracle의 통합 진단 데이터 저장소로, Alert Log, Trace 파일, Incident 정보 등을 파일 시스템 기반으로 체계적으로 관리하는 프레임워크이다.",
+      "keyPoints": [
+        "DIAGNOSTIC_DEST(기본 $ORACLE_BASE) 하위에 diag/ 디렉토리 구조로 구성",
+        "리스너 진단 데이터도 ADR에 저장: diag/tnslsnr/<hostname>/<listener_name>/",
+        "DB 미기동 상태에서도 ADRCI로 진단 데이터 접근 가능 (파일 시스템 기반)",
+        "자동 퍼지: 기본 30일 후 Incident/Trace 파일 자동 삭제"
+      ],
+      "relatedKeywords": ["ADRCI", "리스너 로그 (Listener Log)"],
+      "sourceSection": "s06"
+    },
+    "ADRCI": {
+      "definition": "ADR Command Interpreter. ADR에 저장된 진단 데이터(Alert Log, Trace, Incident)를 조회·관리하는 커맨드라인 도구이다.",
+      "keyPoints": [
+        "데이터베이스 미기동 상태에서도 사용 가능 (파일 시스템 직접 접근)",
+        "SHOW ALERT: Alert Log 조회. SHOW ALERT -tail -f 옵션으로 실시간 모니터링",
+        "SHOW INCIDENT: 인시던트 목록 확인. PURGE: 진단 데이터 수동 삭제",
+        "SET HOMEPATH로 ADR Home을 전환하여 DB/리스너 등 여러 컴포넌트 진단 데이터 조회"
+      ],
+      "relatedKeywords": ["ADR (Automatic Diagnostic Repository)", "리스너 로그 (Listener Log)"],
+      "sourceSection": "s06"
+    },
+    "TCP 1521": {
+      "definition": "Oracle Net Listener의 기본 TCP 포트 번호로, 클라이언트가 데이터베이스에 접속할 때 사용하는 표준 포트이다.",
+      "keyPoints": [
+        "Oracle Net Listener의 기본 수신 포트. 변경 가능하지만 표준은 1521",
+        "기본 포트 사용 시 LOCAL_LISTENER 파라미터 설정 불필요 (자동 감지)",
+        "방화벽 환경에서 1521 포트 개방이 필요"
+      ],
+      "relatedKeywords": ["TCPS 2484", "Oracle Net Listener", "listener.ora"],
+      "sourceSection": "s03"
+    },
+    "TCPS 2484": {
+      "definition": "Oracle Net의 TLS/SSL 암호화 연결을 위한 기본 포트 번호로, 보안이 강화된 접속에 사용된다.",
+      "keyPoints": [
+        "TLS/SSL(TCPS 프로토콜)을 사용한 암호화 연결의 기본 포트",
+        "Oracle 26ai에서 TLS 1.3이 기본 프로토콜로 지원됨",
+        "mTLS(Mutual TLS) 구성 시에도 TCPS 2484 사용"
+      ],
+      "relatedKeywords": ["TCP 1521", "listener.ora"],
+      "sourceSection": "s03"
+    },
+    "Net Service Name": {
+      "definition": "클라이언트가 데이터베이스에 접속할 때 사용하는 별칭(alias)으로, tnsnames.ora에서 접속 디스크립터로 매핑된다.",
+      "keyPoints": [
+        "tnsnames.ora에서 ORCL = (DESCRIPTION = ...) 형식으로 정의되는 왼쪽의 이름",
+        "sqlplus user/pass@net_service_name 형식으로 사용",
+        "NAMES.DIRECTORY_PATH에 따라 TNSNAMES, EZCONNECT, LDAP 등으로 해석"
+      ],
+      "relatedKeywords": ["Connection Descriptor", "tnsnames.ora", "NAMES.DIRECTORY_PATH"],
+      "sourceSection": "s01"
+    },
+    "Connection Descriptor": {
+      "definition": "접속 디스크립터. 데이터베이스 접속에 필요한 프로토콜, 호스트, 포트, 서비스명 등의 정보를 구조화한 TNS 형식의 문자열이다.",
+      "keyPoints": [
+        "DESCRIPTION = (ADDRESS = (PROTOCOL=TCP)(HOST=...)(PORT=...))(CONNECT_DATA = (SERVICE_NAME=...)) 구조",
+        "tnsnames.ora에서 Net Service Name에 매핑되거나, 접속 문자열에 직접 기술 가능",
+        "ADDRESS(주소 정보) + CONNECT_DATA(서비스/SID 정보)로 구성"
+      ],
+      "relatedKeywords": ["Net Service Name", "tnsnames.ora"],
+      "sourceSection": "s01"
+    },
+    "Easy Connect": {
+      "definition": "tnsnames.ora 파일 없이 host:port/service_name 형식의 간단한 문자열로 Oracle 데이터베이스에 접속하는 네이밍 메서드이다.",
+      "keyPoints": [
+        "sqlplus user/pass@host:port/service_name 형식으로 간편하게 접속",
+        "tnsnames.ora 설정 불필요. 개발/테스트 환경에서 유용",
+        "NAMES.DIRECTORY_PATH에 EZCONNECT이 포함되어야 사용 가능 (기본값에 포함)",
+        "tnsping에서도 Easy Connect 문자열 사용 가능"
+      ],
+      "relatedKeywords": ["tnsnames.ora", "NAMES.DIRECTORY_PATH", "tnsping"],
+      "sourceSection": "s02"
+    },
+    "NAMES.DIRECTORY_PATH": {
+      "definition": "sqlnet.ora에서 네이밍 메서드의 시도 순서를 지정하는 파라미터로, 왼쪽부터 순서대로 이름 해석을 시도한다.",
+      "keyPoints": [
+        "기본값: (TNSNAMES, EZCONNECT). 왼쪽부터 순서대로 시도하며 성공 시 이후 생략",
+        "TNSNAMES(로컬 네이밍), EZCONNECT(간편 접속), LDAP(디렉토리 네이밍) 등 지정 가능",
+        "sqlnet.ora에 설정. 해당 파일이 없으면 기본값 적용"
+      ],
+      "relatedKeywords": ["sqlnet.ora", "Easy Connect", "tnsnames.ora"],
+      "sourceSection": "s01"
+    },
+    "SID_LIST": {
+      "definition": "listener.ora에서 정적 서비스 등록을 위해 SID(System Identifier) 및 서비스 정보를 기술하는 섹션이다.",
+      "keyPoints": [
+        "SID_LIST_<listener_name> 형식으로 정의. SID_DESC 내에 SID_NAME, GLOBAL_DBNAME, ORACLE_HOME 기술",
+        "정적 등록은 DB 미기동 상태에서도 리스너가 서비스를 인식하게 함",
+        "RMAN 원격 접속, Data Guard 구성, External Procedure 등에 정적 등록 필요",
+        "동적 등록 사용 시 SID_LIST 설정 생략 가능"
+      ],
+      "relatedKeywords": ["정적 등록 (Static Registration)", "listener.ora"],
+      "sourceSection": "s03"
+    },
+    "PDB 서비스 (PDB Service)": {
+      "definition": "멀티테넌트 환경에서 각 PDB가 자동으로 생성하는 네트워크 서비스로, PDB 이름이 기본 서비스 이름이 된다.",
+      "keyPoints": [
+        "PDB 생성 시 PDB 이름과 동일한 서비스가 자동 생성되어 리스너에 등록",
+        "클라이언트는 PDB 서비스 이름으로 특정 PDB에 직접 접속 가능",
+        "PDB OPEN 시 자동으로 리스너에 등록, PDB CLOSE 시 자동 해제",
+        "Oracle 26ai에서 PDB 상태 변경 시 서비스 등록/해제가 더욱 즉시적으로 반영"
+      ],
+      "relatedKeywords": ["동적 등록 (Dynamic Registration)", "Oracle Net Listener", "LREG 프로세스"],
+      "sourceSection": "s03"
+    },
+    "리스너 로그 (Listener Log)": {
+      "definition": "Oracle Net Listener가 수신한 접속 요청, 오류, 명령 실행 등의 이벤트를 기록하는 로그로, ADR 내에 XML 및 텍스트 형식으로 저장된다.",
+      "keyPoints": [
+        "ADR 내 위치: diag/tnslsnr/<hostname>/<listener_name>/alert/ (XML) 및 trace/ (텍스트)",
+        "접속 클라이언트 IP, 타임스탬프, 서비스명, 오류 코드 등 기록",
+        "보안 감사 및 접속 문제 진단에 활용",
+        "lsnrctl SET LOG_STATUS ON/OFF로 로깅 제어"
+      ],
+      "relatedKeywords": ["ADR (Automatic Diagnostic Repository)", "ADRCI", "lsnrctl"],
+      "sourceSection": "s06"
+    },
+    "리스너 추적 (Listener Trace)": {
+      "definition": "Oracle Net Listener의 내부 동작을 상세하게 기록하는 추적(Trace) 기능으로, 네트워크 문제의 심층 진단에 사용된다.",
+      "keyPoints": [
+        "lsnrctl TRACE 명령 또는 listener.ora의 TRACE_LEVEL 파라미터로 설정",
+        "추적 레벨: OFF, USER, ADMIN, SUPPORT (상위일수록 상세)",
+        "ADR 내 trace/ 디렉토리에 추적 파일 생성",
+        "성능 영향이 있으므로 문제 진단 시에만 활성화하고 진단 후 비활성화 권장"
+      ],
+      "relatedKeywords": ["리스너 로그 (Listener Log)", "ADR (Automatic Diagnostic Repository)", "lsnrctl"],
+      "sourceSection": "s06"
+    },
+    "lsnrctl reload": {
+      "definition": "리스너를 중지하지 않고 listener.ora 구성 파일을 다시 읽어 변경 사항을 반영하는 lsnrctl 명령이다.",
+      "keyPoints": [
+        "리스너 중지 없이 구성 변경 반영 → 서비스 중단 최소화",
+        "listener.ora에서 새 프로토콜 주소 추가, SID_LIST 변경 등을 즉시 적용",
+        "lsnrctl stop + lsnrctl start 대비 안전하고 빠른 구성 반영 방법"
+      ],
+      "relatedKeywords": ["lsnrctl", "listener.ora"],
+      "sourceSection": "s03"
+    },
+    "lsnrctl services": {
+      "definition": "리스너에 등록된 서비스의 상세 정보(핸들러, 인스턴스, 접속 방식, 등록 유형 등)를 표시하는 lsnrctl 명령이다.",
+      "keyPoints": [
+        "lsnrctl status보다 상세한 서비스 정보 제공 (핸들러, 연결 유형, 부하 정보 등)",
+        "동적 등록 서비스와 정적 등록 서비스를 구분하여 표시",
+        "Dedicated/Shared Server 핸들러 수, 현재 접속 수 등 확인 가능"
+      ],
+      "relatedKeywords": ["lsnrctl", "서비스 등록 (Service Registration)"],
+      "sourceSection": "s03"
+    }
+  }
+}

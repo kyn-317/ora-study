@@ -1,0 +1,320 @@
+{
+  "studyId": "06_02",
+  "chapterId": "06",
+  "title": "데이터 상태 (UNDO Data States)",
+  "keywords": {
+    "UNDO Extent": {
+      "definition": "UNDO 세그먼트 내의 공간 할당 단위로, 트랜잭션 생명주기에 따라 ACTIVE, UNEXPIRED, EXPIRED의 3가지 상태 중 하나를 가진다.",
+      "keyPoints": [
+        "상태 전이: ACTIVE → UNEXPIRED → EXPIRED 순서로 진행",
+        "재사용 우선순위: EXPIRED(1순위) → Free Space → AUTOEXTEND → UNEXPIRED(NOGUARANTEE 시) → ORA-30036",
+        "DBA_UNDO_EXTENTS 뷰의 STATUS 컬럼으로 상태 직접 확인 가능",
+        "SMON이 인접 EXPIRED Extent를 합병하여 공간 효율성 향상"
+      ],
+      "relatedKeywords": ["ACTIVE", "UNEXPIRED", "EXPIRED", "DBA_UNDO_EXTENTS"],
+      "sourceSection": "s01"
+    },
+    "ACTIVE": {
+      "definition": "현재 진행 중인(미커밋) 트랜잭션이 사용하고 있는 UNDO Extent 상태로, 롤백에 필수적이므로 어떤 경우에도 절대 덮어쓸 수 없다.",
+      "keyPoints": [
+        "트랜잭션 COMMIT/ROLLBACK 시 UNEXPIRED 상태로 전환",
+        "UNDO 공간 부족 시에도 ACTIVE Extent는 절대 재사용 불가 — 보호됨",
+        "인스턴스 장애 후 복구 과정에서 미커밋 트랜잭션 롤백에 사용",
+        "장기 실행 트랜잭션은 많은 ACTIVE Extent를 점유하여 UNDO 공간 압박 유발"
+      ],
+      "relatedKeywords": ["UNEXPIRED", "EXPIRED", "V$TRANSACTION", "ロールバック"],
+      "sourceSection": "s02"
+    },
+    "UNEXPIRED": {
+      "definition": "트랜잭션이 완료(COMMIT/ROLLBACK)되었으나 UNDO_RETENTION 기간이 아직 경과하지 않은 UNDO Extent 상태로, 장기 쿼리의 읽기 일관성 보장을 위해 보존된다.",
+      "keyPoints": [
+        "NOGUARANTEE(기본) 모드에서 UNDO 공간 부족 시 강제로 EXPIRED 전환되어 재사용 가능",
+        "GUARANTEE 모드에서는 공간 부족 시에도 절대 재사용 불가 — 새 트랜잭션이 ORA-30036으로 실패",
+        "UNEXPIRED UNDO가 강제 재사용되면 ORA-01555(Snapshot Too Old) 발생 위험 증가",
+        "Flashback Query도 UNEXPIRED UNDO 데이터를 활용하여 과거 시점 데이터 조회"
+      ],
+      "relatedKeywords": ["ACTIVE", "EXPIRED", "UNDO_RETENTION", "RETENTION GUARANTEE"],
+      "sourceSection": "s03"
+    },
+    "EXPIRED": {
+      "definition": "UNDO_RETENTION 기간이 경과하여 자유롭게 재사용 가능한 UNDO Extent 상태로, 새로운 트랜잭션의 UNDO 공간 할당 시 1순위로 재사용된다.",
+      "keyPoints": [
+        "EXPIRED Extent 부족 시 Free Space → AUTOEXTEND → UNEXPIRED 강제 전환 순서로 공간 확보",
+        "SMON이 인접 EXPIRED Extent를 합병(Coalescing)하여 대형 Extent 형성",
+        "모든 공간 확보 수단이 소진되면 ORA-30036 에러 발생",
+        "Steal 메커니즘으로 다른 UNDO 세그먼트의 EXPIRED Extent를 가져와 사용 가능"
+      ],
+      "relatedKeywords": ["ACTIVE", "UNEXPIRED", "ORA-30036", "UNDO Tablespace"],
+      "sourceSection": "s04"
+    },
+    "UNDO_RETENTION": {
+      "definition": "COMMIT된 UNDO 데이터의 최소 보존 시간을 초 단위로 지정하는 파라미터로, UNEXPIRED → EXPIRED 전환 시점을 결정하며 기본값은 900초(15분)이다.",
+      "keyPoints": [
+        "ALTER SYSTEM으로 동적 변경 가능 — 인스턴스 재시작 불필요",
+        "NOGUARANTEE(기본)에서는 '최선 노력'으로만 보존, GUARANTEE에서는 절대적 보존 보장",
+        "값이 너무 크면 UNDO 공간 부족 위험, 너무 작으면 ORA-01555 위험",
+        "AUTOEXTEND ON일 때 Auto-Tuning에 의해 자동 조정되며, 파라미터 값이 최소 하한으로 작용"
+      ],
+      "relatedKeywords": ["RETENTION GUARANTEE", "RETENTION NOGUARANTEE", "Auto-Tuning", "UNEXPIRED"],
+      "sourceSection": "s05"
+    },
+    "RETENTION GUARANTEE": {
+      "definition": "UNDO 테이블스페이스 레벨 설정으로, UNDO_RETENTION 기간 동안 UNEXPIRED UNDO를 절대적으로 보호하여 ORA-01555를 방지하는 대신 ORA-30036 위험이 높아진다.",
+      "keyPoints": [
+        "ALTER TABLESPACE ... RETENTION GUARANTEE로 설정",
+        "ORA-01555 감소 vs ORA-30036 증가 — 트레이드오프 관계가 시험 핵심 포인트",
+        "Flashback Query를 안정적으로 사용하려면 GUARANTEE 설정 권장",
+        "DBA_TABLESPACES의 RETENTION 컬럼으로 현재 설정 확인"
+      ],
+      "relatedKeywords": ["RETENTION NOGUARANTEE", "UNDO_RETENTION", "ORA-01555", "ORA-30036"],
+      "sourceSection": "s05"
+    },
+    "RETENTION NOGUARANTEE": {
+      "definition": "UNDO 테이블스페이스의 기본 설정으로, UNDO_RETENTION 기간을 '최선 노력(Best Effort)'으로 보존하되 공간 부족 시 UNEXPIRED Extent를 강제로 재사용할 수 있다.",
+      "keyPoints": [
+        "기본값이므로 별도 설정 없이 적용",
+        "공간 부족 시 UNEXPIRED → EXPIRED 강제 전환하여 재사용 → ORA-01555 위험 증가",
+        "ORA-30036 위험은 GUARANTEE보다 낮음 — UNEXPIRED 재사용으로 공간 확보 가능",
+        "일반적인 OLTP 환경에 적합"
+      ],
+      "relatedKeywords": ["RETENTION GUARANTEE", "UNDO_RETENTION", "ORA-01555", "UNEXPIRED"],
+      "sourceSection": "s05"
+    },
+    "Auto-Tuning": {
+      "definition": "UNDO 테이블스페이스의 AUTOEXTEND가 ON일 때 Oracle이 V$UNDOSTAT의 워크로드 통계를 분석하여 최적의 UNDO retention 기간을 자동으로 조정하는 기능이다.",
+      "keyPoints": [
+        "AUTOEXTEND ON일 때만 활성화, OFF이면 UNDO_RETENTION 값을 그대로 사용",
+        "MAXQUERYLEN(최장 쿼리 실행 시간)을 기준으로 retention 기간 산정",
+        "UNDO_RETENTION 파라미터 값은 Auto-Tuning의 최소 하한(Floor)으로 작용 — 무시하지 않음",
+        "V$UNDOSTAT의 TUNED_UNDORETENTION 컬럼으로 자동 조정된 값 확인 가능"
+      ],
+      "relatedKeywords": ["TUNED_UNDORETENTION", "V$UNDOSTAT", "UNDO_RETENTION", "MAXQUERYLEN"],
+      "sourceSection": "s05"
+    },
+    "TUNED_UNDORETENTION": {
+      "definition": "V$UNDOSTAT 뷰의 컬럼으로, Auto-Tuning 기능에 의해 자동 계산된 실제 UNDO retention 값(초)을 나타낸다.",
+      "keyPoints": [
+        "AUTOEXTEND ON일 때만 의미 있는 값이 표시됨",
+        "UNDO_RETENTION 파라미터 값 이상의 값이 설정됨 (최소 하한 보장)",
+        "워크로드 변화에 따라 동적으로 변동"
+      ],
+      "relatedKeywords": ["Auto-Tuning", "V$UNDOSTAT", "UNDO_RETENTION", "MAXQUERYLEN"],
+      "sourceSection": "s05"
+    },
+    "DBA_UNDO_EXTENTS": {
+      "definition": "UNDO 테이블스페이스 내 각 Extent의 상태(ACTIVE/UNEXPIRED/EXPIRED), 크기, 소속 세그먼트 정보를 제공하는 데이터 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "STATUS 컬럼으로 UNDO Extent의 3가지 상태 직접 확인 — UNDO 상태 분석의 핵심 뷰",
+        "상태별 GROUP BY로 UNDO 공간 사용 현황을 한눈에 파악 가능",
+        "COMMIT_WTIME 컬럼으로 트랜잭션 커밋 시간 확인 가능",
+        "V$ROLLSTAT, V$TRANSACTION과 조인하여 세그먼트별 상세 분석"
+      ],
+      "relatedKeywords": ["UNDO Extent", "V$UNDOSTAT", "V$ROLLSTAT"],
+      "sourceSection": "s07"
+    },
+    "V$UNDOSTAT": {
+      "definition": "10분 간격으로 UNDO 사용 통계를 수집하여 최대 4일(576행) 동안 보존하는 동적 성능 뷰로, UNDO 크기 산정과 문제 진단의 핵심 데이터를 제공한다.",
+      "keyPoints": [
+        "UNDOBLKS: 소비된 UNDO 블록 수 — 초당 UNDO 생성률 계산에 활용",
+        "SSOLDERRCNT: ORA-01555 발생 횟수 (NOSPACEERRCNT는 ORA-30036 발생 횟수 — 혼동 주의)",
+        "UNXPSTEALCNT: UNEXPIRED Extent 강제 재사용 횟수 — 0보다 크면 공간 부족 징후",
+        "AWR(DBA_HIST_UNDOSTAT)에도 기록되어 4일 이상 과거 분석 가능"
+      ],
+      "relatedKeywords": ["TUNED_UNDORETENTION", "MAXQUERYLEN", "SSOLDERRCNT", "NOSPACEERRCNT"],
+      "sourceSection": "s08"
+    },
+    "V$TRANSACTION": {
+      "definition": "현재 활성 트랜잭션의 정보를 제공하는 동적 성능 뷰로, 사용 중인 UNDO 세그먼트, UNDO 블록 수, 시작 시간 등을 조회할 수 있다.",
+      "keyPoints": [
+        "USED_UBLK/USED_UREC로 활성 트랜잭션의 UNDO 사용량 확인",
+        "V$SESSION과 조인하여 세션별 트랜잭션 정보 매핑 가능",
+        "장기 실행 트랜잭션 식별에 핵심적인 뷰"
+      ],
+      "relatedKeywords": ["V$ROLLSTAT", "ACTIVE", "DBA_UNDO_EXTENTS"],
+      "sourceSection": "s02"
+    },
+    "V$ROLLSTAT": {
+      "definition": "UNDO 세그먼트별 실시간 통계를 제공하는 동적 성능 뷰로, 크기, 쓰기량, 활성 트랜잭션 수, Shrink/Wrap/Extend 횟수를 조회할 수 있다.",
+      "keyPoints": [
+        "V$ROLLNAME과 조인하여 USN과 세그먼트 이름 매핑",
+        "XACTS 컬럼으로 세그먼트별 활성 트랜잭션 수 확인",
+        "STATUS 컬럼: ONLINE/OFFLINE/PENDING OFFLINE 상태 표시"
+      ],
+      "relatedKeywords": ["V$TRANSACTION", "V$UNDOSTAT", "DBA_UNDO_EXTENTS"],
+      "sourceSection": "s08"
+    },
+    "DBA_TABLESPACES": {
+      "definition": "데이터베이스의 모든 테이블스페이스 정보를 제공하는 딕셔너리 뷰로, UNDO 관리에서는 CONTENTS='UNDO' 필터와 RETENTION 컬럼이 핵심이다.",
+      "keyPoints": [
+        "RETENTION 컬럼: GUARANTEE / NOGUARANTEE / NOT APPLY로 UNDO 보존 설정 확인",
+        "CONTENTS 컬럼으로 UNDO 테이블스페이스 식별(UNDO/PERMANENT/TEMPORARY)",
+        "BIGFILE 컬럼으로 테이블스페이스 유형 확인"
+      ],
+      "relatedKeywords": ["RETENTION GUARANTEE", "RETENTION NOGUARANTEE", "UNDO Tablespace"],
+      "sourceSection": "s05"
+    },
+    "ORA-01555": {
+      "definition": "쿼리가 읽기 일관성을 위해 필요한 UNDO 데이터가 이미 덮어쓰여진 경우 발생하는 Snapshot Too Old 에러이다.",
+      "keyPoints": [
+        "주요 원인: UNDO 공간 부족, UNDO_RETENTION 부족, 장기 쿼리, Fetch across Commit",
+        "V$UNDOSTAT의 SSOLDERRCNT 컬럼으로 발생 횟수 모니터링",
+        "RETENTION GUARANTEE 설정으로 UNEXPIRED 덮어쓰기 차단하여 예방 가능",
+        "대응: UNDO 확장, RETENTION 증가, 쿼리 최적화"
+      ],
+      "relatedKeywords": ["ORA-30036", "RETENTION GUARANTEE", "SSOLDERRCNT", "Read Consistency"],
+      "sourceSection": "s09"
+    },
+    "ORA-30036": {
+      "definition": "UNDO 테이블스페이스의 공간이 완전히 부족하여 새로운 트랜잭션에 UNDO 공간을 할당할 수 없을 때 발생하는 에러이다.",
+      "keyPoints": [
+        "모든 공간 확보 수단(EXPIRED 재사용, Free Space, AUTOEXTEND, UNEXPIRED Steal) 소진 시 발생",
+        "RETENTION GUARANTEE 모드에서는 UNEXPIRED를 재사용할 수 없으므로 발생 위험 증가",
+        "V$UNDOSTAT의 NOSPACEERRCNT 컬럼으로 발생 횟수 모니터링",
+        "대응: UNDO 테이블스페이스 확장, AUTOEXTEND ON 설정, 장기 트랜잭션 정리"
+      ],
+      "relatedKeywords": ["ORA-01555", "RETENTION GUARANTEE", "NOSPACEERRCNT", "UNDO Tablespace"],
+      "sourceSection": "s09"
+    },
+    "Snapshot Too Old": {
+      "definition": "ORA-01555 에러의 메시지 텍스트로, 쿼리 시작 시점의 일관된 데이터 스냅샷을 제공하기에 UNDO 데이터가 너무 오래되어(이미 덮어쓰여져) 사용할 수 없음을 의미한다.",
+      "keyPoints": [
+        "ORA-01555와 동의어로 사용됨",
+        "NOGUARANTEE 모드에서 UNEXPIRED UNDO가 강제 재사용될 때 발생 위험 증가",
+        "V$UNDOSTAT의 SSOLDERRCNT로 모니터링"
+      ],
+      "relatedKeywords": ["ORA-01555", "UNDO_RETENTION", "RETENTION GUARANTEE"],
+      "sourceSection": "s09"
+    },
+    "Read Consistency": {
+      "definition": "Oracle이 UNDO 데이터를 활용하여 쿼리 시작 시점의 일관된 데이터를 제공하는 메커니즘으로, 읽기 작업이 쓰기 작업에 차단되지 않는 것이 핵심이다.",
+      "keyPoints": [
+        "문장 수준(READ COMMITTED)이 기본, 트랜잭션 수준(SERIALIZABLE)은 명시 설정 필요",
+        "UNEXPIRED UNDO가 보존되어야 장기 쿼리의 읽기 일관성이 유지됨",
+        "UNDO 데이터가 덮어쓰여지면 ORA-01555 발생"
+      ],
+      "relatedKeywords": ["CR Block", "SCN", "ORA-01555", "UNEXPIRED"],
+      "sourceSection": "s03"
+    },
+    "CR Block": {
+      "definition": "읽기 일관성을 위해 Current Block의 복사본에 UNDO 레코드를 역적용하여 생성되는 과거 시점의 블록 이미지이다.",
+      "keyPoints": [
+        "Block SCN > Query SCN일 때 생성 필요",
+        "ITL의 UBA를 따라 UNDO 체인을 역추적하여 과거 이미지 복원",
+        "consistent gets 통계로 CR 블록 읽기 횟수 확인"
+      ],
+      "relatedKeywords": ["Read Consistency", "SCN", "UNDO Extent"],
+      "sourceSection": "s03"
+    },
+    "UNDO Tablespace": {
+      "definition": "UNDO 세그먼트만을 포함하는 전용 테이블스페이스로, UNDO Extent의 3가지 상태(ACTIVE/UNEXPIRED/EXPIRED)가 관리되는 물리적 공간이다.",
+      "keyPoints": [
+        "AUTOEXTEND ON 설정 시 Auto-Tuning 활성화 및 공간 자동 확장",
+        "RETENTION GUARANTEE/NOGUARANTEE 설정이 테이블스페이스 레벨에서 적용",
+        "크기 산정 공식: UNDO Space = UNDO_RETENTION × 초당 UNDO 생성률 + 여유 공간"
+      ],
+      "relatedKeywords": ["UNDO Extent", "UNDO_RETENTION", "AUTOEXTEND"],
+      "sourceSection": "s06"
+    },
+    "AUTOEXTEND": {
+      "definition": "데이터 파일의 자동 확장 기능으로, UNDO 관리에서는 AUTOEXTEND ON 설정이 Auto-Tuning 활성화 여부를 결정하는 핵심 조건이다.",
+      "keyPoints": [
+        "AUTOEXTEND ON: Auto-Tuning 활성화, Oracle이 최적 retention 자동 계산",
+        "AUTOEXTEND OFF: Auto-Tuning 비활성화, UNDO_RETENTION 값 고정 사용",
+        "NEXT(증가 크기)와 MAXSIZE(최대 한계)를 함께 설정"
+      ],
+      "relatedKeywords": ["Auto-Tuning", "UNDO Tablespace", "UNDO_RETENTION"],
+      "sourceSection": "s05"
+    },
+    "UNDO Space Sizing": {
+      "definition": "V$UNDOSTAT의 통계를 기반으로 UNDO 테이블스페이스의 적절한 크기를 산정하는 작업으로, ORA-01555와 ORA-30036 예방의 핵심이다.",
+      "keyPoints": [
+        "공식: UNDO Space = UNDO_RETENTION(초) × 초당 UNDO 생성률(bytes/초) + 여유 공간",
+        "V$UNDOSTAT의 UNDOBLKS와 시간 간격으로 초당 UNDO 블록 생성률 산출",
+        "피크 워크로드 기준으로 산정해야 안정적인 운영 보장",
+        "GUARANTEE 모드 사용 시 NOGUARANTEE보다 더 큰 공간 필요"
+      ],
+      "relatedKeywords": ["V$UNDOSTAT", "UNDO Advisor", "UNDO_RETENTION", "UNDO Tablespace"],
+      "sourceSection": "s06"
+    },
+    "UNDO Advisor": {
+      "definition": "V$UNDOSTAT 기반으로 최적의 UNDO 크기와 UNDO_RETENTION을 자동 분석하여 권장하는 Oracle의 도구이다.",
+      "keyPoints": [
+        "Enterprise Manager(EM)의 Undo Management 페이지에서 그래픽 분석 제공",
+        "DBMS_UNDO_ADV 패키지를 통한 프로그래밍 방식 분석 가능",
+        "현재 워크로드 기반으로 최적의 설정값을 권고"
+      ],
+      "relatedKeywords": ["DBMS_UNDO_ADV", "UNDO Space Sizing", "V$UNDOSTAT"],
+      "sourceSection": "s06"
+    },
+    "DBMS_UNDO_ADV": {
+      "definition": "UNDO Advisor 기능을 프로그래밍 방식으로 활용할 수 있는 PL/SQL 패키지로, 최적의 UNDO 크기와 RETENTION을 자동 산정한다.",
+      "keyPoints": [
+        "Enterprise Manager 없이도 SQL*Plus 등에서 직접 활용 가능",
+        "현재 워크로드 통계(V$UNDOSTAT)를 기반으로 권장값 계산",
+        "ORA-01555 발생 빈도를 고려한 최적 UNDO_RETENTION 제시"
+      ],
+      "relatedKeywords": ["UNDO Advisor", "UNDO Space Sizing", "V$UNDOSTAT"],
+      "sourceSection": "s06"
+    },
+    "UNXPSTEALCNT": {
+      "definition": "V$UNDOSTAT 뷰의 컬럼으로, UNEXPIRED UNDO Extent가 강제로 재사용(Steal)된 횟수를 나타내며, 0보다 크면 UNDO 공간 부족의 징후이다.",
+      "keyPoints": [
+        "0보다 크면 UNDO 테이블스페이스 확장 또는 UNDO_RETENTION 조정 검토 필요",
+        "반드시 UNDO_RETENTION이 작다는 것만을 의미하지 않음 — UNDO 공간 크기 부족일 수도 있음",
+        "SSOLDERRCNT, NOSPACEERRCNT와 함께 종합적으로 진단해야 함"
+      ],
+      "relatedKeywords": ["V$UNDOSTAT", "SSOLDERRCNT", "NOSPACEERRCNT", "UNEXPIRED"],
+      "sourceSection": "s08"
+    },
+    "SSOLDERRCNT": {
+      "definition": "V$UNDOSTAT 뷰의 컬럼으로, ORA-01555(Snapshot Too Old) 에러의 발생 횟수를 기록한다. NOSPACEERRCNT(ORA-30036)와 혼동하지 않도록 주의해야 한다.",
+      "keyPoints": [
+        "ORA-01555 발생 횟수를 기록 — NOSPACEERRCNT(ORA-30036)와 명확히 구분 필요",
+        "값이 0보다 크면 UNDO_RETENTION 증가, UNDO 확장, RETENTION GUARANTEE 설정 검토",
+        "시험에서 SSOLDERRCNT와 NOSPACEERRCNT의 대응 에러를 바꿔 출제하는 패턴 주의"
+      ],
+      "relatedKeywords": ["NOSPACEERRCNT", "ORA-01555", "V$UNDOSTAT", "UNXPSTEALCNT"],
+      "sourceSection": "s08"
+    },
+    "NOSPACEERRCNT": {
+      "definition": "V$UNDOSTAT 뷰의 컬럼으로, UNDO 공간 부족으로 인한 ORA-30036 에러의 발생 횟수를 기록한다.",
+      "keyPoints": [
+        "ORA-30036(UNDO 공간 부족) 발생 횟수 기록 — SSOLDERRCNT(ORA-01555)와 구분 필요",
+        "값이 0보다 크면 UNDO 테이블스페이스 확장 또는 AUTOEXTEND ON 설정 필요",
+        "RETENTION GUARANTEE 모드에서 발생 빈도가 높아질 수 있음"
+      ],
+      "relatedKeywords": ["SSOLDERRCNT", "ORA-30036", "V$UNDOSTAT", "RETENTION GUARANTEE"],
+      "sourceSection": "s08"
+    },
+    "MAXQUERYLEN": {
+      "definition": "V$UNDOSTAT 뷰의 컬럼으로, 통계 수집 기간 내 가장 긴 쿼리 실행 시간(초)을 나타내며, Auto-Tuning이 최적 retention을 산정하는 기준값이다.",
+      "keyPoints": [
+        "Auto-Tuning은 MAXQUERYLEN을 기준으로 최적 retention 기간을 계산",
+        "UNDO_RETENTION은 최소한 MAXQUERYLEN 이상으로 설정하는 것이 ORA-01555 예방에 효과적",
+        "장기 쿼리가 있는 환경에서는 이 값이 크게 나타남"
+      ],
+      "relatedKeywords": ["Auto-Tuning", "TUNED_UNDORETENTION", "V$UNDOSTAT", "UNDO_RETENTION"],
+      "sourceSection": "s08"
+    },
+    "Before Image": {
+      "definition": "DML 실행 시 변경되기 이전의 데이터 복사본으로, UNDO 세그먼트에 저장되어 롤백, 읽기 일관성, Flashback의 기반이 된다.",
+      "keyPoints": [
+        "INSERT → ROWID, UPDATE → 변경 전 컬럼값, DELETE → 전체 행 데이터를 저장",
+        "서버 프로세스가 DML 실행 시 자동 생성",
+        "UNDO 데이터의 본질이 Before Image임"
+      ],
+      "relatedKeywords": ["UNDO Extent", "Read Consistency", "ACTIVE"],
+      "sourceSection": "s01"
+    },
+    "SCN": {
+      "definition": "System Change Number. Oracle 내부의 논리적 타임스탬프로, 모든 변경에 대해 단조 증가하며 읽기 일관성과 복구의 기준이 된다.",
+      "keyPoints": [
+        "쿼리 시작 시 Query SCN 기록, Block SCN과 비교하여 CR 블록 생성 여부 결정",
+        "COMMIT 시 Commit SCN이 기록됨",
+        "UNDO Extent 상태 판단에도 SCN이 활용됨"
+      ],
+      "relatedKeywords": ["CR Block", "Read Consistency", "Before Image"],
+      "sourceSection": "s03"
+    }
+  }
+}

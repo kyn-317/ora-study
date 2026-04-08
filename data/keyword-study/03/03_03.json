@@ -1,0 +1,399 @@
+{
+  "studyId": "03_03",
+  "chapterId": "03",
+  "title": "네이밍 및 접속 규약 (Naming Methods & Connection)",
+  "keywords": {
+    "Oracle Net Services": {
+      "definition": "클라이언트 애플리케이션이 Oracle 데이터베이스 서버에 네트워크를 통해 접속할 수 있도록 하는 통신 인프라로, 네이밍 해석, 접속 관리, 데이터 전송 등을 담당한다.",
+      "keyPoints": [
+        "핵심 구성요소: Oracle Net, 리스너, 네이밍 메서드, 접속 디스크립터, CMAN",
+        "구성 파일: tnsnames.ora(네이밍), sqlnet.ora(프로파일), listener.ora(리스너), cman.ora(CMAN)",
+        "클라이언트 접속 흐름: 이름 해석 → 네트워크 연결 → 리스너 수신 → 프로세스 생성 → 인증 → 세션 수립",
+        "TNS_ADMIN 환경변수로 구성 파일 검색 위치를 변경 가능"
+      ],
+      "relatedKeywords": ["tnsnames.ora", "sqlnet.ora", "listener.ora", "TNS_ADMIN"],
+      "sourceSection": "s01"
+    },
+    "tnsnames.ora": {
+      "definition": "클라이언트 측 로컬 네이밍 구성 파일로, 네트 서비스 이름을 접속 디스크립터로 매핑하여 데이터베이스 접속 정보를 정의한다.",
+      "keyPoints": [
+        "net_service_name = (DESCRIPTION = (ADDRESS_LIST = ...)(CONNECT_DATA = ...)) 형식",
+        "위치: TNS_ADMIN → $ORACLE_HOME/network/admin 순서로 검색",
+        "FAILOVER, LOAD_BALANCE 옵션으로 고가용성 및 부하 분산 구성 가능",
+        "가장 보편적인 네이밍 메서드이나, 클라이언트 수 증가 시 관리 부담 증가"
+      ],
+      "relatedKeywords": ["네트 서비스 이름 (Net Service Name)", "접속 디스크립터 (Connect Descriptor)", "NAMES.DIRECTORY_PATH"],
+      "sourceSection": "s03"
+    },
+    "sqlnet.ora": {
+      "definition": "Oracle Net의 클라이언트/서버 프로파일 설정 파일로, 네이밍 메서드 순서, 보안(인증/암호화), 로깅, SDU 등 네트워크 동작 전반을 제어한다.",
+      "keyPoints": [
+        "NAMES.DIRECTORY_PATH: 네이밍 해석 순서 (기본 TNSNAMES, EZCONNECT)",
+        "NAMES.DEFAULT_DOMAIN: 네트 서비스 이름에 자동 추가되는 기본 도메인",
+        "SQLNET.AUTHENTICATION_SERVICES: 인증 방식 (NTS, NONE, ALL 등)",
+        "SQLNET.ENCRYPTION_SERVER/CLIENT: 네트워크 암호화 설정",
+        "WALLET_LOCATION: TLS/SSL 인증서 저장소(Wallet) 위치 지정"
+      ],
+      "relatedKeywords": ["NAMES.DIRECTORY_PATH", "NAMES.DEFAULT_DOMAIN", "SQLNET.AUTHENTICATION_SERVICES", "WALLET_LOCATION"],
+      "sourceSection": "s07"
+    },
+    "listener.ora": {
+      "definition": "Oracle Net Listener의 동작을 정의하는 서버 측 구성 파일로, 수신 프로토콜 주소, 정적 서비스 등록, 보안 설정 등을 포함한다.",
+      "keyPoints": [
+        "위치: TNS_ADMIN → $ORACLE_HOME/network/admin 순서로 검색",
+        "LISTENER(프로토콜 주소), SID_LIST(정적 서비스 등록), ADR_BASE(진단 경로) 정의",
+        "동적 서비스 등록을 사용하면 최소 구성(ADDRESS만)으로 운영 가능",
+        "NETCA 또는 NETMGR로 편집. lsnrctl reload로 리스너 재시작 없이 반영"
+      ],
+      "relatedKeywords": ["Oracle Net Services", "lsnrctl"],
+      "sourceSection": "s01"
+    },
+    "TNS_ADMIN": {
+      "definition": "Oracle Net 구성 파일(tnsnames.ora, sqlnet.ora, listener.ora 등)의 검색 디렉토리를 지정하는 환경변수이다.",
+      "keyPoints": [
+        "설정 시 $ORACLE_HOME/network/admin 대신 TNS_ADMIN이 가리키는 디렉토리에서 구성 파일 검색",
+        "디렉토리 경로를 가리키며 파일 경로가 아님에 주의",
+        "Oracle Instant Client 사용 시 TNS_ADMIN 설정 필수",
+        "변경 후 새로운 접속부터 적용. 기존 세션에는 영향 없음",
+        "JDBC Thin 드라이버는 oracle.net.tns_admin 시스템 프로퍼티 사용"
+      ],
+      "relatedKeywords": ["tnsnames.ora", "sqlnet.ora", "listener.ora", "Oracle Net Services"],
+      "sourceSection": "s01"
+    },
+    "네트 서비스 이름 (Net Service Name)": {
+      "definition": "클라이언트가 데이터베이스 접속 시 사용하는 별칭(alias)으로, 네이밍 메서드를 통해 접속 디스크립터로 해석된다.",
+      "keyPoints": [
+        "tnsnames.ora에서 ORCL = (DESCRIPTION = ...) 형식의 왼쪽 이름",
+        "sqlplus user/pass@net_service_name 형식으로 사용",
+        "NAMES.DEFAULT_DOMAIN이 설정되면 자동으로 도메인이 추가되어 해석",
+        "동일 이름의 항목이 여러 개 있으면 첫 번째 항목이 사용됨"
+      ],
+      "relatedKeywords": ["접속 디스크립터 (Connect Descriptor)", "tnsnames.ora", "NAMES.DEFAULT_DOMAIN"],
+      "sourceSection": "s03"
+    },
+    "접속 디스크립터 (Connect Descriptor)": {
+      "definition": "데이터베이스 접속에 필요한 프로토콜, 호스트, 포트, 서비스명 등의 정보를 구조화한 TNS 형식의 문자열이다.",
+      "keyPoints": [
+        "DESCRIPTION 내에 ADDRESS(프로토콜/호스트/포트) + CONNECT_DATA(서비스명/SID) 구성",
+        "ADDRESS_LIST로 여러 주소 지정. FAILOVER=ON/LOAD_BALANCE=ON 옵션 가능",
+        "CONNECT_DATA 내 SERVICE_NAME(권장) 또는 SID로 대상 서비스 지정",
+        "tnsnames.ora에 정의하거나 접속 문자열에 직접 기술 가능"
+      ],
+      "relatedKeywords": ["네트 서비스 이름 (Net Service Name)", "DESCRIPTION", "ADDRESS_LIST", "CONNECT_DATA"],
+      "sourceSection": "s05"
+    },
+    "Easy Connect": {
+      "definition": "tnsnames.ora 없이 host:port/service_name 형식의 간단한 문자열로 접속하는 네이밍 메서드로, 별도 구성 파일이 불필요하다.",
+      "keyPoints": [
+        "형식: host[:port][/service_name]. 포트 생략 시 기본 1521",
+        "sqlnet.ora의 NAMES.DIRECTORY_PATH에 EZCONNECT이 포함되어야 사용 가능 (기본값에 포함)",
+        "Failover/Load Balancing 등 고급 기능은 제한적 (Easy Connect Plus에서 확장)",
+        "개발/테스트 환경에서 빠른 접속에 유용"
+      ],
+      "relatedKeywords": ["Easy Connect Plus", "tnsnames.ora", "NAMES.DIRECTORY_PATH"],
+      "sourceSection": "s04"
+    },
+    "Easy Connect Plus": {
+      "definition": "Oracle 19c 이상에서 확장된 Easy Connect 구문으로, 다중 호스트, 로드 밸런싱, TLS 인증서 경로 등 고급 옵션을 접속 문자열 내에서 지정할 수 있다.",
+      "keyPoints": [
+        "다중 호스트 지정: host1,host2:port/service_name 형식으로 Failover 지원",
+        "파라미터 키-값 쌍: ?connect_timeout=10&transport_connect_timeout=3 등",
+        "Oracle 26ai에서 TLS 인증서 경로, 프록시 설정 등 추가 확장",
+        "tnsnames.ora 없이도 상당한 수준의 고가용성 구성 가능"
+      ],
+      "relatedKeywords": ["Easy Connect", "FAILOVER", "LOAD_BALANCE"],
+      "sourceSection": "s04"
+    },
+    "NAMES.DIRECTORY_PATH": {
+      "definition": "sqlnet.ora에서 네이밍 메서드의 해석 시도 순서를 지정하는 파라미터로, 왼쪽부터 순서대로 시도한다.",
+      "keyPoints": [
+        "기본값: (TNSNAMES, EZCONNECT). 성공 시 이후 메서드는 시도하지 않음",
+        "TNSNAMES(로컬 네이밍), EZCONNECT(간편 접속), LDAP(디렉토리 네이밍) 등 지정 가능",
+        "sqlnet.ora 파일이 없으면 기본값 적용",
+        "순서가 중요: 잘못된 순서는 접속 지연의 원인이 될 수 있음"
+      ],
+      "relatedKeywords": ["sqlnet.ora", "Easy Connect", "tnsnames.ora"],
+      "sourceSection": "s02"
+    },
+    "NAMES.DEFAULT_DOMAIN": {
+      "definition": "sqlnet.ora에서 네트 서비스 이름에 자동으로 추가되는 기본 도메인을 지정하는 파라미터이다.",
+      "keyPoints": [
+        "설정 시 클라이언트가 ORCL로 접속하면 자동으로 ORCL.example.com으로 해석",
+        "tnsnames.ora의 항목도 해당 도메인을 포함해야 매칭됨",
+        "도메인 불일치 시 ORA-12154(TNS:could not resolve name) 오류 발생 가능",
+        "미설정 시 네트 서비스 이름을 그대로 해석"
+      ],
+      "relatedKeywords": ["sqlnet.ora", "네트 서비스 이름 (Net Service Name)", "ORA-12154"],
+      "sourceSection": "s07"
+    },
+    "SERVICE_NAMES": {
+      "definition": "데이터베이스 인스턴스가 제공하는 서비스 이름 목록을 정의하는 초기화 파라미터로, 리스너에 등록되는 서비스 이름을 결정한다.",
+      "keyPoints": [
+        "기본값: DB_UNIQUE_NAME.DB_DOMAIN (예: orcl.example.com)",
+        "하나의 인스턴스가 여러 서비스를 제공할 수 있음 (쉼표로 구분)",
+        "클라이언트는 SERVICE_NAME으로 특정 서비스에 접속하여 워크로드 분리 가능",
+        "DBMS_SERVICE 패키지로 서비스를 동적으로 생성/관리 가능"
+      ],
+      "relatedKeywords": ["DB_DOMAIN", "DBMS_SERVICE", "LREG 프로세스"],
+      "sourceSection": "s06"
+    },
+    "DB_DOMAIN": {
+      "definition": "데이터베이스의 도메인 이름을 지정하는 초기화 파라미터로, DB_NAME과 결합하여 글로벌 데이터베이스 이름(Global Database Name)을 구성한다.",
+      "keyPoints": [
+        "글로벌 DB 이름 = DB_NAME.DB_DOMAIN (예: orcl.example.com)",
+        "분산 데이터베이스 환경에서 데이터베이스를 전역적으로 고유하게 식별",
+        "GLOBAL_NAMES=TRUE일 때 DB 링크 이름과 글로벌 DB 이름이 일치해야 함",
+        "SERVICE_NAMES의 기본값에도 영향: DB_UNIQUE_NAME.DB_DOMAIN"
+      ],
+      "relatedKeywords": ["SERVICE_NAMES", "GLOBAL_NAMES"],
+      "sourceSection": "s06"
+    },
+    "DBMS_SERVICE": {
+      "definition": "데이터베이스 서비스를 동적으로 생성, 시작, 중지, 삭제하기 위한 PL/SQL 패키지이다.",
+      "keyPoints": [
+        "CREATE_SERVICE: 서비스 생성. START_SERVICE: 서비스 시작(리스너에 등록)",
+        "STOP_SERVICE: 서비스 중지(리스너에서 해제). DELETE_SERVICE: 서비스 삭제",
+        "TAF(Transparent Application Failover) 정책, 로드 밸런싱 목표 등 서비스 속성 설정 가능",
+        "Oracle 26ai에서 AI 워크로드 분류 속성이 추가됨"
+      ],
+      "relatedKeywords": ["SERVICE_NAMES", "TAF (Transparent Application Failover)", "PDB 서비스 (PDB Service)"],
+      "sourceSection": "s06"
+    },
+    "LREG 프로세스": {
+      "definition": "Listener Registration. 데이터베이스 인스턴스의 서비스 정보를 리스너에 동적으로 등록하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "약 60초 간격으로 리스너에 서비스 정보 자동 등록/갱신",
+        "ALTER SYSTEM REGISTER로 즉시 등록 강제 가능",
+        "LOCAL_LISTENER/REMOTE_LISTENER에 지정된 리스너에 등록",
+        "12c 이전에는 PMON이 이 역할을 수행. 12c부터 LREG로 분리"
+      ],
+      "relatedKeywords": ["Dynamic Service Registration", "LOCAL_LISTENER", "REMOTE_LISTENER", "ALTER SYSTEM REGISTER"],
+      "sourceSection": "s06"
+    },
+    "LOCAL_LISTENER": {
+      "definition": "데이터베이스 인스턴스가 동적 서비스 등록을 수행할 로컬 리스너의 주소를 지정하는 초기화 파라미터이다.",
+      "keyPoints": [
+        "기본 리스너(LISTENER, 포트 1521) 사용 시 설정 불필요",
+        "비표준 포트 또는 비기본 이름의 리스너 사용 시 반드시 설정 필요",
+        "TNS 접속 문자열 또는 tnsnames.ora의 네트 서비스 이름으로 값 지정"
+      ],
+      "relatedKeywords": ["REMOTE_LISTENER", "LREG 프로세스"],
+      "sourceSection": "s06"
+    },
+    "REMOTE_LISTENER": {
+      "definition": "RAC 환경 등에서 원격 노드의 리스너에 서비스를 등록하기 위한 초기화 파라미터이다.",
+      "keyPoints": [
+        "RAC 환경에서 SCAN 리스너 주소 지정에 주로 사용",
+        "단일 인스턴스 환경에서는 일반적으로 설정 불필요",
+        "LOCAL_LISTENER와 함께 사용하여 로컬 + 원격 리스너 동시 등록"
+      ],
+      "relatedKeywords": ["LOCAL_LISTENER", "LREG 프로세스"],
+      "sourceSection": "s06"
+    },
+    "Dynamic Service Registration": {
+      "definition": "LREG 프로세스가 데이터베이스 인스턴스의 서비스 정보를 리스너에 자동 등록하는 메커니즘으로, Oracle 권장 방식이다.",
+      "keyPoints": [
+        "listener.ora에 SID_LIST 설정 불필요. 인스턴스 기동 시 자동 등록",
+        "LREG가 약 60초 간격으로 갱신. ALTER SYSTEM REGISTER로 즉시 등록",
+        "기본 리스너(LISTENER, 1521)에 자동 등록. 비기본 리스너는 LOCAL_LISTENER 설정 필요",
+        "PDB 서비스도 PDB OPEN 시 자동으로 동적 등록됨"
+      ],
+      "relatedKeywords": ["LREG 프로세스", "LOCAL_LISTENER", "PDB 서비스 (PDB Service)"],
+      "sourceSection": "s06"
+    },
+    "DESCRIPTION": {
+      "definition": "접속 디스크립터의 최상위 요소로, ADDRESS(주소 정보)와 CONNECT_DATA(접속 데이터)를 포함하는 TNS 구문 구조이다.",
+      "keyPoints": [
+        "DESCRIPTION = (ADDRESS = ...)(CONNECT_DATA = ...) 기본 구조",
+        "DESCRIPTION_LIST로 여러 DESCRIPTION을 나열하여 Failover/Load Balancing 구성",
+        "ENABLE=BROKEN 옵션으로 Dead Connection Detection 설정 가능"
+      ],
+      "relatedKeywords": ["접속 디스크립터 (Connect Descriptor)", "ADDRESS_LIST", "CONNECT_DATA"],
+      "sourceSection": "s05"
+    },
+    "ADDRESS_LIST": {
+      "definition": "접속 디스크립터 내에서 여러 ADDRESS를 그룹화하는 요소로, Failover 및 Load Balancing 동작을 제어한다.",
+      "keyPoints": [
+        "여러 ADDRESS를 나열하여 다중 리스너 주소 지정",
+        "FAILOVER=ON: 첫 번째 주소 실패 시 다음 주소로 시도 (기본 ON)",
+        "LOAD_BALANCE=ON: 주소 목록에서 랜덤하게 선택하여 부하 분산",
+        "ADDRESS_LIST 중첩으로 복잡한 Failover+Load Balancing 조합 가능"
+      ],
+      "relatedKeywords": ["DESCRIPTION", "FAILOVER", "LOAD_BALANCE"],
+      "sourceSection": "s05"
+    },
+    "CONNECT_DATA": {
+      "definition": "접속 디스크립터 내에서 접속 대상 서비스, SID, 서버 유형 등을 지정하는 섹션이다.",
+      "keyPoints": [
+        "SERVICE_NAME(권장) 또는 SID로 접속 대상 지정. SERVICE_NAME 사용 권장",
+        "SERVER=DEDICATED/SHARED/POOLED로 서버 프로세스 유형 지정",
+        "FAILOVER_MODE로 TAF(Transparent Application Failover) 정책 설정 가능",
+        "INSTANCE_NAME으로 RAC 환경에서 특정 인스턴스 지정 가능"
+      ],
+      "relatedKeywords": ["DESCRIPTION", "SERVICE_NAMES", "TAF (Transparent Application Failover)"],
+      "sourceSection": "s05"
+    },
+    "FAILOVER": {
+      "definition": "tnsnames.ora의 접속 디스크립터에서 첫 번째 접속 주소 실패 시 다음 주소로 자동 전환하는 기능이다.",
+      "keyPoints": [
+        "ADDRESS_LIST 내 FAILOVER=ON(기본값)으로 활성화",
+        "클라이언트 측 Connect-Time Failover: 최초 접속 시 대체 주소로 시도",
+        "TAF(Transparent Application Failover)와 구분: TAF는 접속 후 장애 시 세션 전환",
+        "DESCRIPTION_LIST 수준에서도 설정 가능"
+      ],
+      "relatedKeywords": ["LOAD_BALANCE", "TAF (Transparent Application Failover)", "ADDRESS_LIST"],
+      "sourceSection": "s05"
+    },
+    "LOAD_BALANCE": {
+      "definition": "tnsnames.ora의 접속 디스크립터에서 여러 주소 중 랜덤하게 선택하여 접속 부하를 분산하는 기능이다.",
+      "keyPoints": [
+        "ADDRESS_LIST 내 LOAD_BALANCE=ON으로 활성화 (기본 OFF)",
+        "클라이언트 측 로드 밸런싱: 접속 시 주소 목록에서 랜덤 선택",
+        "서버 측 로드 밸런싱과 구분: 서버 측은 리스너가 부하 정보 기반으로 분배",
+        "FAILOVER와 함께 사용하여 부하 분산 + 장애 전환 동시 구현 가능"
+      ],
+      "relatedKeywords": ["FAILOVER", "ADDRESS_LIST"],
+      "sourceSection": "s05"
+    },
+    "TAF (Transparent Application Failover)": {
+      "definition": "접속 후 장애 발생 시 애플리케이션에 투명하게 다른 인스턴스로 세션을 자동 전환하는 기능으로, CONNECT_DATA 내 FAILOVER_MODE로 설정한다.",
+      "keyPoints": [
+        "FAILOVER_TYPE=SESSION(세션만 복구) 또는 SELECT(진행 중인 SELECT 결과도 복구)",
+        "METHOD=BASIC(장애 후 접속) 또는 PRECONNECT(미리 백업 접속 유지)",
+        "Connect-Time Failover(접속 시 전환)와 구분: TAF는 접속 후 장애 시에도 전환",
+        "DBMS_SERVICE 패키지에서 서비스 레벨로 TAF 정책 설정 가능"
+      ],
+      "relatedKeywords": ["FAILOVER", "DBMS_SERVICE", "CONNECT_DATA"],
+      "sourceSection": "s05"
+    },
+    "Dedicated Server": {
+      "definition": "클라이언트 세션마다 1개의 전용 서버 프로세스를 생성하는 Oracle의 기본 접속 모드이다.",
+      "keyPoints": [
+        "기본 모드. 별도 설정 불필요",
+        "클라이언트당 1개의 서버 프로세스 생성 → PGA를 프로세스별 할당",
+        "리스너가 서버 프로세스를 fork한 후 핸드오프(Direct Hand-off 기본)",
+        "OLTP, 소수 동시 접속 환경에 적합. 대량 접속 시 메모리 부담"
+      ],
+      "relatedKeywords": ["Shared Server", "DRCP (Database Resident Connection Pooling)"],
+      "sourceSection": "s01"
+    },
+    "Shared Server": {
+      "definition": "여러 클라이언트 세션이 Dispatcher 프로세스를 공유하여 서버 프로세스를 효율적으로 사용하는 접속 모드이다.",
+      "keyPoints": [
+        "SHARED_SERVERS, DISPATCHERS 파라미터로 구성",
+        "Dispatcher가 접속을 받아 Request Queue에 등록, 공유 서버 프로세스가 처리",
+        "세션 메모리(UGA)가 SGA의 Large Pool에 할당됨",
+        "대량 동시 접속 환경에 적합하지만, 장시간 트랜잭션에는 부적합"
+      ],
+      "relatedKeywords": ["Dedicated Server", "DRCP (Database Resident Connection Pooling)"],
+      "sourceSection": "s01"
+    },
+    "DRCP (Database Resident Connection Pooling)": {
+      "definition": "서버 측에서 서버 프로세스 풀을 유지하여 다수의 클라이언트가 공유하는 접속 풀링 방식으로, Dedicated Server의 성능과 Shared Server의 확장성을 결합한다.",
+      "keyPoints": [
+        "Dedicated 모드의 전용 프로세스 성능 + Shared 모드의 리소스 공유 효율성 결합",
+        "CONNECT_DATA에 SERVER=POOLED로 지정하여 사용",
+        "DBMS_CONNECTION_POOL 패키지로 풀 관리 (시작/중지/구성)",
+        "웹 애플리케이션 등 대량의 짧은 접속에 특히 효과적"
+      ],
+      "relatedKeywords": ["Dedicated Server", "Shared Server"],
+      "sourceSection": "s01"
+    },
+    "SQLNET.AUTHENTICATION_SERVICES": {
+      "definition": "sqlnet.ora에서 Oracle Net이 사용하는 인증 방식을 지정하는 파라미터이다.",
+      "keyPoints": [
+        "NTS: Windows의 OS 인증 사용. NONE: 데이터베이스 인증만 사용",
+        "ALL: 모든 인증 방식 허용",
+        "원격 접속 시 OS 인증을 제한하려면 NONE으로 설정 권장",
+        "REMOTE_OS_AUTHENT 파라미터와 연관되어 보안 설정에 중요"
+      ],
+      "relatedKeywords": ["sqlnet.ora", "SQLNET.ENCRYPTION_SERVER"],
+      "sourceSection": "s07"
+    },
+    "SQLNET.ENCRYPTION_SERVER": {
+      "definition": "sqlnet.ora에서 서버 측 네트워크 암호화 동작을 지정하는 파라미터로, ACCEPTED/REQUESTED/REQUIRED/REJECTED 중 선택한다.",
+      "keyPoints": [
+        "ACCEPTED(기본): 클라이언트가 요청하면 암호화 수락",
+        "REQUIRED: 암호화 필수. 비암호화 접속 거부",
+        "REQUESTED: 서버가 암호화를 요청하되, 클라이언트 미지원 시에도 접속 허용",
+        "REJECTED: 암호화 거부. 암호화 요청 접속을 거부"
+      ],
+      "relatedKeywords": ["sqlnet.ora", "SQLNET.AUTHENTICATION_SERVICES"],
+      "sourceSection": "s07"
+    },
+    "WALLET_LOCATION": {
+      "definition": "sqlnet.ora에서 TLS/SSL 인증서 및 키를 저장하는 Oracle Wallet의 파일 시스템 경로를 지정하는 파라미터이다.",
+      "keyPoints": [
+        "TCPS(TLS/SSL) 접속 구성 시 필수 설정",
+        "Oracle 26ai에서 mTLS(Mutual TLS) 기반 인증이 기본 권장으로 격상",
+        "자동 로그인 Wallet(cwallet.sso) 사용 시 패스워드 없이 인증서 접근 가능"
+      ],
+      "relatedKeywords": ["sqlnet.ora", "SQLNET.ENCRYPTION_SERVER"],
+      "sourceSection": "s07"
+    },
+    "tnsping": {
+      "definition": "Oracle Net 리스너까지의 네트워크 경로 유효성을 확인하는 커맨드라인 진단 유틸리티이다.",
+      "keyPoints": [
+        "리스너 도달 가능성만 확인. DB 구동 여부, 서비스 등록 여부, 인증 유효성은 확인 불가",
+        "tnsping 성공 ≠ DB 접속 성공",
+        "Easy Connect 문자열로도 테스트 가능"
+      ],
+      "relatedKeywords": ["Oracle Net Services", "ORA-12154"],
+      "sourceSection": "s01"
+    },
+    "ORA-12154": {
+      "definition": "TNS:could not resolve the connect identifier specified. 클라이언트가 지정한 네트 서비스 이름을 해석할 수 없을 때 발생하는 오류이다.",
+      "keyPoints": [
+        "주요 원인: tnsnames.ora에 해당 서비스 이름 미정의, TNS_ADMIN 경로 오류, NAMES.DEFAULT_DOMAIN 불일치",
+        "진단 순서: TNS_ADMIN 확인 → tnsnames.ora 존재/내용 확인 → NAMES.DEFAULT_DOMAIN 확인",
+        "NAMES.DEFAULT_DOMAIN이 설정된 경우 도메인 포함 여부 확인 필요",
+        "tnsping으로 이름 해석 성공 여부를 먼저 확인"
+      ],
+      "relatedKeywords": ["tnsnames.ora", "TNS_ADMIN", "NAMES.DEFAULT_DOMAIN", "ORA-12514"],
+      "sourceSection": "s03"
+    },
+    "ORA-12514": {
+      "definition": "TNS:listener does not currently know of service requested. 리스너에 요청한 서비스가 등록되어 있지 않을 때 발생하는 오류이다.",
+      "keyPoints": [
+        "주요 원인: DB 미기동, 서비스 미등록, 서비스 이름 오타, PDB가 CLOSE 상태",
+        "ORA-12154와의 차이: 12154는 이름 해석 실패, 12514는 리스너에 서비스 미등록",
+        "진단: lsnrctl status로 등록된 서비스 확인 → ALTER SYSTEM REGISTER로 재등록 시도",
+        "PDB 서비스의 경우 PDB가 OPEN 상태인지 확인"
+      ],
+      "relatedKeywords": ["ORA-12154", "Dynamic Service Registration", "lsnrctl"],
+      "sourceSection": "s03"
+    },
+    "PDB 서비스 (PDB Service)": {
+      "definition": "멀티테넌트 환경에서 각 PDB가 자동 생성하는 네트워크 서비스로, PDB 이름이 기본 서비스 이름이 되어 클라이언트가 특정 PDB에 직접 접속할 수 있다.",
+      "keyPoints": [
+        "PDB 생성 시 PDB 이름과 동일한 서비스 자동 생성",
+        "PDB OPEN 시 리스너에 자동 등록, CLOSE 시 자동 해제",
+        "DBMS_SERVICE로 PDB 내에 추가 서비스 생성 가능",
+        "Oracle 26ai에서 PDB 상태 변경 시 서비스 등록/해제가 더욱 즉시적"
+      ],
+      "relatedKeywords": ["Dynamic Service Registration", "DBMS_SERVICE", "SERVICE_NAMES"],
+      "sourceSection": "s06"
+    },
+    "ALTER SYSTEM REGISTER": {
+      "definition": "LREG 프로세스에 즉시 리스너 등록을 수행하도록 요청하는 명령이다.",
+      "keyPoints": [
+        "60초 대기 없이 즉시 서비스를 리스너에 등록",
+        "DB 기동 직후 또는 LOCAL_LISTENER 파라미터 변경 후 사용",
+        "LREG 프로세스의 정기 등록(60초 간격)과 별개로 즉시 실행"
+      ],
+      "relatedKeywords": ["LREG 프로세스", "Dynamic Service Registration"],
+      "sourceSection": "s06"
+    },
+    "SDU (Session Data Unit)": {
+      "definition": "Oracle Net에서 클라이언트와 서버 간 데이터를 전송할 때 사용하는 버퍼 크기(단위: 바이트)를 지정하는 파라미터이다.",
+      "keyPoints": [
+        "기본값: 8192바이트 (8KB). 최대 2MB까지 설정 가능",
+        "대량 데이터 전송 시 SDU를 늘리면 네트워크 왕복 횟수 감소로 성능 향상",
+        "sqlnet.ora의 DEFAULT_SDU_SIZE 또는 tnsnames.ora의 SDU 파라미터로 설정",
+        "클라이언트와 서버 양쪽 설정 중 작은 값이 적용됨"
+      ],
+      "relatedKeywords": ["sqlnet.ora", "Oracle Net Services"],
+      "sourceSection": "s07"
+    }
+  }
+}

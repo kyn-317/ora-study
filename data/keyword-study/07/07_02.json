@@ -1,0 +1,422 @@
+{
+  "studyId": "07_02",
+  "chapterId": "07",
+  "title": "대량 로드 처리 (SQL*Loader)",
+  "keywords": {
+    "SQL*Loader": {
+      "definition": "Oracle 데이터베이스에 외부 데이터 파일을 고속으로 적재하기 위한 클라이언트 측 유틸리티. Conventional Path와 Direct Path 두 가지 로드 방식을 지원한다.",
+      "keyPoints": [
+        "클라이언트 측에서 실행되는 OS 유틸리티 (서버 측 Data Pump와 구분)",
+        "컨트롤 파일(.ctl)로 데이터 파일 위치, 형식, 매핑 규칙을 정의",
+        "Express Mode로 컨트롤 파일 없이 간편 로드 가능 (Oracle 26ai 시험 핵심)",
+        "Bad File, Discard File, Log File을 통한 체계적 에러 처리 지원"
+      ],
+      "relatedKeywords": ["sqlldr", "Control File", "Express Mode", "External Table"],
+      "sourceSection": "s01"
+    },
+    "sqlldr": {
+      "definition": "SQL*Loader를 실행하는 OS 명령줄 커맨드. 커맨드 라인에서 파라미터를 직접 지정하거나 PARFILE로 파라미터 파일을 참조할 수 있다.",
+      "keyPoints": [
+        "기본 구문: sqlldr userid=scott/tiger control=load.ctl",
+        "주요 파라미터: CONTROL, DATA, LOG, BAD, DISCARD, DIRECT, PARALLEL 등",
+        "Express Mode: sqlldr userid=scott/tiger TABLE=emp (컨트롤 파일 불필요)",
+        "PARFILE 파라미터로 긴 옵션을 별도 파일에 기술 가능"
+      ],
+      "relatedKeywords": ["SQL*Loader", "Control File", "Express Mode"],
+      "sourceSection": "s01"
+    },
+    "Express Mode": {
+      "definition": "컨트롤 파일 없이 대상 테이블의 DDL에서 자동으로 필드 매핑을 유추하여 데이터를 로드하는 SQL*Loader의 간편 모드.",
+      "keyPoints": [
+        "TABLE 파라미터만 지정하면 테이블 컬럼 정의에 기반하여 자동 매핑",
+        "기본 구분자는 쉼표(,)이며 CSV 파일에 최적화",
+        "Oracle 26ai에서 기능이 강화되어 1Z0-182 시험의 핵심 출제 포인트",
+        "복잡한 매핑이 필요한 경우에는 컨트롤 파일 방식이 여전히 필요"
+      ],
+      "relatedKeywords": ["SQL*Loader", "sqlldr", "Control File"],
+      "sourceSection": "s03"
+    },
+    "Control File": {
+      "definition": "SQL*Loader의 데이터 로드 규칙을 정의하는 텍스트 파일. 데이터 파일 위치, 형식, 대상 테이블, 필드 매핑, 로드 조건 등을 기술한다.",
+      "keyPoints": [
+        "확장자는 관례적으로 .ctl 사용",
+        "구성: LOAD DATA → INFILE → INTO TABLE → 필드 정의",
+        "하나의 컨트롤 파일에서 여러 테이블로 동시 로드 가능",
+        "데이터를 컨트롤 파일 내에 직접 포함시킬 수도 있음 (BEGINDATA)"
+      ],
+      "relatedKeywords": ["SQL*Loader", "LOAD DATA", "INFILE", "INTO TABLE"],
+      "sourceSection": "s02"
+    },
+    "LOAD DATA": {
+      "definition": "SQL*Loader 컨트롤 파일의 시작 구문으로, 데이터 로드 작업의 시작을 선언한다.",
+      "keyPoints": [
+        "컨트롤 파일의 첫 번째 절로 반드시 존재해야 함",
+        "이후 INFILE, INTO TABLE 등의 절이 순서대로 이어짐",
+        "CONTINUE_LOAD와 구분: LOAD DATA는 새로운 로드, CONTINUE_LOAD는 중단된 로드 재개"
+      ],
+      "relatedKeywords": ["Control File", "INFILE", "INTO TABLE"],
+      "sourceSection": "s02"
+    },
+    "INFILE": {
+      "definition": "SQL*Loader 컨트롤 파일에서 로드할 데이터 파일의 경로를 지정하는 절.",
+      "keyPoints": [
+        "여러 INFILE 절로 다수의 데이터 파일을 하나의 작업으로 로드 가능",
+        "커맨드 라인의 DATA 파라미터로도 지정 가능 (DATA가 우선)",
+        "INFILE * 를 사용하면 컨트롤 파일 내 BEGINDATA 이하의 인라인 데이터를 사용"
+      ],
+      "relatedKeywords": ["Control File", "LOAD DATA"],
+      "sourceSection": "s02"
+    },
+    "INTO TABLE": {
+      "definition": "SQL*Loader에서 데이터를 적재할 대상 테이블과 로드 모드(INSERT/APPEND/REPLACE/TRUNCATE)를 지정하는 절.",
+      "keyPoints": [
+        "하나의 LOAD DATA 블록에 여러 INTO TABLE을 지정하여 다중 테이블 로드 가능",
+        "WHEN 절과 결합하여 조건부로 각 테이블에 분배 로드 가능",
+        "로드 모드를 INTO TABLE 절에 직접 지정"
+      ],
+      "relatedKeywords": ["Control File", "INSERT Mode", "APPEND Mode"],
+      "sourceSection": "s02"
+    },
+    "FIELDS TERMINATED BY": {
+      "definition": "SQL*Loader 컨트롤 파일에서 데이터 파일의 필드 구분 문자를 지정하는 절.",
+      "keyPoints": [
+        "CSV 파일의 경우 쉼표(,), TSV의 경우 탭('\\t')을 주로 사용",
+        "OPTIONALLY ENCLOSED BY와 함께 사용하여 필드 감싸기 문자 지정",
+        "외부 테이블의 ACCESS PARAMETERS에서도 동일한 구문 사용"
+      ],
+      "relatedKeywords": ["Control File", "OPTIONALLY ENCLOSED BY", "ORACLE_LOADER"],
+      "sourceSection": "s02"
+    },
+    "Conventional Path Load": {
+      "definition": "SQL 엔진과 Buffer Cache를 경유하는 표준 데이터 로드 방식. INSERT 문을 내부적으로 생성하여 실행한다.",
+      "keyPoints": [
+        "Buffer Cache를 경유하므로 Direct Path보다 느리지만 유연성이 높음",
+        "모든 제약조건, 트리거, 참조 무결성이 정상적으로 작동",
+        "로드 중에도 다른 세션의 DML이 가능 (테이블 잠금 없음)",
+        "Redo Log가 완전히 생성되어 복구 가능성 보장"
+      ],
+      "relatedKeywords": ["Direct Path Load", "SQL*Loader"],
+      "sourceSection": "s04"
+    },
+    "Direct Path Load": {
+      "definition": "SQL 엔진과 Buffer Cache를 우회하여 HWM 위의 새로운 블록에 직접 데이터를 기록하는 고속 로드 방식. DIRECT=TRUE로 활성화한다.",
+      "keyPoints": [
+        "Buffer Cache를 우회하여 Conventional Path보다 대폭 빠름",
+        "HWM 위에 새로운 블록을 할당하여 기록 → 기존 빈 블록 재사용 안 함",
+        "로드 중 테이블 레벨 잠금으로 다른 세션 DML 차단",
+        "일부 제약조건(CHECK, 외래키)과 INSERT 트리거가 비활성화됨",
+        "NOLOGGING 설정 시 Redo 최소화 가능하지만 복구 불가 위험"
+      ],
+      "relatedKeywords": ["Conventional Path Load", "HWM (High Water Mark)", "NOLOGGING"],
+      "sourceSection": "s04"
+    },
+    "INSERT Mode": {
+      "definition": "SQL*Loader의 기본 로드 모드로, 대상 테이블이 비어있을 때만 데이터를 로드한다. 테이블에 기존 데이터가 있으면 에러 발생.",
+      "keyPoints": [
+        "SQL*Loader의 기본(Default) 로드 모드",
+        "대상 테이블이 비어있지 않으면 즉시 에러로 실패",
+        "실수로 기존 데이터에 중복 적재하는 것을 방지하는 안전장치"
+      ],
+      "relatedKeywords": ["APPEND Mode", "REPLACE Mode", "TRUNCATE Mode"],
+      "sourceSection": "s04"
+    },
+    "APPEND Mode": {
+      "definition": "기존 데이터를 유지한 채 새로운 데이터를 추가하는 SQL*Loader 로드 모드.",
+      "keyPoints": [
+        "테이블에 기존 데이터가 있어도 에러 없이 추가 적재",
+        "가장 많이 사용되는 로드 모드",
+        "기존 데이터와의 중복 여부는 별도로 확인하지 않음"
+      ],
+      "relatedKeywords": ["INSERT Mode", "REPLACE Mode", "TRUNCATE Mode"],
+      "sourceSection": "s04"
+    },
+    "REPLACE Mode": {
+      "definition": "기존 데이터를 모두 DELETE한 후 새 데이터를 로드하는 SQL*Loader 로드 모드. Conventional Path에서만 사용 가능하다.",
+      "keyPoints": [
+        "내부적으로 DELETE FROM table 실행 후 INSERT 수행",
+        "DELETE이므로 Redo/Undo가 생성되어 TRUNCATE Mode보다 느림",
+        "DELETE 트리거가 발동됨",
+        "Direct Path Load에서는 사용 불가"
+      ],
+      "relatedKeywords": ["TRUNCATE Mode", "INSERT Mode", "Conventional Path Load"],
+      "sourceSection": "s04"
+    },
+    "TRUNCATE Mode": {
+      "definition": "기존 데이터를 TRUNCATE한 후 새 데이터를 로드하는 SQL*Loader 로드 모드. REPLACE보다 빠르지만 롤백 불가.",
+      "keyPoints": [
+        "내부적으로 TRUNCATE TABLE 실행 후 로드 수행",
+        "DDL이므로 Redo/Undo 최소, REPLACE보다 훨씬 빠름",
+        "롤백 불가능하며 DELETE 트리거가 발동되지 않음",
+        "Conventional Path와 Direct Path 모두에서 사용 가능"
+      ],
+      "relatedKeywords": ["REPLACE Mode", "INSERT Mode", "Direct Path Load"],
+      "sourceSection": "s04"
+    },
+    "Bad File": {
+      "definition": "SQL*Loader에서 Oracle 서버가 거부한 레코드(데이터 타입 불일치, 제약조건 위반 등)를 기록하는 파일.",
+      "keyPoints": [
+        "형식 오류나 제약조건 위반으로 테이블에 INSERT 실패한 행이 기록됨",
+        "기본적으로 컨트롤 파일명.bad로 자동 생성",
+        "BAD 파라미터나 BADFILE 절로 경로와 파일명 지정 가능",
+        "Discard File(조건 불일치)과 구분: Bad File은 형식/제약조건 오류"
+      ],
+      "relatedKeywords": ["Discard File", "WHEN Clause", "SQL*Loader"],
+      "sourceSection": "s05"
+    },
+    "Discard File": {
+      "definition": "SQL*Loader에서 WHEN 조건에 맞지 않아 어떤 INTO TABLE 절에도 해당하지 않는 레코드를 기록하는 파일.",
+      "keyPoints": [
+        "Bad File(형식/제약 오류)과 구분: Discard는 조건 불일치",
+        "DISCARD 파라미터나 DISCARDFILE 절로 지정",
+        "DISCARDMAX로 최대 허용 Discard 행 수 제한 가능",
+        "Discard 파일은 지정하지 않으면 생성되지 않음 (Bad File과 차이)"
+      ],
+      "relatedKeywords": ["Bad File", "WHEN Clause", "SQL*Loader"],
+      "sourceSection": "s05"
+    },
+    "WHEN Clause": {
+      "definition": "SQL*Loader에서 특정 조건을 만족하는 레코드만 대상 테이블에 로드하도록 필터링하는 절.",
+      "keyPoints": [
+        "INTO TABLE 절에 WHEN 조건을 지정하여 조건부 로드",
+        "조건 불일치 행은 Discard File에 기록됨",
+        "여러 INTO TABLE에 서로 다른 WHEN 조건을 지정하여 분배 로드 가능"
+      ],
+      "relatedKeywords": ["Discard File", "INTO TABLE", "Control File"],
+      "sourceSection": "s05"
+    },
+    "BINDSIZE": {
+      "definition": "SQL*Loader가 Conventional Path Load에서 바인드 배열에 할당하는 메모리 크기(바이트). ROWS와 함께 배치 처리 성능에 영향을 준다.",
+      "keyPoints": [
+        "바인드 배열이 클수록 한 번에 더 많은 행을 처리하여 성능 향상",
+        "ROWS와 BINDSIZE 중 먼저 한계에 도달하는 쪽이 실제 배치 크기 결정",
+        "Conventional Path에서만 유효하며 Direct Path에서는 무시됨"
+      ],
+      "relatedKeywords": ["READSIZE", "ROWS", "Conventional Path Load"],
+      "sourceSection": "s04"
+    },
+    "READSIZE": {
+      "definition": "SQL*Loader가 데이터 파일을 읽을 때 사용하는 I/O 버퍼 크기(바이트).",
+      "keyPoints": [
+        "큰 값을 설정하면 파일 I/O 횟수가 줄어 성능 향상",
+        "BINDSIZE와 함께 Conventional Path Load의 성능 튜닝 파라미터",
+        "기본값은 운영체제에 따라 다름"
+      ],
+      "relatedKeywords": ["BINDSIZE", "Conventional Path Load"],
+      "sourceSection": "s04"
+    },
+    "ROWS": {
+      "definition": "SQL*Loader에서 한 번에 처리할 행 수를 지정하는 파라미터. Conventional Path에서는 배치 커밋 단위, Direct Path에서는 저장 단위를 의미한다.",
+      "keyPoints": [
+        "Conventional Path: N행마다 COMMIT 수행 (기본값 64)",
+        "Direct Path: 데이터 저장(Save) 단위",
+        "BINDSIZE와 함께 실제 배치 크기를 결정"
+      ],
+      "relatedKeywords": ["BINDSIZE", "Conventional Path Load", "Direct Path Load"],
+      "sourceSection": "s04"
+    },
+    "DIRECT": {
+      "definition": "SQL*Loader에서 Direct Path Load를 활성화하는 파라미터. DIRECT=TRUE로 설정하면 Buffer Cache를 우회하여 고속 로드를 수행한다.",
+      "keyPoints": [
+        "기본값: FALSE (Conventional Path Load)",
+        "DIRECT=TRUE 설정 시 Direct Path Load 활성화",
+        "PARALLEL=TRUE와 함께 사용하면 병렬 Direct Path Load 가능"
+      ],
+      "relatedKeywords": ["Direct Path Load", "PARALLEL", "Conventional Path Load"],
+      "sourceSection": "s04"
+    },
+    "PARALLEL": {
+      "definition": "SQL*Loader에서 여러 Direct Path Load 세션을 동시에 실행하여 병렬 로드를 수행하는 파라미터.",
+      "keyPoints": [
+        "DIRECT=TRUE와 함께 사용해야 함 (Conventional Path에서는 불가)",
+        "여러 sqlldr 프로세스를 동시에 시작하여 각각 다른 데이터 파일을 처리",
+        "각 세션이 독립적인 임시 세그먼트에 기록 후 로드 완료 시 병합"
+      ],
+      "relatedKeywords": ["DIRECT", "Direct Path Load", "MULTITHREADING"],
+      "sourceSection": "s04"
+    },
+    "MULTITHREADING": {
+      "definition": "SQL*Loader에서 데이터 파일 읽기와 데이터 변환/로드를 별도 스레드로 분리하여 성능을 향상시키는 파라미터.",
+      "keyPoints": [
+        "Direct Path Load에서 기본적으로 활성화",
+        "읽기 스레드와 로드 스레드가 병렬로 동작하여 처리량 증가",
+        "단일 sqlldr 프로세스 내의 멀티스레딩 (PARALLEL의 다중 프로세스와 구분)"
+      ],
+      "relatedKeywords": ["PARALLEL", "Direct Path Load"],
+      "sourceSection": "s04"
+    },
+    "TRAILING NULLCOLS": {
+      "definition": "데이터 파일에서 후행 필드가 누락된 경우 해당 컬럼을 NULL로 처리하도록 지정하는 SQL*Loader 옵션.",
+      "keyPoints": [
+        "레코드의 필드 수가 테이블 컬럼 수보다 적을 때 부족한 필드를 NULL로 채움",
+        "이 옵션이 없으면 필드 부족 레코드가 Bad File로 분류됨",
+        "외부 테이블의 MISSING FIELD VALUES ARE NULL과 유사한 역할"
+      ],
+      "relatedKeywords": ["Control File", "Bad File", "MISSING FIELD VALUES ARE NULL"],
+      "sourceSection": "s02"
+    },
+    "SEQUENCE": {
+      "definition": "SQL*Loader 컨트롤 파일에서 로드 시 자동으로 순차 번호를 생성하여 컬럼에 할당하는 함수.",
+      "keyPoints": [
+        "구문: SEQUENCE(시작값, 증가값) 또는 SEQUENCE(MAX, 증가값)",
+        "데이터 파일에 해당 컬럼 값이 없을 때 자동 번호 부여에 유용",
+        "Oracle Sequence 객체와는 별개의 SQL*Loader 자체 기능"
+      ],
+      "relatedKeywords": ["Control File", "FILLER", "CONSTANT"],
+      "sourceSection": "s02"
+    },
+    "FILLER": {
+      "definition": "SQL*Loader 컨트롤 파일에서 데이터 파일의 특정 필드를 읽되 테이블에는 로드하지 않도록 지정하는 키워드.",
+      "keyPoints": [
+        "데이터 파일에는 존재하지만 테이블에 불필요한 컬럼을 건너뛸 때 사용",
+        "FILLER 필드는 파싱은 되지만 INSERT 대상에서 제외됨",
+        "WHEN 절의 조건에서는 FILLER 필드도 참조 가능"
+      ],
+      "relatedKeywords": ["Control File", "SEQUENCE", "CONSTANT"],
+      "sourceSection": "s02"
+    },
+    "CONSTANT": {
+      "definition": "SQL*Loader 컨트롤 파일에서 모든 행에 동일한 상수 값을 할당하는 키워드.",
+      "keyPoints": [
+        "구문: column_name CONSTANT 'value'",
+        "로드 일자, 소스 식별자 등 데이터 파일에 없는 고정값 삽입에 유용",
+        "FILLER(건너뛰기), SEQUENCE(순차번호)와 함께 필드 제어 3대 키워드"
+      ],
+      "relatedKeywords": ["FILLER", "SEQUENCE", "Control File"],
+      "sourceSection": "s02"
+    },
+    "NULLIF BLANKS": {
+      "definition": "SQL*Loader에서 필드 값이 공백(Blank)인 경우 NULL로 처리하도록 지정하는 절.",
+      "keyPoints": [
+        "고정 길이 파일에서 공백으로 채워진 필드를 NULL로 변환",
+        "NULLIF 절로 더 복잡한 조건(특정 값일 때 NULL)도 지정 가능",
+        "공백 문자열과 NULL을 구분해야 하는 데이터 품질 관리에 중요"
+      ],
+      "relatedKeywords": ["Control File", "TRAILING NULLCOLS"],
+      "sourceSection": "s02"
+    },
+    "External Table": {
+      "definition": "SQL*Loader의 대안으로, Oracle 서버 측에서 외부 파일을 SQL로 직접 조회할 수 있게 해주는 데이터베이스 객체.",
+      "keyPoints": [
+        "SQL*Loader는 클라이언트 측, External Table은 서버 측에서 동작",
+        "SQL 내에서 JOIN, 서브쿼리 등으로 외부 데이터를 직접 활용 가능",
+        "SQL*Loader 대비 장점: SQL 통합, 병렬 쿼리 지원",
+        "SQL*Loader 대비 단점: DML 트리거 미지원, INSERT/UPDATE/DELETE 불가"
+      ],
+      "relatedKeywords": ["ORACLE_LOADER", "SQL*Loader", "EXTERNAL_TABLE"],
+      "sourceSection": "s06"
+    },
+    "ORACLE_LOADER": {
+      "definition": "SQL*Loader의 파싱 엔진을 외부 테이블에서 사용하는 액세스 드라이버. SQL*Loader 컨트롤 파일과 유사한 구문을 사용한다.",
+      "keyPoints": [
+        "외부 테이블의 기본(Default) 액세스 드라이버",
+        "SQL*Loader의 ACCESS PARAMETERS 구문과 거의 동일",
+        "읽기 전용(SELECT)만 지원",
+        "SQL*Loader에서 외부 테이블로 마이그레이션 시 구문 변환이 용이"
+      ],
+      "relatedKeywords": ["External Table", "SQL*Loader", "ACCESS PARAMETERS"],
+      "sourceSection": "s06"
+    },
+    "EXTERNAL_TABLE": {
+      "definition": "SQL*Loader의 EXTERNAL_TABLE 파라미터로, SQL*Loader 작업을 자동으로 외부 테이블 DDL로 변환하여 실행하는 기능.",
+      "keyPoints": [
+        "EXTERNAL_TABLE=GENERATE_ONLY: DDL만 생성하고 실행하지 않음",
+        "EXTERNAL_TABLE=EXECUTE: DDL 생성 후 자동 실행",
+        "SQL*Loader에서 외부 테이블로 전환할 때의 마이그레이션 도구"
+      ],
+      "relatedKeywords": ["SQL*Loader", "External Table", "ORACLE_LOADER"],
+      "sourceSection": "s06"
+    },
+    "COLUMNARRAYROWS": {
+      "definition": "Direct Path Load에서 한 번에 처리할 컬럼 배열의 행 수를 지정하는 파라미터.",
+      "keyPoints": [
+        "Direct Path Load에서 Conventional Path의 ROWS와 유사한 역할",
+        "값을 늘리면 메모리 사용은 증가하지만 처리 성능 향상",
+        "STREAMSIZE와 함께 Direct Path의 성능 튜닝 파라미터"
+      ],
+      "relatedKeywords": ["STREAMSIZE", "Direct Path Load", "ROWS"],
+      "sourceSection": "s04"
+    },
+    "STREAMSIZE": {
+      "definition": "Direct Path Load에서 데이터 스트림 버퍼의 크기(바이트)를 지정하는 파라미터.",
+      "keyPoints": [
+        "Direct Path Load 전용 성능 튜닝 파라미터",
+        "COLUMNARRAYROWS와 함께 데이터 전송 효율성 결정",
+        "기본값은 대부분의 경우 적절하며, 초대형 로드에서만 조정 필요"
+      ],
+      "relatedKeywords": ["COLUMNARRAYROWS", "Direct Path Load"],
+      "sourceSection": "s04"
+    },
+    "NOLOGGING": {
+      "definition": "Direct Path Load 시 Redo Log 생성을 최소화하여 로드 속도를 향상시키는 테이블/테이블스페이스 옵션.",
+      "keyPoints": [
+        "ALTER TABLE ... NOLOGGING으로 설정 후 Direct Path Load 시 Redo 최소화",
+        "성능 향상이 크지만 미디어 복구(Media Recovery) 불가 위험",
+        "Data Guard 환경에서는 Standby에 데이터 미전파 → FORCE LOGGING으로 무시 가능",
+        "로드 후 반드시 백업을 수행해야 안전"
+      ],
+      "relatedKeywords": ["Direct Path Load", "HWM (High Water Mark)"],
+      "sourceSection": "s04"
+    },
+    "HWM (High Water Mark)": {
+      "definition": "세그먼트 내에서 데이터가 기록된 적이 있는 최고 위치. Direct Path Load는 항상 HWM 위에 기록하며 Full Table Scan 성능에 직접 영향을 준다.",
+      "keyPoints": [
+        "Direct Path Load/Insert는 항상 HWM 위의 새 블록에 기록 → HWM 상승",
+        "DELETE로는 HWM이 하향되지 않으며 TRUNCATE로 초기화됨",
+        "HWM이 높으면 Full Table Scan 시 불필요한 빈 블록까지 읽어 성능 저하",
+        "SHRINK SPACE 또는 ALTER TABLE MOVE로 HWM 하향 가능"
+      ],
+      "relatedKeywords": ["Direct Path Load", "NOLOGGING"],
+      "sourceSection": "s04"
+    },
+    "V$SESSION_LONGOPS": {
+      "definition": "장시간 실행되는 작업(SQL*Loader, Data Pump 등)의 진행 상황을 실시간 모니터링할 수 있는 동적 성능 뷰.",
+      "keyPoints": [
+        "SOFAR, TOTALWORK 열로 작업 진행률 계산 가능",
+        "SQL*Loader Direct Path Load의 진행 상황 추적에 유용",
+        "Data Pump 작업 모니터링에도 동일하게 활용됨"
+      ],
+      "relatedKeywords": ["SQL*Loader", "DBA_INDEXES"],
+      "sourceSection": "s05"
+    },
+    "DBA_INDEXES": {
+      "definition": "데이터베이스의 모든 인덱스 정보를 조회하는 딕셔너리 뷰. SQL*Loader Direct Path Load 후 인덱스 상태 확인에 사용된다.",
+      "keyPoints": [
+        "STATUS 열에서 VALID/UNUSABLE 상태 확인",
+        "Direct Path Load 후 인덱스가 UNUSABLE이 될 수 있으므로 확인 필수",
+        "UNUSABLE 인덱스는 ALTER INDEX ... REBUILD로 재구성 필요"
+      ],
+      "relatedKeywords": ["Direct Path Load", "SQL*Loader"],
+      "sourceSection": "s05"
+    },
+    "POSITION": {
+      "definition": "SQL*Loader 컨트롤 파일에서 고정 길이 파일의 필드 시작 위치와 끝 위치를 바이트 단위로 지정하는 절.",
+      "keyPoints": [
+        "구문: column_name POSITION(start:end) datatype",
+        "고정 길이(Fixed-Length) 파일 로드 시 사용",
+        "구분자 기반 파일에서는 FIELDS TERMINATED BY를 대신 사용"
+      ],
+      "relatedKeywords": ["Control File", "FIELDS TERMINATED BY"],
+      "sourceSection": "s02"
+    },
+    "OPTIONALLY ENCLOSED BY": {
+      "definition": "SQL*Loader에서 필드 값을 감싸는 선택적 문자를 지정하는 절. CSV에서 큰따옴표로 감싼 필드 처리 시 사용한다.",
+      "keyPoints": [
+        "필드 내에 구분자 문자가 포함된 경우를 안전하게 처리",
+        "OPTIONALLY이므로 모든 필드가 감싸져 있지 않아도 동작",
+        "외부 테이블의 ACCESS PARAMETERS에서도 동일한 구문 사용"
+      ],
+      "relatedKeywords": ["FIELDS TERMINATED BY", "Control File"],
+      "sourceSection": "s02"
+    },
+    "DATE_FORMAT": {
+      "definition": "SQL*Loader에서 날짜 필드의 형식을 지정하여 문자열을 DATE 타입으로 변환하는 절.",
+      "keyPoints": [
+        "구문: column_name DATE 'YYYY-MM-DD' 형식으로 지정",
+        "데이터 파일의 날짜 형식과 정확히 일치해야 함",
+        "Express Mode에서는 NLS_DATE_FORMAT을 따름"
+      ],
+      "relatedKeywords": ["Control File", "Express Mode"],
+      "sourceSection": "s02"
+    }
+  }
+}

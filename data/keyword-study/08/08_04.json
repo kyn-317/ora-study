@@ -1,0 +1,454 @@
+{
+  "studyId": "08_04",
+  "chapterId": "08",
+  "title": "진단 모니터 (Diagnostic Monitor - ADDM)",
+  "keywords": {
+    "ADDM": {
+      "definition": "Automatic Database Diagnostic Monitor의 약어로, AWR 스냅샷 데이터를 분석하여 성능 문제의 근본 원인을 자동으로 식별하고 해결 권장 사항을 제시하는 Oracle 내장 자동 성능 진단 엔진이다.",
+      "keyPoints": [
+        "MMON 프로세스가 매 AWR 스냅샷 후 자동 실행",
+        "DB Time을 핵심 메트릭으로 하향식(Top-Down) 분해 분석 수행",
+        "Finding(Problem/Symptom/Information) → Recommendation → Action 계층 구조",
+        "STATISTICS_LEVEL=TYPICAL 이상, CONTROL_MANAGEMENT_PACK_ACCESS=DIAGNOSTIC 이상이어야 활성화"
+      ],
+      "relatedKeywords": ["Automatic Database Diagnostic Monitor", "AWR", "DB Time", "MMON"],
+      "sourceSection": "s01"
+    },
+    "Automatic Database Diagnostic Monitor": {
+      "definition": "ADDM의 정식 명칭으로, Oracle 10g에서 도입된 자기 진단 엔진(Self-Diagnostic Engine)이다. DBA가 수동으로 수행해야 했던 성능 진단 작업을 자동화한다.",
+      "keyPoints": [
+        "증상(Symptom)이 아닌 근본 원인(Root Cause)까지 추적하는 것이 핵심 설계 철학",
+        "각 문제의 영향도를 DB Time 기준으로 정량화하여 우선순위 결정",
+        "실행 가능한 권장 사항을 예상 효과(Benefit)와 함께 제시",
+        "Oracle 권장 하향식(Top-Down) 성능 튜닝 방법론과 일치하는 분석 방식"
+      ],
+      "relatedKeywords": ["ADDM", "Top-Down Analysis", "Root Cause Analysis"],
+      "sourceSection": "s01"
+    },
+    "자동 데이터베이스 진단 모니터": {
+      "definition": "ADDM(Automatic Database Diagnostic Monitor)의 한국어 표현으로, AWR 기반의 자동 성능 진단 엔진이다.",
+      "keyPoints": [
+        "매 AWR 스냅샷 후 자동 분석하여 사전 예방적 모니터링 가능",
+        "DBA_ADVISOR_TASKS, DBA_ADVISOR_FINDINGS 뷰로 결과 조회",
+        "addmrpt.sql 스크립트 또는 DBMS_ADDM 패키지로 보고서 생성"
+      ],
+      "relatedKeywords": ["ADDM"],
+      "sourceSection": "s01"
+    },
+    "AWR": {
+      "definition": "Automatic Workload Repository의 약어로, MMON이 주기적으로 수집하는 성능 통계 스냅샷의 저장소이며 ADDM 분석의 입력 데이터 소스이다.",
+      "keyPoints": [
+        "기본 스냅샷 간격 1시간, 보존 기간 8일",
+        "SYSAUX 테이블스페이스에 저장 (WRM$_, WRH$_ 테이블)",
+        "DBMS_WORKLOAD_REPOSITORY 패키지로 스냅샷/베이스라인/보고서 관리",
+        "Diagnostics Pack 라이선스 필요"
+      ],
+      "relatedKeywords": ["Automatic Workload Repository", "ADDM", "MMON", "DBMS_WORKLOAD_REPOSITORY"],
+      "sourceSection": "s01"
+    },
+    "Automatic Workload Repository": {
+      "definition": "AWR의 정식 명칭으로, Oracle Database의 성능 통계를 주기적으로 수집하여 이력으로 저장하는 인프라이다.",
+      "keyPoints": [
+        "ADDM, ASH, AWR 보고서 등 성능 분석 도구의 공통 데이터 소스",
+        "DBA_HIST_ 접두어의 딕셔너리 뷰로 이력 데이터 조회",
+        "PDB 레벨 AWR은 Oracle 26ai에서 기본 활성화"
+      ],
+      "relatedKeywords": ["AWR"],
+      "sourceSection": "s01"
+    },
+    "DB Time": {
+      "definition": "데이터베이스가 사용자 요청을 처리하는 데 소비한 총 시간으로, 모든 비유휴(Non-Idle) 세션의 경과 시간 합산이다. ADDM 분석의 핵심 메트릭이다.",
+      "keyPoints": [
+        "DB Time = CPU Time + Wait Time (Non-Idle)",
+        "ADDM은 DB Time을 CPU Time, User I/O, Concurrency, Application, Commit, Network 등으로 분해",
+        "DB Time > Elapsed Time × CPU 수이면 데이터베이스 과부하 상태",
+        "V$SYS_TIME_MODEL에서 DB TIME 값 직접 조회 가능"
+      ],
+      "relatedKeywords": ["ADDM", "DB Time Decomposition", "V$SYS_TIME_MODEL"],
+      "sourceSection": "s01"
+    },
+    "MMON": {
+      "definition": "Manageability Monitor의 약어로, AWR 스냅샷 수집과 ADDM 분석을 트리거하는 핵심 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "기본 1시간 간격으로 AWR 스냅샷 수집",
+        "각 스냅샷 완료 후 자동으로 ADDM 분석 태스크 생성 및 실행",
+        "서버 생성 알림(Server-Generated Alerts) 관리",
+        "MMNL(보조 프로세스)과 협력하여 ASH 데이터 플러시 등 수행"
+      ],
+      "relatedKeywords": ["Manageability Monitor", "AWR", "ADDM"],
+      "sourceSection": "s01"
+    },
+    "Manageability Monitor": {
+      "definition": "MMON의 정식 명칭으로, Oracle의 자동 관리성(Manageability) 기능 전반을 담당하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "AWR 스냅샷 수집, ADDM 분석, 알림 생성, 진단 데이터 퍼지 등 다양한 역할",
+        "STATISTICS_LEVEL=BASIC이면 MMON의 관리성 기능이 비활성화",
+        "RAC 환경에서는 각 인스턴스마다 독립적인 MMON이 실행"
+      ],
+      "relatedKeywords": ["MMON"],
+      "sourceSection": "s01"
+    },
+    "Finding": {
+      "definition": "ADDM이 분석 중 식별한 성능 관련 발견 사항으로, Problem(근본 원인), Symptom(증상), Information(정보)의 3가지 유형으로 분류된다.",
+      "keyPoints": [
+        "Problem: DB Time에 직접적 영향을 미치는 근본 원인 (DBA가 집중해야 할 대상)",
+        "Symptom: 다른 Problem의 결과로 나타나는 현상",
+        "Information: 성능에 직접 영향은 없지만 알아야 할 정보",
+        "Impact(영향도)는 전체 DB Time 대비 비율(%)과 절대 시간(초)으로 표시"
+      ],
+      "relatedKeywords": ["Recommendation", "Impact", "ADDM"],
+      "sourceSection": "s02"
+    },
+    "Recommendation": {
+      "definition": "ADDM이 Finding에 대해 생성하는 해결 방안으로, Action(구체적 조치)과 Rationale(근거)로 구성되며 Benefit(예상 효과)을 포함한다.",
+      "keyPoints": [
+        "유형: Hardware Changes, Database Configuration, Schema Changes, Application Changes",
+        "하나의 Finding에 여러 대안적 Recommendation이 제시될 수 있음",
+        "Benefit(DB Time 절약량)이 큰 순서대로 우선순위 정렬",
+        "DBA_ADVISOR_RECOMMENDATIONS 뷰로 조회"
+      ],
+      "relatedKeywords": ["Finding", "Action", "Rationale", "Benefit"],
+      "sourceSection": "s02"
+    },
+    "Action": {
+      "definition": "ADDM Recommendation의 구체적인 실행 조치로, SQL 문, 파라미터 변경 명령 등 DBA가 수행해야 할 조치를 포함한다.",
+      "keyPoints": [
+        "DBA_ADVISOR_ACTIONS 뷰의 COMMAND, ATTR1~ATTR6 컬럼에 세부 정보",
+        "SQL Tuning Advisor 실행 권고, 파라미터 변경, 인덱스 생성 등이 포함",
+        "하나의 Recommendation에 여러 Action이 포함될 수 있음"
+      ],
+      "relatedKeywords": ["Recommendation", "DBA_ADVISOR_ACTIONS"],
+      "sourceSection": "s02"
+    },
+    "Rationale": {
+      "definition": "ADDM Recommendation을 제안하는 근거와 분석 배경을 설명하는 정보이다.",
+      "keyPoints": [
+        "DBA_ADVISOR_RATIONALE 뷰에서 조회",
+        "왜 해당 권장 사항을 제안하는지의 논리적 근거 제시",
+        "DBA가 권장 사항 적용 여부를 판단하는 데 도움"
+      ],
+      "relatedKeywords": ["Recommendation", "DBA_ADVISOR_RATIONALE"],
+      "sourceSection": "s02"
+    },
+    "Impact": {
+      "definition": "ADDM Finding의 영향도로, 해당 문제가 전체 DB Time에서 차지하는 비율(%)과 절대 시간(초)으로 정량화된다.",
+      "keyPoints": [
+        "Impact가 클수록 해당 문제의 성능 영향이 크므로 우선 해결 대상",
+        "기본적으로 DB Time의 1% 이상을 차지하는 문제만 보고",
+        "DBTIME_THRESHOLD 파라미터로 보고 임계값 조정 가능"
+      ],
+      "relatedKeywords": ["Finding", "Benefit", "DBTIME_THRESHOLD"],
+      "sourceSection": "s02"
+    },
+    "Benefit": {
+      "definition": "ADDM Recommendation 적용 시 예상되는 DB Time 절약 효과로, 초 단위의 절대값으로 표시된다.",
+      "keyPoints": [
+        "Benefit이 클수록 해당 권장 사항의 효과가 큼",
+        "여러 Recommendation 중 Benefit이 큰 것을 우선 적용하는 것이 효율적",
+        "DBA_ADVISOR_RECOMMENDATIONS의 BENEFIT 컬럼으로 조회"
+      ],
+      "relatedKeywords": ["Recommendation", "Impact"],
+      "sourceSection": "s02"
+    },
+    "STATISTICS_LEVEL": {
+      "definition": "AWR, ADDM, ASH 등 자동 관리 기능의 활성화 수준을 제어하는 초기화 파라미터이다. ADDM 활성화의 필수 전제 조건이다.",
+      "keyPoints": [
+        "BASIC: ADDM, AWR, ASH 모두 비활성화",
+        "TYPICAL(기본/권장): ADDM 정상 활성화",
+        "ALL: 추가 통계(OS 통계, Plan 통계) 수집 포함",
+        "ALTER SYSTEM으로 동적 변경 가능하며, V$STATISTICS_LEVEL에서 활성화 기능 확인"
+      ],
+      "relatedKeywords": ["CONTROL_MANAGEMENT_PACK_ACCESS", "ADDM"],
+      "sourceSection": "s03"
+    },
+    "CONTROL_MANAGEMENT_PACK_ACCESS": {
+      "definition": "Diagnostic Pack과 Tuning Pack 라이선스에 따른 기능 접근을 제어하는 파라미터이다. ADDM 사용에 DIAGNOSTIC 이상 설정이 필요하다.",
+      "keyPoints": [
+        "NONE: ADDM, AWR 접근 차단",
+        "DIAGNOSTIC: ADDM 활성화, SQL Tuning Advisor 비활성화",
+        "DIAGNOSTIC+TUNING(기본): ADDM + SQL Tuning Advisor 모두 활성화",
+        "라이선스 미보유 시 NONE 설정이 법적으로 필요"
+      ],
+      "relatedKeywords": ["STATISTICS_LEVEL", "ADDM"],
+      "sourceSection": "s03"
+    },
+    "DBMS_ADVISOR": {
+      "definition": "어드바이저 프레임워크의 공통 인터페이스 패키지로, ADDM 수동 분석 시 태스크 생성/실행/결과 조회에 사용된다.",
+      "keyPoints": [
+        "CREATE_TASK('ADDM', task_name)으로 ADDM 수동 태스크 생성",
+        "SET_TASK_PARAMETER로 START_SNAPSHOT, END_SNAPSHOT 등 분석 범위 지정",
+        "EXECUTE_TASK로 실행, GET_TASK_REPORT로 TEXT/HTML/XML 보고서 생성",
+        "SET_DEFAULT_TASK_PARAMETER로 DBTIME_THRESHOLD 등 기본 파라미터 변경"
+      ],
+      "relatedKeywords": ["ADDM", "DBMS_ADDM"],
+      "sourceSection": "s06"
+    },
+    "DBMS_ADDM": {
+      "definition": "ADDM에 특화된 PL/SQL 패키지로, DBMS_ADVISOR보다 간편한 인터페이스로 ADDM 분석을 수행한다.",
+      "keyPoints": [
+        "ANALYZE_DB: 전체 데이터베이스(RAC: 모든 인스턴스) ADDM 분석",
+        "ANALYZE_INST: 특정 인스턴스의 ADDM 분석",
+        "ANALYZE_PARTIAL: RAC 환경에서 일부 인스턴스만 분석",
+        "PDB 컨텍스트에서 직접 ADDM 태스크를 생성하고 분석 가능 (Oracle 26ai)"
+      ],
+      "relatedKeywords": ["ADDM", "DBMS_ADVISOR"],
+      "sourceSection": "s06"
+    },
+    "addmrpt.sql": {
+      "definition": "$ORACLE_HOME/rdbms/admin/ 디렉터리의 SQL*Plus 스크립트로, 대화형으로 스냅샷 범위를 선택하여 ADDM 텍스트 보고서를 생성한다.",
+      "keyPoints": [
+        "인스턴스 번호, 시작/종료 스냅샷 ID를 대화형으로 선택",
+        "텍스트 형식의 ADDM 보고서가 파일로 출력됨",
+        "DBMS_ADDM이나 DBMS_ADVISOR.GET_TASK_REPORT의 간편한 대안"
+      ],
+      "relatedKeywords": ["ADDM", "DBMS_ADDM"],
+      "sourceSection": "s05"
+    },
+    "DBMS_WORKLOAD_REPOSITORY": {
+      "definition": "AWR 스냅샷 생성/삭제, 설정 변경, 베이스라인 관리, 보고서 생성 등 AWR 전반을 관리하는 PL/SQL 패키지이다.",
+      "keyPoints": [
+        "CREATE_SNAPSHOT: 수동 스냅샷 즉시 생성",
+        "MODIFY_SNAPSHOT_SETTINGS: 간격/보존 기간 변경",
+        "PDB 컨텍스트에서 사용하여 PDB별 독립 스냅샷 관리",
+        "AWR_REPORT_HTML/TEXT: AWR 보고서 생성"
+      ],
+      "relatedKeywords": ["AWR", "AWR_PDB_AUTOFLUSH_ENABLED"],
+      "sourceSection": "s03"
+    },
+    "AWR_PDB_AUTOFLUSH_ENABLED": {
+      "definition": "PDB 레벨에서 독립적인 AWR 스냅샷 자동 수집을 활성화하는 파라미터이다. Oracle 26ai에서 기본값이 TRUE이다.",
+      "keyPoints": [
+        "TRUE: PDB별 독립적인 AWR 스냅샷 수집 및 ADDM 분석 가능",
+        "Oracle 21c 이하에서는 기본 FALSE이므로 명시적 활성화 필요",
+        "PDB별 SYSAUX 공간 사용량 증가에 주의"
+      ],
+      "relatedKeywords": ["PDB 레벨 ADDM", "AWR"],
+      "sourceSection": "s04"
+    },
+    "PDB 레벨 ADDM": {
+      "definition": "멀티테넌트 환경에서 PDB별 독립적인 ADDM 분석을 수행하는 기능으로, PDB 로컬 AWR 데이터를 기반으로 해당 PDB의 성능만 분석한다.",
+      "keyPoints": [
+        "Oracle 26ai에서 AWR_PDB_AUTOFLUSH_ENABLED=TRUE 기본이므로 자동 활성화",
+        "CDB 공유 자원(SGA, CPU) 분석은 제한적이며 PDB 변경 가능 항목만 권고",
+        "CDB ADDM은 전체 인스턴스, PDB ADDM은 해당 PDB 워크로드만 분석",
+        "PDB별 SYSAUX 공간 사용량 증가에 주의 필요"
+      ],
+      "relatedKeywords": ["AWR_PDB_AUTOFLUSH_ENABLED", "ADDM"],
+      "sourceSection": "s04"
+    },
+    "DBTIME_THRESHOLD": {
+      "definition": "ADDM이 Finding으로 보고할 최소 DB Time 비율(%) 임계값으로, 기본값은 1%이다.",
+      "keyPoints": [
+        "DB Time의 1% 미만을 차지하는 문제는 기본적으로 보고하지 않음",
+        "DBMS_ADVISOR.SET_DEFAULT_TASK_PARAMETER로 변경 가능",
+        "값을 낮추면 더 많은 Finding이 보고되지만 중요도가 낮은 항목 증가"
+      ],
+      "relatedKeywords": ["Finding", "Impact", "ADDM"],
+      "sourceSection": "s03"
+    },
+    "Real-Time ADDM": {
+      "definition": "AWR 스냅샷 없이 현재 SGA 메모리의 성능 데이터를 직접 분석하는 ADDM 기능으로, 긴급 성능 문제나 DB Hang 상태에서도 진단이 가능하다.",
+      "keyPoints": [
+        "데이터 소스가 SGA 메모리이므로 AWR 스냅샷이 없어도 분석 가능",
+        "현재 시점의 성능 문제를 즉시 진단하는 용도",
+        "Enterprise Manager 또는 DBMS_ADDM으로 호출",
+        "Oracle 26ai에서 DB Hang 상태에서의 진단 기능이 확장됨"
+      ],
+      "relatedKeywords": ["ADDM", "Performance Hub"],
+      "sourceSection": "s06"
+    },
+    "DBA_ADVISOR_TASKS": {
+      "definition": "모든 어드바이저 태스크(ADDM 포함)의 목록, 상태, 생성/수정 시간 등을 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "advisor_name='ADDM'으로 필터링하여 ADDM 태스크만 조회",
+        "STATUS: INITIAL, EXECUTING, COMPLETED, INTERRUPTED, ERROR",
+        "자동 ADDM 태스크와 수동 생성 태스크 모두 포함"
+      ],
+      "relatedKeywords": ["DBA_ADVISOR_FINDINGS", "DBA_ADVISOR_RECOMMENDATIONS"],
+      "sourceSection": "s01"
+    },
+    "DBA_ADVISOR_FINDINGS": {
+      "definition": "어드바이저(ADDM 포함)가 식별한 성능 문제(Finding)의 유형, 영향도, 메시지를 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "TYPE: PROBLEM(근본 원인), SYMPTOM(증상), INFORMATION(정보)",
+        "IMPACT 컬럼으로 각 Finding의 영향도(DB Time 기준) 확인",
+        "MESSAGE 컬럼에 문제에 대한 설명이 포함"
+      ],
+      "relatedKeywords": ["Finding", "DBA_ADVISOR_RECOMMENDATIONS"],
+      "sourceSection": "s02"
+    },
+    "DBA_ADVISOR_RECOMMENDATIONS": {
+      "definition": "어드바이저(ADDM 포함)가 생성한 권장 사항의 목록과 예상 효과(Benefit)를 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "BENEFIT 컬럼으로 권고 적용 시 예상 DB Time 절약량 확인",
+        "DBA_ADVISOR_ACTIONS와 조인하여 구체적 실행 조치 확인",
+        "FINDING_ID로 관련 Finding과 매핑"
+      ],
+      "relatedKeywords": ["Recommendation", "DBA_ADVISOR_FINDINGS", "DBA_ADVISOR_ACTIONS"],
+      "sourceSection": "s02"
+    },
+    "DBA_ADVISOR_ACTIONS": {
+      "definition": "어드바이저 권장 사항의 구체적 실행 조치(Action)를 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "COMMAND 컬럼에 실행할 명령(ALTER SYSTEM, CREATE INDEX 등) 표시",
+        "ATTR1~ATTR6 컬럼에 명령 실행에 필요한 세부 속성 포함",
+        "MESSAGE 컬럼에 조치에 대한 설명"
+      ],
+      "relatedKeywords": ["Action", "DBA_ADVISOR_RECOMMENDATIONS"],
+      "sourceSection": "s02"
+    },
+    "DBA_ADVISOR_RATIONALE": {
+      "definition": "어드바이저 권장 사항의 근거(Rationale)를 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "MESSAGE 컬럼에 해당 권장 사항을 제안하는 이유가 설명됨",
+        "DBA가 권장 사항 적용 여부를 판단하는 데 도움되는 분석 배경 정보",
+        "REC_ID로 관련 Recommendation과 매핑"
+      ],
+      "relatedKeywords": ["Rationale", "DBA_ADVISOR_RECOMMENDATIONS"],
+      "sourceSection": "s02"
+    },
+    "DBA_HIST_SNAPSHOT": {
+      "definition": "AWR에 수집된 스냅샷의 목록과 메타데이터를 조회하는 딕셔너리 뷰로, ADDM 수동 분석 시 스냅샷 ID 확인에 사용된다.",
+      "keyPoints": [
+        "SNAP_ID, BEGIN_INTERVAL_TIME, END_INTERVAL_TIME이 핵심 컬럼",
+        "수동 ADDM 분석 시 START_SNAPSHOT, END_SNAPSHOT 파라미터 값으로 사용",
+        "보존 기간이 지난 스냅샷은 자동 퍼지되어 분석 불가"
+      ],
+      "relatedKeywords": ["AWR", "ADDM"],
+      "sourceSection": "s03"
+    },
+    "Top-Down Analysis": {
+      "definition": "전체 DB Time에서 시작하여 점점 세부적인 원인으로 좁혀가는 ADDM의 분석 방법론이다. Oracle 권장 성능 튜닝 방법론과도 일치한다.",
+      "keyPoints": [
+        "DB Time → CPU/Wait 분해 → Wait Class 분해 → 개별 대기 이벤트 → SQL → 세그먼트 순",
+        "Oracle 권장 튜닝 우선순위: 애플리케이션/SQL > 인스턴스 > OS/하드웨어와 일치",
+        "보텀업(Bottom-Up) 접근보다 비용 대비 효과가 높음"
+      ],
+      "relatedKeywords": ["DB Time Decomposition", "Top-Down Tuning Methodology", "ADDM"],
+      "sourceSection": "s02"
+    },
+    "Root Cause Analysis": {
+      "definition": "ADDM이 성능 문제의 증상(Symptom)이 아닌 근본 원인(Root Cause)까지 추적하는 분석 방식이다.",
+      "keyPoints": [
+        "Finding 유형 중 Problem이 근본 원인, Symptom은 다른 Problem의 결과",
+        "DBA는 Symptom이 아닌 Problem에 집중하여 근본적 해결을 해야 함",
+        "ADDM의 핵심 설계 철학으로, 불필요한 조치를 방지"
+      ],
+      "relatedKeywords": ["Finding", "Top-Down Analysis"],
+      "sourceSection": "s02"
+    },
+    "DB Time Decomposition": {
+      "definition": "ADDM의 핵심 분석 방법으로, 전체 DB Time을 CPU Time, User I/O, Concurrency, Application, Commit, Network 등의 구성요소로 계층적으로 분해하는 것이다.",
+      "keyPoints": [
+        "1차 분해: CPU Time vs Wait Time",
+        "2차 분해: Wait Time을 Wait Class별(User I/O, Concurrency 등)로 분류",
+        "3차 분해: 각 Wait Class 내 개별 대기 이벤트 식별",
+        "가장 큰 비중을 차지하는 구성요소가 최우선 튜닝 대상"
+      ],
+      "relatedKeywords": ["DB Time", "Top-Down Analysis", "ADDM"],
+      "sourceSection": "s02"
+    },
+    "Performance Hub": {
+      "definition": "Enterprise Manager에서 DB Time 그래프를 기반으로 ADDM 결과를 시각적으로 조회하고 드릴다운 분석할 수 있는 인터페이스이다.",
+      "keyPoints": [
+        "DB Time 그래프에서 특정 시간대 클릭으로 ADDM 결과 표시",
+        "Finding → Recommendation → Action 순으로 드릴다운 분석",
+        "과거 ADDM 결과와 비교하여 트렌드 파악 가능"
+      ],
+      "relatedKeywords": ["ADDM", "Real-Time ADDM"],
+      "sourceSection": "s05"
+    },
+    "Top-Down Tuning Methodology": {
+      "definition": "Oracle이 권장하는 성능 튜닝 접근 방법론으로, 애플리케이션/SQL 튜닝(최우선) → 인스턴스 튜닝 → OS/하드웨어 튜닝 순으로 진행한다.",
+      "keyPoints": [
+        "대부분의 성능 문제는 비효율적 SQL이나 부적절한 설계에서 기인",
+        "하드웨어 추가는 마지막 수단이며 근본 SQL 문제를 해결하지 않으면 효과 제한",
+        "ADDM의 하향식 DB Time 분해 분석이 이 방법론과 자연스럽게 일치",
+        "보텀업(Bottom-Up) 접근은 Oracle이 비권장"
+      ],
+      "relatedKeywords": ["Application Tuning", "Instance Tuning", "OS Hardware Tuning", "Top-Down Analysis"],
+      "sourceSection": "s07"
+    },
+    "Application Tuning": {
+      "definition": "Oracle 권장 성능 튜닝 방법론의 최우선 단계로, SQL 최적화, 인덱스 전략, 실행 계획 관리, 바인드 변수 사용 등을 포함한다.",
+      "keyPoints": [
+        "수십~수백 배 성능 개선이 가능하여 가장 높은 효과",
+        "SQL Tuning Advisor, SQL Monitor, SQL Access Advisor 등 도구 활용",
+        "ADDM의 Top SQL 관련 Finding이 이 단계에 해당"
+      ],
+      "relatedKeywords": ["Top-Down Tuning Methodology"],
+      "sourceSection": "s07"
+    },
+    "Instance Tuning": {
+      "definition": "Oracle 권장 성능 튜닝 방법론의 2단계로, SGA/PGA 메모리 구성, 초기화 파라미터 조정, I/O 분산 등을 포함한다.",
+      "keyPoints": [
+        "중간 수준 효과(수 배~수십 퍼센트 개선)",
+        "Memory Advisor, ADDM 권고 활용",
+        "ADDM의 SGA/PGA 크기 조정 권고가 이 단계에 해당"
+      ],
+      "relatedKeywords": ["Top-Down Tuning Methodology"],
+      "sourceSection": "s07"
+    },
+    "OS Hardware Tuning": {
+      "definition": "Oracle 권장 성능 튜닝 방법론의 마지막 단계로, CPU 추가, 메모리 확장, 스토리지 업그레이드 등을 포함한다.",
+      "keyPoints": [
+        "제한적 효과이며 근본적 병목 해소가 어려울 수 있음",
+        "SQL/설계 문제를 해결하지 않으면 하드웨어 증설 효과가 제한적",
+        "ADDM의 CPU 추가/I/O 대역폭 증가 권고가 이 단계에 해당"
+      ],
+      "relatedKeywords": ["Top-Down Tuning Methodology"],
+      "sourceSection": "s07"
+    },
+    "Performance Planning": {
+      "definition": "성능 모니터링을 통해 병목 지점 식별, 기준선 설정, 용량 계획, 변경 영향 평가를 수행하는 DBA의 필수 활동이다.",
+      "keyPoints": [
+        "네트워크, 하드웨어/OS, 데이터베이스 구성, 애플리케이션 설계를 종합적으로 고려",
+        "AWR 베이스라인을 활용하여 정상 상태의 성능 기준선 설정",
+        "Capacity Planning: 향후 리소스 요구량 예측 및 확장 계획 수립"
+      ],
+      "relatedKeywords": ["Capacity Planning", "Baseline", "Top-Down Tuning Methodology"],
+      "sourceSection": "s07"
+    },
+    "V$SYS_TIME_MODEL": {
+      "definition": "DB Time, CPU Time 등 시간 모델 통계를 제공하는 동적 성능 뷰로, ADDM의 DB Time 분석의 기반 데이터를 직접 조회할 수 있다.",
+      "keyPoints": [
+        "STAT_NAME='DB time'으로 총 DB Time 조회",
+        "STAT_NAME='DB CPU'로 CPU에서 소비한 시간 조회",
+        "인스턴스 재시작 시 초기화되므로 AWR 스냅샷으로 이력 보존 필요"
+      ],
+      "relatedKeywords": ["DB Time", "V$SYSTEM_EVENT"],
+      "sourceSection": "s07"
+    },
+    "V$SYSTEM_EVENT": {
+      "definition": "시스템 전체의 대기 이벤트 누적 통계를 제공하는 뷰로, ADDM의 Wait Time 분석과 AWR 보고서의 Top Wait Events의 데이터 소스이다.",
+      "keyPoints": [
+        "WAIT_CLASS <> 'Idle'로 필터링하여 유의미한 대기만 분석",
+        "TIME_WAITED 기준으로 정렬하면 최대 병목 이벤트 식별",
+        "ADDM이 이 데이터를 기반으로 Wait 관련 Finding을 생성"
+      ],
+      "relatedKeywords": ["DB Time", "V$SYS_TIME_MODEL"],
+      "sourceSection": "s07"
+    },
+    "Capacity Planning": {
+      "definition": "성능 모니터링 데이터를 기반으로 향후 리소스 요구량을 예측하고 확장 계획을 수립하는 DBA 활동이다.",
+      "keyPoints": [
+        "AWR 이력 데이터의 트렌드 분석을 통해 성장률 예측",
+        "CPU, 메모리, 스토리지, 네트워크 각 자원별 계획 수립",
+        "베이스라인 비교를 통해 워크로드 증가 패턴 파악"
+      ],
+      "relatedKeywords": ["Performance Planning", "Baseline"],
+      "sourceSection": "s07"
+    },
+    "Baseline": {
+      "definition": "정상 성능 상태의 AWR 스냅샷 범위를 참조점으로 설정하여, 문제 발생 시 비교 분석의 기준으로 활용하는 것이다.",
+      "keyPoints": [
+        "ADDM 결과 비교의 기준점으로 활용",
+        "SYSTEM_MOVING_WINDOW(기본 8일)이 자동 제공",
+        "적응형 임계값(Adaptive Threshold) 설정의 기반",
+        "DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE으로 고정 베이스라인 생성"
+      ],
+      "relatedKeywords": ["AWR", "Performance Planning", "Capacity Planning"],
+      "sourceSection": "s07"
+    }
+  }
+}

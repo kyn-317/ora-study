@@ -1,0 +1,331 @@
+{
+  "studyId": "02_04",
+  "chapterId": "02",
+  "title": "파라미터 및 복제 관리 (PDB Parameters & Cloning)",
+  "keywords": {
+    "ISPDB_MODIFIABLE": {
+      "definition": "초기화 파라미터가 PDB 수준에서 독립적으로 설정 가능한지를 나타내는 V$PARAMETER의 속성(TRUE/FALSE)이다.",
+      "keyPoints": [
+        "TRUE인 파라미터만 PDB에서 ALTER SYSTEM SET으로 변경 가능",
+        "FALSE인 파라미터는 CDB$ROOT에서만 설정 가능하며 모든 PDB에 동일 적용",
+        "V$PARAMETER의 ISPDB_MODIFIABLE 컬럼에서 확인",
+        "예: OPEN_CURSORS(TRUE), SGA_TARGET(FALSE), DB_BLOCK_SIZE(FALSE)"
+      ],
+      "relatedKeywords": ["V$PARAMETER", "ALTER SYSTEM SET", "CONTAINER=CURRENT"],
+      "sourceSection": "s02"
+    },
+    "V$PARAMETER": {
+      "definition": "현재 세션의 초기화 파라미터 값을 조회하는 동적 성능 뷰로, ISPDB_MODIFIABLE 컬럼을 통해 PDB 수준 변경 가능 여부를 확인한다.",
+      "keyPoints": [
+        "ISPDB_MODIFIABLE 컬럼: TRUE=PDB 수준 설정 가능, FALSE=CDB 전용",
+        "PDB에 접속하여 조회 시 해당 PDB에 적용된 값이 표시",
+        "V$SYSTEM_PARAMETER는 인스턴스 전체 수준의 파라미터 값을 조회"
+      ],
+      "relatedKeywords": ["ISPDB_MODIFIABLE", "V$SYSTEM_PARAMETER", "ALTER SYSTEM SET"],
+      "sourceSection": "s02"
+    },
+    "V$SYSTEM_PARAMETER": {
+      "definition": "인스턴스 전체(CDB 수준)의 초기화 파라미터 값을 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "V$PARAMETER는 세션/PDB 수준, V$SYSTEM_PARAMETER는 인스턴스(CDB) 수준",
+        "CDB$ROOT에서 조회 시 인스턴스 전체에 적용된 기본값 확인",
+        "PDB에서 오버라이드한 값은 반영되지 않음"
+      ],
+      "relatedKeywords": ["V$PARAMETER", "ISPDB_MODIFIABLE"],
+      "sourceSection": "s02"
+    },
+    "ALTER SYSTEM SET": {
+      "definition": "초기화 파라미터의 값을 동적으로 변경하는 SQL 명령으로, SCOPE와 CONTAINER 옵션으로 적용 범위를 제어한다.",
+      "keyPoints": [
+        "SCOPE=MEMORY: 현재 인스턴스에만 적용 (재시작 시 초기화)",
+        "SCOPE=SPFILE: SPFILE에만 저장 (재시작 후 적용)",
+        "SCOPE=BOTH: 메모리 + SPFILE 동시 적용 (기본값)",
+        "PDB에서 ISPDB_MODIFIABLE=FALSE인 파라미터를 변경하면 오류 발생"
+      ],
+      "relatedKeywords": ["SCOPE", "CONTAINER=CURRENT", "CONTAINER=ALL", "ALTER SYSTEM RESET"],
+      "sourceSection": "s02"
+    },
+    "CONTAINER=CURRENT": {
+      "definition": "ALTER SYSTEM SET 실행 시 현재 접속한 컨테이너(PDB 또는 CDB$ROOT)에만 파라미터 변경을 적용하는 옵션이다.",
+      "keyPoints": [
+        "PDB에 접속한 상태에서 기본값 — 해당 PDB에만 적용",
+        "CDB$ROOT에서 CONTAINER=CURRENT는 CDB 기본값 변경 (PDB에는 미적용)",
+        "PDB별 독립적인 파라미터 설정의 핵심 옵션"
+      ],
+      "relatedKeywords": ["CONTAINER=ALL", "ALTER SYSTEM SET", "ISPDB_MODIFIABLE"],
+      "sourceSection": "s02"
+    },
+    "CONTAINER=ALL": {
+      "definition": "ALTER SYSTEM SET 실행 시 CDB$ROOT와 모든 PDB에 파라미터 변경을 동시에 적용하는 옵션이다.",
+      "keyPoints": [
+        "CDB$ROOT에서만 사용 가능 — PDB에서 실행 시 오류",
+        "모든 PDB에 동일한 값을 일괄 적용할 때 사용",
+        "개별 PDB에서 CONTAINER=CURRENT로 오버라이드한 값이 있으면 해당 PDB는 덮어쓰기됨"
+      ],
+      "relatedKeywords": ["CONTAINER=CURRENT", "ALTER SYSTEM SET"],
+      "sourceSection": "s02"
+    },
+    "PDB Lockdown Profile": {
+      "definition": "멀티테넌트 환경에서 PDB의 특정 기능 사용을 제한하여 보안을 강화하는 메커니즘으로, CDB 관리자가 PDB 관리자의 권한을 세분화하여 통제한다.",
+      "keyPoints": [
+        "CREATE LOCKDOWN PROFILE profile_name으로 생성",
+        "DISABLE STATEMENT/FEATURE/OPTION으로 기능 제한 규칙 정의",
+        "ALTER PLUGGABLE DATABASE SET PDB_LOCKDOWN=profile_name으로 PDB에 적용",
+        "예: ALTER DATABASE LINK 비활성화, UTL_FILE 패키지 사용 제한 등"
+      ],
+      "relatedKeywords": ["PDB_LOCKDOWN", "DBA_LOCKDOWN_PROFILES"],
+      "sourceSection": "s03"
+    },
+    "PDB_LOCKDOWN": {
+      "definition": "PDB에 적용할 Lockdown Profile을 지정하는 초기화 파라미터이다.",
+      "keyPoints": [
+        "ALTER SYSTEM SET PDB_LOCKDOWN='profile_name' SCOPE=BOTH로 설정",
+        "CDB$ROOT에서 설정 시 모든 PDB에 기본 적용, PDB에서 개별 설정도 가능",
+        "빈 값('')으로 설정 시 Lockdown Profile 해제"
+      ],
+      "relatedKeywords": ["PDB Lockdown Profile", "DBA_LOCKDOWN_PROFILES"],
+      "sourceSection": "s03"
+    },
+    "DBA_LOCKDOWN_PROFILES": {
+      "definition": "생성된 Lockdown Profile의 규칙(제한 항목)을 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "PROFILE_NAME, RULE_TYPE(STATEMENT/FEATURE/OPTION), RULE, STATUS 등 컬럼",
+        "각 프로파일에 설정된 제한 규칙의 상세 내용을 확인",
+        "CDB$ROOT에서 조회하여 전체 프로파일 목록 확인 가능"
+      ],
+      "relatedKeywords": ["PDB Lockdown Profile", "PDB_LOCKDOWN"],
+      "sourceSection": "s03"
+    },
+    "Local Clone": {
+      "definition": "동일 CDB 내에서 기존 PDB를 복제하여 새 PDB를 생성하는 클론 방법이다.",
+      "keyPoints": [
+        "구문: CREATE PLUGGABLE DATABASE new_pdb FROM source_pdb",
+        "소스 PDB가 READ ONLY 상태여야 함 (Hot Clone 사용 시 READ WRITE 가능)",
+        "데이터 파일이 물리적으로 복사됨 — 크기에 비례한 시간 소요",
+        "FILE_NAME_CONVERT로 대상 파일 경로 지정 필수"
+      ],
+      "relatedKeywords": ["Remote Clone", "Hot Clone", "PDB Clone"],
+      "sourceSection": "s04"
+    },
+    "Remote Clone": {
+      "definition": "DB Link를 이용하여 다른 CDB에 있는 PDB를 현재 CDB로 복제하는 클론 방법이다.",
+      "keyPoints": [
+        "구문: CREATE PLUGGABLE DATABASE new_pdb FROM source_pdb@dblink",
+        "소스와 대상 CDB 간 DB Link가 사전 구성되어 있어야 함",
+        "소스 PDB가 OPEN READ ONLY 상태여야 함 (또는 Hot Clone으로 READ WRITE)",
+        "네트워크를 통해 데이터 전송되므로 대역폭에 따라 시간 변동"
+      ],
+      "relatedKeywords": ["Local Clone", "DB Link", "Hot Clone"],
+      "sourceSection": "s05"
+    },
+    "Hot Clone": {
+      "definition": "소스 PDB가 READ WRITE(운영 중) 상태에서 서비스 중단 없이 클론을 수행하는 방법이다.",
+      "keyPoints": [
+        "Local Undo Mode와 ARCHIVELOG 모드가 필수 전제 조건",
+        "소스 PDB가 OPEN READ WRITE 상태에서 복제 가능 — 무중단 운영",
+        "클론 중 발생하는 변경은 Redo 적용으로 동기화",
+        "Local/Remote Clone 모두에서 Hot Clone 사용 가능"
+      ],
+      "relatedKeywords": ["Local Clone", "Remote Clone", "Local UNDO", "ARCHIVELOG"],
+      "sourceSection": "s04"
+    },
+    "DB Link": {
+      "definition": "서로 다른 데이터베이스 간의 원격 접속을 가능하게 하는 데이터베이스 객체로, Remote Clone 시 소스 PDB 접근에 사용된다.",
+      "keyPoints": [
+        "CREATE DATABASE LINK 명령으로 생성",
+        "Remote Clone 시 소스 CDB의 Common User(SYSOPER/SYSDBA)로 접속",
+        "보안 고려: Lockdown Profile로 DB Link 생성을 제한할 수 있음"
+      ],
+      "relatedKeywords": ["Remote Clone", "PDB Lockdown Profile"],
+      "sourceSection": "s05"
+    },
+    "Refreshable Clone PDB": {
+      "definition": "소스 PDB의 변경 사항을 주기적으로 동기화할 수 있는 특수 클론 PDB로, 항상 READ ONLY 상태로 유지된다.",
+      "keyPoints": [
+        "구문: CREATE PLUGGABLE DATABASE ... FROM ... REFRESH MODE EVERY n MINUTES",
+        "REFRESH MODE MANUAL: 수동으로 ALTER PLUGGABLE DATABASE ... REFRESH 실행",
+        "REFRESH MODE EVERY n MINUTES: 지정 간격으로 자동 동기화",
+        "SWITCHOVER 명령으로 소스와 클론의 역할을 전환 가능 (DR 시나리오)"
+      ],
+      "relatedKeywords": ["REFRESH MODE", "SWITCHOVER", "Remote Clone"],
+      "sourceSection": "s06"
+    },
+    "REFRESH MODE": {
+      "definition": "Refreshable Clone PDB의 동기화 방식을 지정하는 옵션으로, MANUAL 또는 EVERY n MINUTES를 선택한다.",
+      "keyPoints": [
+        "MANUAL: 수동으로 REFRESH 명령 실행 시에만 동기화",
+        "EVERY n MINUTES: 지정된 주기(분 단위)로 자동 동기화",
+        "NONE: 동기화 비활성화 (일반 PDB로 전환 시 사용)",
+        "ALTER PLUGGABLE DATABASE ... REFRESH MODE로 변경 가능"
+      ],
+      "relatedKeywords": ["Refreshable Clone PDB", "SWITCHOVER"],
+      "sourceSection": "s06"
+    },
+    "SWITCHOVER": {
+      "definition": "Refreshable Clone PDB와 소스 PDB의 역할을 전환하는 명령으로, 재해 복구(DR) 전환에 사용된다.",
+      "keyPoints": [
+        "ALTER PLUGGABLE DATABASE pdb_name REFRESH MODE SWITCHOVER 구문 사용",
+        "소스→클론, 클론→소스로 역할 전환 — 계획된 DR 전환에 적합",
+        "전환 후 기존 소스가 Refreshable Clone이 되고, 기존 클론이 READ WRITE 소스가 됨",
+        "전환 시 짧은 서비스 중단 발생"
+      ],
+      "relatedKeywords": ["Refreshable Clone PDB", "REFRESH MODE"],
+      "sourceSection": "s06"
+    },
+    "Snapshot Copy PDB": {
+      "definition": "스토리지 레벨의 스냅샷 기능(Copy-on-Write)을 활용하여 데이터 파일 복사 없이 즉시 PDB를 복제하는 방법이다.",
+      "keyPoints": [
+        "구문: CREATE PLUGGABLE DATABASE ... FROM ... SNAPSHOT COPY",
+        "데이터 파일의 물리적 복사 없이 즉시 생성 — 매우 빠름",
+        "Copy-on-Write 방식: 변경 발생 시에만 해당 블록을 복사",
+        "스토리지가 스냅샷 기능을 지원해야 함 (ACFS, Direct NFS, ZFS 등)"
+      ],
+      "relatedKeywords": ["Copy-on-Write", "PDB Clone"],
+      "sourceSection": "s07"
+    },
+    "Copy-on-Write": {
+      "definition": "Snapshot Copy PDB에서 사용하는 기술로, 원본 데이터 블록은 공유하고 변경이 발생한 블록만 실제로 복사하는 방식이다.",
+      "keyPoints": [
+        "초기 스냅샷 생성 시 데이터 복사 없음 — 즉시 완료",
+        "변경(Write) 발생 시에만 해당 블록을 별도 공간에 복사(Copy)",
+        "스토리지 공간과 생성 시간을 대폭 절약"
+      ],
+      "relatedKeywords": ["Snapshot Copy PDB"],
+      "sourceSection": "s07"
+    },
+    "DBCA": {
+      "definition": "Database Configuration Assistant. GUI 및 Silent 모드를 통해 CDB/PDB 생성, 클론, 삭제 등을 수행하는 Oracle 제공 도구이다.",
+      "keyPoints": [
+        "GUI 모드: 시각적 인터페이스로 PDB 클론 작업 수행",
+        "Silent 모드: 명령줄(-silent)로 자동화 가능",
+        "PDB 클론, 생성, 삭제, Unplug/Plug 등 PDB 전체 라이프사이클 관리",
+        "DBCA에서는 Refreshable Clone, Snapshot Copy 등 고급 옵션도 지원"
+      ],
+      "relatedKeywords": ["DBCA Silent Mode", "PDB Clone"],
+      "sourceSection": "s08"
+    },
+    "CDB_PDBS": {
+      "definition": "CDB 내 모든 PDB의 딕셔너리 메타데이터를 조회하는 뷰로, STATUS, CON_ID 등의 정보를 제공한다.",
+      "keyPoints": [
+        "STATUS: NORMAL, UNPLUGGED, NEEDS UPGRADE 등 PDB 상태 확인",
+        "CDB$ROOT에서 조회 시 모든 PDB 정보를 CON_ID별로 확인",
+        "DBA_PDBS와 동일하지만 CDB_ 계열로 CON_ID 컬럼이 추가"
+      ],
+      "relatedKeywords": ["DBA_PDB_SAVED_STATES", "V$PDBS"],
+      "sourceSection": "s08"
+    },
+    "DBA_PDB_SAVED_STATES": {
+      "definition": "SAVE STATE로 저장된 PDB의 오픈 모드 상태를 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "CON_NAME, INSTANCE_NAME, STATE 컬럼으로 저장된 상태 확인",
+        "PDB 클론 후 OPEN → SAVE STATE 수행 여부를 확인할 때 사용",
+        "DISCARD STATE 실행 시 해당 행이 삭제됨"
+      ],
+      "relatedKeywords": ["SAVE STATE", "V$PDBS"],
+      "sourceSection": "s08"
+    },
+    "FILE_NAME_CONVERT": {
+      "definition": "PDB 클론 또는 Plug In 시 소스 데이터 파일의 경로를 대상 경로로 변환하는 절이다.",
+      "keyPoints": [
+        "구문: FILE_NAME_CONVERT = ('소스경로', '대상경로')",
+        "Clone 시 소스 PDB와 대상 PDB의 파일 경로가 다를 경우 필수",
+        "OMF 환경에서는 CREATE_FILE_DEST로 대체 가능"
+      ],
+      "relatedKeywords": ["CREATE PLUGGABLE DATABASE", "DB_CREATE_FILE_DEST"],
+      "sourceSection": "s04"
+    },
+    "CREATE PLUGGABLE DATABASE": {
+      "definition": "PDB를 생성하는 DDL 명령으로, Clone(FROM), Plug In(USING), Seed 등 다양한 소스에서 PDB를 만들 수 있다.",
+      "keyPoints": [
+        "Clone: CREATE PLUGGABLE DATABASE new FROM source[@dblink]",
+        "Plug In: CREATE PLUGGABLE DATABASE new USING 'path.xml'",
+        "SNAPSHOT COPY: 스냅샷 기반 즉시 클론",
+        "REFRESH MODE: Refreshable Clone PDB 생성"
+      ],
+      "relatedKeywords": ["PDB Clone", "FILE_NAME_CONVERT", "Refreshable Clone PDB"],
+      "sourceSection": "s04"
+    },
+    "ALTER SYSTEM RESET": {
+      "definition": "PDB에서 설정한 초기화 파라미터를 초기화하여 CDB 수준의 기본값으로 되돌리는 명령이다.",
+      "keyPoints": [
+        "구문: ALTER SYSTEM RESET parameter_name SCOPE=BOTH",
+        "PDB에서 오버라이드한 값을 삭제하고 CDB$ROOT의 기본값을 상속",
+        "SCOPE 옵션(MEMORY/SPFILE/BOTH)으로 적용 범위 지정"
+      ],
+      "relatedKeywords": ["ALTER SYSTEM SET", "CONTAINER=CURRENT", "ISPDB_MODIFIABLE"],
+      "sourceSection": "s02"
+    },
+    "SCOPE": {
+      "definition": "ALTER SYSTEM SET/RESET 실행 시 파라미터 변경의 적용 범위를 지정하는 옵션이다.",
+      "keyPoints": [
+        "MEMORY: 현재 실행 중인 인스턴스에만 적용 (재시작 시 초기화)",
+        "SPFILE: SPFILE에만 기록 (재시작 후 적용)",
+        "BOTH: MEMORY + SPFILE 동시 적용 (기본값)",
+        "정적 파라미터는 SCOPE=SPFILE만 가능"
+      ],
+      "relatedKeywords": ["ALTER SYSTEM SET", "ALTER SYSTEM RESET"],
+      "sourceSection": "s02"
+    },
+    "ARCHIVELOG": {
+      "definition": "데이터베이스의 Redo Log 아카이빙 모드로, 채워진 Online Redo Log를 아카이브하여 보존하는 설정이다.",
+      "keyPoints": [
+        "Hot Clone의 필수 전제 조건 — ARCHIVELOG 모드여야 Hot Clone 가능",
+        "RMAN 온라인 백업, 미디어 복구의 전제 조건이기도 함",
+        "ALTER DATABASE ARCHIVELOG 명령으로 활성화 (MOUNT 상태에서)"
+      ],
+      "relatedKeywords": ["Hot Clone", "Local UNDO"],
+      "sourceSection": "s04"
+    },
+    "Local UNDO": {
+      "definition": "각 PDB가 자체 UNDO 테이블스페이스를 보유하는 모드로, Hot Clone, PDB Flashback 등의 전제 조건이다.",
+      "keyPoints": [
+        "ALTER DATABASE LOCAL UNDO ON으로 활성화 (STARTUP UPGRADE 상태에서)",
+        "Shared Undo Mode와 대비: Shared는 CDB 전체가 UNDO 테이블스페이스를 공유",
+        "Local Undo 활성화 시 각 PDB에 자체 UNDO 테이블스페이스 자동 생성",
+        "Hot Clone, Refreshable Clone의 필수 요건"
+      ],
+      "relatedKeywords": ["Hot Clone", "ARCHIVELOG", "TEMP_UNDO_ENABLED"],
+      "sourceSection": "s04"
+    },
+    "TEMP_UNDO_ENABLED": {
+      "definition": "임시 테이블에 대한 UNDO 데이터를 임시 테이블스페이스에 저장하도록 하는 파라미터이다.",
+      "keyPoints": [
+        "TRUE 설정 시 Global Temporary Table의 UNDO가 Temp Tablespace에 저장",
+        "UNDO 테이블스페이스 공간 절약 및 Redo 생성량 감소",
+        "PDB 수준에서 설정 가능 (ISPDB_MODIFIABLE=TRUE)"
+      ],
+      "relatedKeywords": ["Local UNDO", "ISPDB_MODIFIABLE"],
+      "sourceSection": "s02"
+    },
+    "Common User": {
+      "definition": "CDB$ROOT에서 생성되어 모든 컨테이너에 공통으로 존재하는 사용자로, C## 접두사가 필수이다.",
+      "keyPoints": [
+        "Remote Clone 시 DB Link의 접속 사용자로 Common User 사용",
+        "CONTAINER=ALL로 모든 PDB에 동시 권한 부여 가능",
+        "PDB의 Local User와 구분 필요 — Local User는 특정 PDB에서만 존재"
+      ],
+      "relatedKeywords": ["Local User", "DB Link", "CONTAINER=ALL"],
+      "sourceSection": "s05"
+    },
+    "V$PDBS": {
+      "definition": "CDB 내 모든 PDB의 런타임 상태(오픈 모드, RESTRICTED 등)를 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "OPEN_MODE, RESTRICTED, CON_ID, NAME 등 PDB 상태 정보 제공",
+        "PDB 클론 후 상태 확인에 사용",
+        "CDB$ROOT에서 조회 시 모든 PDB 정보 확인 가능"
+      ],
+      "relatedKeywords": ["CDB_PDBS", "DBA_PDB_SAVED_STATES"],
+      "sourceSection": "s08"
+    },
+    "DBA_PDB_HISTORY": {
+      "definition": "PDB의 생성, 클론, Plug/Unplug 등 라이프사이클 이력을 기록하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "PDB의 생성 방법(Seed, Clone, Plug In), 소스 PDB 정보 등을 기록",
+        "OPERATION 컬럼: CREATE, CLONE, PLUG IN 등 수행된 작업 유형",
+        "PDB 이력 추적 및 감사(Audit)에 활용"
+      ],
+      "relatedKeywords": ["CDB_PDBS", "V$PDBS", "PDB Clone"],
+      "sourceSection": "s08"
+    }
+  }
+}

@@ -1,0 +1,283 @@
+{
+  "studyId": "05_04",
+  "chapterId": "05",
+  "title": "저장 공간 축소 및 최적화 (Space Reclamation and Storage Optimization)",
+  "keywords": {
+    "HWM (High Water Mark, 最高水位標)": {
+      "definition": "세그먼트 내에서 데이터가 기록된 적이 있는 가장 높은 위치(블록)를 나타내는 표식이다. Full Table Scan 시 HWM까지의 모든 블록을 읽으므로, 공간 최적화의 핵심 개념이다.",
+      "keyPoints": [
+        "DELETE는 행 데이터만 제거하고 HWM은 절대 자동 하향되지 않음 → Full Table Scan 성능 개선 없음",
+        "TRUNCATE는 HWM을 세그먼트 시작점으로 초기화 (DDL이므로 ROLLBACK 불가)",
+        "SHRINK SPACE는 데이터 재배치 후 HWM을 하향하는 유일한 온라인 방법",
+        "Direct-Path Insert(INSERT /*+ APPEND */)는 항상 HWM 위에 기록하여 빈 블록 미재사용",
+        "ASSM: Low HWM(모든 블록 포맷 완료)과 High HWM(포맷된 최고 블록) 두 가지 구분"
+      ],
+      "relatedKeywords": ["SHRINK SPACE", "TRUNCATE TABLE", "ALTER TABLE MOVE", "Low HWM"],
+      "sourceSection": "s02"
+    },
+    "Low HWM": {
+      "definition": "ASSM(Automatic Segment Space Management) 환경에서 Low HWM 이하의 모든 블록이 포맷 완료된 상태를 나타내는 표식이다. Low HWM과 High HWM 사이의 블록은 일부만 포맷된 혼합 영역이다.",
+      "keyPoints": [
+        "ASSM 전용 개념 (MSSM에서는 단일 HWM만 존재)",
+        "Full Table Scan 시 Low HWM까지는 모든 블록을 읽고, High HWM까지는 비트맵 확인 후 읽기",
+        "Low HWM 이하 = 모든 블록 포맷 완료, Low~High 사이 = 혼합, High 이상 = 미사용"
+      ],
+      "relatedKeywords": ["HWM (High Water Mark)", "ASSM"],
+      "sourceSection": "s02"
+    },
+    "SHRINK SPACE": {
+      "definition": "ASSM 환경에서 세그먼트 내 데이터를 하위 블록으로 재배치한 후 HWM을 하향하여 미사용 공간을 테이블스페이스에 반환하는 온라인 공간 회수 기법이다.",
+      "keyPoints": [
+        "전제조건: ROW MOVEMENT ENABLE 설정 필수 (행이 다른 블록으로 이동하므로)",
+        "ASSM 환경에서만 지원 (MSSM 미지원)",
+        "온라인 수행 가능 — DML 동시 수행 허용",
+        "ALTER TABLE ... SHRINK SPACE 구문으로 실행",
+        "인덱스도 자동으로 유지됨 (별도 REBUILD 불필요)"
+      ],
+      "relatedKeywords": ["HWM (High Water Mark)", "SHRINK SPACE COMPACT", "SHRINK SPACE CASCADE", "ROW MOVEMENT (行移動)"],
+      "sourceSection": "s03"
+    },
+    "SHRINK SPACE COMPACT": {
+      "definition": "세그먼트 내 데이터 재배치(Compaction)만 수행하고 HWM은 하향하지 않는 SHRINK의 부분 수행 옵션이다. 이후 SHRINK SPACE로 HWM을 하향할 수 있다.",
+      "keyPoints": [
+        "데이터 재배치만 수행 → HWM 미하향 → 공간 반환 안 됨",
+        "HWM 하향 시 짧은 테이블 잠금이 발생하므로, 사용량이 많은 시간에 COMPACT로 재배치만 수행 후 유지보수 시간에 SHRINK SPACE로 HWM 하향하는 2단계 전략 가능",
+        "ROW MOVEMENT ENABLE 전제조건은 동일"
+      ],
+      "relatedKeywords": ["SHRINK SPACE", "HWM (High Water Mark)"],
+      "sourceSection": "s03"
+    },
+    "SHRINK SPACE CASCADE": {
+      "definition": "테이블과 함께 해당 테이블에 종속된 인덱스, LOB 세그먼트 등도 함께 축소하는 SHRINK 옵션이다.",
+      "keyPoints": [
+        "ALTER TABLE ... SHRINK SPACE CASCADE 구문으로 실행",
+        "종속 세그먼트(인덱스, LOB 등)를 개별적으로 SHRINK할 필요 없음",
+        "테이블만 축소하면 인덱스 크기는 그대로일 수 있으므로 CASCADE 사용이 효율적"
+      ],
+      "relatedKeywords": ["SHRINK SPACE", "SHRINK SPACE COMPACT"],
+      "sourceSection": "s03"
+    },
+    "ROW MOVEMENT (行移動)": {
+      "definition": "테이블의 행이 다른 물리적 위치(블록)로 이동할 수 있도록 허용하는 테이블 속성이다. SHRINK SPACE 및 Flashback Table 등의 전제조건이다.",
+      "keyPoints": [
+        "ALTER TABLE ... ENABLE ROW MOVEMENT로 활성화",
+        "SHRINK SPACE 실행 전 반드시 활성화해야 함 (미활성 시 ORA-10636 오류)",
+        "ROW MOVEMENT 활성화 시 행의 ROWID가 변경될 수 있음",
+        "Flashback Table(FLASHBACK TABLE ... TO TIMESTAMP) 사용 시에도 필요"
+      ],
+      "relatedKeywords": ["SHRINK SPACE", "ROWID"],
+      "sourceSection": "s03"
+    },
+    "Row Migration (行移行)": {
+      "definition": "UPDATE로 행 크기가 증가하여 원래 블록의 남은 공간(PCTFREE 포함)에 들어가지 않을 때, 행 전체가 다른 블록으로 이동하는 현상이다. 원래 위치에 포인터가 남아 추가 I/O가 발생한다.",
+      "keyPoints": [
+        "원인: PCTFREE 부족 상태에서 UPDATE로 행 크기 증가",
+        "원래 ROWID는 유지되며, 원래 블록에 새 블록을 가리키는 포인터가 남음",
+        "V$SYSSTAT의 'table fetch continued row'로 빈도 모니터링",
+        "해결: SHRINK SPACE, ALTER TABLE MOVE, PCTFREE 적절히 설정 후 테이블 재구성"
+      ],
+      "relatedKeywords": ["Row Chaining (行連鎖)", "PCTFREE", "ANALYZE TABLE LIST CHAINED ROWS"],
+      "sourceSection": "s04"
+    },
+    "Row Chaining (行連鎖)": {
+      "definition": "행의 크기가 블록 크기보다 커서 처음부터 여러 블록에 걸쳐 저장되는 현상이다. 블록 크기 변경이나 테이블 재설계로만 해결 가능하다.",
+      "keyPoints": [
+        "행 크기 > 블록 크기일 때 발생 — PCTFREE 조정으로 해결 불가",
+        "Row Migration과 달리 블록 크기를 키우거나 테이블 재설계가 필요",
+        "V$SYSSTAT 'table fetch continued row', ANALYZE TABLE LIST CHAINED ROWS로 탐지",
+        "대용량 VARCHAR2/LOB 열이 많은 테이블에서 주로 발생"
+      ],
+      "relatedKeywords": ["Row Migration (行移行)", "DB_BLOCK_SIZE", "비표준 블록 사이즈"],
+      "sourceSection": "s04"
+    },
+    "PCTFREE": {
+      "definition": "데이터 블록 내에서 UPDATE 작업을 위해 예약하는 빈 공간의 비율(%)이다. 블록 사용률이 (100 - PCTFREE)%에 도달하면 INSERT가 불가능해진다.",
+      "keyPoints": [
+        "기본값: 10% — 블록의 90%까지 INSERT로 채운 후, 나머지 10%는 UPDATE 전용",
+        "UPDATE가 거의 없는 테이블: 0~5%로 공간 효율 극대화",
+        "UPDATE 빈번한 테이블: 20~40%로 Row Migration 방지",
+        "ASSM 환경에서는 PCTUSED 무시, PCTFREE만 유효"
+      ],
+      "relatedKeywords": ["Row Migration (行移行)", "ASSM"],
+      "sourceSection": "s04"
+    },
+    "ROW STORE COMPRESS BASIC": {
+      "definition": "Oracle Enterprise Edition에 기본 포함된 테이블 압축 기능으로, Direct-Path Insert 작업에서만 데이터를 압축한다. 블록 내 중복 값을 심볼 테이블로 대체하여 공간을 절약한다.",
+      "keyPoints": [
+        "Direct-Path Insert(INSERT /*+ APPEND */, CTAS, SQL*Loader Direct Path)에서만 압축 적용",
+        "일반 INSERT/UPDATE로 변경된 행은 비압축 상태로 저장 → 동일 테이블 내 압축/비압축 블록 혼재 가능",
+        "Enterprise Edition에 포함되어 별도 라이선스 불필요",
+        "기존 데이터 압축은 ALTER TABLE MOVE ROW STORE COMPRESS BASIC으로 수행",
+        "DBA_TABLES.COMPRESS_FOR = 'BASIC'으로 확인"
+      ],
+      "relatedKeywords": ["ROW STORE COMPRESS ADVANCED", "Direct-Path Insert", "DBMS_COMPRESSION"],
+      "sourceSection": "s05"
+    },
+    "ROW STORE COMPRESS ADVANCED": {
+      "definition": "모든 DML(INSERT, UPDATE, DELETE)에서 데이터를 압축 상태로 유지하는 고급 테이블 압축 기능이다. Advanced Compression Option 라이선스가 필요하다.",
+      "keyPoints": [
+        "블록이 일정 수준 채워지면 배치(Batch) 방식으로 자동 압축 수행",
+        "Basic Compression과 달리 일반 INSERT, UPDATE에도 압축 유지",
+        "OLTP 환경에 적합 (Advanced Compression Option 라이선스 필요)",
+        "압축률: 2~4배, CPU 오버헤드는 I/O 감소 효과로 상쇄 가능"
+      ],
+      "relatedKeywords": ["ROW STORE COMPRESS BASIC", "HCC (Hybrid Columnar Compression)"],
+      "sourceSection": "s05"
+    },
+    "HCC (Hybrid Columnar Compression)": {
+      "definition": "Compression Unit(CU) 단위로 여러 Oracle 블록을 묶어 열(Column) 기반으로 압축하는 고압축 기법이다. Oracle Exadata, ZFS Storage 등 특정 스토리지에서만 지원된다.",
+      "keyPoints": [
+        "Query Low/High, Archive Low/High 4가지 레벨 제공 (압축률: 6~50배)",
+        "Direct-Path Insert에서만 압축 적용 — 일반 DML 시 해당 CU가 비압축 전환 가능",
+        "Compression Unit(CU): 여러 블록을 묶어 열별로 데이터를 모아 중복 제거 극대화",
+        "Exadata, ZFS Storage Appliance 등 특정 스토리지 전용 — 일반 환경 불가",
+        "주기적인 ALTER TABLE MOVE로 재압축 필요"
+      ],
+      "relatedKeywords": ["Compression Unit (CU)", "ROW STORE COMPRESS BASIC", "ROW STORE COMPRESS ADVANCED"],
+      "sourceSection": "s05"
+    },
+    "Direct-Path Insert": {
+      "definition": "데이터를 SGA의 Buffer Cache를 경유하지 않고 HWM 위의 새로운 블록에 직접 기록하는 고속 데이터 적재 방식이다. INSERT /*+ APPEND */ 힌트로 사용한다.",
+      "keyPoints": [
+        "Buffer Cache 우회 → 캐시 오염 없음, Redo/Undo 최소화로 매우 빠름",
+        "항상 HWM 위에 기록 → 기존 빈 블록 미재사용, HWM 항상 상향",
+        "테이블에 Exclusive DML Lock(TM Lock Mode 6) 획득 → 다른 세션의 DML 차단",
+        "COMMIT 전 동일 세션에서 해당 테이블 SELECT 시 ORA-12838 오류",
+        "NOLOGGING 결합 시 Redo 최소화되어 대량 적재 성능 극대화 (단, 복구 불가)"
+      ],
+      "relatedKeywords": ["HWM (High Water Mark)", "NOLOGGING", "ROW STORE COMPRESS BASIC"],
+      "sourceSection": "s06"
+    },
+    "NOLOGGING": {
+      "definition": "Direct-Path Insert, ALTER TABLE MOVE 등의 작업에서 Redo Log 생성을 최소화하는 설정이다. 성능은 향상되지만 Data Guard Standby에 데이터가 전파되지 않고 복구가 불가능해진다.",
+      "keyPoints": [
+        "Redo 생성 최소화: Extent Invalidation 정보만 기록",
+        "Data Guard Standby에 데이터 미전파 → Standby에서 해당 블록 접근 시 ORA-01578 발생 가능",
+        "FORCE LOGGING이 DB/TS 레벨에서 활성화되면 NOLOGGING이 무시됨",
+        "NOLOGGING 후 반드시 백업을 수행해야 복구 가능성 보장"
+      ],
+      "relatedKeywords": ["Direct-Path Insert", "FORCE LOGGING"],
+      "sourceSection": "s06"
+    },
+    "FORCE LOGGING": {
+      "definition": "데이터베이스 또는 테이블스페이스 레벨에서 NOLOGGING 설정을 무시하고 강제로 Redo Log를 생성하도록 하는 설정이다. Data Guard 환경에서 Standby 보호를 위해 사용된다.",
+      "keyPoints": [
+        "ALTER DATABASE FORCE LOGGING 또는 ALTER TABLESPACE ... FORCE LOGGING으로 설정",
+        "NOLOGGING이 지정되어도 Redo가 강제 생성됨 → 완전 복구 가능, Standby 보호",
+        "Data Guard 환경에서는 FORCE LOGGING 설정이 강력히 권장됨",
+        "성능은 NOLOGGING 대비 저하되나, 데이터 안전성 확보"
+      ],
+      "relatedKeywords": ["NOLOGGING", "Direct-Path Insert"],
+      "sourceSection": "s06"
+    },
+    "UNUSABLE (인덱스 상태)": {
+      "definition": "인덱스를 사용 불가 상태로 설정하여 인덱스 세그먼트(물리적 저장 공간)를 삭제하고 디스크 공간을 회수하는 인덱스 상태이다. 메타데이터만 딕셔너리에 유지된다.",
+      "keyPoints": [
+        "ALTER INDEX ... UNUSABLE로 설정 — 세그먼트 삭제, 공간 즉시 회수",
+        "SKIP_UNUSABLE_INDEXES=TRUE(기본값)이면 UNUSABLE 인덱스가 있어도 DML 정상 수행",
+        "SKIP_UNUSABLE_INDEXES=FALSE이면 DML 시 ORA-01502 오류 발생",
+        "ALTER INDEX ... REBUILD로 복구 (ONLINE, PARALLEL, NOLOGGING 옵션 지원)",
+        "ALTER TABLE MOVE(비Online)는 모든 인덱스를 UNUSABLE로 만듦 → REBUILD 필수"
+      ],
+      "relatedKeywords": ["SKIP_UNUSABLE_INDEXES", "ALTER TABLE MOVE"],
+      "sourceSection": "s07"
+    },
+    "SKIP_UNUSABLE_INDEXES": {
+      "definition": "UNUSABLE 상태의 인덱스가 있을 때 DML 수행 동작을 제어하는 파라미터이다. TRUE이면 UNUSABLE 인덱스를 건너뛰고 DML을 정상 수행한다.",
+      "keyPoints": [
+        "기본값: TRUE — UNUSABLE 인덱스 무시하고 DML 정상 수행",
+        "FALSE 설정 시 UNUSABLE 인덱스가 있으면 DML에서 ORA-01502 오류 발생",
+        "대량 데이터 적재 전 인덱스 UNUSABLE → 적재 → REBUILD 전략에서 TRUE 설정이 필수"
+      ],
+      "relatedKeywords": ["UNUSABLE (인덱스 상태)"],
+      "sourceSection": "s07"
+    },
+    "ALTER TABLE MOVE": {
+      "definition": "테이블을 새로운 세그먼트로 재생성하여 데이터를 재배치하는 DDL 명령이다. HWM이 새 세그먼트에서 초기화되어 공간이 회수된다.",
+      "keyPoints": [
+        "비Online MOVE: 모든 인덱스가 UNUSABLE로 변경됨 → REBUILD 필수",
+        "Online MOVE(ALTER TABLE MOVE ONLINE): 인덱스 VALID 유지, DML 동시 수행 가능",
+        "다른 테이블스페이스로 이동 가능 (ALTER TABLE ... MOVE TABLESPACE ts)",
+        "COMPRESS 옵션과 결합하여 압축 적용 가능 (ALTER TABLE MOVE ROW STORE COMPRESS)",
+        "TRUNCATE TABLE 대안으로 데이터를 보존하면서 공간 최적화"
+      ],
+      "relatedKeywords": ["HWM (High Water Mark)", "UNUSABLE (인덱스 상태)", "SHRINK SPACE"],
+      "sourceSection": "s01"
+    },
+    "TRUNCATE TABLE": {
+      "definition": "테이블의 모든 행을 삭제하고 HWM을 세그먼트 시작점으로 초기화하는 DDL 명령이다. DELETE보다 훨씬 빠르지만 ROLLBACK이 불가능하다.",
+      "keyPoints": [
+        "HWM 초기화 → Full Table Scan 성능 즉시 개선",
+        "DDL이므로 ROLLBACK 불가, 암묵적 COMMIT 수행",
+        "인덱스를 UNUSABLE로 만들지 않고 빈 상태로 VALID 유지",
+        "모든 익스텐트 해제 (MINEXTENTS 제외)",
+        "Undo 데이터 최소 생성 → DELETE보다 훨씬 빠름"
+      ],
+      "relatedKeywords": ["HWM (High Water Mark)", "DELETE"],
+      "sourceSection": "s02"
+    },
+    "Segment Advisor": {
+      "definition": "공간 낭비가 심한 세그먼트를 자동으로 식별하고 축소 권고(SHRINK, MOVE, 압축 등)를 제공하는 Oracle의 자동화 도구이다.",
+      "keyPoints": [
+        "Auto Segment Advisor: 유지보수 윈도우(Maintenance Window)에서 자동 실행",
+        "수동 실행: DBMS_ADVISOR 패키지로 실행 가능",
+        "DBA_ADVISOR_FINDINGS, DBA_ADVISOR_RECOMMENDATIONS로 권고 확인",
+        "Oracle 26ai에서 AI 기반 분석으로 개선되어 보다 정밀한 SHRINK 권고 제공"
+      ],
+      "relatedKeywords": ["SHRINK SPACE", "DBMS_SPACE", "ALTER TABLE MOVE"],
+      "sourceSection": "s01"
+    },
+    "DBMS_SPACE": {
+      "definition": "세그먼트의 공간 사용 현황을 분석하는 PL/SQL 패키지이다. 블록 상태별 분류, 예상 공간 추정 등의 기능을 제공한다.",
+      "keyPoints": [
+        "SPACE_USAGE: ASSM 세그먼트의 블록을 상태별(full, 75-100%, 50-75% 등)로 분류",
+        "CREATE_TABLE_COST / CREATE_INDEX_COST: 테이블/인덱스 생성 시 예상 공간 추정",
+        "Oracle 26ai에서 SPACE_USAGE_EXTENDED로 확장된 분석 기능 제공"
+      ],
+      "relatedKeywords": ["Segment Advisor", "DBA_SEGMENTS"],
+      "sourceSection": "s01"
+    },
+    "DBMS_COMPRESSION": {
+      "definition": "테이블의 압축률을 사전에 추정하고, 현재 압축 상태를 분석하는 PL/SQL 패키지이다.",
+      "keyPoints": [
+        "GET_COMPRESSION_RATIO: 압축 적용 전 예상 압축률을 사전 추정",
+        "각 압축 유형(Basic, Advanced, HCC 등)별 예상 압축률을 비교 제공",
+        "DBA_TABLES.COMPRESSION, COMPRESS_FOR로 현재 상태 확인과 병행 활용"
+      ],
+      "relatedKeywords": ["ROW STORE COMPRESS BASIC", "ROW STORE COMPRESS ADVANCED", "HCC (Hybrid Columnar Compression)"],
+      "sourceSection": "s05"
+    },
+    "table fetch continued row": {
+      "definition": "V$SYSSTAT의 통계 이름으로, 행 접근 시 다른 블록으로의 추가 접근(continued fetch)이 발생한 횟수를 나타낸다. 이 값이 높으면 Row Migration 또는 Row Chaining이 심각한 상태이다.",
+      "keyPoints": [
+        "인스턴스 전체의 누적 카운터로 실시간 모니터링 가능 (부하 없음)",
+        "값이 지속적으로 증가하면 PCTFREE 재설정, SHRINK SPACE 또는 ALTER TABLE MOVE 검토",
+        "Row Migration과 Row Chaining 모두를 포함한 통계"
+      ],
+      "relatedKeywords": ["Row Migration (行移行)", "Row Chaining (行連鎖)", "V$SYSSTAT"],
+      "sourceSection": "s04"
+    },
+    "ANALYZE TABLE LIST CHAINED ROWS": {
+      "definition": "테이블에서 Row Migration 또는 Row Chaining이 발생한 행의 ROWID를 CHAINED_ROWS 테이블에 기록하는 명령이다.",
+      "keyPoints": [
+        "사전에 $ORACLE_HOME/rdbms/admin/utlchain.sql로 CHAINED_ROWS 테이블 생성 필요",
+        "Full Table Scan이 필요하므로 대용량 테이블에서는 부하가 높음",
+        "개별 행 수준의 ROWID를 기록하므로 정밀한 분석 가능",
+        "DBA_TABLES.CHAIN_CNT로 총 행 수만 확인할 수도 있음"
+      ],
+      "relatedKeywords": ["Row Migration (行移行)", "Row Chaining (行連鎖)", "table fetch continued row"],
+      "sourceSection": "s04"
+    },
+    "Compression Unit (CU)": {
+      "definition": "HCC(Hybrid Columnar Compression)에서 여러 Oracle 블록을 묶어 하나의 압축 단위로 관리하는 구조이다. CU 내에서 열별로 데이터를 모아 압축하여 높은 압축률을 달성한다.",
+      "keyPoints": [
+        "기본 크기: 32KB (여러 Oracle 블록으로 구성)",
+        "CU 내에서 동일 열의 데이터가 모여 있어 중복 제거 효과 극대화",
+        "일반 DML 발생 시 해당 CU가 비압축 상태로 전환될 수 있음",
+        "Exadata/ZFS Storage 환경 전용"
+      ],
+      "relatedKeywords": ["HCC (Hybrid Columnar Compression)"],
+      "sourceSection": "s05"
+    }
+  }
+}

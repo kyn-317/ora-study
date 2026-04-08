@@ -1,0 +1,270 @@
+{
+  "studyId": "05_03",
+  "chapterId": "05",
+  "title": "공간 장애 대응 및 생성 (Resumable Space Allocation and Deferred Segment Creation)",
+  "keywords": {
+    "Resumable Space Allocation (재개 가능 영역 할당 / 再開可能領域割当て)": {
+      "definition": "대형 작업 수행 중 공간 부족, 익스텐트 제한 초과, 쿼터 초과 등의 문제 발생 시 작업을 즉시 실패시키지 않고 일시 중지(Suspend)한 후, DBA가 문제를 해결하면 자동으로 재개(Resume)하는 메커니즘이다.",
+      "keyPoints": [
+        "일시 중지 조건 3가지: 공간 부족(ORA-01653/01654), 최대 익스텐트 도달(ORA-01628/01631), 쿼터 초과(ORA-01536)",
+        "RESUMABLE_TIMEOUT > 0이면 시스템 레벨 활성화, = 0이면 비활성(세션별 ALTER SESSION으로 개별 활성화 가능)",
+        "세션 레벨에서 ALTER SESSION DISABLE RESUMABLE로 시스템 설정 무시 가능",
+        "RESUMABLE 시스템 권한이 필요 (미보유 시 ORA-01031 오류)",
+        "TIMEOUT 초과 시 ORA-30032 오류 발생하고 작업 종료"
+      ],
+      "relatedKeywords": ["RESUMABLE_TIMEOUT", "ALTER SESSION ENABLE RESUMABLE", "Suspended (일시 중지)", "AFTER SUSPEND Trigger"],
+      "sourceSection": "s02"
+    },
+    "RESUMABLE_TIMEOUT": {
+      "definition": "재개 가능 영역 할당의 시스템 레벨 타임아웃을 설정하는 초기화 파라미터이다. 0이면 비활성, 0보다 크면 모든 세션에서 기본 활성화된다. 단위는 초(Seconds)이다.",
+      "keyPoints": [
+        "기본값: 0 (비활성), ALTER SYSTEM / ALTER SESSION으로 동적 변경 가능",
+        "0보다 큰 값 설정 시 모든 세션에서 Resumable 자동 활성화",
+        "세션 레벨 ALTER SESSION ENABLE RESUMABLE의 TIMEOUT이 우선 적용",
+        "PDB 레벨에서 독립적으로 설정 가능 (멀티테넌트)"
+      ],
+      "relatedKeywords": ["Resumable Space Allocation", "ALTER SESSION ENABLE RESUMABLE", "ORA-30032"],
+      "sourceSection": "s02"
+    },
+    "ALTER SESSION ENABLE RESUMABLE": {
+      "definition": "현재 세션에서 재개 가능 영역 할당을 활성화하는 명령이다. TIMEOUT(대기 시간)과 NAME(작업 식별자)을 선택적으로 지정할 수 있다.",
+      "keyPoints": [
+        "TIMEOUT 기본값: 3600초(1시간), NAME은 DBA_RESUMABLE에서 조회 가능",
+        "ALTER SESSION DISABLE RESUMABLE로 비활성화(시스템 레벨 설정 무시)",
+        "우선순위: 세션 ENABLE/DISABLE > RESUMABLE_TIMEOUT > 비활성",
+        "RESUMABLE 시스템 권한 필요"
+      ],
+      "relatedKeywords": ["RESUMABLE_TIMEOUT", "Resumable Space Allocation", "DBA_RESUMABLE / USER_RESUMABLE"],
+      "sourceSection": "s02"
+    },
+    "Suspended (일시 중지)": {
+      "definition": "재개 가능 영역 할당이 활성화된 세션에서 공간 부족 등의 조건이 발생하면 작업이 진입하는 대기 상태이다. DBA가 공간을 확보하면 자동으로 재개된다.",
+      "keyPoints": [
+        "V$SESSION에서 event = 'statement suspended, wait error to be cleared'로 확인",
+        "DBA_RESUMABLE에서 status = 'SUSPENDED'로 일시 중지 작업 조회",
+        "AFTER SUSPEND 트리거가 설정된 경우 자동 실행",
+        "TIMEOUT 초과 시 ORA-30032 발생하고 작업 종료"
+      ],
+      "relatedKeywords": ["Resumable Space Allocation", "AFTER SUSPEND Trigger", "ORA-30032"],
+      "sourceSection": "s02"
+    },
+    "AFTER SUSPEND Trigger": {
+      "definition": "재개 가능 작업이 일시 중지(Suspend)될 때 자동으로 실행되는 데이터베이스 이벤트 트리거이다. DBA 알림이나 자동 공간 확보 등의 자동 대응을 구현할 수 있다.",
+      "keyPoints": [
+        "CREATE TRIGGER ... AFTER SUSPEND ON DATABASE/SCHEMA로 생성",
+        "DBMS_RESUMABLE.SPACE_ERROR_INFO로 공간 오류의 상세 정보(TS명, 객체명 등) 조회 가능",
+        "자동 데이터파일 확장, DBA 알림 로그 기록 등의 자동 대응 구현에 활용",
+        "DATABASE 레벨 또는 SCHEMA 레벨로 생성 가능"
+      ],
+      "relatedKeywords": ["Suspended (일시 중지)", "DBMS_RESUMABLE", "SPACE_ERROR_INFO (DBMS_RESUMABLE)"],
+      "sourceSection": "s02"
+    },
+    "DBA_RESUMABLE / USER_RESUMABLE": {
+      "definition": "재개 가능 작업의 상태, 원인, 관련 SQL 등을 조회하는 데이터 딕셔너리 뷰이다. 일시 중지된 작업의 모니터링에 필수적으로 사용된다.",
+      "keyPoints": [
+        "주요 컬럼: STATUS(SUSPENDED/NORMAL), SUSPEND_TIME, RESUME_TIME, ERROR_NUMBER, ERROR_MSG, SQL_TEXT",
+        "NAME 컬럼으로 ALTER SESSION ENABLE RESUMABLE의 NAME 식별",
+        "Oracle 26ai에서 PDB_NAME, CON_ID 컬럼 추가 (멀티테넌트 모니터링 강화)"
+      ],
+      "relatedKeywords": ["Resumable Space Allocation", "ALTER SESSION ENABLE RESUMABLE"],
+      "sourceSection": "s02"
+    },
+    "DBMS_RESUMABLE": {
+      "definition": "재개 가능 작업의 타임아웃 조회/변경, 강제 중단, 공간 오류 정보 조회 등을 수행하는 PL/SQL 패키지이다.",
+      "keyPoints": [
+        "GET_SESSION_TIMEOUT / SET_SESSION_TIMEOUT: 특정 세션의 타임아웃 조회/변경",
+        "SET_TIMEOUT: 현재 세션의 타임아웃 변경",
+        "ABORT: 특정 세션의 재개 가능 작업 강제 중단",
+        "SPACE_ERROR_INFO: 공간 오류의 상세 정보(오류 유형, TS명, 객체명) 조회"
+      ],
+      "relatedKeywords": ["Resumable Space Allocation", "SPACE_ERROR_INFO (DBMS_RESUMABLE)", "AFTER SUSPEND Trigger"],
+      "sourceSection": "s02"
+    },
+    "ORA-30032": {
+      "definition": "재개 가능 작업이 일시 중지된 상태에서 TIMEOUT 시간 내에 공간 문제가 해결되지 않아 작업이 종료될 때 발생하는 오류이다.",
+      "keyPoints": [
+        "메시지: 'the suspended (resumable) statement has timed out'",
+        "TIMEOUT 내에 DBA가 공간을 확보하지 못한 경우 발생",
+        "DBMS_RESUMABLE.SET_SESSION_TIMEOUT으로 타임아웃 연장 가능",
+        "TIMEOUT 초과 전에 공간이 확보되면 자동 재개되므로 이 오류는 발생하지 않음"
+      ],
+      "relatedKeywords": ["Resumable Space Allocation", "RESUMABLE_TIMEOUT", "Suspended (일시 중지)"],
+      "sourceSection": "s02"
+    },
+    "Deferred Segment Creation (지연 세그먼트 생성 / 遅延セグメント作成)": {
+      "definition": "테이블 생성 시 세그먼트(물리적 저장 공간)를 즉시 할당하지 않고, 첫 번째 데이터가 삽입될 때까지 할당을 지연하는 메커니즘이다. 빈 테이블의 불필요한 디스크 공간 사용을 방지한다.",
+      "keyPoints": [
+        "DEFERRED_SEGMENT_CREATION 파라미터 기본값: TRUE (활성)",
+        "DBA_TABLES.SEGMENT_CREATED = 'NO'이면 세그먼트 미할당 상태",
+        "SEGMENT_CREATED='NO'인 테이블은 DBA_SEGMENTS, DBA_EXTENTS에 나타나지 않음",
+        "클러스터드 테이블, GTT, SYS/SYSTEM 소유 테이블은 지연 세그먼트 미적용",
+        "파티션 테이블은 각 파티션별로 독립적으로 지연 세그먼트 적용"
+      ],
+      "relatedKeywords": ["DEFERRED_SEGMENT_CREATION", "SEGMENT CREATION DEFERRED", "DBMS_SPACE_ADMIN.MATERIALIZE_DEFERRED_SEGMENTS", "SEGMENT_CREATED"],
+      "sourceSection": "s03"
+    },
+    "DEFERRED_SEGMENT_CREATION": {
+      "definition": "지연 세그먼트 생성 기능의 활성화 여부를 제어하는 초기화 파라미터이다. TRUE(기본값)이면 새로 생성되는 테이블에 대해 세그먼트 할당을 지연한다.",
+      "keyPoints": [
+        "기본값: TRUE, ALTER SYSTEM / ALTER SESSION으로 동적 변경 가능",
+        "DDL 구문의 SEGMENT CREATION DEFERRED/IMMEDIATE가 최우선 적용",
+        "우선순위: DDL 구문 > 세션 레벨 > 시스템 레벨",
+        "기존 테이블의 세그먼트 할당 상태는 이 파라미터 변경에 영향 없음 (새로 생성되는 객체에만 적용)"
+      ],
+      "relatedKeywords": ["Deferred Segment Creation", "SEGMENT CREATION DEFERRED", "SEGMENT CREATION IMMEDIATE"],
+      "sourceSection": "s03"
+    },
+    "SEGMENT CREATION DEFERRED": {
+      "definition": "CREATE TABLE 구문에서 세그먼트 할당을 첫 번째 데이터 삽입 시까지 지연하도록 명시적으로 지정하는 절이다.",
+      "keyPoints": [
+        "CREATE TABLE ... SEGMENT CREATION DEFERRED 형식으로 사용",
+        "DEFERRED_SEGMENT_CREATION=FALSE여도 DDL 구문에서 DEFERRED 지정 시 지연 적용",
+        "기본값(DEFERRED_SEGMENT_CREATION=TRUE)과 동일한 효과이지만 명시적 지정"
+      ],
+      "relatedKeywords": ["SEGMENT CREATION IMMEDIATE", "DEFERRED_SEGMENT_CREATION", "SEGMENT_CREATED"],
+      "sourceSection": "s03"
+    },
+    "SEGMENT CREATION IMMEDIATE": {
+      "definition": "CREATE TABLE 구문에서 세그먼트를 테이블 생성 시 즉시 할당하도록 명시적으로 지정하는 절이다.",
+      "keyPoints": [
+        "CREATE TABLE ... SEGMENT CREATION IMMEDIATE 형식으로 사용",
+        "DEFERRED_SEGMENT_CREATION=TRUE여도 DDL 구문에서 IMMEDIATE 지정 시 즉시 할당",
+        "Data Pump Import 등에서 빈 테이블에도 세그먼트를 보장해야 할 때 사용"
+      ],
+      "relatedKeywords": ["SEGMENT CREATION DEFERRED", "DEFERRED_SEGMENT_CREATION"],
+      "sourceSection": "s03"
+    },
+    "DBMS_SPACE_ADMIN.MATERIALIZE_DEFERRED_SEGMENTS": {
+      "definition": "지연 세그먼트 상태의 테이블에 세그먼트를 강제로 할당(Materialize)하는 DBMS_SPACE_ADMIN 패키지의 프로시저이다.",
+      "keyPoints": [
+        "특정 테이블 단위 또는 특정 스키마의 모든 지연 세그먼트를 일괄 할당 가능",
+        "ALTER TABLE ... ALLOCATE EXTENT로도 세그먼트 강제 생성 가능",
+        "세그먼트 미할당 테이블은 ALTER TABLE ... MOVE TABLESPACE 불가 (먼저 MATERIALIZE 필요)",
+        "Oracle 26ai에서 기능이 강화되어 상태 조회 및 일괄 할당이 개선됨"
+      ],
+      "relatedKeywords": ["Deferred Segment Creation", "SEGMENT_CREATED"],
+      "sourceSection": "s03"
+    },
+    "SEGMENT_CREATED": {
+      "definition": "DBA_TABLES/USER_TABLES 뷰의 컬럼으로, 해당 테이블에 세그먼트가 할당되었는지 여부를 나타낸다. YES이면 할당됨, NO이면 지연 상태이다.",
+      "keyPoints": [
+        "NO인 테이블은 DBA_SEGMENTS에 나타나지 않으므로 공간 모니터링 시 주의 필요",
+        "파티션 테이블은 DBA_TAB_PARTITIONS의 SEGMENT_CREATED로 파티션별 확인",
+        "첫 번째 INSERT 시 자동으로 YES로 변경됨"
+      ],
+      "relatedKeywords": ["Deferred Segment Creation", "DBMS_SPACE_ADMIN.MATERIALIZE_DEFERRED_SEGMENTS"],
+      "sourceSection": "s03"
+    },
+    "Clustered Table (클러스터드 테이블 / クラスタ化表)": {
+      "definition": "인덱스 클러스터(Index Cluster) 또는 해시 클러스터(Hash Cluster)에 속하는 테이블로, 관련 데이터를 동일한 데이터 블록에 물리적으로 함께 저장하여 조인 성능을 향상시킨다.",
+      "keyPoints": [
+        "클러스터 세그먼트를 클러스터 내 모든 테이블이 공유 → 개별 테이블이 별도 세그먼트를 갖지 않음",
+        "지연 세그먼트 생성 미적용 대상 (클러스터 생성 시 세그먼트가 즉시 할당되어야 함)",
+        "Direct-Path Insert 사용 불가"
+      ],
+      "relatedKeywords": ["Deferred Segment Creation"],
+      "sourceSection": "s03"
+    },
+    "Global Temporary Table (GTT / グローバル一時表)": {
+      "definition": "세션 또는 트랜잭션 동안만 데이터를 유지하는 특수 테이블이다. 데이터는 임시 테이블스페이스에 저장되며, 세그먼트는 데이터 삽입 시 동적으로 생성된다.",
+      "keyPoints": [
+        "ON COMMIT DELETE ROWS(기본값): COMMIT 시 데이터 삭제 (트랜잭션 수준)",
+        "ON COMMIT PRESERVE ROWS: 세션 종료 시 데이터 삭제 (세션 수준)",
+        "GTT 자체가 이미 지연 방식이므로 DEFERRED_SEGMENT_CREATION 설정에 영향받지 않음",
+        "지연 세그먼트 생성 미적용 대상"
+      ],
+      "relatedKeywords": ["Deferred Segment Creation", "V$SORT_SEGMENT"],
+      "sourceSection": "s03"
+    },
+    "ORA-01653 / ORA-01654": {
+      "definition": "테이블스페이스에 새로운 익스텐트를 할당할 공간이 부족할 때 발생하는 오류이다. ORA-01653은 테이블, ORA-01654는 인덱스 세그먼트 확장 실패이다.",
+      "keyPoints": [
+        "Resumable 활성화 시 즉시 실패 대신 작업 일시 중지(Suspend)로 전환",
+        "해결: 데이터파일 추가/확장, AUTOEXTEND ON 설정, 불필요 데이터 삭제",
+        "AUTOEXTEND OFF 상태이거나 MAXSIZE 도달 시 발생 가능"
+      ],
+      "relatedKeywords": ["Resumable Space Allocation", "AUTOEXTEND", "ORA-01536"],
+      "sourceSection": "s01"
+    },
+    "ORA-01536": {
+      "definition": "사용자의 테이블스페이스 쿼터(Quota)를 초과하여 공간을 할당하려 할 때 발생하는 오류이다. Resumable 활성화 시 일시 중지 조건 중 하나이다.",
+      "keyPoints": [
+        "메시지: 'space quota exceeded for tablespace XXX'",
+        "Resumable 활성화 시 작업 일시 중지 → DBA가 쿼터 증가 후 자동 재개",
+        "해결: ALTER USER ... QUOTA 증가 또는 UNLIMITED TABLESPACE 권한 부여"
+      ],
+      "relatedKeywords": ["Resumable Space Allocation", "ORA-01653 / ORA-01654"],
+      "sourceSection": "s01"
+    },
+    "Extent (익스텐트)": {
+      "definition": "논리적으로 연속된 데이터 블록의 집합으로, 공간 할당 및 해제의 기본 단위이다. 하나의 익스텐트는 단일 데이터 파일 내에 존재��다.",
+      "keyPoints": [
+        "AUTOALLOCATE: 64KB→1MB→8MB→64MB 단계적 크기 증가 (대부분 환경 기본)",
+        "UNIFORM: 모든 익스텐트 동일 크기 (기본 1MB, TEMP에 유리)",
+        "최대 익스텐트 도달(ORA-01628/01631)도 Resumable 일시 중지 조건"
+      ],
+      "relatedKeywords": ["AUTOALLOCATE / UNIFORM", "DBA_EXTENTS"],
+      "sourceSection": "s01"
+    },
+    "AUTOALLOCATE / UNIFORM": {
+      "definition": "로컬 관리 테이블스페이스의 익스텐트 할당 방식이다. AUTOALLOCATE는 Oracle이 크기를 자동 결정하고, UNIFORM은 모든 익스텐트를 동일 크기로 할당한다.",
+      "keyPoints": [
+        "AUTOALLOCATE: 세그먼트 크기에 따라 64KB→1MB→8MB→64MB로 단계적 증가",
+        "UNIFORM: 기본 1MB, 사용자 지정 가능, TEMP TS에 특히 적합",
+        "EXTENT MANAGEMENT LOCAL에서 선택하며, AUTOALLOCATE가 기본값"
+      ],
+      "relatedKeywords": ["Extent (익스텐트)", "EXTENT MANAGEMENT LOCAL"],
+      "sourceSection": "s01"
+    },
+    "RESUMABLE 시스템 권한": {
+      "definition": "재개 가능 영역 할당 기능을 사용하기 위해 세션에 필요한 시스템 권한이다. 이 권한이 없으면 ALTER SESSION ENABLE RESUMABLE 실행 시 ORA-01031 오류가 발생한다.",
+      "keyPoints": [
+        "GRANT RESUMABLE TO username으로 부여",
+        "RESUMABLE_TIMEOUT > 0이어도 이 권한이 없으면 Resumable 동작 불가",
+        "DBA 역할에 기본 포함"
+      ],
+      "relatedKeywords": ["Resumable Space Allocation", "ALTER SESSION ENABLE RESUMABLE"],
+      "sourceSection": "s02"
+    },
+    "DBA_SEGMENTS": {
+      "definition": "데이터베이스의 모든 세그먼트 정보(크기, 익스텐트 수, 블록 수 등)를 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "주요 컬럼: SEGMENT_NAME, SEGMENT_TYPE, BYTES, BLOCKS, EXTENTS",
+        "SEGMENT_CREATED='NO'인 지연 세그먼트 테이블은 이 뷰에 나타나지 않음",
+        "공간 사용 현황 분석의 기본 뷰"
+      ],
+      "relatedKeywords": ["DBA_FREE_SPACE", "DBA_EXTENTS", "SEGMENT_CREATED"],
+      "sourceSection": "s01"
+    },
+    "DBA_FREE_SPACE": {
+      "definition": "테이블스페이스 내 여유(사용 가능) 공간 정보를 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "SUM(BYTES)로 전체 여유 공간, MAX(BYTES)로 최대 연속 여유 공간 확인",
+        "DBA_DATA_FILES와 조인하여 사용률(%) 계산 가능",
+        "공간 부족 사전 감지를 위한 정기 모니터링에 활용"
+      ],
+      "relatedKeywords": ["DBA_SEGMENTS", "DBA_TABLESPACE_USAGE_METRICS"],
+      "sourceSection": "s01"
+    },
+    "V$SORT_SEGMENT": {
+      "definition": "임시 세그먼트(TEMP 테이블스페이스)의 사용 현황을 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "CURRENT_USERS, TOTAL_BLOCKS, USED_BLOCKS 등으로 사용량 확인",
+        "GTT 데이터나 정렬/해시 조인의 임시 공간 사용량 모니터링",
+        "TEMP TS 크기 조정의 근거 제공"
+      ],
+      "relatedKeywords": ["Global Temporary Table (GTT)"],
+      "sourceSection": "s01"
+    },
+    "SPACE_ERROR_INFO (DBMS_RESUMABLE)": {
+      "definition": "DBMS_RESUMABLE 패키지의 프로시저로, 재개 가능 작업이 일시 중지될 때 공간 오류의 상세 정보(오류 유형, 테이블스페이스명, 객체명 등)를 조회한���.",
+      "keyPoints": [
+        "AFTER SUSPEND 트리거 내에서 호출하여 오류 원인 파악",
+        "반환 정보: error_type, object_type, object_owner, table_space_name, object_name",
+        "자동 대응 로직 구현의 핵심 함수 (어느 TS가 부족한지 식별)"
+      ],
+      "relatedKeywords": ["DBMS_RESUMABLE", "AFTER SUSPEND Trigger"],
+      "sourceSection": "s02"
+    }
+  }
+}

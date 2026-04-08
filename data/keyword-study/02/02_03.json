@@ -1,0 +1,323 @@
+{
+  "studyId": "02_03",
+  "chapterId": "02",
+  "title": "PDB 상태 관리 및 분리 (PDB State Management & Unplugging)",
+  "keywords": {
+    "PDB": {
+      "definition": "Pluggable Database의 약자로, CDB 내에서 독립적으로 운영되는 논리적 데이터베이스 단위이다. 자체 데이터 파일, 테이블스페이스, 오픈 모드를 가진다.",
+      "keyPoints": [
+        "CDB의 시작/종료와 독립적으로 오픈 모드(READ WRITE, READ ONLY, MOUNTED)를 관리",
+        "ALTER PLUGGABLE DATABASE 명령으로 상태 변경, SAVE STATE로 상태 저장",
+        "Unplug/Plug In으로 CDB 간 이동 가능 — 이식성이 핵심 특징",
+        "DROP PLUGGABLE DATABASE로 삭제 시 INCLUDING DATAFILES 또는 KEEP DATAFILES 선택"
+      ],
+      "relatedKeywords": ["CDB", "OPEN MODE", "Plug/Unplug"],
+      "sourceSection": "s01"
+    },
+    "Pluggable Database": {
+      "definition": "PDB와 동일. CDB 내에서 Plug/Unplug이 가능한 이식성을 가진 독립적 데이터베이스 단위이다.",
+      "keyPoints": [
+        "멀티테넌트 아키텍처의 핵심 개념 — USB 드라이브처럼 연결/분리 가능",
+        "각 PDB는 고유한 CON_ID와 GUID를 가짐",
+        "V$PDBS, DBA_PDBS, CDB_PDBS 등의 뷰에서 상태 모니터링"
+      ],
+      "relatedKeywords": ["PDB", "Container Database", "Plug/Unplug"],
+      "sourceSection": "s01"
+    },
+    "CDB": {
+      "definition": "Container Database의 약자. 하나의 Oracle 인스턴스와 여러 컨테이너(CDB$ROOT, PDB$SEED, 사용자 PDB)로 구성되는 데이터베이스이다.",
+      "keyPoints": [
+        "CDB 재시작 시 모든 PDB는 기본적으로 MOUNTED 상태로 돌아감",
+        "CDB의 SHUTDOWN은 모든 PDB에 영향 — PDB별 상태 보존에는 SAVE STATE 필요",
+        "CDB$ROOT에서 ALTER PLUGGABLE DATABASE ALL OPEN으로 전체 PDB 일괄 OPEN 가능"
+      ],
+      "relatedKeywords": ["PDB", "SAVE STATE", "CDB$ROOT"],
+      "sourceSection": "s01"
+    },
+    "Container Database": {
+      "definition": "CDB와 동일. 멀티테넌트 아키텍처의 최상위 데이터베이스 구조로, 여러 PDB를 포함하는 컨테이너이다.",
+      "keyPoints": [
+        "필수 컨테이너: CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2)",
+        "Control File, Online Redo Log는 CDB 전체 공유",
+        "CDB 수준의 관리 작업은 CDB$ROOT에 접속하여 수행"
+      ],
+      "relatedKeywords": ["CDB", "PDB", "CDB$ROOT"],
+      "sourceSection": "s01"
+    },
+    "OPEN MODE": {
+      "definition": "PDB의 현재 동작 상태를 나타내는 속성으로, READ WRITE, READ ONLY, MOUNTED 세 가지 기본 모드가 있다.",
+      "keyPoints": [
+        "V$PDBS의 OPEN_MODE 컬럼에서 확인 가능",
+        "READ WRITE: 일반 운영 모드 (DML/DDL 모두 가능)",
+        "READ ONLY: 읽기만 가능, 데이터 보호 또는 보고용",
+        "MOUNTED: PDB가 닫힌 상태, 데이터 파일에 접근 불가"
+      ],
+      "relatedKeywords": ["READ WRITE", "READ ONLY", "MOUNTED", "V$PDBS"],
+      "sourceSection": "s02"
+    },
+    "READ WRITE": {
+      "definition": "PDB의 일반 운영 모드로, 모든 DML(INSERT/UPDATE/DELETE)과 DDL(CREATE/ALTER/DROP)이 가능한 상태이다.",
+      "keyPoints": [
+        "ALTER PLUGGABLE DATABASE pdb_name OPEN READ WRITE로 전환",
+        "CDB$ROOT에서 실행하거나 해당 PDB에 접속하여 실행 가능",
+        "운영 환경에서 PDB의 기본 목표 상태"
+      ],
+      "relatedKeywords": ["OPEN MODE", "READ ONLY", "MOUNTED"],
+      "sourceSection": "s02"
+    },
+    "READ ONLY": {
+      "definition": "PDB에서 읽기만 가능하고 데이터 변경(DML/DDL)이 불가능한 상태로, 데이터 보호나 보고용으로 사용된다.",
+      "keyPoints": [
+        "ALTER PLUGGABLE DATABASE pdb_name OPEN READ ONLY로 전환",
+        "PDB Clone의 소스 PDB는 READ ONLY 상태여야 함 (Hot Clone 제외)",
+        "PDB$SEED는 항상 READ ONLY 상태",
+        "Active Data Guard의 Standby PDB도 READ ONLY로 동작"
+      ],
+      "relatedKeywords": ["OPEN MODE", "READ WRITE", "PDB Clone"],
+      "sourceSection": "s02"
+    },
+    "MOUNTED": {
+      "definition": "PDB가 닫힌(CLOSE) 상태로, 데이터 파일에 접근할 수 없으며 사용자 접속이 불가능하다.",
+      "keyPoints": [
+        "CDB 재시작 시 PDB의 기본 상태 (SAVE STATE 미사용 시)",
+        "ALTER PLUGGABLE DATABASE pdb_name CLOSE 명령으로 MOUNTED 전환",
+        "Unplug 수행 전에 PDB를 MOUNTED(CLOSE) 상태로 만들어야 함",
+        "PDB 삭제(DROP)도 MOUNTED 상태에서만 가능"
+      ],
+      "relatedKeywords": ["OPEN MODE", "SAVE STATE", "UNPLUG"],
+      "sourceSection": "s02"
+    },
+    "SAVE STATE": {
+      "definition": "PDB의 현재 오픈 모드를 CDB 딕셔너리에 저장하여, CDB 재시작 후 자동으로 해당 모드로 복원하는 기능이다.",
+      "keyPoints": [
+        "구문: ALTER PLUGGABLE DATABASE pdb_name SAVE STATE",
+        "CDB 재시작 시 저장된 상태로 PDB가 자동 OPEN — 운영 필수 설정",
+        "저장된 상태는 DBA_PDB_SAVED_STATES 뷰에서 확인",
+        "인스턴스별로 저장됨 — RAC에서는 각 인스턴스별 상태를 개별 저장"
+      ],
+      "relatedKeywords": ["DISCARD STATE", "DBA_PDB_SAVED_STATES", "MOUNTED"],
+      "sourceSection": "s03"
+    },
+    "DISCARD STATE": {
+      "definition": "SAVE STATE로 저장된 PDB의 오픈 모드 정보를 삭제하여, CDB 재시작 시 PDB가 MOUNTED 상태로 돌아가도록 하는 명령이다.",
+      "keyPoints": [
+        "구문: ALTER PLUGGABLE DATABASE pdb_name DISCARD STATE",
+        "SAVE STATE의 반대 동작 — 저장된 상태 정보를 삭제",
+        "DISCARD STATE 후 CDB 재시작 시 PDB는 MOUNTED 상태 (수동 OPEN 필요)",
+        "DBA_PDB_SAVED_STATES에서 해당 PDB의 행이 삭제됨"
+      ],
+      "relatedKeywords": ["SAVE STATE", "DBA_PDB_SAVED_STATES", "MOUNTED"],
+      "sourceSection": "s03"
+    },
+    "DBA_PDB_SAVED_STATES": {
+      "definition": "SAVE STATE로 저장된 PDB의 오픈 모드 상태 정보를 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "CON_NAME, INSTANCE_NAME, STATE(OPEN 등) 컬럼으로 저장된 상태 확인",
+        "SAVE STATE가 수행된 PDB만 행이 존재 — 행이 없으면 SAVE STATE 미수행",
+        "RAC 환경에서는 인스턴스별로 별도 행이 저장됨"
+      ],
+      "relatedKeywords": ["SAVE STATE", "DISCARD STATE", "V$PDBS"],
+      "sourceSection": "s03"
+    },
+    "UNPLUG": {
+      "definition": "PDB를 CDB에서 분리(Detach)하여 XML 메타데이터 파일 또는 .pdb 아카이브로 내보내는 작업이다.",
+      "keyPoints": [
+        "구문: ALTER PLUGGABLE DATABASE pdb_name UNPLUG INTO '/path/pdb.xml'",
+        "Unplug 전 PDB를 반드시 CLOSE(MOUNTED) 해야 함",
+        "Unplug 후 PDB는 CDB 내에 UNPLUGGED 상태로 남음 — DROP으로 제거 필요",
+        ".pdb 확장자 사용 시 데이터 파일까지 포함된 아카이브 파일 생성"
+      ],
+      "relatedKeywords": ["PLUG IN", "UNPLUGGED", "XML Metadata", ".pdb Archive"],
+      "sourceSection": "s04"
+    },
+    "PLUG IN": {
+      "definition": "Unplug된 PDB의 XML 메타데이터(또는 .pdb 아카이브)를 사용하여 PDB를 다른 CDB에 연결(Attach)하는 작업이다.",
+      "keyPoints": [
+        "구문: CREATE PLUGGABLE DATABASE pdb_name USING '/path/pdb.xml'",
+        "Plug In 전 DBMS_PDB.CHECK_PLUG_COMPATIBILITY로 호환성 검사 권장",
+        "FILE_NAME_CONVERT로 데이터 파일 경로 변환 지정",
+        "Plug In 후 PDB_PLUG_IN_VIOLATIONS 뷰에서 위반 사항 확인 필요"
+      ],
+      "relatedKeywords": ["UNPLUG", "DBMS_PDB.CHECK_PLUG_COMPATIBILITY", "FILE_NAME_CONVERT"],
+      "sourceSection": "s05"
+    },
+    "UNPLUGGED": {
+      "definition": "PDB가 Unplug된 후 CDB 내에 남아있는 상태로, 더 이상 OPEN할 수 없으며 DROP으로만 제거할 수 있다.",
+      "keyPoints": [
+        "DBA_PDBS의 STATUS='UNPLUGGED'로 확인",
+        "UNPLUGGED 상태의 PDB는 OPEN이나 재Plug가 불가 — DROP 필수",
+        "데이터 파일은 Unplug 시 지정한 위치에 그대로 존재"
+      ],
+      "relatedKeywords": ["UNPLUG", "DROP PLUGGABLE DATABASE", "DBA_PDBS"],
+      "sourceSection": "s04"
+    },
+    "ALTER PLUGGABLE DATABASE": {
+      "definition": "PDB의 상태(OPEN/CLOSE), 속성, 스토리지 등을 변경하는 DDL 명령으로, PDB 관리의 핵심 구문이다.",
+      "keyPoints": [
+        "OPEN/CLOSE: ALTER PLUGGABLE DATABASE pdb_name OPEN/CLOSE",
+        "SAVE/DISCARD STATE: 오픈 모드 저장/삭제",
+        "UNPLUG INTO: PDB 분리",
+        "ALL 키워드로 전체 PDB 일괄 작업 가능: ALTER PLUGGABLE DATABASE ALL OPEN"
+      ],
+      "relatedKeywords": ["OPEN MODE", "SAVE STATE", "UNPLUG"],
+      "sourceSection": "s02"
+    },
+    "CREATE PLUGGABLE DATABASE": {
+      "definition": "PDB를 생성하는 DDL 명령으로, Seed에서 생성, 클론, Plug In 등 다양한 소스에서 PDB를 만들 수 있다.",
+      "keyPoints": [
+        "USING 절: Unplug된 PDB의 XML 또는 .pdb 파일에서 Plug In",
+        "FROM 절: 기존 PDB 또는 원격 PDB를 클론",
+        "기본: PDB$SEED에서 새 빈 PDB 생성 (소스 지정 없음)",
+        "NOCOPY 옵션: 파일 복사 없이 원래 위치의 파일 그대로 사용"
+      ],
+      "relatedKeywords": ["PLUG IN", "PDB Clone", "FILE_NAME_CONVERT"],
+      "sourceSection": "s05"
+    },
+    "DROP PLUGGABLE DATABASE": {
+      "definition": "PDB를 CDB에서 완전히 제거하는 DDL 명령으로, INCLUDING DATAFILES 또는 KEEP DATAFILES 옵션으로 데이터 파일 처리를 결정한다.",
+      "keyPoints": [
+        "PDB가 MOUNTED(CLOSE) 상태여야 삭제 가능",
+        "INCLUDING DATAFILES: 데이터 파일까지 물리적으로 삭제 (영구 제거)",
+        "KEEP DATAFILES: 데이터 파일은 유지하고 딕셔너리 정보만 삭제",
+        "UNPLUGGED 상태의 PDB를 정리할 때 KEEP DATAFILES 사용 (Plug In용 파일 보존)"
+      ],
+      "relatedKeywords": ["INCLUDING DATAFILES", "KEEP DATAFILES", "UNPLUGGED"],
+      "sourceSection": "s06"
+    },
+    "INCLUDING DATAFILES": {
+      "definition": "DROP PLUGGABLE DATABASE 시 PDB의 데이터 파일까지 물리적으로 삭제하는 옵션이다.",
+      "keyPoints": [
+        "PDB를 완전히 제거할 때 사용 — 복구 불가",
+        "OMF(Oracle Managed Files) 사용 시 기본 동작",
+        "KEEP DATAFILES와 반대 — 데이터 파일도 함께 삭제"
+      ],
+      "relatedKeywords": ["DROP PLUGGABLE DATABASE", "KEEP DATAFILES"],
+      "sourceSection": "s06"
+    },
+    "KEEP DATAFILES": {
+      "definition": "DROP PLUGGABLE DATABASE 시 데이터 파일은 보존하고 CDB 딕셔너리에서만 PDB 정보를 제거하는 옵션이다.",
+      "keyPoints": [
+        "Unplug 후 DROP 시 사용 — 데이터 파일을 다른 CDB에 Plug In하기 위해 보존",
+        "비OMF 환경에서 기본 동작",
+        "데이터 파일을 수동으로 정리해야 할 수 있음"
+      ],
+      "relatedKeywords": ["DROP PLUGGABLE DATABASE", "INCLUDING DATAFILES", "UNPLUG"],
+      "sourceSection": "s06"
+    },
+    "DBMS_PDB.CHECK_PLUG_COMPATIBILITY": {
+      "definition": "PDB Plug In 전에 XML 메타데이터를 대상 CDB와 비교하여 호환성을 검사하는 PL/SQL 프로시저이다.",
+      "keyPoints": [
+        "BOOLEAN 반환: TRUE=호환, FALSE=비호환 (PDB_PLUG_IN_VIOLATIONS에서 상세 확인)",
+        "검사 항목: 문자 셋, 엔디안, DB 버전, 옵션/컴포넌트, 플랫폼 등",
+        "Plug In 전 반드시 실행하여 실패를 예방하는 것이 베스트 프랙티스"
+      ],
+      "relatedKeywords": ["PDB_PLUG_IN_VIOLATIONS", "PLUG IN"],
+      "sourceSection": "s05"
+    },
+    "PDB_PLUG_IN_VIOLATIONS": {
+      "definition": "PDB Plug In 호환성 검사 결과 또는 Plug In 후 위반 사항을 기록하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "TYPE: ERROR(Plug In 차단), WARNING(경고, Plug In 가능)",
+        "STATUS: PENDING(미해결), RESOLVED(해결됨)",
+        "MESSAGE 컬럼에서 구체적인 위반 내용과 해결 방법 확인",
+        "Plug In 후에도 반드시 확인하여 미해결 위반 사항 처리"
+      ],
+      "relatedKeywords": ["DBMS_PDB.CHECK_PLUG_COMPATIBILITY", "PLUG IN", "DBA_PDBS"],
+      "sourceSection": "s05"
+    },
+    "V$PDBS": {
+      "definition": "CDB 내 모든 PDB의 런타임 상태(오픈 모드, RESTRICTED 여부 등)를 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "OPEN_MODE: READ WRITE, READ ONLY, MOUNTED 상태 확인",
+        "RESTRICTED: YES일 경우 제한 모드 (SYS/SYSTEM만 접속 가능)",
+        "PDB 상태 변경 후 즉시 확인에 사용"
+      ],
+      "relatedKeywords": ["CDB_PDBS", "V$CONTAINERS", "OPEN MODE"],
+      "sourceSection": "s07"
+    },
+    "CDB_PDBS": {
+      "definition": "CDB 내 모든 PDB의 딕셔너리 수준 메타데이터(STATUS, CREATION_TIME 등)를 조회하는 뷰이다.",
+      "keyPoints": [
+        "STATUS: NORMAL, UNPLUGGED, NEEDS UPGRADE 등 PDB 딕셔너리 상태",
+        "V$PDBS는 런타임 상태, CDB_PDBS는 딕셔너리 메타데이터로 역할 구분",
+        "PDB_ID, CON_ID, DBID 등 식별 정보 제공"
+      ],
+      "relatedKeywords": ["V$PDBS", "DBA_PDBS", "UNPLUGGED"],
+      "sourceSection": "s07"
+    },
+    "XML Metadata": {
+      "definition": "PDB Unplug 시 생성되는 XML 파일로, PDB의 메타데이터(데이터 파일 경로, 테이블스페이스, 문자 셋 등)를 저장한다.",
+      "keyPoints": [
+        "Unplug 시 .xml 확장자로 생성: UNPLUG INTO '/path/pdb.xml'",
+        "Plug In 시 이 XML 파일을 USING 절에서 지정",
+        "데이터 파일 자체는 포함하지 않음 — 별도로 복사/이동 필요",
+        ".pdb 아카이브와 달리 메타데이터만 포함하므로 파일 크기가 작음"
+      ],
+      "relatedKeywords": [".pdb Archive", "UNPLUG", "PLUG IN"],
+      "sourceSection": "s04"
+    },
+    ".pdb Archive": {
+      "definition": "PDB Unplug 시 XML 메타데이터와 데이터 파일을 하나의 아카이브 파일로 묶어 생성하는 형식이다.",
+      "keyPoints": [
+        "UNPLUG INTO '/path/pdb.pdb' — .pdb 확장자 사용 시 아카이브 생성",
+        "데이터 파일이 포함되어 있어 별도 파일 복사 없이 Plug In 가능",
+        "XML 메타데이터만 사용하는 방식 대비 파일 관리가 간편",
+        "파일 크기가 클 수 있음 — 데이터 파일 크기에 비례"
+      ],
+      "relatedKeywords": ["XML Metadata", "UNPLUG", "PLUG IN"],
+      "sourceSection": "s04"
+    },
+    "FILE_NAME_CONVERT": {
+      "definition": "PDB Plug In 또는 Clone 시 소스 데이터 파일의 경로를 대상 경로로 변환하는 절이다.",
+      "keyPoints": [
+        "구문: FILE_NAME_CONVERT = ('소스경로', '대상경로')",
+        "Plug In 시 데이터 파일의 물리적 위치가 다를 경우 필수",
+        "NOCOPY 옵션 사용 시 FILE_NAME_CONVERT 불필요 (원래 경로 그대로 사용)"
+      ],
+      "relatedKeywords": ["PLUG IN", "CREATE PLUGGABLE DATABASE"],
+      "sourceSection": "s05"
+    },
+    "RESTRICTED": {
+      "definition": "PDB를 제한 모드(Restricted Mode)로 오픈하여 RESTRICTED SESSION 권한을 가진 사용자만 접속할 수 있도록 하는 상태이다.",
+      "keyPoints": [
+        "ALTER PLUGGABLE DATABASE pdb_name OPEN RESTRICTED로 오픈",
+        "유지보수, 마이그레이션, 문제 해결 시 사용",
+        "V$PDBS의 RESTRICTED 컬럼이 YES로 표시",
+        "ALTER PLUGGABLE DATABASE pdb_name OPEN으로 제한 해제"
+      ],
+      "relatedKeywords": ["OPEN MODE", "ALTER PLUGGABLE DATABASE"],
+      "sourceSection": "s02"
+    },
+    "FORCE": {
+      "definition": "ALTER PLUGGABLE DATABASE CLOSE 시 FORCE 옵션을 사용하면 세션을 강제 종료하고 PDB를 닫는다.",
+      "keyPoints": [
+        "구문: ALTER PLUGGABLE DATABASE pdb_name CLOSE FORCE",
+        "활성 세션이 있어도 강제 종료 후 PDB를 MOUNTED 상태로 전환",
+        "IMMEDIATE와 유사하지만 PDB 수준에서 사용"
+      ],
+      "relatedKeywords": ["CLOSE IMMEDIATE", "ALTER PLUGGABLE DATABASE", "MOUNTED"],
+      "sourceSection": "s02"
+    },
+    "CLOSE IMMEDIATE": {
+      "definition": "PDB를 즉시 닫는 명령으로, 활성 트랜잭션을 롤백하고 세션을 종료한 후 MOUNTED 상태로 전환한다.",
+      "keyPoints": [
+        "구문: ALTER PLUGGABLE DATABASE pdb_name CLOSE IMMEDIATE",
+        "미커밋 트랜잭션을 롤백 후 종료 — 데이터 일관성 보장",
+        "CLOSE만 사용 시 활성 세션이 있으면 대기할 수 있음"
+      ],
+      "relatedKeywords": ["FORCE", "MOUNTED", "ALTER PLUGGABLE DATABASE"],
+      "sourceSection": "s02"
+    },
+    "AFTER STARTUP Trigger": {
+      "definition": "CDB 기동 후 자동으로 PDB를 OPEN하기 위해 사용하는 데이터베이스 트리거로, SAVE STATE의 대안이다.",
+      "keyPoints": [
+        "CREATE TRIGGER ... AFTER STARTUP ON DATABASE 구문 사용",
+        "트리거 내에서 ALTER PLUGGABLE DATABASE ALL OPEN 실행",
+        "SAVE STATE보다 유연한 로직 구현 가능 (조건부 OPEN 등)",
+        "SAVE STATE 사용이 일반적으로 권장되며, 트리거는 특수 상황에서 사용"
+      ],
+      "relatedKeywords": ["SAVE STATE", "ALTER PLUGGABLE DATABASE"],
+      "sourceSection": "s03"
+    }
+  }
+}

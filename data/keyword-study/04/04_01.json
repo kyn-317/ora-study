@@ -1,0 +1,368 @@
+{
+  "studyId": "04_01",
+  "chapterId": "04",
+  "title": "사용자 및 인증 관리 (User and Authentication Management)",
+  "keywords": {
+    "사용자 (User)": {
+      "definition": "Oracle Database에 접속하여 작업을 수행하는 주체로, 생성 시 동일한 이름의 스키마(Schema)가 자동으로 생성되어 1:1 대응 관계를 가진다.",
+      "keyPoints": [
+        "CREATE USER 실행 시 동일 이름의 스키마가 자동 생성되며, DROP USER ... CASCADE로 삭제 시 스키마 내 모든 객체도 함께 삭제",
+        "멀티테넌트 환경에서 로컬 사용자(PDB 한정)와 공통 사용자(CDB 전체)로 구분",
+        "DBA_USERS 뷰로 사용자 정보를, V$SESSION으로 현재 접속 세션의 사용자/스키마 확인"
+      ],
+      "relatedKeywords": ["스키마 (Schema)", "로컬 사용자 (Local User)", "공통 사용자 (Common User)", "DBA_USERS"],
+      "sourceSection": "s01"
+    },
+    "스키마 (Schema)": {
+      "definition": "사용자가 소유한 데이터베이스 객체(테이블, 뷰, 인덱스 등)의 논리적 집합으로, 사용자와 1:1로 대응한다.",
+      "keyPoints": [
+        "사용자 생성 시 자동으로 동일 이름의 스키마 생성 — 별도로 스키마만 생성하는 명령은 없음",
+        "다른 스키마 객체 참조 시 '스키마명.객체명' 형식 사용 (예: HR.EMPLOYEES)",
+        "Schema-Only Account(NO AUTHENTICATION)로 로그인 불가능한 스키마 전용 계정 생성 가능"
+      ],
+      "relatedKeywords": ["사용자 (User)", "Schema-Only Account"],
+      "sourceSection": "s01"
+    },
+    "인증 (Authentication)": {
+      "definition": "데이터베이스에 접속하려는 사용자의 신원을 검증하는 과정으로, 패스워드/OS/특권/외부/글로벌 등 다양한 방식이 있다.",
+      "keyPoints": [
+        "패스워드 인증: 데이터 딕셔너리의 해시값과 비교 (가장 일반적)",
+        "OS 인증: OS 그룹 멤버십으로 패스워드 없이 접속",
+        "특권 인증: SYSDBA/SYSOPER 접속 시 패스워드 파일 또는 OS 인증 사용",
+        "외부/글로벌 인증: Kerberos, LDAP 등 외부 서비스를 통한 중앙 집중 인증"
+      ],
+      "relatedKeywords": ["패스워드 인증 (Password Authentication)", "OS 인증 (OS Authentication)", "특권 인증 (Privileged Authentication)"],
+      "sourceSection": "s01"
+    },
+    "로컬 사용자 (Local User)": {
+      "definition": "특정 PDB(Pluggable Database) 내에서만 존재하는 사용자로, 해당 PDB의 데이터 딕셔너리에만 정보가 저장된다.",
+      "keyPoints": [
+        "생성 시 반드시 대상 PDB에 접속한 후 CREATE USER 실행 필요",
+        "C##으로 시작하는 이름 사용 불가 — C## 접두사는 공통 사용자 전용",
+        "동일한 이름이 서로 다른 PDB에 독립적으로 존재 가능",
+        "Non-CDB 환경에서는 모든 사용자가 사실상 로컬 사용자"
+      ],
+      "relatedKeywords": ["공통 사용자 (Common User)", "C## 접두사 (C## Prefix)"],
+      "sourceSection": "s02"
+    },
+    "공통 사용자 (Common User)": {
+      "definition": "CDB 루트(CDB$ROOT)에서 생성되어 CDB 전체(루트 + 모든 PDB)에 걸쳐 존재하는 사용자로, 이름에 C## 접두사가 필수이다.",
+      "keyPoints": [
+        "CDB 루트에서만 생성 가능하며, 모든 오픈 상태 PDB에 메타데이터가 자동 전파",
+        "CONTAINER=ALL로 권한 부여 시 모든 컨테이너에서 유효, CONTAINER=CURRENT는 현재 컨테이너만",
+        "SYS, SYSTEM 등 Oracle 사전 정의 공통 사용자는 C## 접두사 없이 존재",
+        "CDB_USERS 뷰의 COMMON 컬럼(YES/NO)으로 공통/로컬 구분"
+      ],
+      "relatedKeywords": ["로컬 사용자 (Local User)", "C## 접두사 (C## Prefix)", "CONTAINER=ALL", "CDB_USERS"],
+      "sourceSection": "s02"
+    },
+    "C## 접두사 (C## Prefix)": {
+      "definition": "멀티테넌트 환경에서 공통 사용자(Common User) 및 공통 롤(Common Role)의 이름에 반드시 사용해야 하는 네이밍 규칙이다.",
+      "keyPoints": [
+        "COMMON_USER_PREFIX 초기화 파라미터로 접두사를 제어 (기본값: C##)",
+        "로컬 사용자에는 C##으로 시작하는 이름 사용 불가",
+        "_ORACLE_SCRIPT 파라미터로 규칙을 우회할 수 있으나 운영 환경에서는 비권장"
+      ],
+      "relatedKeywords": ["공통 사용자 (Common User)", "COMMON_USER_PREFIX"],
+      "sourceSection": "s02"
+    },
+    "SYS": {
+      "definition": "Oracle Database의 최고 권한 사용자로, 데이터 딕셔너리(Data Dictionary)의 모든 기본 테이블과 뷰를 소유한다.",
+      "keyPoints": [
+        "접속 시 반드시 AS SYSDBA 또는 AS SYSOPER 절을 지정해야 함 (미지정 시 ORA-28009 오류)",
+        "SYS 스키마의 데이터 딕셔너리 기본 테이블을 직접 DML로 수정하면 데이터베이스 손상 위험",
+        "DROP USER SYS는 불가능하며, CDB 환경에서 공통 사용자로 존재",
+        "SYSDBA로 접속 시 SYS 스키마로, SYSOPER로 접속 시 PUBLIC 스키마로 연결"
+      ],
+      "relatedKeywords": ["SYSTEM", "SYSDBA", "SYSOPER"],
+      "sourceSection": "s03"
+    },
+    "SYSTEM": {
+      "definition": "SYS 다음으로 높은 관리 권한을 가진 사용자로, 추가 관리용 테이블과 뷰를 소유하며 일반 DBA 관리 작업에 권장된다.",
+      "keyPoints": [
+        "SYS와 달리 AS SYSDBA 없이 일반 접속 가능",
+        "DBA 역할이 부여되어 있으며, 데이터 딕셔너리 기본 테이블은 소유하지 않음",
+        "SYS는 DB 생성/인스턴스 복구 등 최상위 작업용, SYSTEM은 일반 관리 작업용으로 구분"
+      ],
+      "relatedKeywords": ["SYS", "DBA_USERS"],
+      "sourceSection": "s03"
+    },
+    "SYSDBA": {
+      "definition": "Oracle Database의 최상위 관리 권한으로, CREATE DATABASE를 포함한 모든 관리 작업을 수행할 수 있다.",
+      "keyPoints": [
+        "STARTUP/SHUTDOWN, CREATE DATABASE, 완전 복구 등 모든 관리 기능 수행 가능",
+        "접속 시 SYS 스키마로 자동 연결되며, 모든 시스템 권한을 WITH ADMIN OPTION으로 포함",
+        "GRANT SYSDBA TO 사용자 실행 시 패스워드 파일에 자동 등록 (EXCLUSIVE 모드)",
+        "SYSDBA 접속은 필수 감사(Mandatory Auditing) 대상"
+      ],
+      "relatedKeywords": ["SYSOPER", "SYS", "패스워드 파일 (Password File)"],
+      "sourceSection": "s06"
+    },
+    "SYSOPER": {
+      "definition": "SYSDBA보다 제한된 관리 권한으로, STARTUP/SHUTDOWN 등 운영 수준의 관리 작업을 수행할 수 있다.",
+      "keyPoints": [
+        "CREATE DATABASE, 불완전 복구 불가 — SYSDBA와의 핵심 차이",
+        "접속 시 PUBLIC 스키마로 연결 (SYSDBA는 SYS 스키마)",
+        "SYSDBA처럼 필수 감사 대상이며, 로컬 접속 시 OS 인증, 원격 접속 시 패스워드 파일 인증"
+      ],
+      "relatedKeywords": ["SYSDBA", "SYS"],
+      "sourceSection": "s06"
+    },
+    "SYSBACKUP": {
+      "definition": "RMAN 백업/복구 전용 관리 권한으로, 직무 분리(Separation of Duties) 원칙에 따라 SYSDBA의 모든 권한 없이 백업 작업을 수행할 수 있다.",
+      "keyPoints": [
+        "STARTUP/SHUTDOWN 가능하지만 CREATE DATABASE는 불가",
+        "OS 그룹 backupdba와 매핑, 접속 시 SYSBACKUP 전용 스키마로 연결",
+        "V$PWFILE_USERS 뷰에서 SYSBACKUP 권한 부여 여부 확인 가능"
+      ],
+      "relatedKeywords": ["SYSDBA", "SYSDG", "SYSKM", "직무 분리 (Separation of Duties)"],
+      "sourceSection": "s06"
+    },
+    "SYSDG": {
+      "definition": "Data Guard 관리 전용 관리 권한으로, dgmgrl 접속 및 DG 설정/전환/페일오버를 수행할 수 있다.",
+      "keyPoints": [
+        "OS 그룹 dgdba와 매핑, 접속 시 SYSDG 전용 스키마로 연결",
+        "SYSDBA의 모든 권한 없이 Data Guard 관리만 가능하여 직무 분리 실현"
+      ],
+      "relatedKeywords": ["SYSDBA", "SYSBACKUP", "직무 분리 (Separation of Duties)"],
+      "sourceSection": "s06"
+    },
+    "SYSKM": {
+      "definition": "Transparent Data Encryption(TDE) 키 관리 전용 관리 권한으로, 암호화 키의 생성/교체를 수행할 수 있다.",
+      "keyPoints": [
+        "ADMINISTER KEY MANAGEMENT 작업 수행 가능",
+        "OS 그룹 kmdba와 매핑, 접속 시 SYSKM 전용 스키마로 연결",
+        "STARTUP/SHUTDOWN은 불가능 — SYSBACKUP, SYSDG과의 차이점"
+      ],
+      "relatedKeywords": ["SYSDBA", "SYSBACKUP", "SYSDG"],
+      "sourceSection": "s06"
+    },
+    "패스워드 인증 (Password Authentication)": {
+      "definition": "사용자가 제공한 패스워드를 데이터 딕셔너리(USER$ 테이블)에 저장된 해시값과 비교하여 인증하는 가장 일반적인 인증 방식이다.",
+      "keyPoints": [
+        "Oracle 12c 이상에서 SHA-512+Salt(PBKDF2) 해시 알고리즘 사용 권장",
+        "SQLNET.ALLOWED_LOGON_VERSION_SERVER로 허용 해시 버전 제어",
+        "인증 실패 시 ORA-01017 오류 발생",
+        "프로파일(Profile)을 통해 패스워드 복잡성, 만료 기간, 잠금 정책을 중앙 관리"
+      ],
+      "relatedKeywords": ["프로파일 (Profile)", "PASSWORD_VERIFY_FUNCTION", "PASSWORD_LIFE_TIME"],
+      "sourceSection": "s04"
+    },
+    "OS 인증 (OS Authentication)": {
+      "definition": "운영체제의 그룹 멤버십을 활용하여 패스워드 입력 없이 Oracle Database에 접속하는 인증 방식이다.",
+      "keyPoints": [
+        "dba 그룹(SYSDBA), oper 그룹(SYSOPER) 등 OS 그룹 소속 여부로 인증",
+        "OS_AUTHENT_PREFIX 기본값은 OPS$ — OS 사용자와 DB 사용자를 매핑하는 접두사",
+        "REMOTE_OS_AUTHENT=TRUE는 사용자명 위조(Spoofing) 위험이 있어 Deprecated(비권장)",
+        "데이터베이스 미기동 시에도 접속 가능하여 관리자 접속에 유용"
+      ],
+      "relatedKeywords": ["OS_AUTHENT_PREFIX", "REMOTE_OS_AUTHENT", "특권 인증 (Privileged Authentication)"],
+      "sourceSection": "s05"
+    },
+    "특권 인증 (Privileged Authentication)": {
+      "definition": "SYSDBA, SYSOPER 등 관리 권한으로 접속하는 사용자에 대한 인증 메커니즘으로, 로컬은 OS 인증, 원격은 패스워드 파일 인증을 사용한다.",
+      "keyPoints": [
+        "로컬 접속: OS 그룹 멤버십 우선 확인 → 원격 접속: 패스워드 파일에서 인증",
+        "데이터베이스 미기동 상태에서도 인증 가능 (데이터 딕셔너리 불필요)",
+        "REMOTE_LOGIN_PASSWORDFILE 파라미터로 패스워드 파일 사용 모드 결정"
+      ],
+      "relatedKeywords": ["SYSDBA", "SYSOPER", "패스워드 파일 (Password File)", "REMOTE_LOGIN_PASSWORDFILE"],
+      "sourceSection": "s06"
+    },
+    "패스워드 파일 (Password File)": {
+      "definition": "SYSDBA, SYSOPER 등 관리 권한 사용자의 인증 정보를 별도 파일에 저장하는 메커니즘으로, DB 미기동 상태 및 원격 관리자 접속 시 필수이다.",
+      "keyPoints": [
+        "orapwd 유틸리티로 생성 (file, password, format 등 파라미터 지정)",
+        "Linux 기본 위치: $ORACLE_HOME/dbs/orapw<SID>, Windows: %ORACLE_HOME%\\database\\PWD<SID>.ora",
+        "REMOTE_LOGIN_PASSWORDFILE: EXCLUSIVE(SYS 외 등록 가능), SHARED(RAC), NONE(원격 SYSDBA 불가)",
+        "Data Guard 환경에서 Primary-Standby 간 패스워드 파일 동기화 필수"
+      ],
+      "relatedKeywords": ["orapwd", "REMOTE_LOGIN_PASSWORDFILE", "V$PWFILE_USERS"],
+      "sourceSection": "s04"
+    },
+    "orapwd": {
+      "definition": "Oracle 패스워드 파일을 생성하는 유틸리티로, file, password, entries, format 등의 파라미터를 지정하여 관리자 인증용 파일을 생성한다.",
+      "keyPoints": [
+        "format=12.2 이상 권장, force=y로 기존 파일 덮어쓰기 가능",
+        "ASM 환경에서는 dbuniquename 파라미터 사용",
+        "input_file 파라미터로 기존 패스워드 파일에서 복사(마이그레이션) 가능"
+      ],
+      "relatedKeywords": ["패스워드 파일 (Password File)", "REMOTE_LOGIN_PASSWORDFILE"],
+      "sourceSection": "s04"
+    },
+    "REMOTE_LOGIN_PASSWORDFILE": {
+      "definition": "패스워드 파일 사용 모드를 결정하는 초기화 파라미터로, EXCLUSIVE/SHARED/NONE 세 가지 값을 가진다.",
+      "keyPoints": [
+        "EXCLUSIVE: 하나의 인스턴스만 사용, SYS 외 사용자도 등록 가능 (기본값)",
+        "SHARED: 여러 인스턴스가 공유(RAC), SYS와 기존 등록 사용자만 인증 가능",
+        "NONE: 패스워드 파일 미사용, 원격 SYSDBA 접속 불가"
+      ],
+      "relatedKeywords": ["패스워드 파일 (Password File)", "orapwd", "V$PWFILE_USERS"],
+      "sourceSection": "s04"
+    },
+    "프로파일 (Profile)": {
+      "definition": "사용자에게 할당하는 데이터베이스 자원 사용량 및 비밀번호 정책의 집합으로, 각 사용자는 반드시 하나의 프로파일에 연결된다.",
+      "keyPoints": [
+        "자원 제한과 비밀번호 관리 두 가지 역할을 수행",
+        "비밀번호 관리 파라미터는 RESOURCE_LIMIT 설정과 무관하게 항상 적용",
+        "명시적으로 지정하지 않으면 DEFAULT 프로파일이 자동 할당",
+        "DBA_PROFILES 뷰로 설정 조회, DBA_USERS 뷰로 사용자별 할당 프로파일 확인"
+      ],
+      "relatedKeywords": ["PASSWORD_LIFE_TIME", "FAILED_LOGIN_ATTEMPTS", "PASSWORD_VERIFY_FUNCTION"],
+      "sourceSection": "s04"
+    },
+    "PASSWORD_VERIFY_FUNCTION": {
+      "definition": "프로파일에 설정하는 패스워드 복잡성 검증 함수로, 사용자가 패스워드 변경 시 규칙을 자동으로 검증한다.",
+      "keyPoints": [
+        "ORA12C_VERIFY_FUNCTION: 표준 검증 (8자 이상, 대/소/숫자 각 1자 이상 등)",
+        "ORA12C_STRONG_VERIFY_FUNCTION: 강화된 검증 (더 엄격한 규칙)",
+        "utlpwdmg.sql 스크립트 실행으로 사전 정의 함수 설치",
+        "NULL 설정 시 패스워드 복잡성 검증 비활성화"
+      ],
+      "relatedKeywords": ["프로파일 (Profile)", "PASSWORD_LIFE_TIME"],
+      "sourceSection": "s04"
+    },
+    "PASSWORD_LIFE_TIME": {
+      "definition": "프로파일에서 패스워드의 유효 기간(일)을 설정하는 파라미터로, 기본값은 180일이다.",
+      "keyPoints": [
+        "만료 후 PASSWORD_GRACE_TIME(기본 7일) 유예 기간 동안 패스워드 변경 가능",
+        "유예 기간도 초과 시 계정이 EXPIRED 상태가 되어 패스워드 변경 필수",
+        "UNLIMITED로 설정하면 패스워드 만료 없음"
+      ],
+      "relatedKeywords": ["프로파일 (Profile)", "FAILED_LOGIN_ATTEMPTS", "패스워드 만료 (Password Expiry)"],
+      "sourceSection": "s04"
+    },
+    "FAILED_LOGIN_ATTEMPTS": {
+      "definition": "계정 잠금 전 허용되는 로그인 실패 횟수를 설정하는 프로파일 파라미터로, 기본값은 10회이다.",
+      "keyPoints": [
+        "초과 시 PASSWORD_LOCK_TIME(기본 1일) 동안 계정 자동 잠금",
+        "잠금 상태는 DBA_USERS 뷰에서 LOCKED(TIMED)로 표시",
+        "PASSWORD_LOCK_TIME 경과 후 자동 해제되거나, ALTER USER ... ACCOUNT UNLOCK으로 수동 해제"
+      ],
+      "relatedKeywords": ["프로파일 (Profile)", "계정 잠금 (Account Lock)"],
+      "sourceSection": "s04"
+    },
+    "DBA_USERS": {
+      "definition": "데이터베이스의 모든 사용자 정보를 조회하는 딕셔너리 뷰로, 계정 상태, 프로파일, 만료일 등을 확인할 수 있다.",
+      "keyPoints": [
+        "ACCOUNT_STATUS 컬럼으로 OPEN/LOCKED/EXPIRED 등 계정 상태 확인",
+        "PROFILE 컬럼으로 할당된 프로파일 확인",
+        "COMMON 컬럼으로 공통 사용자(YES)/로컬 사용자(NO) 구분",
+        "ORACLE_MAINTAINED 컬럼으로 Oracle 유지 관리 계정 식별"
+      ],
+      "relatedKeywords": ["CDB_USERS", "DBA_USERS_WITH_DEFPWD"],
+      "sourceSection": "s01"
+    },
+    "CDB_USERS": {
+      "definition": "CDB 전체의 사용자 정보를 조회하는 딕셔너리 뷰로, CON_ID와 COMMON 컬럼을 통해 컨테이너별 사용자 유형을 확인할 수 있다.",
+      "keyPoints": [
+        "CON_ID 컬럼으로 사용자가 존재하는 컨테이너 식별",
+        "COMMON 컬럼이 YES이면 공통 사용자, NO이면 로컬 사용자",
+        "CDB 루트에서만 조회 가능하며, PDB에서는 DBA_USERS 사용"
+      ],
+      "relatedKeywords": ["DBA_USERS", "공통 사용자 (Common User)"],
+      "sourceSection": "s02"
+    },
+    "V$PWFILE_USERS": {
+      "definition": "패스워드 파일에 등록된 사용자 및 부여된 관리 권한(SYSDBA, SYSOPER, SYSBACKUP 등)을 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "SYSDBA, SYSOPER, SYSBACKUP, SYSDG, SYSKM 각 권한의 부여 여부를 확인 가능",
+        "REMOTE_LOGIN_PASSWORDFILE = EXCLUSIVE일 때 SYS 외 사용자도 등록됨",
+        "패스워드 파일이 없거나 NONE 설정 시 조회 결과 없음"
+      ],
+      "relatedKeywords": ["패스워드 파일 (Password File)", "REMOTE_LOGIN_PASSWORDFILE"],
+      "sourceSection": "s06"
+    },
+    "V$SESSION": {
+      "definition": "현재 데이터베이스에 접속된 세션 정보를 조회하는 동적 성능 뷰로, USERNAME, SCHEMANAME 등으로 세션의 사용자/스키마를 확인한다.",
+      "keyPoints": [
+        "USERNAME 컬럼으로 접속 사용자, SCHEMANAME 컬럼으로 현재 스키마 확인",
+        "SYSDBA 접속 시 USERNAME은 접속 계정이지만 SCHEMANAME은 SYS",
+        "PROGRAM, TERMINAL, OSUSER 등 클라이언트 정보도 확인 가능"
+      ],
+      "relatedKeywords": ["DBA_USERS", "스키마 (Schema)"],
+      "sourceSection": "s01"
+    },
+    "CONTAINER=ALL": {
+      "definition": "멀티테넌트 환경에서 CDB 루트의 모든 컨테이너(루트 + 모든 PDB)에 권한/사용자/롤을 적용하는 CONTAINER 절 옵션이다.",
+      "keyPoints": [
+        "CDB 루트에서만 사용 가능하며, PDB에서는 사용 불가",
+        "CONTAINER=CURRENT(기본값)는 현재 접속된 컨테이너에만 적용",
+        "공통 사용자 생성 및 공통 롤 부여 시 사용"
+      ],
+      "relatedKeywords": ["공통 사용자 (Common User)", "C## 접두사 (C## Prefix)"],
+      "sourceSection": "s08"
+    },
+    "OS_AUTHENT_PREFIX": {
+      "definition": "OS 인증 시 OS 사용자명과 데이터베이스 사용자명을 매핑하기 위한 접두사 파라미터로, 기본값은 OPS$이다.",
+      "keyPoints": [
+        "OS 사용자 'oracle' → DB 사용자 'OPS$oracle'로 매핑",
+        "빈 문자열(\"\")로 설정하면 OS 사용자명과 DB 사용자명을 동일하게 매핑",
+        "CREATE USER OPS$사용자명 IDENTIFIED EXTERNALLY로 OS 인증 사용자 생성"
+      ],
+      "relatedKeywords": ["OS 인증 (OS Authentication)", "REMOTE_OS_AUTHENT"],
+      "sourceSection": "s05"
+    },
+    "REMOTE_OS_AUTHENT": {
+      "definition": "원격 클라이언트의 OS 인증 허용 여부를 결정하는 파라미터로, 기본값 FALSE이며 TRUE 설정은 보안상 Deprecated이다.",
+      "keyPoints": [
+        "TRUE 설정 시 원격 클라이언트가 OS 사용자명을 위조(Spoofing)할 수 있어 매우 위험",
+        "Oracle에서 Deprecated(비권장)으로 지정된 파라미터",
+        "로컬 OS 인증만 사용하는 것이 강력히 권장됨"
+      ],
+      "relatedKeywords": ["OS 인증 (OS Authentication)", "OS_AUTHENT_PREFIX"],
+      "sourceSection": "s05"
+    },
+    "DBA_USERS_WITH_DEFPWD": {
+      "definition": "기본 패스워드를 사용 중인 데이터베이스 계정을 식별하는 딕셔너리 뷰로, 보안 점검 시 즉시 패스워드를 변경해야 하는 계정을 확인한다.",
+      "keyPoints": [
+        "이 뷰에 조회되는 계정은 기본 패스워드를 변경하지 않은 것이므로 즉시 변경 필요",
+        "Oracle Database 보안 운영의 기본 점검 항목",
+        "운영 환경에서 반드시 정기적으로 확인해야 하는 뷰"
+      ],
+      "relatedKeywords": ["DBA_USERS", "계정 잠금 (Account Lock)"],
+      "sourceSection": "s07"
+    },
+    "Schema-Only Account": {
+      "definition": "NO AUTHENTICATION 옵션으로 생성된 로그인 불가능한 스키마 전용 계정으로, 객체를 소유하되 직접 접속은 차단한다.",
+      "keyPoints": [
+        "CREATE USER app_schema NO AUTHENTICATION으로 생성",
+        "애플리케이션 스키마를 직접 로그인으로부터 보호하는 데 유용",
+        "Oracle 26ai에서 기능이 확장되어 관리 편의성 향상"
+      ],
+      "relatedKeywords": ["스키마 (Schema)", "사용자 (User)"],
+      "sourceSection": "s01"
+    },
+    "직무 분리 (Separation of Duties)": {
+      "definition": "보안 원칙으로, SYSDBA의 모든 권한을 부여하지 않고 SYSBACKUP, SYSDG, SYSKM 등 업무별로 세분화된 관리 권한만 부여하는 것이다.",
+      "keyPoints": [
+        "백업 담당자에게 SYSBACKUP만, DG 담당자에게 SYSDG만 부여",
+        "보안 감사 시 각 관리자의 책임 범위가 명확해짐",
+        "최소 권한 원칙(Principle of Least Privilege)의 구현 방법"
+      ],
+      "relatedKeywords": ["SYSBACKUP", "SYSDG", "SYSKM"],
+      "sourceSection": "s03"
+    },
+    "패스워드 만료 (Password Expiry)": {
+      "definition": "PASSWORD_LIFE_TIME에 설정된 기간이 경과하여 패스워드가 만료된 상태로, 사용자는 패스워드를 변경해야 접속할 수 있다.",
+      "keyPoints": [
+        "만료 후 PASSWORD_GRACE_TIME 유예 기간 동안에는 접속 시 패스워드 변경 요구",
+        "유예 기간 초과 시 계정 상태가 EXPIRED로 변경되어 접속 불가",
+        "DBA_USERS 뷰의 ACCOUNT_STATUS 컬럼에서 EXPIRED, EXPIRED(GRACE) 등으로 확인"
+      ],
+      "relatedKeywords": ["PASSWORD_LIFE_TIME", "프로파일 (Profile)"],
+      "sourceSection": "s04"
+    },
+    "계정 잠금 (Account Lock)": {
+      "definition": "관리자가 수동으로 잠그거나(LOCKED) 로그인 실패 초과로 자동 잠기는(LOCKED(TIMED)) 계정 상태로, 해당 계정은 접속이 차단된다.",
+      "keyPoints": [
+        "수동 잠금: ALTER USER ... ACCOUNT LOCK, 수동 해제: ALTER USER ... ACCOUNT UNLOCK",
+        "자동 잠금(LOCKED(TIMED)): FAILED_LOGIN_ATTEMPTS 초과 시 발생, PASSWORD_LOCK_TIME 후 자동 해제",
+        "기본 계정 대부분은 생성 시 LOCKED & EXPIRED 상태",
+        "DBA_USERS 뷰의 ACCOUNT_STATUS에서 OPEN/LOCKED/LOCKED(TIMED) 등으로 확인"
+      ],
+      "relatedKeywords": ["FAILED_LOGIN_ATTEMPTS", "DBA_USERS"],
+      "sourceSection": "s07"
+    }
+  }
+}

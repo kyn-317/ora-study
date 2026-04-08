@@ -1,0 +1,350 @@
+{
+  "studyId": "03_01",
+  "chapterId": "03",
+  "title": "주요 운영 환경 툴 (Database Administration Tools)",
+  "keywords": {
+    "DBCA": {
+      "definition": "Database Configuration Assistant. Oracle 데이터베이스를 생성, 구성, 삭제하기 위한 전용 유틸리티로, GUI 대화형 모드와 CLI 사일런트 모드를 모두 지원한다.",
+      "keyPoints": [
+        "DB 생성/삭제/구성 변경/PDB 관리/템플릿 관리 가능. 리스너 구성이나 tnsnames.ora 설정은 불가(NETCA/NETMGR 담당)",
+        "대화형 모드의 '네트워크 구성' 단계는 기존 리스너를 선택하는 것이지, 새 리스너를 생성하는 것이 아님",
+        "사일런트 모드(-silent)로 자동화 가능. 응답 파일(.rsp)로 반복 배포 지원",
+        "-generateScripts 옵션으로 실제 생성 없이 SQL 스크립트만 생성 가능"
+      ],
+      "relatedKeywords": ["NETCA", "NETMGR", "사일런트 모드 (Silent Mode)", "응답 파일 (Response File)", "템플릿 (Template)"],
+      "sourceSection": "s02"
+    },
+    "Database Configuration Assistant": {
+      "definition": "DBCA의 정식 명칭. Oracle 데이터베이스 생성·삭제·구성을 위한 GUI/CLI 유틸리티이다.",
+      "keyPoints": [
+        "DBCA와 동일. 실행 경로: $ORACLE_HOME/bin/dbca",
+        "CDB/Non-CDB 데이터베이스 생성 및 PDB 추가/삭제 지원",
+        "General Purpose, Data Warehouse, Custom Database 등 사전 정의 템플릿 제공"
+      ],
+      "relatedKeywords": ["DBCA"],
+      "sourceSection": "s02"
+    },
+    "SQL*Plus": {
+      "definition": "Oracle에서 기본 제공하는 커맨드라인(CLI) 인터페이스로, SQL/PL/SQL 실행 및 데이터베이스 기동/종료 등 관리 작업을 수행하는 가장 기본적인 DBA 도구이다.",
+      "keyPoints": [
+        "STARTUP/SHUTDOWN 명령으로 DB 기동/종료 가능 (SYSDBA/SYSOPER 권한 필요)",
+        "SQL*Net을 통한 원격 접속 가능. 로컬 접속은 / as sysdba 형식",
+        "ALTER SESSION SET CONTAINER로 CDB/PDB 간 전환 가능",
+        "@(at sign)으로 SQL 스크립트 파일 실행. SPOOL로 출력 결과 파일 저장"
+      ],
+      "relatedKeywords": ["SYSDBA", "SYSOPER", "STARTUP", "SHUTDOWN", "SPOOL"],
+      "sourceSection": "s03"
+    },
+    "Enterprise Manager Cloud Control": {
+      "definition": "Oracle의 웹 기반 종합 관리 플랫폼으로, 다수의 Oracle 데이터베이스 및 인프라를 중앙에서 모니터링·관리·자동화하는 도구이다.",
+      "keyPoints": [
+        "3-Tier 아키텍처: OMS(Oracle Management Service) + Management Agent + Management Repository",
+        "웹 브라우저에서 DB 기동/종료, 성능 모니터링, Job 스케줄링, 패치 관리 가능",
+        "대규모 환경(수백~수천 대상) 관리에 적합하며, 단일 DB에는 EM Express가 경량 대안",
+        "리스너 관리 기능도 제공하지만, 리스너 구성 파일 직접 편집은 NETCA/NETMGR 역할"
+      ],
+      "relatedKeywords": ["OMS (Oracle Management Service)", "Management Agent", "Management Repository", "EM Express"],
+      "sourceSection": "s04"
+    },
+    "RMAN": {
+      "definition": "Recovery Manager. Oracle 데이터베이스의 백업 및 복구를 전문적으로 수행하는 CLI 도구로, 블록 레벨 백업과 증분 백업을 지원한다.",
+      "keyPoints": [
+        "BACKUP DATABASE, RESTORE, RECOVER 등 전용 명령어로 백업/복구 수행",
+        "STARTUP/SHUTDOWN 가능 (SQL*Plus와 동일하게 DB 기동/종료 지원)",
+        "Recovery Catalog(선택)에 백업 메타데이터 저장하여 중앙 관리 가능",
+        "블록 레벨 손상 감지(VALIDATE) 및 증분 백업으로 효율적인 백업 전략 구현"
+      ],
+      "relatedKeywords": ["Recovery Catalog", "BACKUP DATABASE", "RESTORE", "VALIDATE"],
+      "sourceSection": "s05"
+    },
+    "Recovery Manager": {
+      "definition": "RMAN의 정식 명칭. Oracle 전용 백업/복구 유틸리티로 블록 수준의 백업과 복구를 지원한다.",
+      "keyPoints": [
+        "RMAN과 동일. 실행 경로: $ORACLE_HOME/bin/rman",
+        "Control File 또는 Recovery Catalog에 백업 이력 관리",
+        "Oracle 권장 백업 도구이며, OS 명령어(cp/dd) 대비 미사용 블록 스킵 등 효율적"
+      ],
+      "relatedKeywords": ["RMAN", "Recovery Catalog"],
+      "sourceSection": "s05"
+    },
+    "SQL Developer": {
+      "definition": "Oracle이 무료 제공하는 GUI 기반 데스크톱 IDE로, SQL/PL/SQL 개발, 객체 관리, 데이터 모델링 등을 지원하지만 DB 기동/종료는 불가하다.",
+      "keyPoints": [
+        "JDBC Thin Driver로 접속하므로 Oracle Client 설치 불필요",
+        "DB 기동/종료(STARTUP/SHUTDOWN) 미지원 — SQL*Plus나 RMAN 사용 필요",
+        "SQL 워크시트, 실행 계획 확인, 데이터 내보내기/가져오기, 객체 브라우저 제공",
+        "Oracle 이외의 DB(MySQL, PostgreSQL 등)에도 접속하여 마이그레이션 지원"
+      ],
+      "relatedKeywords": ["JDBC Thin Driver", "SQL*Plus"],
+      "sourceSection": "s06"
+    },
+    "대화형 모드 (Interactive Mode)": {
+      "definition": "DBCA를 GUI 마법사(Wizard) 형태로 실행하여 단계별 화면을 통해 데이터베이스를 생성·구성하는 방식이다.",
+      "keyPoints": [
+        "12단계의 마법사 화면: 작업 선택 → 생성 모드 → DB 유형 → 템플릿 → 식별 정보 → 저장소 → 네트워크 등",
+        "Typical(일반) 모드는 빠른 생성, Advanced(고급) 모드는 세부 옵션 제어 가능",
+        "네트워크 구성 단계는 기존 리스너를 선택하는 것 (새 리스너 생성 아님)",
+        "Save Response File 기능으로 GUI에서 설정한 내용을 응답 파일로 내보내기 가능"
+      ],
+      "relatedKeywords": ["DBCA", "사일런트 모드 (Silent Mode)", "템플릿 (Template)"],
+      "sourceSection": "s02"
+    },
+    "사일런트 모드 (Silent Mode)": {
+      "definition": "DBCA를 GUI 없이 명령줄(CLI)에서 -silent 옵션으로 실행하여, 파라미터 또는 응답 파일을 통해 데이터베이스를 자동 생성·관리하는 방식이다.",
+      "keyPoints": [
+        "dbca -silent -createDatabase ... 형식으로 실행. X Window 없는 서버 환경에서 필수",
+        "응답 파일(.rsp)에 모든 구성 파라미터를 key=value로 정의하여 재사용 가능",
+        "자동화, 반복 배포, CI/CD 파이프라인 연계에 적합",
+        "-generateScripts로 실제 생성 없이 SQL 스크립트만 생성 가능"
+      ],
+      "relatedKeywords": ["DBCA", "대화형 모드 (Interactive Mode)", "응답 파일 (Response File)"],
+      "sourceSection": "s02"
+    },
+    "응답 파일 (Response File)": {
+      "definition": "DBCA 사일런트 모드에서 사용할 모든 구성 파라미터를 key=value 형식의 텍스트 파일(.rsp)로 정의한 것이다.",
+      "keyPoints": [
+        "위치: $ORACLE_HOME/assistants/dbca/ 디렉토리에 샘플 파일 제공",
+        "DBCA GUI의 Save Response File 기능으로 내보내기 가능",
+        "동일한 응답 파일로 여러 서버에 동일 구성의 DB를 반복 배포 가능",
+        "gdbName, sid, characterSet, memoryPercentage 등 DB 생성에 필요한 모든 옵션 정의"
+      ],
+      "relatedKeywords": ["사일런트 모드 (Silent Mode)", "DBCA"],
+      "sourceSection": "s02"
+    },
+    "STARTUP": {
+      "definition": "Oracle 데이터베이스 인스턴스를 기동하는 명령으로, NOMOUNT → MOUNT → OPEN 3단계를 거쳐 데이터베이스를 사용 가능 상태로 전환한다.",
+      "keyPoints": [
+        "STARTUP = NOMOUNT(파라미터 파일 읽기, SGA 할당) → MOUNT(컨트롤 파일 읽기) → OPEN(데이터/redo 파일 열기)",
+        "STARTUP RESTRICT: RESTRICTED SESSION 권한 보유 사용자만 접속 가능",
+        "STARTUP FORCE: 내부적으로 SHUTDOWN ABORT + STARTUP 수행",
+        "SQL*Plus 또는 RMAN에서 SYSDBA/SYSOPER 권한으로 실행"
+      ],
+      "relatedKeywords": ["SHUTDOWN", "SYSDBA", "SYSOPER"],
+      "sourceSection": "s03"
+    },
+    "SHUTDOWN": {
+      "definition": "Oracle 데이터베이스 인스턴스를 종료하는 명령으로, NORMAL/TRANSACTIONAL/IMMEDIATE/ABORT 4가지 모드를 제공한다.",
+      "keyPoints": [
+        "NORMAL: 모든 사용자가 자발적으로 로그아웃할 때까지 대기 (기본값)",
+        "TRANSACTIONAL: 활성 트랜잭션 완료 대기 후 종료. 트랜잭션 완료 세션은 즉시 종료",
+        "IMMEDIATE: 미완료 트랜잭션 즉시 롤백 후 종료 (가장 많이 사용)",
+        "ABORT만 체크포인트 미수행 → 다음 기동 시 인스턴스 리커버리 필요"
+      ],
+      "relatedKeywords": ["STARTUP", "SHUTDOWN IMMEDIATE", "SHUTDOWN ABORT"],
+      "sourceSection": "s03"
+    },
+    "SYSDBA": {
+      "definition": "Oracle 데이터베이스의 최고 관리 권한으로, 데이터베이스 기동/종료, 복구, ARCHIVELOG 모드 변경 등 모든 관리 작업을 수행할 수 있다.",
+      "keyPoints": [
+        "CONNECT / AS SYSDBA로 접속. OS 인증 또는 패스워드 파일 인증 사용",
+        "SYS 사용자는 반드시 AS SYSDBA 또는 AS SYSOPER로만 접속 가능",
+        "DB가 OPEN 상태가 아니어도(NOMOUNT, MOUNT) 접속 가능",
+        "SYSOPER보다 상위 권한: 불완전 복구, 데이터 딕셔너리 접근 등 추가 가능"
+      ],
+      "relatedKeywords": ["SYSOPER", "SQL*Plus", "RMAN"],
+      "sourceSection": "s03"
+    },
+    "SYSOPER": {
+      "definition": "데이터베이스 기동/종료, 백업/복구 등 운영 작업에 필요한 관리 권한으로, SYSDBA보다 제한적인 범위의 관리 작업을 허용한다.",
+      "keyPoints": [
+        "STARTUP, SHUTDOWN, ALTER DATABASE OPEN/MOUNT, BACKUP/RESTORE 등 수행 가능",
+        "데이터 딕셔너리 직접 접근이나 불완전 복구는 불가 (SYSDBA만 가능)",
+        "운영자(Operator)에게 최소 권한 원칙으로 부여하기 적합",
+        "CONNECT / AS SYSOPER로 접속"
+      ],
+      "relatedKeywords": ["SYSDBA", "SQL*Plus"],
+      "sourceSection": "s03"
+    },
+    "OMS (Oracle Management Service)": {
+      "definition": "Enterprise Manager Cloud Control의 중앙 관리 서버 컴포넌트로, Management Agent로부터 데이터를 수집하고 웹 콘솔을 제공한다.",
+      "keyPoints": [
+        "웹 기반 콘솔 제공. 중간 계층(Middle Tier)으로 동작",
+        "Management Agent가 수집한 성능/구성 데이터를 Management Repository에 저장",
+        "여러 OMS를 배포하여 고가용성 구성 가능",
+        "EM Cloud Control 14c가 Oracle 26ai를 완전 지원"
+      ],
+      "relatedKeywords": ["Enterprise Manager Cloud Control", "Management Agent", "Management Repository"],
+      "sourceSection": "s04"
+    },
+    "Management Agent": {
+      "definition": "EM Cloud Control에서 관리 대상 호스트에 설치되어, 대상 시스템의 모니터링 데이터를 수집하고 OMS에 전달하는 에이전트 프로세스이다.",
+      "keyPoints": [
+        "각 관리 대상 호스트에 1개씩 설치. 대상의 DB, 리스너, OS 등을 모니터링",
+        "수집 데이터를 OMS로 HTTPS 통신으로 전송",
+        "Agent가 중단되어도 대상 DB 운영에는 영향 없음 (모니터링만 불가)"
+      ],
+      "relatedKeywords": ["OMS (Oracle Management Service)", "Enterprise Manager Cloud Control"],
+      "sourceSection": "s04"
+    },
+    "Management Repository": {
+      "definition": "EM Cloud Control이 수집한 모든 관리 데이터(성능 메트릭, 구성 정보, Job 이력 등)를 저장하는 Oracle 데이터베이스(Repository DB)이다.",
+      "keyPoints": [
+        "별도의 Oracle Database에 스키마로 구성. OMS와 분리 가능",
+        "성능 이력, 알림 규칙, Job 스케줄, 패치 정보 등을 영구 저장",
+        "Repository DB 장애 시 EM Cloud Control 전체가 영향을 받으므로 고가용성 필수"
+      ],
+      "relatedKeywords": ["OMS (Oracle Management Service)", "Enterprise Manager Cloud Control"],
+      "sourceSection": "s04"
+    },
+    "EM Express": {
+      "definition": "Oracle 데이터베이스에 내장된 경량 웹 기반 관리 도구로, 단일 데이터베이스에 대한 기본적인 모니터링과 관리를 제공한다.",
+      "keyPoints": [
+        "별도 설치 불필요. 데이터베이스 자체의 XDB HTTP 리스너를 사용 (기본 포트 5500)",
+        "단일 DB에 대한 성능 모니터링, 초기화 파라미터 관리, 세션 관리 등 기본 기능 제공",
+        "EM Cloud Control 대비 기능 제한적: Job 스케줄링, 다중 DB 관리, 패치 관리 등 미지원",
+        "소규모 환경이나 EM Cloud Control 미도입 환경에서 유용"
+      ],
+      "relatedKeywords": ["Enterprise Manager Cloud Control"],
+      "sourceSection": "s04"
+    },
+    "Recovery Catalog": {
+      "definition": "RMAN 백업 메타데이터를 중앙 집중 관리하기 위한 별도의 Oracle 데이터베이스 스키마로, 여러 대상 DB의 백업 정보를 통합 관리한다.",
+      "keyPoints": [
+        "사용은 선택 사항. 미사용 시 대상 DB의 Control File에 백업 정보 저장",
+        "Control File 대비 장점: 백업 이력 장기 보존, 여러 DB 백업 정보 통합 관리",
+        "별도 DB에 RMAN 스키마를 생성하여 사용. 대상 DB와 분리 권장",
+        "REGISTER DATABASE 명령으로 대상 DB를 카탈로그에 등록"
+      ],
+      "relatedKeywords": ["RMAN", "BACKUP DATABASE"],
+      "sourceSection": "s05"
+    },
+    "JDBC Thin Driver": {
+      "definition": "Oracle Client 설치 없이 순수 Java로 구현된 JDBC 드라이버로, SQL Developer 등의 Java 애플리케이션이 Oracle DB에 접속할 때 사용한다.",
+      "keyPoints": [
+        "Oracle Client/Oracle Home 설치 불필요. JAR 파일만으로 접속 가능",
+        "SQL Developer의 기본 접속 방식. 접속 문자열에 호스트/포트/서비스명 직접 지정",
+        "TNS_ADMIN 환경변수 대신 oracle.net.tns_admin 시스템 프로퍼티 사용",
+        "Type 4 JDBC 드라이버 (Pure Java, 플랫폼 독립적)"
+      ],
+      "relatedKeywords": ["SQL Developer", "tnsnames.ora"],
+      "sourceSection": "s06"
+    },
+    "템플릿 (Template)": {
+      "definition": "DBCA에서 데이터베이스 생성 시 사용하는 사전 정의된 설정 묶음으로, Seed Template과 Non-Seed Template으로 구분된다.",
+      "keyPoints": [
+        "Seed Template(.dbc): 데이터 파일 포함. 빠른 생성 가능 (복사 방식)",
+        "Non-Seed Template(.dbt): 구성 정보만 포함. 완전히 새로 생성 (시간 더 소요)",
+        "General Purpose, Data Warehouse, Custom Database 등 사전 정의 템플릿 제공",
+        "저장 위치: $ORACLE_HOME/assistants/dbca/templates/"
+      ],
+      "relatedKeywords": ["DBCA", "대화형 모드 (Interactive Mode)", "사일런트 모드 (Silent Mode)"],
+      "sourceSection": "s02"
+    },
+    "SHUTDOWN IMMEDIATE": {
+      "definition": "현재 진행 중인 미완료 트랜잭션을 즉시 롤백하고 데이터베이스를 종료하는 모드로, 실무에서 가장 많이 사용되는 종료 방식이다.",
+      "keyPoints": [
+        "미완료 트랜잭션을 즉시 롤백 후 체크포인트 수행 → Clean Shutdown",
+        "다음 기동 시 인스턴스 리커버리 불필요 (ABORT와의 핵심 차이)",
+        "새로운 접속 차단, SQL 실행 중단, 트랜잭션 롤백, 세션 종료 순서로 처리",
+        "SHUTDOWN NORMAL(무한 대기) 대비 신속한 종료 가능"
+      ],
+      "relatedKeywords": ["SHUTDOWN ABORT", "SHUTDOWN"],
+      "sourceSection": "s03"
+    },
+    "SHUTDOWN ABORT": {
+      "definition": "체크포인트를 수행하지 않고 인스턴스를 즉시 강제 종료하는 모드로, 다음 기동 시 인스턴스 리커버리가 필요하다.",
+      "keyPoints": [
+        "체크포인트 미수행 → Dirty Buffer가 데이터 파일에 기록되지 않음",
+        "다음 기동 시 SMON에 의한 인스턴스 리커버리(Roll Forward + Roll Back) 필수",
+        "4가지 SHUTDOWN 모드 중 유일하게 인스턴스 리커버리가 필요한 모드",
+        "정상 종료가 불가능한 비상 상황에서만 사용 권장"
+      ],
+      "relatedKeywords": ["SHUTDOWN IMMEDIATE", "SHUTDOWN", "STARTUP"],
+      "sourceSection": "s03"
+    },
+    "ALTER SESSION SET CONTAINER": {
+      "definition": "SQL*Plus에서 현재 세션의 컨테이너를 CDB$ROOT에서 특정 PDB로, 또는 PDB 간에 전환하는 명령이다.",
+      "keyPoints": [
+        "ALTER SESSION SET CONTAINER = pdb_name 형식으로 사용",
+        "CDB 관리자가 여러 PDB를 전환하며 관리할 때 사용",
+        "전환 시 현재 트랜잭션은 자동으로 커밋되지 않으므로 주의",
+        "적절한 권한(COMMON 사용자 또는 SET CONTAINER 권한) 필요"
+      ],
+      "relatedKeywords": ["SQL*Plus", "SYSDBA"],
+      "sourceSection": "s03"
+    },
+    "SPOOL": {
+      "definition": "SQL*Plus에서 화면 출력 결과를 파일로 저장하는 명령으로, 쿼리 결과 및 실행 로그를 기록할 때 사용한다.",
+      "keyPoints": [
+        "SPOOL filename으로 시작, SPOOL OFF로 종료",
+        "쿼리 결과, 오류 메시지, SQL 명령어 등 화면에 표시되는 모든 내용을 파일에 기록",
+        "자동화 스크립트에서 실행 결과를 로그 파일로 남길 때 필수적으로 사용"
+      ],
+      "relatedKeywords": ["SQL*Plus"],
+      "sourceSection": "s03"
+    },
+    "My Oracle Support": {
+      "definition": "Oracle의 공식 기술 지원 포털(support.oracle.com)로, SR(Service Request) 생성, 패치 다운로드, 기술 문서 검색 등을 제공한다.",
+      "keyPoints": [
+        "SR(Service Request)을 통한 Oracle 기술 지원 요청",
+        "Critical Patch Update(CPU) 및 개별 패치 다운로드 제공",
+        "MOS Notes(기술 문서)를 통한 문제 해결 정보 검색 가능"
+      ],
+      "relatedKeywords": ["Enterprise Manager Cloud Control"],
+      "sourceSection": "s04"
+    },
+    "BACKUP DATABASE": {
+      "definition": "RMAN에서 데이터베이스 전체 또는 일부를 백업하는 핵심 명령으로, 백업 세트(Backup Set) 또는 이미지 카피(Image Copy) 형태로 생성한다.",
+      "keyPoints": [
+        "BACKUP DATABASE: 전체 DB 백업. BACKUP TABLESPACE/DATAFILE로 부분 백업 가능",
+        "BACKUP AS BACKUPSET(기본): 사용 블록만 포함하여 압축 효율적",
+        "BACKUP AS COPY: 데이터 파일을 그대로 복사 (Image Copy)",
+        "PLUS ARCHIVELOG 옵션으로 아카이브 로그 동시 백업 가능"
+      ],
+      "relatedKeywords": ["RMAN", "RESTORE", "VALIDATE", "Recovery Catalog"],
+      "sourceSection": "s05"
+    },
+    "RESTORE": {
+      "definition": "RMAN에서 백업된 데이터 파일을 원래 위치(또는 지정 위치)에 복원하는 명령으로, RECOVER와 함께 사용하여 데이터베이스를 복구한다.",
+      "keyPoints": [
+        "RESTORE DATABASE/TABLESPACE/DATAFILE로 복원 범위 지정",
+        "RESTORE 후 RECOVER 명령으로 Redo 적용하여 최신 상태로 복구",
+        "RESTORE는 물리적 파일 복원, RECOVER는 논리적 데이터 일관성 복구"
+      ],
+      "relatedKeywords": ["RMAN", "BACKUP DATABASE"],
+      "sourceSection": "s05"
+    },
+    "VALIDATE": {
+      "definition": "RMAN에서 데이터 파일 또는 백업 세트의 물리적/논리적 손상 여부를 검사하는 명령이다.",
+      "keyPoints": [
+        "BACKUP VALIDATE DATABASE: 실제 백업 없이 블록 손상 여부만 검사",
+        "VALIDATE BACKUPSET: 기존 백업 세트의 유효성 검증",
+        "손상된 블록 정보는 V$DATABASE_BLOCK_CORRUPTION 뷰에서 확인 가능"
+      ],
+      "relatedKeywords": ["RMAN", "BACKUP DATABASE"],
+      "sourceSection": "s05"
+    },
+    "DBA 패널": {
+      "definition": "SQL Developer의 DBA 전용 관리 인터페이스로, 데이터베이스 관리 작업(테이블스페이스, 사용자, 세션 등)을 GUI에서 수행할 수 있는 패널이다.",
+      "keyPoints": [
+        "View → DBA 메뉴에서 활성화. SYSDBA 권한 접속 시 관리 기능 확장",
+        "데이터 가드, RMAN 백업 설정, 테이블스페이스 관리 등 DBA 전용 기능 제공",
+        "SQL Developer에서 관리 작업을 수행하되, DB 기동/종료는 불가"
+      ],
+      "relatedKeywords": ["SQL Developer"],
+      "sourceSection": "s06"
+    },
+    "EM Cloud Control 리스너 관리": {
+      "definition": "Enterprise Manager Cloud Control에서 Oracle Net Listener의 상태 모니터링, 시작/중지, 구성 확인을 웹 UI로 수행하는 기능이다.",
+      "keyPoints": [
+        "웹 콘솔에서 리스너 상태 조회, 시작/중지, 등록된 서비스 확인 가능",
+        "리스너 구성 파일(listener.ora) 직접 편집은 불가 — NETCA/NETMGR 역할",
+        "Management Agent가 설치된 호스트의 리스너를 원격 관리 가능",
+        "알림 규칙(Alert Rule)으로 리스너 장애 자동 통지 구성 가능"
+      ],
+      "relatedKeywords": ["Enterprise Manager Cloud Control", "lsnrctl", "NETCA"],
+      "sourceSection": "s04"
+    },
+    "DBCA 역할 범위": {
+      "definition": "DBCA는 데이터베이스 생성/관리 전용 도구이며, 리스너 구성이나 네이밍 방법(tnsnames.ora, sqlnet.ora) 설정은 수행하지 않는다는 기능 범위 제한을 의미한다.",
+      "keyPoints": [
+        "DBCA: DB 생성/삭제, PDB 생성/삭제, 구성 변경, 템플릿 관리 담당",
+        "리스너 생성/구성은 NETCA, tnsnames.ora/sqlnet.ora 편집은 NETCA/NETMGR 담당",
+        "DBCA의 네트워크 구성 단계는 기존 리스너 선택이지 생성이 아님 — 시험 빈출 포인트",
+        "DBCA로 DB 생성 전 NETCA로 리스너를 먼저 구성해야 함"
+      ],
+      "relatedKeywords": ["DBCA", "NETCA", "NETMGR"],
+      "sourceSection": "s02"
+    }
+  }
+}

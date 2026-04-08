@@ -1,0 +1,321 @@
+{
+  "studyId": "02_02",
+  "chapterId": "02",
+  "title": "PDB 생성 및 템플릿 (PDB Creation & Templates)",
+  "keywords": {
+    "PDB$SEED": {
+      "definition": "CDB 내에서 새로운 PDB를 생성하기 위한 템플릿 역할의 특수 컨테이너(CON_ID=2)로, 항상 READ ONLY 상태로 유지된다.",
+      "keyPoints": [
+        "CDB 생성 시 자동 생성되는 필수 컨테이너 — 삭제 불가",
+        "CREATE PLUGGABLE DATABASE 실행 시 PDB$SEED의 데이터 파일이 복사되어 새 PDB가 생성됨",
+        "PDB$SEED는 수정 불가 — STARTUP UPGRADE 모드에서만 일시적으로 READ WRITE 가능",
+        "PDB$SEED에서 생성 시 빈(empty) PDB가 만들어지며, 데이터는 포함되지 않음"
+      ],
+      "relatedKeywords": ["CREATE PLUGGABLE DATABASE", "Application Seed", "CDB$ROOT"],
+      "sourceSection": "s02"
+    },
+    "CREATE PLUGGABLE DATABASE": {
+      "definition": "PDB를 생성하는 DDL 명령으로, PDB$SEED에서 새로 생성하거나 기존 PDB를 클론하거나 Unplug된 PDB를 Plug In하는 데 사용된다.",
+      "keyPoints": [
+        "기본 구문: CREATE PLUGGABLE DATABASE pdb_name ADMIN USER admin IDENTIFIED BY pw",
+        "FROM 절: 기존 PDB 클론 시 소스 지정 (FROM source_pdb[@dblink])",
+        "USING 절: XML 메타데이터 또는 .pdb 아카이브에서 Plug In",
+        "실행 권한: CREATE PLUGGABLE DATABASE 시스템 권한 필요, CDB$ROOT에서 실행"
+      ],
+      "relatedKeywords": ["PDB$SEED", "ADMIN USER", "FILE_NAME_CONVERT", "PDB Clone"],
+      "sourceSection": "s03"
+    },
+    "ADMIN USER": {
+      "definition": "CREATE PLUGGABLE DATABASE 실행 시 새 PDB의 관리자 계정을 생성하는 절로, PDB_DBA 역할이 자동 부여된다.",
+      "keyPoints": [
+        "구문: ADMIN USER username IDENTIFIED BY password",
+        "생성된 사용자에게 PDB_DBA 역할이 자동으로 부여됨",
+        "이 사용자는 해당 PDB의 Local User로 생성됨",
+        "PDB 생성 후 이 계정으로 접속하여 초기 설정 작업 수행"
+      ],
+      "relatedKeywords": ["CREATE PLUGGABLE DATABASE", "PDB_DBA role", "Local User"],
+      "sourceSection": "s03"
+    },
+    "FILE_NAME_CONVERT": {
+      "definition": "PDB 생성(Clone/Plug In) 시 소스 데이터 파일의 경로를 대상 경로로 변환하는 절로, 파일 위치 매핑을 지정한다.",
+      "keyPoints": [
+        "구문: FILE_NAME_CONVERT = ('소스경로', '대상경로')",
+        "여러 경로 쌍을 지정 가능: ('소스1','대상1','소스2','대상2')",
+        "OMF(Oracle Managed Files) 사용 시 FILE_NAME_CONVERT 대신 CREATE_FILE_DEST 사용 가능",
+        "NONE 지정 시 파일 경로 변환 없음 (ASM 등에서 자동 배치 시)"
+      ],
+      "relatedKeywords": ["CREATE PLUGGABLE DATABASE", "PDB_FILE_NAME_CONVERT", "DB_CREATE_FILE_DEST"],
+      "sourceSection": "s03"
+    },
+    "CREATE_FILE_DEST": {
+      "definition": "PDB 생성 시 데이터 파일이 저장될 기본 디렉토리를 지정하는 CREATE PLUGGABLE DATABASE의 절이다.",
+      "keyPoints": [
+        "Oracle Managed Files(OMF) 방식으로 파일 이름을 자동 생성",
+        "FILE_NAME_CONVERT 대신 사용하여 간편하게 파일 경로 지정",
+        "DB_CREATE_FILE_DEST 파라미터가 CDB 수준에서 기본값을 제공"
+      ],
+      "relatedKeywords": ["FILE_NAME_CONVERT", "DB_CREATE_FILE_DEST", "Oracle Managed Files (OMF)"],
+      "sourceSection": "s03"
+    },
+    "PDB_FILE_NAME_CONVERT": {
+      "definition": "CDB 수준의 초기화 파라미터로, PDB 생성 시 FILE_NAME_CONVERT를 명시하지 않을 경우의 기본 경로 변환 규칙을 정의한다.",
+      "keyPoints": [
+        "SPFILE에 설정하면 모든 PDB 생성 시 기본 적용",
+        "CREATE PLUGGABLE DATABASE의 FILE_NAME_CONVERT 절이 우선 적용됨",
+        "설정 예: ALTER SYSTEM SET PDB_FILE_NAME_CONVERT='/seed/','/pdb1/' SCOPE=SPFILE"
+      ],
+      "relatedKeywords": ["FILE_NAME_CONVERT", "DB_CREATE_FILE_DEST"],
+      "sourceSection": "s03"
+    },
+    "DB_CREATE_FILE_DEST": {
+      "definition": "Oracle Managed Files(OMF) 사용 시 데이터 파일이 생성될 기본 디렉토리를 지정하는 CDB 수준의 초기화 파라미터이다.",
+      "keyPoints": [
+        "OMF 활성화의 핵심 파라미터 — 이 값이 설정되면 파일 이름/경로 자동 관리",
+        "PDB 생성 시 FILE_NAME_CONVERT 없이도 자동으로 파일 배치",
+        "ASM 디스크 그룹 또는 파일시스템 경로를 지정"
+      ],
+      "relatedKeywords": ["Oracle Managed Files (OMF)", "FILE_NAME_CONVERT", "CREATE_FILE_DEST"],
+      "sourceSection": "s03"
+    },
+    "Oracle Managed Files (OMF)": {
+      "definition": "Oracle이 데이터 파일, 제어 파일, Redo Log 파일의 이름과 경로를 자동으로 관리하는 기능으로, 파일 관리의 복잡성을 줄인다.",
+      "keyPoints": [
+        "DB_CREATE_FILE_DEST 파라미터로 기본 디렉토리 지정 시 활성화",
+        "파일 이름이 자동 생성되어 명명 충돌 방지",
+        "테이블스페이스 삭제 시 데이터 파일도 자동 삭제",
+        "PDB 생성 시 FILE_NAME_CONVERT 불필요 — 경로 자동 배치"
+      ],
+      "relatedKeywords": ["DB_CREATE_FILE_DEST", "CREATE_FILE_DEST"],
+      "sourceSection": "s03"
+    },
+    "MAXSIZE": {
+      "definition": "PDB의 전체 데이터 파일 크기 합계를 제한하는 STORAGE 절의 속성으로, PDB별 디스크 사용 상한을 설정한다.",
+      "keyPoints": [
+        "구문: STORAGE (MAXSIZE size) — 예: STORAGE (MAXSIZE 10G)",
+        "UNLIMITED 설정 시 크기 제한 없음",
+        "CDB_PDBS.MAX_SIZE 컬럼에서 설정값 확인 가능",
+        "MAX_SHARED_TEMP_SIZE와 별도 — MAXSIZE는 영구 데이터 파일만 해당"
+      ],
+      "relatedKeywords": ["MAX_SHARED_TEMP_SIZE", "STORAGE clause", "PATH_PREFIX"],
+      "sourceSection": "s04"
+    },
+    "MAX_SHARED_TEMP_SIZE": {
+      "definition": "PDB가 공유 임시 테이블스페이스에서 사용할 수 있는 최대 크기를 제한하는 STORAGE 절의 속성이다.",
+      "keyPoints": [
+        "구문: STORAGE (MAX_SHARED_TEMP_SIZE size)",
+        "CDB의 공유 Temp Tablespace 사용량을 PDB별로 제한",
+        "MAXSIZE와 별도로 관리 — 임시 데이터 사용량만 제어"
+      ],
+      "relatedKeywords": ["MAXSIZE", "STORAGE clause"],
+      "sourceSection": "s04"
+    },
+    "PATH_PREFIX": {
+      "definition": "PDB의 디렉토리 객체 경로를 특정 접두사로 제한하는 CREATE PLUGGABLE DATABASE의 절로, 보안 격리에 사용된다.",
+      "keyPoints": [
+        "구문: PATH_PREFIX = '/oracle/pdb1/' — PDB의 디렉토리 객체가 이 경로 하위로 제한",
+        "설정 후 변경 불가 — PDB 생성 시에만 지정 가능",
+        "PDB가 다른 PDB나 OS 파일에 접근하는 것을 방지하는 보안 메커니즘",
+        "CREATE_FILE_DEST와는 별개 — PATH_PREFIX는 디렉토리 객체 경로, CREATE_FILE_DEST는 데이터 파일 경로"
+      ],
+      "relatedKeywords": ["CREATE PLUGGABLE DATABASE", "MAXSIZE"],
+      "sourceSection": "s04"
+    },
+    "STORAGE clause": {
+      "definition": "CREATE PLUGGABLE DATABASE의 STORAGE 절로, PDB의 디스크 사용량을 MAXSIZE, MAX_SHARED_TEMP_SIZE 등으로 제한한다.",
+      "keyPoints": [
+        "PDB별 스토리지 자원 격리의 핵심 메커니즘",
+        "ALTER PLUGGABLE DATABASE STORAGE로 생성 후에도 변경 가능",
+        "제한 초과 시 ORA-65114 오류 발생하여 추가 공간 할당 거부"
+      ],
+      "relatedKeywords": ["MAXSIZE", "MAX_SHARED_TEMP_SIZE", "CDB Resource Plan"],
+      "sourceSection": "s04"
+    },
+    "PDB_DBA role": {
+      "definition": "PDB 생성 시 ADMIN USER에게 자동 부여되는 역할로, PDB 내 기본적인 관리 권한을 포함한다.",
+      "keyPoints": [
+        "CREATE PLUGGABLE DATABASE ... ADMIN USER 시 자동 부여",
+        "DBA 역할과는 다름 — PDB_DBA는 기본적인 관리 권한만 포함",
+        "필요에 따라 추가 권한 또는 DBA 역할을 별도 부여해야 함"
+      ],
+      "relatedKeywords": ["ADMIN USER", "CREATE PLUGGABLE DATABASE", "Local User"],
+      "sourceSection": "s03"
+    },
+    "Application Container": {
+      "definition": "공통 애플리케이션 정의(테이블, 뷰, PL/SQL 등)를 공유하는 PDB들의 논리적 그룹으로, Application Root와 Application PDB들로 구성된다.",
+      "keyPoints": [
+        "Application Root에서 공통 스키마와 데이터를 정의하면 Application PDB에 자동 전파",
+        "SaaS 환경에서 고객별 PDB를 운영하면서 스키마는 통일 관리 가능",
+        "Application 설치/업그레이드/패치를 Root에서 한번에 적용",
+        "Application Seed를 통해 Application PDB를 빠르게 생성"
+      ],
+      "relatedKeywords": ["Application Seed", "Application Root", "PDB (Pluggable Database)"],
+      "sourceSection": "s05"
+    },
+    "Application Seed": {
+      "definition": "Application Container 내에서 새로운 Application PDB를 생성하기 위한 전용 시드(템플릿) 컨테이너이다.",
+      "keyPoints": [
+        "PDB$SEED의 Application Container 버전 — Application Root의 정의를 포함",
+        "Application PDB 생성 시 Application Seed에서 복사하면 공통 정의가 자동 포함",
+        "Application Container당 최대 1개의 Application Seed 생성 가능"
+      ],
+      "relatedKeywords": ["Application Container", "Application Root", "PDB$SEED"],
+      "sourceSection": "s05"
+    },
+    "Application Root": {
+      "definition": "Application Container의 마스터 컨테이너로, 공통 애플리케이션 객체(테이블, 뷰, PL/SQL 등)를 정의하고 관리하는 역할을 한다.",
+      "keyPoints": [
+        "Application 설치(ALTER PLUGGABLE DATABASE APPLICATION ... BEGIN INSTALL)로 공통 객체 정의",
+        "Application Root의 변경 사항은 SYNC 명령으로 Application PDB에 전파",
+        "CDB$ROOT와는 별개 — Application Root는 사용자 정의 애플리케이션용"
+      ],
+      "relatedKeywords": ["Application Container", "Application Seed"],
+      "sourceSection": "s05"
+    },
+    "DBCA Silent Mode": {
+      "definition": "Database Configuration Assistant를 GUI 없이 명령줄에서 실행하는 모드로, 응답 파일(.rsp) 또는 명령줄 파라미터를 사용한다.",
+      "keyPoints": [
+        "dbca -silent -createPluggableDatabase 명령으로 PDB 생성 가능",
+        "응답 파일(.rsp)은 key=value 형식의 텍스트 파일 (XML 아님)",
+        "-generateScripts 옵션으로 실행 없이 SQL 스크립트만 생성 가능",
+        "X Window 없는 서버 환경에서 자동화에 필수"
+      ],
+      "relatedKeywords": ["DBCA", "CREATE PLUGGABLE DATABASE"],
+      "sourceSection": "s06"
+    },
+    "SAVE STATE": {
+      "definition": "PDB의 현재 오픈 모드를 저장하여 CDB 재시작 후 자동으로 해당 모드로 복원되도록 하는 메커니즘이다.",
+      "keyPoints": [
+        "ALTER PLUGGABLE DATABASE pdb_name SAVE STATE 명령으로 저장",
+        "PDB 생성 후 OPEN → SAVE STATE를 수행해야 CDB 재시작 후 자동 OPEN",
+        "SAVE STATE를 하지 않으면 CDB 재시작 시 PDB는 MOUNTED 상태",
+        "DBA_PDB_SAVED_STATES 뷰에서 저장된 상태 확인"
+      ],
+      "relatedKeywords": ["DBA_PDB_SAVED_STATES", "V$PDBS"],
+      "sourceSection": "s07"
+    },
+    "V$PDBS": {
+      "definition": "CDB 내 모든 PDB의 상태 정보(오픈 모드, RESTRICTED, GUID 등)를 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "OPEN_MODE 컬럼으로 PDB의 현재 상태(READ WRITE/READ ONLY/MOUNTED) 확인",
+        "PDB 생성 직후 상태 확인에 사용: SELECT NAME, OPEN_MODE FROM V$PDBS",
+        "CDB$ROOT 정보는 포함하지 않음"
+      ],
+      "relatedKeywords": ["V$CONTAINERS", "DBA_PDBS", "CON_ID"],
+      "sourceSection": "s07"
+    },
+    "DBA_PDBS": {
+      "definition": "CDB 내 모든 PDB의 메타데이터 정보(생성 시간, 상태, GUID 등)를 조회하는 데이터 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "STATUS 컬럼: NORMAL, UNPLUGGED, NEEDS UPGRADE 등 PDB 상태 확인",
+        "V$PDBS는 런타임 상태, DBA_PDBS는 딕셔너리 수준의 메타데이터 정보",
+        "PDB_ID, PDB_NAME, DBID, CON_UID, GUID 등 식별 정보 제공"
+      ],
+      "relatedKeywords": ["V$PDBS", "CDB_PDBS", "PDB_PLUG_IN_VIOLATIONS"],
+      "sourceSection": "s07"
+    },
+    "CDB_DATA_FILES": {
+      "definition": "CDB 내 모든 컨테이너의 데이터 파일 정보를 통합 조회하는 CDB_ 계열 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "CON_ID 컬럼으로 각 데이터 파일이 속한 컨테이너 식별",
+        "PDB 생성 후 데이터 파일이 올바르게 생성되었는지 확인에 사용",
+        "DBA_DATA_FILES에 CON_ID가 추가된 CDB 버전"
+      ],
+      "relatedKeywords": ["FILE_NAME_CONVERT", "DB_CREATE_FILE_DEST"],
+      "sourceSection": "s07"
+    },
+    "V$CONTAINERS": {
+      "definition": "CDB 내 모든 컨테이너(CDB$ROOT, PDB$SEED, PDB 등)의 정보를 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "V$PDBS보다 범위가 넓음 — CDB$ROOT(CON_ID=1)과 PDB$SEED(CON_ID=2) 포함",
+        "NAME, CON_ID, OPEN_MODE, TOTAL_SIZE 등 컬럼 제공",
+        "CDB 전체 컨테이너 현황 파악에 사용"
+      ],
+      "relatedKeywords": ["V$PDBS", "CON_ID"],
+      "sourceSection": "s07"
+    },
+    "PDB Clone": {
+      "definition": "기존 PDB의 데이터와 메타데이터를 복사하여 새로운 PDB를 생성하는 방법으로, FROM 절을 사용한다.",
+      "keyPoints": [
+        "구문: CREATE PLUGGABLE DATABASE new_pdb FROM source_pdb",
+        "소스 PDB가 READ ONLY 상태여야 함 (Hot Clone 제외)",
+        "데이터 파일이 물리적으로 복사되므로 크기에 비례한 시간 소요",
+        "FILE_NAME_CONVERT로 대상 파일 경로 지정 필수"
+      ],
+      "relatedKeywords": ["Hot Clone", "CREATE PLUGGABLE DATABASE", "FILE_NAME_CONVERT"],
+      "sourceSection": "s08"
+    },
+    "Hot Clone": {
+      "definition": "소스 PDB가 READ WRITE(운영 중) 상태에서 클론을 수행하는 방법으로, 서비스 중단 없이 PDB를 복제할 수 있다.",
+      "keyPoints": [
+        "소스 PDB가 OPEN READ WRITE 상태에서 복제 가능 — 서비스 무중단",
+        "Local Undo Mode가 필수 전제 조건",
+        "CDB가 ARCHIVELOG 모드여야 함",
+        "클론 중 발생하는 변경 사항은 Redo 적용으로 동기화"
+      ],
+      "relatedKeywords": ["PDB Clone", "Local Undo Mode", "ARCHIVELOG"],
+      "sourceSection": "s08"
+    },
+    "Unplug/Plug": {
+      "definition": "PDB를 CDB에서 분리(Unplug)하고 다른 CDB에 연결(Plug In)하는 PDB 이동 메커니즘이다.",
+      "keyPoints": [
+        "Unplug: ALTER PLUGGABLE DATABASE ... UNPLUG INTO '/path/pdb.xml' 또는 .pdb",
+        "Plug In: CREATE PLUGGABLE DATABASE ... USING '/path/pdb.xml'",
+        "Unplug 전 PDB를 CLOSE 해야 함",
+        "Plug In 전 DBMS_PDB.CHECK_PLUG_COMPATIBILITY로 호환성 검사 권장"
+      ],
+      "relatedKeywords": ["DBMS_PDB.CHECK_PLUG_COMPATIBILITY", "PDB_PLUG_IN_VIOLATIONS", "XML Metadata"],
+      "sourceSection": "s08"
+    },
+    "DBMS_PDB.CHECK_PLUG_COMPATIBILITY": {
+      "definition": "Unplug된 PDB의 XML 메타데이터를 대상 CDB와 비교하여 Plug In 호환성을 사전에 검사하는 프로시저이다.",
+      "keyPoints": [
+        "Plug In 실행 전에 호환성 검사를 수행하여 실패를 예방",
+        "검사 결과는 PDB_PLUG_IN_VIOLATIONS 뷰에서 확인",
+        "문자 셋, 엔디안, DB 버전, 컴포넌트 등의 호환성을 검사"
+      ],
+      "relatedKeywords": ["PDB_PLUG_IN_VIOLATIONS", "Unplug/Plug"],
+      "sourceSection": "s08"
+    },
+    "PDB_PLUG_IN_VIOLATIONS": {
+      "definition": "PDB Plug In 호환성 검사 결과 또는 Plug In 후 발생한 위반 사항을 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "TYPE 컬럼: ERROR(차단), WARNING(경고) 구분",
+        "STATUS 컬럼: PENDING(미해결), RESOLVED(해결됨) 상태 추적",
+        "MESSAGE 컬럼에서 구체적인 위반 내용과 해결 방법 확인"
+      ],
+      "relatedKeywords": ["DBMS_PDB.CHECK_PLUG_COMPATIBILITY", "Unplug/Plug"],
+      "sourceSection": "s08"
+    },
+    "DBA_PDB_SAVED_STATES": {
+      "definition": "SAVE STATE로 저장된 PDB의 오픈 모드 상태 정보를 조회하는 딕셔너리 뷰이다.",
+      "keyPoints": [
+        "CON_NAME, INSTANCE_NAME, STATE 등의 컬럼으로 저장된 상태 확인",
+        "SAVE STATE가 수행된 PDB만 이 뷰에 행이 존재",
+        "DISCARD STATE 실행 시 해당 행이 삭제됨"
+      ],
+      "relatedKeywords": ["SAVE STATE", "V$PDBS"],
+      "sourceSection": "s07"
+    },
+    "SERVICE_NAME_CONVERT": {
+      "definition": "PDB 생성(Clone/Plug In) 시 소스 PDB의 서비스 이름을 대상 PDB의 서비스 이름으로 변환하는 CREATE PLUGGABLE DATABASE의 절이다.",
+      "keyPoints": [
+        "구문: SERVICE_NAME_CONVERT = ('소스서비스명', '대상서비스명')",
+        "소스 PDB에 사용자 정의 서비스가 있을 때 이름 충돌 방지에 사용",
+        "FILE_NAME_CONVERT와 유사한 '소스-대상' 매핑 패턴"
+      ],
+      "relatedKeywords": ["FILE_NAME_CONVERT", "CREATE PLUGGABLE DATABASE"],
+      "sourceSection": "s03"
+    },
+    "Local Undo Mode": {
+      "definition": "각 PDB가 자체 UNDO 테이블스페이스를 가지는 모드로, Hot Clone, PDB Flashback 등 고급 기능의 전제 조건이다.",
+      "keyPoints": [
+        "ALTER DATABASE LOCAL UNDO ON 명령으로 활성화 (STARTUP UPGRADE 후)",
+        "Hot Clone, PDB Point-in-Time Recovery의 필수 전제 조건",
+        "Shared Undo Mode(기본)에서는 CDB 전체가 하나의 UNDO 테이블스페이스 공유",
+        "Local Undo 활성화 시 각 PDB에 자체 UNDO 테이블스페이스 자동 생성"
+      ],
+      "relatedKeywords": ["Hot Clone", "ARCHIVELOG"],
+      "sourceSection": "s08"
+    }
+  }
+}

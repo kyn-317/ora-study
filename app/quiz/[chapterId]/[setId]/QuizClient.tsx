@@ -1,8 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { QuizQuestion } from '../../../../lib/data';
+import ExplanationWithKeywords from './ExplanationWithKeywords';
+import type { KeywordEntry } from './ExplanationWithKeywords';
+import StudyPanel from './StudyPanel';
+import type { StudyPanelItem, StudyContentData, KeywordStudyData } from './StudyPanel';
 
 interface QuizClientProps {
   questions: QuizQuestion[];
@@ -11,19 +15,144 @@ interface QuizClientProps {
   backHref?: string;
   storagePrefix?: string;
   showExplanation?: boolean;
+  keywordIndex?: Record<string, KeywordEntry[]>;
 }
 
 function getStorageKey(prefix: string, chapterId: string, setId: string) {
   return `${prefix}_${chapterId}_${setId}`;
 }
 
-export default function QuizClient({ questions, chapterId, setId, backHref, storagePrefix = 'quiz', showExplanation = true }: QuizClientProps) {
+export default function QuizClient({ questions, chapterId, setId, backHref, storagePrefix = 'quiz', showExplanation = true, keywordIndex }: QuizClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [submitted, setSubmitted] = useState<Record<number, boolean>>({});
   const [score, setScore] = useState(0);
   const [mode, setMode] = useState<'taking' | 'review'>('taking');
   const [restored, setRestored] = useState(false);
+
+  // Study Panel state
+  const [studyItems, setStudyItems] = useState<StudyPanelItem[]>([]);
+  const [showStudyPanel, setShowStudyPanel] = useState(false);
+
+  // 패널 드래그 리사이즈
+  const [panelWidth, setPanelWidth] = useState(480);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartWidth = useRef(0);
+
+  const handleDragStart = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    dragStartX.current = e.clientX;
+    dragStartWidth.current = panelWidth;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, [panelWidth]);
+
+  useEffect(() => {
+    const handleMove = (e: PointerEvent) => {
+      if (!isDragging.current) return;
+      const delta = dragStartX.current - e.clientX;
+      const newWidth = Math.max(250, Math.min(window.innerWidth * 0.6, dragStartWidth.current + delta));
+      setPanelWidth(newWidth);
+    };
+    const handleUp = () => {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.addEventListener('pointermove', handleMove);
+    document.addEventListener('pointerup', handleUp);
+    return () => {
+      document.removeEventListener('pointermove', handleMove);
+      document.removeEventListener('pointerup', handleUp);
+    };
+  }, []);
+
+  const handleStudySelect = useCallback(async (keyword: string, entry: KeywordEntry) => {
+    // 중복 체크 — 이미 있으면 패널만 다시 표시
+    const exists = studyItems.some(item => item.keyword === keyword && item.studyId === entry.studyId);
+    if (exists) {
+      setShowStudyPanel(true);
+      return;
+    }
+
+    const newItem: StudyPanelItem = {
+      keyword,
+      studyId: entry.studyId,
+      chapterId: entry.chapterId,
+      title: entry.title,
+      fileName: entry.fileName,
+      content: null,
+      keywordStudy: null,
+    };
+
+    setStudyItems(prev => [...prev, newItem]);
+    setShowStudyPanel(true);
+
+    try {
+      // keyword-study가 있으면 간결한 전용 데이터 우선 사용
+      if (entry.hasKeywordStudy) {
+        const ksRes = await fetch(
+          `/api/keyword-study/${entry.chapterId}/${entry.studyId}?keyword=${encodeURIComponent(keyword)}`
+        );
+        if (ksRes.ok) {
+          const ksData: KeywordStudyData = await ksRes.json();
+          setStudyItems(prev =>
+            prev.map(item =>
+              item.keyword === keyword && item.studyId === entry.studyId
+                ? { ...item, keywordStudy: ksData }
+                : item
+            )
+          );
+          return;
+        }
+      }
+      // fallback: 기존 전체 study 데이터
+      const res = await fetch(`/api/study/${entry.chapterId}/${entry.studyId}`);
+      if (res.ok) {
+        const data: StudyContentData = await res.json();
+        setStudyItems(prev =>
+          prev.map(item =>
+            item.keyword === keyword && item.studyId === entry.studyId
+              ? { ...item, content: data }
+              : item
+          )
+        );
+      }
+    } catch {
+      // fetch 실패 시 item은 content/keywordStudy null 상태 유지
+    }
+  }, [studyItems]);
+
+  const handleStudyRemove = useCallback((keyword: string, studyId: string) => {
+    setStudyItems(prev => {
+      const next = prev.filter(item => !(item.keyword === keyword && item.studyId === studyId));
+      if (next.length === 0) setShowStudyPanel(false);
+      return next;
+    });
+  }, []);
+
+  const handleStudyPanelClose = useCallback(() => {
+    setShowStudyPanel(false);
+  }, []);
+
+  // 모바일 판별
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setPanelWidth(Math.round(Math.min(window.innerWidth * 0.36, 480)));
+      }
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Restore from localStorage
   useEffect(() => {
@@ -129,11 +258,73 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
 
   if (!restored) return null;
 
+  // 해설 렌더링 헬퍼
+  const renderExplanation = (explanationText: string) => (
+    <div style={{
+      marginTop: '1rem',
+      padding: '1.5rem',
+      background: 'rgba(111, 107, 234, 0.08)',
+      borderRadius: '12px',
+      borderLeft: '4px solid var(--color-3)',
+      color: 'var(--foreground)',
+      fontSize: '0.9rem',
+      lineHeight: 1.7,
+    }}>
+      {keywordIndex ? (
+        <ExplanationWithKeywords
+          text={explanationText}
+          keywordIndex={keywordIndex}
+          onStudySelect={handleStudySelect}
+        />
+      ) : (
+        <span style={{ whiteSpace: 'pre-wrap' }}>{explanationText}</span>
+      )}
+    </div>
+  );
+
+  // StudyPanel 렌더 (공통)
+  const studyPanelElement = showStudyPanel && (
+    <div style={{ width: isMobile ? '100%' : panelWidth, display: 'flex' }}>
+      {/* 드래그 핸들 — PC만 표시 */}
+      {!isMobile && (
+        <div
+          onPointerDown={handleDragStart}
+          style={{
+            flex: '0 0 6px',
+            cursor: 'col-resize',
+            background: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(67, 171, 240, 0.2)')}
+          onMouseLeave={e => { if (!isDragging.current) e.currentTarget.style.background = 'transparent'; }}
+        >
+          <div style={{
+            width: '2px',
+            height: '40px',
+            borderRadius: '1px',
+            background: 'var(--glass-border)',
+          }} />
+        </div>
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <StudyPanel
+          items={studyItems}
+          onRemove={handleStudyRemove}
+          onClose={handleStudyPanelClose}
+        />
+      </div>
+    </div>
+  );
+
   // ===== REVIEW MODE =====
   if (mode === 'review') {
     const percentage = Math.round((score / questions.length) * 100);
-    return (
-      <main style={{ padding: '4rem 2rem', maxWidth: '900px', margin: '0 auto' }}>
+
+    const reviewContent = (
+      <div style={{ flex: '1 1 0%', minWidth: 0, padding: '4rem 2rem', maxWidth: showStudyPanel ? 'none' : '900px', margin: showStudyPanel ? '0' : '0 auto' }}>
         <Link href={defaultBackHref} style={{ color: 'var(--color-4)', marginBottom: '2rem', display: 'inline-block' }}>
           &larr; Back
         </Link>
@@ -234,32 +425,32 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
                     <summary style={{ color: 'var(--color-5)', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>
                       View Explanation
                     </summary>
-                    <div style={{
-                      marginTop: '1rem',
-                      padding: '1.5rem',
-                      background: 'rgba(111, 107, 234, 0.08)',
-                      borderRadius: '12px',
-                      borderLeft: '4px solid var(--color-3)',
-                      whiteSpace: 'pre-wrap',
-                      color: 'var(--foreground)',
-                      fontSize: '0.9rem',
-                      lineHeight: 1.7,
-                    }}>
-                      {q.explanation}
-                    </div>
+                    {renderExplanation(q.explanation)}
                   </details>
                 )}
               </div>
             );
           })}
         </div>
+      </div>
+    );
+
+    // 패널 없으면 기존 레이아웃 유지
+    if (!showStudyPanel) {
+      return <main>{reviewContent}</main>;
+    }
+
+    return (
+      <main className="quiz-layout-with-panel">
+        {reviewContent}
+        {studyPanelElement}
       </main>
     );
   }
 
   // ===== TAKING MODE =====
-  return (
-    <main style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+  const takingContent = (
+    <div style={{ flex: '1 1 0%', minWidth: 0, padding: '2rem', maxWidth: showStudyPanel ? 'none' : '900px', margin: showStudyPanel ? '0' : '0 auto' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <Link href={defaultBackHref} style={{ color: 'var(--color-4)', fontSize: '0.9rem' }}>
@@ -400,21 +591,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
         </div>
 
         {/* Explanation after submit */}
-        {isSubmitted && showExplanation && question.explanation && (
-          <div style={{
-            marginTop: '2rem',
-            padding: '1.5rem',
-            background: 'rgba(111, 107, 234, 0.08)',
-            borderRadius: '12px',
-            borderLeft: '4px solid var(--color-3)',
-            whiteSpace: 'pre-wrap',
-            color: 'var(--foreground)',
-            fontSize: '0.9rem',
-            lineHeight: 1.7,
-          }}>
-            {question.explanation}
-          </div>
-        )}
+        {isSubmitted && showExplanation && question.explanation && renderExplanation(question.explanation)}
       </div>
 
       {/* Action Buttons */}
@@ -510,6 +687,18 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
           Next
         </button>
       </div>
+    </div>
+  );
+
+  // 패널 없으면 기존 레이아웃 유지
+  if (!showStudyPanel) {
+    return <main>{takingContent}</main>;
+  }
+
+  return (
+    <main className="quiz-layout-with-panel">
+      {takingContent}
+      {studyPanelElement}
     </main>
   );
 }

@@ -1,0 +1,373 @@
+{
+  "studyId": "02_01",
+  "chapterId": "02",
+  "title": "구조 및 토대 (CDB & PDB Architecture Foundation)",
+  "keywords": {
+    "CDB (Container Database)": {
+      "definition": "멀티테넌트 아키텍처에서 하나의 Oracle 인스턴스와 하나 이상의 컨테이너(CDB$ROOT, PDB$SEED, 사용자 PDB)로 구성되는 최상위 데이터베이스 구조이다.",
+      "keyPoints": [
+        "단일 인스턴스(SGA + 백그라운드 프로세스)를 모든 PDB가 공유하여 자원 절감",
+        "Control File, Online Redo Log, Archived Redo Log는 CDB 전체 공유 파일",
+        "CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2)는 필수 컨테이너",
+        "ENABLE_PLUGGABLE_DATABASE=TRUE로 생성 시 활성화"
+      ],
+      "relatedKeywords": ["PDB (Pluggable Database)", "CDB$ROOT", "PDB$SEED", "멀티테넌트 (Multitenant)"],
+      "sourceSection": "s01"
+    },
+    "PDB (Pluggable Database)": {
+      "definition": "CDB 내에서 독립적으로 운영되는 논리적 데이터베이스 단위로, 자체 데이터 파일과 테이블스페이스를 가지며 애플리케이션 데이터를 저장한다.",
+      "keyPoints": [
+        "CON_ID는 3 이상의 값을 가짐. CDB당 최대 4096개 이상 생성 가능",
+        "각 PDB는 독립적인 오픈 모드(READ WRITE, READ ONLY, MOUNTED)를 가짐",
+        "Plug/Unplug으로 CDB 간 이동 가능 — 이식성(Portability)이 핵심 장점",
+        "PDB별 데이터 파일과 Temp Tablespace를 독립적으로 보유"
+      ],
+      "relatedKeywords": ["CDB (Container Database)", "Plug/Unplug", "PDB Clone", "CON_ID"],
+      "sourceSection": "s01"
+    },
+    "CDB$ROOT": {
+      "definition": "CDB의 루트 컨테이너(CON_ID=1)로, Oracle 제공 시스템 메타데이터와 공통 객체가 저장되는 필수 컨테이너이다.",
+      "keyPoints": [
+        "Oracle 데이터 딕셔너리 기본 테이블(SYS.TAB$, SYS.OBJ$ 등)의 원본이 저장됨",
+        "Common User, Common Role 등 공통 객체가 여기에 생성됨",
+        "PDB의 메타데이터 링크가 CDB$ROOT의 원본을 참조하는 구조",
+        "CDB 관리 작업(ALTER DATABASE 등)은 CDB$ROOT에서 수행"
+      ],
+      "relatedKeywords": ["CDB (Container Database)", "PDB$SEED", "Common User (공통 사용자)", "Metadata Link (메타데이터 링크)"],
+      "sourceSection": "s02"
+    },
+    "PDB$SEED": {
+      "definition": "새로운 PDB를 생성하기 위한 템플릿 역할의 특수 컨테이너(CON_ID=2)로, 항상 READ ONLY 상태로 유지된다.",
+      "keyPoints": [
+        "CDB 생성 시 자동으로 생성되는 필수 컨테이너",
+        "CREATE PLUGGABLE DATABASE 실행 시 PDB$SEED의 데이터 파일이 복사됨",
+        "사용자가 직접 수정할 수 없음 — 항상 READ ONLY 모드",
+        "PDB$SEED에서 생성하면 빈(empty) PDB가 만들어짐"
+      ],
+      "relatedKeywords": ["CDB$ROOT", "CREATE PLUGGABLE DATABASE", "Application Seed"],
+      "sourceSection": "s02"
+    },
+    "멀티테넌트 (Multitenant)": {
+      "definition": "하나의 물리적 Oracle 인스턴스 내에서 여러 개의 논리적 데이터베이스(PDB)를 운영할 수 있는 Oracle 12c에서 도입된 데이터베이스 통합 아키텍처이다.",
+      "keyPoints": [
+        "Oracle 12c에서 처음 도입. Non-CDB 환경 대비 자원 절감·관리 단순화가 목적",
+        "인스턴스, SGA, 백그라운드 프로세스, Redo Log를 공유하여 오버헤드 최소화",
+        "패치·업그레이드를 CDB 단위로 한번에 적용 가능",
+        "Oracle 26c(26ai)에서는 Non-CDB 지원이 완전 폐지되어 멀티테넌트가 기본"
+      ],
+      "relatedKeywords": ["CDB (Container Database)", "PDB (Pluggable Database)", "ENABLE_PLUGGABLE_DATABASE"],
+      "sourceSection": "s01"
+    },
+    "CON_ID": {
+      "definition": "CDB 내 각 컨테이너를 고유하게 식별하는 정수형 ID로, CDB$ROOT=1, PDB$SEED=2, 사용자 PDB=3 이상이다.",
+      "keyPoints": [
+        "V$CONTAINERS, CDB_ 뷰에서 컨테이너를 구분하는 핵심 컬럼",
+        "CON_ID=0은 CDB 전체를 나타냄 (특정 컨테이너에 귀속되지 않는 경우)",
+        "현재 접속 컨테이너 확인: SHOW CON_ID 또는 SYS_CONTEXT('USERENV','CON_ID')"
+      ],
+      "relatedKeywords": ["CDB$ROOT", "PDB$SEED", "V$CONTAINERS"],
+      "sourceSection": "s02"
+    },
+    "ENABLE_PLUGGABLE_DATABASE": {
+      "definition": "CDB 생성 시 멀티테넌트 기능을 활성화하는 초기화 파라미터로, TRUE로 설정 시 CDB로 생성된다.",
+      "keyPoints": [
+        "CDB 생성 시점에만 설정 가능하며, 이후 변경 불가",
+        "FALSE이면 Non-CDB로 생성됨 (Oracle 26ai에서는 Non-CDB 지원 폐지)",
+        "V$PARAMETER에서 확인 가능"
+      ],
+      "relatedKeywords": ["CDB (Container Database)", "멀티테넌트 (Multitenant)", "MAX_PDBS"],
+      "sourceSection": "s01"
+    },
+    "MAX_PDBS": {
+      "definition": "CDB 내에서 생성 가능한 PDB의 최대 개수를 제한하는 초기화 파라미터이다.",
+      "keyPoints": [
+        "기본값은 4098 (PDB$SEED + Application Root 포함)",
+        "ALTER SYSTEM으로 동적 변경 가능",
+        "실제 생성 가능한 사용자 PDB 수는 MAX_PDBS에서 시드/루트 컨테이너를 제외한 수"
+      ],
+      "relatedKeywords": ["CDB (Container Database)", "ENABLE_PLUGGABLE_DATABASE", "PDB (Pluggable Database)"],
+      "sourceSection": "s02"
+    },
+    "Common User (공통 사용자)": {
+      "definition": "CDB$ROOT에서 생성되어 CDB 전체(모든 컨테이너)에서 공통으로 존재하는 사용자로, 이름이 C##으로 시작해야 한다.",
+      "keyPoints": [
+        "C## 접두사 필수 (예: C##ADMIN). CDB$ROOT에서 CREATE USER C##... 으로 생성",
+        "각 PDB에서 개별적으로 권한을 부여해야 해당 PDB에서 작업 가능",
+        "CONTAINER=ALL 옵션으로 모든 컨테이너에 동시 권한 부여 가능",
+        "Local User와 혼동 주의: Local User는 특정 PDB 내에서만 존재"
+      ],
+      "relatedKeywords": ["Local User (로컬 사용자)", "C## (Common User Prefix)", "CDB$ROOT"],
+      "sourceSection": "s03"
+    },
+    "Local User (로컬 사용자)": {
+      "definition": "특정 PDB 내에서만 존재하고 해당 PDB에서만 접속·작업이 가능한 사용자이다.",
+      "keyPoints": [
+        "PDB에 접속한 상태에서 CREATE USER로 생성 (C## 접두사 불필요)",
+        "다른 PDB의 동일 이름 사용자와는 완전히 별개의 사용자",
+        "PDB의 독립성 보장을 위해 대부분의 애플리케이션 사용자는 Local User로 생성"
+      ],
+      "relatedKeywords": ["Common User (공통 사용자)", "PDB (Pluggable Database)"],
+      "sourceSection": "s03"
+    },
+    "Metadata Link (메타데이터 링크)": {
+      "definition": "PDB의 데이터 딕셔너리가 CDB$ROOT의 원본 메타데이터(Oracle 제공 객체)를 참조하는 포인터 방식의 연결 구조이다.",
+      "keyPoints": [
+        "PDB에 Oracle 제공 메타데이터의 복사본을 두지 않고 CDB$ROOT의 원본을 참조",
+        "데이터 딕셔너리 중복 저장을 방지하여 스토리지 절감 및 패치 효율 향상",
+        "Object Link와 구분: Metadata Link는 정의(메타데이터)만, Object Link는 데이터까지 공유"
+      ],
+      "relatedKeywords": ["Object Link (객체 링크)", "CDB$ROOT", "데이터 딕셔너리"],
+      "sourceSection": "s03"
+    },
+    "Object Link (객체 링크)": {
+      "definition": "PDB에서 CDB$ROOT의 객체 데이터를 직접 참조하는 링크로, 메타데이터뿐 아니라 실제 데이터 행까지 공유하는 방식이다.",
+      "keyPoints": [
+        "Metadata Link는 정의만 공유하지만 Object Link는 데이터 자체를 공유",
+        "대표적 예: CDB$ROOT의 AWR 데이터 등 공유 데이터 접근 시 사용",
+        "PDB에서 DML 불가 — 읽기 전용 참조"
+      ],
+      "relatedKeywords": ["Metadata Link (메타데이터 링크)", "CDB$ROOT"],
+      "sourceSection": "s03"
+    },
+    "Plug/Unplug": {
+      "definition": "PDB를 CDB에서 분리(Unplug)하거나 다른 CDB에 연결(Plug In)하는 멀티테넌트의 핵심 이식성(Portability) 메커니즘이다.",
+      "keyPoints": [
+        "Unplug: ALTER PLUGGABLE DATABASE ... UNPLUG INTO 'path.xml' 또는 .pdb",
+        "Plug In: CREATE PLUGGABLE DATABASE ... USING 'path.xml'",
+        "Unplug 전 PDB를 CLOSE 해야 함. Unplug된 PDB는 CDB에서 UNPLUGGED 상태",
+        "Plug In 전 DBMS_PDB.CHECK_PLUG_COMPATIBILITY로 호환성 검사 필수"
+      ],
+      "relatedKeywords": ["PDB (Pluggable Database)", "DBMS_PDB.CHECK_PLUG_COMPATIBILITY", "XML Metadata"],
+      "sourceSection": "s01"
+    },
+    "PDB Clone": {
+      "definition": "기존 PDB의 데이터와 메타데이터를 복사하여 새로운 PDB를 생성하는 방법으로, 개발/테스트 환경 구축에 주로 사용된다.",
+      "keyPoints": [
+        "CREATE PLUGGABLE DATABASE ... FROM source_pdb 구문 사용",
+        "Local Clone(동일 CDB 내), Remote Clone(DB Link 이용), Hot Clone(소스 OPEN 상태) 지원",
+        "소스 PDB의 데이터 파일이 물리적으로 복사됨 — 데이터 크기에 비례한 시간 소요",
+        "Hot Clone은 Local Undo Mode 필수"
+      ],
+      "relatedKeywords": ["Plug/Unplug", "Hot Clone", "PDB (Pluggable Database)"],
+      "sourceSection": "s01"
+    },
+    "PDB Relocate": {
+      "definition": "PDB를 한 CDB에서 다른 CDB로 온라인 상태를 유지하면서 이동시키는 기능으로, 최소 다운타임 마이그레이션을 가능하게 한다.",
+      "keyPoints": [
+        "CREATE PLUGGABLE DATABASE ... RELOCATE 구문 사용",
+        "소스 PDB가 OPEN 상태에서 이동 가능 — 서비스 중단 최소화",
+        "내부적으로 Hot Clone + 증분 전송 + 최종 전환(Switchover) 단계로 진행",
+        "RAC 환경에서 노드 간 PDB 이동에도 활용 가능"
+      ],
+      "relatedKeywords": ["PDB Clone", "Plug/Unplug", "Hot Clone"],
+      "sourceSection": "s01"
+    },
+    "RAC (Real Application Clusters)": {
+      "definition": "여러 노드(인스턴스)가 하나의 공유 스토리지에 접근하여 고가용성(HA)과 확장성(Scalability)을 제공하는 Oracle의 클러스터링 기술이다.",
+      "keyPoints": [
+        "각 노드가 독립적인 인스턴스(SGA + 프로세스)를 가지지만 공유 스토리지 사용",
+        "멀티테넌트와 완벽 통합: 각 PDB를 특정 노드에서만 열거나 모든 노드에서 열 수 있음",
+        "Cache Fusion으로 노드 간 데이터 블록을 메모리-메모리 전송",
+        "srvctl로 PDB 서비스를 특정 노드에 배치하여 워크로드 분산"
+      ],
+      "relatedKeywords": ["Cache Fusion", "GCS (Global Cache Service)", "GES (Global Enqueue Service)", "srvctl"],
+      "sourceSection": "s05"
+    },
+    "Cache Fusion": {
+      "definition": "RAC 환경에서 노드 간 데이터 블록을 디스크를 거치지 않고 인터커넥트(고속 네트워크)를 통해 메모리 간 직접 전송하는 기술이다.",
+      "keyPoints": [
+        "디스크 I/O 없이 노드 간 블록 전송 — 성능 향상의 핵심",
+        "GCS(Global Cache Service)가 블록 전송을 관리",
+        "Consistent Read(CR) 블록과 Current 블록 모두 전송 가능"
+      ],
+      "relatedKeywords": ["RAC (Real Application Clusters)", "GCS (Global Cache Service)"],
+      "sourceSection": "s05"
+    },
+    "GCS (Global Cache Service)": {
+      "definition": "RAC 환경에서 노드 간 데이터 블록의 공유와 전송을 관리하는 서비스로, Cache Fusion의 핵심 구성요소이다.",
+      "keyPoints": [
+        "각 블록의 마스터 노드를 관리하여 블록 요청 시 적절한 노드에서 전송",
+        "LMS(Global Cache Service Process) 백그라운드 프로세스가 블록 전송 실행",
+        "Global Resource Directory(GRD)에서 블록 상태 정보를 관리"
+      ],
+      "relatedKeywords": ["Cache Fusion", "GES (Global Enqueue Service)", "RAC (Real Application Clusters)"],
+      "sourceSection": "s05"
+    },
+    "GES (Global Enqueue Service)": {
+      "definition": "RAC 환경에서 노드 간 Lock과 Enqueue의 전역적 조정을 담당하는 서비스로, 동시성 제어를 보장한다.",
+      "keyPoints": [
+        "노드 간 테이블/행 수준 Lock의 글로벌 조정 담당",
+        "LMD(Global Enqueue Service Daemon) 백그라운드 프로세스가 실행",
+        "교착 상태(Deadlock) 검출도 글로벌 수준에서 수행"
+      ],
+      "relatedKeywords": ["GCS (Global Cache Service)", "RAC (Real Application Clusters)"],
+      "sourceSection": "s05"
+    },
+    "CDB Resource Plan": {
+      "definition": "CDB 내 PDB 간의 CPU, I/O 등 자원 사용을 제어하는 Resource Manager 계획으로, PDB별 자원 할당 비율과 상한을 설정한다.",
+      "keyPoints": [
+        "shares(상대적 비율), utilization_limit(최대 사용률 %), parallel_server_limit 설정 가능",
+        "CDB$ROOT에서 DBMS_RESOURCE_MANAGER로 생성·관리",
+        "RESOURCE_MANAGER_PLAN 파라미터로 활성 계획 지정",
+        "PDB 간 자원 격리를 통해 '시끄러운 이웃(Noisy Neighbor)' 문제 방지"
+      ],
+      "relatedKeywords": ["CDB (Container Database)", "PDB (Pluggable Database)"],
+      "sourceSection": "s04"
+    },
+    "Local Undo Mode": {
+      "definition": "각 PDB가 자체 UNDO 테이블스페이스를 가지는 모드로, PDB별 독립적인 UNDO 관리와 Hot Clone, Flashback PDB 등의 기능을 지원한다.",
+      "keyPoints": [
+        "Shared Undo Mode(기본)와 대비: Shared는 CDB 전체가 하나의 UNDO 테이블스페이스 공유",
+        "Local Undo 활성화: ALTER DATABASE LOCAL UNDO ON (CDB$ROOT에서 실행)",
+        "Hot Clone, PDB Flashback, PDB Point-in-Time Recovery의 전제 조건",
+        "PDB별 UNDO 관리로 성능 격리 향상"
+      ],
+      "relatedKeywords": ["ALTER DATABASE LOCAL UNDO ON/OFF", "TEMP_UNDO_ENABLED", "Hot Clone"],
+      "sourceSection": "s04"
+    },
+    "ALTER DATABASE LOCAL UNDO ON/OFF": {
+      "definition": "CDB의 UNDO 모드를 Local Undo(각 PDB 독립) 또는 Shared Undo(CDB 공유)로 전환하는 SQL 명령이다.",
+      "keyPoints": [
+        "CDB$ROOT에서 STARTUP UPGRADE 후 실행해야 함",
+        "ON: 각 PDB에 자체 UNDO 테이블스페이스 생성됨",
+        "OFF: 공유 UNDO 모드로 전환, PDB별 UNDO 테이블스페이스 불필요",
+        "변경 후 CDB 재시작 필요"
+      ],
+      "relatedKeywords": ["Local Undo Mode", "STARTUP UPGRADE"],
+      "sourceSection": "s04"
+    },
+    "TEMP_UNDO_ENABLED": {
+      "definition": "임시 테이블에 대한 UNDO 데이터를 임시 테이블스페이스에 저장하도록 하는 파라미터로, UNDO 테이블스페이스의 사용량을 줄인다.",
+      "keyPoints": [
+        "TRUE로 설정 시 임시 테이블의 UNDO가 Temp Tablespace에 저장",
+        "UNDO 테이블스페이스 공간 절약 및 UNDO Retention 관리 개선",
+        "Global Temporary Table을 많이 사용하는 환경에서 효과적"
+      ],
+      "relatedKeywords": ["Local Undo Mode", "Temporary UNDO (일시 UNDO)"],
+      "sourceSection": "s04"
+    },
+    "Temporary UNDO (일시 UNDO)": {
+      "definition": "TEMP_UNDO_ENABLED 파라미터가 TRUE일 때, 임시 테이블에 대한 UNDO 데이터를 임시 테이블스페이스에 기록하는 기능이다.",
+      "keyPoints": [
+        "기존에는 임시 테이블의 UNDO도 일반 UNDO 테이블스페이스에 저장되었음",
+        "Temporary UNDO 사용 시 Redo Log에도 기록되지 않아 I/O 절감",
+        "Shared Undo Mode에서 PDB별 독립 관리가 어려운 문제를 부분적으로 완화"
+      ],
+      "relatedKeywords": ["TEMP_UNDO_ENABLED", "Local Undo Mode"],
+      "sourceSection": "s04"
+    },
+    "ALTER SYSTEM FLUSH BUFFER_CACHE": {
+      "definition": "Database Buffer Cache의 모든 Dirty Buffer를 디스크에 기록하고 캐시를 초기화하는 명령으로, 주로 테스트 환경에서 사용한다.",
+      "keyPoints": [
+        "운영 환경에서는 성능에 심각한 영향을 주므로 사용 금지",
+        "PDB 수준에서 실행 시 해당 PDB의 버퍼만 Flush",
+        "테스트 시 일관된 I/O 측정을 위해 캐시를 비울 때 사용"
+      ],
+      "relatedKeywords": ["Database Buffer Cache", "CDB (Container Database)"],
+      "sourceSection": "s04"
+    },
+    "STARTUP UPGRADE": {
+      "definition": "데이터베이스를 업그레이드 모드로 기동하는 명령으로, 딕셔너리 변경이 필요한 관리 작업(UNDO 모드 변경 등) 시 사용한다.",
+      "keyPoints": [
+        "ALTER DATABASE LOCAL UNDO ON/OFF 실행 시 필수 전제 조건",
+        "일반 사용자 접속이 제한되고 SYS/SYSTEM만 접속 가능",
+        "업그레이드 스크립트(catupgrd.sql 등) 실행 시에도 사용"
+      ],
+      "relatedKeywords": ["ALTER DATABASE LOCAL UNDO ON/OFF", "Local Undo Mode"],
+      "sourceSection": "s04"
+    },
+    "V$CONTAINERS": {
+      "definition": "CDB 내 모든 컨테이너(CDB$ROOT, PDB$SEED, 사용자 PDB 등)의 정보를 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "CON_ID, NAME, OPEN_MODE, RESTRICTED, TOTAL_SIZE 등 핵심 컬럼 제공",
+        "CDB$ROOT에서 조회 시 모든 컨테이너 정보 확인 가능",
+        "V$PDBS와 유사하지만 CDB$ROOT, PDB$SEED 정보도 포함하는 점이 차이"
+      ],
+      "relatedKeywords": ["V$PDBS", "CON_ID", "CDB_뷰"],
+      "sourceSection": "s02"
+    },
+    "V$PDBS": {
+      "definition": "CDB 내 모든 PDB(PDB$SEED 포함)의 상태 정보를 조회하는 동적 성능 뷰로, PDB의 오픈 모드와 상태 확인에 사용된다.",
+      "keyPoints": [
+        "CON_ID, NAME, OPEN_MODE, RESTRICTED, GUID 등 컬럼 제공",
+        "OPEN_MODE 값: READ WRITE, READ ONLY, MOUNTED",
+        "CDB$ROOT 정보는 포함하지 않음 — V$CONTAINERS와의 차이점"
+      ],
+      "relatedKeywords": ["V$CONTAINERS", "SAVE STATE", "CON_ID"],
+      "sourceSection": "s02"
+    },
+    "CDB_뷰": {
+      "definition": "CDB$ROOT에서 조회 시 모든 컨테이너의 데이터를 통합하여 보여주는 딕셔너리 뷰 계열로, DBA_ 뷰에 CON_ID 컬럼이 추가된 형태이다.",
+      "keyPoints": [
+        "CDB_USERS, CDB_TABLESPACES, CDB_DATA_FILES 등 DBA_ 뷰의 CDB 버전",
+        "CDB$ROOT에서 조회하면 모든 PDB의 데이터를 CON_ID별로 확인 가능",
+        "PDB에서 조회하면 해당 PDB의 데이터만 표시 (DBA_ 뷰와 동일 동작)"
+      ],
+      "relatedKeywords": ["V$CONTAINERS", "CON_ID", "CDB$ROOT"],
+      "sourceSection": "s03"
+    },
+    "Application Container": {
+      "definition": "공통 애플리케이션 정의(테이블, 뷰, PL/SQL 등)를 공유하는 PDB들의 논리적 그룹으로, Application Root와 Application PDB로 구성된다.",
+      "keyPoints": [
+        "Application Root: 공통 애플리케이션 객체를 정의하는 마스터 컨테이너",
+        "Application PDB: Application Root의 정의를 상속받는 개별 PDB",
+        "SaaS(멀티테넌트 애플리케이션) 시나리오에 적합 — 스키마는 공유, 데이터는 분리",
+        "애플리케이션 업그레이드를 Root에서 한번에 적용 가능"
+      ],
+      "relatedKeywords": ["CDB (Container Database)", "PDB (Pluggable Database)", "Application Seed"],
+      "sourceSection": "s02"
+    },
+    "SGA_MIN_SIZE": {
+      "definition": "멀티테넌트 환경에서 PDB에 보장되는 최소 SGA 메모리 크기를 지정하는 파라미터이다.",
+      "keyPoints": [
+        "PDB별 최소 SGA 할당을 보장하여 메모리 자원 격리 강화",
+        "CDB 전체 SGA_TARGET의 일정 비율 이하로 설정해야 함",
+        "CDB Resource Plan과 함께 사용하여 PDB 간 자원 관리 최적화"
+      ],
+      "relatedKeywords": ["CDB Resource Plan", "PDB (Pluggable Database)"],
+      "sourceSection": "s04"
+    },
+    "PDB GUID": {
+      "definition": "PDB를 전역적으로 고유하게 식별하는 글로벌 고유 식별자(GUID)로, Plug/Unplug 시에도 변경되지 않는다.",
+      "keyPoints": [
+        "PDB의 데이터 파일 경로에 GUID가 포함될 수 있음 (OMF 사용 시)",
+        "V$PDBS, DBA_PDBS의 GUID 컬럼으로 확인 가능",
+        "CON_ID는 CDB 내에서만 유효하지만, GUID는 CDB 간에도 유일"
+      ],
+      "relatedKeywords": ["PDB (Pluggable Database)", "Plug/Unplug", "V$PDBS"],
+      "sourceSection": "s02"
+    },
+    "SAVE STATE": {
+      "definition": "PDB의 현재 오픈 모드를 저장하여 CDB 재시작 후 자동으로 해당 모드로 복원되도록 하는 메커니즘이다.",
+      "keyPoints": [
+        "ALTER PLUGGABLE DATABASE pdb_name SAVE STATE 명령으로 저장",
+        "CDB 재시작 시 저장된 상태로 자동 OPEN — 수동 OPEN 불필요",
+        "DBA_PDB_SAVED_STATES 뷰에서 저장된 상태 확인 가능",
+        "DISCARD STATE로 저장된 상태를 삭제하면 기본 MOUNTED로 돌아감"
+      ],
+      "relatedKeywords": ["V$PDBS", "DBA_PDB_SAVED_STATES", "PDB (Pluggable Database)"],
+      "sourceSection": "s04"
+    },
+    "srvctl": {
+      "definition": "Oracle RAC 및 Grid Infrastructure 환경에서 데이터베이스, 인스턴스, 서비스, PDB 등을 관리하는 명령줄 도구이다.",
+      "keyPoints": [
+        "srvctl start/stop/status database|service|pdb 등 다양한 관리 명령 제공",
+        "RAC 환경에서 PDB를 특정 인스턴스(노드)에서 시작/중지할 때 사용",
+        "SQL*Plus의 ALTER PLUGGABLE DATABASE와 달리 클러스터 수준의 관리 가능"
+      ],
+      "relatedKeywords": ["RAC (Real Application Clusters)", "PDB (Pluggable Database)"],
+      "sourceSection": "s05"
+    },
+    "C## (Common User Prefix)": {
+      "definition": "CDB$ROOT에서 생성하는 공통 사용자(Common User)의 이름에 반드시 붙여야 하는 접두사(C##)이다.",
+      "keyPoints": [
+        "예: CREATE USER C##ADMIN IDENTIFIED BY password CONTAINER=ALL",
+        "COMMON_USER_PREFIX 파라미터로 접두사 변경 가능 (기본값 C##)",
+        "Local User에는 C## 접두사를 붙이지 않음 — 혼동 주의",
+        "C## 없이 CDB$ROOT에서 사용자를 생성하면 오류 발생"
+      ],
+      "relatedKeywords": ["Common User (공통 사용자)", "Local User (로컬 사용자)", "CDB$ROOT"],
+      "sourceSection": "s03"
+    }
+  }
+}

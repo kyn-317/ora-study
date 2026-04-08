@@ -145,6 +145,50 @@ export async function getQuizQuestions(chapterId: string, setId: string): Promis
   );
 }
 
+// ── Keyword Index ──
+
+export interface KeywordEntry {
+  studyId: string;
+  chapterId: string;
+  title: string;
+  fileName: string;
+  hasKeywordStudy?: boolean;
+}
+
+// ── Keyword Study (키워드 전용 학습자료) ──
+
+export interface KeywordStudyEntry {
+  definition: string;
+  keyPoints: string[];
+  relatedKeywords: string[];
+  sourceSection: string;
+}
+
+interface KeywordStudyFile {
+  studyId: string;
+  chapterId: string;
+  title: string;
+  keywords: Record<string, KeywordStudyEntry>;
+}
+
+export function getKeywordIndex(): Record<string, KeywordEntry[]> {
+  return (manifest as Record<string, unknown>).keywordIndex as Record<string, KeywordEntry[]> ?? {};
+}
+
+const KEYWORD_STUDY_DIR = path.join(DATA_DIR, 'keyword-study');
+
+export async function getKeywordStudyEntry(
+  chapterId: string,
+  studyId: string,
+  keyword: string,
+): Promise<(KeywordStudyEntry & { title: string }) | null> {
+  const file = await readJson<KeywordStudyFile>(
+    path.join(KEYWORD_STUDY_DIR, chapterId, `${studyId}.json`),
+  );
+  if (!file?.keywords?.[keyword]) return null;
+  return { ...file.keywords[keyword], title: file.title };
+}
+
 // ── Exam (original questions) ──
 
 export async function getExamChapters(): Promise<ExamChapter[]> {

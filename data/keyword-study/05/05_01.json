@@ -1,0 +1,321 @@
+{
+  "studyId": "05_01",
+  "chapterId": "05",
+  "title": "테이블스페이스 구조 (Tablespace Structure)",
+  "keywords": {
+    "테이블스페이스 (Tablespace / 表領域)": {
+      "definition": "Oracle Database의 논리적 저장 구조에서 가장 큰 단위로, 데이터베이스 객체(테이블, 인덱스 등)가 저장되는 논리적 컨테이너이다. 하나 이상의 데이터 파일(Datafile)로 구성되어 물리적 저장 장치와 연결된다.",
+      "keyPoints": [
+        "논리적 저장 구조 계층: Tablespace → Segment → Extent → Data Block (4단계)",
+        "기본 제공 TS: SYSTEM(딕셔너리), SYSAUX(보조), TEMP(임시), UNDO(언두), USERS(사용자 데이터)",
+        "SYSTEM TS는 항상 ONLINE 유지 필수이며, 사용자 객체 생성은 비권장",
+        "SYSAUX는 AWR, ADDM 등 Oracle 내부 구성 요소 데이터를 통합 저장 (V$SYSAUX_OCCUPANTS로 확인)"
+      ],
+      "relatedKeywords": ["SMALLFILE 테이블스페이스", "BIGFILE 테이블스페이스", "데이터 파일 (Datafile)", "세그먼트 (Segment)"],
+      "sourceSection": "s01"
+    },
+    "SMALLFILE 테이블스페이스 (SMALLFILE Tablespace / SMALLFILE 表領域)": {
+      "definition": "Oracle Database의 전통적인 기본 테이블스페이스 유형으로, 하나의 테이블스페이스에 최대 1,022개의 데이터 파일을 포함할 수 있다. ROWID에서 파일 번호에 10비트를 할당한다.",
+      "keyPoints": [
+        "데이터 파일당 최대 크기: 8KB 블록 기준 약 32GB (ROWID 블록 번호 22비트)",
+        "테이블스페이스 최대 크기: 8KB 블록 기준 약 32TB (1,022 파일)",
+        "크기 변경은 ALTER DATABASE DATAFILE ... RESIZE로 데이터 파일 단위로만 가능",
+        "ADD DATAFILE / DROP DATAFILE로 데이터 파일 추가/삭제 가능",
+        "Non-ASM 전통적 파일 시스템 환경에서 기본 사용되며, 여러 디스크에 I/O 분산 가능"
+      ],
+      "relatedKeywords": ["BIGFILE 테이블스페이스", "ROWID", "DB_FILES", "데이터 파일 (Datafile)"],
+      "sourceSection": "s02"
+    },
+    "BIGFILE 테이블스페이스 (BIGFILE Tablespace / BIGFILE 表領域)": {
+      "definition": "Oracle 10g에서 도입된 테이블스페이스 유형으로, 정확히 하나의 데이터 파일만으로 구성된다. ROWID에서 파일 번호 10비트를 블록 번호에 재할당하여 단일 파일로 최대 32TB(8KB 블록 기준)까지 지원한다.",
+      "keyPoints": [
+        "데이터 파일 수는 정확히 1개 — ADD DATAFILE / DROP DATAFILE 사용 불가",
+        "ALTER TABLESPACE ... RESIZE/AUTOEXTEND로 테이블스페이스 레벨에서 직접 관리 가능",
+        "ASM + OMF 환경에서 사용 시 최대 효과 (ASM이 I/O 분산 처리)",
+        "Non-ASM 환경에서는 단일 파일에 I/O 집중으로 병목 가능성 존재",
+        "8KB 블록 기준 최대 크기: SMALLFILE TS(~32TB)와 BIGFILE TS(~32TB)는 거의 동일"
+      ],
+      "relatedKeywords": ["SMALLFILE 테이블스페이스", "ASM (Automatic Storage Management)", "OMF (Oracle Managed Files)", "CREATE BIGFILE TABLESPACE"],
+      "sourceSection": "s03"
+    },
+    "데이터 파일 (Datafile / データ・ファイル)": {
+      "definition": "테이블스페이스의 데이터를 디스크에 실제로 저장하는 OS 파일이다. 하나의 데이터 파일은 정확히 하나의 테이블스페이스에만 속하며, 테이블스페이스와 1:N 관계를 갖는다.",
+      "keyPoints": [
+        "DBA_DATA_FILES 뷰로 파일 경로, 크기, 자동 확장 상태 조회 가능",
+        "TEMP 테이블스페이스는 DATAFILE이 아닌 TEMPFILE을 사용",
+        "V$DATAFILE의 STATUS 컬럼으로 상태(ONLINE/OFFLINE/RECOVER) 확인",
+        "SYSTEM, UNDO TS의 데이터 파일은 오프라인 전환 불가"
+      ],
+      "relatedKeywords": ["테이블스페이스 (Tablespace)", "AUTOEXTEND", "DBA_DATA_FILES", "V$DATAFILE"],
+      "sourceSection": "s01"
+    },
+    "AUTOEXTEND (自動拡張機能)": {
+      "definition": "데이터 파일의 공간이 부족할 때 Oracle이 자동으로 데이터 파일 크기를 확장하는 기능이다. NEXT(증가 크기)와 MAXSIZE(최대 한계)를 지정하여 동작을 제어한다.",
+      "keyPoints": [
+        "AUTOEXTEND OFF 상태에서 공간 부족 시 ORA-01653(테이블)/ORA-01654(인덱스) 오류 발생",
+        "MAXSIZE UNLIMITED는 무한이 아니라 파일의 물리적 최대 크기까지(8KB 블록: SMALLFILE 32GB, BIGFILE 32TB)",
+        "SMALLFILE은 ALTER DATABASE DATAFILE 단위, BIGFILE은 ALTER TABLESPACE 레벨 설정 가능",
+        "DBA_DATA_FILES의 AUTOEXTENSIBLE, MAXBYTES, INCREMENT_BY 컬럼으로 상태 확인",
+        "운영 환경에서는 AUTOEXTEND ON + 명시적 MAXSIZE 설정이 권장 (UNLIMITED는 디스크 고갈 위험)"
+      ],
+      "relatedKeywords": ["MAXSIZE", "데이터 파일 (Datafile)", "ALTER TABLESPACE RESIZE"],
+      "sourceSection": "s05"
+    },
+    "ROWID": {
+      "definition": "Oracle Database에서 테이블 내 각 행의 물리적 위치를 고유하게 식별하는 주소(의사 컬럼)이다. Data Object Number + File Number + Block Number + Row Number로 구성된 18자리 Base64 문자열이다.",
+      "keyPoints": [
+        "SMALLFILE ROWID: 파일 번호 10비트(최대 1,022개) + 블록 번호 22비트",
+        "BIGFILE ROWID: 파일 번호 0비트 + 블록 번호 32비트 (10비트 재할당)",
+        "이 구조적 차이가 SMALLFILE/BIGFILE의 최대 파일 수, 최대 크기 차이를 결정",
+        "ALTER DATABASE MOVE DATAFILE 시 ROWID는 변경되지 않음 (Relative File Number 동일)"
+      ],
+      "relatedKeywords": ["SMALLFILE 테이블스페이스", "BIGFILE 테이블스페이스", "DBMS_ROWID 패키지"],
+      "sourceSection": "s02"
+    },
+    "세그먼트 (Segment)": {
+      "definition": "특정 데이터베이스 객체(테이블, 인덱스 등)에 할당된 익스텐트의 집합으로, 객체별 공간 관리 단위이다. 하나의 세그먼트는 동일 테이블스페이스 내 여러 데이터 파일에 걸쳐 익스텐트를 가질 수 있다.",
+      "keyPoints": [
+        "유형: 테이블, 인덱스, 임시, 언두, LOB, 클러스터 세그먼트",
+        "DBA_SEGMENTS 뷰로 세그먼트 크기(BYTES, BLOCKS, EXTENTS) 확인",
+        "하나의 세그먼트는 동일 TS 내 여러 데이터 파일에 걸칠 수 있음"
+      ],
+      "relatedKeywords": ["익스텐트 (Extent)", "데이터 블록 (Data Block)", "테이블스페이스 (Tablespace)"],
+      "sourceSection": "s01"
+    },
+    "익스텐트 (Extent)": {
+      "definition": "논리적으로 연속된 데이터 블록의 집합으로, 공간 할당 및 해제의 기본 단위이다. 하나의 익스텐트는 반드시 단일 데이터 파일 내에 존재한다.",
+      "keyPoints": [
+        "AUTOALLOCATE: Oracle이 64KB→1MB→8MB→64MB 단계적 크기 결정",
+        "UNIFORM: 모든 익스텐트가 동일 크기 (기본 1MB)",
+        "DBA_EXTENTS 뷰로 개별 익스텐트 정보(FILE_ID, BLOCK_ID, BYTES) 확인"
+      ],
+      "relatedKeywords": ["AUTOALLOCATE", "UNIFORM SIZE", "세그먼트 (Segment)", "데이터 블록 (Data Block)"],
+      "sourceSection": "s01"
+    },
+    "데이터 블록 (Data Block)": {
+      "definition": "Oracle Database가 데이터를 읽고 쓰는 최소 I/O 단위이다. DB_BLOCK_SIZE 파라미터로 크기가 결정되며, 데이터베이스 생성 후 변경할 수 없다.",
+      "keyPoints": [
+        "구성: 블록 헤더(공통 헤더, ITL, 행 디렉토리) + 프리 스페이스 + 행 데이터",
+        "기본 크기: 8KB (8192바이트), 2KB/4KB/16KB/32KB 선택 가능",
+        "1개의 Oracle 데이터 블록 = 여러 OS 블록으로 구성"
+      ],
+      "relatedKeywords": ["DB_BLOCK_SIZE", "익스텐트 (Extent)", "PCTFREE"],
+      "sourceSection": "s01"
+    },
+    "DB_BLOCK_SIZE": {
+      "definition": "Oracle Database의 표준 데이터 블록 크기를 결정하는 초기화 파라미터이다. CREATE DATABASE 시 설정되며 이후 변경할 수 없다.",
+      "keyPoints": [
+        "기본값 8192(8KB), 허용값: 2048, 4096, 8192, 16384, 32768",
+        "SYSTEM, SYSAUX, UNDO, 기본 TEMP TS는 반드시 표준 블록 사이즈 사용",
+        "블록 크기에 따라 SMALLFILE/BIGFILE의 최대 데이터 파일 크기가 결정됨",
+        "OLTP는 8KB 권장, DW/DSS는 16KB~32KB가 효율적"
+      ],
+      "relatedKeywords": ["데이터 블록 (Data Block)", "DB_nK_CACHE_SIZE"],
+      "sourceSection": "s01"
+    },
+    "DB_FILES": {
+      "definition": "Oracle 인스턴스에서 열 수 있는 최대 데이터 파일 수를 제한하는 초기화 파라미터이다. 기본값은 200이다.",
+      "keyPoints": [
+        "SMALLFILE TS가 많으면 DB_FILES 한계에 도달 가능",
+        "BIGFILE TS도 데이터 파일 1개가 DB_FILES 카운트에 포함됨",
+        "모든 데이터 파일 정보가 컨트롤 파일에 기록되므로 파일 수가 많으면 관리 부담 증가"
+      ],
+      "relatedKeywords": ["SMALLFILE 테이블스페이스", "데이터 파일 (Datafile)"],
+      "sourceSection": "s02"
+    },
+    "EXTENT MANAGEMENT LOCAL": {
+      "definition": "테이블스페이스의 익스텐트 할당을 로컬(비트맵) 방식으로 관리하는 설정이다. 데이터 파일 헤더의 비트맵으로 여유 공간을 추적하여 딕셔너리 관리 방식보다 성능이 우수하다.",
+      "keyPoints": [
+        "현재 Oracle의 기본값이며, DICTIONARY 관리는 구버전 호환으로 비권장",
+        "AUTOALLOCATE 또는 UNIFORM SIZE 중 선택 가능",
+        "비트맵 기반이므로 공간 할당/해제 시 데이터 딕셔너리 경합 없음"
+      ],
+      "relatedKeywords": ["AUTOALLOCATE", "UNIFORM SIZE"],
+      "sourceSection": "s06"
+    },
+    "AUTOALLOCATE": {
+      "definition": "Oracle이 익스텐트 크기를 자동으로 결정하는 로컬 관리 익스텐트 방식이다. 세그먼트 크기에 따라 64KB→1MB→8MB→64MB로 단계적으로 증가한다.",
+      "keyPoints": [
+        "대부분의 환경에 적합한 기본값",
+        "세그먼트 크기가 작을 때는 작은 익스텐트, 커지면 큰 익스텐트를 할당하여 효율적",
+        "UNIFORM과 달리 공간 낭비를 최소화하면서 관리 편의성 제공"
+      ],
+      "relatedKeywords": ["UNIFORM SIZE", "EXTENT MANAGEMENT LOCAL", "익스텐트 (Extent)"],
+      "sourceSection": "s06"
+    },
+    "UNIFORM SIZE": {
+      "definition": "테이블스페이스 내 모든 익스텐트를 동일한 크기로 할당하는 로컬 관리 익스텐트 방식이다. 기본 크기는 1MB이다.",
+      "keyPoints": [
+        "예측 가능한 공간 관리가 가능하며, TEMP 테이블스페이스에 특히 유리",
+        "모든 익스텐트가 동일 크기이므로 공간 단편화가 적음",
+        "AUTOALLOCATE와 달리 사용자가 크기를 명시적으로 지정"
+      ],
+      "relatedKeywords": ["AUTOALLOCATE", "EXTENT MANAGEMENT LOCAL", "익스텐트 (Extent)"],
+      "sourceSection": "s06"
+    },
+    "SEGMENT SPACE MANAGEMENT AUTO (ASSM)": {
+      "definition": "세그먼트 내 블록의 여유 공간을 비트맵(Bitmap)으로 자동 관리하는 방식이다. 프리리스트(Freelist) 방식보다 동시성이 우수하며 Oracle의 기본값이다.",
+      "keyPoints": [
+        "비트맵으로 블록의 가용 공간 상태를 자동 추적 — PCTUSED 파라미터 무시됨",
+        "PCTFREE만 유효하며, 높은 동시성 환경에 적합",
+        "MANUAL(Freelist) 방식은 구버전 호환으로 비권장",
+        "SHRINK SPACE는 ASSM 환경에서만 지원됨"
+      ],
+      "relatedKeywords": ["PCTFREE", "익스텐트 (Extent)", "EXTENT MANAGEMENT LOCAL"],
+      "sourceSection": "s06"
+    },
+    "ASM (Automatic Storage Management)": {
+      "definition": "Oracle이 제공하는 전용 볼륨 매니저 겸 파일 시스템으로, 디스크 관리를 자동화하는 스토리지 솔루션이다. 스트라이핑과 미러링을 자체적으로 수행한다.",
+      "keyPoints": [
+        "ASM 파일 경로: +<디스크그룹>/<DB>/<파일유형>/<파일명> 형식",
+        "미러링: External(없음), Normal(2-way), High(3-way), Flex(파일별 지정)",
+        "BIGFILE TS + ASM 조합이 Oracle 권장 구성 (ASM이 I/O 분산 처리)",
+        "V$ASM_DISKGROUP, V$ASM_DISK 뷰로 상태 모니터링"
+      ],
+      "relatedKeywords": ["BIGFILE 테이블스페이스", "OMF (Oracle Managed Files)"],
+      "sourceSection": "s03"
+    },
+    "OMF (Oracle Managed Files)": {
+      "definition": "데이터 파일의 이름과 경로를 Oracle이 자동으로 생성 및 관리하는 기능이다. DB_CREATE_FILE_DEST 파라미터로 기본 경로를 지정한다.",
+      "keyPoints": [
+        "OMF 사용 시 CREATE TABLESPACE에서 파일 경로 없이 SIZE만 지정 가능",
+        "ASM + OMF 환경에서 BIGFILE이 기본 TS 타입으로 설정될 수 있음",
+        "관리 간소화: 파일 생성/삭제를 Oracle이 자동 수행"
+      ],
+      "relatedKeywords": ["DB_CREATE_FILE_DEST", "ASM (Automatic Storage Management)", "BIGFILE 테이블스페이스"],
+      "sourceSection": "s03"
+    },
+    "DB_CREATE_FILE_DEST": {
+      "definition": "OMF(Oracle Managed Files) 사용 시 데이터 파일이 생성되는 기본 디렉토리 또는 ASM 디스크 그룹을 지정하는 초기화 파라미터이다.",
+      "keyPoints": [
+        "ASM 환경에서는 +DATA 등 디스크 그룹명을 지정",
+        "이 파라미터가 설정되면 CREATE TABLESPACE 시 파일 경로 생략 가능",
+        "ALTER SYSTEM SET으로 동적 변경 가능"
+      ],
+      "relatedKeywords": ["OMF (Oracle Managed Files)", "ASM (Automatic Storage Management)"],
+      "sourceSection": "s07"
+    },
+    "DBA_TABLESPACES": {
+      "definition": "모든 테이블스페이스의 속성 정보를 조회하는 데이터 딕셔너리 뷰이다. BIGFILE 여부, 상태, 익스텐트 관리 방식, 블록 사이즈 등을 확인할 수 있다.",
+      "keyPoints": [
+        "BIGFILE 컬럼: YES=BIGFILE, NO=SMALLFILE 구분",
+        "CONTENTS: PERMANENT, TEMPORARY, UNDO 구분",
+        "BLOCK_SIZE: 각 TS의 블록 사이즈 확인 (비표준 블록 사이즈 식별)",
+        "SEGMENT_SPACE_MANAGEMENT: AUTO(ASSM) 또는 MANUAL 확인"
+      ],
+      "relatedKeywords": ["V$TABLESPACE", "DBA_DATA_FILES", "DATABASE_PROPERTIES"],
+      "sourceSection": "s01"
+    },
+    "DBA_DATA_FILES": {
+      "definition": "모든 영구 테이블스페이스의 데이터 파일 상세 정보를 조회하는 데이터 딕셔너리 뷰이다. 파일 경로, 크기, 자동 확장 상태 등을 확인할 수 있다.",
+      "keyPoints": [
+        "주요 컬럼: FILE_NAME, BYTES, AUTOEXTENSIBLE, MAXBYTES, INCREMENT_BY",
+        "TEMP 파일은 DBA_TEMP_FILES 별도 뷰에서 조회",
+        "AUTOEXTENSIBLE='YES'/'' NO로 자동 확장 활성화 여부 확인"
+      ],
+      "relatedKeywords": ["DBA_TABLESPACES", "V$DATAFILE", "AUTOEXTEND"],
+      "sourceSection": "s01"
+    },
+    "DBA_FREE_SPACE": {
+      "definition": "테이블스페이스 내 여유(사용 가능) 공간 정보를 조회하는 데이터 딕셔너리 뷰이다. 테이블스페이스의 공간 사용률 계산에 활용된다.",
+      "keyPoints": [
+        "DBA_DATA_FILES와 조인하여 사용률(%) 계산 가능",
+        "SUM(BYTES)로 전체 여유 공간, MAX(BYTES)로 최대 연속 여유 공간 확인",
+        "정기적 모니터링으로 공간 부족 사전 방지"
+      ],
+      "relatedKeywords": ["DBA_DATA_FILES", "DBA_TABLESPACES"],
+      "sourceSection": "s01"
+    },
+    "V$TABLESPACE": {
+      "definition": "테이블스페이스의 동적 성능 정보를 제공하는 동적 성능 뷰이다. TS#(번호)와 NAME(이름) 등 기본 정보를 포함한다.",
+      "keyPoints": [
+        "컨트롤 파일 기반 정보 제공",
+        "DBA_TABLESPACES와 달리 인스턴스 레벨의 동적 정보",
+        "Oracle 26ai에서 추가 메트릭이 포함되어 모니터링 가시성 향상"
+      ],
+      "relatedKeywords": ["DBA_TABLESPACES", "V$DATAFILE"],
+      "sourceSection": "s01"
+    },
+    "V$DATAFILE": {
+      "definition": "컨트롤 파일 기반으로 데이터 파일의 동적 성능 정보를 제공하는 뷰이다. 데이터 파일 상태(STATUS), SCN 등을 확인할 수 있다.",
+      "keyPoints": [
+        "STATUS: ONLINE, OFFLINE, RECOVER, SYSOFF 등 상태 확인",
+        "DBA_DATA_FILES와 함께 데이터 파일 관리의 핵심 뷰",
+        "V$DATAFILE_HEADER로 파일 헤더의 SCN, 체크포인트 정보 조회 가능"
+      ],
+      "relatedKeywords": ["DBA_DATA_FILES", "V$TABLESPACE"],
+      "sourceSection": "s01"
+    },
+    "DATABASE_PROPERTIES": {
+      "definition": "데이터베이스 레벨의 속성(Property) 정보를 저장하는 딕셔너리 뷰이다. 기본 영구 TS, 기본 임시 TS, 기본 TS 타입 등을 확인할 수 있다.",
+      "keyPoints": [
+        "DEFAULT_PERMANENT_TABLESPACE: 기본 영구 테이블스페이스 확인",
+        "DEFAULT_TEMP_TABLESPACE: 기본 임시 테이블스페이스 확인",
+        "DEFAULT_TBS_TYPE: SMALLFILE 또는 BIGFILE 기본 타입 확인"
+      ],
+      "relatedKeywords": ["DEFAULT_TBS_TYPE", "DEFAULT_PERMANENT_TABLESPACE"],
+      "sourceSection": "s07"
+    },
+    "DEFAULT_TBS_TYPE": {
+      "definition": "CREATE TABLESPACE 시 SMALLFILE/BIGFILE을 명시하지 않을 때 적용되는 기본 테이블스페이스 타입을 나타내는 데이터베이스 속성이다.",
+      "keyPoints": [
+        "ALTER DATABASE SET DEFAULT BIGFILE/SMALLFILE TABLESPACE로 변경",
+        "DATABASE_PROPERTIES 뷰에서 PROPERTY_NAME='DEFAULT_TBS_TYPE'으로 확인",
+        "ASM + OMF 환경에서 BIGFILE이 기본으로 설정되는 경우가 있음"
+      ],
+      "relatedKeywords": ["DATABASE_PROPERTIES", "BIGFILE 테이블스페이스", "SMALLFILE 테이블스페이스"],
+      "sourceSection": "s07"
+    },
+    "DEFAULT_PERMANENT_TABLESPACE": {
+      "definition": "사용자 생성 시 DEFAULT TABLESPACE를 명시하지 않을 때 적용되는 데이터베이스 레벨의 기본 영구 테이블스페이스 설정이다.",
+      "keyPoints": [
+        "ALTER DATABASE DEFAULT TABLESPACE 명령으로 변경",
+        "미설정 시 SYSTEM TS가 기본값이 되어 사용자 데이터가 SYSTEM에 저장되는 문제 발생",
+        "우선순위: 사용자 레벨 > CREATE USER 시 명시 > DB 레벨 기본 > SYSTEM"
+      ],
+      "relatedKeywords": ["DATABASE_PROPERTIES", "테이블스페이스 (Tablespace)"],
+      "sourceSection": "s07"
+    },
+    "MAXSIZE": {
+      "definition": "AUTOEXTEND ON 설정 시 데이터 파일이 자동 확장될 수 있는 최대 크기를 지정하는 옵션이다. UNLIMITED로 설정하면 파일의 물리적 최대 크기까지 확장된다.",
+      "keyPoints": [
+        "MAXSIZE UNLIMITED: SMALLFILE은 ~32GB, BIGFILE은 ~32TB(8KB 블록 기준)까지",
+        "운영 환경에서는 명시적 MAXSIZE 설정이 권장 (디스크 고갈 방지)",
+        "OS/파일 시스템 제한에 먼저 도달할 수 있음"
+      ],
+      "relatedKeywords": ["AUTOEXTEND", "데이터 파일 (Datafile)"],
+      "sourceSection": "s05"
+    },
+    "TEMPFILE": {
+      "definition": "TEMPORARY 테이블스페이스에서 사용되는 파일로, 정렬, 해시 조인 등의 임시 데이터를 저장한다. 일반 데이터 파일(DATAFILE)과 구분되며, DBA_TEMP_FILES 뷰로 조회한다.",
+      "keyPoints": [
+        "TEMPORARY TS 생성 시 DATAFILE 대신 TEMPFILE 키워드 사용",
+        "임시 세그먼트는 세션 종료 시 자동 해제",
+        "DBA_TEMP_FILES 뷰(DBA_DATA_FILES가 아님)로 조회"
+      ],
+      "relatedKeywords": ["테이블스페이스 (Tablespace)", "DBA_DATA_FILES"],
+      "sourceSection": "s01"
+    },
+    "ALTER TABLESPACE RESIZE": {
+      "definition": "BIGFILE 테이블스페이스의 크기를 테이블스페이스 레벨에서 직접 변경하는 DDL 명령이다. SMALLFILE에서는 사용할 수 없다.",
+      "keyPoints": [
+        "BIGFILE 전용 명령 — SMALLFILE은 ALTER DATABASE DATAFILE ... RESIZE 사용",
+        "축소 시 현재 사용 중인 공간(HWM) 이하로는 축소 불가",
+        "BIGFILE의 관리 편의성을 보여주는 대표적 기능"
+      ],
+      "relatedKeywords": ["BIGFILE 테이블스페이스", "AUTOEXTEND"],
+      "sourceSection": "s03"
+    },
+    "CREATE BIGFILE TABLESPACE": {
+      "definition": "BIGFILE 유형의 테이블스페이스를 생성하는 DDL 구문이다. 정확히 하나의 데이터 파일만 지정할 수 있다.",
+      "keyPoints": [
+        "CREATE BIGFILE TABLESPACE ... DATAFILE ... SIZE ... 형식으로 생성",
+        "ASM + OMF 환경에서는 파일 경로 없이 SIZE만 지정 가능",
+        "BIGFILE TEMPORARY TABLESPACE도 생성 가능",
+        "SMALLFILE이 기본값이므로 BIGFILE은 명시적으로 지정해야 함"
+      ],
+      "relatedKeywords": ["BIGFILE 테이블스페이스", "OMF (Oracle Managed Files)", "EXTENT MANAGEMENT LOCAL"],
+      "sourceSection": "s06"
+    }
+  }
+}

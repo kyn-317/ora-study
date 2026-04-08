@@ -1,0 +1,922 @@
+{
+  "studyId": "01_02",
+  "chapterId": "01",
+  "title": "프로세스 구조 (Process Structures)",
+  "keywords": {
+    "User Process": {
+      "definition": "클라이언트 측에서 실행되는 애플리케이션 프로세스로, Oracle 서버와 통신하여 SQL 요청을 전달하는 역할을 한다.",
+      "keyPoints": [
+        "SGA에 직접 접근할 수 없으며, 반드시 Server Process를 통해 데이터에 접근한다",
+        "Oracle Net(TCP/IP)을 통해 서버와 통신하며, 로컬 접속 시 IPC 사용 가능",
+        "SQL*Plus, SQL Developer, JDBC/ODBC 애플리케이션 등이 User Process에 해당한다",
+        "User Process와 Server Process는 별개의 프로세스이며, 1:1 또는 N:1로 매핑될 수 있다"
+      ],
+      "relatedKeywords": ["Server Process", "Connection", "Session"],
+      "sourceSection": "s01"
+    },
+    "Server Process": {
+      "definition": "사용자의 SQL 요청을 대신 처리하는 Oracle 인스턴스 측 프로세스로, SQL 파싱·실행, 데이터 블록 읽기, 결과 반환을 수행한다.",
+      "keyPoints": [
+        "각 Server Process는 자신만의 PGA(Program Global Area)를 보유한다",
+        "데이터 파일에서 블록을 읽어(Read) Buffer Cache에 적재하지만, 데이터 파일 Write는 DBWn이 담당한다",
+        "Dedicated Server 모드에서는 User Process와 1:1로 매핑된다",
+        "Shared Server 모드에서는 여러 사용자 요청을 공유 서버 프로세스가 처리한다"
+      ],
+      "relatedKeywords": ["User Process", "PGA", "Background Process", "Dedicated Server", "Shared Server"],
+      "sourceSection": "s01"
+    },
+    "Background Process": {
+      "definition": "인스턴스 시작 시 자동으로 기동되어 유지관리, 성능 최적화, 장애 복구 등의 작업을 수행하는 Oracle 내부 프로세스이다.",
+      "keyPoints": [
+        "필수 프로세스: DBWn, LGWR, CKPT, SMON, PMON, MMON 등 인스턴스 운영에 반드시 필요",
+        "선택적 프로세스: ARCn(아카이브), RECO(분산 트랜잭션 복구), CJQ0(Job 스케줄링) 등 기능별 기동",
+        "슬레이브 프로세스: Pnnn(병렬 실행), Innn(I/O 슬레이브) 등 작업 분담용",
+        "V$BGPROCESS 뷰에서 현재 활성화된 Background Process를 조회할 수 있다"
+      ],
+      "relatedKeywords": ["DBWn", "LGWR", "CKPT", "SMON", "PMON", "MMON", "ARCn"],
+      "sourceSection": "s01"
+    },
+    "Connection": {
+      "definition": "User Process와 Oracle 인스턴스 간에 수립되는 물리적 통신 경로로, 네트워크 또는 IPC를 통해 데이터를 전송하는 채널이다.",
+      "keyPoints": [
+        "로컬 접속 시 IPC(Inter-Process Communication), 원격 접속 시 Oracle Net(TCP/IP)을 사용한다",
+        "하나의 Connection에 0개 이상(0~N개)의 Session이 존재할 수 있다",
+        "Connection은 물리적 경로이고, Session은 논리적 엔티티로 구분해야 한다",
+        "Connection이 수립되어도 인증 전까지는 Session이 생성되지 않는다"
+      ],
+      "relatedKeywords": ["Session", "User Process", "Listener"],
+      "sourceSection": "s02"
+    },
+    "Session": {
+      "definition": "사용자 인증이 완료된 후 생성되는 논리적 엔티티로, 로그인부터 로그아웃까지의 기간 동안 사용자의 상태 정보를 유지한다.",
+      "keyPoints": [
+        "SID(Session ID)와 Serial#의 조합으로 세션을 고유하게 식별한다",
+        "V$SESSION 뷰에서 현재 활성 세션의 정보를 조회할 수 있다",
+        "하나의 Connection 위에 여러 Session이 존재할 수 있다(다중 세션)",
+        "ALTER SYSTEM KILL SESSION 'sid,serial#' 명령으로 특정 세션을 강제 종료할 수 있다"
+      ],
+      "relatedKeywords": ["Connection", "SID", "Serial#", "V$SESSION"],
+      "sourceSection": "s02"
+    },
+    "SID": {
+      "definition": "Session ID의 약자로, Oracle 인스턴스 내에서 각 세션을 식별하기 위해 부여되는 고유 번호이다.",
+      "keyPoints": [
+        "세션이 종료되면 SID가 재사용될 수 있으므로 SID만으로는 세션을 고유하게 식별할 수 없다",
+        "Serial#과 조합하여 세션을 정확하게 식별한다(SID + Serial# = 고유 식별자)",
+        "V$SESSION에서 SID 컬럼으로 조회 가능하다",
+        "KILL SESSION, DISCONNECT SESSION 등의 명령에서 SID와 Serial#을 함께 지정한다"
+      ],
+      "relatedKeywords": ["Serial#", "Session", "V$SESSION"],
+      "sourceSection": "s02"
+    },
+    "Serial#": {
+      "definition": "세션 직렬 번호로, SID가 재사용될 때 이전 세션과 현재 세션을 구분하기 위해 사용되는 순차 증가 번호이다.",
+      "keyPoints": [
+        "SID는 재사용 가능하므로 Serial#과 반드시 조합해야 세션을 고유하게 식별할 수 있다",
+        "ALTER SYSTEM KILL SESSION 'sid,serial#' 형식으로 세션 종료 시 반드시 함께 지정한다",
+        "V$SESSION의 SERIAL# 컬럼에서 조회 가능하다",
+        "같은 SID라도 Serial#이 다르면 서로 다른 세션이다"
+      ],
+      "relatedKeywords": ["SID", "Session", "V$SESSION"],
+      "sourceSection": "s02"
+    },
+    "PGA": {
+      "definition": "Program Global Area의 약자로, 각 서버 프로세스에 전용으로 할당되는 비공유 메모리 영역이다.",
+      "keyPoints": [
+        "SGA와 달리 각 프로세스가 독점적으로 사용하며 다른 프로세스와 공유하지 않는다",
+        "SQL Work Area, Private SQL Area, Session Memory를 포함한다",
+        "PGA_AGGREGATE_TARGET 파라미터로 인스턴스 전체 PGA 목표 크기를 관리한다",
+        "Dedicated Server 모드에서는 UGA가 PGA 내에 위치한다",
+        "Shared Server 모드에서는 UGA가 SGA(Large Pool 또는 Shared Pool)로 이동한다"
+      ],
+      "relatedKeywords": ["SGA", "SQL Work Area", "Private SQL Area", "Server Process"],
+      "sourceSection": "s02"
+    },
+    "Private SQL Area": {
+      "definition": "SQL 문의 실행 상태와 바인드 변수 값을 저장하는 메모리 영역으로, Dedicated Server에서는 PGA에, Shared Server에서는 SGA에 위치한다.",
+      "keyPoints": [
+        "Persistent Area: 바인드 변수 정보 등 커서가 닫힐 때까지 유지되는 영역",
+        "Runtime Area: SQL 실행 중에만 사용되는 상태 정보 저장 영역으로 실행 완료 시 해제",
+        "커서(Cursor)와 1:1로 대응되며, 각 SQL 문마다 별도의 Private SQL Area가 할당된다",
+        "Shared Server 모드에서는 SGA(Large Pool)에 위치하므로 메모리 구성이 달라진다"
+      ],
+      "relatedKeywords": ["PGA", "SQL Work Area", "User Global Area"],
+      "sourceSection": "s02"
+    },
+    "UGA": {
+      "definition": "User Global Area의 약칭으로, 사용자 세션 정보(Private SQL Area, 커서 상태, 세션 변수)를 저장하는 메모리 영역이다.",
+      "keyPoints": [
+        "Dedicated Server: UGA가 PGA 내부에 위치",
+        "Shared Server: UGA가 SGA(Large Pool 또는 Shared Pool)로 이동 — 시험 최빈출 포인트",
+        "DRCP: UGA가 PGA에 위치하여 Dedicated Server와 동일한 메모리 구조 유지",
+        "UGA 위치 차이는 Dedicated/Shared/DRCP를 구분하는 핵심 기준"
+      ],
+      "relatedKeywords": ["User Global Area", "PGA", "Dedicated Server", "Shared Server"],
+      "sourceSection": "s03"
+    },
+    "SQL Work Area": {
+      "definition": "PGA 내에 위치하며, 정렬(Sort), 해시 조인(Hash Join), 비트맵 병합(Bitmap Merge) 등 메모리 집약적 SQL 연산에 사용되는 메모리 영역이다.",
+      "keyPoints": [
+        "PGA_AGGREGATE_TARGET으로 자동 관리 권장",
+        "메모리가 부족하면 디스크(TEMP 테이블스페이스)를 사용하여 성능이 저하된다",
+        "Optimal(메모리 내 완료), Onepass(1회 디스크 사용), Multipass(다회 디스크 사용)로 실행 모드가 구분된다"
+      ],
+      "relatedKeywords": ["PGA", "Private SQL Area"],
+      "sourceSection": "s02"
+    },
+    "Dedicated Server": {
+      "definition": "각 사용자 프로세스에 전용 서버 프로세스 1개가 1:1로 할당되는 Oracle의 기본 연결 모드이다.",
+      "keyPoints": [
+        "기본 모드로, 사용자 프로세스와 서버 프로세스가 1:1 매핑 — 세션 종료까지 전용 유지",
+        "UGA(User Global Area)가 PGA 내부에 위치 (Shared Server와의 핵심 차이)",
+        "유휴(Idle) 상태에서도 서버 프로세스를 해제하지 않아 리소스 낭비 가능",
+        "구성이 단순하고 응답 시간이 빠르지만, 대규모 동시 접속 시 확장성 한계"
+      ],
+      "relatedKeywords": ["Shared Server", "DRCP", "User Global Area"],
+      "sourceSection": "s03"
+    },
+    "Shared Server": {
+      "definition": "소수의 서버 프로세스가 다수의 사용자 요청을 디스패처와 요청 큐를 통해 공유 처리하는 연결 모드이다.",
+      "keyPoints": [
+        "UGA가 PGA에서 SGA(Large Pool 우선, 없으면 Shared Pool)로 이동 — 가장 핵심적인 메모리 차이",
+        "디스패처 → Request Queue → Shared Server → Response Queue → 디스패처 흐름으로 처리",
+        "SYSDBA/SYSOPER 접속, RMAN, Data Guard 등 관리 작업은 반드시 Dedicated Server 사용",
+        "대규모 동시 접속에 유리하지만, 큐 대기로 응답 지연 및 SGA 크기 증가가 단점"
+      ],
+      "relatedKeywords": ["Dedicated Server", "Request Queue", "User Global Area", "Dispatcher"],
+      "sourceSection": "s03"
+    },
+    "DRCP": {
+      "definition": "Database Resident Connection Pooling의 약자로, DB 서버 측에서 서버 프로세스 풀을 관리하여 필요 시 할당(Attach)하고 완료 후 반환(Detach)하는 연결 풀링 방식이다.",
+      "keyPoints": [
+        "Dedicated Server의 성능과 Shared Server의 확장성을 결합한 방식이다",
+        "접속 문자열에 (SERVER=POOLED)를 지정하여 DRCP를 사용한다",
+        "UGA가 PGA에 위치하므로 Shared Server와 달리 SGA 부담이 적다",
+        "DBMS_CONNECTION_POOL 패키지로 풀 시작(START), 중지(STOP), 구성(CONFIGURE)을 관리한다",
+        "V$CPOOL_STAT 뷰로 풀 사용 현황을 모니터링한다"
+      ],
+      "relatedKeywords": ["Database Resident Connection Pooling", "Dedicated Server", "Shared Server"],
+      "sourceSection": "s03"
+    },
+    "Database Resident Connection Pooling": {
+      "definition": "DRCP의 정식 명칭으로, Oracle DB 서버 측에서 서버 프로세스와 세션의 풀을 유지·관리하여 대규모 동시 접속 환경에서 리소스 효율성을 높이는 연결 관리 방식이다.",
+      "keyPoints": [
+        "Dedicated Server(프로세스 1:1 매핑)의 성능과 Shared Server(프로세스 공유)의 확장성을 결합한다",
+        "DBMS_CONNECTION_POOL.START_POOL / STOP_POOL / CONFIGURE_POOL 프로시저로 관리한다",
+        "V$CPOOL_STAT 뷰에서 NUM_HITS, NUM_MISSES 등 풀 효율성 지표를 확인한다",
+        "웹 애플리케이션처럼 짧은 트랜잭션이 빈번한 환경에 적합하다"
+      ],
+      "relatedKeywords": ["DRCP", "Dedicated Server", "Shared Server"],
+      "sourceSection": "s03"
+    },
+    "Dispatcher": {
+      "definition": "Shared Server 환경에서 사용자 프로세스의 요청을 수신하여 Request Queue에 배치하고, 처리 결과를 Response Queue에서 가져와 클라이언트에 반환하는 중계 프로세스이다.",
+      "keyPoints": [
+        "DISPATCHERS 초기화 파라미터로 프로토콜별 디스패처 수를 구성한다",
+        "여러 사용자 프로세스의 연결을 하나의 Dispatcher가 다중화(Multiplexing)하여 처리한다",
+        "Request Queue는 인스턴스에 하나(공유), Response Queue는 디스패처별로 개별 존재한다",
+        "V$DISPATCHER 뷰에서 디스패처 상태와 부하를 모니터링한다"
+      ],
+      "relatedKeywords": ["Shared Server", "Request Queue", "Response Queue", "DISPATCHERS"],
+      "sourceSection": "s03"
+    },
+    "Request Queue": {
+      "definition": "Shared Server 환경에서 디스패처가 사용자 요청을 배치하고, 공유 서버 프로세스가 가져가는 공유 큐이다.",
+      "keyPoints": [
+        "Shared Server 구조에서 디스패처와 서버 프로세스 사이의 중간 버퍼 역할",
+        "V$QUEUE 뷰에서 요청 큐(COMMON)의 대기 상태를 조회하여 성능 모니터링",
+        "avg_wait_sec가 높으면 Shared Server 프로세스 수 증가를 검토",
+        "Response Queue와 쌍으로 동작 — 요청은 Request Queue, 응답은 Response Queue"
+      ],
+      "relatedKeywords": ["Shared Server", "Dispatcher", "Response Queue"],
+      "sourceSection": "s03"
+    },
+    "Response Queue": {
+      "definition": "Shared Server 환경에서 공유 서버 프로세스가 SQL 처리 결과를 배치하는 큐로, 디스패처가 이 큐에서 결과를 가져와 클라이언트에 반환한다.",
+      "keyPoints": [
+        "각 디스패처별로 개별 Response Queue가 존재한다(1:1 관계)",
+        "Request Queue(요청 큐)는 인스턴스에 하나만 공유되지만, Response Queue는 디스패처마다 별도이다",
+        "SGA 내 Large Pool(또는 Shared Pool)에 위치한다",
+        "공유 서버 프로세스가 처리를 완료하면 해당 디스패처의 Response Queue에 결과를 배치한다"
+      ],
+      "relatedKeywords": ["Dispatcher", "Request Queue", "Shared Server"],
+      "sourceSection": "s03"
+    },
+    "User Global Area": {
+      "definition": "사용자 세션 정보(Private SQL Area, 커서 상태, 세션 변수)를 저장하는 메모리 영역으로, 서버 연결 방식에 따라 위치가 달라진다.",
+      "keyPoints": [
+        "Dedicated Server: UGA가 PGA 내부에 위치",
+        "Shared Server: UGA가 SGA(Large Pool 또는 Shared Pool)로 이동 — 시험 최빈출 포인트",
+        "DRCP: UGA가 PGA에 위치하여 Dedicated Server와 동일한 메모리 구조 유지",
+        "UGA 위치 차이는 Dedicated/Shared/DRCP를 구분하는 핵심 기준"
+      ],
+      "relatedKeywords": ["Dedicated Server", "Shared Server", "DRCP"],
+      "sourceSection": "s03"
+    },
+    "DBWn": {
+      "definition": "Database Writer의 약칭으로, Buffer Cache의 Dirty Buffer를 데이터 파일에 비동기적으로 일괄 기록하는 필수 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "Checkpoint Queue를 LRBA 순서로 참조하여 Dirty Buffer를 데이터 파일에 기록",
+        "DB_WRITER_PROCESSES 파라미터로 개수 지정(최대 100개)",
+        "기록 조건: 체크포인트, Dirty Buffer 임계값 도달, Free Buffer 부족, 3초 타임아웃, 테이블스페이스 오프라인 등",
+        "서버 프로세스가 직접 기록하지 않고 DBWn이 대신 비동기로 일괄 기록하여 성능 최적화",
+        "DBWn 기록 전 반드시 LGWR이 관련 Redo를 먼저 기록해야 함(Write-Ahead Logging)"
+      ],
+      "relatedKeywords": ["Dirty Buffer", "Checkpoint Queue", "LRBA", "Buffer Cache", "LGWR"],
+      "sourceSection": "s04"
+    },
+    "Database Writer": {
+      "definition": "DBWn의 정식 명칭으로, SGA의 Buffer Cache에 있는 변경된 데이터 블록(Dirty Buffer)을 디스크의 데이터 파일에 기록하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "DBWn은 Database Writer의 약칭이며, n은 프로세스 번호를 나타냄(DBW0, DBW1 등)",
+        "다중 DBWn 프로세스를 통해 대규모 시스템의 I/O 처리량 향상 가능",
+        "Checkpoint Queue의 LRBA 순서에 따라 기록 순서를 결정"
+      ],
+      "relatedKeywords": ["DBWn", "Dirty Buffer", "Buffer Cache"],
+      "sourceSection": "s04"
+    },
+    "Dirty Buffer": {
+      "definition": "Buffer Cache에서 변경되었지만 아직 데이터 파일에 기록되지 않은 버퍼로, DBWn에 의해 데이터 파일에 기록된다.",
+      "keyPoints": [
+        "서버 프로세스가 DML을 수행하면 Buffer Cache의 블록이 Dirty Buffer가 됨",
+        "Checkpoint Queue에서 LRBA 순서로 관리되며 DBWn이 이 순서대로 기록",
+        "Dirty Buffer가 데이터 파일에 기록되면 Clean Buffer로 전환",
+        "Free Buffer 부족 시 DBWn이 Dirty Buffer를 기록하여 Free Buffer를 확보"
+      ],
+      "relatedKeywords": ["DBWn", "Checkpoint Queue", "Buffer Cache", "LRBA"],
+      "sourceSection": "s04"
+    },
+    "Checkpoint Queue": {
+      "definition": "Dirty Buffer를 변경 순서(LRBA)대로 관리하는 큐로, DBWn이 이 순서에 따라 Dirty Buffer를 데이터 파일에 기록한다.",
+      "keyPoints": [
+        "Dirty Buffer를 LRBA(Low Redo Block Address) 순서로 정렬하여 관리",
+        "DBWn은 Checkpoint Queue 순서대로 기록하여 효율적인 I/O 수행",
+        "인스턴스 복구 시 Redo 적용 시작점(Checkpoint Position) 결정에 사용",
+        "체크포인트 발생 시 Checkpoint Queue의 모든 Dirty Buffer를 기록"
+      ],
+      "relatedKeywords": ["Dirty Buffer", "LRBA", "DBWn", "Instance Recovery"],
+      "sourceSection": "s04"
+    },
+    "LRBA": {
+      "definition": "Low Redo Block Address의 약자로, Dirty Buffer의 가장 오래된 변경과 연관된 Redo Log 블록 주소이며 Checkpoint Queue의 정렬 기준이다.",
+      "keyPoints": [
+        "Dirty Buffer가 최초로 변경될 때의 Redo Log 블록 주소를 기록",
+        "Checkpoint Queue에서 Dirty Buffer의 정렬 기준으로 사용",
+        "인스턴스 복구 시 Redo 적용 시작점을 결정하는 핵심 정보",
+        "LRBA가 가장 오래된 Dirty Buffer부터 먼저 기록하여 복구 시간 최소화"
+      ],
+      "relatedKeywords": ["Checkpoint Queue", "Dirty Buffer", "Instance Recovery", "DBWn"],
+      "sourceSection": "s04"
+    },
+    "LGWR": {
+      "definition": "Log Writer의 약칭으로, Redo Log Buffer의 Redo Entry를 온라인 Redo Log 파일에 기록하여 트랜잭션의 Durability를 보장하는 필수 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "기록 조건: COMMIT, 1/3 버퍼 사용, 1MB 축적, 3초 타임아웃, DBWn 기록 전",
+        "순차 기록(Sequential Write)으로 높은 I/O 성능 확보",
+        "Group Commit을 지원하여 여러 트랜잭션의 Redo를 한 번에 기록",
+        "Write-Ahead Logging 원칙에 따라 DBWn보다 먼저 관련 Redo를 기록",
+        "Log Switch 시 현재 Redo Log 그룹에서 다음 그룹으로 전환"
+      ],
+      "relatedKeywords": ["Redo Log Buffer", "Log Force at Commit", "Group Commit", "Log Switch", "DBWn"],
+      "sourceSection": "s04"
+    },
+    "Log Writer": {
+      "definition": "LGWR의 정식 명칭으로, SGA의 Redo Log Buffer에 있는 Redo Entry를 온라인 Redo Log 파일에 기록하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "LGWR은 Log Writer의 약칭이며 인스턴스당 하나만 존재",
+        "트랜잭션 Durability(영속성) 보장의 핵심 프로세스",
+        "COMMIT 시 동기적으로 Redo를 기록하여 트랜잭션 완료를 보장"
+      ],
+      "relatedKeywords": ["LGWR", "Redo Log Buffer", "Log Force at Commit"],
+      "sourceSection": "s04"
+    },
+    "Redo Log Buffer": {
+      "definition": "SGA 내의 순환 버퍼로, 서버 프로세스가 생성한 Redo Entry를 임시 저장하며 LGWR이 이를 온라인 Redo Log 파일에 기록한다.",
+      "keyPoints": [
+        "LOG_BUFFER 파라미터로 크기를 지정",
+        "순환(Circular) 구조로 재사용되며, LGWR이 기록 완료한 영역은 재사용 가능",
+        "서버 프로세스가 DML/DDL 수행 시 변경 내용을 Redo Entry로 생성하여 저장",
+        "LGWR이 1/3 사용, 1MB 축적, COMMIT 등의 조건에서 디스크에 기록"
+      ],
+      "relatedKeywords": ["LGWR", "SGA", "Log Force at Commit", "Redo Entry"],
+      "sourceSection": "s04"
+    },
+    "Log Force at Commit": {
+      "definition": "COMMIT 시 LGWR이 해당 트랜잭션의 Redo를 즉시 온라인 Redo Log 파일에 기록하는 원칙으로, 트랜잭션 Durability 보장의 핵심 메커니즘이다.",
+      "keyPoints": [
+        "COMMIT 발행 시 LGWR이 동기적으로 Redo를 디스크에 기록 후 사용자에게 성공 반환",
+        "데이터 파일에 변경이 기록되지 않아도 Redo가 기록되면 복구 가능",
+        "ACID 속성 중 Durability(영속성)를 실현하는 핵심 원칙"
+      ],
+      "relatedKeywords": ["LGWR", "Redo Log Buffer", "Group Commit"],
+      "sourceSection": "s04"
+    },
+    "Group Commit": {
+      "definition": "LGWR이 여러 트랜잭션의 COMMIT Redo를 모아서 한 번의 I/O로 기록하는 최적화 기법으로, I/O 효율성을 향상시킨다.",
+      "keyPoints": [
+        "동시에 COMMIT하는 여러 트랜잭션의 Redo를 하나의 I/O 작업으로 병합",
+        "개별 I/O 대비 전체 I/O 횟수를 줄여 성능 향상",
+        "OLTP 환경처럼 동시 트랜잭션이 많을수록 효과가 큼",
+        "Log Force at Commit 원칙을 유지하면서 I/O 효율을 최적화"
+      ],
+      "relatedKeywords": ["LGWR", "Log Force at Commit", "Redo Log Buffer"],
+      "sourceSection": "s04"
+    },
+    "Log Switch": {
+      "definition": "LGWR이 현재 온라인 Redo Log 그룹이 가득 차면 다음 그룹으로 전환하는 이벤트로, Thread Checkpoint가 발생한다.",
+      "keyPoints": [
+        "현재 Redo Log 그룹이 가득 차면 자동으로 다음 그룹으로 전환",
+        "Log Switch 시 Thread Checkpoint가 발생하여 DBWn이 Dirty Buffer 기록",
+        "ARCHIVELOG 모드에서는 전환된 이전 로그가 아카이빙 대상이 됨",
+        "ALTER SYSTEM SWITCH LOGFILE 명령으로 수동 전환 가능",
+        "Log Switch가 너무 빈번하면 Redo Log 그룹 크기 증가 검토 필요"
+      ],
+      "relatedKeywords": ["LGWR", "ARCHIVELOG", "ARCn", "Checkpoint"],
+      "sourceSection": "s04"
+    },
+    "CKPT": {
+      "definition": "Checkpoint 프로세스. 체크포인트 이벤트 발생 시 데이터 파일 헤더와 컨트롤 파일을 갱신하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "CKPT는 직접 Dirty Buffer를 기록하지 않음 — DBWn에 기록을 요청한 후 파일 헤더에 결과 반영",
+        "데이터 파일 헤더에 마지막 체크포인트 SCN과 시간을 기록",
+        "인스턴스 복구 시 Redo 적용의 시작점을 결정하여 복구 시간 단축",
+        "Full / Incremental / Thread / Tablespace 4가지 체크포인트 유형 존재"
+      ],
+      "relatedKeywords": ["Checkpoint", "Full Checkpoint", "Incremental Checkpoint", "Database Writer"],
+      "sourceSection": "s04"
+    },
+    "Checkpoint": {
+      "definition": "Buffer Cache의 Dirty Buffer를 데이터 파일에 기록하고 파일 헤더를 갱신하는 이벤트로, 인스턴스 복구 시 Redo 적용 시작점을 결정한다.",
+      "keyPoints": [
+        "체크포인트 완료 시점 이전의 Redo는 복구 시 적용 불필요 → 복구 시간 단축",
+        "Full Checkpoint: ALTER SYSTEM CHECKPOINT 또는 정상 SHUTDOWN 시 모든 Dirty Buffer 기록",
+        "Incremental Checkpoint: 내부 알고리즘으로 지속적으로 조금씩 기록 — FAST_START_MTTR_TARGET으로 빈도 제어",
+        "Log Switch 시 Thread Checkpoint 발생 → 이전 Redo Log 그룹 관련 Dirty Buffer 기록"
+      ],
+      "relatedKeywords": ["CKPT", "Full Checkpoint", "Incremental Checkpoint", "FAST_START_MTTR_TARGET"],
+      "sourceSection": "s04"
+    },
+    "Full Checkpoint": {
+      "definition": "Buffer Cache의 모든 Dirty Buffer를 데이터 파일에 기록하는 체크포인트 유형이다.",
+      "keyPoints": [
+        "트리거: ALTER SYSTEM CHECKPOINT 명령 또는 정상 SHUTDOWN(NORMAL/TRANSACTIONAL/IMMEDIATE)",
+        "Incremental Checkpoint와 달리 모든 Dirty Buffer를 한 번에 기록하므로 I/O 부하 큼",
+        "SHUTDOWN ABORT 시에는 Full Checkpoint가 수행되지 않아 재기동 시 인스턴스 복구 필요",
+        "운영 중에는 Incremental Checkpoint가 주로 사용되며, Full Checkpoint는 특수 상황에서만 발생"
+      ],
+      "relatedKeywords": ["Incremental Checkpoint", "Checkpoint", "CKPT"],
+      "sourceSection": "s04"
+    },
+    "Incremental Checkpoint": {
+      "definition": "Oracle이 내부 알고리즘에 의해 자동으로 Dirty Buffer를 조금씩 지속적으로 기록하는 체크포인트 방식이다.",
+      "keyPoints": [
+        "Full Checkpoint와 달리 전체 버퍼를 한번에 기록하지 않고 점진적으로 수행",
+        "FAST_START_MTTR_TARGET 파라미터로 인스턴스 복구 목표 시간(초) 설정 → 체크포인트 빈도 자동 조정",
+        "값을 작게 설정하면 체크포인트 빈번 → I/O 부하 증가, 복구 시간 단축",
+        "V$INSTANCE_RECOVERY 뷰에서 예상 복구 시간 확인 가능"
+      ],
+      "relatedKeywords": ["Full Checkpoint", "FAST_START_MTTR_TARGET", "CKPT"],
+      "sourceSection": "s04"
+    },
+    "FAST_START_MTTR_TARGET": {
+      "definition": "인스턴스 복구에 걸리는 목표 시간(초)을 지정하는 파라미터로, Incremental Checkpoint의 빈도를 자동 조정한다.",
+      "keyPoints": [
+        "값이 작을수록 체크포인트가 빈번 → I/O 부하 증가하지만 복구 시간 단축",
+        "값이 클수록 체크포인트 빈도 감소 → I/O 부하 감소하지만 복구 시간 증가",
+        "V$INSTANCE_RECOVERY 뷰의 TARGET_MTTR, ESTIMATED_MTTR 컬럼으로 목표/예상 복구 시간 비교",
+        "아카이브 로그 기록 간격과는 무관 — 인스턴스 복구 시간만 제어"
+      ],
+      "relatedKeywords": ["Incremental Checkpoint", "CKPT", "Instance Recovery"],
+      "sourceSection": "s04"
+    },
+    "SMON": {
+      "definition": "System Monitor의 약칭으로, 인스턴스 복구(Roll Forward→Open→Roll Back), 임시 세그먼트 정리, Free Extent 병합 등을 수행하는 필수 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "인스턴스 비정상 종료 후 재기동 시 자동으로 Instance Recovery 수행",
+        "Instance Recovery 순서: Roll Forward(Redo 재적용) → DB Open → Roll Back(미커밋 롤백)",
+        "불필요한 임시 세그먼트 정리 및 DMT에서 인접한 Free Extent 병합",
+        "DB Open 후에도 Roll Back 단계를 백그라운드에서 수행하여 가용성 확보"
+      ],
+      "relatedKeywords": ["Instance Recovery", "Roll Forward", "Roll Back", "System Monitor"],
+      "sourceSection": "s04"
+    },
+    "System Monitor": {
+      "definition": "SMON의 정식 명칭으로, 인스턴스 복구와 공간 관리를 담당하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "SMON은 System Monitor의 약칭이며 인스턴스당 하나만 존재",
+        "인스턴스 복구, 임시 세그먼트 정리, Free Extent 병합 등 시스템 유지보수 수행",
+        "비정상 종료 후 재기동 시 자동 복구를 통해 데이터 일관성 보장"
+      ],
+      "relatedKeywords": ["SMON", "Instance Recovery"],
+      "sourceSection": "s04"
+    },
+    "Instance Recovery": {
+      "definition": "인스턴스 비정상 종료 후 재기동 시 SMON이 수행하는 자동 복구 과정으로, Roll Forward→DB Open→Roll Back의 3단계로 진행된다.",
+      "keyPoints": [
+        "1단계 Roll Forward(Cache Recovery): 온라인 Redo Log를 데이터 파일에 재적용(커밋/미커밋 모두)",
+        "2단계: DB Open하여 사용자 접속 허용(가용성 우선)",
+        "3단계 Roll Back(Transaction Recovery): 미커밋 트랜잭션을 Undo로 롤백(백그라운드 수행)",
+        "Checkpoint Position(LRBA)부터 Redo 적용을 시작하여 복구 범위 결정",
+        "FAST_START_MTTR_TARGET 파라미터로 목표 복구 시간 설정 가능"
+      ],
+      "relatedKeywords": ["SMON", "Roll Forward", "Roll Back", "LRBA", "FAST_START_MTTR_TARGET"],
+      "sourceSection": "s04"
+    },
+    "Roll Forward": {
+      "definition": "Instance Recovery의 1단계(Cache Recovery)로, 온라인 Redo Log의 변경사항을 데이터 파일에 재적용하는 과정이다.",
+      "keyPoints": [
+        "커밋된 트랜잭션과 미커밋 트랜잭션의 변경사항을 모두 데이터 파일에 적용",
+        "Checkpoint Position(LRBA)부터 Redo Log 끝까지 순차적으로 재적용",
+        "Roll Forward 완료 후 DB를 Open하여 사용자 접속을 먼저 허용",
+        "Cache Recovery라고도 하며, 디스크에 기록되지 못한 Buffer Cache 변경을 복원"
+      ],
+      "relatedKeywords": ["Instance Recovery", "SMON", "Roll Back", "LRBA"],
+      "sourceSection": "s04"
+    },
+    "Roll Back": {
+      "definition": "Instance Recovery의 3단계(Transaction Recovery)로, 커밋되지 않은 트랜잭션을 Undo 데이터를 사용하여 롤백하는 과정이다.",
+      "keyPoints": [
+        "Roll Forward에서 적용된 미커밋 트랜잭션을 Undo 데이터로 취소",
+        "DB Open 후 백그라운드에서 수행되어 가용성에 영향을 최소화",
+        "Transaction Recovery라고도 하며 데이터 일관성(Consistency) 보장",
+        "롤백이 완료되기 전에도 다른 사용자가 해당 데이터에 접근 가능(On-Demand Rollback)"
+      ],
+      "relatedKeywords": ["Instance Recovery", "SMON", "Roll Forward", "Undo"],
+      "sourceSection": "s04"
+    },
+    "PMON": {
+      "definition": "Process Monitor의 약칭으로, 실패한 프로세스의 정리(트랜잭션 롤백, 잠금 해제, PGA/SGA 해제, 세션 정리)를 수행하는 필수 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "실패한 사용자 프로세스의 미완료 트랜잭션을 롤백하고 잠금을 해제",
+        "PGA 메모리 반환, SGA 리소스 해제, V$SESSION 정리 등 리소스 정리 수행",
+        "Oracle 23ai부터 CLMN(조율) + CLnn(워커)으로 기능이 분리됨",
+        "주기적으로 비정상 종료된 프로세스를 감지하여 자동 정리"
+      ],
+      "relatedKeywords": ["Process Monitor", "CLMN", "CLnn", "Failed Process Cleanup"],
+      "sourceSection": "s04"
+    },
+    "Process Monitor": {
+      "definition": "PMON의 정식 명칭으로, 비정상 종료된 사용자 프로세스를 감지하고 관련 리소스를 정리하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "PMON은 Process Monitor의 약칭이며 인스턴스당 하나만 존재",
+        "사용자 세션이 비정상 종료 시 자동으로 정리 작업 수행",
+        "Oracle 23ai에서 CLMN/CLnn으로 기능 분리되어 효율성 향상"
+      ],
+      "relatedKeywords": ["PMON", "CLMN", "CLnn"],
+      "sourceSection": "s04"
+    },
+    "CLMN": {
+      "definition": "Cleanup Main Process의 약칭으로, Oracle 23ai부터 PMON에서 분리된 프로세스이며 정리 작업의 조율과 관리를 담당한다.",
+      "keyPoints": [
+        "Oracle 23ai에서 PMON의 정리 기능을 분리하여 도입된 프로세스",
+        "CLnn 워커 프로세스를 조율하여 효율적인 정리 작업 수행",
+        "대규모 정리 작업 시 병렬 처리를 관리하여 성능 향상",
+        "PMON은 프로세스 모니터링에 집중하고 CLMN이 실제 정리를 조율"
+      ],
+      "relatedKeywords": ["PMON", "CLnn", "Failed Process Cleanup"],
+      "sourceSection": "s04"
+    },
+    "CLnn": {
+      "definition": "Cleanup Helper의 약칭으로, PMON/CLMN의 워커 프로세스이며 대규모 정리 작업을 병렬로 수행한다.",
+      "keyPoints": [
+        "Oracle 23ai에서 도입된 병렬 정리 워커 프로세스",
+        "CLMN의 조율 아래 실패한 프로세스의 정리 작업을 병렬 수행",
+        "대규모 트랜잭션 롤백 등 시간이 오래 걸리는 정리 작업을 분산 처리",
+        "nn은 프로세스 번호를 나타냄(CL00, CL01 등)"
+      ],
+      "relatedKeywords": ["CLMN", "PMON", "Failed Process Cleanup"],
+      "sourceSection": "s04"
+    },
+    "Failed Process Cleanup": {
+      "definition": "PMON(23ai 이후 CLMN/CLnn)이 수행하는 실패 프로세스 정리 작업으로, 미완료 트랜잭션 롤백부터 세션 정리까지 일련의 리소스 해제를 포함한다.",
+      "keyPoints": [
+        "미완료 트랜잭션 롤백: 실패한 세션의 진행 중이던 트랜잭션을 취소",
+        "잠금 해제: 해당 세션이 보유하던 모든 테이블/행 잠금을 해제",
+        "PGA 메모리 반환 및 SGA 리소스(Buffer Pin 등) 해제",
+        "V$SESSION에서 해당 세션 정보를 정리하여 리소스 누수 방지",
+        "Oracle 23ai부터 CLMN이 조율하고 CLnn이 병렬로 수행"
+      ],
+      "relatedKeywords": ["PMON", "CLMN", "CLnn", "PGA"],
+      "sourceSection": "s04"
+    },
+    "LREG": {
+      "definition": "Listener Registration의 약칭으로, 인스턴스 및 서비스 정보를 리스너에 동적으로 등록하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "60초마다 인스턴스/서비스 정보를 리스너에 자동 갱신",
+        "ALTER SYSTEM REGISTER 명령으로 즉시 등록 가능",
+        "LOCAL_LISTENER 파라미터로 로컬 리스너 대상 지정",
+        "REMOTE_LISTENER 파라미터로 RAC 환경의 원격 리스너 대상 지정",
+        "동적 등록을 통해 실시간 부하 정보와 인스턴스 상태를 리스너에 제공"
+      ],
+      "relatedKeywords": ["Listener Registration", "Dynamic Registration", "LOCAL_LISTENER", "REMOTE_LISTENER"],
+      "sourceSection": "s04"
+    },
+    "Listener Registration": {
+      "definition": "LREG의 정식 명칭으로, 동적 등록 방식을 통해 인스턴스/서비스 정보와 실시간 부하 정보를 리스너에 제공하는 메커니즘이다.",
+      "keyPoints": [
+        "동적 등록 방식으로 실시간 부하 정보를 리스너에 제공",
+        "정적 등록(listener.ora 수동 구성)은 부하 정보를 제공하지 않음",
+        "RAC 환경에서 서버 간 로드 밸런싱을 위해 필수적인 기능",
+        "인스턴스 상태(UP/DOWN)를 자동으로 리스너에 반영"
+      ],
+      "relatedKeywords": ["LREG", "Dynamic Registration", "LOCAL_LISTENER", "REMOTE_LISTENER"],
+      "sourceSection": "s04"
+    },
+    "Dynamic Registration": {
+      "definition": "LREG에 의한 자동 서비스 등록 방식으로, 정적 등록(listener.ora 수동 구성)과 대비되며 실시간 부하 정보와 인스턴스 상태를 자동 반영한다.",
+      "keyPoints": [
+        "LREG가 60초마다 자동으로 리스너에 서비스 정보를 등록/갱신",
+        "정적 등록과 달리 실시간 부하 정보(Load Balancing Advisory)를 제공",
+        "인스턴스 시작/종료 시 상태가 자동으로 리스너에 반영됨",
+        "정적 등록은 인스턴스가 DOWN 상태에서도 리스너에 등록되어 있어 오류 발생 가능"
+      ],
+      "relatedKeywords": ["LREG", "Listener Registration", "LOCAL_LISTENER"],
+      "sourceSection": "s04"
+    },
+    "LOCAL_LISTENER": {
+      "definition": "LREG가 등록할 로컬 리스너를 지정하는 초기화 파라미터로, 기본값은 localhost:1521이다.",
+      "keyPoints": [
+        "기본값은 localhost의 1521 포트로 설정됨",
+        "비기본 포트를 사용하는 리스너에 등록하려면 명시적 설정 필요",
+        "TNS 이름 또는 주소 형식으로 리스너 위치 지정 가능",
+        "설정 변경 시 ALTER SYSTEM REGISTER로 즉시 반영 가능"
+      ],
+      "relatedKeywords": ["LREG", "REMOTE_LISTENER", "Dynamic Registration"],
+      "sourceSection": "s04"
+    },
+    "REMOTE_LISTENER": {
+      "definition": "RAC 환경에서 다른 노드의 리스너에 인스턴스/서비스 정보를 등록하기 위한 초기화 파라미터로, 서버 간 로드 밸런싱을 지원한다.",
+      "keyPoints": [
+        "RAC 환경에서 다른 노드의 리스너에 자신의 인스턴스 정보를 등록",
+        "서버 간(Server-Side) 로드 밸런싱을 가능하게 하는 핵심 파라미터",
+        "SCAN Listener 주소를 지정하여 RAC 환경의 부하 분산 구현",
+        "단일 인스턴스 환경에서는 일반적으로 설정하지 않음"
+      ],
+      "relatedKeywords": ["LREG", "LOCAL_LISTENER", "Dynamic Registration"],
+      "sourceSection": "s04"
+    },
+    "ARCn": {
+      "definition": "Archiver 프로세스의 약칭으로, ARCHIVELOG 모드에서 Log Switch 후 가득 찬 온라인 Redo Log 파일을 아카이브 목적지에 복사하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "ARCHIVELOG 모드에서만 동작하며, 미디어 복구(PITR)를 가능하게 함",
+        "LOG_ARCHIVE_MAX_PROCESSES로 프로세스 수 제어 (기본 4, 최대 30)",
+        "아카이빙이 완료되어야 해당 Redo Log 그룹을 재사용할 수 있음",
+        "아카이브 목적지가 가득 차면 데이터베이스가 중단될 수 있음"
+      ],
+      "relatedKeywords": ["ARCHIVELOG", "NOARCHIVELOG", "LGWR", "Log Switch"],
+      "sourceSection": "s05"
+    },
+    "Archiver": {
+      "definition": "ARCn의 정식 명칭으로, 온라인 Redo Log 파일을 아카이브 로그 목적지에 복사하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "ARCn으로 표기되며, n은 프로세스 번호를 나타냄 (ARC0, ARC1 등)",
+        "ARCHIVELOG 모드에서만 활성화됨",
+        "LOG_ARCHIVE_MAX_PROCESSES 파라미터로 최대 프로세스 수 지정"
+      ],
+      "relatedKeywords": ["ARCn", "ARCHIVELOG"],
+      "sourceSection": "s05"
+    },
+    "ARCHIVELOG": {
+      "definition": "아카이브 로그 모드로, ARCn 프로세스가 온라인 Redo Log를 아카이브 목적지에 복사하여 미디어 복구 및 PITR을 가능하게 하는 운영 모드이다.",
+      "keyPoints": [
+        "미디어 복구(Media Recovery)와 PITR(Point-In-Time Recovery)이 가능함",
+        "아카이빙이 완료된 후에만 Redo Log 그룹을 재사용할 수 있음",
+        "운영 환경에서는 반드시 ARCHIVELOG 모드로 운영해야 함",
+        "NOARCHIVELOG 모드와 달리 데이터 손실 없는 복구 가능"
+      ],
+      "relatedKeywords": ["ARCn", "NOARCHIVELOG", "Log Switch"],
+      "sourceSection": "s05"
+    },
+    "NOARCHIVELOG": {
+      "definition": "비아카이브 로그 모드로, ARCn 프로세스가 비활성화되어 Redo Log가 아카이빙되지 않으며 미디어 복구가 불가능한 운영 모드이다.",
+      "keyPoints": [
+        "ARCn 프로세스가 동작하지 않음",
+        "체크포인트 완료 후 즉시 Redo Log를 재사용할 수 있음",
+        "미디어 복구 및 PITR 불가, 전체 백업 복원만 가능",
+        "테스트/개발 환경에서 주로 사용"
+      ],
+      "relatedKeywords": ["ARCHIVELOG", "ARCn", "CKPT"],
+      "sourceSection": "s05"
+    },
+    "MMON": {
+      "definition": "Manageability Monitor. AWR 스냅샷 수집, ADDM 분석, 임계값 경고 등 Oracle 자동 성능 관리를 담당하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "기본 1시간마다 AWR 스냅샷을 수집하여 SYSAUX 테이블스페이스에 저장",
+        "AWR 스냅샷 수집 후 ADDM(Automatic Database Diagnostic Monitor) 분석 자동 실행",
+        "서버 생성 경고(Server-Generated Alerts)로 테이블스페이스 부족 등을 자동 알림",
+        "MMNL(Manageability Monitor Light)은 ASH 데이터를 디스크로 플러시하는 경량 프로세스"
+      ],
+      "relatedKeywords": ["AWR", "ASH", "MMNL"],
+      "sourceSection": "s05"
+    },
+    "MMNL": {
+      "definition": "Manageability Monitor Light 프로세스로, ASH(Active Session History) 데이터를 메모리에서 디스크의 WRH$_ACTIVE_SESSION_HISTORY 테이블로 플러시하는 경량 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "MMON보다 가벼운 작업을 더 빈번하게 수행함",
+        "ASH 버퍼가 가득 차기 전에 디스크로 플러시하여 데이터 손실 방지",
+        "플러시 대상 테이블은 WRH$_ACTIVE_SESSION_HISTORY (SYSAUX 테이블스페이스)"
+      ],
+      "relatedKeywords": ["ASH", "MMON", "AWR"],
+      "sourceSection": "s05"
+    },
+    "AWR": {
+      "definition": "Automatic Workload Repository의 약칭으로, MMON 프로세스가 수집한 성능 통계 스냅샷을 SYSAUX 테이블스페이스에 저장하는 성능 관리 프레임워크이다.",
+      "keyPoints": [
+        "MMON이 기본 1시간마다 스냅샷을 수집하여 저장",
+        "ADDM(Automatic Database Diagnostic Monitor) 분석의 기반 데이터 제공",
+        "기본 보존 기간은 8일이며 조정 가능",
+        "AWR 리포트로 두 스냅샷 간 성능 비교 분석 가능"
+      ],
+      "relatedKeywords": ["MMON", "MMNL", "ASH", "ADDM"],
+      "sourceSection": "s05"
+    },
+    "ASH": {
+      "definition": "Active Session History의 약칭으로, 1초마다 활성 세션의 샘플링 데이터를 메모리(SGA)에 저장하여 실시간 성능 분석에 활용하는 기능이다.",
+      "keyPoints": [
+        "1초마다 활성 세션(Active Session)을 샘플링하여 메모리에 기록",
+        "MMNL 프로세스가 메모리 데이터를 디스크(WRH$_ACTIVE_SESSION_HISTORY)로 플러시",
+        "V$ACTIVE_SESSION_HISTORY 뷰로 메모리 내 실시간 데이터 조회",
+        "실시간 성능 문제 진단에 유용 (대기 이벤트, SQL, 세션 정보 등)"
+      ],
+      "relatedKeywords": ["Active Session History", "MMNL", "AWR"],
+      "sourceSection": "s05"
+    },
+    "Active Session History": {
+      "definition": "ASH의 정식 명칭으로, 활성 세션의 실시간 샘플링 데이터를 수집하여 성능 분석에 활용하는 Oracle의 성능 진단 기능이다.",
+      "keyPoints": [
+        "ASH로 약칭하며, 1초 간격으로 활성 세션 정보를 샘플링",
+        "메모리(SGA)에 저장되어 실시간 조회 가능",
+        "MMNL이 주기적으로 디스크(AWR)에 플러시"
+      ],
+      "relatedKeywords": ["ASH", "MMNL", "AWR"],
+      "sourceSection": "s05"
+    },
+    "RECO": {
+      "definition": "Recoverer 프로세스의 약칭으로, 분산 트랜잭션(2-Phase Commit)에서 발생한 In-Doubt 트랜잭션을 자동으로 해결하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "네트워크 복구 후 다른 노드와 통신하여 커밋 또는 롤백을 결정",
+        "DBA_2PC_PENDING 뷰에서 미해결 In-Doubt 트랜잭션 조회 가능",
+        "분산 데이터베이스 환경에서 자동으로 동작",
+        "Database Link를 통한 분산 트랜잭션의 일관성 보장"
+      ],
+      "relatedKeywords": ["Recoverer", "Distributed Transaction", "2-Phase Commit", "In-Doubt Transaction"],
+      "sourceSection": "s05"
+    },
+    "Recoverer": {
+      "definition": "RECO의 정식 명칭으로, 분산 트랜잭션에서 발생한 In-Doubt 트랜잭션의 자동 해결을 담당하는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "RECO로 약칭되며, 인스턴스 시작 시 자동으로 기동",
+        "네트워크 장애 복구 후 관련 노드와 통신하여 트랜잭션 결과 결정",
+        "수동 해결이 필요한 경우 DBA_2PC_PENDING 뷰 활용"
+      ],
+      "relatedKeywords": ["RECO", "In-Doubt Transaction", "2-Phase Commit"],
+      "sourceSection": "s05"
+    },
+    "Distributed Transaction": {
+      "definition": "Database Link를 통해 여러 데이터베이스에 걸쳐 수행되는 트랜잭션으로, 2-Phase Commit 프로토콜을 사용하여 모든 노드의 데이터 일관성을 보장한다.",
+      "keyPoints": [
+        "Database Link를 통해 원격 데이터베이스에 접근하여 수행",
+        "2-Phase Commit(2PC) 프로토콜로 모든 노드의 커밋/롤백 일관성 보장",
+        "장애 발생 시 In-Doubt 트랜잭션이 될 수 있으며, RECO가 자동 해결"
+      ],
+      "relatedKeywords": ["2-Phase Commit", "RECO", "In-Doubt Transaction"],
+      "sourceSection": "s05"
+    },
+    "2-Phase Commit": {
+      "definition": "분산 트랜잭션의 커밋 프로토콜로, Prepare Phase(준비 요청)와 Commit Phase(커밋 실행)의 두 단계로 나뉘어 모든 참여 노드의 데이터 일관성을 보장한다.",
+      "keyPoints": [
+        "Prepare Phase: 모든 참여 노드에 커밋 준비 요청, 각 노드가 준비 완료 응답",
+        "Commit Phase: 모든 노드가 준비 완료 시 커밋 실행, 하나라도 실패하면 롤백",
+        "두 단계 사이에 장애 발생 시 In-Doubt 트랜잭션 발생",
+        "RECO 프로세스가 In-Doubt 트랜잭션을 자동 해결"
+      ],
+      "relatedKeywords": ["Distributed Transaction", "In-Doubt Transaction", "RECO"],
+      "sourceSection": "s05"
+    },
+    "In-Doubt Transaction": {
+      "definition": "2-Phase Commit 과정 중 네트워크 장애 등으로 인해 커밋 또는 롤백 여부가 결정되지 않은 상태의 분산 트랜잭션이다.",
+      "keyPoints": [
+        "2PC의 Prepare Phase와 Commit Phase 사이에 장애 발생 시 생성",
+        "RECO 프로세스가 네트워크 복구 후 자동으로 해결",
+        "DBA_2PC_PENDING 뷰에서 미해결 트랜잭션 조회 가능",
+        "수동 해결 시 COMMIT FORCE 또는 ROLLBACK FORCE 사용"
+      ],
+      "relatedKeywords": ["2-Phase Commit", "RECO", "Distributed Transaction"],
+      "sourceSection": "s05"
+    },
+    "CJQ0": {
+      "definition": "Job Queue Coordinator 프로세스의 약칭으로, DBMS_SCHEDULER 및 DBMS_JOB으로 등록된 예약 작업의 실행 시점을 모니터링하고 Jnnn 슬레이브 프로세스를 생성하여 실제 작업을 실행시킨다.",
+      "keyPoints": [
+        "예약 작업의 실행 시점을 주기적으로 모니터링",
+        "실제 작업 실행은 Jnnn 슬레이브 프로세스가 담당",
+        "JOB_QUEUE_PROCESSES 파라미터로 동시 실행 가능한 작업 수 제어",
+        "JOB_QUEUE_PROCESSES가 0이면 CJQ0 비활성화"
+      ],
+      "relatedKeywords": ["Job Queue Coordinator", "DBMS_SCHEDULER"],
+      "sourceSection": "s05"
+    },
+    "Job Queue Coordinator": {
+      "definition": "CJQ0의 정식 명칭으로, 데이터베이스의 예약 작업 실행을 조율하고 Jnnn 슬레이브 프로세스를 생성하여 작업을 수행시키는 백그라운드 프로세스이다.",
+      "keyPoints": [
+        "CJQ0로 약칭되며, 자동 유지관리 태스크의 실행도 관리",
+        "Jnnn 슬레이브 프로세스를 동적으로 생성 및 관리",
+        "JOB_QUEUE_PROCESSES 파라미터에 의해 제어"
+      ],
+      "relatedKeywords": ["CJQ0", "DBMS_SCHEDULER"],
+      "sourceSection": "s05"
+    },
+    "DBMS_SCHEDULER": {
+      "definition": "Oracle의 작업 스케줄러 패키지로, CJQ0/Jnnn 프로세스를 통해 예약 작업을 실행하며 자동 유지관리 태스크(통계 수집, Segment Advisor 등)도 이 패키지를 사용한다.",
+      "keyPoints": [
+        "CJQ0가 실행 시점 모니터링, Jnnn 슬레이브가 실제 작업 수행",
+        "자동 통계 수집, Segment Advisor 등 자동 유지관리 태스크에 사용",
+        "JOB_QUEUE_PROCESSES 파라미터로 동시 실행 가능한 작업 수 제어",
+        "DBMS_JOB보다 기능이 풍부하며 권장되는 스케줄러"
+      ],
+      "relatedKeywords": ["CJQ0", "Job Queue Coordinator"],
+      "sourceSection": "s05"
+    },
+    "Write-Ahead Logging": {
+      "definition": "데이터 블록을 디스크에 기록하기 전에 반드시 해당 변경에 대한 Redo를 먼저 디스크에 기록해야 한다는 원칙으로, 인스턴스 복구의 기반이 된다.",
+      "keyPoints": [
+        "LGWR이 Redo를 먼저 기록한 후에만 DBWn이 Dirty Buffer를 기록할 수 있음",
+        "인스턴스 장애 시 Redo Log를 통한 복구(Roll Forward)를 보장하는 핵심 원칙",
+        "LGWR과 DBWn 간의 기록 순서를 규정하는 프로토콜",
+        "커밋된 데이터의 영속성(Durability)을 보장"
+      ],
+      "relatedKeywords": ["LGWR", "DBWn", "Redo Entry", "Instance Recovery"],
+      "sourceSection": "s06"
+    },
+    "Redo Entry": {
+      "definition": "DML 수행 시 서버 프로세스가 생성하는 변경 기록으로, 하나 이상의 Change Vector로 구성되어 Redo Log Buffer에 기록된 후 LGWR에 의해 디스크에 기록된다.",
+      "keyPoints": [
+        "서버 프로세스가 DML 수행 시 Redo Log Buffer에 기록",
+        "하나 이상의 Change Vector로 구성됨",
+        "LGWR이 Redo Log Buffer에서 온라인 Redo Log 파일로 기록",
+        "인스턴스 복구 시 변경 내용을 재적용하는 데 사용"
+      ],
+      "relatedKeywords": ["Change Vector", "Redo Log Buffer", "LGWR", "Write-Ahead Logging"],
+      "sourceSection": "s06"
+    },
+    "Change Vector": {
+      "definition": "Redo Entry를 구성하는 개별 변경 단위로, 하나의 데이터 블록에 대한 변경 내용을 기술하며 Redo Entry는 하나 이상의 Change Vector로 구성된다.",
+      "keyPoints": [
+        "하나의 데이터 블록에 대한 변경 내용을 기술하는 최소 단위",
+        "하나의 Redo Entry는 여러 Change Vector를 포함할 수 있음 (예: 데이터 블록 + Undo 블록)",
+        "블록 주소, 변경 유형, 변경 데이터 등의 정보 포함"
+      ],
+      "relatedKeywords": ["Redo Entry", "Redo Log Buffer", "LGWR"],
+      "sourceSection": "s06"
+    },
+    "V$SESSION": {
+      "definition": "현재 데이터베이스에 연결된 활성 세션의 상세 정보(SID, Serial#, 사용자, 상태, 대기 이벤트 등)를 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "SID, SERIAL#로 세션을 고유하게 식별",
+        "STATUS 컬럼으로 ACTIVE/INACTIVE 상태 확인",
+        "EVENT 컬럼으로 현재 대기 이벤트 확인 가능",
+        "V$PROCESS와 조인하여 OS 프로세스 정보 조회 가능"
+      ],
+      "relatedKeywords": ["V$PROCESS", "Session", "SID", "Serial#"],
+      "sourceSection": "s02"
+    },
+    "V$PROCESS": {
+      "definition": "Oracle 인스턴스의 OS 프로세스 정보(SPID, PGA 메모리 사용량 등)를 조회하는 동적 성능 뷰로, pname이 NULL이면 서버 프로세스를 나타낸다.",
+      "keyPoints": [
+        "SPID 컬럼으로 OS 프로세스 ID 확인 가능",
+        "PNAME이 NULL이면 서버 프로세스, 값이 있으면 백그라운드 프로세스",
+        "PGA_USED_MEM, PGA_ALLOC_MEM 등으로 PGA 메모리 사용량 조회",
+        "V$SESSION과 조인하여 세션별 OS 프로세스 매핑 가능"
+      ],
+      "relatedKeywords": ["V$SESSION", "V$BGPROCESS", "PGA", "Server Process"],
+      "sourceSection": "s01"
+    },
+    "V$BGPROCESS": {
+      "definition": "Oracle 인스턴스에 등록된 백그라운드 프로세스의 목록과 상태를 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "PADDR이 '00'이 아닌 행이 현재 활성화된 백그라운드 프로세스",
+        "NAME 컬럼으로 프로세스 이름(DBW0, LGWR 등) 확인",
+        "V$PROCESS와 조인하여 OS 레벨의 프로세스 정보 조회 가능"
+      ],
+      "relatedKeywords": ["V$PROCESS", "Background Process", "DBWn", "LGWR"],
+      "sourceSection": "s04"
+    },
+    "V$DISPATCHER": {
+      "definition": "Shared Server 환경에서 디스패처 프로세스의 상태, 처리 메시지 수, 사용률 등을 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "busy_pct(사용률)가 50%를 초과하면 디스패처 추가 검토 필요",
+        "각 디스패처의 프로토콜, 상태, 처리량 정보 제공",
+        "MESSAGES 컬럼으로 처리한 메시지 수 확인"
+      ],
+      "relatedKeywords": ["V$QUEUE", "Shared Server", "DISPATCHERS", "Dispatcher"],
+      "sourceSection": "s03"
+    },
+    "V$QUEUE": {
+      "definition": "Shared Server 환경에서 요청 큐(COMMON)와 응답 큐(DISPATCHER)의 대기 상태를 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "TYPE이 COMMON이면 요청 큐, DISPATCHER이면 응답 큐",
+        "avg_wait_sec(평균 대기 시간)으로 성능 모니터링",
+        "요청 큐 대기 시간이 길면 Shared Server 프로세스 추가 필요"
+      ],
+      "relatedKeywords": ["V$DISPATCHER", "Shared Server", "SHARED_SERVERS", "Request Queue"],
+      "sourceSection": "s03"
+    },
+    "V$INSTANCE_RECOVERY": {
+      "definition": "인스턴스 복구에 필요한 예상 복구 시간(ESTIMATED_MTTR), 목표 복구 시간(TARGET_MTTR), 필요 Redo 블록 수 등을 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "ESTIMATED_MTTR: 현재 상태 기준 예상 복구 소요 시간(초)",
+        "TARGET_MTTR: FAST_START_MTTR_TARGET 기반 목표 복구 시간",
+        "CKPT가 이 뷰의 정보를 기반으로 체크포인트 빈도 조절",
+        "FAST_START_MTTR_TARGET 파라미터와 연계하여 복구 시간 관리"
+      ],
+      "relatedKeywords": ["CKPT", "FAST_START_MTTR_TARGET", "Instance Recovery"],
+      "sourceSection": "s04"
+    },
+    "V$CPOOL_STAT": {
+      "definition": "DRCP(Database Resident Connection Pooling)의 Connection Pool 상태(오픈 서버 수, hit_pct 등)를 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "hit_pct가 낮으면 풀 크기가 부족하여 새 서버 프로세스를 자주 생성한다는 의미",
+        "NUM_OPEN_SERVERS로 현재 오픈된 풀 서버 수 확인",
+        "DRCP 환경의 성능 튜닝 시 핵심 모니터링 뷰"
+      ],
+      "relatedKeywords": ["DRCP", "Database Resident Connection Pooling"],
+      "sourceSection": "s03"
+    },
+    "V$SYSTEM_EVENT": {
+      "definition": "인스턴스 시작 이후 시스템 전체의 대기 이벤트 통계(총 대기 횟수, 누적 대기 시간 등)를 조회하는 동적 성능 뷰이다.",
+      "keyPoints": [
+        "TOTAL_WAITS: 해당 이벤트의 총 대기 횟수",
+        "TIME_WAITED: 누적 대기 시간(centiseconds)",
+        "인스턴스 레벨의 성능 문제 진단에 활용",
+        "log file sync, free buffer waits 등 주요 대기 이벤트 분석 시 참조"
+      ],
+      "relatedKeywords": ["log file sync", "free buffer waits", "log buffer space"],
+      "sourceSection": "s06"
+    },
+    "SHARED_SERVERS": {
+      "definition": "인스턴스 시작 시 생성할 Shared Server 프로세스의 초기 수를 지정하는 파라미터로, 0으로 설정하면 Shared Server를 비활성화한다.",
+      "keyPoints": [
+        "0으로 설정하면 Shared Server 기능 비활성화",
+        "부하에 따라 Oracle이 동적으로 프로세스 수를 조절",
+        "MAX_SHARED_SERVERS 파라미터로 최대 수 제한 가능",
+        "DISPATCHERS 파라미터와 함께 Shared Server 환경 구성"
+      ],
+      "relatedKeywords": ["Shared Server", "DISPATCHERS", "V$QUEUE"],
+      "sourceSection": "s03"
+    },
+    "DISPATCHERS": {
+      "definition": "Shared Server 환경에서 디스패처 프로세스의 구성(프로토콜, 수 등)을 지정하는 파라미터로, Shared Server 환경의 필수 설정이다.",
+      "keyPoints": [
+        "프로토콜(TCP 등), 디스패처 수 등을 지정",
+        "Shared Server 환경에서 반드시 설정해야 하는 필수 파라미터",
+        "V$DISPATCHER 뷰에서 디스패처 상태 모니터링 가능",
+        "ALTER SYSTEM으로 동적 변경 가능"
+      ],
+      "relatedKeywords": ["SHARED_SERVERS", "V$DISPATCHER", "Shared Server", "Dispatcher"],
+      "sourceSection": "s03"
+    },
+    "DB_WRITER_PROCESSES": {
+      "definition": "DBWn 백그라운드 프로세스의 수를 지정하는 파라미터로, 기본값은 CPU 수를 기반으로 자동 결정되며 최대 100개까지 설정 가능하다.",
+      "keyPoints": [
+        "기본값은 CPU 수 기반으로 Oracle이 자동 결정",
+        "최대 100개까지 설정 가능 (DBW0~DBW99)",
+        "I/O 부하가 높은 시스템에서 프로세스 수 증가 검토",
+        "free buffer waits 대기 이벤트 빈발 시 증가 고려"
+      ],
+      "relatedKeywords": ["DBWn", "free buffer waits", "Buffer Cache"],
+      "sourceSection": "s04"
+    },
+    "log file sync": {
+      "definition": "COMMIT 수행 후 LGWR이 Redo Log Buffer의 내용을 온라인 Redo Log 파일에 기록 완료할 때까지 서버 프로세스가 대기하는 이벤트이다.",
+      "keyPoints": [
+        "COMMIT 시 발생하며 LGWR의 Redo 기록 완료를 대기",
+        "높은 빈도 시 LGWR의 I/O 성능 점검 필요",
+        "과도한 COMMIT 빈도(건별 커밋 등)도 원인이 될 수 있음",
+        "Redo Log 파일을 고속 디스크에 배치하여 개선 가능"
+      ],
+      "relatedKeywords": ["LGWR", "log buffer space", "Group Commit"],
+      "sourceSection": "s04"
+    },
+    "log buffer space": {
+      "definition": "Redo Log Buffer가 가득 차서 서버 프로세스가 LGWR의 Redo 기록 완료를 대기하는 이벤트로, LOG_BUFFER 크기나 Redo Log 파일의 I/O 성능 점검이 필요하다.",
+      "keyPoints": [
+        "Redo Log Buffer 공간 부족으로 발생하는 대기 이벤트",
+        "LOG_BUFFER 파라미터 크기 증가 검토",
+        "온라인 Redo Log 파일의 I/O 성능(디스크 속도) 점검 필요",
+        "LGWR의 기록 속도가 Redo 생성 속도를 따라가지 못할 때 발생"
+      ],
+      "relatedKeywords": ["LGWR", "Redo Log Buffer", "log file sync"],
+      "sourceSection": "s04"
+    },
+    "free buffer waits": {
+      "definition": "서버 프로세스가 Buffer Cache에서 Free Buffer를 찾지 못하여 DBWn의 Dirty Buffer 기록 완료를 대기하는 이벤트이다.",
+      "keyPoints": [
+        "DBWn이 Dirty Buffer를 충분히 빠르게 기록하지 못할 때 발생",
+        "DB_WRITER_PROCESSES 증가로 DBWn 프로세스 수 확대 검토",
+        "Buffer Cache 크기(DB_CACHE_SIZE) 증가 검토",
+        "디스크 I/O 성능 저하가 근본 원인일 수 있음"
+      ],
+      "relatedKeywords": ["DBWn", "DB_WRITER_PROCESSES", "Buffer Cache", "Dirty Buffer"],
+      "sourceSection": "s04"
+    }
+  }
+}
