@@ -1,0 +1,70 @@
+[
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_006",
+    "title": "Oracle AI DatabaseのUNDO Extentの3つの状態に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) ACTIVE状態のUNDO Extentは、UNDO_RETENTIONパラメータで指定した時間が経過すると自動的にEXPIRED状態に遷移する。",
+      "B) UNEXPIRED状態のUNDO Extentは、RETENTION NOGUARANTEEモードの場合、UNDO空間が不足した際に強制的に再利用される可能性がある。",
+      "C) EXPIRED状態のUNDO Extentは、新しいトランザクションによって自由に再利用可能であり、再利用の優先順位が最も高い。",
+      "D) ACTIVE状態のUNDO Extentは、UNDO空間が不足した場合にEXPIRED Extentよりも優先的に再利用される。",
+      "E) UNEXPIRED状態のUNDO ExtentはCOMMIT前のトランザクションが使用しているデータを含んでいるため、絶対に上書きされない。"
+    ],
+    "answer": ["B", "C"],
+    "explanation": "정답: B, C\nB) 정답 — UNEXPIRED 상태의 UNDO Extent는 트랜잭션이 완료되었으나 UNDO_RETENTION 기간이 아직 경과하지 않은 상태입니다. RETENTION NOGUARANTEE(기본) 모드에서는 UNDO 공간이 부족할 경우, UNEXPIRED Extent가 강제로 EXPIRED로 전환되어 재사용될 수 있습니다. 이 경우 ORA-01555(Snapshot Too Old) 발생 위험이 증가합니다.\n\nC) 정답 — EXPIRED 상태는 UNDO_RETENTION 기간이 경과하여 자유롭게 재사용 가능한 Extent입니다. 새로운 트랜잭션이 UNDO 공간을 필요로 할 때, Oracle은 EXPIRED Extent를 1순위로 재사용합니다.\n\nA) 오답 — ACTIVE 상태는 현재 진행 중인(미커밋) 트랜잭션이 사용하는 UNDO Extent입니다. 트랜잭션이 COMMIT 또는 ROLLBACK되면 UNEXPIRED 상태로 전환되며, 직접 EXPIRED로 전환되는 것이 아닙니다. ACTIVE → UNEXPIRED → EXPIRED 순서로 상태가 전이됩니다.\n\nD) 오답 — ACTIVE 상태의 UNDO Extent는 어떤 경우에도 절대 재사용할 수 없습니다. 활성 트랜잭션의 롤백에 필수적이기 때문입니다. 공간 부족 시 재사용 대상은 EXPIRED → Free Space → UNEXPIRED(NOGUARANTEE 시) 순서입니다.\n\nE) 오답 — UNEXPIRED는 COMMIT 후 UNDO_RETENTION 기간 내의 Extent이며, COMMIT 전 트랜잭션의 데이터를 포함하는 것은 ACTIVE 상태입니다. 또한 UNEXPIRED는 NOGUARANTEE 모드에서 공간 부족 시 재사용될 수 있습니다.\n\n핵심 개념: UNDO Extent의 상태는 ACTIVE(활성 트랜잭션 사용 중) → UNEXPIRED(커밋 후 보존 기간 내) → EXPIRED(보존 기간 경과, 재사용 가능) 순으로 전이됩니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_007",
+    "title": "Oracle AI DatabaseのUNDO_RETENTIONパラメータのAuto-Tuning(自動調整)機能に関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) Auto-Tuningが有効な場合、V$UNDOSTATビューのTUNED_UNDORETENTION列で自動調整された実際のRetention値を確認できる。",
+      "B) Auto-TuningはUNDOテーブルスペースのAUTOEXTENDがOFFの場合に有効になる。",
+      "C) Auto-TuningはUNDO_RETENTIONパラメータの値を無視して、常にOracle内部で計算された値のみを適用する。",
+      "D) Auto-Tuningが有効な場合でも、V$UNDOSTATビューのMAXQUERYLEN列は参照されず、固定のアルゴリズムでRetention値が計算される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — UNDO_RETENTION Auto-Tuning이 활성화되면, Oracle이 워크로드를 분석하여 최적의 retention 기간을 자동 계산합니다. 이 자동 조정된 값은 V$UNDOSTAT 뷰의 TUNED_UNDORETENTION 컬럼에서 확인할 수 있습니다.\n\nB) 오답 — Auto-Tuning은 UNDO 테이블스페이스의 AUTOEXTEND가 ON일 때 활성화됩니다. AUTOEXTEND OFF인 경우에는 Auto-Tuning이 비활성화되며, UNDO_RETENTION 파라미터 값이 그대로 사용됩니다.\n\nC) 오답 — Auto-Tuning은 UNDO_RETENTION 파라미터 값을 무시하지 않습니다. UNDO_RETENTION 값은 Auto-Tuning의 최소 하한(Floor)으로 작용하며, 자동 계산된 값이 UNDO_RETENTION보다 큰 경우에만 더 큰 값이 적용됩니다.\n\nD) 오답 — Auto-Tuning은 V$UNDOSTAT에 기록된 통계를 분석하며, 특히 MAXQUERYLEN(최장 쿼리 실행 시간)을 기준으로 최적의 retention 기간을 산정합니다. 고정 알고리즘이 아니라 실제 워크로드 기반으로 동적 대응합니다.\n\n핵심 개념: UNDO_RETENTION Auto-Tuning은 AUTOEXTEND ON일 때 활성화되며, V$UNDOSTAT의 워크로드 통계(특히 MAXQUERYLEN)를 기반으로 최적의 retention을 자동 계산합니다. UNDO_RETENTION 파라미터 값은 최소 하한으로 보장됩니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_008",
+    "title": "Oracle AI DatabaseのTemporary UNDO(一時UNDO)機能に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Temporary UNDOが有効な場合、Global Temporary Table(GTT)に対するDML操作のUNDOデータは一時テーブルスペースに格納され、REDOログへの記録が不要になる。",
+      "B) TEMP_UNDO_ENABLEDパラメータはOracle 21c以降のデフォルト値がTRUEであり、セッションレベルおよびシステムレベルの両方で動的に変更できる。",
+      "C) Temporary UNDO機能は、通常の永続テーブルに対するDML操作にも適用され、全体的なREDO生成量を削減する。",
+      "D) Temporary UNDOが有効な場合、インスタンス障害後の復旧時にGTTのUNDOデータも復旧対象となる。",
+      "E) TEMP_UNDO_ENABLEDパラメータはデータベース再起動後にのみ変更可能な静的パラメータである。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — Temporary UNDO가 활성화되면, GTT(Global Temporary Table)에 대한 DML 작업의 UNDO 데이터가 UNDO 테이블스페이스 대신 임시 테이블스페이스에 저장됩니다. GTT 데이터는 세션/트랜잭션 범위로 한정되어 인스턴스 복구가 불필요하므로, UNDO 데이터에 대한 REDO 로그 기록도 생략됩니다. 이로 인해 이중의 I/O 감소 효과를 달성합니다.\n\nB) 정답 — TEMP_UNDO_ENABLED 파라미터는 Oracle 21c 이후 기본값이 TRUE이며, ALTER SESSION(세션 레벨) 및 ALTER SYSTEM(시스템 레벨) 명령으로 동적 변경이 가능합니다. 세션 레벨 설정이 시스템 레벨보다 우선 적용됩니다.\n\nC) 오답 — Temporary UNDO는 GTT, Private Temporary Table, 임시 LOB에만 적용됩니다. 일반 영구 테이블에 대한 DML 작업에는 적용되지 않으며, 일반 테이블의 UNDO는 기존과 동일하게 UNDO 테이블스페이스에 저장됩니다.\n\nD) 오답 — Temporary UNDO는 인스턴스 복구(Instance Recovery) 시 사용되지 않습니다. GTT 데이터는 본질적으로 임시 데이터이므로, 인스턴스 재시작 시 Temp 데이터와 함께 자동으로 소멸됩니다.\n\nE) 오답 — TEMP_UNDO_ENABLED는 동적 파라미터이며, ALTER SESSION 또는 ALTER SYSTEM 명령으로 데이터베이스를 재시작하지 않고도 변경할 수 있습니다.\n\n핵심 개념: Temporary UNDO는 GTT의 UNDO 데이터를 임시 테이블스페이스에 저장하여 UNDO 테이블스페이스와 REDO 로그에 대한 I/O를 대폭 줄이는 최적화 기능입니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_009",
+    "title": "DROP TABLESPACE文の使用に関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) DROP TABLESPACE文にINCLUDING CONTENTS AND DATAFILESオプションを指定すると、テーブルスペース内のすべてのセグメントとOS上のデータファイルが同時に削除される。",
+      "B) DROP TABLESPACE文はテーブルスペースが空でない場合でも、オプションなしでデフォルトで削除が実行される。",
+      "C) DROP TABLESPACE文にCASCADE CONSTRAINTSを指定すると、削除対象テーブルスペースを参照する外部キー制約だけでなく、参照元のテーブル自体も連鎖的に削除される。",
+      "D) SYSTEM表領域はDROP TABLESPACE ... INCLUDING CONTENTS AND DATAFILESで削除可能である。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — DROP TABLESPACE ... INCLUDING CONTENTS AND DATAFILES를 사용하면, 테이블스페이스 내의 모든 세그먼트(테이블, 인덱스 등)와 OS상의 데이터 파일이 동시에 삭제됩니다. INCLUDING CONTENTS만 지정하면 세그먼트는 삭제되지만 데이터 파일은 OS에 남아 수동 삭제가 필요합니다.\n\nB) 오답 — 테이블스페이스에 세그먼트(데이터)가 존재하는 경우, INCLUDING CONTENTS 옵션 없이 DROP TABLESPACE를 실행하면 ORA-01549 에러가 발생합니다. 빈 테이블스페이스만 옵션 없이 삭제할 수 있습니다.\n\nC) 오답 — CASCADE CONSTRAINTS 옵션은 삭제 대상 테이블스페이스의 테이블을 참조하는 외래 키(FK) 제약조건만 삭제합니다. 참조원 테이블 자체가 연쇄적으로 삭제되는 것이 아닙니다. 제약조건만 제거되므로 참조원 테이블은 그대로 유지됩니다.\n\nD) 오답 — SYSTEM 테이블스페이스는 데이터 딕셔너리가 저장된 필수 테이블스페이스로, 어떤 옵션을 사용하더라도 삭제할 수 없습니다.\n\n핵심 개념: DROP TABLESPACE 시 INCLUDING CONTENTS(세그먼트 삭제), AND DATAFILES(OS 파일 삭제), CASCADE CONSTRAINTS(참조 FK 삭제)를 조합하여 사용합니다. SYSTEM 테이블스페이스는 삭제 불가합니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_010",
+    "title": "Oracle AI DatabaseのV$UNDOSTATビューを使用したUNDO監視に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) V$UNDOSTATビューは10分間隔でUNDO使用統計を収集し、最大4日間(576行)のデータを保持する。",
+      "B) V$UNDOSTATビューのSSOLDERRCNT列はORA-30036(UNDO空間不足)エラーの発生回数を記録する。",
+      "C) V$UNDOSTATビューのUNDOBLKS列とBEGIN_TIME/END_TIMEを使用して、1秒あたりのUNDOブロック生成率を計算し、UNDOテーブルスペースの適切なサイズを算定できる。",
+      "D) V$UNDOSTATビューのUNXPSTEALCNT列が0より大きい場合は、UNDO_RETENTIONの値が小さすぎることを示しており、パラメータ値を増加する必要がある。",
+      "E) V$UNDOSTATビューは現在のインスタンスの統計のみを保持し、AWR(Automatic Workload Repository)には記録されない。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — V$UNDOSTAT는 Oracle이 자동으로 수집하는 UNDO 사용 통계를 제공하는 동적 성능 뷰입니다. 10분 간격의 스냅샷 데이터를 최대 4일(576행) 동안 보존합니다.\n\nC) 정답 — V$UNDOSTAT의 UNDOBLKS(소비된 UNDO 블록 수)와 BEGIN_TIME/END_TIME(통계 수집 기간)을 사용하여 초당 UNDO 블록 생성률을 계산할 수 있습니다. 이 값을 UNDO Space = UNDO_RETENTION × 초당 UNDO 생성률 공식에 대입하여 UNDO 테이블스페이스의 적절한 크기를 산정합니다.\n\nB) 오답 — SSOLDERRCNT 컬럼은 ORA-01555(Snapshot Too Old) 에러의 발생 횟수를 기록합니다. ORA-30036(UNDO 공간 부족) 에러의 발생 횟수는 NOSPACEERRCNT 컬럼에서 확인합니다.\n\nD) 오답 — UNXPSTEALCNT가 0보다 크면 UNEXPIRED Extent가 강제로 재사용된 것을 의미하며, 이는 UNDO 공간 부족의 징후입니다. 반드시 UNDO_RETENTION 값이 작다는 것만을 의미하는 것이 아니라, UNDO 테이블스페이스의 크기가 부족하거나 UNDO_RETENTION이 현재 공간 대비 너무 큰 것일 수도 있습니다. 대응 방법은 UNDO 테이블스페이스 확장, UNDO_RETENTION 조정 등 여러 가지입니다.\n\nE) 오답 — V$UNDOSTAT의 데이터는 AWR(Automatic Workload Repository)에도 기록됩니다. DBA_HIST_UNDOSTAT 뷰를 통해 4일 이상의 과거 UNDO 통계를 장기적으로 분석할 수 있습니다.\n\n핵심 개념: V$UNDOSTAT는 UNDO 관리 최적화의 핵심 뷰로, 10분 간격으로 UNDO 소비량, 최장 쿼리 시간, ORA-01555/ORA-30036 발생 횟수, Auto-Tuning 값 등을 제공합니다. UNDOBLKS를 활용한 UNDO 크기 산정과 SSOLDERRCNT/NOSPACEERRCNT를 통한 문제 진단이 주요 활용 패턴입니다."
+  }
+]

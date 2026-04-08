@@ -1,0 +1,316 @@
+{
+  "id": "03_01",
+  "title": "주요 운영 환경 툴 (Database Administration Tools)",
+  "chapter": "03. 데이터베이스 관리 툴 및 네트워크 (Net Services)",
+  "description": "Oracle Database를 관리하기 위한 주요 운영 툴인 DBCA, SQL*Plus, Enterprise Manager Cloud Control, RMAN, SQL Developer의 용도, 아키텍처, 사용 방법을 상세히 다루며, 각 툴의 특성 비교와 실무 활용 시나리오를 포함합니다.",
+  "oracle26ai_changes": [
+    "Oracle 26ai에서 DBCA의 비대화형(사일런트) 모드에서 AI 기반 워크로드 프로파일을 지정할 수 있는 -aiWorkloadProfile 옵션이 추가되었습니다.",
+    "SQL*Plus에서 JSON 데이터 타입 컬럼의 출력 포맷팅이 개선되어, JSON_SERIALIZE 없이도 구조화된 출력이 가능합니다.",
+    "Enterprise Manager Cloud Control 14c가 Oracle 26ai를 완전 지원하며, AI Vector Search 관련 모니터링 메트릭이 추가되었습니다.",
+    "RMAN에서 Autonomous Recovery 기능이 강화되어, AI 기반 자동 복구 권장 사항을 제시하는 RECOMMEND 명령이 개선되었습니다.",
+    "SQL Developer 최신 버전에서 Oracle 26ai의 Vector 데이터 타입 및 AI Vector Search 인덱스 관리 GUI가 추가되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "Oracle DBA 툴 전체 개요 (Overview of Database Administration Tools)",
+      "content": "Oracle Database를 관리하기 위해 다양한 툴이 제공됩니다. 각 툴은 고유한 용도와 인터페이스를 가지며, DBA는 상황에 따라 적절한 툴을 선택하여 사용합니다.\n\n## 주요 DBA 관리 툴 비교\n\n| 툴 | 인터페이스 | 주요 용도 | 데이터베이스 기동/종료 | 원격 관리 | 스크립트/자동화 |\n|---|---|---|---|---|---|\n| **DBCA** | GUI / CLI | DB 생성·삭제·구성 | 생성 시 자동 기동 | 지원 안 함 | 응답 파일(Response File)로 자동화 |\n| **SQL*Plus** | CLI (텍스트) | SQL 실행, DB 기동/종료, 관리 | STARTUP / SHUTDOWN | SQL*Net 통해 가능 | SQL 스크립트(@) |\n| **EM Cloud Control** | 웹 GUI | 종합 모니터링, 관리, 운영 | 웹에서 기동/종료 가능 | 완전 지원 (웹 기반) | Job 시스템으로 자동화 |\n| **RMAN** | CLI (전용) | 백업/복구 전문 | STARTUP / SHUTDOWN | 지원 | RMAN 스크립트 |\n| **SQL Developer** | GUI (데스크톱) | SQL 실행, 객체 관리, 개발 | 지원 안 함 | JDBC 접속 | 제한적 |\n\n## 툴 선택 기준\n\n```\n데이터베이스 생성/삭제     → DBCA\n일상 관리/SQL 실행        → SQL*Plus\n대규모 환경 모니터링       → Enterprise Manager Cloud Control\n백업 및 복구             → RMAN\nSQL 개발/디버깅          → SQL Developer\n```\n\n각 툴은 상호 보완적이며, 실무에서는 복수의 툴을 조합하여 사용합니다. 예를 들어, DBCA로 데이터베이스를 생성한 후 SQL*Plus로 세부 설정을 수행하고, RMAN으로 백업 정책을 구성하며, EM Cloud Control로 전체 환경을 모니터링하는 것이 일반적인 패턴입니다.",
+      "sqlExamplesIds": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "DBCA - 데이터베이스 구성 도우미 (Database Configuration Assistant)",
+      "content": "DBCA(Database Configuration Assistant)는 Oracle Database를 **생성, 구성, 삭제**하기 위한 전용 유틸리티입니다. GUI 기반의 **대화형 모드(Interactive Mode)**와 명령줄 기반의 **비대화형(사일런트) 모드(Silent Mode)**를 모두 지원합니다.\n\n## DBCA 주요 기능\n\n| 기능 | 설명 |\n|---|---|\n| **데이터베이스 생성** | CDB/Non-CDB 데이터베이스 신규 생성 |\n| **PDB 생성** | CDB 내에 Pluggable Database 추가 생성 |\n| **데이터베이스 삭제** | 기존 데이터베이스 완전 제거 |\n| **데이터베이스 구성 변경** | 기존 DB의 옵션, 초기화 파라미터 변경 |\n| **템플릿 관리** | DB 생성 템플릿 생성/관리 |\n| **PDB 삭제** | CDB에서 PDB 제거 |\n\n## DBCA의 역할 범위 (중요)\n\nDBCA는 **데이터베이스 생성/관리 전용 도구**이며, 리스너 구성이나 네이밍 방법(tnsnames.ora, sqlnet.ora) 설정은 수행하지 않습니다. 리스너 생성 및 네트워크 구성은 **NETCA** 또는 **Net Manager(NETMGR)**의 역할입니다.\n\n| 작업 | DBCA | NETCA/NETMGR |\n|---|---|---|\n| 데이터베이스 생성/삭제 | O | X |\n| PDB 생성/삭제 | O | X |\n| 리스너 생성/구성 | X | O |\n| tnsnames.ora 구성 | X | O |\n| sqlnet.ora 구성 | X | O |\n\nDBCA 대화형 모드의 **\"네트워크 구성\" 단계**(7단계)는 기존에 생성되어 있는 리스너를 **선택**하는 것이지, 새로운 리스너를 생성하는 것이 아닙니다. 따라서 DBCA로 데이터베이스를 생성하기 전에 NETCA를 사용하여 리스너를 먼저 구성해야 합니다.\n\n## DBCA 실행 방법\n\n```bash\n# GUI 모드 (대화형)\n$ORACLE_HOME/bin/dbca\n\n# 사일런트 모드 (비대화형)\ndbca -silent -createDatabase -responseFile /path/to/response.rsp\n```",
+      "sqlExamplesIds": ["sql01", "sql02"],
+      "subsections": [
+        {
+          "title": "대화형 모드 (Interactive Mode / GUI Mode)",
+          "content": "DBCA를 GUI로 실행하여 **마법사(Wizard) 형태**의 단계별 화면을 통해 데이터베이스를 생성·구성하는 방식입니다. 시각적으로 옵션을 확인하며 진행할 수 있어 초기 학습이나 소규모 환경에서 유용합니다.\n\n### 대화형 모드 실행 과정\n\n1. **작업 선택(Operation Selection)**: 데이터베이스 생성, 구성 변경, 삭제, 템플릿 관리, PDB 관리 중 선택\n2. **생성 모드 선택(Creation Mode)**: 일반 구성(Typical) 또는 고급 구성(Advanced) 선택\n3. **데이터베이스 유형 선택**: CDB(Container Database) 생성 여부 결정\n4. **템플릿 선택(Template Selection)**: General Purpose, Data Warehouse, Custom Database 중 선택\n5. **데이터베이스 식별 정보 입력**: Global Database Name, SID 지정\n6. **저장 옵션 설정**: 파일 시스템, ASM, OMF(Oracle Managed Files) 설정\n7. **네트워크 구성**: 리스너 선택 또는 새 리스너 생성\n8. **Data Vault / Label Security 옵션**: 보안 옵션 구성\n9. **메모리, 문자 셋, 연결 모드 설정**: SGA/PGA 크기, 문자 인코딩(AL32UTF8 등) 설정\n10. **EM Cloud Control 등록**: Enterprise Manager에 등록 여부 선택\n11. **관리자 패스워드 설정**: SYS, SYSTEM 등 관리자 패스워드 지정\n12. **요약 및 생성 시작**: 설정 요약 검토 후 생성 실행\n\n### Typical vs Advanced 구성 모드\n\n| 구분 | Typical (일반) | Advanced (고급) |\n|---|---|---|\n| **대상** | 기본 설정으로 빠르게 생성 | 세부 옵션까지 직접 제어 |\n| **메모리 설정** | 자동 메모리 관리(AMM) | SGA/PGA 개별 세부 지정 가능 |\n| **저장소 옵션** | 기본 위치 사용 | 데이터 파일 위치, 크기 개별 지정 |\n| **문자 셋** | 기본값(AL32UTF8) | NLS 파라미터 상세 지정 |\n| **초기화 파라미터** | 기본값 사용 | 개별 파라미터 직접 수정 가능 |\n\n### DBCA 템플릿 (Template)\n\n데이터베이스 생성 시 사전 정의된 설정 묶음인 **템플릿**을 활용할 수 있습니다.\n\n| 템플릿 유형 | 설명 |\n|---|---|\n| **Seed Template** | 데이터 파일을 포함하는 템플릿. 빠른 생성 가능(데이터 파일 복사 방식) |\n| **Non-Seed Template** | 데이터 파일 미포함. 구성 정보만 포함하여 완전히 새로 생성 (시간 더 소요) |\n| **Custom Template** | 기존 DB에서 구조를 추출하여 커스텀 템플릿 생성 가능 |\n\n템플릿 파일은 `$ORACLE_HOME/assistants/dbca/templates/` 디렉토리에 `.dbt`(Non-Seed) 또는 `.dbc`(Seed) 확장자로 저장됩니다.",
+          "key_points": [
+            "GUI 마법사 형태로 단계별 진행하여 직관적인 데이터베이스 생성 가능",
+            "Typical(일반) 모드는 빠른 생성, Advanced(고급) 모드는 세부 옵션 제어 가능",
+            "Seed Template은 데이터 파일 포함(빠른 생성), Non-Seed Template은 구성 정보만 포함(완전 새 생성)",
+            "템플릿 파일은 $ORACLE_HOME/assistants/dbca/templates/ 디렉토리에 저장",
+            "CDB 생성 여부, PDB 수, 메모리 설정, 문자 셋 등 주요 옵션을 화면에서 선택",
+            "General Purpose, Data Warehouse, Custom Database 등 사전 정의 템플릿 제공",
+            "DBCA는 데이터베이스 생성/관리 전용 도구이며, 리스너 구성이나 네이밍 방법 설정은 NETCA/NETMGR 담당",
+            "DBCA의 '네트워크 구성' 단계(7단계)는 기존 리스너를 선택하는 것이지, 새 리스너를 생성하는 것이 아님"
+          ]
+        },
+        {
+          "title": "비대화형(사일런트) 모드 (Silent Mode / Non-Interactive Mode)",
+          "content": "DBCA를 **명령줄(CLI)**에서 파라미터를 직접 지정하거나 **응답 파일(Response File)**을 사용하여 GUI 없이 데이터베이스를 생성·관리하는 방식입니다. 자동화, 스크립트 기반 배포, 원격 서버(X Window 없는 환경) 등에서 필수적으로 사용됩니다.\n\n### 사일런트 모드 실행 형식\n\n```bash\n# 명령줄 파라미터로 직접 지정\ndbca -silent -createDatabase \\\n  -templateName General_Purpose.dbc \\\n  -gdbName orcl26ai \\\n  -sid orcl26ai \\\n  -createAsContainerDatabase true \\\n  -numberOfPDBs 1 \\\n  -pdbName pdb1 \\\n  -pdbAdminPassword <password> \\\n  -sysPassword <password> \\\n  -systemPassword <password> \\\n  -characterSet AL32UTF8 \\\n  -memoryPercentage 40 \\\n  -storageType FS \\\n  -datafileDestination /u01/oradata\n\n# 응답 파일 사용\ndbca -silent -createDatabase -responseFile /path/to/dbca.rsp\n```\n\n### 주요 DBCA 사일런트 모드 명령\n\n| 명령 | 설명 |\n|---|---|\n| `-createDatabase` | 새 데이터베이스 생성 |\n| `-deleteDatabase` | 기존 데이터베이스 삭제 |\n| `-configureDatabase` | 기존 데이터베이스 구성 변경 |\n| `-createPluggableDatabase` | CDB 내 PDB 생성 |\n| `-deletePluggableDatabase` | PDB 삭제 |\n| `-generateScripts` | DB 생성 스크립트만 생성(실제 생성하지 않음) |\n| `-createTemplateFromDB` | 기존 DB에서 템플릿 생성 |\n\n### 응답 파일 (Response File)\n\n응답 파일은 DBCA 사일런트 모드에서 사용할 모든 구성 파라미터를 텍스트 파일 형태로 정의한 것입니다.\n\n| 항목 | 설명 |\n|---|---|\n| **위치** | `$ORACLE_HOME/assistants/dbca/` 디렉토리에 샘플 파일 제공 |\n| **형식** | `key=value` 형식의 텍스트 파일 |\n| **확장자** | `.rsp` (Response File) |\n| **생성 방법** | 샘플 복사 후 수정, 또는 DBCA GUI에서 저장(Save Response File) |\n\n응답 파일의 주요 파라미터:\n\n```properties\nresponseFileVersion=/oracle/assistants/rspfmt_dbca_response.rsp\ngdbName=orcl26ai\nsid=orcl26ai\ncreateAsContainerDatabase=true\nnumberOfPDBs=1\npdbName=pdb1\ntemplateType=0\ntemplateFile=General_Purpose.dbc\nsysPassword=<password>\nsystemPassword=<password>\ncharacterSet=AL32UTF8\nmemoryPercentage=40\n```\n\n### 사일런트 모드 장점\n\n- **자동화**: 쉘 스크립트에 포함하여 완전 자동화된 DB 프로비저닝 가능\n- **반복 가능성**: 동일한 응답 파일로 여러 서버에 동일 구성의 DB 배포\n- **원격 서버**: X Window가 없는 서버에서도 DB 생성 가능\n- **CI/CD 연계**: DevOps 파이프라인에서 테스트 DB 자동 생성에 활용",
+          "key_points": [
+            "GUI 없이 명령줄에서 -silent 옵션으로 데이터베이스 생성·삭제·구성 가능",
+            "응답 파일(Response File, .rsp)에 모든 구성 파라미터를 key=value 형식으로 정의",
+            "샘플 응답 파일은 $ORACLE_HOME/assistants/dbca/ 디렉토리에 제공",
+            "DBCA GUI에서 Save Response File 기능으로 응답 파일을 내보낼 수 있음",
+            "-generateScripts 옵션으로 실제 생성 없이 SQL 스크립트만 생성 가능",
+            "자동화, 반복 배포, X Window 미지원 환경에서 필수적으로 사용",
+            "-createPluggableDatabase, -deletePluggableDatabase로 PDB 관리도 사일런트로 수행 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "SQL*Plus (SQL*Plus Command-Line Interface)",
+      "content": "SQL*Plus는 Oracle Database와 상호 작용하기 위한 **명령줄 인터페이스(CLI)** 도구로, Oracle DBA가 가장 빈번하게 사용하는 핵심 관리 도구입니다. SQL, PL/SQL 실행은 물론 데이터베이스 **기동(STARTUP)** 및 **종료(SHUTDOWN)** 등 인스턴스 관리 기능을 제공합니다.\n\n## SQL*Plus의 주요 기능 분류\n\n| 기능 분류 | 설명 |\n|---|---|\n| **SQL 실행** | DML, DDL, DCL 등 모든 SQL 문 실행 |\n| **PL/SQL 실행** | 익명 블록, 프로시저, 함수 호출 |\n| **인스턴스 관리** | STARTUP, SHUTDOWN 명령 |\n| **포맷팅 및 리포팅** | COLUMN, SET LINESIZE/PAGESIZE 등 출력 형식 제어 |\n| **스크립트 실행** | @, @@, START 명령으로 SQL 스크립트 파일 실행 |\n| **세션 관리** | ALTER SESSION, SET/SHOW 명령 |\n| **CDB/PDB 관리** | ALTER SESSION SET CONTAINER로 PDB 전환 |",
+      "sqlExamplesIds": ["sql03", "sql04", "sql05", "sql06", "sql07"],
+      "subsections": [
+        {
+          "title": "SQL*Plus 접속 방법 (Connection Methods)",
+          "content": "SQL*Plus는 다양한 방식으로 Oracle Database에 접속할 수 있습니다. 접속 방식은 크게 **로컬 접속**과 **원격 접속**으로 나뉘며, 인증 방식에 따라 **OS 인증**과 **패스워드 인증**이 있습니다.\n\n### 접속 유형 분류\n\n| 접속 유형 | 설명 | 사용 사례 |\n|---|---|---|\n| **로컬 접속 (Local)** | DB 서버에서 직접 접속. 리스너 불필요 | 인스턴스 기동/종료, 유지보수 |\n| **원격 접속 (Remote)** | 네트워크를 통해 접속. 리스너 필요 | 원격 관리, 애플리케이션 접속 |\n| **OS 인증 (/ as sysdba)** | OS 그룹 멤버십으로 인증 | 인스턴스 미기동 시 접속 |\n| **패스워드 인증** | 사용자명/패스워드로 인증 | 일반 사용자 접속 |\n\n### 주요 접속 명령어\n\n```bash\n# 로컬 접속 - OS 인증 (SYSDBA 권한)\nsqlplus / as sysdba\n\n# 로컬 접속 - 패스워드 인증\nsqlplus system/password\n\n# 원격 접속 - TNS 이름 사용 (Net Service Name)\nsqlplus system/password@orcl26ai\n\n# 원격 접속 - Easy Connect 문자열\nsqlplus system/password@hostname:1521/orcl26ai\n\n# SYSOPER 권한 접속\nsqlplus / as sysoper\n\n# SYSDG, SYSBACKUP, SYSKM 등 관리 권한 접속\nsqlplus / as sysbackup\n```\n\n### SYSDBA vs SYSOPER 권한 비교\n\n| 권한 | STARTUP/SHUTDOWN | CREATE DATABASE | ALTER DATABASE | 접속 스키마 |\n|---|---|---|---|---|\n| **SYSDBA** | 가능 | 가능 | 가능 (완전 복구 포함) | SYS |\n| **SYSOPER** | 가능 | 불가 | 제한적 (OPEN/MOUNT/BACKUP) | PUBLIC |\n\n### OS 인증 관련 OS 그룹\n\nSYSDBA 및 SYSOPER 인증은 OS의 특정 그룹 멤버십에 의해 결정됩니다.\n\n| 권한 | Linux OS 그룹 | Windows OS 그룹 |\n|---|---|---|\n| **SYSDBA** | dba | ORA_DBA |\n| **SYSOPER** | oper | ORA_OPER |\n| **SYSBACKUP** | backupdba | ORA_BACKUPDBA |\n| **SYSDG** | dgdba | ORA_DGDBA |\n| **SYSKM** | kmdba | ORA_KMDBA |",
+          "key_points": [
+            "로컬 접속은 리스너 불필요, 원격 접속은 리스너(Listener)가 반드시 필요",
+            "OS 인증(/ as sysdba)은 인스턴스가 기동되지 않은 상태에서도 접속 가능",
+            "SYSDBA는 CREATE DATABASE 포함 모든 권한, SYSOPER는 기동/종료 등 제한된 권한",
+            "Easy Connect 문자열: username/password@host:port/service_name 형식",
+            "TNS 이름(Net Service Name) 사용 시 tnsnames.ora에 해당 서비스 정의 필요",
+            "SYSBACKUP, SYSDG, SYSKM 등 세분화된 관리 권한도 지원"
+          ]
+        },
+        {
+          "title": "SQL*Plus 주요 명령어 (Key Commands)",
+          "content": "SQL*Plus는 **SQL 문**, **PL/SQL 블록** 외에도 SQL*Plus 자체의 **환경 설정 명령어**와 **관리 명령어**를 제공합니다. SQL*Plus 명령어는 SQL 문과 달리 세미콜론(`;`)이 필수가 아닙니다.\n\n### 인스턴스 기동/종료 명령\n\n| 명령 | 설명 |\n|---|---|\n| `STARTUP` | 인스턴스 기동 (NOMOUNT → MOUNT → OPEN) |\n| `STARTUP NOMOUNT` | 인스턴스만 기동 (SGA 할당, 프로세스 시작). DB 생성, 컨트롤 파일 재생성 시 사용 |\n| `STARTUP MOUNT` | 인스턴스 기동 + 컨트롤 파일 읽기. 데이터 파일 이름 변경, 복구 작업 시 사용 |\n| `STARTUP RESTRICT` | 제한 모드로 기동. RESTRICTED SESSION 권한 가진 사용자만 접속 가능 |\n| `STARTUP FORCE` | 실행 중인 인스턴스를 ABORT 후 재기동 |\n| `STARTUP UPGRADE` | 업그레이드 모드로 기동. 데이터베이스 업그레이드 스크립트 실행 시 사용 |\n| `SHUTDOWN NORMAL` | 새 접속 차단, 현재 세션 모두 종료 후 종료 (기본 모드) |\n| `SHUTDOWN TRANSACTIONAL` | 새 접속 차단, 현재 트랜잭션 완료 후 세션 종료 |\n| `SHUTDOWN IMMEDIATE` | 새 접속 차단, 현재 문장 중단, 미커밋 트랜잭션 롤백 후 종료 (가장 많이 사용) |\n| `SHUTDOWN ABORT` | 즉시 종료. 복구 불필요 보장 안 됨. 다음 기동 시 인스턴스 복구(Instance Recovery) 발생 |\n\n### SHUTDOWN 모드 비교\n\n| 동작 | NORMAL | TRANSACTIONAL | IMMEDIATE | ABORT |\n|---|---|---|---|---|\n| 새 접속 차단 | O | O | O | O |\n| 현재 세션 대기 | O | X | X | X |\n| 현재 트랜잭션 대기 | O | O | X | X |\n| 체크포인트 수행 | O | O | O | X |\n| 다음 기동 시 복구 | 불필요 | 불필요 | 불필요 | 필요 |\n\n### 환경 설정 명령 (SET / SHOW)\n\n| 명령 | 설명 |\n|---|---|\n| `SET LINESIZE n` | 한 줄의 최대 문자 수 설정 |\n| `SET PAGESIZE n` | 페이지당 행 수 설정 (헤더 반복 간격) |\n| `SET SERVEROUTPUT ON` | DBMS_OUTPUT.PUT_LINE 출력 활성화 |\n| `SET FEEDBACK ON/OFF` | \"n rows selected\" 메시지 표시 여부 |\n| `SET ECHO ON/OFF` | 스크립트 실행 시 SQL 문 표시 여부 |\n| `SET TIMING ON/OFF` | SQL 실행 시간 표시 |\n| `SET AUTOCOMMIT ON/OFF` | DML 자동 커밋 여부 |\n| `SHOW ALL` | 모든 환경 변수 표시 |\n| `SHOW PARAMETER param` | 초기화 파라미터 값 조회 |\n| `SHOW SGA` | SGA 메모리 구성 요약 표시 |\n| `SHOW PDBS` | CDB 내 PDB 목록 및 상태 표시 |\n| `SHOW CON_NAME` | 현재 접속된 컨테이너 이름 표시 |\n| `SHOW CON_ID` | 현재 접속된 컨테이너 ID 표시 |\n\n### 스크립트 실행 명령\n\n| 명령 | 설명 |\n|---|---|\n| `@script.sql` | 지정 경로의 SQL 스크립트 실행 |\n| `@@script.sql` | 현재 스크립트와 같은 디렉토리의 스크립트 실행 (중첩 스크립트) |\n| `START script.sql` | @와 동일 |\n| `SPOOL filename` | 출력 결과를 파일로 저장 시작 |\n| `SPOOL OFF` | 파일 저장 종료 |\n| `EXIT` 또는 `QUIT` | SQL*Plus 종료 |",
+          "key_points": [
+            "STARTUP은 NOMOUNT → MOUNT → OPEN 3단계로 인스턴스를 기동",
+            "SHUTDOWN IMMEDIATE가 실무에서 가장 많이 사용되는 종료 모드 (미커밋 롤백 후 깨끗한 종료)",
+            "SHUTDOWN ABORT는 체크포인트를 수행하지 않아 다음 기동 시 인스턴스 복구 필요",
+            "SET/SHOW 명령으로 SQL*Plus 환경 변수 및 초기화 파라미터 조회·설정",
+            "@ 명령으로 SQL 스크립트 파일 실행, @@ 명령으로 상대 경로 중첩 스크립트 실행",
+            "SPOOL 명령으로 실행 결과를 파일로 저장 가능",
+            "SHOW PDBS, SHOW CON_NAME으로 현재 컨테이너 정보 확인 가능",
+            "STARTUP RESTRICT로 제한 모드 기동 시 RESTRICTED SESSION 권한 가진 사용자만 접속 가능"
+          ]
+        },
+        {
+          "title": "SQL*Plus에서 CDB/PDB 관리 (CDB/PDB Management in SQL*Plus)",
+          "content": "Oracle Multitenant 환경에서 SQL*Plus를 사용하여 **CDB(Container Database)**와 **PDB(Pluggable Database)** 간 전환하고 관리하는 방법입니다.\n\n### 컨테이너 전환 (Container Switching)\n\nCDB에 SYSDBA로 접속한 상태에서 `ALTER SESSION SET CONTAINER` 명령을 사용하여 특정 PDB로 전환할 수 있습니다.\n\n```sql\n-- 현재 컨테이너 확인\nSHOW CON_NAME;\n\n-- PDB로 전환\nALTER SESSION SET CONTAINER = pdb1;\n\n-- CDB$ROOT로 복귀\nALTER SESSION SET CONTAINER = CDB$ROOT;\n\n-- PDB$SEED로 전환\nALTER SESSION SET CONTAINER = PDB$SEED;\n```\n\n### PDB 상태 관리\n\n| 명령 | 설명 |\n|---|---|\n| `ALTER PLUGGABLE DATABASE pdb1 OPEN;` | PDB 오픈 |\n| `ALTER PLUGGABLE DATABASE pdb1 CLOSE;` | PDB 클로즈 |\n| `ALTER PLUGGABLE DATABASE ALL OPEN;` | 모든 PDB 오픈 |\n| `ALTER PLUGGABLE DATABASE ALL CLOSE;` | 모든 PDB 클로즈 |\n| `ALTER PLUGGABLE DATABASE pdb1 SAVE STATE;` | CDB 재기동 시 PDB 자동 오픈 설정 |\n\n### 직접 PDB 접속 (서비스 이름 사용)\n\n```bash\n# TNS를 사용하여 직접 PDB에 접속\nsqlplus system/password@hostname:1521/pdb1\n\n# Easy Connect으로 직접 PDB에 접속\nsqlplus system/password@//hostname:1521/pdb1.example.com\n```\n\n직접 PDB에 접속하면 해당 PDB가 현재 컨테이너가 되며, `ALTER SESSION SET CONTAINER`로 전환할 필요 없이 바로 PDB 내 작업이 가능합니다. 단, PDB에 직접 접속한 경우 다른 컨테이너로의 전환은 불가합니다.\n\n### CDB vs PDB 접속 시 동작 차이\n\n| 항목 | CDB$ROOT 접속 | PDB 직접 접속 |\n|---|---|---|\n| **다른 PDB로 전환** | 가능 (ALTER SESSION SET CONTAINER) | 불가 |\n| **CDB 전체 관리** | 가능 | 불가 |\n| **V$ 뷰 범위** | CDB 전체 | 해당 PDB만 |\n| **일반 사용자(Common User)** | 접속 가능 | 접속 가능 |\n| **로컬 사용자(Local User)** | 접속 불가 | 접속 가능 |",
+          "key_points": [
+            "ALTER SESSION SET CONTAINER = pdb_name으로 CDB$ROOT에서 특정 PDB로 전환",
+            "PDB에 직접 접속(서비스 이름 사용)하면 해당 PDB가 현재 컨테이너가 됨",
+            "PDB에 직접 접속한 경우 다른 컨테이너로의 전환 불가",
+            "ALTER PLUGGABLE DATABASE ... SAVE STATE로 CDB 재기동 시 PDB 자동 오픈 설정",
+            "CDB$ROOT 접속 시 V$ 뷰는 CDB 전체 범위, PDB 접속 시 해당 PDB만 조회"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "Enterprise Manager Cloud Control (EM Cloud Control)",
+      "content": "Oracle Enterprise Manager Cloud Control(EM CC)은 Oracle 환경 전체를 **웹 기반 GUI**로 모니터링하고 관리하는 **통합 관리 플랫폼**입니다. 단일 데이터베이스부터 수백 개의 데이터베이스, 미들웨어, 호스트 등을 중앙 집중식으로 관리할 수 있습니다.\n\n## EM Cloud Control 주요 기능\n\n| 기능 | 설명 |\n|---|---|\n| **모니터링** | 성능 메트릭, 가용성, 알림 관리 |\n| **데이터베이스 관리** | 기동/종료, 초기화 파라미터, 스토리지, 사용자 관리 |\n| **성능 분석** | AWR, ADDM, ASH 기반 성능 진단 |\n| **백업/복구** | RMAN 기반 백업 스케줄링 및 관리 |\n| **패치 관리** | Oracle 패치 자동화 |\n| **프로비저닝** | 데이터베이스 자동 배포 |\n| **컴플라이언스** | 보안 정책 준수 여부 모니터링 |",
+      "sqlExamplesIds": ["sql08"],
+      "subsections": [
+        {
+          "title": "EM Cloud Control 아키텍처 (Architecture)",
+          "content": "EM Cloud Control은 **3-tier 아키텍처**로 구성되며, OMS(Oracle Management Service), 관리 에이전트(Management Agent), 관리 리포지토리(Management Repository)가 핵심 구성요소입니다.\n\n### 아키텍처 구성요소\n\n```\n┌──────────────────┐\n│   웹 브라우저      │  ← DBA가 접근하는 UI\n└────────┬─────────┘\n         │ HTTPS\n┌────────▼─────────┐\n│  OMS              │  ← Oracle Management Service\n│  (WebLogic 기반)   │     비즈니스 로직, UI 렌더링\n└────────┬─────────┘\n         │\n┌────────▼─────────┐\n│  Management       │  ← 관리 리포지토리\n│  Repository       │     OMS 구성, 메트릭 데이터 저장\n│  (Oracle DB)      │     전용 Oracle Database\n└──────────────────┘\n         ▲\n┌────────┴─────────┐\n│  Management Agent │  ← 각 관리 대상 호스트에 설치\n│  (각 호스트별)     │     메트릭 수집, 작업 실행\n└──────────────────┘\n```\n\n### 구성요소 상세\n\n| 구성요소 | 설명 |\n|---|---|\n| **OMS (Oracle Management Service)** | EM의 핵심 서버 컴포넌트. WebLogic Server 위에서 동작. Agent가 수집한 데이터를 처리하고, 웹 UI를 제공. 고가용성을 위해 다중 OMS 구성 가능 |\n| **Management Agent** | 관리 대상 호스트에 설치되는 경량 프로세스. 데이터베이스, OS 등의 메트릭을 수집하여 OMS에 전송. 관리 작업(기동/종료, 패치 등)을 호스트에서 실행 |\n| **Management Repository** | OMS의 구성 정보, 수집된 메트릭, 경고 이력 등을 저장하는 전용 Oracle Database. 별도 DB에 설치 권장 |\n| **Plug-in** | 특정 타겟 유형(DB, Middleware, Cloud 등)을 관리하기 위한 확장 모듈. OMS와 Agent 양쪽에 배포 |\n\n### Management Agent 동작 방식\n\n1. Agent가 관리 대상(Target)의 **메트릭을 주기적으로 수집** (기본 수집 주기: 메트릭별 상이)\n2. 수집된 데이터를 **XML 형태**로 OMS에 **HTTPS**를 통해 전송\n3. OMS가 데이터를 처리하여 **Management Repository에 저장**\n4. **임계값(Threshold)** 초과 시 **경고(Alert)** 발생\n5. DBA가 웹 UI에서 경고 확인 및 관리 작업 수행\n6. 관리 작업(Job)은 OMS → Agent → Target 경로로 실행\n\n### 관련 포트 및 URL\n\n| 항목 | 기본값 |\n|---|---|\n| **EM 콘솔 URL** | `https://hostname:7803/em` |\n| **OMS Upload 포트** | 4903 (HTTPS) |\n| **Agent 포트** | 3872 |\n| **관리 명령** | `$OMS_HOME/bin/emctl` |",
+          "key_points": [
+            "3-tier 아키텍처: 웹 브라우저 → OMS(WebLogic 기반) → Management Repository(Oracle DB)",
+            "Management Agent가 각 관리 대상 호스트에 설치되어 메트릭 수집 및 작업 실행",
+            "OMS는 다중 구성(Multi-OMS)으로 고가용성 확보 가능",
+            "Agent가 수집한 메트릭은 HTTPS로 OMS에 전송, Repository DB에 저장",
+            "임계값(Threshold) 기반 경고 시스템으로 문제 사전 감지",
+            "emctl 명령으로 OMS 및 Agent의 기동/종료/상태 확인"
+          ]
+        },
+        {
+          "title": "EM Cloud Control에서 데이터베이스 관리 (Database Management via EM)",
+          "content": "EM Cloud Control의 웹 인터페이스를 통해 데이터베이스의 기동/종료, 모니터링, 성능 분석, 구성 관리 등을 수행할 수 있습니다.\n\n### 데이터베이스 기동/종료\n\nEM Cloud Control에서 데이터베이스를 기동하거나 종료하려면:\n\n1. 웹 콘솔에서 관리 대상 데이터베이스를 선택\n2. **Oracle Database** → **Control** → **Startup/Shutdown** 메뉴 선택\n3. **Host Credentials**(호스트 OS 인증 정보)와 **Database Credentials**(SYSDBA 인증 정보) 입력\n4. 기동 모드(Open, Mount, Nomount, Restrict) 또는 종료 모드(Immediate, Transactional, Normal, Abort) 선택\n5. 작업 실행\n\n내부적으로 EM은 해당 호스트의 **Management Agent**를 통해 `sqlplus / as sysdba`로 STARTUP/SHUTDOWN 명령을 실행합니다.\n\n### 주요 모니터링 기능\n\n| 모니터링 항목 | 설명 |\n|---|---|\n| **데이터베이스 홈페이지** | 가용성, CPU/메모리 사용량, 세션 수, 알림 요약 |\n| **성능 페이지 (Performance Hub)** | 실시간 및 과거 성능 데이터 (AWR, ASH 기반) |\n| **ADDM (Automatic Database Diagnostic Monitor)** | 자동 성능 진단 및 권장 사항 |\n| **SQL 모니터** | 실행 중인 SQL의 실시간 모니터링 |\n| **공간 관리** | 테이블스페이스, 세그먼트 사용량 모니터링 |\n| **경고(Alerts)** | 임계값 기반 경고, 이벤트 이력 |\n\n### Oracle Support (My Oracle Support) 연계\n\nEM Cloud Control은 **My Oracle Support(MOS)**와 직접 연계하여 다음 기능을 제공합니다:\n\n| 기능 | 설명 |\n|---|---|\n| **패치 권장 사항** | 현재 환경에 필요한 패치 자동 식별 및 다운로드 |\n| **SR(Service Request) 생성** | EM에서 직접 Oracle 지원 요청 생성 |\n| **Configuration Collector** | 시스템 구성 정보를 MOS에 업로드하여 맞춤 권장 사항 수신 |\n| **Bug 검색** | Known Bug 및 해결책 검색 |\n| **보안 경고** | 보안 취약점 관련 패치 알림 |\n\n### EM Express (간이 버전)\n\n전체 EM Cloud Control 설치 없이 **개별 데이터베이스에 내장된 경량 관리 도구**입니다.\n\n| 항목 | EM Cloud Control | EM Express |\n|---|---|---|\n| **설치** | 별도 설치 필요 | DB에 내장 (별도 설치 불필요) |\n| **범위** | 다수 타겟 중앙 관리 | 단일 DB만 관리 |\n| **Agent** | 필요 | 불필요 |\n| **기능** | 전체 기능 | 기본 모니터링/관리 |\n| **접속 URL** | `https://oms-host:7803/em` | `https://db-host:5500/em` |\n| **설정** | EXEC DBMS_XDB_CONFIG.setHTTPSPort(5500); | 포트 설정만으로 활성화 |",
+          "key_points": [
+            "웹 UI에서 데이터베이스 기동/종료 가능 (내부적으로 Agent가 sqlplus 명령 실행)",
+            "AWR, ADDM, ASH 기반의 강력한 성능 분석 기능 제공",
+            "My Oracle Support(MOS) 연계로 패치 권장, SR 생성, Bug 검색 기능 지원",
+            "EM Express는 별도 설치 없이 DB에 내장된 경량 웹 관리 도구",
+            "EM Express는 DBMS_XDB_CONFIG.setHTTPSPort로 HTTPS 포트 설정만으로 활성화",
+            "EM Cloud Control은 다수 타겟 중앙 관리, EM Express는 단일 DB 관리용"
+          ]
+        },
+        {
+          "title": "EM Cloud Control의 리스너 관리 기능 (Listener Management via EM CC)",
+          "content": "EM Cloud Control은 데이터베이스뿐만 아니라 **Oracle Net Listener**도 관리 대상(Target)으로 등록하여 웹 GUI를 통해 운영 관리할 수 있습니다.\n\n### 리스너 Target 등록\n\nEM Cloud Control에서 리스너를 관리하려면 먼저 해당 리스너를 **Target으로 등록**해야 합니다. Management Agent가 설치된 호스트에서 리스너를 자동 검색(Auto Discovery)하거나, 수동으로 Target을 추가할 수 있습니다.\n\n### 리스너 관리 기능\n\n| 기능 | 설명 |\n|---|---|\n| **리스너 시작 (Start)** | 웹 콘솔에서 리스너를 시작 |\n| **리스너 중지 (Stop)** | 웹 콘솔에서 리스너를 중지 |\n| **상태 확인 (Status)** | 리스너 가동 상태, 등록된 서비스 정보를 웹에서 확인 |\n| **모니터링** | 리스너의 가용성, 연결 수, 응답 시간 등 메트릭 수집 및 경고 |\n\n### 내부 동작 원리\n\nEM Cloud Control에서 리스너를 시작/중지할 때의 내부 처리 과정:\n\n1. DBA가 웹 콘솔에서 리스너 시작/중지 명령을 요청\n2. OMS가 해당 호스트의 **Management Agent**에 작업(Job)을 전달\n3. Agent가 호스트에서 **lsnrctl start** 또는 **lsnrctl stop** 명령을 실행\n4. 실행 결과를 Agent → OMS → 웹 콘솔 경로로 반환\n\n즉, EM Cloud Control은 내부적으로 Agent를 통해 `lsnrctl` 명령을 실행하는 방식이며, 이를 웹 GUI로 추상화하여 제공합니다. 데이터베이스 기동/종료와 마찬가지로 **Host Credentials**(OS 인증 정보)가 필요합니다.",
+          "key_points": [
+            "EM Cloud Control에서 리스너를 Target으로 등록하면 웹 GUI를 통해 리스너 운영 관리 가능",
+            "Management Agent를 통해 리스너의 시작/중지/상태 확인이 가능",
+            "내부적으로 Agent가 lsnrctl start/stop 명령을 실행하는 방식으로 동작",
+            "리스너 가용성, 연결 수, 응답 시간 등의 모니터링 메트릭도 수집 가능",
+            "리스너 관리 시에도 Host Credentials(OS 인증 정보)가 필요"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "RMAN - Recovery Manager (복구 관리자)",
+      "content": "RMAN(Recovery Manager)은 Oracle Database의 **백업 및 복구** 작업을 전문적으로 수행하는 **명령줄 유틸리티**입니다. Oracle이 공식적으로 권장하는 백업/복구 도구이며, SQL*Plus와 유사한 명령줄 인터페이스를 제공합니다.\n\n## RMAN의 주요 기능\n\n| 기능 | 설명 |\n|---|---|\n| **데이터베이스 백업** | 전체/증분/아카이브 로그 백업 |\n| **데이터베이스 복구** | 완전 복구(Complete Recovery) 및 불완전 복구(Point-in-Time Recovery) |\n| **데이터베이스 기동/종료** | SQL*Plus와 동일한 STARTUP/SHUTDOWN 기능 |\n| **블록 미디어 복구** | 손상된 개별 블록 복구 (Block-Level Media Recovery) |\n| **백업 검증** | VALIDATE로 백업 파일 무결성 확인 |\n| **카탈로그 관리** | 백업 메타데이터 관리 (Recovery Catalog 또는 Control File) |\n| **중복 데이터베이스 생성** | DUPLICATE 명령으로 데이터베이스 복제 |",
+      "sqlExamplesIds": ["sql09", "sql10", "sql11"],
+      "subsections": [
+        {
+          "title": "RMAN 접속 및 기동/종료 (Connection and Startup/Shutdown)",
+          "content": "RMAN은 독립 실행형 유틸리티로, SQL*Plus와 별도로 실행됩니다. RMAN에서도 데이터베이스의 **기동(STARTUP)**과 **종료(SHUTDOWN)**를 직접 수행할 수 있어, 백업/복구 작업 전후로 SQL*Plus 없이도 인스턴스 상태를 변경할 수 있습니다.\n\n### RMAN 접속 방법\n\n```bash\n# 로컬 접속 (Target Database)\nrman target /\n\n# 로컬 접속 (SYSDBA)\nrman target sys/password\n\n# 원격 접속\nrman target sys/password@orcl26ai\n\n# Recovery Catalog 함께 접속\nrman target / catalog rman_user/password@catdb\n\n# 보조(Auxiliary) 데이터베이스 접속 (DUPLICATE 시)\nrman target / auxiliary sys/password@auxdb\n```\n\n### RMAN에서의 기동/종료\n\nRMAN에서 사용하는 기동/종료 명령은 SQL*Plus와 **동일한 구문**을 사용합니다:\n\n| RMAN 명령 | 설명 |\n|---|---|\n| `STARTUP` | 인스턴스 기동 (NOMOUNT → MOUNT → OPEN) |\n| `STARTUP NOMOUNT` | 인스턴스만 기동 |\n| `STARTUP MOUNT` | 인스턴스 기동 + 컨트롤 파일 읽기 |\n| `SHUTDOWN IMMEDIATE` | 즉시 종료 |\n| `SHUTDOWN ABORT` | 강제 종료 |\n\n### RMAN이 SQL*Plus 대신 기동/종료를 수행하는 이유\n\n복구 작업 시 데이터베이스를 특정 상태(MOUNT 등)로 전환해야 하는 경우가 빈번합니다. RMAN에서 직접 기동/종료가 가능하므로:\n\n1. 별도의 SQL*Plus 세션을 열 필요 없이 RMAN 내에서 전체 복구 워크플로우 완료 가능\n2. 복구 스크립트에서 기동 → 복구 → 오픈까지 하나의 RMAN 스크립트로 자동화\n3. 백업 전 MOUNT 모드 전환 등 상태 변경이 원활\n\n### RMAN vs SQL*Plus 기동/종료 비교\n\n| 항목 | RMAN | SQL*Plus |\n|---|---|---|\n| **STARTUP/SHUTDOWN** | 지원 | 지원 |\n| **STARTUP NOMOUNT/MOUNT** | 지원 | 지원 |\n| **ALTER DATABASE** | 미지원 (SQL 실행은 `SQL` 접두사 필요) | 직접 지원 |\n| **SQL 실행** | `SQL 'ALTER SYSTEM ...'` 형태로 제한적 | 모든 SQL 직접 실행 |\n| **백업/복구 명령** | RMAN 전용 명령 지원 | 미지원 |\n| **접속 권한** | SYSBACKUP 또는 SYSDBA | 모든 권한 |",
+          "key_points": [
+            "rman target / 명령으로 로컬 데이터베이스에 접속 (OS 인증)",
+            "RMAN에서도 STARTUP/SHUTDOWN 명령으로 인스턴스 기동/종료 가능",
+            "Recovery Catalog 사용 시 catalog 절로 카탈로그 DB에 동시 접속",
+            "RMAN 내에서 SQL 실행 시 SQL 접두사를 붙여야 함 (예: SQL 'ALTER SYSTEM ...')",
+            "SYSBACKUP 권한으로도 RMAN 접속 및 백업/복구 작업 가능",
+            "복구 워크플로우(기동 → 복구 → 오픈)를 하나의 RMAN 스크립트로 자동화 가능"
+          ]
+        },
+        {
+          "title": "RMAN의 백업/복구 도구로서의 위치 (RMAN as Backup and Recovery Tool)",
+          "content": "RMAN은 Oracle Database의 **공식 권장 백업/복구 도구**로, OS 유틸리티(cp, tar 등)를 사용한 수동 백업(User-Managed Backup) 대비 다양한 이점을 제공합니다.\n\n### RMAN vs User-Managed 백업 비교\n\n| 항목 | RMAN | User-Managed (OS 명령) |\n|---|---|---|\n| **증분 백업** | 지원 (Level 0, Level 1) | 불가 (전체 복사만) |\n| **블록 손상 감지** | 백업 중 자동 감지 | 불가 |\n| **블록 레벨 복구** | 지원 (BLOCKRECOVER) | 불가 |\n| **사용하지 않는 블록 건너뛰기** | 자동 (Unused Block Compression) | 불가 (전체 파일 복사) |\n| **백업 메타데이터 관리** | 자동 (Control File 또는 Recovery Catalog) | 수동 관리 필요 |\n| **백업 보존 정책** | 자동 관리 (RETENTION POLICY) | 수동 관리 |\n| **압축** | Oracle 네이티브 압축 지원 | OS 압축 도구 사용 |\n| **암호화** | 투명 암호화 지원 | 별도 도구 필요 |\n| **SBT (테이프 백업)** | 직접 지원 (MML 인터페이스) | 별도 도구 연계 |\n\n### RMAN 백업 저장소\n\n| 저장소 유형 | 설명 |\n|---|---|\n| **디스크 (Disk)** | 로컬 또는 공유 파일 시스템. 기본 저장소 |\n| **ASM (Automatic Storage Management)** | Oracle ASM 디스크 그룹 |\n| **SBT (System Backup to Tape)** | 테이프 장치. MML(Media Management Layer) 라이브러리 필요 |\n| **Recovery Appliance** | Oracle Zero Data Loss Recovery Appliance |\n\n### Recovery Catalog vs Control File\n\nRMAN의 백업 메타데이터는 **Control File**에 기본 저장되며, 선택적으로 **Recovery Catalog**(별도 DB)를 구성할 수 있습니다.\n\n| 항목 | Control File | Recovery Catalog |\n|---|---|---|\n| **별도 DB 필요** | 불필요 (기본) | 필요 (전용 DB 권장) |\n| **메타데이터 보존** | CONTROL_FILE_RECORD_KEEP_TIME 기간만큼 | 무제한 |\n| **Stored Script** | 미지원 | 지원 |\n| **다중 DB 관리** | 불가 | 가능 (중앙 집중) |\n| **Control File 손실 시** | 메타데이터 손실 | 카탈로그에서 복구 가능 |",
+          "key_points": [
+            "RMAN은 Oracle 공식 권장 백업/복구 도구로, User-Managed 백업 대비 다양한 이점 제공",
+            "증분 백업(Level 0, Level 1), 블록 레벨 복구, 사용하지 않는 블록 건너뛰기 등 고급 기능 지원",
+            "백업 메타데이터는 기본적으로 Control File에 저장, 선택적으로 Recovery Catalog 구성 가능",
+            "Recovery Catalog는 Stored Script 지원, 무제한 메타데이터 보존, 다중 DB 중앙 관리 가능",
+            "RETENTION POLICY로 백업 보존 정책을 자동 관리 (예: REDUNDANCY 2, RECOVERY WINDOW OF 7 DAYS)",
+            "Oracle 네이티브 압축 및 투명 암호화로 백업 크기 절감 및 보안 강화"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "SQL Developer (Oracle SQL Developer)",
+      "content": "Oracle SQL Developer는 Oracle Database를 관리하고 개발하기 위한 **무료 GUI(그래픽 사용자 인터페이스) 도구**입니다. Java 기반의 데스크톱 애플리케이션으로, SQL 및 PL/SQL 개발, 데이터베이스 객체 관리, 데이터 모델링 등 폭넓은 기능을 제공합니다.\n\n## SQL Developer 주요 특징\n\n| 특징 | 설명 |\n|---|---|\n| **무료** | Oracle Technology Network에서 무료 다운로드 |\n| **크로스 플랫폼** | Windows, Linux, macOS 지원 (Java 기반) |\n| **JDBC 접속** | JDBC Thin Driver 사용 (Oracle Client 설치 불필요) |\n| **다중 DB 지원** | Oracle 외 MySQL, PostgreSQL, SQL Server 등 접속 가능 |\n| **확장 가능** | 플러그인(Extension)으로 기능 확장 |",
+      "sqlExamplesIds": ["sql12"],
+      "subsections": [
+        {
+          "title": "SQL Developer 데이터베이스 접속 (Database Connection)",
+          "content": "SQL Developer는 **JDBC Thin Driver**를 기본으로 사용하므로 별도의 Oracle Client 설치 없이 데이터베이스에 접속할 수 있습니다. 접속 설정 시 다양한 방식을 지원합니다.\n\n### 접속 유형\n\n| 접속 유형 | 설명 |\n|---|---|\n| **Basic** | 호스트명, 포트, SID 또는 Service Name 직접 입력 |\n| **TNS** | tnsnames.ora 파일의 TNS 항목 선택 |\n| **LDAP** | LDAP 디렉토리 서비스를 통한 접속 |\n| **Advanced** | JDBC URL 직접 입력 |\n| **SSH** | SSH 터널링을 통한 보안 접속 |\n| **Cloud Wallet** | Oracle Cloud Database 접속 (Wallet 파일 사용) |\n\n### 접속 설정 항목\n\n| 항목 | 설명 |\n|---|---|\n| **Connection Name** | 접속 식별 이름 (사용자 정의) |\n| **Username** | 데이터베이스 사용자 이름 |\n| **Password** | 사용자 패스워드 (저장 선택 가능) |\n| **Connection Type** | Basic, TNS, LDAP, Advanced 등 |\n| **Hostname** | 데이터베이스 서버 호스트명/IP |\n| **Port** | 리스너 포트 (기본 1521) |\n| **SID / Service Name** | 데이터베이스 식별자 (Service Name 사용 권장) |\n| **Role** | Default, SYSDBA, SYSOPER 등 접속 역할 |\n\n### SID vs Service Name\n\n| 항목 | SID | Service Name |\n|---|---|---|\n| **정의** | 인스턴스 식별자 | 서비스 식별자 |\n| **CDB 환경** | CDB 인스턴스 접속 | PDB 직접 접속 가능 |\n| **RAC 환경** | 특정 인스턴스만 | 여러 인스턴스에 분산 가능 |\n| **권장** | 레거시 | 권장 (CDB/RAC 환경 필수) |\n\nSQL Developer에서 PDB에 접속하려면 **Service Name**을 해당 PDB의 서비스 이름으로 지정합니다. 예를 들어 PDB1에 접속하려면 Service Name에 `pdb1`을 입력합니다.",
+          "key_points": [
+            "JDBC Thin Driver 사용으로 Oracle Client 설치 없이 접속 가능",
+            "Basic, TNS, LDAP, Advanced, SSH, Cloud Wallet 등 다양한 접속 유형 지원",
+            "Service Name 사용이 권장되며, CDB/PDB 환경에서 PDB 직접 접속 시 필수",
+            "SYSDBA, SYSOPER 등 관리 권한으로 접속 가능 (Role 설정)",
+            "접속 패스워드 저장 기능으로 반복 접속 시 편의성 제공"
+          ]
+        },
+        {
+          "title": "SQL Developer 주요 기능 (Key Features)",
+          "content": "SQL Developer는 SQL/PL/SQL 개발뿐만 아니라 데이터베이스 관리, 데이터 이관, 모델링 등 다양한 기능을 통합 제공합니다.\n\n### SQL 워크시트 (SQL Worksheet)\n\n| 기능 | 설명 |\n|---|---|\n| **SQL 실행** | SQL 문 작성 및 실행 (F5: 전체 실행, Ctrl+Enter: 현재 문 실행) |\n| **실행 계획 (Explain Plan)** | F10으로 SQL 실행 계획 확인 |\n| **자동 완성 (Autocomplete)** | Ctrl+Space로 테이블/컬럼명 자동 완성 |\n| **SQL 이력** | 실행한 SQL 이력 조회 및 재실행 |\n| **스크립트 출력** | DBMS_OUTPUT 결과 표시 |\n\n### 객체 관리 (Object Browser)\n\n데이터베이스 객체를 **트리 구조**로 탐색하고 관리할 수 있습니다:\n\n```\n접속명\n├── Tables\n│   ├── EMPLOYEES\n│   │   ├── Columns\n│   │   ├── Data (조회/편집)\n│   │   ├── Constraints\n│   │   ├── Grants\n│   │   ├── Indexes\n│   │   └── Statistics\n│   └── DEPARTMENTS\n├── Views\n├── Indexes\n├── Packages\n├── Procedures\n├── Functions\n├── Sequences\n├── Synonyms\n├── Types\n├── Triggers\n└── Other Users\n```\n\n| 관리 기능 | 설명 |\n|---|---|\n| **객체 생성** | GUI로 테이블, 뷰, 인덱스 등 생성 (DDL 자동 생성) |\n| **데이터 편집** | 테이블 데이터를 스프레드시트처럼 직접 편집 |\n| **DDL 확인** | 객체의 CREATE 문(DDL)을 GUI에서 확인 |\n| **통계 수집** | 테이블/인덱스 통계 수집 실행 |\n| **권한 관리** | GRANT/REVOKE를 GUI로 수행 |\n\n### 추가 기능\n\n| 기능 | 설명 |\n|---|---|\n| **DBA 패널** | DBA 전용 관리 뷰 (스토리지, 세션, 초기화 파라미터 관리) |\n| **Data Modeler** | ER 다이어그램 기반 데이터 모델링 도구 (내장) |\n| **데이터 이관 (Migration)** | MySQL, SQL Server 등에서 Oracle으로 데이터 이관 |\n| **Data Pump 위저드** | Data Pump Export/Import 작업을 GUI로 수행 |\n| **Report** | 사전 정의 리포트 및 사용자 정의 리포트 생성 |\n| **Unit Test** | PL/SQL 단위 테스트 프레임워크 |\n| **버전 관리** | Git, SVN 등과 연동하여 SQL 스크립트 버전 관리 |\n\n### SQL Developer vs SQL*Plus 비교\n\n| 항목 | SQL Developer | SQL*Plus |\n|---|---|---|\n| **인터페이스** | GUI (데스크톱) | CLI (텍스트) |\n| **DB 기동/종료** | 불가 | 가능 (STARTUP/SHUTDOWN) |\n| **실행 계획** | F10으로 시각적 표시 | EXPLAIN PLAN + DBMS_XPLAN |\n| **자동 완성** | 지원 | 미지원 |\n| **데이터 편집** | 스프레드시트 방식 | INSERT/UPDATE SQL 필요 |\n| **설치 요구사항** | JDK 필요 | Oracle Home에 포함 |\n| **원격 서버(headless)** | 불가 (GUI 필요) | 가능 |",
+          "key_points": [
+            "SQL 워크시트에서 SQL/PL/SQL 작성·실행 및 실행 계획(F10) 확인 가능",
+            "Object Browser로 테이블, 뷰, 인덱스 등 데이터베이스 객체를 트리 구조로 탐색·관리",
+            "DBA 패널에서 스토리지, 세션, 초기화 파라미터 등 관리 작업 수행 가능",
+            "Data Modeler 내장으로 ER 다이어그램 기반 데이터 모델링 지원",
+            "SQL Developer는 DB 기동/종료 불가 — 이 작업은 SQL*Plus 또는 RMAN 사용 필요",
+            "MySQL, SQL Server 등 타 DBMS에서 Oracle으로의 데이터 이관(Migration) 기능 지원"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "DBCA 사일런트 모드로 CDB 생성",
+      "sql": "dbca -silent -createDatabase \\\n  -templateName General_Purpose.dbc \\\n  -gdbName orcl26ai \\\n  -sid orcl26ai \\\n  -createAsContainerDatabase true \\\n  -numberOfPDBs 1 \\\n  -pdbName pdb1 \\\n  -pdbAdminPassword Oracle123 \\\n  -sysPassword Oracle123 \\\n  -systemPassword Oracle123 \\\n  -characterSet AL32UTF8 \\\n  -memoryPercentage 40 \\\n  -storageType FS \\\n  -datafileDestination /u01/oradata",
+      "description": "DBCA 사일런트 모드로 Oracle 26ai CDB를 생성합니다. General_Purpose 템플릿을 사용하며, PDB 1개(pdb1)를 함께 생성합니다. 문자 셋은 AL32UTF8, 메모리는 시스템의 40%를 할당합니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "DBCA 사일런트 모드로 PDB 생성",
+      "sql": "dbca -silent -createPluggableDatabase \\\n  -sourceDB orcl26ai \\\n  -pdbName pdb2 \\\n  -pdbAdminPassword Oracle123 \\\n  -createPDBFrom DEFAULT",
+      "description": "기존 CDB(orcl26ai)에 사일런트 모드로 새로운 PDB(pdb2)를 생성합니다. PDB$SEED를 소스로 사용(DEFAULT)하여 생성합니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "SQL*Plus SYSDBA 접속 및 기동",
+      "sql": "-- OS 인증으로 SYSDBA 접속\nsqlplus / as sysdba\n\n-- 인스턴스 기동\nSTARTUP;\n\n-- 또는 MOUNT 상태까지만 기동\nSTARTUP MOUNT;\n\n-- MOUNT에서 OPEN으로 전환\nALTER DATABASE OPEN;",
+      "description": "SQL*Plus에서 OS 인증(/ as sysdba)으로 접속한 후, 데이터베이스를 기동합니다. STARTUP MOUNT로 마운트까지만 기동한 후 ALTER DATABASE OPEN으로 오픈하는 2단계 기동도 가능합니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "SQL*Plus SHUTDOWN 모드별 종료",
+      "sql": "-- 가장 일반적인 종료 (미커밋 롤백 후 종료)\nSHUTDOWN IMMEDIATE;\n\n-- 현재 트랜잭션 완료 후 종료\nSHUTDOWN TRANSACTIONAL;\n\n-- 모든 세션 종료 대기 후 종료\nSHUTDOWN NORMAL;\n\n-- 강제 종료 (다음 기동 시 인스턴스 복구 필요)\nSHUTDOWN ABORT;",
+      "description": "SQL*Plus에서 4가지 SHUTDOWN 모드를 보여줍니다. IMMEDIATE가 가장 많이 사용되며, ABORT는 비상 시에만 사용합니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "SQL*Plus 환경 설정 및 PDB 관리",
+      "sql": "-- 출력 포맷 설정\nSET LINESIZE 200\nSET PAGESIZE 50\nSET SERVEROUTPUT ON\n\n-- 현재 컨테이너 확인\nSHOW CON_NAME;\n\n-- PDB 목록 확인\nSHOW PDBS;\n\n-- PDB로 전환\nALTER SESSION SET CONTAINER = pdb1;\n\n-- PDB에서 작업 수행\nSELECT name, open_mode FROM v$pdbs;\n\n-- CDB$ROOT로 복귀\nALTER SESSION SET CONTAINER = CDB$ROOT;",
+      "description": "SQL*Plus에서 환경 설정(SET), 현재 컨테이너 확인(SHOW CON_NAME), PDB 목록 확인(SHOW PDBS), PDB 전환(ALTER SESSION SET CONTAINER) 등의 CDB/PDB 관리 작업을 수행합니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "SQL*Plus 초기화 파라미터 조회",
+      "sql": "-- 특정 파라미터 조회\nSHOW PARAMETER db_name;\nSHOW PARAMETER sga;\nSHOW PARAMETER pga;\n\n-- SGA 정보 조회\nSHOW SGA;\n\n-- V$PARAMETER로 세부 파라미터 조회\nSELECT name, value, isdefault, ismodified\nFROM v$parameter\nWHERE name LIKE '%memory%'\nORDER BY name;",
+      "description": "SQL*Plus의 SHOW PARAMETER 명령으로 초기화 파라미터를 조회하고, SHOW SGA로 SGA 메모리 구성을 확인합니다. V$PARAMETER 뷰를 직접 조회하여 더 상세한 파라미터 정보를 확인할 수도 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "SQL*Plus 스크립트 실행 및 스풀링",
+      "sql": "-- 스크립트 파일 실행\n@/home/oracle/scripts/check_tablespace.sql\n\n-- 출력 결과를 파일로 저장\nSPOOL /tmp/report.txt\nSELECT tablespace_name, \n       ROUND(bytes/1024/1024) AS size_mb,\n       ROUND(maxbytes/1024/1024) AS max_mb\nFROM dba_data_files\nORDER BY tablespace_name;\nSPOOL OFF\n\n-- Oracle 제공 스크립트 실행 (예: 데이터 딕셔너리 뷰 재생성)\n@?/rdbms/admin/catalog.sql",
+      "description": "SQL*Plus에서 외부 SQL 스크립트를 @명령으로 실행하고, SPOOL 명령으로 실행 결과를 파일로 저장합니다. @?는 $ORACLE_HOME을 나타내는 SQL*Plus 약어입니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "EM Express 활성화",
+      "sql": "-- EM Express HTTPS 포트 설정\nEXEC DBMS_XDB_CONFIG.setHTTPSPort(5500);\n\n-- 현재 설정된 포트 확인\nSELECT DBMS_XDB_CONFIG.getHTTPSPort() AS https_port FROM dual;\n\n-- PDB에서 EM Express 활성화 (PDB별 별도 포트)\nALTER SESSION SET CONTAINER = pdb1;\nEXEC DBMS_XDB_CONFIG.setHTTPSPort(5501);",
+      "description": "EM Express(경량 웹 관리 도구)를 활성화합니다. DBMS_XDB_CONFIG.setHTTPSPort 프로시저로 HTTPS 포트를 설정하면 https://hostname:5500/em 으로 접속 가능합니다. PDB마다 별도 포트를 설정하여 개별 PDB의 EM Express에 접근할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "RMAN 접속 및 데이터베이스 기동",
+      "sql": "-- RMAN으로 로컬 접속\nrman target /\n\n-- RMAN에서 데이터베이스 기동\nRMAN> STARTUP MOUNT;\n\n-- RMAN에서 데이터베이스 오픈\nRMAN> SQL 'ALTER DATABASE OPEN';",
+      "description": "RMAN으로 로컬 데이터베이스에 접속한 후, STARTUP MOUNT로 마운트 상태까지 기동합니다. RMAN에서 ALTER DATABASE 명령은 SQL 접두사를 붙여 실행합니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "RMAN 기본 백업 명령",
+      "sql": "-- 전체 데이터베이스 백업\nRMAN> BACKUP DATABASE PLUS ARCHIVELOG;\n\n-- 증분 Level 0 백업 (전체 기준)\nRMAN> BACKUP INCREMENTAL LEVEL 0 DATABASE;\n\n-- 증분 Level 1 백업 (변경분만)\nRMAN> BACKUP INCREMENTAL LEVEL 1 DATABASE;\n\n-- 특정 테이블스페이스 백업\nRMAN> BACKUP TABLESPACE users;\n\n-- 아카이브 로그 백업\nRMAN> BACKUP ARCHIVELOG ALL DELETE ALL INPUT;",
+      "description": "RMAN의 주요 백업 명령을 보여줍니다. BACKUP DATABASE PLUS ARCHIVELOG로 전체 백업과 아카이브 로그를 함께 백업하며, INCREMENTAL LEVEL로 증분 백업을 수행할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "RMAN 백업 검증 및 리포트",
+      "sql": "-- 백업 목록 조회\nRMAN> LIST BACKUP SUMMARY;\n\n-- 데이터 파일 검증\nRMAN> VALIDATE DATABASE;\n\n-- 복구 가능성 검증\nRMAN> RESTORE DATABASE PREVIEW;\n\n-- 불필요한 백업 정리 (보존 정책 기반)\nRMAN> DELETE OBSOLETE;\n\n-- 백업 보존 정책 설정\nRMAN> CONFIGURE RETENTION POLICY TO REDUNDANCY 2;",
+      "description": "RMAN에서 백업 상태 확인(LIST), 데이터 무결성 검증(VALIDATE), 복구 가능성 미리보기(RESTORE PREVIEW), 불필요 백업 정리(DELETE OBSOLETE) 등 백업 관리 명령을 보여줍니다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "SQL Developer DBA 패널 관련 SQL 조회",
+      "sql": "-- 테이블스페이스 사용량 조회 (SQL Developer DBA 패널에서도 제공)\nSELECT tablespace_name,\n       ROUND(SUM(bytes)/1024/1024, 2) AS used_mb,\n       ROUND(SUM(maxbytes)/1024/1024, 2) AS max_mb,\n       ROUND(SUM(bytes)/SUM(maxbytes)*100, 2) AS pct_used\nFROM dba_data_files\nGROUP BY tablespace_name\nORDER BY tablespace_name;\n\n-- 현재 세션 정보 조회\nSELECT sid, serial#, username, status, program\nFROM v$session\nWHERE type = 'USER'\nORDER BY username;",
+      "description": "SQL Developer의 DBA 패널에서 GUI로 확인할 수 있는 정보를 SQL로 직접 조회하는 예시입니다. 테이블스페이스 사용량과 현재 세션 정보를 조회합니다."
+    }
+  ],
+  "keywords": [
+    "DBCA",
+    "Database Configuration Assistant",
+    "SQL*Plus",
+    "Enterprise Manager Cloud Control",
+    "RMAN",
+    "Recovery Manager",
+    "SQL Developer",
+    "대화형 모드 (Interactive Mode)",
+    "사일런트 모드 (Silent Mode)",
+    "응답 파일 (Response File)",
+    "STARTUP",
+    "SHUTDOWN",
+    "SYSDBA",
+    "SYSOPER",
+    "OMS (Oracle Management Service)",
+    "Management Agent",
+    "Management Repository",
+    "EM Express",
+    "Recovery Catalog",
+    "JDBC Thin Driver",
+    "템플릿 (Template)",
+    "SHUTDOWN IMMEDIATE",
+    "SHUTDOWN ABORT",
+    "ALTER SESSION SET CONTAINER",
+    "SPOOL",
+    "My Oracle Support",
+    "BACKUP DATABASE",
+    "RESTORE",
+    "VALIDATE",
+    "DBA 패널",
+    "EM Cloud Control 리스너 관리",
+    "DBCA 역할 범위"
+  ]
+}

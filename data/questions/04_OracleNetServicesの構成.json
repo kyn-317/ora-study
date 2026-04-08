@@ -1,0 +1,78 @@
+[
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "04_001",
+    "title": "以下のコマンドを実行した内容を確認してください。\n\n$ tnsping pdborcl\n\nUsed TNSNAMES adapter to resolve the alias\nAttempting to contact (DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))) (CONNECT_DATA = (SERVICE_NAME = pdborcl)))\nOK (10 msec)\n\n結果について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) PDBORCLデータベースがOPEN状態であることが確認できる。",
+      "B) リスナーがデータベース・サービス名であるPDBORCLを認識していることが確認できる。",
+      "C) この結果から、一般ユーザーでデータベースに接続できるかは確認できない。",
+      "D) PDBORCLユーザーがデータベース・サービス名PDBORCLでデータベースに接続できることが確認できる。",
+      "E) PDBORCLネット・サービス名を使用してリスナーとの通信が可能であることが確認できる。"
+    ],
+    "answer": [
+      "C",
+      "E"
+    ]
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "04_002",
+    "title": "リスナー構成やローカル・ネーミング構成に使用できるツールについての説明で正しい組み合わせを選択してください。",
+    "options": [
+      "A) Oracle Net Configuration Assistant: リスナーの起動および停止などの管理作業",
+      "B) Oracle Net Manager: リスナーの起動および停止などの管理作業",
+      "C) lsnrctl ユーティリティ: ローカル・ネーミング構成の生成",
+      "D) Enterprise Manager Cloud Control: リスナーの起動および停止などの管理作業",
+      "E) Oracle Net Manager: 新規リスナーの構成"
+    ],
+    "answer": [
+      "D",
+      "E"
+    ]
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "04_003",
+    "title": "マルチテナント環境にて、ORCLCDBインスタンス上に以下のPDBが起動しています。\n\nSQL> show pdbs\n\n    CON_ID CON_NAME                       OPEN MODE  RESTRICTED\n---------- ------------------------------ ---------- ----------\n         2 PDB$SEED                       READ ONLY\n         3 PDBORCL                        READ WRITE\n\nリスナーはポート1521ポートでリスニングしており、データベースのサービスを認識しています。DB_DOMAINの設定はありません。この環境において正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) PDBORCLに接続するためには、デフォルトポートを使用した専用のリスナー構成が必要である。",
+      "B) PDBORCLにはデータベース・サービス名PDBORCLを使用して接続が可能である。",
+      "C) PDBORCLに接続するためには、ORCLCDBインスタンスとは別にPDBORCLインスタンスへの接続設定が必要である。",
+      "D) ローカル・ネーミングでPDBORCLに接続する場合、ネット・サービス名をPDBORCLとしてtnsnames.oraの構成が必要である。"
+    ],
+    "answer": [
+      "B"
+    ]
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "04_004",
+    "title": "以下の簡易接続ネーミング・メソッドを使用した接続文字列を確認してください。\n\n$ sqlplus system/systemmgr123@finance_db01:1521/prodpdb01\n\n使用した接続文字列に関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) 接続先のデータベース・インスタンスの名前はfinance_db01である。",
+      "B) tnsnames.oraファイル内にデータベース・サービス名prodpdb01を解決する設定が必要である。",
+      "C) 正しく接続されるにはリスナーがデータベース・サービス名であるprodpdb01を認識している必要がある。",
+      "D) prodpdb01インスタンス内のfinance_db01プラガブル・データベースに接続される。"
+    ],
+    "answer": [
+      "C"
+    ]
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "04_005",
+    "title": "Oracle Databaseのデータベース・リンクの説明として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) データベース外にあるOS上にあるデータに対してリンクを構築することで外部データを参照することができる機能である。",
+      "B) アプリケーションの接続に対して優先度的なリンクを設定し、リソースの分配の優劣を構築できる機能である。",
+      "C) 他のOracleデータベース上のオブジェクトにアクセスすることができるスキーマ・オブジェクトである。",
+      "D) パブリック・データベース・リンクとは任意のユーザーで作成することができるデータベース・リンクのことである。",
+      "E) データベース・リンクを構成するためには適切なネットワーク接続ができるtnsnames.oraの構成が必要である。"
+    ],
+    "answer": [
+      "C",
+      "E"
+    ]
+  }
+]

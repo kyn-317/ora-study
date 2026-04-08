@@ -1,0 +1,306 @@
+{
+  "id": "08_01",
+  "title": "기본 모니터링 및 로깅 (Basic Monitoring and Logging)",
+  "chapter": "08. 성능 모니터링, 어드바이저 및 자동 관리 태스크",
+  "description": "Oracle Database의 동적 성능 뷰(V$ Views), 데이터 딕셔너리(Data Dictionary), 자동 진단 리포지토리(ADR), 자동 워크로드 리포지토리(AWR)를 포함한 기본 모니터링 및 로깅 인프라의 구조와 활용을 상세히 다룹니다. 인스턴스 상태, 성능, 장애 진단을 위한 정보 수집 체계 전반과 Oracle 26ai에서의 변경 사항을 포함합니다.",
+  "oracle26ai_changes": [
+    "AWR(Automatic Workload Repository)이 Autonomous Database 환경에서 자동 관리 기본화되어 수동 스냅샷 주기 변경의 필요성이 감소하였습니다.",
+    "ADR(Automatic Diagnostic Repository)에서 JSON 형식의 Alert Log 출력이 기본 지원되며, 구조화된 로그 분석이 용이해졌습니다.",
+    "V$DIAG_ALERT_EXT 뷰가 개선되어 Alert Log를 SQL로 직접 조회할 때 JSON 파싱 없이 컬럼 기반 접근이 가능합니다.",
+    "DBMS_WORKLOAD_REPOSITORY 패키지에 PDB 레벨 AWR 관리 기능이 강화되어, CDB/PDB 독립적 스냅샷 및 리포트 생성이 가능합니다.",
+    "Health Monitor(건강 점검기)가 AI 기반 이상 탐지와 연동되어, 사전 예방적 진단 권고사항을 자동 생성합니다.",
+    "Unified Audit Trail과 ADR의 통합이 강화되어, 보안 이벤트와 진단 이벤트를 통합적으로 조회할 수 있습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "모니터링 및 로깅 개요 (Monitoring and Logging Overview)",
+      "sqlExamplesIds": [],
+      "content": "Oracle Database의 모니터링 및 로깅 인프라는 **실시간 상태 확인**, **성능 이력 분석**, **장애 진단**이라는 세 가지 축으로 구성됩니다. DBA는 이 인프라를 통해 데이터베이스의 현재 상태를 파악하고, 과거 성능 추이를 분석하며, 장애 발생 시 원인을 신속하게 규명할 수 있습니다.\n\n## Oracle 모니터링 인프라 4대 핵심 구성요소\n\n| 구성요소 | 분류 | 주요 역할 | 데이터 위치 |\n|---|---|---|---|\n| **동적 성능 뷰 (V$ Views)** | 실시간 | 인스턴스의 현재 상태 및 메모리 내 통계 정보 제공 | SGA (메모리) |\n| **데이터 딕셔너리 (Data Dictionary)** | 구조적 | 데이터베이스 객체의 메타데이터 및 구조 정보 제공 | SYSTEM/SYSAUX 테이블스페이스 |\n| **ADR (Automatic Diagnostic Repository)** | 진단 | Alert Log, Trace 파일, 인시던트 덤프 등 진단 데이터 관리 | 파일 시스템 (ADR_BASE) |\n| **AWR (Automatic Workload Repository)** | 이력 | 성능 통계 스냅샷의 주기적 수집 및 이력 관리 | SYSAUX 테이블스페이스 |\n\n## 모니터링 인프라 계층 구조\n\n```\nOracle Database 모니터링 인프라\n├── 실시간 계층 (Real-Time Layer)\n│   ├── 동적 성능 뷰 (V$ Views) — SGA 메모리 내 실시간 데이터\n│   └── 고정 테이블 (X$ Tables) — V$ 뷰의 실제 데이터 소스\n├── 영속 메타데이터 계층 (Persistent Metadata Layer)\n│   ├── 데이터 딕셔너리 기본 테이블 (SYS 소유)\n│   └── 데이터 딕셔너리 뷰 (DBA_/ALL_/USER_)\n├── 이력 통계 계층 (Historical Statistics Layer)\n│   ├── AWR 스냅샷 (WRM$_/WRH$_ 테이블)\n│   ├── AWR 베이스라인 (Baselines)\n│   └── ASH (Active Session History)\n└── 진단 로깅 계층 (Diagnostic Logging Layer)\n    ├── Alert Log (경고 로그)\n    ├── Trace Files (추적 파일)\n    ├── Incident Dumps (인시던트 덤프)\n    └── Health Monitor Reports (건강 점검 보고서)\n```\n\n## 구성요소 간 관계 비교\n\n| 비교 항목 | V$ Views | Data Dictionary | ADR | AWR |\n|---|---|---|---|---|\n| **데이터 유형** | 실시간 통계 | 메타데이터 | 진단 로그 | 이력 통계 |\n| **저장 위치** | SGA 메모리 | 디스크 (SYSTEM/SYSAUX) | 파일 시스템 | 디스크 (SYSAUX) |\n| **영속성** | 인스턴스 종료 시 소멸 | 영구 보존 | 파일로 영구 보존 | 보존 기간 내 보존 |\n| **접근 방법** | SELECT (SQL) | SELECT (SQL) | ADRCI / SQL / OS | SQL / EM / DBMS_WORKLOAD_REPOSITORY |\n| **수집 방식** | 자동 (커널 수준) | DDL 시 자동 갱신 | 이벤트 발생 시 자동 기록 | MMON 프로세스가 주기적 수집 |\n| **Oracle 26ai 기본 제공** | 예 | 예 | 예 | 예 (Diagnostics Pack 라이선스 필요) |",
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "동적 성능 뷰 (Dynamic Performance Views / V$ Views)",
+      "sqlExamplesIds": ["sql01", "sql02", "sql03"],
+      "content": "**동적 성능 뷰(Dynamic Performance Views)**는 Oracle 인스턴스가 기동(Startup)된 시점부터 메모리(SGA) 내에 유지되는 실시간 성능 및 상태 정보를 SQL로 조회할 수 있게 하는 뷰입니다. 접두어 **V$**로 시작하며, 실제로는 **GV$** (Global V$) 뷰의 로컬 인스턴스 필터링 버전입니다.",
+      "subsections": [
+        {
+          "title": "동적 성능 뷰의 정의와 아키텍처 (V$ View Definition and Architecture)",
+          "content": "**동적 성능 뷰(Dynamic Performance Views)**는 Oracle 커널이 SGA 메모리 내에 유지하는 내부 구조체(C 구조체)를 SQL로 접근 가능하게 만든 **읽기 전용 가상 테이블**입니다. 'V$'는 Oracle이 제공하는 **공개 동의어(Public Synonym)**이며, 실제 뷰 이름은 'V_$'입니다.\n\n### V$ 뷰의 내부 계층 구조\n\n```\n사용자 SQL: SELECT * FROM V$SESSION;\n    │\n    ▼\nV$SESSION (Public Synonym)\n    │\n    ▼\nSYS.V_$SESSION (View, 실제 뷰 객체)\n    │\n    ▼\nSYS.V$SESSION (Fixed View, 고정 뷰 정의)\n    │\n    ▼\nX$KSUSE (Fixed Table / X$ 테이블, C 구조체 매핑)\n    │\n    ▼\nSGA 메모리 내 커널 데이터 구조\n```\n\n### 각 계층의 역할\n\n| 계층 | 이름 형식 | 설명 |\n|---|---|---|\n| **Public Synonym** | V$xxx | 사용자가 접근하는 이름. V_$xxx 뷰를 가리키는 동의어 |\n| **뷰 (View)** | V_$xxx (SYS 소유) | GV_$xxx에서 현재 인스턴스(INST_ID)만 필터링한 뷰 |\n| **Global 뷰** | GV_$xxx (SYS 소유) | RAC 환경에서 모든 인스턴스의 데이터를 포함하는 뷰 |\n| **고정 뷰 (Fixed View)** | V$FIXED_VIEW_DEFINITION에서 정의 조회 | X$ 테이블에 대한 SELECT 문으로 정의됨 |\n| **고정 테이블 (Fixed Table)** | X$xxx | SGA 메모리의 C 구조체를 직접 매핑. SYS만 접근 가능 |\n\n### V$ 뷰 접근 가능 시점 (인스턴스 상태별)\n\n| 인스턴스 상태 | 접근 가능한 V$ 뷰 | 설명 |\n|---|---|---|\n| **NOMOUNT** | V$INSTANCE, V$PROCESS, V$SESSION, V$PARAMETER, V$SGA 등 | SGA 할당 후 메모리 관련 뷰만 접근 가능 |\n| **MOUNT** | 위 + V$DATABASE, V$DATAFILE, V$LOGFILE, V$CONTROLFILE 등 | Control File 읽기 완료 후 파일 관련 뷰 추가 |\n| **OPEN** | 모든 V$ 뷰 | 데이터 딕셔너리 접근 가능, 전체 뷰 사용 가능 |\n\n### V$ 뷰와 GV$ 뷰의 관계\n\n| 특성 | V$ 뷰 | GV$ 뷰 |\n|---|---|---|\n| **범위** | 현재 인스턴스만 | RAC 내 모든 인스턴스 |\n| **INST_ID 컬럼** | 없음 | 있음 (인스턴스 식별) |\n| **사용 환경** | 단일 인스턴스, 로컬 진단 | RAC 환경에서 클러스터 전체 진단 |\n| **성능** | 빠름 (로컬만 조회) | 느릴 수 있음 (인터커넥트 통신) |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **STATISTICS_LEVEL** | ALL/TYPICAL/BASIC — V$ 뷰에 수집되는 통계의 상세 수준 제어 |\n| **TIMED_STATISTICS** | TRUE/FALSE — 시간 관련 통계 수집 여부 (STATISTICS_LEVEL=TYPICAL 이상이면 자동 TRUE) |\n| **TIMED_OS_STATISTICS** | OS 레벨 통계 수집 주기(초) |\n\n### 관련 동적 성능 뷰 (메타 뷰)\n\n| 뷰 | 설명 |\n|---|---|\n| **V$FIXED_TABLE** | 모든 X$ 테이블과 V$ 고정 뷰 목록 |\n| **V$FIXED_VIEW_DEFINITION** | V$ 고정 뷰의 SELECT 정의문 조회 |\n| **DICTIONARY** | 전체 딕셔너리 뷰 목록 (V$ 뷰 포함) |\n| **DICT_COLUMNS** | 딕셔너리 뷰의 컬럼 정보 |\n\n### 특수 동작 케이스\n\n- **인스턴스 재시작 시**: 모든 V$ 뷰의 누적 통계가 초기화됨. AWR 스냅샷으로 이력을 보존해야 함\n- **NOMOUNT 상태에서의 제약**: Control File 기반 V$ 뷰(V$DATABASE 등)는 접근 불가\n- **X$ 테이블 직접 접근**: SYS 사용자만 가능하며, 문서화되지 않은 내부 구조이므로 버전 간 호환성 보장 없음\n- **V$ 뷰에서의 래치(Latch) 경합**: V$SESSION, V$SQL 등 대량 데이터 뷰를 빈번히 조회하면 래치 경합 발생 가능",
+          "key_points": [
+            "V$ 뷰는 SGA 메모리 내 커널 데이터 구조(X$ 테이블)를 SQL로 접근 가능하게 한 읽기 전용 가상 테이블",
+            "계층 구조: Public Synonym(V$) → View(V_$) → Fixed View → Fixed Table(X$) → SGA 메모리",
+            "GV$ 뷰는 RAC 환경에서 모든 인스턴스 데이터를 포함하며, V$ 뷰는 로컬 인스턴스만 필터링",
+            "인스턴스 상태(NOMOUNT/MOUNT/OPEN)에 따라 접근 가능한 V$ 뷰의 범위가 달라짐",
+            "인스턴스 재시작 시 모든 V$ 누적 통계가 초기화되므로 AWR로 이력 보존 필요",
+            "STATISTICS_LEVEL 파라미터(TYPICAL 권장)로 수집되는 통계의 상세 수준을 제어",
+            "V$FIXED_TABLE과 V$FIXED_VIEW_DEFINITION으로 V$ 뷰 자체의 메타데이터를 조회 가능"
+          ]
+        },
+        {
+          "title": "주요 V$ 뷰 분류 및 활용 (Key V$ View Categories and Usage)",
+          "content": "Oracle은 수백 개의 V$ 뷰를 제공하며, 용도에 따라 여러 카테고리로 분류할 수 있습니다. DBA는 목적에 맞는 V$ 뷰를 선택하여 효율적으로 모니터링해야 합니다.\n\n### V$ 뷰 카테고리별 분류\n\n| 카테고리 | 주요 V$ 뷰 | 용도 |\n|---|---|---|\n| **인스턴스 정보** | V$INSTANCE, V$VERSION, V$OPTION | 인스턴스 상태, 버전, 옵션 확인 |\n| **데이터베이스 정보** | V$DATABASE, V$TABLESPACE, V$DATAFILE | DB 구조 및 파일 정보 |\n| **세션/프로세스** | V$SESSION, V$PROCESS, V$SESSION_WAIT | 접속 세션, OS 프로세스, 대기 이벤트 |\n| **메모리 관리** | V$SGA, V$SGASTAT, V$BUFFER_POOL, V$SGA_TARGET_ADVICE | SGA 구성요소별 크기 및 사용량 |\n| **SQL 실행** | V$SQL, V$SQLAREA, V$SQL_PLAN, V$SQL_MONITOR | SQL 커서, 실행 계획, 실시간 모니터링 |\n| **대기 이벤트** | V$SYSTEM_EVENT, V$SESSION_EVENT, V$EVENT_NAME | 시스템/세션 레벨 대기 이벤트 통계 |\n| **잠금(Lock)** | V$LOCK, V$LOCKED_OBJECT, V$ENQUEUE_STAT | Lock 경합 및 Enqueue 통계 |\n| **I/O 통계** | V$FILESTAT, V$TEMPSTAT, V$IOSTAT_FILE | 파일별 I/O 성능 통계 |\n| **Redo/UNDO** | V$LOG, V$LOGFILE, V$ARCHIVED_LOG, V$UNDOSTAT | Redo Log, Archive Log, UNDO 통계 |\n| **파라미터** | V$PARAMETER, V$SYSTEM_PARAMETER, V$SPPARAMETER | 초기화 파라미터 현재 값 및 SPFILE 값 |\n| **시스템 통계** | V$SYSSTAT, V$SESSTAT, V$STATNAME | 시스템/세션 레벨 누적 통계 |\n| **ASH** | V$ACTIVE_SESSION_HISTORY | 초 단위 액티브 세션 샘플링 |\n| **진단** | V$DIAG_INFO, V$DIAG_ALERT_EXT | ADR 정보, Alert Log 조회 |\n\n### 가장 빈번히 사용되는 V$ 뷰 TOP 10\n\n| 순위 | 뷰 | 용도 | 핵심 컬럼 |\n|---|---|---|---|\n| 1 | **V$SESSION** | 현재 접속 세션 정보 | SID, SERIAL#, USERNAME, STATUS, SQL_ID, EVENT, WAIT_CLASS |\n| 2 | **V$SQL** | Library Cache 내 SQL 커서 정보 | SQL_ID, EXECUTIONS, ELAPSED_TIME, BUFFER_GETS, ROWS_PROCESSED |\n| 3 | **V$INSTANCE** | 인스턴스 상태 | INSTANCE_NAME, STATUS, STARTUP_TIME, DATABASE_STATUS |\n| 4 | **V$DATABASE** | 데이터베이스 정보 | NAME, OPEN_MODE, LOG_MODE, FLASHBACK_ON, CDB |\n| 5 | **V$PARAMETER** | 현재 파라미터 값 | NAME, VALUE, ISDEFAULT, ISMODIFIED, ISSYS_MODIFIABLE |\n| 6 | **V$LOCK** | 현재 Lock 정보 | SID, TYPE, ID1, ID2, LMODE, REQUEST, BLOCK |\n| 7 | **V$SYSSTAT** | 시스템 누적 통계 | NAME, VALUE, STATISTIC# |\n| 8 | **V$SYSTEM_EVENT** | 시스템 레벨 대기 이벤트 | EVENT, TOTAL_WAITS, TIME_WAITED, AVERAGE_WAIT |\n| 9 | **V$SGA** | SGA 크기 정보 | NAME, VALUE |\n| 10 | **V$ACTIVE_SESSION_HISTORY** | 액티브 세션 이력 | SAMPLE_TIME, SESSION_ID, SQL_ID, EVENT, WAIT_CLASS |\n\n### V$ 뷰 활용 시 주의사항\n\n| 주의사항 | 설명 |\n|---|---|\n| **래치 경합** | V$SESSION, V$SQL 등의 빈번한 조회는 Library Cache Latch, Shared Pool Latch 경합을 유발할 수 있음 |\n| **일관성 미보장** | V$ 뷰는 메모리를 직접 읽으므로, 조회 중에도 데이터가 변경될 수 있어 완벽한 읽기 일관성이 보장되지 않음 |\n| **권한 필요** | SELECT_CATALOG_ROLE 또는 SELECT ANY DICTIONARY 권한이 필요 |\n| **RAC 환경** | 단일 인스턴스 뷰(V$)가 아닌 글로벌 뷰(GV$)를 사용해야 클러스터 전체 현황 파악 가능 |\n\n### 다른 구성요소와의 관계\n\n- **AWR**: MMON 프로세스가 주기적으로 V$ 뷰의 통계를 AWR 스냅샷으로 저장 → 이력 분석 가능\n- **ASH**: V$ACTIVE_SESSION_HISTORY는 1초 간격으로 V$SESSION에서 ACTIVE 세션을 샘플링한 데이터\n- **Statspack**: AWR의 전신으로, V$ 뷰 통계를 수동으로 수집하는 무료 도구\n- **Enterprise Manager**: V$ 뷰 데이터를 GUI 형태로 시각화하여 제공",
+          "key_points": [
+            "V$ 뷰는 인스턴스, 세션, SQL, 메모리, I/O, 대기 이벤트 등 카테고리별로 수백 개가 제공됨",
+            "V$SESSION(세션 정보)과 V$SQL(SQL 커서 정보)이 가장 빈번히 사용되는 핵심 뷰",
+            "V$ 뷰는 메모리를 직접 읽으므로 완벽한 읽기 일관성이 보장되지 않음",
+            "SELECT_CATALOG_ROLE 또는 SELECT ANY DICTIONARY 권한이 V$ 뷰 조회에 필요",
+            "RAC 환경에서는 V$ 대신 GV$ 뷰를 사용하여 모든 인스턴스를 조회해야 함",
+            "AWR의 MMON 프로세스가 V$ 뷰 통계를 주기적으로 스냅샷으로 저장하여 이력 보존"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "데이터 딕셔너리 (Data Dictionary)",
+      "sqlExamplesIds": ["sql04", "sql05"],
+      "content": "**데이터 딕셔너리(Data Dictionary)**는 Oracle Database의 모든 객체, 사용자, 권한, 저장 구조 등에 대한 **메타데이터(Metadata)**를 저장하는 읽기 전용 테이블과 뷰의 집합입니다. 데이터베이스의 '카탈로그(Catalog)'라고도 하며, Oracle 커널이 DDL 작업 시 자동으로 갱신합니다.",
+      "subsections": [
+        {
+          "title": "데이터 딕셔너리의 구조와 분류 (Data Dictionary Structure and Categories)",
+          "content": "**데이터 딕셔너리(Data Dictionary)**는 Oracle Database가 생성될 때 SYSTEM 테이블스페이스에 자동으로 생성되는 **기본 테이블(Base Tables)**과, 이를 사용자 친화적으로 가공한 **딕셔너리 뷰(Dictionary Views)**로 구성됩니다.\n\n### 데이터 딕셔너리의 계층 구조\n\n```\n데이터 딕셔너리 (Data Dictionary)\n├── 기본 테이블 (Base Tables)\n│   ├── SYS 소유 — SYSTEM 테이블스페이스에 저장\n│   ├── 정규화된 내부 형식 — 직접 조회 비권장\n│   ├── 예: TAB$, OBJ$, COL$, USER$, TS$, SEG$, FILE$\n│   └── DB 생성 시 catalog.sql (또는 자동) 스크립트로 생성\n├── 딕셔너리 뷰 (Dictionary Views)\n│   ├── DBA_ 뷰 — 데이터베이스 전체 객체 (DBA 권한 필요)\n│   ├── ALL_ 뷰 — 현재 사용자가 접근 가능한 객체\n│   ├── USER_ 뷰 — 현재 사용자 소유 객체\n│   └── CDB_ 뷰 — CDB 전체 (모든 PDB 포함) 객체 조회\n└── 기타 뷰\n    ├── DICTIONARY (DICT) — 전체 딕셔너리 뷰 목록\n    ├── DICT_COLUMNS — 딕셔너리 뷰의 컬럼 정보\n    └── GLOBAL_NAME — 데이터베이스 글로벌 이름\n```\n\n### DBA_ / ALL_ / USER_ / CDB_ 뷰 비교\n\n| 접두어 | 범위 | 권한 요건 | OWNER 컬럼 | 예시 |\n|---|---|---|---|---|\n| **DBA_** | 데이터베이스 전체 객체 | SELECT_CATALOG_ROLE 또는 SELECT ANY DICTIONARY | 있음 | DBA_TABLES, DBA_USERS |\n| **ALL_** | 현재 사용자가 접근 가능한 객체 | 별도 권한 불요 | 있음 | ALL_TABLES, ALL_OBJECTS |\n| **USER_** | 현재 사용자가 소유한 객체만 | 별도 권한 불요 | 없음 | USER_TABLES, USER_INDEXES |\n| **CDB_** | CDB 전체 (모든 PDB 포함) | SYSDBA 또는 공통 권한 | CON_ID 포함 | CDB_TABLES, CDB_USERS |\n\n### 주요 데이터 딕셔너리 뷰 분류\n\n| 카테고리 | 주요 뷰 | 설명 |\n|---|---|---|\n| **객체 정보** | DBA_OBJECTS, DBA_TABLES, DBA_INDEXES, DBA_VIEWS | 테이블, 인덱스, 뷰 등 스키마 객체 메타데이터 |\n| **사용자/권한** | DBA_USERS, DBA_ROLES, DBA_SYS_PRIVS, DBA_TAB_PRIVS | 사용자, 역할, 시스템/오브젝트 권한 |\n| **저장 구조** | DBA_TABLESPACES, DBA_DATA_FILES, DBA_SEGMENTS, DBA_EXTENTS | 테이블스페이스, 데이터파일, 세그먼트, 익스텐트 |\n| **제약조건** | DBA_CONSTRAINTS, DBA_CONS_COLUMNS | 제약조건 정보 |\n| **감사** | DBA_AUDIT_POLICIES, UNIFIED_AUDIT_TRAIL | 감사 정책 및 감사 트레일 |\n| **스케줄러** | DBA_SCHEDULER_JOBS, DBA_SCHEDULER_PROGRAMS | 자동 작업 스케줄 정보 |\n\n### 데이터 딕셔너리와 V$ 뷰의 비교\n\n| 비교 항목 | 데이터 딕셔너리 (DBA_/ALL_/USER_) | 동적 성능 뷰 (V$) |\n|---|---|---|\n| **데이터 유형** | 메타데이터 (구조, 정의, 권한) | 실시간 통계 (성능, 상태) |\n| **저장 위치** | SYSTEM/SYSAUX 테이블스페이스 (디스크) | SGA 메모리 |\n| **영속성** | 영구 보존 | 인스턴스 종료 시 소멸 |\n| **갱신 시점** | DDL 실행 시 자동 갱신 | 실시간 지속 갱신 |\n| **읽기 일관성** | 보장됨 (일반 테이블과 동일) | 보장되지 않음 (메모리 직접 읽기) |\n| **접근 가능 시점** | OPEN 상태에서만 | NOMOUNT 이후 부분적 접근 가능 |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **DICTIONARY_CACHE_SIZE** | 딕셔너리 캐시(Row Cache) 크기 — Shared Pool 내에 자동 관리 |\n| **SHARED_POOL_SIZE** | Shared Pool 크기 — 딕셔너리 캐시 포함 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$ROWCACHE** | 딕셔너리 캐시(Row Cache) 히트율 및 미스 통계 |\n| **V$SGASTAT** | SGA 구성요소별 크기 — 딕셔너리 캐시 크기 확인 |\n\n### 특수 동작 케이스\n\n- **딕셔너리 캐시 미스 (Row Cache Miss)**: 빈번한 DDL이나 하드 파싱 시 딕셔너리 캐시 미스가 증가하여 성능 저하 발생. Shared Pool 크기 조정 필요\n- **DBCA/카탈로그 스크립트**: 데이터베이스 생성 시 catalog.sql, catproc.sql 등이 실행되어 딕셔너리 뷰와 PL/SQL 패키지를 생성\n- **CDB 환경**: CDB_ 뷰는 CDB$ROOT에서 모든 PDB의 데이터를 통합 조회. CON_ID 컬럼으로 PDB 구분\n\n### 다른 구성요소와의 관계\n\n- **V$ 뷰**: 일부 V$ 뷰(예: V$PARAMETER)는 딕셔너리 뷰(예: DBA_PARAMETERS)와 유사한 정보를 제공하지만, V$는 메모리 기반이고 딕셔너리 뷰는 디스크 기반\n- **AWR**: AWR 스냅샷은 DBA_HIST_ 접두어로 딕셔너리 뷰 형태로 조회 가능 (예: DBA_HIST_SYSSTAT)\n- **Shared Pool**: 딕셔너리 캐시(Row Cache)가 Shared Pool 내에 존재하여 자주 조회되는 딕셔너리 정보를 메모리에 캐싱",
+          "key_points": [
+            "데이터 딕셔너리는 기본 테이블(SYS 소유, SYSTEM TS)과 딕셔너리 뷰(DBA_/ALL_/USER_/CDB_)로 구성",
+            "DBA_ 뷰는 전체 객체, ALL_ 뷰는 접근 가능 객체, USER_ 뷰는 소유 객체만 표시",
+            "CDB_ 뷰는 Oracle 12c 이후 CDB 환경에서 모든 PDB의 데이터를 통합 조회하는 뷰",
+            "딕셔너리 뷰는 디스크 기반으로 읽기 일관성이 보장되지만, V$ 뷰는 메모리 직접 읽기로 보장되지 않음",
+            "딕셔너리 캐시(Row Cache)가 Shared Pool 내에 존재하여 빈번히 조회되는 메타데이터를 캐싱",
+            "V$ROWCACHE로 딕셔너리 캐시의 히트율을 모니터링하여 Shared Pool 크기 적정성을 판단",
+            "데이터베이스 생성 시 catalog.sql/catproc.sql 스크립트로 딕셔너리 뷰와 PL/SQL 패키지가 생성됨"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "자동 진단 리포지토리 (Automatic Diagnostic Repository / ADR)",
+      "sqlExamplesIds": ["sql06", "sql07", "sql08"],
+      "content": "**자동 진단 리포지토리(ADR, Automatic Diagnostic Repository)**는 Oracle 11g부터 도입된 파일 시스템 기반의 통합 진단 데이터 저장소입니다. Alert Log, Trace 파일, 인시던트 덤프, 건강 점검 보고서 등 모든 진단 데이터를 일원화된 디렉터리 구조로 관리합니다.",
+      "subsections": [
+        {
+          "title": "ADR의 구조와 디렉터리 계층 (ADR Structure and Directory Hierarchy)",
+          "content": "**ADR(Automatic Diagnostic Repository)**은 Oracle 커널이 생성하는 모든 진단 데이터를 **일관된 디렉터리 구조**로 관리하는 파일 시스템 기반 저장소입니다. ADR 이전에는 진단 파일이 여러 위치에 분산되어 관리가 어려웠으나, ADR 도입으로 통합 관리가 가능해졌습니다.\n\n### ADR 디렉터리 구조\n\n```\nADR_BASE (DIAGNOSTIC_DEST 파라미터로 지정)\n└── diag/\n    └── rdbms/\n        └── <db_unique_name>/\n            └── <instance_name>/     ← ADR Home\n                ├── alert/           ← Alert Log (XML 형식)\n                │   └── log.xml\n                ├── trace/           ← Trace 파일 및 텍스트 Alert Log\n                │   ├── alert_<SID>.log  ← 텍스트 형식 Alert Log\n                │   ├── <SID>_ora_<PID>.trc  ← 프로세스별 Trace 파일\n                │   └── <SID>_ora_<PID>.trm  ← Trace 메타데이터\n                ├── incident/        ← 인시던트 덤프\n                │   ├── incdir_<N>/   ← 인시던트별 디렉터리\n                │   └── ...\n                ├── cdump/           ← Core Dump 파일\n                ├── hm/              ← Health Monitor 보고서\n                ├── ir/              ← Incident Report\n                ├── lck/             ← Lock 파일\n                ├── metadata/        ← ADR 메타데이터\n                ├── stage/           ← 패키징 스테이지 영역\n                └── sweep/           ← 정리된 파일 임시 보관\n```\n\n### ADR 핵심 용어\n\n| 용어 | 설명 |\n|---|---|\n| **ADR_BASE** | ADR 최상위 디렉터리. DIAGNOSTIC_DEST 파라미터로 지정 |\n| **ADR Home** | 특정 인스턴스의 진단 데이터 루트 디렉터리 |\n| **Problem** | 반복 가능한 특정 오류 유형 (예: ORA-00600, ORA-07445) |\n| **Incident** | Problem의 개별 발생 건. 각 Incident에 고유 번호가 부여됨 |\n| **Incident Package** | Oracle 지원에 보낼 진단 데이터 묶음 |\n| **Flood Control** | 동일 Problem의 인시던트가 과도하게 생성되는 것을 방지하는 메커니즘 |\n\n### ADR의 내부 동작 원리\n\n1. **오류 발생 감지**: Oracle 커널이 심각한 오류(Critical Error)를 감지\n2. **Problem 식별**: 오류를 Problem Key로 분류 (예: ORA 600 [kdsgrp1])\n3. **Incident 생성**: 고유 Incident ID를 부여하고 incident/ 디렉터리에 덤프 생성\n4. **Alert Log 기록**: alert/ (XML) 및 trace/ (텍스트) 디렉터리에 경고 메시지 기록\n5. **Trace 파일 생성**: 해당 프로세스의 상세 Trace 파일을 trace/ 디렉터리에 생성\n6. **Flood Control 적용**: 동일 Problem의 과도한 Incident 생성을 제한 (기본 5분 내 최대 5개)\n7. **Health Monitor 실행**: 필요 시 자동으로 건강 점검 실행\n\n### 관련 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **DIAGNOSTIC_DEST** | ADR_BASE 경로 지정 | $ORACLE_BASE 또는 $ORACLE_HOME/log |\n| **MAX_DUMP_FILE_SIZE** | 개별 Trace 파일의 최대 크기 | UNLIMITED |\n| **ENABLE_DDL_LOGGING** | DDL 문장을 Alert Log에 기록 여부 | FALSE |\n| **ENABLE_GOLDENGATE_REPLICATION** | GoldenGate 관련 로깅 제어 | FALSE |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$DIAG_INFO** | ADR Home 경로, Alert Log 위치 등 ADR 설정 정보 |\n| **V$DIAG_ALERT_EXT** | Alert Log를 SQL로 직접 조회 (Oracle 12c+) |\n| **V$DIAG_INCIDENT** | 인시던트 목록 및 상태 조회 |\n| **V$DIAG_PROBLEM** | Problem 목록 및 최근 발생 시간 조회 |\n\n### 특수 동작 케이스\n\n- **ADR 공간 부족**: ADR 디렉터리가 위치한 파일 시스템이 가득 차면 Trace 파일 생성이 실패하고, Alert Log 기록도 중단될 수 있음\n- **Flood Control**: 동일 Problem에 대해 짧은 시간 내 대량의 Incident가 생성되는 것을 방지. 임계값 초과 시 Incident 대신 요약 정보만 기록\n- **자동 퍼지(Auto-Purge)**: MMON 프로세스가 주기적으로 오래된 진단 데이터를 자동 정리 (기본: Incident/Trace 30일, Alert Log 무기한)\n\n### 다른 구성요소와의 관계\n\n- **Enterprise Manager**: EM이 ADR의 진단 데이터를 GUI로 시각화하여 제공\n- **Support Workbench**: ADR 데이터를 기반으로 Oracle SR(Service Request) 생성 및 진단 패키지 제작\n- **AWR**: AWR 스냅샷에 인시던트 정보 포함. AWR 보고서에서 Alert Log 이벤트 참조 가능",
+          "key_points": [
+            "ADR은 DIAGNOSTIC_DEST(기본 $ORACLE_BASE) 하위에 diag/rdbms/<db_name>/<instance_name>/ 구조로 구성",
+            "ADR Home 내에 alert/(XML Alert Log), trace/(텍스트 Alert Log 및 Trace 파일), incident/(인시던트 덤프) 등이 존재",
+            "Problem은 반복 가능한 오류 유형이고, Incident는 Problem의 개별 발생 건으로 고유 ID가 부여됨",
+            "Flood Control 메커니즘이 동일 Problem의 과도한 Incident 생성을 방지 (기본 5분 내 최대 5개)",
+            "V$DIAG_INFO로 ADR Home 경로와 Alert Log 위치를 SQL로 확인 가능",
+            "MAX_DUMP_FILE_SIZE 파라미터로 개별 Trace 파일의 최대 크기를 제한 가능 (기본 UNLIMITED)",
+            "MMON이 오래된 진단 데이터를 자동 퍼지(기본 Incident/Trace 30일)"
+          ]
+        },
+        {
+          "title": "Alert Log와 Trace 파일 (Alert Log and Trace Files)",
+          "content": "**Alert Log**는 데이터베이스의 주요 운영 이벤트와 오류를 시간순으로 기록하는 핵심 진단 파일이며, **Trace 파일**은 개별 프로세스의 상세 진단 정보를 기록합니다.\n\n### Alert Log의 정의와 역할\n\n**Alert Log**는 Oracle Database가 기동(Startup)된 이후 발생하는 모든 중요 이벤트를 시간순(Chronological)으로 기록하는 로그 파일입니다. DBA가 데이터베이스의 운영 이력을 파악하는 1차적인 진단 도구입니다.\n\n### Alert Log에 기록되는 이벤트 유형\n\n| 이벤트 유형 | 예시 |\n|---|---|\n| **기동/종료** | STARTUP, SHUTDOWN (모드 포함) |\n| **Redo Log 전환** | Log Switch, Archive Log 생성 |\n| **체크포인트** | Checkpoint 시작/완료 |\n| **테이블스페이스 변경** | CREATE/ALTER/DROP TABLESPACE, DATAFILE 추가 |\n| **인스턴스 복구** | Instance Recovery 시작/완료, Media Recovery |\n| **ORA- 에러** | 심각한 오류 (ORA-00600, ORA-07445, ORA-04031 등) |\n| **파라미터 변경** | ALTER SYSTEM SET으로 변경된 파라미터 |\n| **DDL 문장** | ENABLE_DDL_LOGGING=TRUE 시 DDL 기록 |\n| **PDB 관련** | PDB OPEN/CLOSE, PDB 생성/삭제 |\n\n### Alert Log의 두 가지 형식\n\n| 형식 | 위치 | 설명 |\n|---|---|---|\n| **XML 형식** | ADR Home/alert/log.xml | 구조화된 XML 형식. V$DIAG_ALERT_EXT로 SQL 조회 가능 |\n| **텍스트 형식** | ADR Home/trace/alert_<SID>.log | 전통적인 텍스트 형식. OS 명령(tail, grep 등)으로 직접 조회 |\n\n### Trace 파일의 종류\n\n| 종류 | 파일명 형식 | 설명 |\n|---|---|---|\n| **서버 프로세스 Trace** | <SID>_ora_<PID>.trc | 사용자 세션의 서버 프로세스가 생성한 Trace |\n| **백그라운드 프로세스 Trace** | <SID>_<process>_<PID>.trc | PMON, SMON, DBWn, LGWR 등 백그라운드 프로세스 Trace |\n| **Trace 메타데이터** | <SID>_ora_<PID>.trm | Trace 파일의 메타데이터 (크기, 시간 등) |\n\n### Trace 파일 생성 방법\n\n| 방법 | 명령/설정 | 설명 |\n|---|---|---|\n| **자동 생성** | 오류 발생 시 | Oracle 커널이 심각한 오류 시 자동 생성 |\n| **SQL Trace** | ALTER SESSION SET SQL_TRACE=TRUE | 세션의 SQL 실행 정보를 Trace |\n| **이벤트 설정** | ALTER SESSION SET EVENTS '10046 trace name context forever, level 12' | 상세한 SQL Trace (바인드 변수, 대기 이벤트 포함) |\n| **DBMS_MONITOR** | DBMS_MONITOR.SESSION_TRACE_ENABLE(sid, serial#) | 다른 세션의 Trace 활성화 |\n| **DBMS_SESSION** | DBMS_SESSION.SET_SQL_TRACE(TRUE) | 현재 세션의 SQL Trace |\n| **oradebug** | oradebug setospid <PID>; oradebug tracefile_name | OS PID로 Trace 파일 위치 확인 및 덤프 생성 |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **MAX_DUMP_FILE_SIZE** | Trace 파일 최대 크기 | UNLIMITED |\n| **SQL_TRACE** | SQL Trace 활성화 여부 | FALSE |\n| **ENABLE_DDL_LOGGING** | DDL을 Alert Log에 기록 | FALSE |\n| **TRACEFILE_IDENTIFIER** | Trace 파일명에 식별자 추가 | 없음 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$DIAG_ALERT_EXT** | Alert Log를 SQL로 조회 (XML 형식 파싱) |\n| **V$DIAG_INFO** | Alert Log 및 Trace 디렉터리 경로 확인 |\n| **V$DIAG_TRACE_FILE** | Trace 파일 목록 조회 |\n| **V$DIAG_TRACE_FILE_CONTENTS** | Trace 파일 내용을 SQL로 조회 |\n| **V$PROCESS** | 프로세스별 Trace 파일명 (TRACEFILE 컬럼) |\n\n### 특수 동작 케이스\n\n- **Alert Log 로테이션**: Alert Log는 자동 로테이션되지 않으므로, 크기가 매우 커질 수 있음. 주기적으로 OS 레벨에서 아카이빙 또는 삭제 필요\n- **텍스트 vs XML**: XML 형식이 공식이며 V$DIAG_ALERT_EXT로 조회 가능. 텍스트 형식은 편의를 위한 부가 파일\n- **Trace 파일 축적**: MAX_DUMP_FILE_SIZE를 UNLIMITED로 유지하면 디스크 공간이 빠르게 소진될 수 있음\n- **Oracle 26ai**: Alert Log가 JSON 형식으로도 출력 가능하여 로그 분석 도구와의 연동이 용이해짐",
+          "key_points": [
+            "Alert Log는 DB의 기동/종료, Redo 전환, 체크포인트, ORA-에러 등 주요 이벤트를 시간순으로 기록",
+            "Alert Log는 XML 형식(alert/log.xml)과 텍스트 형식(trace/alert_<SID>.log) 두 가지로 유지됨",
+            "V$DIAG_ALERT_EXT 뷰로 Alert Log를 SQL로 직접 조회 가능 (Oracle 12c 이후)",
+            "Trace 파일은 서버 프로세스용(<SID>_ora_<PID>.trc)과 백그라운드 프로세스용으로 구분됨",
+            "SQL Trace 활성화 방법: ALTER SESSION SET SQL_TRACE, Event 10046, DBMS_MONITOR.SESSION_TRACE_ENABLE 등",
+            "MAX_DUMP_FILE_SIZE 파라미터로 개별 Trace 파일 크기를 제한하여 디스크 공간 보호",
+            "Alert Log는 자동 로테이션되지 않으므로 OS 레벨에서 주기적 관리가 필요",
+            "ENABLE_DDL_LOGGING=TRUE 설정 시 DDL 문장도 Alert Log에 기록되어 변경 추적이 가능"
+          ]
+        },
+        {
+          "title": "ADRCI 도구와 인시던트 관리 (ADRCI Tool and Incident Management)",
+          "content": "**ADRCI(ADR Command Interpreter)**는 ADR의 진단 데이터를 조회, 관리, 패키징하기 위한 전용 커맨드라인 도구입니다. SQL*Plus 없이도 ADR 데이터에 접근할 수 있으며, 데이터베이스가 기동되지 않은 상태에서도 사용 가능합니다.\n\n### ADRCI 주요 명령어\n\n| 명령어 | 설명 |\n|---|---|\n| **SHOW HOME** | 현재 ADR Home 경로 표시 |\n| **SHOW HOMEPATH** | 모든 ADR Home 목록 표시 |\n| **SET HOMEPATH** | 작업할 ADR Home 지정 |\n| **SHOW ALERT** | Alert Log 내용 표시 (tail -f 모드 지원) |\n| **SHOW ALERT -tail -f** | Alert Log 실시간 모니터링 (tail -f와 동일) |\n| **SHOW INCIDENT** | 인시던트 목록 표시 |\n| **SHOW PROBLEM** | Problem 목록 표시 |\n| **SHOW TRACE** | Trace 파일 목록 표시 |\n| **SHOW HM_RUN** | Health Monitor 실행 이력 표시 |\n| **IPS CREATE PACKAGE** | 인시던트 패키지 생성 (Oracle 지원에 제출용) |\n| **IPS ADD INCIDENT** | 패키지에 인시던트 추가 |\n| **IPS GENERATE PACKAGE** | 패키지를 zip 파일로 생성 |\n| **PURGE** | 오래된 진단 데이터 수동 정리 |\n\n### ADRCI 사용 예시\n\n```\n$ adrci\n\nadrci> SHOW HOMES\nADR Homes:\n  diag/rdbms/orcl/orcl1\n\nadrci> SET HOMEPATH diag/rdbms/orcl/orcl1\n\nadrci> SHOW ALERT -tail 20\n[최근 20줄의 Alert Log 표시]\n\nadrci> SHOW INCIDENT\nADR Home = /u01/app/oracle/diag/rdbms/orcl/orcl1:\n***********************************************************************\nINCIDENT_ID  PROBLEM_KEY                    CREATE_TIME\n-----------  ----------------------------   -------------------------\n12345        ORA 600 [kdsgrp1]              2026-04-05 10:30:15.123\n12346        ORA 7445 [segv]                2026-04-05 14:22:33.456\n\nadrci> SHOW PROBLEM\nPROBLEM_ID  PROBLEM_KEY                    LAST_INCIDENT   LASTINC_TIME\n----------  ----------------------------   -------------   -------------------------\n1           ORA 600 [kdsgrp1]              12345           2026-04-05 10:30:15.123\n2           ORA 7445 [segv]                12346           2026-04-05 14:22:33.456\n```\n\n### 인시던트(Incident) 관리 체계\n\n| 단계 | 설명 |\n|---|---|\n| 1. **오류 감지** | Oracle 커널이 심각한 내부 오류(ORA-00600, ORA-07445 등) 감지 |\n| 2. **Problem 매핑** | 오류를 Problem Key로 분류. 동일 유형의 오류는 같은 Problem에 매핑 |\n| 3. **Incident 생성** | 고유 Incident ID를 부여하고, incident/incdir_<ID>/ 디렉터리에 진단 덤프 생성 |\n| 4. **Flood Control** | 동일 Problem에 대해 짧은 시간 내 과도한 Incident 생성 방지 |\n| 5. **Alert Log 기록** | Incident 발생 정보를 Alert Log에 기록 |\n| 6. **패키징** | DBA가 ADRCI의 IPS 명령으로 진단 데이터를 패키지로 생성 |\n| 7. **Oracle 지원 제출** | 패키지를 SR(Service Request)에 첨부하여 제출 |\n\n### 인시던트 Flood Control 메커니즘\n\n```\n동일 Problem 발생 시:\n├── 첫 번째 Incident → 전체 덤프 생성 (Full Dump)\n├── 2~5번째 Incident → 전체 덤프 생성 (5분 내)\n├── 5번째 이후 → 요약 정보만 기록 (Flood Controlled)\n│   └── Flood Control 해제 조건: 일정 시간 경과 후\n└── Flood Control 해제 후 → 다시 전체 덤프 생성 재개\n```\n\n### Health Monitor (건강 점검기)\n\nHealth Monitor는 데이터베이스의 다양한 구성요소의 건강 상태를 사전 점검하는 프레임워크입니다.\n\n| 점검 종류 | 대상 | 설명 |\n|---|---|---|\n| **DB Structure Integrity Check** | 데이터 파일, 컨트롤 파일 | 물리적 파일 무결성 검증 |\n| **Data Block Integrity Check** | 데이터 블록 | 블록 손상(Block Corruption) 검출 |\n| **Redo Integrity Check** | Redo Log 파일 | Redo 무결성 검증 |\n| **Dictionary Integrity Check** | 데이터 딕셔너리 | 딕셔너리 일관성 검증 |\n| **Undo Segment Integrity Check** | UNDO 세그먼트 | UNDO 세그먼트 무결성 검증 |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **DIAGNOSTIC_DEST** | ADR_BASE 경로 (ADRCI가 참조하는 기본 경로) |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$DIAG_INCIDENT** | 인시던트 목록 및 상태 |\n| **V$DIAG_PROBLEM** | Problem 목록 및 최근 발생 시간 |\n| **V$HM_RUN** | Health Monitor 실행 이력 |\n| **V$HM_FINDING** | Health Monitor 발견 사항 |\n| **V$HM_RECOMMENDATION** | Health Monitor 권고 사항 |\n\n### 다른 구성요소와의 관계\n\n- **Data Recovery Advisor (DRA)**: Health Monitor의 결과를 기반으로 자동 복구 계획 수립\n- **Enterprise Manager**: Support Workbench를 통해 GUI 기반 인시던트 관리 및 패키징 제공\n- **Oracle Support**: IPS 패키지를 통해 진단 데이터를 Oracle 기술지원에 효율적으로 전달",
+          "key_points": [
+            "ADRCI는 ADR 진단 데이터를 조회/관리하는 전용 CLI 도구로, DB 미기동 상태에서도 사용 가능",
+            "SHOW ALERT -tail -f 명령으로 Alert Log를 실시간 모니터링 가능 (tail -f와 동일 효과)",
+            "Problem은 오류 유형, Incident는 개별 발생 건. Incident ID로 각 발생을 고유 식별",
+            "Flood Control이 동일 Problem에 대해 과도한 Incident 생성을 방지 (기본 5분 내 최대 5개)",
+            "IPS(Incident Packaging Service)로 진단 데이터를 Oracle 지원용 패키지로 생성",
+            "Health Monitor는 데이터 파일, 블록, Redo, 딕셔너리 등의 무결성을 사전 점검하는 프레임워크",
+            "V$HM_RUN, V$HM_FINDING, V$HM_RECOMMENDATION으로 Health Monitor 결과를 SQL로 조회"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "자동 워크로드 리포지토리 (Automatic Workload Repository / AWR)",
+      "sqlExamplesIds": ["sql09", "sql10", "sql11", "sql12"],
+      "content": "**자동 워크로드 리포지토리(AWR, Automatic Workload Repository)**는 Oracle Database의 성능 통계 데이터를 주기적으로 수집하여 **SYSAUX 테이블스페이스**에 저장하는 성능 이력 관리 인프라입니다. **MMON(Manageability Monitor)** 백그라운드 프로세스가 자동으로 스냅샷을 생성하며, 성능 분석의 기초 데이터를 제공합니다.",
+      "subsections": [
+        {
+          "title": "AWR의 정의와 아키텍처 (AWR Definition and Architecture)",
+          "content": "**AWR(Automatic Workload Repository)**는 Oracle 10g에서 도입된 성능 통계 이력 관리 시스템으로, V$ 뷰의 실시간 통계를 주기적으로 스냅샷하여 디스크에 영구 저장합니다. 이를 통해 인스턴스 재시작 후에도 과거 성능 데이터를 분석할 수 있습니다.\n\n### AWR 아키텍처 개요\n\n```\nV$ 동적 성능 뷰 (SGA 메모리)\n    │\n    │ 주기적 수집 (기본 60분마다)\n    ▼\nMMON 프로세스 (Manageability Monitor)\n    │\n    │ 스냅샷 저장\n    ▼\nSYSAUX 테이블스페이스\n├── WRM$_ 테이블 (메타데이터)\n│   ├── WRM$_SNAPSHOT — 스냅샷 메타정보\n│   ├── WRM$_BASELINE — 베이스라인 정보\n│   └── WRM$_WR_CONTROL — AWR 설정 (주기, 보존기간)\n├── WRH$_ 테이블 (이력 데이터)\n│   ├── WRH$_SYSSTAT — 시스템 통계 이력\n│   ├── WRH$_SYSTEM_EVENT — 대기 이벤트 이력\n│   ├── WRH$_SQLSTAT — SQL 통계 이력\n│   ├── WRH$_SGASTAT — SGA 통계 이력\n│   ├── WRH$_FILESTATXS — 파일 I/O 이력\n│   └── ... (수십 개의 이력 테이블)\n└── DBA_HIST_ 뷰 (WRH$_/WRM$_ 테이블에 대한 딕셔너리 뷰)\n    ├── DBA_HIST_SNAPSHOT\n    ├── DBA_HIST_SYSSTAT\n    ├── DBA_HIST_SYSTEM_EVENT\n    └── ...\n```\n\n### AWR 핵심 구성요소\n\n| 구성요소 | 설명 |\n|---|---|\n| **스냅샷 (Snapshot)** | 특정 시점의 V$ 뷰 통계를 캡처한 것. SNAP_ID로 식별 |\n| **베이스라인 (Baseline)** | 정상 운영 시의 스냅샷 범위를 지정한 참조점. 성능 비교의 기준 |\n| **보존 기간 (Retention)** | 스냅샷 보존 기간. 기본 8일 |\n| **스냅샷 주기 (Interval)** | 스냅샷 생성 간격. 기본 60분 |\n| **MMON 프로세스** | AWR 스냅샷 자동 생성, 통계 수집, 어드바이저 실행을 담당하는 백그라운드 프로세스 |\n| **MMNL 프로세스** | MMON의 경량 보조 프로세스. ASH 버퍼 플러시 등 담당 |\n\n### AWR 스냅샷에 포함되는 데이터\n\n| 데이터 카테고리 | 해당 V$ 뷰 | DBA_HIST_ 뷰 |\n|---|---|---|\n| **시스템 통계** | V$SYSSTAT | DBA_HIST_SYSSTAT |\n| **대기 이벤트** | V$SYSTEM_EVENT | DBA_HIST_SYSTEM_EVENT |\n| **SQL 통계** | V$SQL | DBA_HIST_SQLSTAT |\n| **세그먼트 통계** | V$SEGMENT_STATISTICS | DBA_HIST_SEG_STAT |\n| **파일 I/O** | V$FILESTAT | DBA_HIST_FILESTATXS |\n| **SGA 구성** | V$SGASTAT | DBA_HIST_SGASTAT |\n| **파라미터** | V$PARAMETER | DBA_HIST_PARAMETER |\n| **OS 통계** | V$OSSTAT | DBA_HIST_OSSTAT |\n| **ASH 데이터** | V$ACTIVE_SESSION_HISTORY | DBA_HIST_ACTIVE_SESS_HISTORY |\n\n### AWR 스냅샷 생성/삭제/설정 변경\n\n| 작업 | DBMS_WORKLOAD_REPOSITORY 프로시저 | 설명 |\n|---|---|---|\n| **수동 스냅샷 생성** | CREATE_SNAPSHOT() | 즉시 스냅샷 생성 |\n| **스냅샷 삭제** | DROP_SNAPSHOT_RANGE(low_snap_id, high_snap_id) | 지정 범위의 스냅샷 삭제 |\n| **주기/보존기간 변경** | MODIFY_SNAPSHOT_SETTINGS(retention, interval) | 스냅샷 설정 변경 |\n| **베이스라인 생성** | CREATE_BASELINE(start_snap_id, end_snap_id, name) | 베이스라인 생성 |\n| **베이스라인 삭제** | DROP_BASELINE(name) | 베이스라인 삭제 |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **STATISTICS_LEVEL** | ALL/TYPICAL/BASIC — AWR 수집 수준 제어. BASIC이면 AWR 비활성화 | TYPICAL |\n| **CONTROL_MANAGEMENT_PACK_ACCESS** | DIAGNOSTIC+TUNING / DIAGNOSTIC / NONE — AWR 접근 라이선스 제어 | DIAGNOSTIC+TUNING |\n| **AWR_PDB_AUTOFLUSH_ENABLED** | PDB 레벨 AWR 자동 스냅샷 활성화 여부 | FALSE |\n| **AWR_SNAPSHOT_TIME_OFFSET** | 스냅샷 생성 시각 오프셋 | 0 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_HIST_SNAPSHOT** | AWR 스냅샷 메타정보 (SNAP_ID, BEGIN/END_INTERVAL_TIME) |\n| **DBA_HIST_WR_CONTROL** | AWR 설정 (보존기간, 주기) |\n| **DBA_HIST_BASELINE** | 베이스라인 목록 |\n| **V$ACTIVE_SESSION_HISTORY** | 실시간 ASH 데이터 (AWR 스냅샷에 포함됨) |\n\n### 특수 동작 케이스\n\n- **STATISTICS_LEVEL=BASIC**: AWR 자동 스냅샷이 비활성화됨. ADDM, ASH 등 관련 기능도 모두 비활성화. 절대 BASIC으로 설정하지 말 것 (TYPICAL 권장)\n- **SYSAUX 공간 부족**: AWR 스냅샷 저장 공간이 부족하면 오래된 스냅샷이 자동 퍼지(PURGE)됨. SYSAUX 여유 공간 모니터링 필요\n- **라이선스 요건**: AWR은 Oracle Diagnostics Pack 라이선스가 필요. Enterprise Edition 전용\n- **PDB 레벨 AWR**: Oracle 12c R2+에서 AWR_PDB_AUTOFLUSH_ENABLED=TRUE로 PDB별 독립 스냅샷 생성 가능\n\n### 다른 구성요소와의 관계\n\n- **ADDM (Automatic Database Diagnostic Monitor)**: AWR 스냅샷 생성 시 자동으로 ADDM 분석을 실행하여 성능 문제 자동 진단\n- **ASH (Active Session History)**: V$ACTIVE_SESSION_HISTORY의 데이터가 AWR 스냅샷에 포함되어 DBA_HIST_ACTIVE_SESS_HISTORY에 저장\n- **SQL Tuning Advisor**: AWR의 SQL 통계를 기반으로 SQL 튜닝 권고사항 생성\n- **V$ 뷰**: AWR는 V$ 뷰의 통계를 주기적으로 스냅샷하여 디스크에 영구 보존하는 역할",
+          "key_points": [
+            "AWR은 MMON 프로세스가 V$ 뷰 통계를 주기적으로(기본 60분) SYSAUX 테이블스페이스에 스냅샷으로 저장",
+            "AWR 데이터는 WRM$_(메타데이터)과 WRH$_(이력 데이터) 테이블에 저장되며, DBA_HIST_ 뷰로 조회",
+            "기본 설정: 스냅샷 주기 60분, 보존기간 8일 — DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS로 변경",
+            "STATISTICS_LEVEL=BASIC이면 AWR 자동 스냅샷이 비활성화되므로 절대 BASIC 사용 금지 (TYPICAL 권장)",
+            "베이스라인(Baseline)은 정상 운영 시의 스냅샷 범위를 지정하여 성능 비교의 기준점으로 활용",
+            "AWR은 Oracle Diagnostics Pack 라이선스가 필요하며, Enterprise Edition 전용 기능",
+            "ADDM이 AWR 스냅샷 생성 시 자동으로 성능 분석을 실행하여 문제를 자동 진단",
+            "AWR_PDB_AUTOFLUSH_ENABLED=TRUE로 PDB 레벨에서 독립적인 AWR 스냅샷 생성 가능 (Oracle 12c R2+)"
+          ]
+        },
+        {
+          "title": "AWR 보고서와 베이스라인 활용 (AWR Reports and Baseline Usage)",
+          "content": "**AWR 보고서(AWR Report)**는 두 스냅샷 사이의 성능 통계 변화량을 분석하여 데이터베이스 성능의 전체적인 현황을 보여주는 종합 보고서입니다. **베이스라인(Baseline)**은 정상 성능 상태의 참조점을 설정하여, 문제 발생 시 비교 분석의 기준으로 활용합니다.\n\n### AWR 보고서 생성 방법\n\n| 방법 | 명령/도구 | 설명 |\n|---|---|---|\n| **SQL 스크립트** | @$ORACLE_HOME/rdbms/admin/awrrpt.sql | 대화식으로 기간 선택 후 HTML/TEXT 보고서 생성 |\n| **RAC 보고서** | @$ORACLE_HOME/rdbms/admin/awrgrpt.sql | RAC 글로벌 AWR 보고서 |\n| **SQL 상세** | @$ORACLE_HOME/rdbms/admin/awrsqrpt.sql | 특정 SQL_ID의 상세 AWR 보고서 |\n| **비교 보고서** | @$ORACLE_HOME/rdbms/admin/awrddrpt.sql | 두 기간의 AWR 데이터를 비교하는 Diff 보고서 |\n| **DBMS_WORKLOAD_REPOSITORY** | AWR_REPORT_HTML/AWR_REPORT_TEXT 함수 | PL/SQL로 보고서 생성 |\n| **Enterprise Manager** | 성능 → AWR 메뉴 | GUI 기반 AWR 보고서 생성 및 시각화 |\n\n### AWR 보고서 주요 섹션\n\n| 섹션 | 내용 |\n|---|---|\n| **Report Summary** | DB 이름, 인스턴스, 기간, DB Time, Elapsed Time 등 요약 |\n| **Load Profile** | 초당/트랜잭션당 주요 지표 (Logical Reads, Physical Reads, Redo Size 등) |\n| **Instance Efficiency** | Buffer Cache Hit Ratio, Library Cache Hit Ratio, Parse 비율 등 |\n| **Top 5 Timed Events** | 가장 많은 DB Time을 소비한 상위 5개 대기 이벤트 |\n| **SQL Statistics** | Top SQL by Elapsed Time, CPU Time, Buffer Gets, Executions |\n| **Segment Statistics** | Top Segments by Logical/Physical Reads, Row Lock Waits |\n| **I/O Statistics** | 파일별 I/O 통계 |\n| **Advisory Statistics** | Buffer Cache, Shared Pool, PGA 등 메모리 어드바이저 권고 |\n\n### 베이스라인(Baseline) 관리\n\n| 유형 | 설명 |\n|---|---|\n| **고정 베이스라인 (Static)** | 특정 스냅샷 범위를 수동으로 지정. 해당 스냅샷은 자동 퍼지에서 보호됨 |\n| **이동 베이스라인 (Moving Window)** | 최근 N일(기본 8일)의 스냅샷을 자동으로 베이스라인으로 유지. SYSTEM_MOVING_WINDOW가 기본 제공 |\n| **베이스라인 템플릿** | 반복 기간(예: 매주 월요일 9~17시)에 대해 자동으로 베이스라인 생성 |\n\n### 베이스라인 활용 시나리오\n\n1. **성능 비교**: 문제 발생 기간의 AWR과 정상 베이스라인의 AWR을 비교 (awrddrpt.sql)\n2. **임계값 설정**: 베이스라인 기반의 적응형 임계값(Adaptive Threshold) 설정으로 이상 탐지 자동화\n3. **스냅샷 보존**: 중요 시기(월말 결산, 이벤트 등)의 스냅샷을 베이스라인으로 보호하여 자동 퍼지 방지\n\n### AWR 보고서 분석 핵심 포인트\n\n| 지표 | 확인 사항 | 정상 기준 |\n|---|---|---|\n| **DB Time** | 총 DB Time이 Elapsed Time × CPU 수를 초과하면 과부하 | DB Time < Elapsed Time × CPU 수 |\n| **Buffer Cache Hit Ratio** | 캐시 히트율이 낮으면 Physical I/O 과다 | > 95% |\n| **Library Cache Hit Ratio** | 하드 파싱이 많으면 히트율 저하 | > 99% |\n| **Top Wait Events** | DB file sequential read(인덱스 I/O), log file sync(커밋 대기) 등 병목 식별 | 비정상 이벤트가 상위에 없어야 함 |\n| **SQL ordered by Elapsed Time** | 가장 많은 시간을 소비하는 SQL 식별 | 특정 SQL이 과도한 비중을 차지하면 튜닝 대상 |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **STATISTICS_LEVEL** | TYPICAL 이상이어야 AWR 활성화 |\n| **CONTROL_MANAGEMENT_PACK_ACCESS** | DIAGNOSTIC 이상이어야 AWR 보고서 생성 가능 |\n\n### 다른 구성요소와의 관계\n\n- **ADDM**: AWR 스냅샷 쌍을 분석하여 자동으로 성능 진단 보고서를 생성. AWR 보고서보다 더 구체적인 권고사항 제공\n- **SQL Tuning Advisor**: AWR의 Top SQL을 대상으로 SQL 프로파일, 인덱스 생성 등 튜닝 권고\n- **Adaptive Thresholds**: 베이스라인 기반으로 자동 임계값을 설정하여 Enterprise Manager의 알림 정확도 향상",
+          "key_points": [
+            "AWR 보고서는 awrrpt.sql 스크립트 또는 DBMS_WORKLOAD_REPOSITORY 함수로 HTML/TEXT 형식으로 생성",
+            "AWR 보고서의 핵심 섹션: Load Profile, Instance Efficiency, Top 5 Timed Events, SQL Statistics",
+            "Top 5 Timed Events 섹션이 성능 병목을 식별하는 가장 중요한 분석 포인트",
+            "고정 베이스라인(Static)으로 중요 시기의 스냅샷을 자동 퍼지에서 보호 가능",
+            "이동 베이스라인(Moving Window, 기본 SYSTEM_MOVING_WINDOW)은 최근 N일을 자동으로 베이스라인 유지",
+            "awrddrpt.sql로 두 기간의 AWR 데이터를 비교하는 Diff 보고서 생성 가능",
+            "DB Time이 Elapsed Time × CPU 수를 초과하면 데이터베이스가 과부하 상태임을 나타냄"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "V$ 뷰 목록 및 정의 조회",
+      "sql": "-- 전체 V$ 고정 뷰 목록 조회\nSELECT COUNT(*) AS total_v_views\nFROM V$FIXED_TABLE\nWHERE NAME LIKE 'V$%';\n\n-- 특정 V$ 뷰의 내부 SELECT 정의 조회\nSELECT VIEW_NAME, VIEW_DEFINITION\nFROM V$FIXED_VIEW_DEFINITION\nWHERE VIEW_NAME = 'GV$SESSION';",
+      "description": "V$FIXED_TABLE에서 전체 V$ 고정 뷰의 수를 확인하고, V$FIXED_VIEW_DEFINITION에서 특정 V$ 뷰가 어떤 X$ 테이블을 참조하는지 내부 SELECT 정의문을 조회합니다. 이를 통해 V$ 뷰의 데이터 소스와 필터 조건을 파악할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "인스턴스 및 데이터베이스 기본 정보 확인",
+      "sql": "-- 인스턴스 기본 정보\nSELECT INSTANCE_NAME, HOST_NAME, VERSION_FULL,\n       STATUS, DATABASE_STATUS, STARTUP_TIME,\n       INSTANCE_ROLE\nFROM V$INSTANCE;\n\n-- 데이터베이스 기본 정보\nSELECT NAME, DB_UNIQUE_NAME, OPEN_MODE,\n       LOG_MODE, FLASHBACK_ON, CDB,\n       DATABASE_ROLE, PLATFORM_NAME\nFROM V$DATABASE;",
+      "description": "V$INSTANCE에서 인스턴스 이름, 호스트, 버전, 상태, 기동 시간을 확인하고, V$DATABASE에서 데이터베이스 이름, 오픈 모드(READ WRITE/READ ONLY/MOUNTED), 아카이브 로그 모드, Flashback 활성화 여부, CDB 여부 등을 확인합니다. DBA가 데이터베이스 접속 후 가장 먼저 실행하는 기본 점검 SQL입니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "현재 세션 및 대기 이벤트 모니터링",
+      "sql": "-- 현재 ACTIVE 세션 및 대기 이벤트 조회\nSELECT s.SID, s.SERIAL#, s.USERNAME, s.STATUS,\n       s.SQL_ID, s.EVENT, s.WAIT_CLASS,\n       s.SECONDS_IN_WAIT, s.STATE,\n       s.PROGRAM, s.MACHINE\nFROM V$SESSION s\nWHERE s.STATUS = 'ACTIVE'\n  AND s.USERNAME IS NOT NULL\nORDER BY s.SECONDS_IN_WAIT DESC;\n\n-- 시스템 레벨 Top 대기 이벤트\nSELECT EVENT, TOTAL_WAITS, TIME_WAITED,\n       AVERAGE_WAIT, WAIT_CLASS,\n       ROUND(TIME_WAITED / (SELECT SUM(TIME_WAITED) FROM V$SYSTEM_EVENT WHERE WAIT_CLASS <> 'Idle') * 100, 2) AS PCT\nFROM V$SYSTEM_EVENT\nWHERE WAIT_CLASS <> 'Idle'\nORDER BY TIME_WAITED DESC\nFETCH FIRST 10 ROWS ONLY;",
+      "description": "V$SESSION에서 현재 ACTIVE 상태인 사용자 세션의 SQL_ID, 대기 이벤트, 대기 시간을 조회하여 실시간 병목을 식별합니다. V$SYSTEM_EVENT에서 Idle 이벤트를 제외한 시스템 레벨 Top 대기 이벤트를 비율과 함께 조회하여, 데이터베이스 전체의 성능 병목 패턴을 파악합니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "데이터 딕셔너리 뷰 검색 및 활용",
+      "sql": "-- 'TABLE' 관련 딕셔너리 뷰 검색\nSELECT TABLE_NAME, COMMENTS\nFROM DICTIONARY\nWHERE TABLE_NAME LIKE '%TABLE%'\nORDER BY TABLE_NAME;\n\n-- 딕셔너리 캐시 히트율 확인\nSELECT SUM(GETS) AS total_gets,\n       SUM(GETMISSES) AS total_misses,\n       ROUND((1 - SUM(GETMISSES)/NULLIF(SUM(GETS),0)) * 100, 2) AS hit_ratio_pct\nFROM V$ROWCACHE;",
+      "description": "DICTIONARY 뷰에서 키워드로 관련 딕셔너리 뷰를 검색합니다. 특정 정보가 어떤 딕셔너리 뷰에 있는지 모를 때 유용합니다. V$ROWCACHE에서 딕셔너리 캐시(Row Cache)의 히트율을 계산하여, 히트율이 낮으면(< 95%) Shared Pool 크기 증가를 검토해야 합니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "데이터 딕셔너리를 통한 객체 정보 조회",
+      "sql": "-- 테이블스페이스별 사용 현황 조회\nSELECT t.TABLESPACE_NAME,\n       t.STATUS,\n       ROUND(t.MAX_SIZE_MB, 2) AS max_size_mb,\n       ROUND(t.USED_MB, 2) AS used_mb,\n       ROUND((t.USED_MB / NULLIF(t.MAX_SIZE_MB, 0)) * 100, 2) AS used_pct\nFROM (\n    SELECT dts.TABLESPACE_NAME, dts.STATUS,\n           SUM(GREATEST(df.MAXBYTES, df.BYTES)) / 1024 / 1024 AS max_size_mb,\n           SUM(df.BYTES - NVL(fs.FREE_BYTES, 0)) / 1024 / 1024 AS used_mb\n    FROM DBA_TABLESPACES dts\n    JOIN DBA_DATA_FILES df ON dts.TABLESPACE_NAME = df.TABLESPACE_NAME\n    LEFT JOIN (\n        SELECT TABLESPACE_NAME, SUM(BYTES) AS FREE_BYTES\n        FROM DBA_FREE_SPACE\n        GROUP BY TABLESPACE_NAME\n    ) fs ON dts.TABLESPACE_NAME = fs.TABLESPACE_NAME\n    GROUP BY dts.TABLESPACE_NAME, dts.STATUS\n) t\nORDER BY used_pct DESC;",
+      "description": "DBA_TABLESPACES, DBA_DATA_FILES, DBA_FREE_SPACE 딕셔너리 뷰를 조인하여 테이블스페이스별 최대 크기, 사용량, 사용률을 계산합니다. 사용률이 85%를 초과하는 테이블스페이스는 공간 확장이 필요합니다. 데이터 딕셔너리 뷰를 활용한 일상적인 공간 모니터링의 대표적인 예입니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "ADR 진단 정보 조회",
+      "sql": "-- ADR 경로 정보 확인\nSELECT NAME, VALUE\nFROM V$DIAG_INFO\nORDER BY NAME;\n\n-- Alert Log를 SQL로 조회 (최근 24시간의 ORA- 에러)\nSELECT ORIGINATING_TIMESTAMP, MESSAGE_TEXT\nFROM V$DIAG_ALERT_EXT\nWHERE ORIGINATING_TIMESTAMP > SYSTIMESTAMP - INTERVAL '24' HOUR\n  AND MESSAGE_TEXT LIKE '%ORA-%'\nORDER BY ORIGINATING_TIMESTAMP DESC;",
+      "description": "V$DIAG_INFO에서 ADR Home, Alert Log 위치, Trace 디렉터리 경로 등 ADR 설정 정보를 확인합니다. V$DIAG_ALERT_EXT에서 최근 24시간 내 발생한 ORA- 에러 메시지를 SQL로 직접 조회합니다. OS에 로그인하지 않고도 Alert Log를 분석할 수 있어 원격 모니터링에 유용합니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "인시던트 및 Problem 조회",
+      "sql": "-- 최근 인시던트 목록 조회\nSELECT INCIDENT_ID, PROBLEM_KEY, CREATE_TIME,\n       CLOSE_TIME, STATUS, FLOOD_CONTROLLED\nFROM V$DIAG_INCIDENT\nWHERE CREATE_TIME > SYSTIMESTAMP - INTERVAL '7' DAY\nORDER BY CREATE_TIME DESC;\n\n-- Problem 목록 및 최근 발생 시간 조회\nSELECT PROBLEM_ID, PROBLEM_KEY, LAST_INCIDENT,\n       LASTINC_TIME, FIRST_INCIDENT, FIRSTINC_TIME\nFROM V$DIAG_PROBLEM\nORDER BY LASTINC_TIME DESC;",
+      "description": "V$DIAG_INCIDENT에서 최근 7일 내 발생한 인시던트의 ID, Problem Key, 생성 시간, 상태, Flood Control 여부를 조회합니다. V$DIAG_PROBLEM에서 Problem별 첫 번째/마지막 인시던트 발생 시간을 확인하여 반복적으로 발생하는 오류 패턴을 식별합니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "Trace 파일 조회 및 Health Monitor 확인",
+      "sql": "-- 현재 세션의 Trace 파일 경로 확인\nSELECT p.TRACEFILE\nFROM V$SESSION s\nJOIN V$PROCESS p ON s.PADDR = p.ADDR\nWHERE s.SID = SYS_CONTEXT('USERENV', 'SID');\n\n-- Health Monitor 실행 이력 조회\nSELECT RUN_ID, NAME, CHECK_NAME,\n       RUN_MODE, STATUS, START_TIME, END_TIME\nFROM V$HM_RUN\nORDER BY START_TIME DESC\nFETCH FIRST 10 ROWS ONLY;",
+      "description": "V$SESSION과 V$PROCESS를 조인하여 현재 세션의 서버 프로세스가 생성하는 Trace 파일의 전체 경로를 확인합니다. V$HM_RUN에서 Health Monitor의 최근 실행 이력을 조회하여 데이터 파일, 블록, Redo 등의 무결성 점검 결과를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "AWR 스냅샷 관리",
+      "sql": "-- 최근 AWR 스냅샷 목록 조회\nSELECT SNAP_ID, BEGIN_INTERVAL_TIME, END_INTERVAL_TIME,\n       FLUSH_ELAPSED, SNAP_LEVEL, STATUS\nFROM DBA_HIST_SNAPSHOT\nWHERE BEGIN_INTERVAL_TIME > SYSDATE - 3\nORDER BY SNAP_ID DESC;\n\n-- 수동 AWR 스냅샷 생성\nEXEC DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT();",
+      "description": "DBA_HIST_SNAPSHOT에서 최근 3일간 생성된 AWR 스냅샷의 ID, 시작/종료 시간, 소요 시간, 레벨, 상태를 조회합니다. DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT()으로 즉시 수동 스냅샷을 생성할 수 있으며, 이는 성능 문제 발생 직전/직후에 수동으로 스냅샷을 찍어 정밀 분석할 때 유용합니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "AWR 설정 변경 (주기 및 보존기간)",
+      "sql": "-- 현재 AWR 설정 확인\nSELECT DBID, SNAP_INTERVAL, RETENTION, TOPNSQL\nFROM DBA_HIST_WR_CONTROL;\n\n-- AWR 스냅샷 주기를 30분, 보존기간을 30일로 변경\nBEGIN\n  DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS(\n    retention => 30 * 24 * 60,  -- 30일 (분 단위)\n    interval  => 30             -- 30분\n  );\nEND;\n/\n\n-- 변경 후 설정 확인\nSELECT DBID, SNAP_INTERVAL, RETENTION, TOPNSQL\nFROM DBA_HIST_WR_CONTROL;",
+      "description": "DBA_HIST_WR_CONTROL에서 현재 AWR의 스냅샷 주기(SNAP_INTERVAL, 기본 +00 01:00:00 = 1시간)와 보존기간(RETENTION, 기본 +08 00:00:00 = 8일)을 확인합니다. MODIFY_SNAPSHOT_SETTINGS로 주기를 30분, 보존기간을 30일로 변경합니다. 주기를 줄이면 더 세밀한 분석이 가능하지만 SYSAUX 공간 사용량이 증가합니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "AWR 베이스라인 생성 및 관리",
+      "sql": "-- 고정 베이스라인 생성 (특정 스냅샷 범위)\nBEGIN\n  DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE(\n    start_snap_id => 1000,\n    end_snap_id   => 1010,\n    baseline_name => 'NORMAL_WEEKDAY_BASELINE',\n    expiration    => NULL  -- NULL = 만료되지 않음\n  );\nEND;\n/\n\n-- 베이스라인 목록 조회\nSELECT BASELINE_ID, BASELINE_NAME, BASELINE_TYPE,\n       START_SNAP_ID, END_SNAP_ID,\n       START_SNAP_TIME, END_SNAP_TIME, EXPIRATION\nFROM DBA_HIST_BASELINE\nORDER BY BASELINE_ID;\n\n-- 베이스라인 삭제\nBEGIN\n  DBMS_WORKLOAD_REPOSITORY.DROP_BASELINE(\n    baseline_name => 'NORMAL_WEEKDAY_BASELINE',\n    cascade       => FALSE  -- TRUE이면 스냅샷도 함께 삭제\n  );\nEND;\n/",
+      "description": "DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE으로 정상 운영 시의 스냅샷 범위를 베이스라인으로 지정합니다. 베이스라인에 포함된 스냅샷은 자동 퍼지에서 보호됩니다. DBA_HIST_BASELINE에서 베이스라인 목록을 조회하고, DROP_BASELINE으로 삭제할 수 있습니다. cascade=TRUE이면 베이스라인과 함께 스냅샷도 삭제됩니다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "AWR 보고서 PL/SQL 생성",
+      "sql": "-- AWR HTML 보고서를 PL/SQL로 생성하여 SPOOL\n-- 먼저 SNAP_ID 범위를 확인\nSELECT SNAP_ID, BEGIN_INTERVAL_TIME\nFROM DBA_HIST_SNAPSHOT\nWHERE BEGIN_INTERVAL_TIME > SYSDATE - 1\nORDER BY SNAP_ID;\n\n-- HTML 보고서 생성 (함수 호출 예시)\nSELECT output\nFROM TABLE(\n  DBMS_WORKLOAD_REPOSITORY.AWR_REPORT_HTML(\n    l_dbid     => (SELECT DBID FROM V$DATABASE),\n    l_inst_num => (SELECT INSTANCE_NUMBER FROM V$INSTANCE),\n    l_bid      => 1000,  -- 시작 스냅샷 ID\n    l_eid      => 1005   -- 종료 스냅샷 ID\n  )\n);",
+      "description": "DBMS_WORKLOAD_REPOSITORY.AWR_REPORT_HTML 함수를 사용하여 PL/SQL에서 AWR HTML 보고서를 생성합니다. l_dbid(데이터베이스 ID), l_inst_num(인스턴스 번호), l_bid(시작 스냅샷), l_eid(종료 스냅샷)을 지정합니다. 생성된 HTML을 파일로 SPOOL하여 브라우저에서 열면 Load Profile, Top Wait Events, SQL Statistics 등 종합 성능 분석 보고서를 확인할 수 있습니다."
+    }
+  ],
+  "keywords": [
+    "동적 성능 뷰 (Dynamic Performance Views)",
+    "V$ Views",
+    "GV$ Views",
+    "X$ Tables (Fixed Tables)",
+    "V$FIXED_TABLE",
+    "V$FIXED_VIEW_DEFINITION",
+    "V$SESSION",
+    "V$SQL",
+    "V$INSTANCE",
+    "V$DATABASE",
+    "V$SYSSTAT",
+    "V$SYSTEM_EVENT",
+    "V$ACTIVE_SESSION_HISTORY (ASH)",
+    "V$PARAMETER",
+    "V$DIAG_INFO",
+    "V$DIAG_ALERT_EXT",
+    "V$DIAG_INCIDENT",
+    "V$DIAG_PROBLEM",
+    "데이터 딕셔너리 (Data Dictionary)",
+    "DBA_ Views",
+    "ALL_ Views",
+    "USER_ Views",
+    "CDB_ Views",
+    "DBA_HIST_SNAPSHOT",
+    "DBA_HIST_WR_CONTROL",
+    "DBA_HIST_BASELINE",
+    "DICTIONARY (DICT)",
+    "V$ROWCACHE",
+    "SELECT_CATALOG_ROLE",
+    "SELECT ANY DICTIONARY",
+    "ADR (Automatic Diagnostic Repository)",
+    "ADRCI (ADR Command Interpreter)",
+    "ADR_BASE",
+    "ADR Home",
+    "DIAGNOSTIC_DEST",
+    "Alert Log",
+    "Trace Files",
+    "Incident",
+    "Problem",
+    "Flood Control",
+    "Health Monitor",
+    "MAX_DUMP_FILE_SIZE",
+    "ENABLE_DDL_LOGGING",
+    "AWR (Automatic Workload Repository)",
+    "MMON (Manageability Monitor)",
+    "MMNL",
+    "AWR Snapshot",
+    "AWR Baseline",
+    "AWR Report",
+    "DBMS_WORKLOAD_REPOSITORY",
+    "STATISTICS_LEVEL",
+    "CONTROL_MANAGEMENT_PACK_ACCESS",
+    "AWR_PDB_AUTOFLUSH_ENABLED",
+    "WRM$_ Tables",
+    "WRH$_ Tables",
+    "DBA_HIST_ Views",
+    "ADDM (Automatic Database Diagnostic Monitor)",
+    "IPS (Incident Packaging Service)",
+    "SQL Trace",
+    "Event 10046",
+    "DBMS_MONITOR",
+    "V$HM_RUN",
+    "V$HM_FINDING",
+    "Retention",
+    "Snap Interval",
+    "awrrpt.sql",
+    "awrddrpt.sql",
+    "Load Profile",
+    "Top 5 Timed Events",
+    "DB Time"
+  ]
+}

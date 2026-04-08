@@ -1,0 +1,65 @@
+[
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "02_001",
+    "title": "Database Configuration Assistant(DBCA)について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) DBCAはOracleデータベース・ソフトウェアのインストール後に使用することができる。",
+      "B) DBCAを使用してリスナー構成やローカル・ネーミングの設定を行うことができる。",
+      "C) DBCAを使用したデータベースの作成ではPDBは1つのみ作成することができる。",
+      "D) DBCAのコマンドライン引数を指定してデータベースを作成するとデータベースのバックアップも取得することができる。",
+      "E) DBCAには2つのモードがあり、「対話型モード」と「非対話型/サイレントモード」を使用することができる。"
+    ],
+    "answer": [
+      "A",
+      "E"
+    ]
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "02_002",
+    "title": "Oracleデータベース製品に実装されている各種ツールの説明について正しいものはどれですか(2つ選択してください)。",
+    "options": [
+      "A) マルチテナント環境におけるSQL*Plusでの接続は、CDBルート・コンテナのみに接続することができる。",
+      "B) SQL*Plusには、1行に表示する文字数の設定やSQLの実行計画情報を出力するコマンドなどが実装されている。",
+      "C) Recovery Manager(RMAN)からデータベースの起動や停止処理を行うことができる。",
+      "D) SQL*PlusにはSQL文の実行以外にリスナーの起動および停止や、CDB全体のバックアップ取得などのコマンドがある。",
+      "E) 必要なモジュールをOracle Techology Network(OTN)からダウンロードすることでSQL*PlusやRMANをWebベースで使用することができる。",
+      "F) マルチテナント環境におけるRMANの操作はCDBルート・コンテナに接続して行う必要がある。"
+    ],
+    "answer": [
+      "B",
+      "C"
+    ]
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "02_003",
+    "title": "SQL*Plusを実行するディレクトリ上に pdborcl.sqlファイルがあり、ファイル内には複数のSQL文が記載されています。\nマルチテナント環境にて以下の操作を行い、SYSTEMユーザーでPDBORCLプラガブル・データベースに接続しました。\n\n$ sqlplus system/oracle@pdborcl\n\nSQL> show con_name\nCON_NAME\n------------------------------\nPDBORCL\n\nその後、SQL*Plusのプロンプト上から以下の操作を行った結果として正しいものを選択してください。\n\nSQL> @pdborcl",
+    "options": [
+      "A) 接続処理の@pdborclを指定しているため重複処理となりエラーが発生する。",
+      "B) pdborcl.sqlファイルがスクリプトファイルとして認識され、ファイル内のSQL文が実行される。",
+      "C) PDBORCLプラガブル・データベースにSYSユーザーで接続される。",
+      "D) 拡張子 .sql を指定していないためスクリプトファイルとして認識することができずエラーが発生する。"
+    ],
+    "answer": [
+      "B"
+    ]
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "02_004",
+    "title": "Oracle AI Databaseを管理するツールに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SQL Developerツールを使用するにはEnterprise Editionライセンスが必要である。",
+      "B) SQL DeveloperツールはWebベースのグラフィカル操作画面を提供する。",
+      "C) Enterprise Manager Cloud ControlはOracle AI Database製品のみに特化した管理ツールである。",
+      "D) Enterprise Manager Cloud Controlを使用するとOracleデータベースの停止、起動操作を実行できる。",
+      "E) Enterprise Manager Cloud Controlを使用してOracleサポートとの情報連携ができる。"
+    ],
+    "answer": [
+      "D",
+      "E"
+    ]
+  }
+]

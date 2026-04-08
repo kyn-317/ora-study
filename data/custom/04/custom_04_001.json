@@ -1,0 +1,81 @@
+[
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_001",
+    "title": "Oracle Netリスナーの動的サービス登録と静的サービス登録に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 動的サービス登録では、LREGプロセスがリスナーにサービス情報を自動的に登録し、インスタンスの状態や負荷情報がリアルタイムで反映される。",
+      "B) 静的サービス登録では、listener.oraのSID_LISTセクションにサービスを記述し、登録されたサービスのインスタンス状態はREADYとして表示される。",
+      "C) 動的サービス登録は、デフォルト・リスナー(LISTENER、TCP 1521)のみに対して行われ、カスタム・リスナーには動的登録を行うことができない。",
+      "D) 静的サービス登録は、インスタンスが起動していない状態でもリスナーにサービスが登録されたままであるため、リモートからのSTARTUPが可能になる。",
+      "E) ALTER SYSTEM REGISTER文は、静的サービス登録の情報をlistener.oraに保存するために使用するコマンドである。"
+    ],
+    "answer": [
+      "A",
+      "D"
+    ],
+    "explanation": "정답 분석:\nA) 정답 — 동적 서비스 등록에서는 LREG(Listener Registration) 프로세스가 약 60초마다 자동으로 리스너에 서비스 정보를 전송합니다. 이때 인스턴스 이름, 서비스 이름, 인스턴스 상태(READY/BLOCKED), 부하 정보 등이 실시간으로 반영됩니다.\nD) 정답 — 정적 서비스 등록은 listener.ora의 SID_LIST 섹션에 수동으로 서비스를 기술하는 방식이며, 인스턴스가 기동되지 않은 상태에서도 등록이 유지됩니다. 따라서 Oracle Enterprise Manager 원격 관리, Data Guard, RMAN DUPLICATE 등에서 원격 STARTUP이 필요한 경우 정적 등록이 필수입니다.\n\n오답 분석:\nB) 오류 — 정적 서비스 등록 시 인스턴스 상태는 항상 UNKNOWN으로 표시됩니다. READY로 표시되는 것은 동적 등록의 특징입니다.\nC) 오류 — 동적 서비스 등록은 기본 리스너(LISTENER, TCP 1521)뿐만 아니라, LOCAL_LISTENER 파라미터를 설정하면 커스텀 리스너에도 동적 등록이 가능합니다. REMOTE_LISTENER 파라미터로 원격 리스너에도 등록할 수 있습니다.\nE) 오류 — ALTER SYSTEM REGISTER 문은 LREG 프로세스가 즉시 리스너에 동적 등록을 수행하도록 트리거하는 명령이며, 정적 등록이나 listener.ora 저장과는 무관합니다.\n\n핵심 개념: 동적 등록은 LREG 프로세스가 자동으로 수행하며 실시간 상태 반영이 가능하고, 정적 등록은 listener.ora에 수동 기술하여 인스턴스 미기동 시에도 등록을 유지하는 방식입니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_002",
+    "title": "sqlnet.oraファイルのNAMES.DIRECTORY_PATHパラメータについて正しく述べているものを選択してください。",
+    "options": [
+      "A) NAMES.DIRECTORY_PATHは、リスナーがデータベース・サービスを検索する順序を定義するパラメータである。",
+      "B) NAMES.DIRECTORY_PATHのデフォルト値は(TNSNAMES, EZCONNECT)であり、ローカル・ネーミングと簡易接続ネーミングが順番に試行される。",
+      "C) NAMES.DIRECTORY_PATHにEZCONNECTが含まれていなくても、簡易接続ネーミング・メソッドは常に使用可能である。",
+      "D) NAMES.DIRECTORY_PATHはlistener.oraファイルに設定するサーバー側のパラメータである。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답 분석:\nB) 정답 — NAMES.DIRECTORY_PATH는 클라이언트가 네트 서비스 이름을 해석할 때 사용하는 네이밍 메서드의 시도 순서를 정의하는 파라미터입니다. 기본값은 (TNSNAMES, EZCONNECT)이며, 먼저 tnsnames.ora 파일에서 로컬 네이밍으로 해석을 시도하고, 실패하면 Easy Connect 방식으로 시도합니다.\n\n오답 분석:\nA) 오류 — NAMES.DIRECTORY_PATH는 리스너가 서비스를 검색하는 순서가 아니라, 클라이언트가 네트 서비스 이름(별칭)을 해석하는 네이밍 메서드의 시도 순서를 정의하는 파라미터입니다. 리스너의 서비스 검색과는 무관합니다.\nC) 오류 — 간편 접속(Easy Connect) 네이밍 메서드를 사용하려면 sqlnet.ora의 NAMES.DIRECTORY_PATH에 EZCONNECT가 포함되어 있어야 합니다. 다만, 기본값에 이미 포함되어 있으므로 sqlnet.ora를 수정하지 않아도 대부분 사용 가능합니다.\nD) 오류 — NAMES.DIRECTORY_PATH는 listener.ora가 아닌 sqlnet.ora 파일에 설정하는 클라이언트 측 파라미터입니다. sqlnet.ora는 클라이언트와 서버 모두에서 사용되는 프로파일 구성 파일입니다.\n\n핵심 개념: NAMES.DIRECTORY_PATH는 sqlnet.ora에 설정되며, 클라이언트의 네이밍 메서드 시도 순서를 정의하는 파라미터로, 기본값은 (TNSNAMES, EZCONNECT)입니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_003",
+    "title": "listener.oraの変更をリスナーに反映する方法について正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) lsnrctl reloadコマンドはリスナーを停止せずにlistener.oraの変更を反映でき、動的サービス登録情報も維持される。",
+      "B) lsnrctl reloadコマンドを実行すると、既存のデータベース接続セッションがすべて切断される。",
+      "C) lsnrctl stopとstartで再起動した場合、動的サービス登録情報が失われ、LREGプロセスが再登録するまで最大60秒の待機が必要になる。",
+      "D) listener.oraの変更を反映するためには、必ずlsnrctl stopとstartでリスナーを再起動する必要がある。",
+      "E) lsnrctl SET CURRENT_LISTENERコマンドはlistener.oraの変更を現在のリスナーに即座に反映するコマンドである。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답 분석:\nA) 정답 — lsnrctl reload 명령은 리스너를 중지하지 않고(무중단) listener.ora의 변경 사항을 반영합니다. 기존 연결과 동적 서비스 등록 정보가 유지되므로 운영 환경에서 안전하게 구성 변경을 적용할 수 있습니다.\nC) 정답 — lsnrctl stop 후 start로 재시작하면, 동적 등록 정보가 손실됩니다. LREG 프로세스가 약 60초 주기로 서비스 정보를 재등록하기 때문에, 재시작 후 최대 60초 동안 동적 등록된 서비스가 리스너에 표시되지 않을 수 있습니다. ALTER SYSTEM REGISTER 명령으로 즉시 재등록을 강제할 수 있습니다.\n\n오답 분석:\nB) 오류 — lsnrctl reload는 기존 데이터베이스 접속 세션에 영향을 주지 않습니다. 이미 연결된 세션은 리스너를 경유하지 않고 직접 서버 프로세스와 통신하므로, 리스너 reload나 심지어 stop/start도 기존 세션에는 영향이 없습니다.\nD) 오류 — listener.ora의 변경을 반영하기 위해 반드시 stop/start로 재시작할 필요가 없습니다. lsnrctl reload 명령으로 무중단으로 변경 사항을 반영할 수 있으며, 이것이 운영 환경에서 권장되는 방법입니다.\nE) 오류 — SET CURRENT_LISTENER는 lsnrctl 대화형 모드에서 제어 대상 리스너를 변경하는 명령이며, listener.ora의 변경 사항을 반영하는 명령이 아닙니다.\n\n핵심 개념: listener.ora 변경 반영 시 lsnrctl reload는 무중단으로 동적 등록 정보를 유지하며 반영하고, stop/start는 동적 등록 정보가 손실되어 LREG 재등록까지 대기가 필요합니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_004",
+    "title": "データベース・リンクのタイプと名前解決の優先順位について正しく述べているものを選択してください。",
+    "options": [
+      "A) パブリック・データベース・リンクはCREATE DATABASE LINK権限を持つ任意のユーザーが作成できる。",
+      "B) 同じ名前のプライベート・データベース・リンクとパブリック・データベース・リンクが存在する場合、パブリック・リンクが優先的に使用される。",
+      "C) プライベート・データベース・リンクは作成した所有者のスキーマに格納され、所有者のみが使用できる。",
+      "D) パブリック・データベース・リンクを使用するためには、各ユーザーに対して個別にUSAGE権限を付与する必要がある。"
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "정답 분석:\nC) 정답 — Private 데이터베이스 링크는 CREATE DATABASE LINK 시스템 권한을 가진 사용자가 자신의 스키마 내에 생성하며, 해당 소유자만 사용할 수 있습니다. 다른 사용자는 접근할 수 없어 보안성이 가장 높은 링크 유형입니다.\n\n오답 분석:\nA) 오류 — Public 데이터베이스 링크를 생성하려면 CREATE DATABASE LINK가 아닌 CREATE PUBLIC DATABASE LINK 시스템 권한이 필요합니다. CREATE DATABASE LINK는 Private 링크 생성을 위한 권한입니다.\nB) 오류 — 동일한 이름의 데이터베이스 링크가 여러 유형으로 존재하는 경우, Private > Public > Global 순서로 이름이 해석됩니다. 따라서 Private 링크가 우선적으로 사용되며, Public 링크가 아닙니다.\nD) 오류 — Public 데이터베이스 링크는 데이터베이스 내 모든 사용자가 별도의 추가 권한 없이 자동으로 사용할 수 있습니다. 개별 USAGE 권한 부여는 필요하지 않습니다.\n\n핵심 개념: Private 링크는 소유자만, Public 링크는 DB 내 모든 사용자가 사용 가능하며, 동일 이름의 링크는 Private > Public > Global 순서로 우선 해석됩니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_005",
+    "title": "tnsnames.oraのCONNECT_DATAセクションにおけるSERVICE_NAMEとSIDの違いに関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) SIDはサービス・ベースの接続に使用されるため、RAC環境で複数のインスタンスが1つのサービスを提供する構成に適している。",
+      "B) SERVICE_NAMEを使用すると、マルチテナント環境でPDBに直接接続することが可能である。",
+      "C) SERVICE_NAMEはレガシー方式であり、現在のOracle環境ではSIDの使用が推奨されている。",
+      "D) SIDを使用したCONNECT_DATAの構成では、リスナーへの動的サービス登録が自動的に行われる。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답 분석:\nB) 정답 — SERVICE_NAME을 사용하면 멀티테넌트 환경에서 PDB에 직접 접속할 수 있습니다. 각 PDB는 PDB 이름과 동일한 기본 서비스를 가지며, 클라이언트는 tnsnames.ora의 SERVICE_NAME을 통해 특정 PDB를 지정하여 접속합니다. SID로는 CDB SID만 지정 가능하여 PDB에 직접 접속할 수 없습니다.\n\n오답 분석:\nA) 오류 — 설명이 SID가 아닌 SERVICE_NAME의 특징입니다. SERVICE_NAME은 여러 인스턴스가 하나의 서비스를 제공할 수 있어 RAC 환경에 적합합니다. SID는 인스턴스와 1:1로 대응하므로 RAC 환경에서 제한적입니다.\nC) 오류 — 설명이 반대입니다. SID가 레거시 방식이며, 현재 Oracle에서는 SERVICE_NAME 사용이 표준으로 권장됩니다. SERVICE_NAME은 RAC, 멀티테넌트 등 현대적 환경을 더 잘 지원합니다.\nD) 오류 — SID를 사용한 접속 구성은 리스너에 대한 동적 서비스 등록과 직접 관련이 없습니다. SID 기반 접속은 일반적으로 listener.ora에 정적 등록(SID_LIST)이 필요합니다. 동적 서비스 등록은 SERVICE_NAME 기반으로 LREG 프로세스가 수행합니다.\n\n핵심 개념: SERVICE_NAME은 Oracle 표준 권장 방식으로 RAC 및 멀티테넌트(PDB 직접 접속)를 지원하며, SID는 인스턴스 1:1 대응의 레거시 방식입니다."
+  }
+]

@@ -1,0 +1,76 @@
+[
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "10_001",
+    "title": "マルチテナント環境にて新規プラガブル・データベースPDBORCLを作成しようと検討しています。この新規PDB作成に関する内容について正しいものを2つ選択してください。",
+    "options": [
+      "A) 新規PDB作成時にはCDB$ROOTをREAD ONLYに変更する必要がある。",
+      "B) PDBORCLの新しい管理ユーザーを作成する必要があるが、管理ユーザー名はPDBORCLにする必要がある。",
+      "C) PDB$SEEDコンテナをテンプレートとして作成することができる。",
+      "D) PDBORCLプラガブル・データベース用のSYSTEM表領域が作成される。",
+      "E) PDBORCLプラガブル・データベース作成後、CDB全体の再起動が必要になる。"
+    ],
+    "answer": [
+      "C",
+      "D"
+    ]
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "10_002",
+    "title": "以下の実行結果を確認してください。\n\nSQL> select pdb_name, status from cdb_pdbs where pdb_name='PDBORCL2'\n\nPDB_NAME                  STATUS\n------------------------- ----------\nPDBORCL2                  UNPLUGGED\n\nPDBORCL2のステータスについて正しく述べているのはどれですか。",
+    "options": [
+      "A) ALTER PLUGGABLE文でOPEN処理を実行するとSTATUSがPLUGGEDに変更されPDBが使用できる状態になる。",
+      "B) PDBORCL2はCDBから切断処理が実行された状態で、このPDBに対してDROP操作が実行できる。",
+      "C) UNPLUGGEDになったPDBは元のCDBにプラグインすることはできない。",
+      "D) PDBORCL2を使用できるようにするためにはリカバリにてPLUGする処理が必要である。"
+    ],
+    "answer": [
+      "B"
+    ]
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "10_003",
+    "title": "PDBの切断を実行して別CDBへ接続するために以下のコマンドを実行しました。\n\nSQL> atler pluggable database pdborcl unplug into '/tmp/pdborcl.pdb';\n\nこのコマンドに関する内容について正しいものを選択してください。",
+    "options": [
+      "A) このコマンドの結果により、CDBに接続するために必要な単一のアーカイブ・ファイルが作成される。",
+      "B) アーカイブ・ファイルを使用した切断方法であり、データ・ファイル、アーカイブREDOログファイルが圧縮して作成される。",
+      "C) 別CDBに接続するためには出力されたpdborcl.pdbファイルと該当PDBのすべてのデータ・ファイルが必要である。",
+      "D) alter pluggable database 文を実行したpdborclは引き続き通常の操作が可能である。"
+    ],
+    "answer": [
+      "A"
+    ]
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "10_004",
+    "title": "マルチテナント環境にて、初期化パラメータの情報を確認するために以下のSQL文を実行しました。\n\nselect name, ispdb_modifiable from v$parameter where name='open_cursors'\n\nNAME                      ISPDB\n------------------------- -----\nopen_cursors              TRUE\n\nこの結果について正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) OPEN_CURSORS初期化パラメータはCDB$ROOTコンテナに接続して変更を行う必要がある。",
+      "B) OPEN_CURSORS初期化パラメータはPDBがMOUNTED状態であってもPDBに対して変更が可能である。",
+      "C) OPEN_CURSORS初期化パラメータは各コンテナ毎に個別に設定が可能である。",
+      "D) OPEN_CURSORS初期化パラメータをPDBで変更処理するとすべてのコンテナで変更内容が反映される。"
+    ],
+    "answer": [
+      "C"
+    ]
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "10_005",
+    "title": "マルチテナント環境におけるプラガブル・データベースの管理に関する内容で正しいものはどれですか。",
+    "options": [
+      "A) 特定のPDBで「ALTER SYSTEM FLUSH BUFFER CACHE」を実行するとCDB全体に影響が出るので注意が必要である。",
+      "B) PDB$SEEDコンテナはCDB作成時には必須コンテナになるが、作成後は任意に削除することが可能である。",
+      "C) PDBのクローン操作のオプションとしてリフレッシュ可能なクローンを作成することができる。",
+      "D) PDBのクローニング処理ではソースPDBはREAD ONLYにして実行する必要がある。",
+      "E) DBCAを使用してリモートPDBのクローニング操作が可能である。"
+    ],
+    "answer": [
+      "C",
+      "E"
+    ]
+  }
+]

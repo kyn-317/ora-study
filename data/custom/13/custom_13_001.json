@@ -1,0 +1,72 @@
+[
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_001",
+    "title": "AWR(自動ワークロード・リポジトリ)のスナップショットに関する内容について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) AWRスナップショットは、デフォルトで30分間隔で自動的に生成される。",
+      "B) AWRスナップショットのデータは、SYSAUX表領域に格納される。",
+      "C) AWRスナップショットの保存期間はデフォルトで30日間である。",
+      "D) STATISTICS_LEVELパラメータがBASICに設定されていても、AWRスナップショットは自動的に収集される。",
+      "E) AWRスナップショットの間隔と保存期間は、DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGSプロシージャで変更できる。"
+    ],
+    "answer": ["B", "E"],
+    "explanation": "해설:\n\n정답:\nB) AWR 스냅샷 데이터는 SYSAUX 테이블스페이스에 저장됩니다. AWR은 MMON 프로세스가 V$ 뷰 통계를 주기적으로 SYSAUX 테이블스페이스에 스냅샷으로 저장하는 구조입니다.\nE) AWR 스냅샷의 간격과 보존 기간은 DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS 프로시저를 사용하여 변경할 수 있습니다.\n\n오답:\nA) AWR 스냅샷의 기본 간격은 30분이 아니라 60분(1시간)입니다.\nC) AWR 스냅샷의 기본 보존 기간은 30일이 아니라 8일입니다.\nD) STATISTICS_LEVEL=BASIC으로 설정하면 AWR 자동 스냅샷이 비활성화됩니다. TYPICAL(기본값) 이상이어야 AWR이 활성화됩니다.\n\n핵심 개념: AWR은 MMON 프로세스가 기본 60분 간격으로 V$ 뷰 통계를 SYSAUX 테이블스페이스에 저장하며, 기본 보존 기간은 8일입니다. STATISTICS_LEVEL=TYPICAL 이상이어야 AWR이 활성화됩니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_002",
+    "title": "ADDMの分析メカニズムにおけるFinding(発見)の分類について正しく述べているのはどれになりますか(2つ選択してください)。",
+    "options": [
+      "A) ADDMのFindingは、Problem(問題)とSymptom(症状)の2種類に分類される。",
+      "B) ADDMは、デフォルトでDB Time全体の5%以上を占める問題のみをレポートする。",
+      "C) Problem Findingは、DB Timeに直接的な影響を与える根本原因を示す。",
+      "D) Symptom Findingは、他のProblemの結果として現れる現象であり、根本原因ではない場合がある。",
+      "E) ADDMはボトムアップ方式でDB Timeを分析し、詳細な原因から全体像へと追跡する。"
+    ],
+    "answer": ["C", "D"],
+    "explanation": "해설:\n\n정답:\nC) Problem Finding은 DB Time에 직접적인 영향을 미치는 근본 원인을 나타냅니다. 예를 들어 'Top SQL by DB Time', 'I/O throughput 병목' 등이 이에 해당합니다.\nD) Symptom Finding은 다른 Problem의 결과로 나타나는 현상으로, 근본 원인이 아닐 수 있습니다. 예를 들어 '높은 CPU 사용률', '과도한 대기 시간' 등이 이에 해당합니다.\n\n오답:\nA) ADDM의 Finding은 Problem과 Symptom 2가지가 아니라, Problem(근본 원인), Symptom(증상), Information(정보)의 3가지로 분류됩니다.\nB) ADDM은 기본적으로 DB Time의 5%가 아니라 1% 이상을 차지하는 문제를 보고합니다. 이 임계값은 DBTIME_THRESHOLD 파라미터로 조정할 수 있습니다.\nE) ADDM은 보텀업(Bottom-Up)이 아니라 하향식(Top-Down) 분석 방법론을 사용합니다. 전체 DB Time에서 시작하여 세부 원인까지 계층적으로 추적합니다.\n\n핵심 개념: ADDM은 하향식(Top-Down) DB Time 분해 분석을 수행하며, Finding을 Problem(근본 원인), Symptom(증상), Information(정보)의 3가지로 분류합니다. 기본 보고 임계값은 DB Time의 1%입니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_003",
+    "title": "STATISTICS_LEVELパラメータの設定値とADDMの動作に関する説明として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) STATISTICS_LEVELをALLに設定すると、ADDMは無効になるが、AWRスナップショットは引き続き収集される。",
+      "B) STATISTICS_LEVELをTYPICALに設定すると、ADDM、AWR、ASHが有効になる。",
+      "C) STATISTICS_LEVELの変更はデータベースの再起動後にのみ有効になる。",
+      "D) STATISTICS_LEVELをBASICに変更しても、既存のAWRデータやADDM結果は削除されない。",
+      "E) CONTROL_MANAGEMENT_PACK_ACCESSパラメータがNONEに設定されていても、STATISTICS_LEVELがTYPICALであればADDMは自動的に有効になる。"
+    ],
+    "answer": ["B", "D"],
+    "explanation": "해설:\n\n정답:\nB) STATISTICS_LEVEL=TYPICAL(기본값)로 설정하면 ADDM, AWR 스냅샷, ASH(Active Session History) 모두 활성화됩니다. 이것이 Oracle 권장 설정입니다.\nD) STATISTICS_LEVEL을 BASIC으로 변경하더라도 이미 수집된 AWR 데이터와 ADDM 결과는 삭제되지 않습니다. 새로운 수집만 중단됩니다.\n\n오답:\nA) STATISTICS_LEVEL=ALL로 설정하면 ADDM이 무효화되는 것이 아니라, TYPICAL 수준의 모든 기능에 추가로 OS 통계, Plan 통계 등이 수집됩니다. ADDM은 정상적으로 활성화됩니다.\nC) STATISTICS_LEVEL 변경은 동적으로(ALTER SYSTEM) 즉시 적용되며, 데이터베이스 재시작이 필요하지 않습니다.\nE) 오답 — CONTROL_MANAGEMENT_PACK_ACCESS가 NONE으로 설정되면 Diagnostic Pack 사용이 비활성화되므로, STATISTICS_LEVEL이 TYPICAL이더라도 ADDM은 자동으로 활성화되지 않습니다. ADDM이 정상 동작하려면 STATISTICS_LEVEL=TYPICAL 이상이면서 동시에 CONTROL_MANAGEMENT_PACK_ACCESS=DIAGNOSTIC+TUNING(또는 DIAGNOSTIC)이어야 합니다.\n\n핵심 개념: STATISTICS_LEVEL의 3가지 설정(BASIC/TYPICAL/ALL) 중 TYPICAL이 기본이며, BASIC 설정 시 AWR/ADDM/ASH가 모두 비활성화됩니다. 설정 변경은 동적으로 즉시 적용되며, 기존 데이터는 보존됩니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_004",
+    "title": "SQLチューニング・アドバイザとSQLアクセス・アドバイザの比較について正しく述べているのはどれになりますか(2つ選択してください)。",
+    "options": [
+      "A) SQLチューニング・アドバイザは、DBMS_ADVISORパッケージを使用してタスクを生成する。",
+      "B) SQLアクセス・アドバイザは、個別のSQL文の最適化に特化したアドバイザである。",
+      "C) SQLチューニング・アドバイザは、SQLプロファイルの生成や索引作成の推奨など、個別SQL文のパフォーマンス最適化の推奨事項を提供する。",
+      "D) SQLアクセス・アドバイザは、索引、マテリアライズド・ビュー、パーティショニングなどのアクセス構造に関する最適化推奨を生成する。",
+      "E) SQLチューニング・アドバイザとSQLアクセス・アドバイザはどちらもDBMS_SQLTUNEパッケージを使用して実行する。"
+    ],
+    "answer": ["C", "D"],
+    "explanation": "해설:\n\n정답:\nC) SQL 튜닝 어드바이저는 개별 SQL 문을 심층 분석하여 SQL 프로파일 생성, 인덱스 생성 권고, 통계 수집 권고, SQL 구조 변경 권고 등 개별 SQL 수준의 최적화 권고를 제공합니다. DBMS_SQLTUNE 패키지를 사용합니다.\nD) SQL 액세스 어드바이저는 전체 SQL 워크로드를 분석하여 인덱스(Index), 구체화 뷰(Materialized View), 파티셔닝(Partitioning) 등의 액세스 구조에 대한 최적화 권고를 생성합니다. DBMS_ADVISOR 패키지를 사용합니다.\n\n오답:\nA) SQL 튜닝 어드바이저는 DBMS_ADVISOR가 아니라 DBMS_SQLTUNE 패키지를 사용하여 태스크를 생성합니다. DBMS_ADVISOR 패키지를 사용하는 것은 SQL 액세스 어드바이저입니다.\nB) 개별 SQL 문의 최적화에 특화된 것은 SQL 액세스 어드바이저가 아니라 SQL 튜닝 어드바이저입니다. SQL 액세스 어드바이저는 전체 워크로드를 고려한 종합적인 액세스 구조 권고를 제공합니다.\nE) SQL 튜닝 어드바이저는 DBMS_SQLTUNE 패키지를, SQL 액세스 어드바이저는 DBMS_ADVISOR 패키지를 사용합니다. 두 어드바이저가 동일한 패키지를 사용하지 않습니다.\n\n핵심 개념: SQL 튜닝 어드바이저(DBMS_SQLTUNE)는 개별 SQL 최적화, SQL 액세스 어드바이저(DBMS_ADVISOR)는 전체 워크로드 기반의 액세스 구조(인덱스, MV, 파티션) 최적화를 담당합니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_005",
+    "title": "AWRレポートの主要セクションとその内容の組み合わせとして正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Load Profile: データベースのバッファ・キャッシュ・ヒット率やライブラリ・キャッシュ・ヒット率を表示する。",
+      "B) Top 5 Timed Events: 最も多くのDB Timeを消費した上位5つの待機イベントを表示し、パフォーマンスのボトルネックを特定するための最も重要な分析ポイントである。",
+      "C) Instance Efficiency: 1秒あたりまたはトランザクションあたりの主要指標(論理読取り、物理読取り、REDOサイズなど)を表示する。",
+      "D) SQL Statistics: AWRスナップショットの保存期間と間隔の設定情報を表示する。",
+      "E) Report Summary: データベース名、インスタンス名、期間、DB Time、経過時間などの概要情報を表示する。"
+    ],
+    "answer": ["B", "E"],
+    "explanation": "해설:\n\n정답:\nB) Top 5 Timed Events 섹션은 가장 많은 DB Time을 소비한 상위 5개 대기 이벤트를 표시합니다. 이 섹션이 성능 병목을 식별하는 가장 중요한 분석 포인트입니다.\nE) Report Summary 섹션은 데이터베이스 이름, 인스턴스 이름, 기간, DB Time, 경과 시간(Elapsed Time) 등의 개요 정보를 표시합니다.\n\n오답:\nA) Load Profile은 버퍼 캐시 히트율이나 라이브러리 캐시 히트율을 표시하는 것이 아니라, 초당/트랜잭션당 주요 지표(Logical Reads, Physical Reads, Redo Size 등)를 표시합니다. 히트율 정보는 Instance Efficiency 섹션에서 확인합니다.\nC) Instance Efficiency는 초당 또는 트랜잭션당 지표를 표시하는 것이 아니라, 버퍼 캐시 히트율(Buffer Cache Hit Ratio), 라이브러리 캐시 히트율(Library Cache Hit Ratio), Parse 비율 등의 효율성 지표를 표시합니다. 초당/트랜잭션당 지표는 Load Profile 섹션에서 확인합니다.\nD) SQL Statistics는 스냅샷 설정 정보를 표시하는 것이 아니라, Top SQL by Elapsed Time, CPU Time, Buffer Gets, Executions 등 SQL 실행 통계를 표시합니다.\n\n핵심 개념: AWR 보고서의 주요 섹션은 Report Summary(개요), Load Profile(초당/트랜잭션당 지표), Instance Efficiency(캐시 히트율 등), Top 5 Timed Events(상위 대기 이벤트), SQL Statistics(SQL 실행 통계) 등으로 구성됩니다."
+  }
+]

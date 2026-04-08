@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_006",
+    "title": "V$UNDOSTATビューに関する説明として正しいものを選択してください。(2つ選択してください)",
+    "options": [
+      "A) V$UNDOSTATはUNDO使用統計を10分間隔のスナップショットとして収集し、最大4日間(576行)保持する。",
+      "B) TUNED_UNDORETENTION列は、DBAが手動で設定したUNDO_RETENTIONパラメータの値を表示する。",
+      "C) SSOLDERRCNT列はORA-01555(Snapshot Too Old)エラーの発生回数を確認できる。",
+      "D) V$UNDOSTATは1分間隔でUNDO統計を収集し、最大7日間保持する。",
+      "E) UNXPSTEALCNT列の値が0より大きい場合、EXPIRED状態のExtentが不足していることを示す。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답:\nA) V$UNDOSTAT는 UNDO 사용 통계를 10분 간격 스냅샷으로 수집하며, 최대 4일(576행) 동안 보존합니다. AWR(Automatic Workload Repository)에도 기록됩니다.\nC) SSOLDERRCNT 컬럼은 해당 통계 기간 내 ORA-01555(Snapshot Too Old) 에러 발생 횟수를 나타냅니다. NOSPACEERRCNT 컬럼은 ORA-30036(공간 부족) 에러 횟수를 확인하는 데 사용됩니다.\n\n오답 분석:\nB) TUNED_UNDORETENTION 컬럼은 DBA가 수동 설정한 값이 아니라, Auto-Tuning에 의해 Oracle이 자동으로 계산한 실제 적용 retention 값(초)을 표시합니다. AUTOEXTEND ON일 때 워크로드 기반으로 자동 조정됩니다.\nD) V$UNDOSTAT의 수집 간격은 1분이 아니라 10분이며, 보존 기간은 7일이 아닌 최대 4일입니다.\nE) UNXPSTEALCNT가 0보다 크다는 것은 UNEXPIRED 상태의 Extent가 강제로 재사용(Steal)되었음을 의미합니다. 이는 UNDO 공간이 부족하여 아직 보존 기간이 만료되지 않은 UNDO까지 덮어쓴 것으로, EXPIRED Extent 부족이 아닌 전체적인 UNDO 공간 부족 징후입니다.\n\n핵심 개념: V$UNDOSTAT는 UNDO 운영 상태를 분석하는 핵심 동적 성능 뷰로, UNDO 공간 산정, ORA-01555 진단, Auto-Tuning 확인 등에 활용됩니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_007",
+    "title": "UNDO_RETENTIONのAuto-Tuning(自動調整)機能について正しく述べているものを選択してください。",
+    "options": [
+      "A) Auto-TuningはUNDO表領域のAUTOEXTENDがONに設定されている場合に有効になり、ワークロードに基づいて最適なretention期間を自動調整する。",
+      "B) Auto-Tuningが有効な場合、UNDO_RETENTIONパラメータの値は無視され、Oracleが算出した値のみが使用される。",
+      "C) Auto-TuningはAUTOEXTENDがOFFの場合にのみ有効になり、固定サイズ内で最適な保持期間を算出する。",
+      "D) Auto-Tuning機能を使用するためにはDBMS_UNDO_ADVパッケージを手動で実行する必要がある。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A) UNDO_RETENTION Auto-Tuning은 UNDO 테이블스페이스의 AUTOEXTEND가 ON으로 설정된 경우에 활성화됩니다. Oracle은 V$UNDOSTAT에 기록된 통계를 분석하여 최장 쿼리 실행 시간(MAXQUERYLEN)을 기준으로 최적의 retention 기간을 자동으로 계산하고 적용합니다.\n\n오답 분석:\nB) Auto-Tuning이 활성화되어도 UNDO_RETENTION 파라미터 값이 무시되는 것이 아닙니다. UNDO_RETENTION 값은 Auto-Tuning의 최소 하한(Floor)으로 작용하며, Oracle이 계산한 값이 이보다 큰 경우에만 더 큰 값이 적용됩니다.\nC) AUTOEXTEND가 OFF인 경우에는 Auto-Tuning이 비활성화되며, UNDO_RETENTION 파라미터에 설정된 값을 그대로 사용합니다. 설명이 정반대입니다.\nD) DBMS_UNDO_ADV 패키지는 UNDO Advisor로 분석 및 권장값을 제공하는 도구이며, Auto-Tuning 기능 자체와는 별개입니다. Auto-Tuning은 Oracle이 자동으로 수행합니다.\n\n핵심 개념: UNDO_RETENTION Auto-Tuning은 AUTOEXTEND ON 환경에서 자동 활성화되며, UNDO_RETENTION 파라미터는 최소 하한으로 작용합니다. V$UNDOSTAT의 TUNED_UNDORETENTION 컬럼으로 자동 조정된 값을 확인할 수 있습니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_008",
+    "title": "UNDO表領域の空き領域が不足した場合のExtent割り当て優先順位について正しく述べているものを選択してください。",
+    "options": [
+      "A) EXPIRED Extent再利用 → Free Space新規割り当て → AUTOEXTEND拡張 → UNEXPIRED Extent強制再利用 → ORA-30036エラー",
+      "B) UNEXPIRED Extent強制再利用 → EXPIRED Extent再利用 → Free Space新規割り当て → ORA-30036エラー",
+      "C) Free Space新規割り当て → AUTOEXTEND拡張 → EXPIRED Extent再利用 → ACTIVE Extent再利用 → ORA-30036エラー",
+      "D) EXPIRED Extent再利用 → ACTIVE Extent再利用 → UNEXPIRED Extent強制再利用 → ORA-30036エラー"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A) UNDO 공간이 부족할 때 Oracle은 다음 우선순위로 Extent를 할당합니다: (1) EXPIRED Extent 재사용 → (2) UNDO 테이블스페이스의 Free Space에서 새 Extent 할당 → (3) AUTOEXTEND ON이면 데이터 파일 자동 확장 → (4) UNEXPIRED Extent를 강제로 EXPIRED 전환 후 재사용(NOGUARANTEE 모드) → (5) 모든 수단 소진 시 ORA-30036 에러 발생.\n\n오답 분석:\nB) UNEXPIRED Extent 강제 재사용은 최후 수단 중 하나이며, EXPIRED Extent 재사용과 Free Space 할당이 먼저 시도됩니다. 우선순위가 올바르지 않습니다.\nC) ACTIVE Extent는 현재 진행 중인 트랜잭션이 사용 중이므로 어떤 경우에도 재사용할 수 없습니다. ACTIVE Extent 재사용이라는 단계는 존재하지 않습니다.\nD) C와 마찬가지로 ACTIVE Extent는 절대 재사용 불가합니다. 활성 트랜잭션의 롤백을 위해 반드시 보호되어야 하는 공간입니다.\n\n핵심 개념: UNDO 공간 할당에서 EXPIRED가 1순위, ACTIVE는 절대 재사용 불가이며, NOGUARANTEE 모드에서만 UNEXPIRED 강제 전환이 가능합니다. GUARANTEE 모드에서는 UNEXPIRED도 보호되어 ORA-30036이 발생합니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_009",
+    "title": "UNDOセグメントの構造と動作に関する正しい説明を選択してください。(2つ選択してください)",
+    "options": [
+      "A) UNDOセグメントのヘッダーブロックにはトランザクションテーブルが存在し、トランザクションID、状態、コミットSCNなどを管理する。",
+      "B) 1つのUNDOセグメントは同時に1つのトランザクションのみに割り当てることができる。",
+      "C) UNDOセグメントはExtentを順次使用し、最後のExtentに達すると最初のExtentに戻る循環方式で動作する。",
+      "D) UNDOセグメントの名前はDBAが手動で指定する必要があり、自動生成されない。",
+      "E) UNDOセグメントのExtent使用中にACTIVE状態のExtentに到達した場合、そのExtentを強制的に再利用する。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답:\nA) UNDO 세그먼트의 헤더 블록에는 트랜잭션 테이블(Transaction Table)이 존재합니다. 이 구조는 트랜잭션 ID(XID: USN+Slot+Sequence), 트랜잭션 상태(ACTIVE/COMMITTED/DEAD), 커밋 SCN, UBA(UNDO Block Address) 등을 관리합니다.\nC) UNDO 세그먼트는 Redo Log와 유사하게 순환적(Circular)으로 Extent를 사용합니다. 현재 Extent가 가득 차면 다음 Extent로 이동하고, 마지막 Extent에 도달하면 첫 번째 Extent로 돌아갑니다.\n\n오답 분석:\nB) 하나의 UNDO 세그먼트는 여러 트랜잭션을 동시에 서비스할 수 있습니다. 각 트랜잭션은 하나의 UNDO 세그먼트에 할당되지만, 그 반대는 1:1이 아닙니다.\nD) UNDO 세그먼트 이름은 _SYSSMU<N>_<hash>$ 형태로 Oracle이 자동 생성합니다. Automatic UNDO Management(AUTO 모드)에서는 DBA가 수동으로 생성하거나 이름을 지정할 필요가 없습니다.\nE) ACTIVE 상태의 UNDO가 있는 Extent는 절대 재사용할 수 없습니다. 순환 사용 중 ACTIVE Extent에 도달하면 해당 Extent를 건너뛰고 새로운 Extent를 할당합니다.\n\n핵심 개념: UNDO 세그먼트는 헤더의 트랜잭션 테이블로 트랜잭션을 관리하며, Extent를 순환적으로 사용합니다. ACTIVE Extent는 항상 보호되고, 세그먼트는 자동 관리됩니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_010",
+    "title": "UNDO表領域のサイズ算定(Sizing)に関する説明として正しいものを選択してください。",
+    "options": [
+      "A) UNDO表領域の最小サイズは「UNDO_RETENTION(秒) × 秒あたりのUNDO生成量(bytes/秒)」の公式で算定できる。",
+      "B) V$UNDOSTATのUNDOBLKS列とMAXQUERYLEN列を使用して秒あたりのUNDO生成ブロック数を計算できる。",
+      "C) UNDO表領域のサイズ算定においては平均ワークロードを基準にすればよく、ピークワークロードを考慮する必要はない。",
+      "D) RETENTION GUARANTEEモードとNOGUARANTEEモードで必要なUNDO表領域のサイズは同じである。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A) UNDO 테이블스페이스의 최소 크기는 'UNDO_RETENTION(초) × 초당 UNDO 생성률(bytes/초)'로 산정할 수 있습니다. 여기에 10~20%의 여유 공간(오버헤드)을 더하는 것이 권장됩니다. V$UNDOSTAT의 UNDOBLKS와 시간 간격을 이용하여 초당 UNDO 블록 생성률을 산출할 수 있습니다.\n\n오답 분석:\nB) UNDOBLKS 컬럼은 해당 통계 기간 동안 소비된 UNDO 블록 수를 나타내며, BEGIN_TIME과 END_TIME의 시간 간격으로 나누어 초당 블록 생성률을 계산합니다. MAXQUERYLEN은 최장 쿼리 실행 시간을 나타내는 컬럼으로, 초당 UNDO 생성률 계산에 직접 사용되지 않습니다. MAXQUERYLEN은 UNDO_RETENTION 설정의 기준으로 활용됩니다.\nC) UNDO 크기 산정은 반드시 피크(최대) 워크로드 시점을 기준으로 해야 합니다. 평균 워크로드만 고려하면 부하가 집중되는 시점에 UNDO 공간 부족(ORA-30036)이 발생할 수 있습니다.\nD) RETENTION GUARANTEE 모드는 UNEXPIRED Extent를 절대 재사용하지 않으므로, NOGUARANTEE 모드보다 더 큰 UNDO 테이블스페이스가 필요합니다. 두 모드의 필요 크기는 다릅니다.\n\n핵심 개념: UNDO 공간 산정은 피크 워크로드 기준으로 'UNDO_RETENTION × 초당 UNDO 생성률 + 여유 공간' 공식을 사용하며, DBMS_UNDO_ADV(UNDO Advisor)로 자동 분석도 가능합니다."
+  }
+]

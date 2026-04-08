@@ -1,0 +1,353 @@
+{
+  "id": "06_03",
+  "title": "특수 환경 제어 (Special Environment Control)",
+  "chapter": "06. UNDO 데이터베이스 제어",
+  "description": "성능 최적화를 위한 임시(Temporary) UNDO 적용 방법과 멀티테넌트(Multitenant) 환경에서의 로컬(Local) / 공유(Shared) UNDO 모드 운영 전략을 다룹니다. Temporary UNDO를 활용하면 Global Temporary Table 작업 시 UNDO 테이블스페이스와 REDO 로그에 대한 쓰기량을 대폭 줄일 수 있으며, 멀티테넌트 환경에서는 UNDO 모드 선택이 PDB 이동성과 운영 효율성에 직접적인 영향을 미칩니다.",
+  "oracle26ai_changes": [
+    "Oracle 23ai/26ai에서는 Local UNDO 모드가 CDB의 기본값으로 완전히 정착되었으며, Shared UNDO 모드는 레거시 호환 목적으로만 유지됩니다.",
+    "Automatic UNDO Management가 PDB 레벨에서도 더욱 정교하게 동작하며, PDB 격리(Isolation) 강화를 위해 각 PDB별 UNDO_RETENTION 설정의 독립성이 향상되었습니다.",
+    "PDB Relocate, Hot Clone 등 멀티테넌트 이동성 기능이 Local UNDO 모드 기반으로 최적화되어 성능이 개선되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "특수 환경 제어 개요 (Overview of Special Environment Control)",
+      "sqlExamplesIds": ["sql01", "sql02"],
+      "content": "Oracle UNDO 관리에서 **특수 환경 제어**란 기본적인 UNDO 테이블스페이스 운영을 넘어, 특수한 워크로드나 아키텍처 환경에 맞춰 UNDO 동작을 최적화하는 기법을 의미합니다.\n\n## 특수 환경 제어의 두 가지 축\n\n| 영역 | 대상 | 핵심 목적 | 주요 파라미터 |\n|---|---|---|---|\n| **임시 UNDO (Temporary UNDO)** | Global Temporary Table (GTT) 작업 | UNDO/REDO 쓰기량 감소로 성능 최적화 | `TEMP_UNDO_ENABLED` |\n| **멀티테넌트 UNDO 모드** | CDB/PDB 환경 | PDB 이동성 확보 및 운영 효율화 | `UNDO_TABLESPACE`, `UNDO_MODE` |\n\n## 전체 아키텍처 맥락\n\n```\nOracle UNDO 특수 환경 제어\n├── Temporary UNDO\n│   ├── Global Temporary Table (GTT) 전용\n│   ├── UNDO 데이터를 Temp Tablespace에 저장\n│   ├── REDO 로그 기록 불필요\n│   └── TEMP_UNDO_ENABLED = TRUE\n└── 멀티테넌트 UNDO 모드\n    ├── Shared UNDO Mode\n    │   ├── CDB$ROOT의 단일 UNDO 테이블스페이스\n    │   └── 모든 PDB가 공유\n    └── Local UNDO Mode\n        ├── 각 PDB별 독립 UNDO 테이블스페이스\n        ├── PDB 이동성 (Portability) 극대화\n        └── Oracle 21c 이후 기본값\n```\n\n## 일반 UNDO vs 특수 환경 UNDO 비교\n\n| 구분 | 일반 UNDO | Temporary UNDO | 멀티테넌트 UNDO |\n|---|---|---|---|\n| **저장 위치** | UNDO 테이블스페이스 | Temp 테이블스페이스 | UNDO 테이블스페이스 (Shared/Local) |\n| **REDO 기록** | 필수 | 불필요 | 필수 |\n| **적용 대상** | 영구 테이블 DML | GTT DML | CDB/PDB 환경 전체 |\n| **복구 가능성** | 인스턴스 복구 시 사용 | 인스턴스 복구 불필요 | 모드에 따라 다름 |\n| **Flashback Query** | 지원 | 세션 내에서만 지원 | 지원 |",
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "임시 UNDO (Temporary UNDO)",
+      "sqlExamplesIds": ["sql01", "sql02", "sql03", "sql04", "sql05"],
+      "content": "**임시 UNDO(Temporary UNDO)**는 Global Temporary Table(GTT) 및 임시 테이블에 대한 DML 작업 시 생성되는 UNDO 데이터를 **UNDO 테이블스페이스가 아닌 임시 테이블스페이스(Temporary Tablespace)**에 저장하는 메커니즘입니다.\n\n## Temporary UNDO의 핵심 이점\n\n| 항목 | 기존 방식 (Temp UNDO 비활성) | Temp UNDO 활성 시 |\n|---|---|---|\n| **UNDO 저장 위치** | UNDO 테이블스페이스 | Temp 테이블스페이스 |\n| **REDO 생성** | UNDO 데이터에 대한 REDO 생성 | REDO 생성 없음 |\n| **UNDO 테이블스페이스 부하** | GTT 작업도 UNDO 공간 사용 | GTT 작업은 UNDO 공간 미사용 |\n| **인스턴스 복구** | GTT UNDO도 복구 대상 | GTT UNDO는 복구 불필요 |\n| **성능 영향** | REDO/UNDO I/O 발생 | I/O 대폭 감소 |",
+      "subsections": [
+        {
+          "title": "Temporary UNDO의 정의와 목적 (Definition and Purpose)",
+          "content": "### 정의\n\n**Temporary UNDO**는 **임시 세그먼트(Temporary Segment)**에 대한 DML 작업의 UNDO 데이터를 임시 테이블스페이스에 기록하는 Oracle의 최적화 기능입니다. Oracle 12c R1에서 처음 도입되었습니다.\n\n### 동작 원리 — 단계별 설명\n\n1. **세션이 GTT에 DML 수행** — INSERT, UPDATE, DELETE 작업 시작\n2. **TEMP_UNDO_ENABLED 확인** — 세션 또는 시스템 레벨에서 TRUE인지 확인\n3. **Temp UNDO 세그먼트 할당** — 해당 세션의 임시 테이블스페이스 내에 UNDO 세그먼트 할당\n4. **UNDO 데이터를 Temp Tablespace에 기록** — 일반 UNDO 테이블스페이스 대신 Temp 테이블스페이스에 저장\n5. **REDO 기록 생략** — 임시 데이터이므로 REDO 로그에 기록하지 않음\n6. **롤백 시** — Temp Tablespace에서 UNDO 데이터를 읽어 롤백 수행\n7. **세션/트랜잭션 종료 시** — Temp UNDO 세그먼트 자동 해제\n\n### 왜 REDO가 불필요한가?\n\nGTT의 데이터는 본질적으로 **세션 또는 트랜잭션 범위**로 한정되며, 인스턴스 장애 시 복구할 필요가 없습니다. 따라서:\n- GTT 데이터 자체에 대한 REDO가 불필요\n- GTT의 UNDO 데이터에 대한 REDO도 불필요\n- 결과적으로 **이중의 I/O 감소 효과** 달성\n\n### 적용 대상\n\n| 대상 | Temporary UNDO 적용 |\n|---|---|\n| **Global Temporary Table (GTT)** | 적용됨 |\n| **Private Temporary Table** | 적용됨 |\n| **일반 영구 테이블** | 적용 안됨 (기존 UNDO 사용) |\n| **임시 LOB** | 적용됨 |\n| **WITH 절 Materialized Subquery** | 임시 세그먼트 사용 시 적용 가능 |",
+          "key_points": [
+            "Temporary UNDO는 GTT의 UNDO 데이터를 UNDO 테이블스페이스 대신 Temp 테이블스페이스에 저장",
+            "UNDO 데이터에 대한 REDO 로그 기록이 생략되어 이중의 I/O 감소 효과 달성",
+            "Oracle 12c R1에서 최초 도입된 기능",
+            "GTT 데이터는 세션/트랜잭션 범위이므로 인스턴스 복구 대상이 아님",
+            "Global Temporary Table, Private Temporary Table, 임시 LOB에 적용됨",
+            "일반 영구 테이블의 DML에는 적용되지 않음"
+          ]
+        },
+        {
+          "title": "TEMP_UNDO_ENABLED 파라미터 (Parameter Configuration)",
+          "content": "### 파라미터 상세\n\n| 속성 | 값 |\n|---|---|\n| **파라미터명** | `TEMP_UNDO_ENABLED` |\n| **기본값** | `FALSE` (Oracle 12c~19c), `TRUE` (Oracle 21c 이후) |\n| **변경 레벨** | 세션(Session) 및 시스템(System) 레벨 모두 가능 |\n| **동적 변경** | 가능 (`ALTER SESSION` / `ALTER SYSTEM`) |\n| **데이터 타입** | Boolean |\n| **도입 버전** | Oracle 12c Release 1 |\n\n### 설정 방법\n\n**세션 레벨 설정:**\n```sql\nALTER SESSION SET TEMP_UNDO_ENABLED = TRUE;\n```\n\n**시스템 레벨 설정:**\n```sql\nALTER SYSTEM SET TEMP_UNDO_ENABLED = TRUE SCOPE=BOTH;\n```\n\n### 설정 시 고려사항\n\n1. **세션 레벨 우선**: 세션 레벨 설정이 시스템 레벨보다 우선합니다.\n2. **기존 트랜잭션에 대한 영향**: 이미 진행 중인 트랜잭션에는 변경이 적용되지 않습니다. 새 트랜잭션부터 적용됩니다.\n3. **Temp 테이블스페이스 크기 확인**: Temporary UNDO가 Temp 테이블스페이스를 추가로 사용하므로, 충분한 크기를 확보해야 합니다.\n4. **멀티테넌트 환경**: PDB 레벨에서도 설정 가능합니다.\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| `TEMP_UNDO_ENABLED` | Temporary UNDO 활성화 여부 |\n| `DEFAULT_TEMP_TABLESPACE` | 기본 임시 테이블스페이스 지정 |\n| `UNDO_RETENTION` | UNDO 보존 시간 (Temporary UNDO에도 영향) |",
+          "key_points": [
+            "TEMP_UNDO_ENABLED 파라미터로 활성화하며, Oracle 21c 이후 기본값이 TRUE",
+            "세션(ALTER SESSION) 및 시스템(ALTER SYSTEM) 레벨 모두에서 동적 변경 가능",
+            "세션 레벨 설정이 시스템 레벨보다 우선 적용",
+            "이미 진행 중인 트랜잭션에는 영향 없이 새 트랜잭션부터 적용",
+            "Temp 테이블스페이스 크기가 충분한지 사전 확인 필요",
+            "멀티테넌트 환경에서는 PDB 레벨에서도 독립적으로 설정 가능"
+          ]
+        },
+        {
+          "title": "Temporary UNDO의 내부 저장 구조 (Internal Storage Architecture)",
+          "content": "### 저장 구조 개요\n\nTemporary UNDO 데이터는 세션의 **임시 테이블스페이스(Temporary Tablespace)** 내에 **임시 UNDO 세그먼트(Temporary Undo Segment)**로 저장됩니다.\n\n### 내부 구조\n\n```\nTemp Tablespace\n├── Sort Segment (정렬 작업용)\n├── Hash Segment (해시 조인용)\n├── GTT Data Segment (GTT 데이터)\n└── Temporary Undo Segment  ← Temp UNDO 저장\n    ├── Undo Block Header\n    ├── Undo Records (Before-Image)\n    └── Transaction Table Entry\n```\n\n### 기존 UNDO vs Temporary UNDO 저장 흐름 비교\n\n| 단계 | 기존 UNDO 흐름 | Temporary UNDO 흐름 |\n|---|---|---|\n| 1단계 | GTT DML 실행 | GTT DML 실행 |\n| 2단계 | UNDO 레코드를 UNDO 테이블스페이스에 기록 | UNDO 레코드를 Temp 테이블스페이스에 기록 |\n| 3단계 | UNDO 레코드에 대한 REDO 생성 | REDO 생성 없음 |\n| 4단계 | REDO 로그 버퍼에 기록 | 해당 없음 |\n| 5단계 | LGWR이 REDO를 디스크에 기록 | 해당 없음 |\n| 6단계 | 커밋 시 UNDO 보존 | 커밋 시 Temp UNDO 즉시 해제 가능 |\n\n### Temp 테이블스페이스 공간 관리\n\n- Temporary UNDO는 Temp 테이블스페이스의 공간을 **추가로** 사용합니다.\n- Sort 작업, Hash 작업과 동일한 Temp 공간을 공유합니다.\n- 대량 GTT 작업 시 Temp 테이블스페이스의 공간 부족이 발생할 수 있습니다.\n- `V$TEMP_SPACE_HEADER`, `DBA_TEMP_FREE_SPACE` 뷰로 공간을 모니터링해야 합니다.\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$TEMPUNDOSTAT** | Temporary UNDO 사용 통계 (10분 간격 스냅샷) |\n| **V$UNDOSTAT** | 일반 UNDO 통계 (비교용) |\n| **V$TEMP_SPACE_HEADER** | Temp 테이블스페이스 공간 현황 |\n| **DBA_TEMP_FREE_SPACE** | Temp 테이블스페이스 여유 공간 |\n| **V$TEMPSTAT** | Temp 파일별 I/O 통계 |\n| **V$SORT_SEGMENT** | Sort 세그먼트 사용 현황 |",
+          "key_points": [
+            "Temporary UNDO 데이터는 Temp Tablespace 내에 Temporary Undo Segment로 저장",
+            "Sort/Hash 작업과 동일한 Temp 공간을 공유하므로 공간 경합 가능",
+            "REDO 로그 기록 단계(3~5단계)가 완전히 생략되어 I/O 대폭 감소",
+            "V$TEMPUNDOSTAT 뷰로 Temporary UNDO 사용 통계를 10분 간격으로 모니터링",
+            "대량 GTT 작업 시 Temp 테이블스페이스 크기를 사전에 충분히 확보해야 함",
+            "커밋 시 Temporary UNDO가 즉시 해제 가능하여 공간 효율성이 높음"
+          ]
+        },
+        {
+          "title": "Temporary UNDO의 제한사항 및 주의점 (Limitations and Considerations)",
+          "content": "### 제한사항\n\n| 제한 항목 | 설명 |\n|---|---|\n| **적용 범위** | GTT, Private Temporary Table, 임시 LOB에만 적용. 일반 테이블 DML에는 미적용 |\n| **분산 트랜잭션** | 분산 트랜잭션(Distributed Transaction)에서는 Temporary UNDO 미지원 |\n| **Serializable 격리 수준** | Serializable 격리 수준에서 다른 세션의 Temporary UNDO를 읽을 수 없음 |\n| **Flashback Query 제한** | 다른 세션의 GTT 데이터에 대한 Flashback Query 불가 |\n| **Export/Import** | GTT의 데이터는 Export되지 않으므로 Temporary UNDO도 Export 대상 아님 |\n| **Data Guard** | Standby 데이터베이스로 Temporary UNDO는 전파되지 않음 |\n\n### 주의점\n\n1. **Temp 테이블스페이스 크기 관리**\n   - Temporary UNDO가 활성화되면 Temp 테이블스페이스 사용량이 증가합니다.\n   - 정렬/해시 작업과 UNDO가 동일한 Temp 공간을 사용하므로, 피크 시 공간 부족 가능성이 있습니다.\n   - Temp 테이블스페이스를 AUTOEXTEND ON으로 설정하는 것이 권장됩니다.\n\n2. **혼합 트랜잭션 주의**\n   - 하나의 트랜잭션 내에서 GTT와 일반 테이블을 모두 DML하는 경우:\n     - GTT 부분: Temporary UNDO 사용\n     - 일반 테이블 부분: 기존 UNDO 사용\n   - 두 가지 UNDO가 동시에 생성됩니다.\n\n3. **Read Consistency**\n   - 같은 세션 내에서는 Temporary UNDO를 사용한 Read Consistency가 정상 동작합니다.\n   - 다른 세션에서는 GTT의 데이터 자체가 보이지 않으므로 Read Consistency 문제가 없습니다.\n\n4. **인스턴스 복구**\n   - Temporary UNDO는 인스턴스 복구(Instance Recovery) 시 사용되지 않습니다.\n   - 인스턴스 재시작 시 Temp 데이터는 자동으로 삭제됩니다.\n\n### 특수 동작 케이스\n\n| 케이스 | 동작 |\n|---|---|\n| GTT ON COMMIT DELETE ROWS + 커밋 | Temp UNDO 즉시 해제 |\n| GTT ON COMMIT PRESERVE ROWS + 세션 종료 | 세션 종료 시 Temp UNDO 해제 |\n| ROLLBACK 수행 | Temp Tablespace에서 UNDO 읽어 롤백 수행 |\n| 인스턴스 장애 | Temp UNDO는 복구 대상 아님, 자동 소멸 |\n| SAVEPOINT + 부분 롤백 | Temp UNDO의 부분 롤백 정상 지원 |",
+          "key_points": [
+            "분산 트랜잭션(Distributed Transaction)에서는 Temporary UNDO가 지원되지 않음",
+            "다른 세션의 GTT 데이터에 대한 Flashback Query는 불가",
+            "Data Guard Standby로 Temporary UNDO는 전파되지 않음",
+            "혼합 트랜잭션에서는 GTT용 Temp UNDO와 일반 UNDO가 동시에 생성됨",
+            "인스턴스 복구 시 Temporary UNDO는 사용되지 않으며 자동 소멸",
+            "Temp 테이블스페이스를 AUTOEXTEND ON으로 설정하여 공간 부족 방지 권장",
+            "SAVEPOINT를 통한 부분 롤백도 Temporary UNDO에서 정상 지원"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "멀티테넌트 환경의 UNDO 모드 개요 (Multitenant UNDO Mode Overview)",
+      "sqlExamplesIds": ["sql06", "sql07"],
+      "content": "**멀티테넌트 아키텍처(Multitenant Architecture)**에서 UNDO 관리는 **공유 UNDO 모드(Shared UNDO Mode)**와 **로컬 UNDO 모드(Local UNDO Mode)**의 두 가지 방식으로 나뉩니다. 이 선택은 CDB 전체의 UNDO 관리 방식, PDB 이동성, 그리고 운영 전략에 큰 영향을 미칩니다.\n\n## 두 가지 UNDO 모드 비교\n\n| 비교 항목 | Shared UNDO Mode | Local UNDO Mode |\n|---|---|---|\n| **UNDO 테이블스페이스 위치** | CDB$ROOT에 1개 | 각 PDB마다 1개 |\n| **UNDO 관리 주체** | CDB 관리자 | PDB 관리자 (독립 관리 가능) |\n| **PDB 이동성** | 제한적 | 높음 (자체 UNDO 포함) |\n| **Hot Clone 지원** | 불가 | 가능 |\n| **PDB Relocate 지원** | 불가 | 가능 |\n| **Flashback PDB 지원** | 불가 | 가능 |\n| **UNDO 공간 격리** | 미격리 (PDB 간 경합 가능) | 완전 격리 |\n| **관리 복잡성** | 단순 | 상대적으로 복잡 |\n| **Oracle 21c+ 기본값** | 아니오 | **예 (기본값)** |\n| **Oracle 26ai 권장** | 레거시 호환만 | **권장** |\n\n## 아키텍처 비교 다이어그램\n\n```\n[Shared UNDO Mode]\nCDB$ROOT\n├── UNDO Tablespace (공유) ← 모든 PDB의 UNDO 데이터 저장\n├── PDB1 (UNDO 테이블스페이스 없음)\n├── PDB2 (UNDO 테이블스페이스 없음)\n└── PDB$SEED (UNDO 테이블스페이스 없음)\n\n[Local UNDO Mode]\nCDB$ROOT\n├── UNDO Tablespace (CDB$ROOT 전용)\n├── PDB1\n│   └── UNDO Tablespace (PDB1 전용)\n├── PDB2\n│   └── UNDO Tablespace (PDB2 전용)\n└── PDB$SEED\n    └── UNDO Tablespace (PDB$SEED 전용)\n```\n\n## UNDO 모드 확인 방법\n\nCDB의 현재 UNDO 모드는 `DATABASE_PROPERTIES` 딕셔너리 뷰 또는 `V$PARAMETER`에서 확인할 수 있습니다.",
+      "subsections": [
+        {
+          "title": "CDB / PDB 기본 개념 (CDB/PDB Fundamentals)",
+          "content": "### CDB (Container Database)\n\n**CDB**는 하나 이상의 PDB를 포함하는 **컨테이너 데이터베이스**입니다. 멀티테넌트 아키텍처의 최상위 컨테이너로, 공통 메타데이터와 시스템 리소스를 관리합니다.\n\n| 구성요소 | 설명 |\n|---|---|\n| **CDB$ROOT** | CDB의 루트 컨테이너. 시스템 메타데이터, 공통 사용자, 공통 오브젝트 저장 |\n| **PDB$SEED** | 새 PDB 생성 시 사용되는 템플릿 PDB. 읽기 전용 |\n| **PDB (User PDB)** | 실제 애플리케이션 데이터를 저장하는 Pluggable Database |\n| **Application Container** | 애플리케이션별 공통 오브젝트를 관리하는 선택적 컨테이너 |\n\n### PDB (Pluggable Database)\n\n**PDB**는 CDB 내에서 **독립적인 데이터베이스처럼 동작**하는 논리적 단위입니다:\n\n- 자체 사용자, 테이블스페이스, 스키마를 보유\n- CDB의 인스턴스(SGA, 백그라운드 프로세스)를 공유\n- Plug/Unplug 작업으로 다른 CDB로 이동 가능\n- 각 PDB는 독립적인 백업, 복구, 포인트-인-타임 복구 가능\n\n### 멀티테넌트와 UNDO의 관계\n\n멀티테넌트 환경에서 UNDO 관리가 중요한 이유:\n\n1. **PDB 이동성**: PDB를 다른 CDB로 이동할 때 UNDO 데이터의 처리 방식 결정\n2. **격리성**: PDB 간 UNDO 공간 경합 방지\n3. **Flashback PDB**: 개별 PDB를 과거 시점으로 복원하려면 PDB별 UNDO 이력이 필요\n4. **리소스 관리**: PDB별 UNDO 사용량 모니터링 및 제한",
+          "key_points": [
+            "CDB는 CDB$ROOT, PDB$SEED, 사용자 PDB로 구성되는 컨테이너 데이터베이스",
+            "PDB는 독립적인 데이터베이스처럼 동작하면서 CDB의 인스턴스를 공유",
+            "UNDO 모드 선택이 PDB 이동성, 격리성, Flashback PDB 지원에 직접 영향",
+            "PDB Plug/Unplug 작업 시 UNDO 데이터 처리 방식이 모드에 따라 달라짐",
+            "각 PDB의 UNDO 사용량을 독립적으로 모니터링하고 제한할 수 있어야 효율적 운영 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "공유 UNDO 모드 (Shared UNDO Mode)",
+      "sqlExamplesIds": ["sql06", "sql07", "sql08"],
+      "content": "**공유 UNDO 모드(Shared UNDO Mode)**는 CDB 전체가 **CDB$ROOT에 위치한 하나의 UNDO 테이블스페이스를 공유**하는 방식입니다. Oracle 12c에서 멀티테넌트가 처음 도입되었을 때의 기본 모드였습니다.",
+      "subsections": [
+        {
+          "title": "공유 UNDO 모드의 아키텍처 (Shared UNDO Architecture)",
+          "content": "### 정의\n\n공유 UNDO 모드에서는 CDB 내의 **모든 컨테이너(CDB$ROOT + 모든 PDB)**가 CDB$ROOT에 존재하는 **단일 UNDO 테이블스페이스**를 사용합니다.\n\n### 내부 동작 원리\n\n1. **UNDO 테이블스페이스**: CDB$ROOT에만 존재하며, 모든 PDB의 UNDO 데이터가 여기에 기록됨\n2. **UNDO 세그먼트 할당**: 각 PDB의 트랜잭션에 대해 CDB$ROOT의 UNDO 세그먼트가 할당됨\n3. **SMU (System-Managed Undo)**: CDB 레벨에서 UNDO 세그먼트를 자동 관리\n4. **UNDO 보존**: `UNDO_RETENTION` 파라미터가 CDB 레벨에서 단일로 적용됨\n\n### 구조 다이어그램\n\n```\nCDB Instance\n├── SGA (공유)\n│   └── Undo Segment Cache\n├── CDB$ROOT\n│   ├── SYSTEM Tablespace\n│   ├── SYSAUX Tablespace\n│   └── UNDOTBS1 (공유 UNDO 테이블스페이스)\n│       ├── PDB1 트랜잭션의 UNDO 데이터\n│       ├── PDB2 트랜잭션의 UNDO 데이터\n│       └── CDB$ROOT 트랜잭션의 UNDO 데이터\n├── PDB1 (UNDO 테이블스페이스 없음)\n└── PDB2 (UNDO 테이블스페이스 없음)\n```\n\n### 관련 파라미터\n\n| 파라미터 | 설정 레벨 | 설명 |\n|---|---|---|\n| `UNDO_TABLESPACE` | CDB (CDB$ROOT) | 공유 UNDO 테이블스페이스 이름 |\n| `UNDO_RETENTION` | CDB (CDB$ROOT) | UNDO 보존 시간 (초) — CDB 전체에 적용 |\n| `UNDO_MANAGEMENT` | CDB | AUTO (기본값) |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `V$UNDOSTAT` | UNDO 사용 통계 (CDB 전체) |\n| `V$ROLLSTAT` | 롤백 세그먼트별 통계 |\n| `V$TRANSACTION` | 현재 활성 트랜잭션 정보 |\n| `DBA_UNDO_EXTENTS` | UNDO 익스텐트 상태 (ACTIVE/EXPIRED/UNEXPIRED) |\n| `V$CONTAINERS` | 컨테이너 정보 |",
+          "key_points": [
+            "CDB$ROOT에 위치한 단일 UNDO 테이블스페이스를 모든 PDB가 공유",
+            "UNDO_TABLESPACE, UNDO_RETENTION 파라미터가 CDB 레벨에서만 적용",
+            "Oracle 12c 멀티테넌트 초기 도입 시의 기본 모드",
+            "CDB 관리자가 UNDO 공간을 중앙에서 통합 관리",
+            "V$UNDOSTAT, V$ROLLSTAT으로 CDB 전체 UNDO 통계 조회"
+          ]
+        },
+        {
+          "title": "공유 UNDO 모드의 장점과 단점 (Advantages and Disadvantages)",
+          "content": "### 장점\n\n| 장점 | 설명 |\n|---|---|\n| **관리 단순성** | UNDO 테이블스페이스가 1개이므로 관리 포인트가 적음 |\n| **공간 효율성** | 모든 PDB가 하나의 UNDO 공간을 공유하므로, 개별 PDB에 UNDO가 유휴 상태로 남는 낭비 감소 |\n| **설정 간단** | 추가 설정 없이 CDB 생성 시 기본으로 동작 (Oracle 12c~19c) |\n\n### 단점\n\n| 단점 | 설명 |\n|---|---|\n| **PDB 이동성 제한** | PDB Unplug 시 UNDO 데이터가 CDB$ROOT에 남아 있어, 완전한 이동 불가 |\n| **Hot Clone 불가** | PDB의 온라인 복제 시 UNDO 분리가 불가능 |\n| **PDB Relocate 불가** | PDB를 다른 CDB로 실시간 이동하는 기능 미지원 |\n| **Flashback PDB 불가** | 개별 PDB를 과거 시점으로 복원할 수 없음 |\n| **UNDO 공간 경합** | 한 PDB의 대량 트랜잭션이 다른 PDB의 UNDO 공간을 압박 |\n| **격리성 부족** | PDB별 UNDO_RETENTION을 독립적으로 설정 불가 |\n| **ORA-01555 전파** | 한 PDB의 장기 쿼리가 다른 PDB의 UNDO 덮어쓰기로 ORA-01555(Snapshot Too Old) 발생 가능 |\n\n### 공유 UNDO 모드가 적합한 경우\n\n- PDB 수가 적고 이동 요구사항이 없는 환경\n- 레거시 12c/18c에서 업그레이드하지 않은 환경\n- UNDO 관리를 최소화하고 싶은 소규모 환경",
+          "key_points": [
+            "관리 포인트가 적고 설정이 단순한 것이 주요 장점",
+            "PDB Hot Clone, Relocate, Flashback PDB 기능을 사용할 수 없는 것이 가장 큰 단점",
+            "PDB 간 UNDO 공간 경합이 발생할 수 있어 격리성이 부족",
+            "한 PDB의 장기 쿼리가 다른 PDB에서 ORA-01555 발생을 유발할 수 있음",
+            "PDB 이동성이 필요 없는 소규모 환경이나 레거시 호환 목적으로만 권장"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "로컬 UNDO 모드 (Local UNDO Mode)",
+      "sqlExamplesIds": ["sql06", "sql07", "sql09", "sql10", "sql11"],
+      "content": "**로컬 UNDO 모드(Local UNDO Mode)**는 각 PDB(및 CDB$ROOT)가 **자체적인 UNDO 테이블스페이스를 보유**하는 방식입니다. Oracle 21c 이후 CDB의 기본 UNDO 모드이며, Oracle 26ai에서 권장되는 표준 구성입니다.",
+      "subsections": [
+        {
+          "title": "로컬 UNDO 모드의 아키텍처 (Local UNDO Architecture)",
+          "content": "### 정의\n\n로컬 UNDO 모드에서는 CDB$ROOT를 포함한 **각 컨테이너가 독립적인 UNDO 테이블스페이스를 보유**합니다. 각 PDB의 트랜잭션은 해당 PDB의 UNDO 테이블스페이스에만 UNDO 데이터를 기록합니다.\n\n### 내부 동작 원리\n\n1. **PDB 생성 시**: 자동으로 UNDO 테이블스페이스가 생성됨 (또는 명시적으로 지정)\n2. **트랜잭션 시작**: 해당 PDB의 UNDO 테이블스페이스에서 UNDO 세그먼트 할당\n3. **UNDO 기록**: PDB 내부의 UNDO 테이블스페이스에만 기록\n4. **UNDO 보존**: PDB 레벨에서 `UNDO_RETENTION`을 독립적으로 설정 가능\n5. **PDB 이동 시**: UNDO 테이블스페이스가 PDB와 함께 이동\n\n### 구조 다이어그램\n\n```\nCDB Instance (Local UNDO Mode)\n├── CDB$ROOT\n│   ├── SYSTEM Tablespace\n│   ├── SYSAUX Tablespace\n│   └── UNDOTBS_ROOT (CDB$ROOT 전용 UNDO)\n├── PDB$SEED\n│   └── UNDOTBS_SEED (PDB$SEED 전용 UNDO)\n├── PDB1\n│   ├── Data Tablespace(s)\n│   └── UNDOTBS_PDB1 (PDB1 전용 UNDO)\n└── PDB2\n    ├── Data Tablespace(s)\n    └── UNDOTBS_PDB2 (PDB2 전용 UNDO)\n```\n\n### 관련 파라미터\n\n| 파라미터 | 설정 레벨 | 설명 |\n|---|---|---|\n| `UNDO_TABLESPACE` | PDB 레벨 | 각 PDB의 UNDO 테이블스페이스 이름 |\n| `UNDO_RETENTION` | PDB 레벨 | 각 PDB별 독립적인 UNDO 보존 시간 설정 가능 |\n| `UNDO_MANAGEMENT` | CDB 레벨 | AUTO (기본값) |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 조회 위치 | 설명 |\n|---|---|---|\n| `V$UNDOSTAT` | PDB 내에서 조회 | 해당 PDB의 UNDO 통계만 표시 |\n| `V$ROLLSTAT` | PDB 내에서 조회 | 해당 PDB의 롤백 세그먼트 통계 |\n| `CDB_UNDO_EXTENTS` | CDB$ROOT에서 조회 | 모든 PDB의 UNDO 익스텐트 통합 조회 |\n| `V$CONTAINERS` | CDB$ROOT에서 조회 | 각 PDB의 UNDO 모드 확인 |\n| `DBA_TABLESPACES` | PDB 내에서 조회 | UNDO 테이블스페이스 정보 확인 |",
+          "key_points": [
+            "각 PDB(및 CDB$ROOT)가 독립적인 UNDO 테이블스페이스를 보유",
+            "PDB 생성 시 UNDO 테이블스페이스가 자동 생성됨",
+            "UNDO_TABLESPACE, UNDO_RETENTION을 PDB 레벨에서 독립적으로 설정 가능",
+            "V$UNDOSTAT를 PDB 내에서 조회하면 해당 PDB의 통계만 표시됨",
+            "CDB$ROOT에서 CDB_ 접두사 뷰를 사용하면 모든 PDB의 UNDO 정보를 통합 조회 가능",
+            "PDB 이동(Unplug/Plug) 시 UNDO 테이블스페이스가 함께 이동"
+          ]
+        },
+        {
+          "title": "로컬 UNDO 모드의 장점과 단점 (Advantages and Disadvantages)",
+          "content": "### 장점\n\n| 장점 | 상세 설명 |\n|---|---|\n| **PDB 이동성 (Portability)** | PDB Unplug/Plug 시 UNDO 데이터가 PDB와 함께 이동하여 완전한 이동 가능 |\n| **Hot Clone 지원** | PDB를 온라인 상태에서 복제 가능. UNDO가 PDB 내에 있으므로 일관된 복제 가능 |\n| **PDB Relocate 지원** | PDB를 다른 CDB로 실시간 이동 가능 (최소 다운타임) |\n| **Flashback PDB** | 개별 PDB를 과거 시점으로 복원 가능. PDB별 UNDO 이력이 독립적 |\n| **UNDO 공간 격리** | PDB 간 UNDO 공간 경합 완전 방지. 한 PDB의 대량 트랜잭션이 다른 PDB에 영향 없음 |\n| **독립적 UNDO_RETENTION** | PDB별로 다른 UNDO 보존 시간 설정 가능. 워크로드에 맞춤 최적화 |\n| **ORA-01555 격리** | PDB 간 UNDO 덮어쓰기로 인한 ORA-01555 발생 방지 |\n| **PDB 관리자 자율성** | PDB 관리자가 자체 UNDO 테이블스페이스를 독립 관리 가능 |\n\n### 단점\n\n| 단점 | 상세 설명 |\n|---|---|\n| **관리 복잡성 증가** | PDB 수만큼 UNDO 테이블스페이스가 존재하므로 관리 포인트 증가 |\n| **공간 오버헤드** | 각 PDB마다 최소한의 UNDO 공간이 필요하여, 전체 디스크 사용량이 증가할 수 있음 |\n| **유휴 공간 비효율** | 각 PDB의 UNDO 공간이 독립적이므로, 유휴 PDB의 UNDO 공간을 다른 PDB가 사용 불가 |\n\n### 로컬 UNDO가 Oracle 21c 이후 기본값인 이유\n\n1. **클라우드 환경 대응**: 클라우드에서 PDB 단위의 프로비저닝/이동이 표준이 됨\n2. **PDB-as-a-Service**: PDB를 독립 서비스 단위로 운영하려면 완전한 격리가 필수\n3. **고급 기능 전제조건**: Hot Clone, Relocate, Flashback PDB 등 핵심 기능이 Local UNDO를 요구\n4. **운영 안정성**: PDB 간 UNDO 경합 제거로 예측 가능한 성능 보장\n5. **Oracle의 전략적 방향**: 멀티테넌트 아키텍처의 완전한 격리 지향",
+          "key_points": [
+            "PDB Hot Clone, Relocate, Flashback PDB 등 고급 기능의 필수 전제조건",
+            "PDB 간 UNDO 공간이 완전히 격리되어 경합 및 ORA-01555 전파 방지",
+            "PDB별 독립적인 UNDO_RETENTION 설정으로 워크로드 맞춤 최적화 가능",
+            "관리 복잡성과 디스크 오버헤드가 증가하는 것이 단점",
+            "클라우드 및 PDB-as-a-Service 운영 모델에 필수적인 아키텍처",
+            "Oracle 21c 이후 기본값이며 Oracle 26ai에서 권장되는 표준 구성"
+          ]
+        },
+        {
+          "title": "PDB에서의 UNDO 테이블스페이스 관리 (PDB UNDO Tablespace Management)",
+          "content": "### PDB UNDO 테이블스페이스 생성\n\nLocal UNDO 모드에서 PDB에 접속한 후 UNDO 테이블스페이스를 관리합니다:\n\n```sql\n-- PDB에 접속\nALTER SESSION SET CONTAINER = pdb1;\n\n-- UNDO 테이블스페이스 생성\nCREATE UNDO TABLESPACE undotbs_pdb1\n  DATAFILE '/u01/app/oracle/oradata/cdb1/pdb1/undotbs_pdb1_01.dbf'\n  SIZE 200M AUTOEXTEND ON NEXT 50M MAXSIZE 2G;\n\n-- 기본 UNDO 테이블스페이스 전환\nALTER SYSTEM SET UNDO_TABLESPACE = 'UNDOTBS_PDB1' SCOPE=BOTH;\n```\n\n### PDB별 UNDO 크기 가이드라인\n\n| PDB 워크로드 유형 | 권장 UNDO 크기 | UNDO_RETENTION |\n|---|---|---|\n| **소규모 OLTP** | 200MB ~ 500MB | 300초 (기본값) |\n| **중규모 OLTP** | 500MB ~ 2GB | 600초 |\n| **대규모 OLTP** | 2GB ~ 10GB | 900초 이상 |\n| **분석/리포트** | 1GB ~ 5GB | 1800초 이상 |\n| **혼합 워크로드** | 2GB ~ 10GB | 900초 이상 |\n\n### PDB 레벨 UNDO 관련 작업\n\n| 작업 | SQL |\n|---|---|\n| UNDO 테이블스페이스 생성 | `CREATE UNDO TABLESPACE ...` |\n| UNDO 테이블스페이스 전환 | `ALTER SYSTEM SET UNDO_TABLESPACE = '...'` |\n| UNDO_RETENTION 설정 | `ALTER SYSTEM SET UNDO_RETENTION = 900 SCOPE=BOTH` |\n| UNDO 테이블스페이스 크기 조회 | `SELECT * FROM DBA_TABLESPACES WHERE CONTENTS = 'UNDO'` |\n| UNDO 사용량 모니터링 | `SELECT * FROM V$UNDOSTAT` |\n\n### 주의사항\n\n1. **PDB 생성 시 자동 생성**: Local UNDO 모드에서 PDB를 생성하면 UNDO 테이블스페이스가 자동으로 생성됩니다.\n2. **UNDO 테이블스페이스 삭제 제한**: 현재 활성 상태인 UNDO 테이블스페이스는 삭제할 수 없습니다.\n3. **데이터파일 경로**: PDB별로 데이터파일 경로를 적절히 분리하여 I/O 분산을 고려합니다.\n4. **AUTOEXTEND**: 공간 부족으로 인한 트랜잭션 실패를 방지하기 위해 AUTOEXTEND ON 설정을 권장합니다.",
+          "key_points": [
+            "Local UNDO 모드에서 PDB 생성 시 UNDO 테이블스페이스가 자동으로 생성됨",
+            "ALTER SYSTEM SET UNDO_TABLESPACE로 PDB 내에서 UNDO 테이블스페이스 전환 가능",
+            "PDB별로 독립적인 UNDO_RETENTION 설정이 가능하여 워크로드에 맞춤 조정",
+            "AUTOEXTEND ON 설정으로 공간 부족으로 인한 트랜잭션 실패 방지 권장",
+            "활성 상태의 UNDO 테이블스페이스는 삭제할 수 없음"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "UNDO 모드 전환 (UNDO Mode Switching)",
+      "sqlExamplesIds": ["sql09", "sql10", "sql11", "sql12"],
+      "content": "CDB의 UNDO 모드를 **Shared에서 Local로**, 또는 **Local에서 Shared로** 전환할 수 있습니다. 전환 작업은 CDB를 재시작해야 하며, 신중한 계획이 필요합니다.",
+      "subsections": [
+        {
+          "title": "Shared → Local UNDO 모드 전환 (Switching to Local UNDO)",
+          "content": "### 전환 절차 — 단계별\n\n1. **사전 확인**\n   - 현재 UNDO 모드 확인: `SELECT PROPERTY_VALUE FROM DATABASE_PROPERTIES WHERE PROPERTY_NAME = 'LOCAL_UNDO_ENABLED';`\n   - 모든 PDB가 OPEN 상태인지 확인\n\n2. **CDB 종료**\n   ```sql\n   SHUTDOWN IMMEDIATE;\n   ```\n\n3. **UPGRADE 모드로 시작**\n   ```sql\n   STARTUP UPGRADE;\n   ```\n\n4. **Local UNDO 모드 활성화**\n   ```sql\n   ALTER DATABASE LOCAL UNDO ON;\n   ```\n\n5. **모든 PDB를 UPGRADE 모드로 OPEN**\n   ```sql\n   ALTER PLUGGABLE DATABASE ALL OPEN UPGRADE;\n   ```\n\n6. **CDB 재시작 (정상 모드)**\n   ```sql\n   SHUTDOWN IMMEDIATE;\n   STARTUP;\n   ```\n\n7. **모든 PDB OPEN**\n   ```sql\n   ALTER PLUGGABLE DATABASE ALL OPEN;\n   ```\n\n8. **전환 확인**\n   ```sql\n   SELECT PROPERTY_VALUE FROM DATABASE_PROPERTIES\n   WHERE PROPERTY_NAME = 'LOCAL_UNDO_ENABLED';\n   -- 결과: TRUE\n   ```\n\n### 전환 시 내부 동작\n\n| 단계 | 내부 동작 |\n|---|---|\n| `ALTER DATABASE LOCAL UNDO ON` 실행 | DATABASE_PROPERTIES에 LOCAL_UNDO_ENABLED = TRUE 기록 |\n| CDB 재시작 | 각 PDB에 대해 UNDO 테이블스페이스 자동 생성 |\n| PDB OPEN | 각 PDB가 자체 UNDO 테이블스페이스를 사용하기 시작 |\n| CDB$ROOT의 기존 UNDO | 기존 UNDO 데이터가 만료(EXPIRED)될 때까지 유지 |\n\n### 주의사항\n\n- 전환 작업 중 CDB **다운타임이 필요**합니다.\n- 전환 후 각 PDB에 UNDO 테이블스페이스가 자동 생성되므로 **디스크 공간을 사전에 확보**해야 합니다.\n- 기존 CDB$ROOT의 UNDO 데이터는 점진적으로 만료됩니다.",
+          "key_points": [
+            "Shared → Local 전환 시 STARTUP UPGRADE 모드에서 ALTER DATABASE LOCAL UNDO ON 실행",
+            "전환 작업에는 CDB 다운타임이 필수적으로 필요",
+            "전환 후 각 PDB에 UNDO 테이블스페이스가 자동 생성됨",
+            "디스크 공간을 사전에 확보해야 전환 중 오류 방지",
+            "기존 CDB$ROOT의 UNDO 데이터는 만료될 때까지 점진적으로 유지됨"
+          ]
+        },
+        {
+          "title": "Local → Shared UNDO 모드 전환 (Switching to Shared UNDO)",
+          "content": "### 전환 절차 — 단계별\n\n1. **사전 확인**\n   ```sql\n   SELECT PROPERTY_VALUE FROM DATABASE_PROPERTIES\n   WHERE PROPERTY_NAME = 'LOCAL_UNDO_ENABLED';\n   -- 결과: TRUE (현재 Local UNDO)\n   ```\n\n2. **CDB 종료**\n   ```sql\n   SHUTDOWN IMMEDIATE;\n   ```\n\n3. **UPGRADE 모드로 시작**\n   ```sql\n   STARTUP UPGRADE;\n   ```\n\n4. **Local UNDO 모드 비활성화**\n   ```sql\n   ALTER DATABASE LOCAL UNDO OFF;\n   ```\n\n5. **CDB 재시작 (정상 모드)**\n   ```sql\n   SHUTDOWN IMMEDIATE;\n   STARTUP;\n   ```\n\n6. **모든 PDB OPEN**\n   ```sql\n   ALTER PLUGGABLE DATABASE ALL OPEN;\n   ```\n\n7. **전환 확인**\n   ```sql\n   SELECT PROPERTY_VALUE FROM DATABASE_PROPERTIES\n   WHERE PROPERTY_NAME = 'LOCAL_UNDO_ENABLED';\n   -- 결과: FALSE\n   ```\n\n### 전환 후 PDB의 UNDO 테이블스페이스\n\n| 항목 | 동작 |\n|---|---|\n| PDB의 UNDO 테이블스페이스 | 자동 삭제되지 않음 (수동 삭제 필요) |\n| PDB의 UNDO 데이터 | 기존 데이터가 만료될 때까지 유지 |\n| 새 트랜잭션의 UNDO | CDB$ROOT의 UNDO 테이블스페이스에 기록 |\n\n### 주의사항\n\n- Local → Shared 전환은 **기능 다운그레이드**이므로 신중한 판단이 필요합니다.\n- 전환 후 Hot Clone, PDB Relocate, Flashback PDB 기능이 비활성화됩니다.\n- PDB의 기존 UNDO 테이블스페이스를 수동으로 삭제하여 디스크 공간을 회수할 수 있습니다.\n- Oracle 21c 이후에서는 Shared UNDO로의 전환을 **비권장(Deprecated)** 합니다.",
+          "key_points": [
+            "Local → Shared 전환 시 ALTER DATABASE LOCAL UNDO OFF 실행",
+            "전환 후 PDB의 기존 UNDO 테이블스페이스는 자동 삭제되지 않으므로 수동 정리 필요",
+            "전환 후 Hot Clone, Relocate, Flashback PDB 기능이 비활성화됨",
+            "Oracle 21c 이후에서는 Shared UNDO로의 전환을 비권장(Deprecated)",
+            "기능 다운그레이드에 해당하므로 전환 전 영향도 분석 필수"
+          ]
+        },
+        {
+          "title": "UNDO 모드 전환 비교 요약 (Mode Switching Comparison)",
+          "content": "### 전환 방향별 비교\n\n| 비교 항목 | Shared → Local | Local → Shared |\n|---|---|---|\n| **명령어** | `ALTER DATABASE LOCAL UNDO ON` | `ALTER DATABASE LOCAL UNDO OFF` |\n| **전제 조건** | STARTUP UPGRADE 모드 | STARTUP UPGRADE 모드 |\n| **다운타임** | 필수 | 필수 |\n| **PDB UNDO 테이블스페이스** | 자동 생성됨 | 수동 삭제 필요 |\n| **디스크 영향** | 추가 공간 필요 (PDB별 UNDO) | 공간 회수 가능 |\n| **기능 영향** | 고급 기능 활성화 | 고급 기능 비활성화 |\n| **Oracle 권장** | 적극 권장 | 비권장 (레거시 호환만) |\n| **복잡도** | 중간 | 중간 |\n\n### 전환 판단 체크리스트\n\n| 체크 항목 | Shared → Local 전환 시 | Local → Shared 전환 시 |\n|---|---|---|\n| 디스크 공간 충분한가? | PDB 수 x UNDO 크기 확보 | 해당 없음 |\n| 다운타임 허용 가능한가? | 필수 확인 | 필수 확인 |\n| Hot Clone 필요한가? | Local 필수 | 사용 불가 확인 |\n| PDB Relocate 필요한가? | Local 필수 | 사용 불가 확인 |\n| Flashback PDB 필요한가? | Local 필수 | 사용 불가 확인 |\n| Oracle 버전은? | 21c+ 권장 | 비권장 (호환 목적만) |",
+          "key_points": [
+            "양방향 전환 모두 STARTUP UPGRADE 모드와 CDB 다운타임이 필수",
+            "Shared → Local 전환 시 PDB별 UNDO 테이블스페이스가 자동 생성되어 추가 디스크 공간 필요",
+            "Local → Shared 전환 시 PDB의 기존 UNDO 테이블스페이스를 수동 삭제해야 공간 회수",
+            "Oracle 21c 이후에서는 Shared UNDO로의 전환이 비권장(Deprecated)이므로 Local UNDO 유지 권장",
+            "전환 전 Hot Clone, Relocate, Flashback PDB 사용 여부를 반드시 확인"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s07",
+      "title": "CDB/PDB에서의 UNDO 관련 뷰 조회 (UNDO Views in CDB/PDB)",
+      "sqlExamplesIds": ["sql06", "sql07", "sql08", "sql13"],
+      "content": "멀티테넌트 환경에서 UNDO 관련 뷰를 조회할 때는 **조회 위치(CDB$ROOT vs PDB)**와 **UNDO 모드(Shared vs Local)**에 따라 결과가 달라집니다. 이를 정확히 이해하는 것이 멀티테넌트 UNDO 운영의 핵심입니다.\n\n## 뷰 조회 결과 비교\n\n| 뷰 | CDB$ROOT에서 조회 | PDB 내에서 조회 | Shared UNDO | Local UNDO |\n|---|---|---|---|---|\n| **V$UNDOSTAT** | CDB 전체 UNDO 통계 | 해당 PDB의 UNDO 통계 | CDB 통합 | PDB별 독립 |\n| **V$ROLLSTAT** | CDB$ROOT의 롤백 세그먼트 | 해당 PDB의 롤백 세그먼트 | CDB 통합 | PDB별 독립 |\n| **V$TRANSACTION** | 모든 PDB의 활성 트랜잭션 | 해당 PDB의 활성 트랜잭션 | CDB 통합 | PDB별 독립 |\n| **DBA_UNDO_EXTENTS** | CDB$ROOT의 UNDO 익스텐트 | 해당 PDB의 UNDO 익스텐트 | CDB 통합 | PDB별 독립 |\n| **CDB_UNDO_EXTENTS** | 모든 PDB의 UNDO 익스텐트 | 사용 불가 | CDB 통합 | PDB별 통합 조회 |\n| **V$TEMPUNDOSTAT** | CDB 전체 Temp UNDO 통계 | 해당 PDB의 Temp UNDO 통계 | CDB 통합 | PDB별 독립 |\n\n## CDB_ 접두사 뷰 활용\n\nCDB$ROOT에서 `CDB_` 접두사 뷰를 사용하면 모든 PDB의 정보를 **CON_ID 컬럼**으로 구분하여 통합 조회할 수 있습니다:\n\n```sql\n-- CDB$ROOT에서 모든 PDB의 UNDO 테이블스페이스 조회\nSELECT con_id, tablespace_name, status, contents\nFROM CDB_TABLESPACES\nWHERE contents = 'UNDO'\nORDER BY con_id;\n```",
+      "subsections": [
+        {
+          "title": "UNDO 모니터링 뷰 상세 (Detailed UNDO Monitoring Views)",
+          "content": "### V$UNDOSTAT\n\n| 컬럼 | 설명 |\n|---|---|\n| `BEGIN_TIME` / `END_TIME` | 통계 수집 구간 (10분 간격) |\n| `UNDOBLKS` | 사용된 UNDO 블록 수 |\n| `TXNCOUNT` | 트랜잭션 수 |\n| `MAXQUERYLEN` | 최장 쿼리 실행 시간 (초) |\n| `MAXCONCURRENCY` | 최대 동시 트랜잭션 수 |\n| `UNXPSTEALCNT` | Unexpired UNDO의 steal 횟수 |\n| `EXPSTEALCNT` | Expired UNDO의 steal 횟수 |\n| `SSOLDERRCNT` | ORA-01555 (Snapshot Too Old) 발생 횟수 |\n| `NOSPACEERRCNT` | UNDO 공간 부족 에러 횟수 |\n| `CON_ID` | 컨테이너 ID (멀티테넌트) |\n\n### V$TEMPUNDOSTAT\n\n| 컬럼 | 설명 |\n|---|---|\n| `BEGIN_TIME` / `END_TIME` | 통계 수집 구간 |\n| `UNDOBLKS` | Temporary UNDO 블록 수 |\n| `TXNCOUNT` | Temporary UNDO를 사용한 트랜잭션 수 |\n| `MAXCONCURRENCY` | 최대 동시 Temp UNDO 트랜잭션 수 |\n| `MAXQUERYLEN` | 최장 GTT 관련 쿼리 실행 시간 |\n| `CON_ID` | 컨테이너 ID |\n\n### V$ROLLSTAT\n\n| 컬럼 | 설명 |\n|---|---|\n| `USN` | UNDO 세그먼트 번호 |\n| `WRITES` | 기록된 바이트 수 |\n| `GETS` | 헤더 블록 가져오기 횟수 |\n| `WAITS` | 헤더 블록 대기 횟수 |\n| `XACTS` | 활성 트랜잭션 수 |\n| `STATUS` | ONLINE / OFFLINE / PENDING OFFLINE |\n| `CON_ID` | 컨테이너 ID |\n\n### 뷰 조회 시 모드별 차이점\n\n**Shared UNDO 모드:**\n- PDB 내에서 `V$UNDOSTAT`를 조회해도 CDB 전체 통계가 표시됨\n- PDB별 구분이 어려움\n\n**Local UNDO 모드:**\n- PDB 내에서 `V$UNDOSTAT`를 조회하면 해당 PDB의 통계만 표시됨\n- CDB$ROOT에서 조회하면 CDB$ROOT의 통계만 표시됨\n- 전체를 보려면 `CDB_` 접두사 뷰 또는 `CONTAINERS()` 함수 사용",
+          "key_points": [
+            "V$UNDOSTAT: 10분 간격 UNDO 사용 통계, ORA-01555 및 공간 부족 에러 횟수 포함",
+            "V$TEMPUNDOSTAT: Temporary UNDO 전용 통계 뷰, GTT 관련 UNDO 모니터링",
+            "V$ROLLSTAT: 롤백 세그먼트별 WRITES, GETS, WAITS, 활성 트랜잭션 수 확인",
+            "Shared UNDO 모드에서는 PDB 내에서도 CDB 전체 통계가 표시되어 PDB별 구분 어려움",
+            "Local UNDO 모드에서는 PDB 내 조회 시 해당 PDB 통계만 표시되어 정확한 모니터링 가능",
+            "CDB$ROOT에서 CDB_ 접두사 뷰 또는 CONTAINERS() 함수로 전체 PDB 통합 조회 가능"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "Temporary UNDO 활성화 상태 확인",
+      "sql": "SELECT name, value, isdefault\nFROM V$PARAMETER\nWHERE name = 'temp_undo_enabled';",
+      "description": "현재 세션 또는 시스템 레벨에서 TEMP_UNDO_ENABLED 파라미터의 값과 기본값 여부를 확인합니다. Oracle 21c 이후에서는 기본값이 TRUE입니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "Temporary UNDO 활성화 설정",
+      "sql": "-- 세션 레벨 활성화\nALTER SESSION SET TEMP_UNDO_ENABLED = TRUE;\n\n-- 시스템 레벨 활성화\nALTER SYSTEM SET TEMP_UNDO_ENABLED = TRUE SCOPE=BOTH;",
+      "description": "Temporary UNDO를 세션 레벨 또는 시스템 레벨에서 활성화합니다. 세션 레벨 설정이 시스템 레벨보다 우선합니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "V$TEMPUNDOSTAT으로 Temporary UNDO 통계 조회",
+      "sql": "SELECT begin_time, end_time,\n       undoblks AS temp_undo_blocks,\n       txncount AS temp_undo_txns,\n       maxconcurrency AS max_concurrent,\n       maxquerylen AS max_query_sec\nFROM V$TEMPUNDOSTAT\nORDER BY begin_time DESC\nFETCH FIRST 10 ROWS ONLY;",
+      "description": "Temporary UNDO 사용 통계를 10분 간격 스냅샷으로 조회합니다. GTT 관련 트랜잭션의 UNDO 블록 수, 트랜잭션 수, 최대 동시성 등을 확인할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "Temp 테이블스페이스 여유 공간 확인",
+      "sql": "SELECT tablespace_name,\n       tablespace_size/1024/1024 AS total_mb,\n       allocated_space/1024/1024 AS allocated_mb,\n       free_space/1024/1024 AS free_mb\nFROM DBA_TEMP_FREE_SPACE;",
+      "description": "Temporary UNDO가 저장되는 임시 테이블스페이스의 전체 크기, 할당 크기, 여유 공간을 확인합니다. Temporary UNDO 활성화 시 추가 공간이 필요하므로 모니터링이 중요합니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "GTT 생성 및 Temporary UNDO 동작 테스트",
+      "sql": "-- Global Temporary Table 생성\nCREATE GLOBAL TEMPORARY TABLE gtt_test (\n  id    NUMBER,\n  data  VARCHAR2(100)\n) ON COMMIT PRESERVE ROWS;\n\n-- Temporary UNDO 활성화\nALTER SESSION SET TEMP_UNDO_ENABLED = TRUE;\n\n-- GTT에 데이터 삽입 (Temp UNDO 사용)\nINSERT INTO gtt_test\nSELECT level, 'test data ' || level\nFROM dual CONNECT BY level <= 10000;\n\n-- Temp UNDO 사용 확인\nSELECT undoblks, txncount\nFROM V$TEMPUNDOSTAT\nWHERE begin_time = (SELECT MAX(begin_time) FROM V$TEMPUNDOSTAT);",
+      "description": "Global Temporary Table을 생성하고 데이터를 삽입하여 Temporary UNDO가 실제로 동작하는지 확인하는 테스트 시나리오입니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "현재 CDB의 UNDO 모드 확인",
+      "sql": "-- 방법 1: DATABASE_PROPERTIES에서 확인\nSELECT property_name, property_value\nFROM DATABASE_PROPERTIES\nWHERE property_name = 'LOCAL_UNDO_ENABLED';\n\n-- 방법 2: V$PARAMETER에서 확인 (Oracle 21c+)\nSELECT name, value\nFROM V$PARAMETER\nWHERE name = 'undo_mode';",
+      "description": "CDB의 현재 UNDO 모드(Shared 또는 Local)를 확인합니다. LOCAL_UNDO_ENABLED가 TRUE이면 Local UNDO 모드, FALSE이면 Shared UNDO 모드입니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "각 PDB의 UNDO 테이블스페이스 현황 조회",
+      "sql": "-- CDB$ROOT에서 실행: 모든 PDB의 UNDO 테이블스페이스 조회\nSELECT c.con_id, c.name AS pdb_name,\n       t.tablespace_name,\n       d.file_name,\n       d.bytes/1024/1024 AS size_mb,\n       d.autoextensible\nFROM CDB_TABLESPACES t\nJOIN CDB_DATA_FILES d ON t.tablespace_name = d.tablespace_name\n                      AND t.con_id = d.con_id\nJOIN V$CONTAINERS c ON t.con_id = c.con_id\nWHERE t.contents = 'UNDO'\nORDER BY c.con_id;",
+      "description": "CDB$ROOT에서 모든 PDB의 UNDO 테이블스페이스 이름, 데이터파일, 크기, 자동확장 여부를 통합 조회합니다. Local UNDO 모드에서 각 PDB의 UNDO 구성을 확인하는 데 유용합니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "PDB별 UNDO 사용량 통합 조회 (CDB$ROOT에서)",
+      "sql": "-- CDB$ROOT에서 실행: CONTAINERS() 함수로 모든 PDB의 UNDO 통계 조회\nSELECT con_id,\n       SUM(undoblks) AS total_undo_blocks,\n       SUM(txncount) AS total_transactions,\n       MAX(maxquerylen) AS max_query_length,\n       SUM(ssolderrcnt) AS ora_01555_count\nFROM CONTAINERS(V_$UNDOSTAT)\nGROUP BY con_id\nORDER BY con_id;",
+      "description": "CDB$ROOT에서 CONTAINERS() 함수를 사용하여 모든 PDB의 UNDO 사용 통계를 CON_ID별로 통합 조회합니다. PDB별 UNDO 블록 수, 트랜잭션 수, ORA-01555 발생 횟수를 한눈에 확인할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "Shared → Local UNDO 모드 전환",
+      "sql": "-- 1. 현재 모드 확인\nSELECT property_value FROM DATABASE_PROPERTIES\nWHERE property_name = 'LOCAL_UNDO_ENABLED';\n\n-- 2. CDB 종료\nSHUTDOWN IMMEDIATE;\n\n-- 3. UPGRADE 모드로 시작\nSTARTUP UPGRADE;\n\n-- 4. Local UNDO 활성화\nALTER DATABASE LOCAL UNDO ON;\n\n-- 5. 모든 PDB UPGRADE 모드 OPEN\nALTER PLUGGABLE DATABASE ALL OPEN UPGRADE;\n\n-- 6. CDB 재시작\nSHUTDOWN IMMEDIATE;\nSTARTUP;\n\n-- 7. 모든 PDB OPEN\nALTER PLUGGABLE DATABASE ALL OPEN;\n\n-- 8. 전환 확인\nSELECT property_value FROM DATABASE_PROPERTIES\nWHERE property_name = 'LOCAL_UNDO_ENABLED';",
+      "description": "CDB의 UNDO 모드를 Shared에서 Local로 전환하는 전체 절차입니다. STARTUP UPGRADE 모드에서 ALTER DATABASE LOCAL UNDO ON을 실행한 후 CDB를 재시작합니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "Local → Shared UNDO 모드 전환",
+      "sql": "-- 1. 현재 모드 확인\nSELECT property_value FROM DATABASE_PROPERTIES\nWHERE property_name = 'LOCAL_UNDO_ENABLED';\n\n-- 2. CDB 종료\nSHUTDOWN IMMEDIATE;\n\n-- 3. UPGRADE 모드로 시작\nSTARTUP UPGRADE;\n\n-- 4. Local UNDO 비활성화\nALTER DATABASE LOCAL UNDO OFF;\n\n-- 5. CDB 재시작\nSHUTDOWN IMMEDIATE;\nSTARTUP;\n\n-- 6. 모든 PDB OPEN\nALTER PLUGGABLE DATABASE ALL OPEN;\n\n-- 7. 전환 확인\nSELECT property_value FROM DATABASE_PROPERTIES\nWHERE property_name = 'LOCAL_UNDO_ENABLED';",
+      "description": "CDB의 UNDO 모드를 Local에서 Shared로 전환하는 절차입니다. Oracle 21c 이후에서는 비권장(Deprecated)됩니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "PDB 내에서 UNDO 테이블스페이스 생성 및 전환",
+      "sql": "-- PDB에 접속\nALTER SESSION SET CONTAINER = pdb1;\n\n-- 새 UNDO 테이블스페이스 생성\nCREATE UNDO TABLESPACE undotbs_pdb1_new\n  DATAFILE '/u01/app/oracle/oradata/cdb1/pdb1/undotbs_pdb1_new_01.dbf'\n  SIZE 500M AUTOEXTEND ON NEXT 100M MAXSIZE 5G;\n\n-- UNDO 테이블스페이스 전환\nALTER SYSTEM SET UNDO_TABLESPACE = 'UNDOTBS_PDB1_NEW' SCOPE=BOTH;\n\n-- 이전 UNDO 테이블스페이스의 세그먼트가 모두 OFFLINE 될 때까지 대기 후 삭제\n-- (활성 트랜잭션 완료 후)\nDROP TABLESPACE undotbs_pdb1_old INCLUDING CONTENTS AND DATAFILES;",
+      "description": "Local UNDO 모드에서 PDB 내에 새 UNDO 테이블스페이스를 생성하고 전환하는 절차입니다. PDB 관리자가 독립적으로 UNDO 테이블스페이스를 관리할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "PDB별 UNDO_RETENTION 독립 설정",
+      "sql": "-- PDB1에 접속하여 UNDO_RETENTION 설정\nALTER SESSION SET CONTAINER = pdb1;\nALTER SYSTEM SET UNDO_RETENTION = 1800 SCOPE=BOTH;\n\n-- PDB2에 접속하여 다른 UNDO_RETENTION 설정\nALTER SESSION SET CONTAINER = pdb2;\nALTER SYSTEM SET UNDO_RETENTION = 600 SCOPE=BOTH;\n\n-- 각 PDB의 UNDO_RETENTION 확인\nSELECT con_id, name, value\nFROM V$SYSTEM_PARAMETER\nWHERE name = 'undo_retention';",
+      "description": "Local UNDO 모드에서 각 PDB별로 독립적인 UNDO_RETENTION을 설정합니다. 분석 워크로드가 많은 PDB는 긴 보존 시간을, OLTP PDB는 짧은 보존 시간을 설정할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql13",
+      "title": "UNDO 관련 종합 모니터링 쿼리",
+      "sql": "-- 1. UNDO 테이블스페이스 사용률\nSELECT tablespace_name,\n       SUM(CASE WHEN status = 'ACTIVE' THEN bytes ELSE 0 END)/1024/1024 AS active_mb,\n       SUM(CASE WHEN status = 'UNEXPIRED' THEN bytes ELSE 0 END)/1024/1024 AS unexpired_mb,\n       SUM(CASE WHEN status = 'EXPIRED' THEN bytes ELSE 0 END)/1024/1024 AS expired_mb\nFROM DBA_UNDO_EXTENTS\nGROUP BY tablespace_name;\n\n-- 2. ORA-01555 및 공간 부족 에러 확인\nSELECT begin_time, end_time,\n       undoblks, txncount,\n       ssolderrcnt AS ora_01555_cnt,\n       nospaceerrcnt AS no_space_cnt\nFROM V$UNDOSTAT\nWHERE ssolderrcnt > 0 OR nospaceerrcnt > 0\nORDER BY begin_time DESC;\n\n-- 3. 현재 활성 트랜잭션의 UNDO 사용량\nSELECT t.xidusn, t.xidslot, t.xidsqn,\n       t.used_ublk AS undo_blocks_used,\n       t.used_urec AS undo_records,\n       s.username, s.program\nFROM V$TRANSACTION t\nJOIN V$SESSION s ON t.ses_addr = s.saddr\nORDER BY t.used_ublk DESC;",
+      "description": "UNDO 관련 종합 모니터링 쿼리입니다. UNDO 익스텐트 상태별 사용량, ORA-01555/공간 부족 에러 이력, 활성 트랜잭션의 UNDO 사용량을 종합적으로 확인합니다."
+    }
+  ],
+  "keywords": [
+    "Temporary UNDO",
+    "一時UNDO",
+    "TEMP_UNDO_ENABLED",
+    "Global Temporary Table",
+    "GTT",
+    "Private Temporary Table",
+    "Temporary Tablespace",
+    "REDO 로그 쓰기량 감소",
+    "UNDO 쓰기량 감소",
+    "V$TEMPUNDOSTAT",
+    "CDB",
+    "Container Database",
+    "PDB",
+    "Pluggable Database",
+    "CDB$ROOT",
+    "PDB$SEED",
+    "Shared UNDO Mode",
+    "共有UNDOモード",
+    "Local UNDO Mode",
+    "ローカルUNDOモード",
+    "UNDO_TABLESPACE",
+    "UNDO_RETENTION",
+    "ALTER DATABASE LOCAL UNDO ON",
+    "ALTER DATABASE LOCAL UNDO OFF",
+    "STARTUP UPGRADE",
+    "Hot Clone",
+    "PDB Relocate",
+    "Flashback PDB",
+    "PDB Unplug/Plug",
+    "V$UNDOSTAT",
+    "V$ROLLSTAT",
+    "V$TRANSACTION",
+    "DBA_UNDO_EXTENTS",
+    "CDB_TABLESPACES",
+    "CONTAINERS()",
+    "CON_ID",
+    "ORA-01555",
+    "Snapshot Too Old",
+    "UNDO Mode Switching",
+    "PDB Portability",
+    "Multitenant Architecture"
+  ]
+}

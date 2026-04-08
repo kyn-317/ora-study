@@ -1,0 +1,84 @@
+[
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_001",
+    "title": "ALTER DATABASE MOVE DATAFILE文を使用したオンライン・データファイル移動に関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) 移動中はDML操作が一時停止され、移動完了後に自動的に再開される。",
+      "B) 移動中にDMLの変更はシャドウ・ファイルと元のファイルの両方に書き込まれる二重書き込み(Dual Write)が行われる。",
+      "C) KEEP句を指定しない場合でも元のデータファイルは自動的に削除されず、手動で削除する必要がある。",
+      "D) 一時ファイル(Tempfile)もALTER DATABASE MOVE DATAFILEの対象として移動できる。",
+      "E) オフライン状態のデータファイルもMOVE DATAFILEで移動可能である。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답 B: ALTER DATABASE MOVE DATAFILE 명령은 섀도 복사(Shadow Copy) 메커니즘을 사용합니다. 이동 중 발생하는 DML 변경 사항은 원본 파일과 섀도 파일 양쪽에 동시에 기록되는 이중 쓰기(Dual Write)가 수행되어, 복사 완료 시점에 섀도 파일이 원본과 완전히 동일한 상태를 유지합니다.\n\n오답 A: 온라인 데이터 파일 이동 중에도 DML(INSERT, UPDATE, DELETE) 및 SELECT 작업이 계속 허용됩니다. DML이 일시 정지되는 것이 아닙니다.\n\n오답 C: KEEP 옵션을 지정하지 않는 경우(기본 동작), 이동 완료 후 원본 파일이 자동으로 삭제됩니다. KEEP을 지정해야 원본 파일이 유지됩니다.\n\n오답 D: 임시 파일(Tempfile)은 ALTER DATABASE MOVE DATAFILE의 대상이 아니며, 별도로 재생성해야 합니다.\n\n오답 E: 오프라인 상태의 데이터 파일은 MOVE DATAFILE을 사용할 수 없으며, 반드시 온라인 상태여야 합니다.\n\n핵심 개념: ALTER DATABASE MOVE DATAFILE은 섀도 복사와 이중 쓰기 메커니즘을 사용하여 서비스 중단 없이 데이터 파일을 이동하는 기능이며, 임시 파일과 오프라인 파일은 대상에서 제외됩니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_002",
+    "title": "OracleデータベースのHWM(最高水位標)に関する説明として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) DELETE文で大量の行を削除するとHWMは自動的に下方へ調整される。",
+      "B) TRUNCATE TABLE文を実行するとHWMがセグメントの先頭位置に初期化される。",
+      "C) Direct-Path Insert(INSERT /*+ APPEND */)はHWM以下の空きブロックを再利用してデータを挿入する。",
+      "D) Full Table Scanを実行する際、OracleはHWM以下のすべてのブロックを読み取る。",
+      "E) SHRINK SPACE COMPACTを実行するとデータの再配置とHWMの下方調整が同時に行われる。"
+    ],
+    "answer": [
+      "B",
+      "D"
+    ],
+    "explanation": "정답 B: TRUNCATE TABLE 문을 실행하면 HWM이 세그먼트의 시작점(첫 번째 익스텐트 시작)으로 초기화됩니다. 모든 익스텐트가 해제되어(MINEXTENTS 제외) 즉시 공간이 회수됩니다.\n\n정답 D: Oracle이 Full Table Scan을 수행할 때 HWM 아래의 모든 블록을 읽습니다. 따라서 DELETE로 행을 삭제해도 HWM이 하향되지 않으면 빈 블록까지 불필요하게 스캔하게 됩니다.\n\n오답 A: DELETE 문은 행 데이터를 제거하지만 HWM을 자동으로 하향시키지 않습니다. HWM은 DELETE로 절대 자동 하향되지 않습니다.\n\n오답 C: Direct-Path Insert(INSERT /*+ APPEND */)는 항상 HWM 위의 새로운 블록에 기록합니다. HWM 이하의 빈 블록을 재사용하지 않으며, 항상 HWM을 상향시킵니다.\n\n오답 E: SHRINK SPACE COMPACT는 데이터 재배치만 수행하고 HWM 하향은 수행하지 않습니다. HWM 하향은 별도로 SHRINK SPACE를 실행해야 합니다.\n\n핵심 개념: HWM은 세그먼트 내에서 데이터가 기록된 적이 있는 최고 위치를 나타내며, DELETE로는 하향되지 않고, TRUNCATE로 초기화되며, Full Table Scan 성능에 직접적으로 영향을 줍니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_003",
+    "title": "Oracleデータベースの行移行(Row Migration)とPCTFREEに関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) 行移行が発生すると行データが複数のブロックに分割して格納されるため、常に複数ブロックのI/Oが必要になる。",
+      "B) PCTFREEはINSERT操作用に予約されたブロック内の空き領域の割合である。",
+      "C) ASSM(自動セグメント領域管理)環境ではPCTFREEのみが使用され、PCTUSEDは無視される。",
+      "D) 行移行の発生状況はV$SYSSTATの「table fetch continued row」統計値のみで確認でき、テーブル単位での確認手段は存在しない。",
+      "E) PCTFREEのデフォルト値は20%に設定されている。"
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "정답 C: ASSM(Automatic Segment Space Management) 환경에서는 비트맵이 블록의 여유 공간 상태를 자동으로 관리하므로, PCTFREE만 사용되고 PCTUSED는 무시됩니다. PCTUSED는 MSSM(Manual Segment Space Management) 환경에서만 유효합니다.\n\n오답 A: 행 이동(Row Migration)은 UPDATE로 행 크기가 증가하여 원래 블록에 들어가지 않아 전체 행이 다른 블록으로 이동하는 현상입니다. 원래 블록에는 새 위치를 가리키는 포인터만 남습니다. 여러 블록에 분할 저장되는 것은 행 체이닝(Row Chaining)입니다.\n\n오답 B: PCTFREE는 향후 UPDATE를 위해 예약되는 블록 내 여유 공간의 비율입니다. INSERT가 아닌 UPDATE용 예약 공간입니다. INSERT는 블록 사용률이 (100 - PCTFREE)%에 도달하면 해당 블록을 건너뜁니다.\n\n오답 D: V$SYSSTAT의 'table fetch continued row' 통계 외에도, ANALYZE TABLE ... LIST CHAINED ROWS나 DBA_TABLES의 CHAIN_CNT 열로 테이블 단위 확인이 가능합니다.\n\n오답 E: PCTFREE의 기본값은 10%입니다. 20%가 아닙니다.\n\n핵심 개념: PCTFREE는 UPDATE를 위한 블록 내 예약 공간(기본 10%)이며, ASSM 환경에서는 PCTFREE만 유효하고 PCTUSED는 무시됩니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_004",
+    "title": "OracleデータベースのDirect-Path Insert(ダイレクト・パス・インサート)について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Direct-Path InsertはSGAのバッファ・キャッシュを経由してデータを書き込むため、通常のINSERTよりキャッシュ効率が向上する。",
+      "B) Direct-Path Insertの実行中はテーブルレベルの排他DMLロック(TM Lock)が取得され、他のセッションからのDMLがブロックされる。",
+      "C) NOLOGGING設定と組み合わせることでREDOログの生成を最小化でき、Data Guard環境でもスタンバイに完全に反映される。",
+      "D) 同一セッション内でDirect-Path Insertを実行した後、COMMITする前に同じテーブルに対するSELECTを実行するとORA-12838エラーが発生する。",
+      "E) Direct-Path InsertはHWM以下の空きブロックを優先的に再利用して効率的にデータを格納する。"
+    ],
+    "answer": [
+      "B",
+      "D"
+    ],
+    "explanation": "정답 B: Direct-Path Insert는 테이블에 Exclusive DML Lock(TM Lock, Mode 6)을 획득합니다. 이로 인해 수행 중 다른 세션의 DML이 차단됩니다.\n\n정답 D: Direct-Path Insert 실행 후 COMMIT 전에 동일 세션에서 해당 테이블을 SELECT하면 ORA-12838 오류가 발생합니다. COMMIT 후에야 해당 테이블에 대한 SELECT가 가능합니다.\n\n오답 A: Direct-Path Insert는 SGA의 Buffer Cache를 경유하지 않고 HWM 위의 새로운 블록에 직접 기록하는 방식입니다. Buffer Cache를 우회하므로 캐시 오염이 없습니다.\n\n오답 C: NOLOGGING 설정 시 Redo 생성이 최소화되어 속도는 향상되지만, Data Guard Standby에 데이터가 전파되지 않으며 불완전 복구(데이터 손실)의 위험이 있습니다. FORCE LOGGING이 활성화되면 NOLOGGING이 무시됩니다.\n\n오답 E: Direct-Path Insert는 HWM 이하의 빈 블록을 재사용하지 않으며, 항상 HWM 위의 새로운 블록에 기록합니다. 이로 인해 반복 사용 시 세그먼트 크기가 불필요하게 증가할 수 있습니다.\n\n핵심 개념: Direct-Path Insert는 Buffer Cache를 우회하여 HWM 위에 직접 기록하는 고속 적재 방식으로, 테이블 레벨 잠금과 COMMIT 전 SELECT 제약이 있습니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_005",
+    "title": "BIGFILE表領域とSMALLFILE表領域に関する説明として正しい内容を述べているのはどれになりますか。",
+    "options": [
+      "A) BIGFILE表領域はテーブルスペースごとに複数のデータファイルを格納でき、最大サイズを拡張できる。",
+      "B) SMALLFILE表領域のデータファイルの最大数はテーブルスペースごとに1,022個であり、DB_BLOCK_SIZEが8KBの場合1つのデータファイルの最大サイズは約32GBである。",
+      "C) Oracle Databaseの作成時にデフォルトの表領域タイプはBIGFILEに設定されている。",
+      "D) BIGFILE表領域ではDB_BLOCK_SIZEが8KBの場合、最大約32GBまでサポートされる。",
+      "E) SMALLFILE表領域はASM環境でのみ使用可能であり、ファイルシステムには対応していない。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답 B: SMALLFILE 테이블스페이스는 하나의 테이블스페이스에 최대 1,022개의 데이터 파일을 포함할 수 있습니다. ROWID에서 Relative File Number에 10비트를 할당하여 최대 1,022개 파일을 식별합니다. DB_BLOCK_SIZE가 8KB(기본)일 때 데이터 파일 최대 크기는 약 32GB이며, 테이블스페이스 최대 크기는 약 32TB입니다.\n\n오답 A: BIGFILE 테이블스페이스는 정확히 1개의 데이터 파일로만 구성됩니다. 여러 데이터 파일을 포함할 수 있는 것은 SMALLFILE 테이블스페이스입니다.\n\n오답 C: Oracle Database 생성 시 별도 설정이 없으면 SMALLFILE이 기본 테이블스페이스 타입입니다. BIGFILE을 기본으로 하려면 SET DEFAULT BIGFILE을 명시적으로 지정해야 합니다.\n\n오답 D: BIGFILE 테이블스페이스에서 DB_BLOCK_SIZE가 8KB인 경우, 최대 약 32TB까지 지원됩니다. 32GB가 아니라 32TB입니다(SMALLFILE의 단일 파일 최대가 32GB).\n\n오답 E: SMALLFILE 테이블스페이스는 ASM 환경뿐만 아니라 일반 파일 시스템 환경에서도 사용 가능합니다. 오히려 Non-ASM 전통적 파일 시스템 환경에서 기본적으로 사용되는 유형입니다.\n\n핵심 개념: SMALLFILE은 최대 1,022개의 데이터 파일을 가질 수 있는 전통적 테이블스페이스이고, BIGFILE은 단일 대용량 파일(8KB 블록 시 최대 32TB)을 사용하는 테이블스페이스입니다."
+  }
+]

@@ -1,0 +1,337 @@
+{
+  "id": "08_03",
+  "title": "문제 해결 어드바이저 (Problem Resolution Advisors)",
+  "chapter": "08. 성능 모니터링, 어드바이저 및 자동 관리 태스크",
+  "description": "Oracle 데이터베이스의 문제 해결을 위한 어드바이저 프레임워크를 포괄적으로 다루며, 세그먼트 어드바이저를 통한 공간 관리, 옵티마이저 통계의 자동 수집 및 관리, SQL 튜닝 어드바이저와 SQL 액세스 어드바이저를 통한 성능 최적화 권고 사항 생성 및 적용 방법을 상세히 설명합니다.",
+  "oracle26ai_changes": [
+    "Oracle 26ai에서 SQL 튜닝 어드바이저가 AI 기반 워크로드 분석 기능을 통합하여 SQL 프로파일 권고의 정확도가 향상되었습니다.",
+    "자동 옵티마이저 통계 수집 작업(Auto Optimizer Stats Collection)이 머신러닝 기반 통계 노후화 예측 모델을 도입하여 불필요한 통계 수집을 줄이고 효율성을 개선했습니다.",
+    "SQL 액세스 어드바이저가 JSON Relational Duality View 및 벡터 인덱스(Vector Index) 등 26ai 신규 기능에 대한 권고 사항을 생성할 수 있도록 확장되었습니다.",
+    "세그먼트 어드바이저에서 In-Memory Column Store 세그먼트와 블록체인 테이블에 대한 공간 분석 기능이 강화되었습니다.",
+    "DBMS_ADVISOR 패키지에 새로운 프로시저가 추가되어 어드바이저 태스크 간 종속성 관리와 병렬 실행이 개선되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "어드바이저 프레임워크 개요 (Advisor Framework Overview)",
+      "content": "Oracle 데이터베이스의 **어드바이저 프레임워크(Advisor Framework)**는 데이터베이스 성능 및 운영 문제를 자동으로 진단하고 해결 방안을 권고하는 통합 인프라입니다. 모든 어드바이저는 **DBMS_ADVISOR** 패키지를 중심으로 일관된 인터페이스를 통해 관리됩니다.\n\n### 어드바이저 프레임워크 아키텍처\n\n```\n┌─────────────────────────────────────────────────┐\n│            Oracle Advisor Framework              │\n├─────────────┬──────────────┬────────────────────┤\n│  Segment    │  SQL Tuning  │  SQL Access        │\n│  Advisor    │  Advisor     │  Advisor           │\n├─────────────┼──────────────┼────────────────────┤\n│  ADDM       │  Undo        │  Memory            │\n│             │  Advisor     │  Advisor            │\n├─────────────┴──────────────┴────────────────────┤\n│          DBMS_ADVISOR (공통 패키지)               │\n├─────────────────────────────────────────────────┤\n│     AWR (Automatic Workload Repository)          │\n└─────────────────────────────────────────────────┘\n```\n\n### 주요 어드바이저 비교\n\n| 어드바이저 | 목적 | 입력 소스 | 출력 | 관련 패키지 |\n|---|---|---|---|---|\n| **세그먼트 어드바이저 (Segment Advisor)** | 세그먼트 공간 최적화 | 세그먼트 메타데이터 | 공간 회수 권고 | DBMS_SPACE, DBMS_ADVISOR |\n| **SQL 튜닝 어드바이저 (SQL Tuning Advisor)** | 개별 SQL 문 최적화 | SQL 문, AWR | SQL 프로파일, 인덱스 권고 | DBMS_SQLTUNE |\n| **SQL 액세스 어드바이저 (SQL Access Advisor)** | 액세스 구조 최적화 | 워크로드(STS) | 인덱스, MV, 파티션 권고 | DBMS_ADVISOR |\n| **ADDM** | 전체 성능 진단 | AWR 스냅샷 | 성능 병목 분석 | DBMS_ADDM |\n| **메모리 어드바이저 (Memory Advisor)** | 메모리 구성 최적화 | V$뷰 통계 | SGA/PGA 크기 권고 | DBMS_ADVISOR |\n| **언두 어드바이저 (Undo Advisor)** | 언두 관리 최적화 | 언두 통계 | UNDO_RETENTION 권고 | DBMS_ADVISOR |\n\n### 어드바이저 공통 워크플로우\n\n1. **태스크 생성 (Create Task)**: 어드바이저 태스크를 생성하고 분석 대상을 지정\n2. **파라미터 설정 (Set Parameters)**: 태스크 실행에 필요한 파라미터를 설정\n3. **태스크 실행 (Execute Task)**: 분석을 실행하여 권고 사항을 생성\n4. **결과 조회 (View Results)**: DBA_ADVISOR_* 뷰를 통해 결과를 확인\n5. **권고 적용 (Implement)**: 권고 사항을 수동 또는 자동으로 적용\n\n### 어드바이저 관련 데이터 딕셔너리 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_ADVISOR_TASKS** | 모든 어드바이저 태스크 목록 |\n| **DBA_ADVISOR_EXECUTIONS** | 태스크 실행 이력 |\n| **DBA_ADVISOR_FINDINGS** | 분석 결과(발견 사항) |\n| **DBA_ADVISOR_RECOMMENDATIONS** | 권고 사항 |\n| **DBA_ADVISOR_ACTIONS** | 권고 사항의 세부 실행 액션 |\n| **DBA_ADVISOR_RATIONALE** | 권고 사항의 근거 |\n| **DBA_ADVISOR_OBJECTS** | 분석 대상 객체 |\n| **DBA_ADVISOR_PARAMETERS** | 태스크 파라미터 설정 |",
+      "sqlExamplesIds": ["sql01", "sql02"],
+      "subsections": [
+        {
+          "title": "DBMS_ADVISOR 패키지 및 태스크 관리 (DBMS_ADVISOR Package and Task Management)",
+          "content": "**DBMS_ADVISOR** 패키지는 Oracle 어드바이저 프레임워크의 핵심 공통 인터페이스로, 모든 어드바이저에서 태스크 생성, 파라미터 설정, 실행, 결과 조회를 위한 표준화된 프로시저를 제공합니다. 각 어드바이저는 이 공통 프레임워크 위에 전문화된 기능을 추가로 구현합니다.\n\n### DBMS_ADVISOR 주요 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **CREATE_TASK** | 어드바이저 태스크 생성. advisor_name 파라미터로 어드바이저 유형 지정 |\n| **SET_TASK_PARAMETER** | 태스크 실행 파라미터 설정 (시간 제한, 분석 범위 등) |\n| **EXECUTE_TASK** | 태스크 실행 (분석 수행 및 권고 사항 생성) |\n| **GET_TASK_REPORT** | 태스크 실행 결과를 텍스트/HTML/XML 보고서로 출력 |\n| **DELETE_TASK** | 태스크 및 관련 데이터 삭제 |\n| **CANCEL_TASK** | 실행 중인 태스크 취소 |\n| **RESET_TASK** | 태스크를 초기 상태로 리셋 |\n| **CREATE_OBJECT** | 분석 대상 객체를 태스크에 추가 |\n| **MARK_RECOMMENDATION** | 권고 사항을 수락/거부/보류로 표시 |\n\n### 태스크 상태 (Task States)\n\n| 상태 | 설명 | 전이 가능 상태 |\n|---|---|---|\n| **INITIAL** | 태스크 생성 직후 상태 | EXECUTING |\n| **EXECUTING** | 분석 실행 중 | COMPLETED, INTERRUPTED, ERROR |\n| **COMPLETED** | 분석 완료 (결과 생성됨) | INITIAL (RESET 시) |\n| **INTERRUPTED** | 시간 제한 등으로 중단됨 | INITIAL (RESET 시) |\n| **ERROR** | 오류로 실행 실패 | INITIAL (RESET 시) |\n| **CANCELLED** | 사용자에 의해 취소됨 | INITIAL (RESET 시) |\n\n### 어드바이저 결과 구조\n\n어드바이저 분석 결과는 계층 구조로 구성됩니다:\n\n```\nTask (태스크)\n└── Execution (실행)\n    └── Finding (발견 사항)\n        ├── Recommendation (권고 사항)\n        │   └── Action (실행 액션)\n        └── Rationale (근거)\n```\n\n### 관련 초기화 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **STATISTICS_LEVEL** | 어드바이저 데이터 수집 수준 결정 (BASIC/TYPICAL/ALL) | TYPICAL |\n| **CONTROL_MANAGEMENT_PACK_ACCESS** | 진단/튜닝 팩 접근 제어 (NONE/DIAGNOSTIC/DIAGNOSTIC+TUNING) | DIAGNOSTIC+TUNING |\n\n### 필요한 권한\n\n| 권한 | 설명 |\n|---|---|\n| **ADVISOR** | 어드바이저 프레임워크의 기본 사용 권한 |\n| **ADMINISTER SQL TUNING SET** | SQL Tuning Set 관리 권한 |\n| **ADMINISTER SQL MANAGEMENT OBJECT** | SQL Plan Baseline 등 관리 권한 |\n| **CREATE ANY SQL PROFILE** | SQL 프로파일 생성 권한 |",
+          "key_points": [
+            "DBMS_ADVISOR는 모든 어드바이저의 공통 인터페이스로 CREATE_TASK, EXECUTE_TASK, GET_TASK_REPORT 등 표준화된 프로시저 제공",
+            "태스크 상태는 INITIAL → EXECUTING → COMPLETED/INTERRUPTED/ERROR로 전이되며, RESET_TASK로 INITIAL 상태로 되돌릴 수 있음",
+            "어드바이저 결과는 Task → Execution → Finding → Recommendation → Action의 계층 구조로 구성",
+            "STATISTICS_LEVEL이 BASIC이면 AWR 데이터 수집이 비활성화되어 ADDM 등의 어드바이저가 정상 동작하지 않음",
+            "CONTROL_MANAGEMENT_PACK_ACCESS 파라미터로 진단/튜닝 팩 접근을 제어하며, NONE으로 설정 시 관련 어드바이저 사용 불가",
+            "ADVISOR 시스템 권한이 있어야 DBMS_ADVISOR 패키지를 사용할 수 있으며, DBA 역할에 포함됨",
+            "DBA_ADVISOR_TASKS, DBA_ADVISOR_FINDINGS, DBA_ADVISOR_RECOMMENDATIONS 등의 뷰로 결과 조회"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s02",
+      "title": "세그먼트 어드바이저 (Segment Advisor)",
+      "content": "**세그먼트 어드바이저(Segment Advisor)**는 데이터베이스 세그먼트의 공간 사용을 분석하여 공간 회수(Space Reclaim) 권고 사항을 생성하는 어드바이저입니다. 테이블, 인덱스, 테이블스페이스, 파티션 등의 공간 낭비를 식별하고 **온라인 세그먼트 축소(Online Segment Shrink)**, **재구성(Reorganization)** 등의 해결 방안을 제시합니다.\n\n### 자동 세그먼트 어드바이저 vs 수동 세그먼트 어드바이저\n\n| 구분 | 자동 세그먼트 어드바이저 (Automatic) | 수동 세그먼트 어드바이저 (Manual) |\n|---|---|---|\n| **실행 방식** | 자동 유지 관리 태스크로 야간 실행 | 사용자가 직접 실행 |\n| **분석 대상** | 전체 세그먼트 중 공간 낭비 가능성이 높은 세그먼트 자동 선택 | 사용자가 지정한 특정 세그먼트/테이블스페이스 |\n| **태스크 이름** | AUTO_SPACE_ADVISOR_JOB | 사용자 정의 이름 |\n| **실행 주기** | 유지 관리 윈도우 내 자동 실행 | 필요 시 수동 실행 |\n| **결과 조회** | DBA_ADVISOR_FINDINGS, Enterprise Manager | DBA_ADVISOR_FINDINGS, DBMS_SPACE 패키지 |\n| **적용 패키지** | DBMS_ADVISOR | DBMS_ADVISOR, DBMS_SPACE |\n\n### 세그먼트 어드바이저가 분석하는 항목\n\n| 분석 항목 | 설명 |\n|---|---|\n| **공간 낭비 (Wasted Space)** | HWM(High Water Mark) 아래의 미사용 블록 비율 분석 |\n| **행 체이닝/마이그레이션** | Row Chaining/Migration으로 인한 공간 낭비 식별 |\n| **성장 추세 (Growth Trend)** | 세그먼트의 과거 성장 패턴 분석 및 미래 크기 예측 |\n| **테이블스페이스 충만도** | 테이블스페이스의 여유 공간 부족 경고 |\n\n### 세그먼트 어드바이저 권고 유형\n\n| 권고 유형 | 설명 | 적용 조건 |\n|---|---|---|\n| **Online Segment Shrink** | ALTER TABLE ... SHRINK SPACE | ASSM 테이블스페이스, ROW MOVEMENT 활성화 |\n| **Online Reorganization** | DBMS_REDEFINITION 패키지 사용 | Shrink 불가능한 경우 |\n| **Compress** | 테이블/인덱스 압축 권고 | 읽기 위주 세그먼트 |\n| **Index Rebuild** | 인덱스 재구축 | 인덱스 공간 낭비 높은 경우 |",
+      "sqlExamplesIds": ["sql03", "sql04"],
+      "subsections": [
+        {
+          "title": "자동 세그먼트 어드바이저와 DBMS_SPACE 패키지 (Auto Segment Advisor and DBMS_SPACE Package)",
+          "content": "**자동 세그먼트 어드바이저(Automatic Segment Advisor)**는 Oracle 자동 유지 관리 태스크(Automatic Maintenance Task) 중 하나로, 야간 유지 관리 윈도우(Maintenance Window) 동안 자동으로 실행됩니다. 내부적으로 **DBMS_SPACE** 패키지를 활용하여 세그먼트의 공간 사용률을 정밀하게 분석합니다.\n\n### 자동 세그먼트 어드바이저 동작 원리\n\n1. **대상 선택 단계**: AUTO_SPACE_ADVISOR_JOB이 유지 관리 윈도우에서 시작되면, 세그먼트 통계를 기반으로 공간 낭비 가능성이 높은 세그먼트를 자동으로 선정합니다.\n2. **분석 단계**: 선정된 세그먼트에 대해 DBMS_SPACE.SPACE_USAGE 프로시저로 실제 블록 사용 현황을 분석합니다.\n3. **HWM 분석**: High Water Mark와 실제 사용 블록 간의 차이를 계산하여 회수 가능한 공간을 산정합니다.\n4. **성장 추세 분석**: AWR 데이터를 기반으로 세그먼트의 과거 성장 패턴을 분석하고 미래 크기를 예측합니다.\n5. **권고 생성**: 분석 결과를 바탕으로 공간 회수 방법(Shrink, Reorganize, Compress 등)을 권고합니다.\n\n### DBMS_SPACE 주요 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **SPACE_USAGE** | ASSM 세그먼트의 블록 사용 현황 (전체/미사용/25%미만/25-50%/50-75%/75-100% 블록 수) |\n| **OBJECT_SPACE_USAGE** | 객체의 세그먼트 공간 사용 요약 정보 |\n| **ASA_RECOMMENDATIONS** | 자동 세그먼트 어드바이저 권고 사항을 파이프라인 함수로 반환 |\n| **OBJECT_GROWTH_TREND** | 객체의 공간 성장 추세를 파이프라인 함수로 반환 |\n| **CREATE_TABLE_COST** | 테이블 생성 시 예상 소요 공간 추정 |\n| **CREATE_INDEX_COST** | 인덱스 생성 시 예상 소요 공간 추정 |\n\n### SPACE_USAGE 프로시저 출력 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **UNFORMATTED_BLOCKS** | 포맷되지 않은 블록 수 (아직 사용된 적 없는 블록) |\n| **FS1_BLOCKS** | 0-25% 사용된 블록 수 |\n| **FS2_BLOCKS** | 25-50% 사용된 블록 수 |\n| **FS3_BLOCKS** | 50-75% 사용된 블록 수 |\n| **FS4_BLOCKS** | 75-100% 사용된 블록 수 |\n| **FULL_BLOCKS** | 100% 사용된 블록 수 |\n\n### 관련 초기화 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **DB_BLOCK_SIZE** | 데이터베이스 블록 크기 | 8192 |\n| **STATISTICS_LEVEL** | TYPICAL 이상이어야 자동 어드바이저가 동작 | TYPICAL |\n\n### 관련 동적 성능 뷰 및 딕셔너리 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_ADVISOR_FINDINGS** | 세그먼트 어드바이저 발견 사항 |\n| **DBA_ADVISOR_RECOMMENDATIONS** | 공간 회수 권고 사항 |\n| **DBA_ADVISOR_ACTIONS** | 권고 사항의 세부 SQL 실행 스크립트 |\n| **DBA_SEGMENTS** | 세그먼트 크기 및 공간 정보 |\n| **DBA_TABLESPACE_USAGE_METRICS** | 테이블스페이스별 사용률 |\n| **V$SORT_SEGMENT** | 임시 세그먼트 사용 현황 |\n| **DBA_AUTOTASK_CLIENT** | 자동 유지 관리 태스크 상태 확인 |",
+          "key_points": [
+            "자동 세그먼트 어드바이저는 AUTO_SPACE_ADVISOR_JOB으로 유지 관리 윈도우에서 자동 실행되며, DBA_AUTOTASK_CLIENT에서 상태 확인 가능",
+            "DBMS_SPACE.SPACE_USAGE는 ASSM(Automatic Segment Space Management) 세그먼트에서만 사용 가능하며, 블록 사용률을 5단계로 분류",
+            "DBMS_SPACE.ASA_RECOMMENDATIONS 파이프라인 함수로 자동 세그먼트 어드바이저 권고 사항을 SQL로 직접 조회 가능",
+            "DBMS_SPACE.OBJECT_GROWTH_TREND로 세그먼트의 과거 성장 패턴 분석 및 미래 크기 예측이 가능",
+            "Online Segment Shrink는 ASSM 테이블스페이스에서만 가능하며, ROW MOVEMENT를 먼저 활성화해야 함",
+            "STATISTICS_LEVEL이 BASIC이면 자동 세그먼트 어드바이저가 실행되지 않음",
+            "CREATE_TABLE_COST와 CREATE_INDEX_COST로 객체 생성 전 필요한 공간을 사전 추정 가능"
+          ]
+        },
+        {
+          "title": "수동 세그먼트 어드바이저 실행 및 결과 활용 (Manual Segment Advisor Execution and Results)",
+          "content": "수동 세그먼트 어드바이저는 특정 세그먼트나 테이블스페이스를 대상으로 사용자가 직접 분석을 실행하는 방식입니다. **DBMS_ADVISOR** 패키지를 사용하여 태스크를 생성하고 실행하며, 자동 어드바이저보다 세밀한 제어가 가능합니다.\n\n### 수동 세그먼트 어드바이저 실행 단계\n\n1. **태스크 생성**: DBMS_ADVISOR.CREATE_TASK에서 advisor_name을 'Segment Advisor'로 지정\n2. **분석 대상 추가**: DBMS_ADVISOR.CREATE_OBJECT로 분석할 세그먼트 또는 테이블스페이스를 태스크에 추가\n3. **파라미터 설정**: SET_TASK_PARAMETER로 분석 시간 제한 등 설정\n4. **태스크 실행**: DBMS_ADVISOR.EXECUTE_TASK로 분석 실행\n5. **결과 조회**: DBA_ADVISOR_FINDINGS, DBA_ADVISOR_RECOMMENDATIONS, DBA_ADVISOR_ACTIONS 뷰로 결과 확인\n6. **보고서 생성**: DBMS_ADVISOR.GET_TASK_REPORT로 HTML/TEXT 보고서 생성\n\n### CREATE_OBJECT 파라미터 (분석 대상 유형)\n\n| 객체 유형 | OBJECT_TYPE 값 | 설명 |\n|---|---|---|\n| **테이블** | 'TABLE' | 특정 테이블 세그먼트 분석 |\n| **인덱스** | 'INDEX' | 특정 인덱스 세그먼트 분석 |\n| **테이블스페이스** | 'TABLESPACE' | 테이블스페이스 내 모든 세그먼트 분석 |\n| **테이블 파티션** | 'TABLE PARTITION' | 특정 파티션 분석 |\n| **인덱스 파티션** | 'INDEX PARTITION' | 특정 인덱스 파티션 분석 |\n| **테이블 서브파티션** | 'TABLE SUBPARTITION' | 특정 서브파티션 분석 |\n\n### 결과 뷰의 주요 컬럼\n\n| 뷰/컬럼 | 설명 |\n|---|---|\n| **DBA_ADVISOR_FINDINGS.TYPE** | PROBLEM(문제점) 또는 INFORMATION(정보) |\n| **DBA_ADVISOR_FINDINGS.MESSAGE** | 발견 사항에 대한 설명 메시지 |\n| **DBA_ADVISOR_RECOMMENDATIONS.BENEFIT** | 권고 적용 시 예상 이점 (공간 절약량 등) |\n| **DBA_ADVISOR_ACTIONS.COMMAND** | 실행할 DDL 명령어 (SHRINK SPACE, REORGANIZE 등) |\n| **DBA_ADVISOR_ACTIONS.ATTR1~ATTR6** | 명령어 실행에 필요한 세부 속성 |\n\n### 특수 동작 케이스\n\n- **LOB 세그먼트**: SecureFiles LOB은 Shrink 지원, BasicFiles LOB은 미지원\n- **IOT(Index-Organized Table)**: Overflow 세그먼트에 대해서만 Shrink 지원\n- **클러스터 테이블**: Segment Shrink 미지원, 재구성만 권고\n- **압축된 테이블**: 이미 압축된 테이블에는 추가 압축 권고 생성 안 함\n- **MSSM 테이블스페이스**: Manual Segment Space Management 테이블스페이스의 세그먼트는 Shrink 미지원\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$SEGMENT_STATISTICS** | 세그먼트별 I/O 및 공간 통계 |\n| **V$SEGSTAT** | 세그먼트 통계의 세부 항목 |\n| **DBA_SEG_STAT** | 세그먼트 통계의 데이터 딕셔너리 뷰 |",
+          "key_points": [
+            "수동 세그먼트 어드바이저는 DBMS_ADVISOR.CREATE_TASK에서 advisor_name을 'Segment Advisor'로 지정하여 생성",
+            "CREATE_OBJECT로 분석 대상을 추가할 때 TABLE, INDEX, TABLESPACE, TABLE PARTITION 등의 객체 유형 지정 가능",
+            "DBA_ADVISOR_ACTIONS.COMMAND 컬럼에서 권고된 DDL 문(SHRINK SPACE, REORGANIZE 등)을 확인할 수 있음",
+            "LOB 세그먼트 중 SecureFiles LOB만 Shrink 지원하며, BasicFiles LOB과 클러스터 테이블은 미지원",
+            "MSSM(Manual Segment Space Management) 테이블스페이스의 세그먼트는 Online Segment Shrink 미지원",
+            "DBA_ADVISOR_RECOMMENDATIONS.BENEFIT 컬럼으로 권고 적용 시 예상 공간 절약량을 확인 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "옵티마이저 통계 (Optimizer Statistics)",
+      "content": "**옵티마이저 통계(Optimizer Statistics)**는 Oracle 비용 기반 옵티마이저(Cost-Based Optimizer, CBO)가 최적의 실행 계획을 생성하기 위해 참조하는 데이터베이스 객체 및 시스템에 관한 통계 정보입니다. 정확한 통계는 최적의 실행 계획 선택의 전제 조건이며, **DBMS_STATS** 패키지를 통해 수집, 관리, 잠금, 복원 등의 작업을 수행합니다.\n\n### 옵티마이저 통계의 유형\n\n| 통계 유형 | 설명 | 수집 대상 |\n|---|---|---|\n| **테이블 통계** | 행 수(NUM_ROWS), 블록 수(BLOCKS), 평균 행 길이(AVG_ROW_LEN) | 테이블 |\n| **컬럼 통계** | NDV(Number of Distinct Values), NULL 수, 히스토그램, 최소/최대값 | 컬럼 |\n| **인덱스 통계** | 깊이(BLEVEL), 리프 블록 수(LEAF_BLOCKS), 클러스터링 팩터 | 인덱스 |\n| **시스템 통계** | CPU 속도, I/O 속도, I/O 대역폭 | 시스템 전체 |\n| **확장 통계 (Extended Statistics)** | 컬럼 그룹, 표현식 통계 | 컬럼 조합/표현식 |\n\n### 통계 관리 핵심 개념\n\n| 개념 | 설명 |\n|---|---|\n| **노후 통계 (Stale Statistics)** | 데이터 변경량이 임계값(기본 10%)을 초과하여 통계가 현재 데이터를 정확히 반영하지 않는 상태 |\n| **보류 통계 (Pending Statistics)** | 즉시 적용하지 않고 테스트 목적으로 임시 저장된 통계 |\n| **잠금 통계 (Locked Statistics)** | 자동 수집을 포함한 모든 통계 변경이 차단된 상태 |\n| **증분 통계 (Incremental Statistics)** | 파티션 테이블에서 변경된 파티션만 분석하여 글로벌 통계를 도출하는 방법 |\n| **통계 기본 설정 (Statistics Preferences)** | 통계 수집 시 적용되는 기본 파라미터 값 |\n\n### 히스토그램 유형 (Histogram Types)\n\n| 히스토그램 유형 | NDV 조건 | 특징 |\n|---|---|---|\n| **Frequency** | NDV ≤ 254 | 각 고유값의 정확한 빈도 기록 |\n| **Top-Frequency** | NDV > 254, 상위 값이 대부분 | 상위 빈도 값만 기록 |\n| **Height-Balanced** | 12c 이전 호환 | 등높이 히스토그램 (레거시) |\n| **Hybrid** | NDV > 254 | Frequency + Height-Balanced 결합, 인기 값의 정확한 빈도 + 나머지 분포 |\n| **None** | - | 히스토그램 없음 (균일 분포 가정) |\n\n### 자동 통계 수집 작업 (Auto Optimizer Stats Collection)\n\n자동 옵티마이저 통계 수집은 Oracle의 자동 유지 관리 태스크로, 유지 관리 윈도우 동안 노후화된 통계를 자동으로 재수집합니다.\n\n| 항목 | 설명 |\n|---|---|\n| **태스크 이름** | auto optimizer stats collection |\n| **실행 시간** | 유지 관리 윈도우 (기본: 야간/주말) |\n| **대상** | 통계가 없거나 노후화된(Stale) 객체 |\n| **노후화 기준** | 전체 행의 10% 이상 변경 (기본값) |\n| **확인 뷰** | DBA_AUTOTASK_CLIENT |",
+      "sqlExamplesIds": ["sql05", "sql06", "sql07"],
+      "subsections": [
+        {
+          "title": "DBMS_STATS 패키지를 통한 통계 수집 및 관리 (Statistics Gathering and Management with DBMS_STATS)",
+          "content": "**DBMS_STATS** 패키지는 옵티마이저 통계의 수집, 삭제, 잠금, 복원, 전송, 보류 등 모든 통계 관리 작업을 수행하는 핵심 패키지입니다. ANALYZE 명령어보다 기능이 풍부하고 정확하며, Oracle은 통계 수집에 DBMS_STATS 사용을 권장합니다.\n\n### DBMS_STATS 주요 수집 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **GATHER_TABLE_STATS** | 특정 테이블의 통계 수집 (컬럼, 인덱스 통계 포함) |\n| **GATHER_INDEX_STATS** | 특정 인덱스의 통계 수집 |\n| **GATHER_SCHEMA_STATS** | 스키마 내 모든 객체의 통계 수집 |\n| **GATHER_DATABASE_STATS** | 데이터베이스 전체 통계 수집 |\n| **GATHER_SYSTEM_STATS** | 시스템 통계 수집 (CPU, I/O 속도) |\n| **GATHER_DICTIONARY_STATS** | 딕셔너리 스키마(SYS, SYSTEM 등)의 통계 수집 |\n| **GATHER_FIXED_OBJECTS_STATS** | 고정 객체(V$ 뷰 등) 통계 수집 |\n\n### GATHER_TABLE_STATS 주요 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **ownname** | 스키마 이름 | - |\n| **tabname** | 테이블 이름 | - |\n| **estimate_percent** | 샘플링 비율 (0.000001~100) | DBMS_STATS.AUTO_SAMPLE_SIZE |\n| **method_opt** | 컬럼 통계/히스토그램 수집 방법 | 'FOR ALL COLUMNS SIZE AUTO' |\n| **cascade** | 인덱스 통계 함께 수집 여부 | DBMS_STATS.AUTO_CASCADE |\n| **degree** | 병렬도 | NULL (기본 병렬도) |\n| **granularity** | 파티션 통계 수집 수준 (ALL, GLOBAL, PARTITION, SUBPARTITION 등) | 'AUTO' |\n| **no_invalidate** | 기존 커서 무효화 제어 | DBMS_STATS.AUTO_INVALIDATE |\n| **force** | 잠긴 통계도 강제 수집 여부 | FALSE |\n\n### method_opt 파라미터 상세\n\n| 설정값 | 설명 |\n|---|---|\n| **FOR ALL COLUMNS SIZE AUTO** | 모든 컬럼에 대해 자동으로 히스토그램 필요 여부 판단 |\n| **FOR ALL COLUMNS SIZE 1** | 모든 컬럼의 기본 통계만 수집 (히스토그램 없음) |\n| **FOR ALL COLUMNS SIZE 254** | 모든 컬럼에 254 버킷의 히스토그램 생성 |\n| **FOR COLUMNS col1 SIZE AUTO** | 특정 컬럼에 대해서만 히스토그램 자동 판단 |\n| **FOR ALL INDEXED COLUMNS SIZE AUTO** | 인덱스된 컬럼에 대해서만 히스토그램 자동 판단 |\n\n### 통계 삭제, 잠금, 복원 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **DELETE_TABLE_STATS** | 테이블 통계 삭제 |\n| **LOCK_TABLE_STATS** | 테이블 통계 잠금 (자동 수집 포함 모든 변경 차단) |\n| **UNLOCK_TABLE_STATS** | 테이블 통계 잠금 해제 |\n| **RESTORE_TABLE_STATS** | 특정 시점의 통계로 복원 (as_of_timestamp 기반) |\n| **EXPORT_TABLE_STATS** | 통계를 별도 테이블에 내보내기 |\n| **IMPORT_TABLE_STATS** | 내보낸 통계를 다시 가져오기 |\n\n### 관련 초기화 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **OPTIMIZER_DYNAMIC_SAMPLING** | 통계 없는 객체에 대한 동적 샘플링 수준 | 2 |\n| **STATISTICS_LEVEL** | AWR 및 자동 통계 수집 활성화 수준 | TYPICAL |\n| **OPTIMIZER_ADAPTIVE_STATISTICS** | 적응형 통계 활성화 여부 | FALSE (12.2+) |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_TAB_STATISTICS** | 테이블 통계 상태 (STALE 여부 포함) |\n| **DBA_TAB_COL_STATISTICS** | 컬럼 통계 정보 |\n| **DBA_IND_STATISTICS** | 인덱스 통계 정보 |\n| **DBA_TAB_STAT_PREFS** | 테이블별 통계 기본 설정 |\n| **DBA_OPTSTAT_OPERATIONS** | 통계 수집 작업 이력 |\n| **DBA_TAB_MODIFICATIONS** | 테이블 DML 변경량 추적 |",
+          "key_points": [
+            "DBMS_STATS는 ANALYZE 명령어보다 정확하고 기능이 풍부하여 Oracle이 공식적으로 권장하는 통계 수집 방법",
+            "estimate_percent의 기본값은 AUTO_SAMPLE_SIZE로, 옵티마이저가 자동으로 최적 샘플링 비율을 결정",
+            "method_opt의 기본값 'FOR ALL COLUMNS SIZE AUTO'는 워크로드 기반으로 히스토그램 필요 여부를 자동 판단",
+            "LOCK_TABLE_STATS로 통계를 잠그면 자동 수집 작업을 포함한 모든 통계 변경이 차단됨",
+            "RESTORE_TABLE_STATS로 특정 시점의 통계로 복원이 가능하며, 통계 이력 보관 기간은 SET_TABLE_PREFS로 설정",
+            "no_invalidate 기본값 AUTO_INVALIDATE는 통계 변경 후 기존 커서를 즉시 무효화하지 않고 점진적으로 무효화",
+            "DBA_TAB_MODIFICATIONS 뷰로 마지막 통계 수집 이후의 DML 변경량을 확인하여 노후화 여부 판단 가능",
+            "force=TRUE로 설정하면 잠긴(Locked) 통계도 강제로 재수집 가능"
+          ]
+        },
+        {
+          "title": "증분 통계, 보류 통계 및 통계 기본 설정 (Incremental, Pending Statistics, and Preferences)",
+          "content": "대규모 파티션 테이블에서의 통계 수집 효율성을 위한 **증분 통계(Incremental Statistics)**, 통계 변경의 안전한 테스트를 위한 **보류 통계(Pending Statistics)**, 그리고 통계 수집 동작을 제어하는 **통계 기본 설정(Statistics Preferences)**은 옵티마이저 통계 관리의 고급 기능입니다.\n\n### 증분 통계 (Incremental Statistics)\n\n증분 통계는 파티션 테이블에서 **변경된 파티션만** 분석하여 글로벌 통계를 효율적으로 도출하는 방법입니다. 내부적으로 각 파티션에 **시놉시스(Synopsis)**를 저장하여 글로벌 NDV(Number of Distinct Values)를 정확하게 계산합니다.\n\n#### 증분 통계 동작 원리\n\n1. **파티션 분석**: 변경된 파티션에 대해서만 통계를 수집합니다.\n2. **시놉시스 생성**: 각 파티션의 시놉시스(HyperLogLog 기반의 NDV 추정 구조체)를 생성/갱신합니다.\n3. **글로벌 통계 도출**: 모든 파티션의 시놉시스를 집계하여 글로벌 통계를 계산합니다. 전체 테이블을 다시 스캔할 필요가 없습니다.\n\n#### 증분 통계 활성화 방법\n\n| 방법 | SQL |\n|---|---|\n| **테이블 레벨** | `DBMS_STATS.SET_TABLE_PREFS('owner','table','INCREMENTAL','TRUE')` |\n| **스키마 레벨** | `DBMS_STATS.SET_SCHEMA_PREFS('owner','INCREMENTAL','TRUE')` |\n| **데이터베이스 레벨** | `DBMS_STATS.SET_GLOBAL_PREFS('INCREMENTAL','TRUE')` |\n\n#### 증분 통계의 전제 조건\n\n- INCREMENTAL 기본 설정이 TRUE로 설정되어 있어야 함\n- 파티션 수준의 통계가 존재해야 함\n- granularity가 'AUTO' 또는 'GLOBAL AND PARTITION'으로 설정되어야 함\n\n### 보류 통계 (Pending Statistics)\n\n보류 통계는 수집한 통계를 즉시 데이터 딕셔너리에 반영하지 않고 별도의 **보류 영역(Pending Area)**에 저장하여 테스트할 수 있는 기능입니다.\n\n#### 보류 통계 워크플로우\n\n1. **PUBLISH 기본 설정을 FALSE로 변경**: `DBMS_STATS.SET_TABLE_PREFS('owner','table','PUBLISH','FALSE')`\n2. **통계 수집**: GATHER_TABLE_STATS 실행 → 보류 영역에 저장\n3. **보류 통계로 테스트**: `ALTER SESSION SET OPTIMIZER_USE_PENDING_STATISTICS = TRUE` 후 실행 계획 확인\n4. **통계 게시 또는 삭제**:\n   - 게시: `DBMS_STATS.PUBLISH_PENDING_STATS('owner','table')`\n   - 삭제: `DBMS_STATS.DELETE_PENDING_STATS('owner','table')`\n\n### 통계 기본 설정 (Statistics Preferences)\n\n통계 기본 설정은 테이블, 스키마, 데이터베이스, 글로벌 수준에서 통계 수집 동작을 제어합니다.\n\n#### 설정 가능한 기본 설정 항목\n\n| 기본 설정 (Preference) | 설명 | 기본값 |\n|---|---|---|\n| **AUTOSTATS_TARGET** | 자동 수집 대상 (AUTO, ALL, ORACLE) | AUTO |\n| **CASCADE** | 인덱스 통계 동시 수집 여부 | DBMS_STATS.AUTO_CASCADE |\n| **DEGREE** | 병렬도 | NULL |\n| **ESTIMATE_PERCENT** | 샘플링 비율 | DBMS_STATS.AUTO_SAMPLE_SIZE |\n| **GRANULARITY** | 파티션 통계 수집 수준 | AUTO |\n| **INCREMENTAL** | 증분 통계 사용 여부 | FALSE |\n| **METHOD_OPT** | 히스토그램 수집 방법 | FOR ALL COLUMNS SIZE AUTO |\n| **NO_INVALIDATE** | 커서 무효화 제어 | DBMS_STATS.AUTO_INVALIDATE |\n| **PUBLISH** | 통계 즉시 게시 여부 | TRUE |\n| **STALE_PERCENT** | 노후화 판단 임계값 (%) | 10 |\n| **TABLE_CACHED_BLOCKS** | 클러스터링 팩터 계산 시 캐시 블록 수 | 1 |\n| **APPROXIMATE_NDV_ALGORITHM** | 근사 NDV 알고리즘 | REPEAT OR HYPERLOGLOG |\n\n#### 기본 설정 우선순위 (낮은 → 높은)\n\n```\nGlobal → Database → Schema → Table\n```\n\n테이블 레벨 설정이 가장 높은 우선순위를 가집니다.\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_TAB_PENDING_STATS** | 보류 상태의 테이블 통계 |\n| **DBA_IND_PENDING_STATS** | 보류 상태의 인덱스 통계 |\n| **DBA_COL_PENDING_STATS** | 보류 상태의 컬럼 통계 |\n| **DBA_TAB_STAT_PREFS** | 테이블별 통계 기본 설정 |\n| **DBA_OPTSTAT_OPERATION_TASKS** | 통계 수집 작업의 세부 태스크 |",
+          "key_points": [
+            "증분 통계는 파티션 테이블에서 변경된 파티션만 분석하여 글로벌 통계를 효율적으로 도출하며, 시놉시스(Synopsis)를 사용하여 정확한 NDV 계산",
+            "증분 통계 활성화를 위해 INCREMENTAL 기본 설정을 TRUE로 설정하고, granularity가 AUTO 또는 GLOBAL AND PARTITION이어야 함",
+            "보류 통계(Pending Statistics)는 PUBLISH 설정을 FALSE로 변경한 후 수집하면 보류 영역에 저장됨",
+            "OPTIMIZER_USE_PENDING_STATISTICS 세션 파라미터를 TRUE로 설정하여 보류 통계 기반의 실행 계획을 테스트 가능",
+            "통계 기본 설정의 우선순위는 Global < Database < Schema < Table 순으로, 테이블 레벨 설정이 최우선",
+            "STALE_PERCENT 기본값은 10%이며, 테이블 데이터의 10% 이상이 변경되면 통계가 노후화(Stale) 상태로 표시됨",
+            "DBMS_STATS.PUBLISH_PENDING_STATS로 보류 통계를 게시하거나, DELETE_PENDING_STATS로 삭제 가능",
+            "DBA_TAB_STAT_PREFS 뷰에서 테이블별 통계 기본 설정을 확인할 수 있음"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "SQL 튜닝 어드바이저 (SQL Tuning Advisor)",
+      "content": "**SQL 튜닝 어드바이저(SQL Tuning Advisor)**는 개별 SQL 문을 심층 분석하여 성능 개선을 위한 구체적인 권고 사항을 제공하는 어드바이저입니다. 옵티마이저의 **자동 튜닝 모드(Automatic Tuning Mode)**를 활용하여 통계 분석, SQL 프로파일 생성, 인덱스 권고, SQL 구조 변경 등 다양한 최적화 방안을 제시합니다.\n\n### SQL 튜닝 어드바이저의 분석 유형\n\n| 분석 유형 | 설명 | 출력 |\n|---|---|---|\n| **통계 분석 (Statistics Analysis)** | 관련 객체의 통계 노후화/누락 확인 | 통계 수집 권고 |\n| **SQL 프로파일링 (SQL Profiling)** | 자동 튜닝 옵티마이저가 추가 정보를 수집하여 최적 실행 계획 탐색 | SQL 프로파일 생성 권고 |\n| **액세스 경로 분석 (Access Path Analysis)** | 새로운 인덱스 생성으로 성능 개선 가능 여부 분석 | 인덱스 생성 권고 |\n| **SQL 구조 분석 (SQL Structure Analysis)** | SQL 문의 구조적 문제(안티패턴 등) 분석 | SQL 문 수정 권고 |\n\n### 자동 SQL 튜닝 태스크 (Automatic SQL Tuning Task)\n\n| 항목 | 설명 |\n|---|---|\n| **태스크 이름** | SYS_AUTO_SQL_TUNING_TASK |\n| **실행 시간** | 유지 관리 윈도우 내 자동 실행 |\n| **분석 대상** | AWR에서 고부하 SQL 자동 선별 |\n| **자동 적용** | SQL 프로파일 자동 적용 가능 (ACCEPT_SQL_PROFILES 파라미터) |\n| **확인 뷰** | DBA_ADVISOR_TASKS, DBA_AUTOTASK_CLIENT |\n\n### SQL 프로파일 (SQL Profile)\n\n| 항목 | 설명 |\n|---|---|\n| **정의** | SQL 문에 대한 보조 통계 정보의 집합으로, 옵티마이저의 비용 추정을 보정 |\n| **저장 위치** | 데이터 딕셔너리 (SQLOBJ$ 테이블) |\n| **SQL 텍스트 바인딩** | SQL 문의 시그니처(해시값)에 연결됨 |\n| **강제 매칭 (Force Matching)** | 리터럴 값이 다른 유사 SQL에도 프로파일 적용 |\n| **관련 뷰** | DBA_SQL_PROFILES |\n\n### SQL 프로파일 vs SQL Plan Baseline vs SQL Patch 비교\n\n| 구분 | SQL 프로파일 | SQL Plan Baseline | SQL Patch |\n|---|---|---|---|\n| **목적** | 비용 추정 보정 | 실행 계획 고정 | SQL 문 힌트 적용 |\n| **실행 계획 보장** | 보장하지 않음 (힌트 아닌 보조 정보) | 특정 계획 고정 | 힌트로 계획 유도 |\n| **적용 범위** | SQL 시그니처 매칭 | SQL 시그니처 매칭 | SQL 시그니처 매칭 |\n| **자동 생성** | SQL 튜닝 어드바이저에 의해 | SPM에 의해 | 수동 생성만 가능 |\n| **관련 패키지** | DBMS_SQLTUNE | DBMS_SPM | DBMS_SQLDIAG |",
+      "sqlExamplesIds": ["sql08", "sql09", "sql10"],
+      "subsections": [
+        {
+          "title": "SQL 튜닝 어드바이저 실행 및 SQL 프로파일 관리 (Running SQL Tuning Advisor and SQL Profile Management)",
+          "content": "SQL 튜닝 어드바이저는 **DBMS_SQLTUNE** 패키지를 통해 수동으로 실행하거나, 자동 SQL 튜닝 태스크(SYS_AUTO_SQL_TUNING_TASK)로 자동 실행됩니다. 분석 결과로 생성된 SQL 프로파일은 옵티마이저의 비용 추정을 보정하여 더 나은 실행 계획을 선택하도록 유도합니다.\n\n### 수동 SQL 튜닝 어드바이저 실행 단계\n\n1. **튜닝 태스크 생성**: `DBMS_SQLTUNE.CREATE_TUNING_TASK` 호출\n   - SQL 텍스트 직접 지정, SQL_ID로 커서 캐시/AWR에서 참조, 또는 SQL Tuning Set(STS)에서 참조\n2. **태스크 실행**: `DBMS_SQLTUNE.EXECUTE_TUNING_TASK` 호출\n3. **보고서 조회**: `DBMS_SQLTUNE.REPORT_TUNING_TASK` 호출하여 권고 사항 확인\n4. **SQL 프로파일 적용**: `DBMS_SQLTUNE.ACCEPT_SQL_PROFILE` 호출\n\n### CREATE_TUNING_TASK 주요 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **sql_id** | 분석할 SQL 문의 SQL_ID (커서 캐시 또는 AWR에서 참조) |\n| **sql_text** | 분석할 SQL 텍스트 직접 지정 |\n| **plan_hash_value** | 특정 실행 계획에 대해서만 분석 |\n| **time_limit** | 분석 시간 제한 (초 단위, 기본 1800초) |\n| **scope** | 분석 범위: COMPREHENSIVE(전체 분석) 또는 LIMITED(빠른 분석) |\n| **task_name** | 태스크 이름 |\n| **sql_tuning_set** | SQL Tuning Set에서 SQL 참조 |\n\n### SQL 프로파일 관리 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **ACCEPT_SQL_PROFILE** | SQL 튜닝 어드바이저 권고의 SQL 프로파일을 수락하고 생성 |\n| **ALTER_SQL_PROFILE** | SQL 프로파일의 속성 변경 (STATUS, FORCE_MATCHING 등) |\n| **DROP_SQL_PROFILE** | SQL 프로파일 삭제 |\n| **IMPORT_SQL_PROFILE** | SQL 프로파일을 다른 데이터베이스에서 가져오기 |\n\n### ACCEPT_SQL_PROFILE 주요 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **task_name** | 튜닝 태스크 이름 | - |\n| **name** | SQL 프로파일 이름 | 자동 생성 |\n| **category** | 프로파일 카테고리 (DEFAULT, TEST 등) | DEFAULT |\n| **force_match** | 리터럴 값이 다른 유사 SQL에도 적용 여부 | FALSE |\n| **replace** | 기존 프로파일 대체 여부 | FALSE |\n\n### 자동 SQL 튜닝 태스크 제어\n\n자동 SQL 튜닝 태스크의 동작은 DBMS_AUTO_SQLTUNE 패키지로 제어합니다:\n\n| 설정 | 설명 | 기본값 |\n|---|---|---|\n| **ACCEPT_SQL_PROFILES** | SQL 프로파일 자동 적용 여부 | TRUE |\n| **MAX_SQL_PROFILES_PER_EXEC** | 실행당 최대 자동 적용 프로파일 수 | 20 |\n| **MAX_AUTO_SQL_PROFILES** | 최대 자동 프로파일 보유 수 | 10000 |\n| **EXECUTION_DAYS_TO_EXPIRE** | 자동 프로파일 만료 기간 (일) | UNLIMITED |\n\n### 관련 초기화 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **OPTIMIZER_CAPTURE_SQL_PLAN_BASELINES** | 실행 계획 자동 캡처 여부 | FALSE |\n| **OPTIMIZER_USE_SQL_PLAN_BASELINES** | SQL Plan Baseline 사용 여부 | TRUE |\n| **SQLTUNE_CATEGORY** | 활성 SQL 프로파일 카테고리 | DEFAULT |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_SQL_PROFILES** | 생성된 SQL 프로파일 목록 |\n| **DBA_ADVISOR_TASKS** | 튜닝 태스크 목록 및 상태 |\n| **V$SQL** | 커서 캐시의 SQL 문 정보 (SQL_ID 확인) |\n| **V$SQL_PLAN** | SQL 실행 계획 |\n| **DBA_HIST_SQLSTAT** | AWR의 SQL 통계 이력 |\n| **DBA_AUTO_SQLTUNING_CONFIG** | 자동 SQL 튜닝 구성 |",
+          "key_points": [
+            "SQL 튜닝 어드바이저는 DBMS_SQLTUNE.CREATE_TUNING_TASK로 태스크를 생성하며, sql_id 또는 sql_text로 분석 대상 SQL 지정",
+            "scope 파라미터가 COMPREHENSIVE이면 SQL 프로파일링을 포함한 전체 분석, LIMITED이면 통계/구조 분석만 수행",
+            "SQL 프로파일은 실행 계획을 고정하지 않고 옵티마이저의 비용 추정을 보정하는 보조 정보",
+            "ACCEPT_SQL_PROFILE의 force_match=TRUE로 설정하면 리터럴 값만 다른 유사 SQL에도 동일 프로파일 적용",
+            "자동 SQL 튜닝 태스크(SYS_AUTO_SQL_TUNING_TASK)는 ACCEPT_SQL_PROFILES=TRUE 시 SQL 프로파일을 자동 적용",
+            "DBA_SQL_PROFILES 뷰에서 현재 활성화된 SQL 프로파일과 그 상태(ENABLED/DISABLED)를 확인 가능",
+            "REPORT_TUNING_TASK 함수로 TEXT, HTML, XML 형식의 상세 보고서 생성 가능",
+            "SQL 프로파일은 데이터 딕셔너리에 저장되므로 데이터베이스 재시작 후에도 유지됨"
+          ]
+        },
+        {
+          "title": "SQL Tuning Set (STS) 관리 및 활용 (SQL Tuning Set Management and Usage)",
+          "content": "**SQL Tuning Set(STS)**은 하나 이상의 SQL 문과 그 실행 통계를 포함하는 데이터베이스 객체로, SQL 튜닝 어드바이저와 SQL 액세스 어드바이저의 입력 소스로 활용됩니다. STS는 SQL 워크로드를 캡처하고 전송하여 반복적인 튜닝 분석의 기반을 제공합니다.\n\n### STS의 구성 요소\n\n| 구성 요소 | 설명 |\n|---|---|\n| **SQL 텍스트** | SQL 문의 전체 텍스트 |\n| **실행 컨텍스트** | 파싱 스키마, 바인드 값, 컴파일 환경 |\n| **실행 통계** | 경과 시간, CPU 시간, 버퍼 읽기, 디스크 읽기, 실행 횟수 등 |\n| **실행 계획** | SQL 실행 계획 (선택적) |\n\n### DBMS_SQLTUNE STS 관리 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **CREATE_SQLSET** | 빈 STS 생성 |\n| **LOAD_SQLSET** | STS에 SQL 문 로드 (커서 캐시, AWR 등에서) |\n| **SELECT_CURSOR_CACHE** | 커서 캐시에서 SQL 문을 선택하는 테이블 함수 |\n| **SELECT_WORKLOAD_REPOSITORY** | AWR에서 SQL 문을 선택하는 테이블 함수 |\n| **SELECT_SQL_TRACE** | SQL 트레이스 파일에서 SQL 문 선택 |\n| **DELETE_SQLSET** | STS에서 SQL 문 삭제 |\n| **DROP_SQLSET** | STS 삭제 |\n| **ADD_SQLSET_REFERENCE** | STS에 참조 추가 (삭제 보호) |\n| **PACK_STGTAB_SQLSET** | STS를 스테이징 테이블에 팩킹 (전송용) |\n| **UNPACK_STGTAB_SQLSET** | 스테이징 테이블에서 STS 언팩킹 |\n\n### STS 로드 소스 (Load Sources)\n\n| 소스 | 테이블 함수 | 설명 |\n|---|---|---|\n| **커서 캐시** | SELECT_CURSOR_CACHE | 현재 Library Cache의 SQL 문 |\n| **AWR** | SELECT_WORKLOAD_REPOSITORY | AWR 스냅샷의 SQL 통계 |\n| **SQL 트레이스** | SELECT_SQL_TRACE | 10046 트레이스 파일 |\n| **다른 STS** | SELECT_SQLSET | 기존 STS에서 SQL 복사 |\n\n### STS 전송 (Transport) 프로세스\n\n다른 데이터베이스로 STS를 전송하는 과정:\n\n1. **스테이징 테이블 생성**: `DBMS_SQLTUNE.CREATE_STGTAB_SQLSET`\n2. **STS 팩킹**: `DBMS_SQLTUNE.PACK_STGTAB_SQLSET`\n3. **테이블 전송**: Data Pump, 데이터베이스 링크 등으로 스테이징 테이블 전송\n4. **STS 언팩킹**: `DBMS_SQLTUNE.UNPACK_STGTAB_SQLSET`\n\n### STS 필터링\n\nSTS에 SQL을 로드할 때 **basic_filter**(SQL 텍스트 기반), **plan_filter**(실행 계획 기반), **ranking_measure**(순위 기준) 등의 파라미터로 필터링할 수 있습니다.\n\n| 필터 유형 | 예시 |\n|---|---|\n| **basic_filter** | `'parsing_schema_name = ''HR'''` |\n| **ranking_measure1** | `'ELAPSED_TIME'`, `'CPU_TIME'`, `'BUFFER_GETS'` |\n| **result_limit** | 상위 N개 SQL만 로드 |\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_SQLSET** | 생성된 STS 목록 |\n| **DBA_SQLSET_STATEMENTS** | STS에 포함된 SQL 문 목록 |\n| **DBA_SQLSET_REFERENCES** | STS 참조 정보 |\n| **DBA_SQLSET_PLANS** | STS에 포함된 실행 계획 |",
+          "key_points": [
+            "SQL Tuning Set(STS)은 SQL 문과 실행 통계를 포함하는 객체로 SQL 튜닝 어드바이저와 SQL 액세스 어드바이저의 입력으로 사용",
+            "STS에 SQL을 로드할 때 SELECT_CURSOR_CACHE(커서 캐시), SELECT_WORKLOAD_REPOSITORY(AWR) 등의 테이블 함수 사용",
+            "STS는 PACK_STGTAB_SQLSET/UNPACK_STGTAB_SQLSET로 다른 데이터베이스로 전송 가능",
+            "basic_filter와 ranking_measure 파라미터로 로드할 SQL을 필터링하고 우선순위를 지정할 수 있음",
+            "ADD_SQLSET_REFERENCE로 STS에 참조를 추가하면 해당 참조가 제거될 때까지 STS를 삭제할 수 없음",
+            "DBA_SQLSET_STATEMENTS 뷰에서 STS에 포함된 개별 SQL 문의 실행 통계를 확인 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "SQL 액세스 어드바이저 (SQL Access Advisor)",
+      "content": "**SQL 액세스 어드바이저(SQL Access Advisor)**는 SQL 워크로드를 분석하여 **인덱스(Index)**, **구체화 뷰(Materialized View)**, **구체화 뷰 로그(Materialized View Log)**, **파티셔닝(Partitioning)** 등의 액세스 구조에 대한 최적화 권고를 생성하는 어드바이저입니다. 개별 SQL이 아닌 **전체 워크로드**를 고려한 종합적인 권고를 제공합니다.\n\n### SQL 액세스 어드바이저의 권고 유형\n\n| 권고 유형 | 설명 | 적용 효과 |\n|---|---|---|\n| **인덱스 생성 (Create Index)** | 새로운 B-Tree/Bitmap 인덱스 생성 권고 | 쿼리 액세스 경로 최적화 |\n| **인덱스 삭제 (Drop Index)** | 미사용/저효율 인덱스 삭제 권고 | 공간 절약, DML 성능 개선 |\n| **구체화 뷰 생성 (Create MV)** | 자주 실행되는 집계/조인 쿼리의 MV 생성 권고 | 쿼리 응답 시간 단축 |\n| **구체화 뷰 로그 생성** | Fast Refresh를 위한 MV 로그 생성 권고 | MV 갱신 효율화 |\n| **파티셔닝 권고** | 대규모 테이블의 파티셔닝 전략 권고 | 파티션 프루닝 활용 |\n\n### SQL 액세스 어드바이저 vs SQL 튜닝 어드바이저 비교\n\n| 구분 | SQL 액세스 어드바이저 | SQL 튜닝 어드바이저 |\n|---|---|---|\n| **분석 범위** | 전체 SQL 워크로드 | 개별 SQL 문 |\n| **입력** | STS, 현재 워크로드, 가상 워크로드 | SQL_ID, SQL 텍스트, STS |\n| **권고 유형** | 인덱스, MV, 파티션 등 액세스 구조 | SQL 프로파일, 통계, 인덱스, SQL 수정 |\n| **관점** | 스키마 설계 수준의 최적화 | 개별 SQL 수준의 최적화 |\n| **패키지** | DBMS_ADVISOR | DBMS_SQLTUNE |\n| **실행 빈도** | 필요 시 수동 실행 | 자동 + 수동 |\n\n### SQL 액세스 어드바이저 워크플로우\n\n```\n┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐\n│  워크로드 정의     │────>│  태스크 생성 및    │────>│  태스크 실행      │\n│  (STS/현재 활동)   │     │  파라미터 설정     │     │  (분석 수행)      │\n└──────────────────┘     └──────────────────┘     └────────┬─────────┘\n                                                           │\n┌──────────────────┐     ┌──────────────────┐              │\n│  스크립트 생성     │<────│  권고 사항 검토    │<─────────────┘\n│  (구현 스크립트)   │     │  (보고서 확인)     │\n└──────────────────┘     └──────────────────┘\n```",
+      "sqlExamplesIds": ["sql11", "sql12"],
+      "subsections": [
+        {
+          "title": "SQL 액세스 어드바이저 실행 및 구현 스크립트 (Running SQL Access Advisor and Implementation Scripts)",
+          "content": "SQL 액세스 어드바이저는 **DBMS_ADVISOR** 패키지를 사용하여 태스크를 생성하고 실행합니다. 빠른 실행을 위한 **QUICK_TUNE** 프로시저와 상세 분석을 위한 표준 워크플로우를 모두 제공합니다.\n\n### 표준 워크플로우 단계별 상세\n\n1. **태스크 생성**:\n   - `DBMS_ADVISOR.CREATE_TASK('SQL Access Advisor', task_name => :task_name)`\n   - advisor_name은 반드시 'SQL Access Advisor'로 지정\n\n2. **워크로드 소스 설정**:\n   - **STS 사용**: `DBMS_ADVISOR.ADD_STS_REF(task_name, sts_owner, sts_name)`\n   - **현재 활동 사용**: `SET_TASK_PARAMETER(task_name, 'WORKLOAD_SCOPE', 'CURRENT')`\n\n3. **파라미터 설정**:\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **ANALYSIS_SCOPE** | 분석 범위: INDEX, MV, TABLE, PARTITION 등 조합 | INDEX,MV |\n| **MODE** | 분석 모드: COMPREHENSIVE, LIMITED, BASIC | COMPREHENSIVE |\n| **TIME_LIMIT** | 분석 시간 제한 (초) | UNLIMITED |\n| **WORKLOAD_SCOPE** | 워크로드 범위: FULL, PARTIAL, CURRENT | FULL |\n| **DEF_INDEX_TABLESPACE** | 권고 인덱스의 기본 테이블스페이스 | NULL |\n| **DEF_MVIEW_TABLESPACE** | 권고 MV의 기본 테이블스페이스 | NULL |\n| **STORAGE_CHANGE** | 허용되는 추가 저장 공간 한도 | UNLIMITED |\n| **DML_VOLATILITY** | DML 빈도 고려 여부 | TRUE |\n| **ORDER_LIST** | 권고 순서 기준 | BENEFIT |\n| **VALID_ACTION_LIST** | 허용 액션 유형 | NULL (전체 허용) |\n\n4. **태스크 실행**: `DBMS_ADVISOR.EXECUTE_TASK(task_name)`\n\n5. **보고서 생성**: `DBMS_ADVISOR.GET_TASK_REPORT(task_name, 'TEXT', 'ALL')`\n\n6. **구현 스크립트 생성**: `DBMS_ADVISOR.GET_TASK_SCRIPT(task_name)`\n\n### QUICK_TUNE 프로시저\n\n단일 SQL 문에 대한 빠른 분석을 수행합니다:\n\n```sql\nDBMS_ADVISOR.QUICK_TUNE(\n  advisor_name => 'SQL Access Advisor',\n  task_name    => 'quick_task',\n  attr1        => 'SELECT * FROM hr.employees WHERE department_id = 10'\n);\n```\n\n### 권고 사항의 구현\n\n`DBMS_ADVISOR.GET_TASK_SCRIPT` 함수는 권고 사항을 구현할 수 있는 SQL DDL 스크립트를 CLOB으로 반환합니다. 이 스크립트는 다음을 포함합니다:\n\n| 스크립트 구성 요소 | 설명 |\n|---|---|\n| **UNDOABLE 스크립트** | 변경 사항을 되돌리기 위한 DDL |\n| **IMPLEMENTATION 스크립트** | 권고 사항을 적용하기 위한 DDL |\n| **예상 효과** | 권고 적용 시 예상되는 성능 개선 정보 |\n\n### 관련 초기화 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **QUERY_REWRITE_ENABLED** | 구체화 뷰 쿼리 재작성 활성화 (MV 권고 시 필요) |\n| **QUERY_REWRITE_INTEGRITY** | 쿼리 재작성 무결성 수준 |\n| **OPTIMIZER_FEATURES_ENABLE** | 옵티마이저 기능 호환성 수준 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_ADVISOR_TASKS** | SQL 액세스 어드바이저 태스크 목록 |\n| **DBA_ADVISOR_RECOMMENDATIONS** | 생성된 권고 사항 |\n| **DBA_ADVISOR_ACTIONS** | 권고의 세부 액션 (CREATE INDEX, CREATE MATERIALIZED VIEW 등) |\n| **DBA_ADVISOR_SQLA_WK_STMTS** | 워크로드의 SQL 문 목록 |\n| **DBA_ADVISOR_SQLA_WK_MAP** | 워크로드 SQL과 권고 사항 간 매핑 |\n| **DBA_ADVISOR_SQLA_TABLES** | 분석 대상 테이블 목록 |\n| **DBA_ADVISOR_SQLA_COLVOL** | 컬럼별 DML 변동성 분석 |",
+          "key_points": [
+            "SQL 액세스 어드바이저는 DBMS_ADVISOR 패키지의 CREATE_TASK에서 advisor_name을 'SQL Access Advisor'로 지정하여 생성",
+            "ANALYSIS_SCOPE 파라미터로 INDEX, MV, TABLE, PARTITION 등 분석 범위를 조합 설정 가능 (기본값: INDEX,MV)",
+            "QUICK_TUNE 프로시저로 단일 SQL 문에 대한 빠른 액세스 구조 분석을 수행할 수 있음",
+            "GET_TASK_SCRIPT로 권고 사항의 구현 DDL 스크립트와 원복(UNDO) 스크립트를 자동 생성",
+            "STORAGE_CHANGE 파라미터로 추가 저장 공간 한도를 제한하여 현실적인 권고 생성 유도",
+            "워크로드 소스는 STS, 현재 워크로드(CURRENT), 가상 워크로드 중 선택 가능",
+            "DBA_ADVISOR_SQLA_WK_MAP 뷰로 특정 SQL 문에 대한 권고 사항을 역추적 가능",
+            "MV 권고를 받으려면 QUERY_REWRITE_ENABLED 파라미터가 TRUE로 설정되어 있어야 함"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "옵티마이저 통계 어드바이저 (Optimizer Statistics Advisor)",
+      "content": "**옵티마이저 통계 어드바이저(Optimizer Statistics Advisor)**는 Oracle 12c R2(12.2)부터 도입된 독립적인 어드바이저로, 현재 데이터베이스 내의 옵티마이저 통계 수집 상황과 통계의 품질을 분석하여 최적의 통계 수집 방법에 대한 권고 사항을 제공합니다. 자동 유지관리 태스크인 **auto optimizer stats collection**과는 별개의 진단 도구로서, 통계 수집 전략 자체의 개선점을 식별합니다.\n\n### 옵티마이저 통계 어드바이저의 핵심 기능\n\n| 기능 | 설명 |\n|---|---|\n| **통계 수집 설정 분석** | 현재 통계 수집 기본 설정(Preferences)의 적절성을 평가 |\n| **누락된 통계 식별** | 통계가 수집되지 않은 객체를 식별 |\n| **오래된(Stale) 통계 감지** | 데이터 변경에도 불구하고 재수집되지 않은 통계 식별 |\n| **비효율적 설정 탐지** | 불필요하게 높은 샘플링 비율, 부적절한 히스토그램 설정 등 비효율적 수집 설정 탐지 |\n| **권고 사항 제공** | 통계 수집 전략 개선을 위한 구체적인 권고 사항 생성 |\n\n### 옵티마이저 통계 어드바이저 vs 자동 통계 수집 비교\n\n| 구분 | 옵티마이저 통계 어드바이저 | 자동 통계 수집 (Auto Stats Collection) |\n|---|---|---|\n| **역할** | 통계 수집 전략의 진단 및 권고 | 실제 통계 수집 수행 |\n| **실행 방식** | 분석 및 보고서 생성 | 유지 관리 윈도우에서 자동 실행 |\n| **출력** | 통계 수집 개선 권고 사항 | 수집된 통계 데이터 |\n| **관련 패키지** | DBMS_STATS.REPORT_ADVISOR_TASK | DBMS_STATS |\n\n### 보고서 생성 방법\n\n`DBMS_STATS.REPORT_ADVISOR_TASK` 함수를 사용하여 통계 어드바이저 보고서를 생성합니다:\n\n```sql\n-- 옵티마이저 통계 어드바이저 보고서 생성\nSELECT DBMS_STATS.REPORT_ADVISOR_TASK('AUTO_STATS_ADVISOR_TASK') AS report\nFROM   DUAL;\n```\n\n### 주요 진단 항목\n\n| 진단 항목 | 설명 |\n|---|---|\n| **규칙 위반 (Rule Violations)** | Oracle 권장 통계 수집 모범 사례를 위반하는 설정 식별 |\n| **통계 노후화 현황** | 데이터베이스 전체의 노후화(Stale) 통계 현황 요약 |\n| **누락 통계 현황** | 통계가 전혀 없는 객체 목록 |\n| **수집 설정 적합성** | ESTIMATE_PERCENT, METHOD_OPT 등 수집 파라미터의 적합성 평가 |\n| **자동 수집 효과** | 자동 통계 수집 작업의 효과 및 커버리지 분석 |",
+      "sqlExamplesIds": ["sql14"],
+      "subsections": [
+        {
+          "title": "옵티마이저 통계 어드바이저 실행 및 보고서 해석 (Running Optimizer Statistics Advisor and Report Interpretation)",
+          "content": "옵티마이저 통계 어드바이저는 Oracle 12c R2(12.2)부터 자동 통계 수집 태스크와 함께 주기적으로 실행되며, 수동으로도 보고서를 생성하여 현재 통계 수집 전략의 문제점을 파악할 수 있습니다.\n\n### 사전 정의된 태스크\n\n| 태스크 이름 | 설명 |\n|---|---|\n| **AUTO_STATS_ADVISOR_TASK** | 자동으로 실행되는 통계 어드바이저 태스크 |\n\n### 보고서 구성 요소\n\n| 구성 요소 | 설명 |\n|---|---|\n| **규칙 목록 (Rules)** | 적용된 분석 규칙의 목록 |\n| **위반 사항 (Violations)** | 각 규칙에 대한 위반 내역 |\n| **권고 사항 (Recommendations)** | 위반 해결을 위한 구체적인 조치 방안 |\n| **근거 (Rationale)** | 각 권고의 배경 및 기대 효과 |\n\n### 주요 분석 규칙 예시\n\n| 규칙 | 설명 |\n|---|---|\n| **UseAutoJob** | 자동 통계 수집 작업이 활성화되어 있는지 확인 |\n| **CompleteAutoJob** | 자동 통계 수집 작업이 유지 관리 윈도우 내에 완료되는지 확인 |\n| **MaintainVolatileStats** | 변동이 큰 테이블의 통계가 적시에 수집되는지 확인 |\n| **UseConcurrent** | 동시 통계 수집(Concurrent Statistics Gathering) 활용 여부 확인 |\n| **UseIncremental** | 파티션 테이블에 증분 통계가 적절히 활용되는지 확인 |\n| **AvoidSetProcedures** | 개별 테이블에 대한 비표준 통계 수집 프로시저 설정 여부 확인 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_ADVISOR_TASKS** | 통계 어드바이저 태스크 상태 확인 (task_name = 'AUTO_STATS_ADVISOR_TASK') |\n| **DBA_ADVISOR_FINDINGS** | 통계 어드바이저가 식별한 문제 사항 |\n| **DBA_ADVISOR_RECOMMENDATIONS** | 통계 관련 권고 사항 |\n| **DBA_OPTSTAT_OPERATIONS** | 통계 수집 작업 이력 |",
+          "key_points": [
+            "옵티마이저 통계 어드바이저는 Oracle 12c R2(12.2)부터 도입된 독립 어드바이저로, 통계 수집 전략의 품질을 진단",
+            "DBMS_STATS.REPORT_ADVISOR_TASK 함수로 AUTO_STATS_ADVISOR_TASK 태스크의 보고서를 생성하여 진단 결과 확인",
+            "자동 통계 수집(auto optimizer stats collection)과는 별개의 진단 도구로, 통계 수집 자체가 아닌 수집 전략의 개선을 목적으로 함",
+            "누락된 통계, 오래된(Stale) 통계, 비효율적인 수집 설정 등을 자동으로 식별하고 개선안 제시",
+            "UseAutoJob, CompleteAutoJob, UseIncremental 등의 분석 규칙을 통해 모범 사례 준수 여부를 검증",
+            "Oracle 26ai에서 머신러닝 기반 통계 노후화 예측과 연계되어 보다 정밀한 통계 관리 전략 권고가 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s07",
+      "title": "SQL 퍼포먼스 애널라이저 (SQL Performance Analyzer, SPA)",
+      "content": "**SQL 퍼포먼스 애널라이저(SQL Performance Analyzer, SPA)**는 시스템 변경이 SQL 워크로드 성능에 미치는 영향을 사전에 평가하는 도구입니다. 데이터베이스 업그레이드, 파라미터 변경, 스키마 변경, 통계 변경 등의 변경 작업 전에 실제 환경에 영향을 주지 않고 성능 영향을 분석할 수 있습니다. **DBMS_SQLPA** 패키지를 사용합니다.\n\n### SPA의 주요 사용 시나리오\n\n| 시나리오 | 설명 |\n|---|---|\n| **DB 업그레이드** | Oracle 버전 업그레이드 전 SQL 워크로드 성능 영향도 사전 평가 |\n| **파라미터 변경** | 초기화 파라미터 변경 전 워크로드 성능 영향 분석 |\n| **스키마 변경** | 인덱스 추가/삭제, 테이블 구조 변경 전 성능 영향 평가 |\n| **통계 변경** | 옵티마이저 통계 재수집 전 실행 계획 변경 영향 분석 |\n| **OS/하드웨어 변경** | 시스템 환경 변경 전 성능 영향 예측 |\n\n### SPA 워크플로우\n\n```\n┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐\n│  SQL Tuning Set   │────>│  변경 전 성능     │────>│  시스템 변경      │\n│  (STS) 준비       │     │  기준선 수집      │     │  (업그레이드 등)  │\n└──────────────────┘     └──────────────────┘     └────────┬─────────┘\n                                                           │\n┌──────────────────┐     ┌──────────────────┐              │\n│  비교 보고서 생성  │<────│  변경 후 성능     │<─────────────┘\n│  (영향도 분석)     │     │  측정             │\n└──────────────────┘     └──────────────────┘\n```\n\n### SPA vs SQL Tuning Advisor vs SQL Access Advisor 비교\n\n| 구분 | SQL Performance Analyzer (SPA) | SQL Tuning Advisor | SQL Access Advisor |\n|---|---|---|---|\n| **목적** | 변경 전후 워크로드 성능 비교 | 개별 SQL 문 최적화 | 스키마 구조(인덱스, MV) 최적화 |\n| **분석 대상** | 전체 SQL 워크로드 (STS) | 개별 SQL 문 | 전체 SQL 워크로드 (STS) |\n| **입력** | SQL Tuning Set (STS) | SQL_ID, SQL 텍스트, STS | STS, 현재 워크로드 |\n| **출력** | 변경 전후 성능 비교 보고서 | SQL 프로파일, 인덱스 권고, SQL 수정 권고 | 인덱스, MV, 파티션 생성 권고 |\n| **관련 패키지** | DBMS_SQLPA | DBMS_SQLTUNE | DBMS_ADVISOR |\n| **핵심 가치** | 변경의 성능 영향 사전 평가 (위험 관리) | 개별 SQL의 성능 개선 | 워크로드 전반의 액세스 구조 최적화 |\n\n### DBMS_SQLPA 주요 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **CREATE_ANALYSIS_TASK** | SPA 분석 태스크 생성 (STS를 입력으로 지정) |\n| **EXECUTE_ANALYSIS_TASK** | 분석 태스크 실행 (변경 전/후 성능 데이터 수집) |\n| **REPORT_ANALYSIS_TASK** | 변경 전후 비교 보고서 생성 |\n| **CANCEL_ANALYSIS_TASK** | 실행 중인 분석 태스크 취소 |\n| **DROP_ANALYSIS_TASK** | 분석 태스크 삭제 |\n\n### SPA 비교 메트릭\n\n| 메트릭 | 설명 |\n|---|---|\n| **Elapsed Time** | 경과 시간 변화 |\n| **CPU Time** | CPU 시간 변화 |\n| **Buffer Gets** | 논리적 읽기(Buffer Gets) 변화 |\n| **Disk Reads** | 물리적 읽기 변화 |\n| **Optimizer Cost** | 옵티마이저 비용 변화 |\n| **Rows Processed** | 처리된 행 수 변화 |",
+      "sqlExamplesIds": ["sql15"],
+      "subsections": [
+        {
+          "title": "SQL 퍼포먼스 애널라이저 실행 및 결과 해석 (Running SPA and Interpreting Results)",
+          "content": "SPA는 SQL Tuning Set(STS)을 입력으로 받아 변경 전후의 실행 계획 및 성능 통계를 비교합니다. 분석 결과는 각 SQL에 대해 개선(Improved), 퇴보(Regressed), 변화 없음(Unchanged)으로 분류되어 보고됩니다.\n\n### SPA 실행 단계\n\n1. **STS 준비**: 분석 대상 SQL 워크로드를 SQL Tuning Set으로 캡처\n2. **분석 태스크 생성**: `DBMS_SQLPA.CREATE_ANALYSIS_TASK`로 태스크 생성\n3. **변경 전 실행 (Trial 1)**: 현재 환경에서 STS의 SQL을 실행하여 기준선(Baseline) 수집\n4. **시스템 변경 적용**: DB 업그레이드, 파라미터 변경 등 계획된 변경 수행\n5. **변경 후 실행 (Trial 2)**: 변경된 환경에서 동일한 STS SQL을 재실행\n6. **비교 보고서 생성**: `DBMS_SQLPA.REPORT_ANALYSIS_TASK`로 비교 보고서 생성\n\n### 비교 보고서의 SQL 분류\n\n| 분류 | 설명 |\n|---|---|\n| **Improved (개선)** | 변경 후 성능이 향상된 SQL |\n| **Regressed (퇴보)** | 변경 후 성능이 저하된 SQL |\n| **Unchanged (변화 없음)** | 변경 전후 성능 차이가 없는 SQL |\n| **Errors (오류)** | 변경 후 실행 오류가 발생한 SQL |\n\n### 퇴보(Regressed) SQL 대응 방법\n\n| 대응 방법 | 설명 |\n|---|---|\n| **SQL Plan Baseline** | 변경 전 실행 계획을 SPM Baseline으로 등록하여 계획 고정 |\n| **SQL Tuning Advisor** | 퇴보된 SQL에 대해 개별 튜닝 수행 |\n| **SQL Patch** | 힌트를 적용하여 실행 계획 유도 |\n| **통계 조정** | 관련 객체의 통계를 조정하여 실행 계획 개선 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_ADVISOR_TASKS** | SPA 분석 태스크 목록 (advisor_name = 'SQL Performance Analyzer') |\n| **DBA_ADVISOR_EXECUTIONS** | SPA 태스크 실행 이력 (Trial 1, Trial 2, 비교 실행) |\n| **DBA_ADVISOR_SQLSTATS** | SPA 분석 대상 SQL의 실행 통계 |\n| **DBA_ADVISOR_FINDINGS** | SPA 분석 결과 (Regressed SQL 등) |",
+          "key_points": [
+            "SPA는 SQL Tuning Set(STS)을 입력으로 받아 변경 전후의 SQL 워크로드 성능을 비교하는 도구",
+            "DBMS_SQLPA 패키지를 사용하여 분석 태스크 생성, 실행, 보고서 생성을 수행",
+            "SQL Tuning Advisor(개별 SQL 최적화)와 달리 SPA는 전체 워크로드에 대한 변경 영향도를 평가",
+            "SQL Access Advisor(스키마 구조 최적화)와 달리 SPA는 변경 전후 성능 비교에 초점",
+            "비교 보고서는 각 SQL을 Improved, Regressed, Unchanged, Errors로 분류하여 변경 영향을 명확히 시각화",
+            "퇴보(Regressed) SQL에 대해서는 SQL Plan Baseline, SQL Tuning Advisor, SQL Patch 등으로 대응 가능",
+            "DB 업그레이드, 파라미터 변경, 스키마 변경, 통계 변경 등 주요 시스템 변경 전 필수적인 사전 평가 도구"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "어드바이저 태스크 목록 및 상태 조회 (Query Advisor Tasks and Status)",
+      "sql": "SELECT task_id, task_name, advisor_name, status, created, last_modified\nFROM   dba_advisor_tasks\nWHERE  advisor_name IN ('Segment Advisor', 'SQL Tuning Advisor', 'SQL Access Advisor')\nORDER BY last_modified DESC;",
+      "description": "DBA_ADVISOR_TASKS 뷰에서 세그먼트 어드바이저, SQL 튜닝 어드바이저, SQL 액세스 어드바이저의 태스크 목록을 조회합니다. status 컬럼으로 INITIAL, EXECUTING, COMPLETED, ERROR 등 태스크 상태를 확인할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "어드바이저 발견 사항 및 권고 조회 (Query Advisor Findings and Recommendations)",
+      "sql": "SELECT f.task_name, f.type, f.message,\n       r.rec_id, r.rank, r.benefit,\n       a.command, a.attr1, a.attr2, a.attr3\nFROM   dba_advisor_findings f\n       JOIN dba_advisor_recommendations r ON f.task_id = r.task_id AND f.finding_id = r.finding_id\n       JOIN dba_advisor_actions a ON r.task_id = a.task_id AND r.rec_id = a.rec_id\nWHERE  f.task_name = :task_name\nORDER BY r.rank;",
+      "description": "특정 어드바이저 태스크의 발견 사항(Finding), 권고(Recommendation), 실행 액션(Action)을 계층적으로 조회합니다. benefit 컬럼은 권고 적용 시 예상 이점을, command 컬럼은 실행할 DDL 명령을 나타냅니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "자동 세그먼트 어드바이저 권고 조회 (Query Auto Segment Advisor Recommendations)",
+      "sql": "SELECT tablespace_name, segment_owner, segment_name, segment_type,\n       allocated_space, used_space, reclaimable_space,\n       recommendations, c1 AS partition_name\nFROM   TABLE(DBMS_SPACE.ASA_RECOMMENDATIONS('TRUE', 'TRUE', 'FALSE'))\nWHERE  reclaimable_space > 0\nORDER BY reclaimable_space DESC;",
+      "description": "DBMS_SPACE.ASA_RECOMMENDATIONS 파이프라인 함수를 사용하여 자동 세그먼트 어드바이저의 공간 회수 권고를 조회합니다. reclaimable_space는 회수 가능한 공간(바이트)이며, recommendations 컬럼에 구체적인 조치 사항이 표시됩니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "수동 세그먼트 어드바이저 태스크 생성 및 실행 (Create and Execute Manual Segment Advisor Task)",
+      "sql": "-- 1. 태스크 생성\nDECLARE\n  v_task_name VARCHAR2(100) := 'seg_advisor_hr_employees';\n  v_task_id   NUMBER;\n  v_obj_id    NUMBER;\nBEGIN\n  -- 태스크 생성 (advisor_name: 'Segment Advisor')\n  DBMS_ADVISOR.CREATE_TASK(\n    advisor_name => 'Segment Advisor',\n    task_name    => v_task_name,\n    task_id      => v_task_id\n  );\n  -- 분석 대상 객체 추가\n  DBMS_ADVISOR.CREATE_OBJECT(\n    task_name   => v_task_name,\n    object_type => 'TABLE',\n    attr1       => 'HR',\n    attr2       => 'EMPLOYEES',\n    attr3       => NULL,\n    attr4       => NULL,\n    attr5       => NULL,\n    object_id   => v_obj_id\n  );\n  -- 태스크 실행\n  DBMS_ADVISOR.EXECUTE_TASK(task_name => v_task_name);\nEND;\n/\n-- 2. 결과 조회\nSELECT task_name, type, message\nFROM   dba_advisor_findings\nWHERE  task_name = 'seg_advisor_hr_employees';",
+      "description": "수동 세그먼트 어드바이저 태스크를 생성하여 HR.EMPLOYEES 테이블의 공간 사용을 분석합니다. CREATE_TASK로 'Segment Advisor' 태스크를 생성하고, CREATE_OBJECT로 분석 대상 테이블을 추가한 후 EXECUTE_TASK로 실행합니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "테이블 통계 수집 및 노후화 상태 확인 (Gather Table Statistics and Check Staleness)",
+      "sql": "-- 1. 테이블 통계 수집\nBEGIN\n  DBMS_STATS.GATHER_TABLE_STATS(\n    ownname          => 'HR',\n    tabname          => 'EMPLOYEES',\n    estimate_percent => DBMS_STATS.AUTO_SAMPLE_SIZE,\n    method_opt       => 'FOR ALL COLUMNS SIZE AUTO',\n    cascade          => DBMS_STATS.AUTO_CASCADE,\n    degree           => 4,\n    no_invalidate    => DBMS_STATS.AUTO_INVALIDATE\n  );\nEND;\n/\n-- 2. 통계 노후화 상태 확인\nSELECT owner, table_name, num_rows, blocks, avg_row_len,\n       last_analyzed, stale_stats, stattype_locked\nFROM   dba_tab_statistics\nWHERE  owner = 'HR'\nORDER BY table_name;",
+      "description": "DBMS_STATS.GATHER_TABLE_STATS로 HR.EMPLOYEES 테이블의 통계를 수집합니다. AUTO_SAMPLE_SIZE로 자동 샘플링, AUTO_CASCADE로 인덱스 통계 자동 수집, 병렬도 4로 실행합니다. DBA_TAB_STATISTICS에서 stale_stats 컬럼으로 통계 노후화 여부를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "증분 통계 설정 및 보류 통계 활용 (Set Incremental Statistics and Use Pending Statistics)",
+      "sql": "-- 1. 증분 통계 활성화\nBEGIN\n  DBMS_STATS.SET_TABLE_PREFS(\n    ownname => 'SALES',\n    tabname => 'ORDERS',\n    pname   => 'INCREMENTAL',\n    pvalue  => 'TRUE'\n  );\nEND;\n/\n-- 2. 보류 통계 설정\nBEGIN\n  DBMS_STATS.SET_TABLE_PREFS(\n    ownname => 'SALES',\n    tabname => 'ORDERS',\n    pname   => 'PUBLISH',\n    pvalue  => 'FALSE'\n  );\n  -- 통계 수집 (보류 영역에 저장)\n  DBMS_STATS.GATHER_TABLE_STATS('SALES', 'ORDERS');\nEND;\n/\n-- 3. 보류 통계 확인\nSELECT * FROM dba_tab_pending_stats WHERE owner = 'SALES' AND table_name = 'ORDERS';\n-- 4. 보류 통계로 실행 계획 테스트\nALTER SESSION SET OPTIMIZER_USE_PENDING_STATISTICS = TRUE;\nEXPLAIN PLAN FOR SELECT * FROM sales.orders WHERE order_date > SYSDATE - 30;\nSELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);\n-- 5. 보류 통계 게시\nBEGIN\n  DBMS_STATS.PUBLISH_PENDING_STATS('SALES', 'ORDERS');\nEND;\n/",
+      "description": "파티션 테이블에 대한 증분 통계를 활성화하고, 보류 통계 기능을 사용하여 통계 변경의 영향을 사전 테스트합니다. PUBLISH=FALSE로 설정 후 수집하면 보류 영역에 저장되며, OPTIMIZER_USE_PENDING_STATISTICS=TRUE로 세션을 설정하여 보류 통계 기반 실행 계획을 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "통계 잠금, 복원 및 기본 설정 관리 (Lock, Restore Statistics, and Manage Preferences)",
+      "sql": "-- 1. 테이블 통계 잠금\nBEGIN\n  DBMS_STATS.LOCK_TABLE_STATS('HR', 'EMPLOYEES');\nEND;\n/\n-- 2. 통계 잠금 상태 확인\nSELECT table_name, stattype_locked\nFROM   dba_tab_statistics\nWHERE  owner = 'HR' AND table_name = 'EMPLOYEES';\n-- 3. 통계 복원 (특정 시점으로)\nBEGIN\n  DBMS_STATS.RESTORE_TABLE_STATS(\n    ownname      => 'HR',\n    tabname      => 'EMPLOYEES',\n    as_of_timestamp => SYSTIMESTAMP - INTERVAL '1' DAY,\n    force        => TRUE  -- 잠긴 통계도 강제 복원\n  );\nEND;\n/\n-- 4. 통계 기본 설정 조회\nSELECT *\nFROM   dba_tab_stat_prefs\nWHERE  owner = 'HR';\n-- 5. 노후화 임계값 변경\nBEGIN\n  DBMS_STATS.SET_TABLE_PREFS(\n    ownname => 'HR',\n    tabname => 'EMPLOYEES',\n    pname   => 'STALE_PERCENT',\n    pvalue  => '5'  -- 5%로 낮춤 (기본 10%)\n  );\nEND;\n/",
+      "description": "테이블 통계의 잠금, 복원, 기본 설정 관리 방법을 보여줍니다. LOCK_TABLE_STATS로 통계를 잠그면 자동 수집을 포함한 모든 변경이 차단됩니다. RESTORE_TABLE_STATS로 과거 시점의 통계로 복원이 가능하며, SET_TABLE_PREFS로 노후화 임계값 등 수집 동작을 세밀하게 제어합니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "SQL 튜닝 어드바이저 수동 실행 (Manually Run SQL Tuning Advisor)",
+      "sql": "-- 1. SQL_ID로 튜닝 태스크 생성\nDECLARE\n  v_task_name VARCHAR2(100);\nBEGIN\n  v_task_name := DBMS_SQLTUNE.CREATE_TUNING_TASK(\n    sql_id      => 'g3yc9v4wsm71a',\n    scope       => DBMS_SQLTUNE.SCOPE_COMPREHENSIVE,\n    time_limit  => 300,\n    task_name   => 'tune_sql_g3yc9v4wsm71a'\n  );\n  -- 2. 태스크 실행\n  DBMS_SQLTUNE.EXECUTE_TUNING_TASK(task_name => v_task_name);\nEND;\n/\n-- 3. 튜닝 보고서 조회\nSELECT DBMS_SQLTUNE.REPORT_TUNING_TASK(\n  task_name => 'tune_sql_g3yc9v4wsm71a',\n  type      => 'TEXT',\n  level     => 'ALL',\n  section   => 'ALL'\n) AS report\nFROM dual;",
+      "description": "특정 SQL_ID에 대해 SQL 튜닝 어드바이저를 수동으로 실행합니다. SCOPE_COMPREHENSIVE로 전체 분석(통계, SQL 프로파일, 인덱스, 구조 분석)을 수행하며, 시간 제한을 300초로 설정합니다. REPORT_TUNING_TASK로 TEXT 형식의 상세 보고서를 생성합니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "SQL 프로파일 수락 및 관리 (Accept and Manage SQL Profile)",
+      "sql": "-- 1. SQL 프로파일 수락\nBEGIN\n  DBMS_SQLTUNE.ACCEPT_SQL_PROFILE(\n    task_name   => 'tune_sql_g3yc9v4wsm71a',\n    name        => 'profile_g3yc9v4wsm71a',\n    category    => 'DEFAULT',\n    force_match => TRUE,\n    replace     => TRUE\n  );\nEND;\n/\n-- 2. SQL 프로파일 목록 조회\nSELECT name, sql_text, category, status, force_matching,\n       created, last_modified, type\nFROM   dba_sql_profiles\nORDER BY last_modified DESC;\n-- 3. SQL 프로파일 비활성화\nBEGIN\n  DBMS_SQLTUNE.ALTER_SQL_PROFILE(\n    name            => 'profile_g3yc9v4wsm71a',\n    attribute_name  => 'STATUS',\n    value           => 'DISABLED'\n  );\nEND;\n/\n-- 4. SQL 프로파일 삭제\nBEGIN\n  DBMS_SQLTUNE.DROP_SQL_PROFILE(name => 'profile_g3yc9v4wsm71a');\nEND;\n/",
+      "description": "SQL 튜닝 어드바이저가 권고한 SQL 프로파일을 수락하고 관리하는 방법을 보여줍니다. force_match=TRUE로 리터럴 값이 다른 유사 SQL에도 적용되도록 설정합니다. DBA_SQL_PROFILES에서 프로파일 상태를 확인하고, ALTER_SQL_PROFILE로 비활성화, DROP_SQL_PROFILE로 삭제합니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "SQL Tuning Set 생성 및 로드 (Create and Load SQL Tuning Set)",
+      "sql": "-- 1. STS 생성\nBEGIN\n  DBMS_SQLTUNE.CREATE_SQLSET(\n    sqlset_name  => 'my_workload_sts',\n    description  => 'Top SQL by elapsed time from AWR'\n  );\nEND;\n/\n-- 2. AWR에서 STS에 SQL 로드\nBEGIN\n  DBMS_SQLTUNE.LOAD_SQLSET(\n    sqlset_name     => 'my_workload_sts',\n    populate_cursor => DBMS_SQLTUNE.SELECT_WORKLOAD_REPOSITORY(\n      begin_snap   => 100,\n      end_snap     => 110,\n      basic_filter => 'parsing_schema_name NOT IN (''SYS'',''SYSTEM'')',\n      ranking_measure1 => 'ELAPSED_TIME',\n      result_limit     => 50\n    )\n  );\nEND;\n/\n-- 3. STS 내용 확인\nSELECT sql_id, sql_text, elapsed_time, cpu_time, buffer_gets, executions\nFROM   dba_sqlset_statements\nWHERE  sqlset_name = 'my_workload_sts'\nORDER BY elapsed_time DESC;",
+      "description": "SQL Tuning Set(STS)을 생성하고 AWR에서 상위 SQL을 로드합니다. SELECT_WORKLOAD_REPOSITORY로 AWR 스냅샷 범위(100~110)에서 SYS/SYSTEM 스키마를 제외한 경과 시간 상위 50개 SQL을 선별하여 로드합니다. DBA_SQLSET_STATEMENTS에서 로드된 SQL의 실행 통계를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "SQL 액세스 어드바이저 실행 (Run SQL Access Advisor)",
+      "sql": "DECLARE\n  v_task_name VARCHAR2(100) := 'access_advisor_task';\n  v_task_id   NUMBER;\nBEGIN\n  -- 1. 태스크 생성\n  DBMS_ADVISOR.CREATE_TASK(\n    advisor_name => 'SQL Access Advisor',\n    task_name    => v_task_name,\n    task_id      => v_task_id\n  );\n  -- 2. STS를 워크로드로 연결\n  DBMS_ADVISOR.ADD_STS_REF(\n    task_name      => v_task_name,\n    sts_owner      => 'SYS',\n    sts_name       => 'my_workload_sts'\n  );\n  -- 3. 파라미터 설정\n  DBMS_ADVISOR.SET_TASK_PARAMETER(\n    task_name => v_task_name,\n    parameter => 'ANALYSIS_SCOPE',\n    value     => 'INDEX,MV'\n  );\n  DBMS_ADVISOR.SET_TASK_PARAMETER(\n    task_name => v_task_name,\n    parameter => 'MODE',\n    value     => 'COMPREHENSIVE'\n  );\n  DBMS_ADVISOR.SET_TASK_PARAMETER(\n    task_name => v_task_name,\n    parameter => 'TIME_LIMIT',\n    value     => 600\n  );\n  -- 4. 태스크 실행\n  DBMS_ADVISOR.EXECUTE_TASK(task_name => v_task_name);\nEND;\n/\n-- 5. 보고서 조회\nSELECT DBMS_ADVISOR.GET_TASK_REPORT(v_task_name, 'TEXT', 'ALL') AS report\nFROM   dual;",
+      "description": "SQL 액세스 어드바이저를 실행하여 STS 워크로드 기반의 인덱스 및 구체화 뷰 권고를 생성합니다. ANALYSIS_SCOPE를 INDEX,MV로 설정하여 인덱스와 구체화 뷰 권고를, MODE를 COMPREHENSIVE로 설정하여 전체 분석을 수행합니다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "SQL 액세스 어드바이저 권고 조회 및 구현 스크립트 생성 (Query Recommendations and Generate Implementation Script)",
+      "sql": "-- 1. 권고 사항 조회\nSELECT rec_id, rank, benefit,\n       a.command, a.attr1 AS object_owner, a.attr2 AS object_name,\n       a.attr3 AS ddl_text\nFROM   dba_advisor_recommendations r\n       JOIN dba_advisor_actions a ON r.task_id = a.task_id AND r.rec_id = a.rec_id\nWHERE  r.task_name = 'access_advisor_task'\nORDER BY r.rank;\n-- 2. 구현 스크립트 생성\nSELECT DBMS_ADVISOR.GET_TASK_SCRIPT('access_advisor_task') AS implementation_script\nFROM   dual;\n-- 3. 워크로드 SQL과 권고 매핑 조회\nSELECT sql_id, recommendation_id, precost, postcost,\n       ROUND((precost - postcost) / NULLIF(precost, 0) * 100, 2) AS improvement_pct\nFROM   dba_advisor_sqla_wk_map\nWHERE  task_name = 'access_advisor_task'\nORDER BY (precost - postcost) DESC;",
+      "description": "SQL 액세스 어드바이저의 권고 사항을 조회하고 구현 스크립트를 생성합니다. DBA_ADVISOR_ACTIONS에서 권고된 DDL 명령을 확인하고, GET_TASK_SCRIPT로 실행 가능한 구현 스크립트를 CLOB으로 추출합니다. DBA_ADVISOR_SQLA_WK_MAP에서 각 SQL의 개선 예상 비율을 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql13",
+      "title": "자동 유지 관리 태스크 상태 확인 (Check Automatic Maintenance Task Status)",
+      "sql": "-- 1. 자동 유지 관리 클라이언트 상태 확인\nSELECT client_name, status, consumer_group, window_group,\n       next_try_date, mean_job_duration\nFROM   dba_autotask_client\nWHERE  client_name IN (\n  'auto optimizer stats collection',\n  'sql tuning advisor',\n  'auto space advisor'\n);\n-- 2. 자동 태스크 실행 이력 조회\nSELECT client_name, window_name, window_start_time, window_end_time,\n       job_status, job_start_time, job_duration\nFROM   dba_autotask_job_history\nWHERE  client_name IN (\n  'auto optimizer stats collection',\n  'sql tuning advisor',\n  'auto space advisor'\n)\nAND    window_start_time > SYSDATE - 7\nORDER BY window_start_time DESC;",
+      "description": "자동 옵티마이저 통계 수집, 자동 SQL 튜닝, 자동 세그먼트 어드바이저의 상태와 실행 이력을 확인합니다. DBA_AUTOTASK_CLIENT에서 각 태스크의 활성화 상태를, DBA_AUTOTASK_JOB_HISTORY에서 최근 7일간의 실행 이력을 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql14",
+      "title": "옵티마이저 통계 어드바이저 보고서 생성 및 조회 (Generate Optimizer Statistics Advisor Report)",
+      "sql": "-- 1. 옵티마이저 통계 어드바이저 보고서 생성\nSELECT DBMS_STATS.REPORT_ADVISOR_TASK('AUTO_STATS_ADVISOR_TASK') AS report\nFROM   DUAL;\n-- 2. 통계 어드바이저 태스크 상태 확인\nSELECT task_id, task_name, advisor_name, status,\n       TO_CHAR(created, 'YYYY-MM-DD HH24:MI:SS') AS created,\n       TO_CHAR(last_modified, 'YYYY-MM-DD HH24:MI:SS') AS last_modified\nFROM   dba_advisor_tasks\nWHERE  task_name = 'AUTO_STATS_ADVISOR_TASK';\n-- 3. 통계 어드바이저 발견 사항 조회\nSELECT finding_id, finding_name, type, message\nFROM   dba_advisor_findings\nWHERE  task_name = 'AUTO_STATS_ADVISOR_TASK'\nORDER BY finding_id;\n-- 4. 통계 어드바이저 권고 사항 조회\nSELECT rec_id, finding_id, rank, benefit\nFROM   dba_advisor_recommendations\nWHERE  task_name = 'AUTO_STATS_ADVISOR_TASK'\nORDER BY rank;",
+      "description": "옵티마이저 통계 어드바이저(AUTO_STATS_ADVISOR_TASK)의 보고서를 생성하고 발견 사항과 권고 사항을 조회합니다. DBMS_STATS.REPORT_ADVISOR_TASK로 전체 보고서를 확인하고, DBA_ADVISOR_FINDINGS/RECOMMENDATIONS 뷰에서 세부 항목을 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql15",
+      "title": "SQL 퍼포먼스 애널라이저(SPA) 태스크 생성 및 실행 (Create and Execute SPA Task)",
+      "sql": "-- 1. SPA 분석 태스크 생성 (STS 기반)\nDECLARE\n  v_task_name VARCHAR2(100);\nBEGIN\n  v_task_name := DBMS_SQLPA.CREATE_ANALYSIS_TASK(\n    sqlset_name  => 'my_workload_sts',\n    sqlset_owner => 'SYS',\n    task_name    => 'spa_upgrade_test'\n  );\n  DBMS_OUTPUT.PUT_LINE('SPA Task Created: ' || v_task_name);\nEND;\n/\n-- 2. 변경 전 Trial 실행 (기준선 수집)\nBEGIN\n  DBMS_SQLPA.EXECUTE_ANALYSIS_TASK(\n    task_name      => 'spa_upgrade_test',\n    execution_type => 'TEST EXECUTE',\n    execution_name => 'before_change'\n  );\nEND;\n/\n-- 3. (시스템 변경 수행 후) 변경 후 Trial 실행\nBEGIN\n  DBMS_SQLPA.EXECUTE_ANALYSIS_TASK(\n    task_name      => 'spa_upgrade_test',\n    execution_type => 'TEST EXECUTE',\n    execution_name => 'after_change'\n  );\nEND;\n/\n-- 4. 변경 전후 비교 분석 실행\nBEGIN\n  DBMS_SQLPA.EXECUTE_ANALYSIS_TASK(\n    task_name        => 'spa_upgrade_test',\n    execution_type   => 'COMPARE PERFORMANCE',\n    execution_name   => 'comparison',\n    execution_params => DBMS_ADVISOR.ARGLIST(\n      'execution_name1', 'before_change',\n      'execution_name2', 'after_change',\n      'comparison_metric', 'ELAPSED_TIME'\n    )\n  );\nEND;\n/\n-- 5. 비교 보고서 생성\nSELECT DBMS_SQLPA.REPORT_ANALYSIS_TASK(\n         task_name     => 'spa_upgrade_test',\n         type          => 'TEXT',\n         section       => 'ALL',\n         execution_name => 'comparison'\n       ) AS report\nFROM   DUAL;",
+      "description": "SQL 퍼포먼스 애널라이저(SPA)의 전체 워크플로우를 보여줍니다. STS를 입력으로 분석 태스크를 생성하고, 변경 전후 Trial을 실행한 뒤 COMPARE PERFORMANCE로 비교 분석합니다. ELAPSED_TIME 메트릭 기준으로 성능 차이를 비교하고, REPORT_ANALYSIS_TASK로 비교 보고서를 생성합니다."
+    }
+  ],
+  "keywords": [
+    "Advisor Framework",
+    "DBMS_ADVISOR",
+    "Segment Advisor",
+    "SQL Tuning Advisor",
+    "SQL Access Advisor",
+    "DBMS_SQLTUNE",
+    "DBMS_STATS",
+    "DBMS_SPACE",
+    "SQL Profile",
+    "SQL Tuning Set (STS)",
+    "Optimizer Statistics",
+    "Stale Statistics",
+    "Incremental Statistics",
+    "Pending Statistics",
+    "Histogram",
+    "AUTO_SAMPLE_SIZE",
+    "GATHER_TABLE_STATS",
+    "Online Segment Shrink",
+    "High Water Mark (HWM)",
+    "Materialized View",
+    "DBA_ADVISOR_FINDINGS",
+    "DBA_ADVISOR_RECOMMENDATIONS",
+    "Auto Optimizer Stats Collection",
+    "SYS_AUTO_SQL_TUNING_TASK",
+    "AUTO_SPACE_ADVISOR_JOB",
+    "STATISTICS_LEVEL",
+    "force_match",
+    "QUICK_TUNE",
+    "ANALYSIS_SCOPE",
+    "GET_TASK_SCRIPT",
+    "Optimizer Statistics Advisor",
+    "AUTO_STATS_ADVISOR_TASK",
+    "DBMS_STATS.REPORT_ADVISOR_TASK",
+    "SQL Performance Analyzer (SPA)",
+    "DBMS_SQLPA",
+    "CREATE_ANALYSIS_TASK",
+    "EXECUTE_ANALYSIS_TASK",
+    "REPORT_ANALYSIS_TASK",
+    "COMPARE PERFORMANCE",
+    "Regressed SQL",
+    "TEST EXECUTE"
+  ]
+}

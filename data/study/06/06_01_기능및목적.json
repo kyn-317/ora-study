@@ -1,0 +1,290 @@
+{
+  "id": "06_01",
+  "title": "기능 및 목적 (UNDO Functions and Purpose)",
+  "chapter": "06. UNDO 데이터베이스 제어",
+  "description": "Oracle Database의 UNDO 데이터, UNDO 세그먼트, UNDO 테이블스페이스의 구조와 역할을 상세히 다룹니다. 읽기 일관성(Read Consistency) 보장, 트랜잭션 롤백(Rollback), Flashback 기능 지원 등 UNDO의 핵심 기능과 내부 동작 원리, ORA-01555 에러의 원인과 대응, 관련 파라미터 및 V$ 뷰를 포함합니다.",
+  "oracle26ai_changes": [
+    "Oracle 23ai/26ai에서 Automatic UNDO Management가 완전히 기본화되어, 수동 UNDO 관리(MANUAL 모드)는 사실상 지원 중단(Deprecated)되었습니다.",
+    "UNDO Advisor 기능이 개선되어, UNDO_RETENTION 자동 튜닝(Auto-Tuning)이 보다 적극적으로 작동하며, Flashback 요구사항까지 반영한 권장값을 제공합니다.",
+    "Pluggable Database(PDB) 환경에서 각 PDB별 독립적인 UNDO 테이블스페이스 운영이 기본 구성이 되었으며, CDB 레벨의 공유 UNDO 모드는 레거시 호환으로만 유지됩니다.",
+    "Temporal Validity 및 Flashback 기능 확장으로 UNDO 보존(Retention) 정책의 중요성이 더욱 증가하였습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "UNDO 개요 및 전체 구성 (UNDO Overview and Architecture)",
+      "sqlExamplesIds": [],
+      "content": "**UNDO 데이터(UNDO Data)**는 Oracle Database에서 DML(INSERT, UPDATE, DELETE, MERGE) 작업이 수행될 때, 변경 **이전의 데이터 이미지(Before Image)**를 저장한 것입니다. UNDO 데이터는 Oracle의 데이터 무결성과 동시성 제어(Concurrency Control)를 가능하게 하는 핵심 인프라입니다.\n\n## UNDO 데이터의 3대 핵심 기능\n\n| 기능 | 설명 |\n|---|---|\n| **읽기 일관성 (Read Consistency)** | 다른 세션이 변경 중인 데이터를 읽을 때, 변경 전의 일관된 이미지를 제공 |\n| **트랜잭션 롤백 (Transaction Rollback)** | ROLLBACK 명령 시 변경 전 데이터를 이용하여 원래 상태로 복원 |\n| **Flashback 기능** | 과거 시점의 데이터를 조회하거나 복원하기 위해 UNDO 데이터를 활용 |\n\n## UNDO 관련 핵심 구성요소\n\n| 구성요소 | 계층 | 설명 |\n|---|---|---|\n| **UNDO 데이터 (UNDO Data)** | 데이터 | DML 변경 전의 이미지 (Before Image) |\n| **UNDO 세그먼트 (UNDO Segment)** | 세그먼트 | UNDO 데이터를 저장하는 세그먼트. 트랜잭션에 할당됨 |\n| **UNDO 테이블스페이스 (UNDO Tablespace)** | 테이블스페이스 | UNDO 세그먼트만을 포함하는 전용 테이블스페이스 |\n| **UNDO 레코드 (UNDO Record)** | 레코드 | 개별 변경에 대한 UNDO 정보 단위 |\n| **트랜잭션 테이블 (Transaction Table)** | 구조 | UNDO 세그먼트 헤더 블록 내 트랜잭션 관리 구조 |\n\n## UNDO 데이터 흐름 개요\n\n```\n사용자 DML 실행\n    │\n    ▼\n서버 프로세스\n    ├── 1) Redo Log Buffer에 변경 사항 기록 (UNDO 변경 포함)\n    ├── 2) UNDO 세그먼트에 Before Image 기록\n    └── 3) 데이터 블록에 실제 변경 적용\n    │\n    ▼\nCOMMIT 시: UNDO 데이터는 즉시 삭제되지 않고 UNDO_RETENTION 기간 동안 보존\nROLLBACK 시: UNDO 데이터를 이용하여 변경 전 상태로 복원\n```\n\n## UNDO vs Redo 비교\n\n| 구분 | UNDO | Redo |\n|---|---|---|\n| **저장 내용** | 변경 전 이미지 (Before Image) | 변경 내역 (Change Vector) |\n| **주요 목적** | 읽기 일관성, 롤백, Flashback | 장애 복구 (Instance/Media Recovery) |\n| **저장 위치** | UNDO 테이블스페이스 | Online Redo Log 파일, Archive Log |\n| **관리 주체** | 서버 프로세스 → DBWn | 서버 프로세스 → LGWR |\n| **COMMIT 후** | UNDO_RETENTION 기간 동안 보존 후 덮어쓰기 가능 | 영구 보존 (Archive 시) |\n| **ROLLBACK 시** | 사용하여 원래 상태로 복원 | 사용하지 않음 |",
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "UNDO 데이터와 UNDO 레코드 (UNDO Data and UNDO Records)",
+      "sqlExamplesIds": ["sql01", "sql02"],
+      "content": "UNDO 데이터는 DML 작업 시 생성되는 **변경 전 이미지(Before Image)**이며, UNDO 레코드라는 단위로 UNDO 세그먼트에 저장됩니다.",
+      "subsections": [
+        {
+          "title": "UNDO 데이터의 정의와 역할 (UNDO Data Definition and Role)",
+          "content": "**UNDO 데이터**는 DML 문장(INSERT, UPDATE, DELETE, MERGE)이 실행될 때 자동으로 생성되는 **변경 전 데이터의 복사본**입니다. Oracle은 이를 UNDO 세그먼트에 저장하며, 사용자가 직접 생성하거나 관리하지 않습니다.\n\n### DML 유형별 UNDO 데이터 내용\n\n| DML 유형 | UNDO 데이터 내용 | 설명 |\n|---|---|---|\n| **INSERT** | 삽입된 행의 ROWID | 롤백 시 해당 행을 삭제하기 위해 위치 정보 저장 |\n| **UPDATE** | 변경 전 컬럼 값 (Before Image) | 롤백 시 원래 값으로 복원하기 위해 이전 값 저장 |\n| **DELETE** | 삭제 전 전체 행 데이터 | 롤백 시 행을 다시 삽입하기 위해 전체 행 저장 |\n| **MERGE** | INSERT/UPDATE에 따라 해당 UNDO 생성 | MERGE의 각 동작에 맞는 UNDO 데이터 생성 |\n\n### UNDO 데이터의 생명주기\n\n1. **생성**: DML 실행 시 서버 프로세스가 UNDO 레코드를 UNDO 세그먼트에 기록\n2. **활성 상태 (Active)**: 트랜잭션이 진행 중인 동안. 롤백에 반드시 필요하므로 절대 덮어쓸 수 없음\n3. **미만료 상태 (Unexpired)**: COMMIT 후 UNDO_RETENTION 기간이 경과하지 않은 상태. 읽기 일관성과 Flashback을 위해 보존 시도\n4. **만료 상태 (Expired)**: UNDO_RETENTION 기간이 경과한 상태. 새로운 트랜잭션이 해당 공간을 재사용 가능\n\n### UNDO 데이터 상태 분류\n\n| 상태 | 덮어쓰기 가능 | 설명 |\n|---|---|---|\n| **Active** | 불가 | 활성 트랜잭션의 UNDO. 롤백에 필수 |\n| **Unexpired** | 가능 (비선호) | COMMIT 완료, RETENTION 미경과. 공간 부족 시 재사용 가능 |\n| **Expired** | 가능 (우선) | COMMIT 완료, RETENTION 경과. 우선적으로 재사용 |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **UNDO_RETENTION** | COMMIT 후 UNDO 데이터 보존 시간(초) | 900 (15분) |\n| **UNDO_MANAGEMENT** | UNDO 관리 모드 (AUTO/MANUAL) | AUTO |\n| **UNDO_TABLESPACE** | 사용할 UNDO 테이블스페이스 이름 | 시스템 지정 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$UNDOSTAT** | 10분 간격의 UNDO 사용 통계 (소비량, 쿼리 길이, Snapshot Too Old 발생 등) |\n| **DBA_UNDO_EXTENTS** | UNDO 세그먼트별 Extent 상태 (ACTIVE/UNEXPIRED/EXPIRED) |",
+          "key_points": [
+            "UNDO 데이터는 DML 실행 시 자동 생성되는 변경 전 이미지(Before Image)",
+            "INSERT는 ROWID, UPDATE는 변경 전 컬럼값, DELETE는 전체 행을 UNDO에 저장",
+            "UNDO 데이터 상태: Active(활성) → Unexpired(미만료) → Expired(만료) 순으로 전이",
+            "Active 상태의 UNDO는 절대 덮어쓸 수 없으며, Expired부터 우선적으로 재사용",
+            "UNDO_RETENTION 파라미터(기본 900초)로 COMMIT 후 보존 기간 제어",
+            "UNDO 데이터 변경도 Redo Log에 기록되어 장애 복구 시 UNDO 세그먼트도 복구 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "UNDO 세그먼트 (UNDO Segments)",
+      "sqlExamplesIds": ["sql03", "sql04", "sql05"],
+      "content": "UNDO 세그먼트는 UNDO 데이터를 물리적으로 저장하는 데이터베이스 세그먼트입니다. 각 트랜잭션은 하나의 UNDO 세그먼트에 할당되며, 하나의 UNDO 세그먼트는 여러 트랜잭션을 동시에 서비스할 수 있습니다.",
+      "subsections": [
+        {
+          "title": "UNDO 세그먼트의 구조와 동작 (UNDO Segment Structure and Operation)",
+          "content": "**UNDO 세그먼트(UNDO Segment)**는 UNDO 테이블스페이스 내에 존재하는 세그먼트로, 이름이 `_SYSSMU<N>_<hash>$` 형태로 자동 생성됩니다.\n\n### UNDO 세그먼트 내부 구조\n\n```\nUNDO 세그먼트\n├── 세그먼트 헤더 블록 (Segment Header Block)\n│   └── 트랜잭션 테이블 (Transaction Table)\n│       ├── 슬롯 1: TXN ID, 상태, SCN, UBA\n│       ├── 슬롯 2: TXN ID, 상태, SCN, UBA\n│       ├── ...\n│       └── 슬롯 N: (최대 약 34~47개, 블록 크기에 따라 다름)\n├── Extent 1 (UNDO 데이터 블록들)\n├── Extent 2\n├── ...\n└── Extent N\n```\n\n### 트랜잭션 테이블 (Transaction Table)\n\nUNDO 세그먼트 헤더 블록에 존재하는 핵심 구조로, 해당 세그먼트에서 처리 중이거나 처리 완료된 트랜잭션 정보를 관리합니다.\n\n| 필드 | 설명 |\n|---|---|\n| **Transaction ID (XID)** | USN(UNDO Segment Number) + Slot + Sequence로 구성 |\n| **Transaction Status** | ACTIVE, COMMITTED, DEAD 등 |\n| **Commit SCN** | 트랜잭션 커밋 시점의 SCN |\n| **UBA (UNDO Block Address)** | 마지막 UNDO 레코드의 위치 |\n| **DBA (Data Block Address)** | UNDO 데이터 블록 주소 |\n\n### UNDO 세그먼트의 순환적 Extent 사용\n\nUNDO 세그먼트는 Redo Log와 유사하게 **순환적(Circular)**으로 Extent를 사용합니다:\n\n1. 트랜잭션이 시작되면 현재 Extent의 현재 위치부터 UNDO 레코드를 기록\n2. 현재 Extent가 가득 차면 다음 Extent로 이동\n3. 마지막 Extent에 도달하면 첫 번째 Extent로 돌아감 (순환)\n4. 단, **Active 상태의 UNDO가 있는 Extent는 건너뜀** — 새 Extent를 할당\n5. Extent 할당이 불가능하면(테이블스페이스 공간 부족) Unexpired Extent를 재사용 시도\n\n### Extent 할당 메커니즘\n\n| 단계 | 조건 | 동작 |\n|---|---|---|\n| 1단계 | 다음 Extent가 Expired 상태 | 해당 Extent를 재사용 |\n| 2단계 | 다음 Extent가 Unexpired 상태 | UNDO 테이블스페이스에서 새 Extent 할당 시도 |\n| 3단계 | 테이블스페이스 공간 부족 | Unexpired Extent를 Steal(강제 재사용) |\n| 4단계 | 여전히 공간 부족 | ORA-30036 에러 발생 (UNDO 공간 부족) |\n\n### UNDO 세그먼트 상태\n\n| 상태 | 설명 |\n|---|---|\n| **ONLINE** | 정상적으로 트랜잭션에 할당 가능한 상태 |\n| **OFFLINE** | 사용 불가. 활성 트랜잭션이 없을 때만 OFFLINE 가능 |\n| **PENDING OFFLINE** | OFFLINE 요청을 받았으나 활성 트랜잭션이 남아있어 대기 중 |\n| **NEEDS RECOVERY** | 손상되어 복구가 필요한 상태 |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **_UNDO_AUTOTUNE** | UNDO Auto-Tuning 활성화 (기본 TRUE) |\n| **_ROLLBACK_SEGMENT_COUNT** | 자동 생성되는 UNDO 세그먼트 최대 수 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$ROLLSTAT** | UNDO 세그먼트별 통계 (쓰기량, Shrink, Wrap 등) |\n| **V$ROLLNAME** | UNDO 세그먼트 이름과 USN 매핑 |\n| **V$TRANSACTION** | 현재 활성 트랜잭션 정보 (사용 중인 UNDO 세그먼트, 블록 수 등) |\n| **DBA_ROLLBACK_SEGS** | UNDO 세그먼트 메타데이터 (상태, 테이블스페이스 등) |\n\n### 특수 동작: SYSTEM UNDO 세그먼트\n\n**SYSTEM 테이블스페이스**에는 시스템 전용 UNDO 세그먼트가 존재하며, SYSTEM 테이블스페이스 내의 객체(딕셔너리 테이블 등)에 대한 변경 시에만 사용됩니다. 일반 사용자 트랜잭션은 UNDO 테이블스페이스의 세그먼트를 사용합니다.",
+          "key_points": [
+            "UNDO 세그먼트 이름은 _SYSSMU<N>_<hash>$ 형태로 자동 생성됨",
+            "세그먼트 헤더 블록의 트랜잭션 테이블이 트랜잭션 상태(Active/Committed/Dead)를 관리",
+            "Transaction ID(XID)는 USN + Slot + Sequence로 구성",
+            "Extent를 순환적(Circular)으로 사용하며, Active UNDO가 있는 Extent는 건너뜀",
+            "공간 부족 시 Expired → 새 Extent 할당 → Unexpired Steal → ORA-30036 에러 순으로 처리",
+            "V$ROLLSTAT으로 세그먼트별 사용 통계, V$TRANSACTION으로 활성 트랜잭션의 UNDO 사용량 확인",
+            "SYSTEM 테이블스페이스에는 시스템 전용 UNDO 세그먼트가 별도로 존재"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "UNDO 테이블스페이스 (UNDO Tablespace)",
+      "sqlExamplesIds": ["sql06", "sql07"],
+      "content": "UNDO 테이블스페이스는 UNDO 세그먼트만을 포함하는 전용 테이블스페이스로, Oracle이 자동으로 UNDO 세그먼트를 생성하고 관리합니다.",
+      "subsections": [
+        {
+          "title": "UNDO 테이블스페이스의 구조와 관리 (UNDO Tablespace Structure and Management)",
+          "content": "**UNDO 테이블스페이스(UNDO Tablespace)**는 `CREATE UNDO TABLESPACE` 명령으로 생성하며, 인스턴스당 하나의 UNDO 테이블스페이스만 활성화됩니다.\n\n### UNDO 테이블스페이스 생성\n\n```sql\nCREATE UNDO TABLESPACE undotbs2\n  DATAFILE '/u01/oradata/orcl/undotbs02.dbf' SIZE 2G\n  AUTOEXTEND ON NEXT 100M MAXSIZE 10G;\n```\n\n### UNDO 관리 모드 (UNDO_MANAGEMENT)\n\n| 모드 | 설명 |\n|---|---|\n| **AUTO (자동 관리)** | Oracle이 UNDO 세그먼트의 생성, 확장, 축소, 삭제를 자동 관리. **기본값이며 권장** |\n| **MANUAL (수동 관리)** | DBA가 롤백 세그먼트를 직접 생성/관리. Oracle 26ai에서 Deprecated |\n\n### 핵심 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **UNDO_MANAGEMENT** | UNDO 관리 모드 | AUTO |\n| **UNDO_TABLESPACE** | 활성 UNDO 테이블스페이스 이름 | DB 생성 시 지정 |\n| **UNDO_RETENTION** | COMMIT 후 UNDO 보존 시간(초) | 900 |\n\n### UNDO_RETENTION의 동작\n\n**UNDO_RETENTION** 파라미터는 COMMIT된 UNDO 데이터를 최소 얼마나 보존할 것인지를 지정합니다:\n\n| UNDO 테이블스페이스 유형 | UNDO_RETENTION 동작 |\n|---|---|\n| **AUTOEXTEND ON** | UNDO_RETENTION은 **자동 튜닝**(Auto-Tuning)됨. 가장 긴 쿼리 실행 시간 기반으로 자동 조정 |\n| **AUTOEXTEND OFF (고정 크기)** | UNDO_RETENTION은 **힌트**로만 작동. 공간 부족 시 Unexpired도 덮어씀 |\n| **GUARANTEE 모드** | UNDO_RETENTION 기간 내 UNDO는 **절대 덮어쓰지 않음**. 공간 부족 시 DML 실패 |\n\n### RETENTION GUARANTEE vs NOGUARANTEE\n\n| 모드 | 설명 |\n|---|---|\n| **NOGUARANTEE (기본)** | UNDO_RETENTION은 최선 노력(Best Effort). 공간 부족 시 Unexpired UNDO 재사용 가능 |\n| **GUARANTEE** | UNDO_RETENTION 기간 동안의 보존을 **보장**. ORA-01555 방지에 유리하나 공간 부족 시 DML이 ORA-30036으로 실패 |\n\n```sql\n-- GUARANTEE 모드 설정\nALTER TABLESPACE undotbs1 RETENTION GUARANTEE;\n-- NOGUARANTEE로 복원\nALTER TABLESPACE undotbs1 RETENTION NOGUARANTEE;\n```\n\n### UNDO 테이블스페이스 전환 (Switch)\n\n운영 중에 UNDO 테이블스페이스를 변경할 수 있습니다:\n\n```sql\nALTER SYSTEM SET UNDO_TABLESPACE = undotbs2;\n```\n\n- 기존 UNDO 테이블스페이스의 활성 트랜잭션이 모두 종료될 때까지 기존 테이블스페이스도 유지\n- 전환 완료 후 기존 UNDO 테이블스페이스 삭제 가능\n\n### PDB 환경에서의 UNDO 테이블스페이스\n\n| 모드 | 설명 |\n|---|---|\n| **Local UNDO (기본, 권장)** | 각 PDB가 자체 UNDO 테이블스페이스를 보유. PDB 독립성 보장 |\n| **Shared UNDO (레거시)** | CDB 루트의 UNDO 테이블스페이스를 모든 PDB가 공유 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_TABLESPACES** | 테이블스페이스 정보 (CONTENTS='UNDO'로 필터) |\n| **V$UNDOSTAT** | 10분 간격 UNDO 사용 통계 |\n| **DBA_UNDO_EXTENTS** | UNDO Extent 상태별 현황 |",
+          "key_points": [
+            "인스턴스당 하나의 UNDO 테이블스페이스만 활성화(UNDO_TABLESPACE 파라미터)",
+            "UNDO_MANAGEMENT=AUTO가 기본이며 Oracle 26ai에서 MANUAL은 Deprecated",
+            "UNDO_RETENTION(기본 900초)은 COMMIT 후 보존 시간이며, AUTOEXTEND ON 시 자동 튜닝",
+            "RETENTION GUARANTEE 설정 시 UNDO_RETENTION 내 UNDO가 절대 덮어쓰이지 않음",
+            "RETENTION NOGUARANTEE(기본)에서는 공간 부족 시 Unexpired UNDO도 재사용 가능",
+            "ALTER SYSTEM SET UNDO_TABLESPACE로 운영 중 UNDO 테이블스페이스 전환 가능",
+            "PDB 환경에서는 Local UNDO 모드(각 PDB별 독립 UNDO)가 기본이며 권장"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "읽기 일관성 메커니즘 (Read Consistency Mechanism)",
+      "sqlExamplesIds": ["sql08", "sql09"],
+      "content": "Oracle Database의 가장 강력한 특징 중 하나인 **읽기 일관성(Read Consistency)**은 UNDO 데이터를 활용하여 구현됩니다. 읽기 작업(SELECT)이 쓰기 작업(DML)에 의해 차단되지 않으며, 쓰기 작업도 읽기 작업에 의해 차단되지 않습니다.",
+      "subsections": [
+        {
+          "title": "읽기 일관성의 원리와 CR 블록 (Read Consistency Principle and CR Blocks)",
+          "content": "Oracle은 **다중 버전 읽기 일관성(Multi-Version Read Consistency)**을 제공합니다. 이는 쿼리가 시작된 시점(SCN 기준)의 **일관된 데이터 스냅샷**을 보장하는 메커니즘입니다.\n\n### 읽기 일관성의 수준\n\n| 수준 | 설명 |\n|---|---|\n| **문장 수준 읽기 일관성 (Statement-Level)** | 하나의 SQL 문장이 실행되는 동안 해당 문장 시작 시점의 일관된 데이터를 보장. **기본 동작** |\n| **트랜잭션 수준 읽기 일관성 (Transaction-Level)** | 트랜잭션 내 모든 문장이 트랜잭션 시작 시점의 일관된 데이터를 보장. `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE`로 설정 |\n\n### SCN (System Change Number)과 읽기 일관성\n\n**SCN**은 Oracle 내부의 논리적 타임스탬프로, 모든 변경에 대해 단조 증가하는 번호입니다. 읽기 일관성의 핵심 메커니즘은 다음과 같습니다:\n\n1. 쿼리 시작 시 현재 **SCN(Query SCN)**을 기록\n2. 데이터 블록을 읽을 때 해당 블록의 **Block SCN**을 확인\n3. Block SCN ≤ Query SCN → 해당 블록을 그대로 읽음 (변경이 쿼리 시작 전에 커밋됨)\n4. Block SCN > Query SCN → 해당 블록에 쿼리 시작 후의 변경이 포함됨 → **CR 블록 생성 필요**\n\n### CR 블록 (Consistent Read Block) 생성 과정\n\n**CR 블록**은 읽기 일관성을 위해 버퍼 캐시에 생성되는 **과거 시점의 블록 복사본**입니다:\n\n1. 서버 프로세스가 현재 블록(Current Block)을 버퍼 캐시에서 찾음\n2. Block SCN > Query SCN이면, 현재 블록의 **복사본(Clone)**을 생성\n3. 블록 내 변경을 수행한 트랜잭션의 **UNDO 레코드**를 찾음 (블록 헤더의 ITL에서 UBA 참조)\n4. UNDO 레코드를 복사본에 역순으로 적용하여 **과거 시점의 블록 이미지**를 생성\n5. 복원된 블록의 SCN이 Query SCN 이하가 될 때까지 반복\n6. 완성된 CR 블록에서 데이터를 읽어 반환\n\n### ITL (Interested Transaction List)\n\n데이터 블록 헤더에 존재하는 구조로, 해당 블록을 변경한 트랜잭션의 정보를 기록합니다:\n\n| ITL 필드 | 설명 |\n|---|---|\n| **XID** | 트랜잭션 ID |\n| **UBA** | UNDO Block Address — 해당 변경의 UNDO 레코드 위치 |\n| **Flag** | C(Committed), U(Uncommitted) 등 |\n| **SCN/Wrap** | 커밋 SCN |\n\nCR 블록 생성 시 ITL의 UBA를 따라 UNDO 체인을 역추적하여 과거 이미지를 복원합니다.\n\n### 문장 수준 vs 트랜잭션 수준 상세 비교\n\n| 구분 | 문장 수준 (READ COMMITTED) | 트랜잭션 수준 (SERIALIZABLE) |\n|---|---|---|\n| **기준 SCN** | 각 SQL 문장 시작 시의 SCN | 트랜잭션 시작 시의 SCN |\n| **기본 여부** | 기본 격리 수준 | 명시적 설정 필요 |\n| **ORA-01555 위험** | 상대적으로 낮음 | 장기 트랜잭션 시 높음 |\n| **동시성** | 높음 | 상대적으로 낮음 |\n| **용도** | 일반적인 OLTP 환경 | 강력한 일관성이 필요한 경우 |\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$SYSSTAT** | 'consistent gets', 'physical reads' 등 읽기 일관성 관련 통계 |\n| **V$SESSTAT** | 세션별 읽기 일관성 통계 |\n| **V$CR_BLOCK_SERVER** | CR 블록 생성 관련 통계 (RAC 환경) |",
+          "key_points": [
+            "Oracle은 UNDO를 이용한 다중 버전 읽기 일관성(MVCC)으로 읽기-쓰기 비차단(Non-blocking) 구현",
+            "문장 수준 읽기 일관성(READ COMMITTED)이 기본, 트랜잭션 수준(SERIALIZABLE)은 명시 설정 필요",
+            "쿼리 시작 시 기록한 Query SCN과 Block SCN 비교로 CR 블록 생성 여부 결정",
+            "CR 블록은 Current Block의 복사본에 UNDO 레코드를 역적용하여 과거 시점 이미지를 생성",
+            "ITL(Interested Transaction List)의 UBA를 통해 UNDO 체인을 역추적",
+            "SCN(System Change Number)은 Oracle의 논리적 타임스탬프로 모든 읽기 일관성의 기준",
+            "consistent gets 통계로 CR 블록을 통한 논리적 읽기 횟수 확인 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "트랜잭션 롤백 메커니즘 (Transaction Rollback Mechanism)",
+      "sqlExamplesIds": ["sql10"],
+      "content": "트랜잭션 롤백은 UNDO 데이터를 이용하여 DML 변경 사항을 원래 상태로 되돌리는 메커니즘입니다. 사용자 명시적 롤백, 시스템 롤백, SMON에 의한 Dead Transaction Recovery 등 여러 유형이 있습니다.",
+      "subsections": [
+        {
+          "title": "롤백의 유형과 내부 동작 (Rollback Types and Internal Operations)",
+          "content": "**롤백(Rollback)**은 트랜잭션이 수행한 모든 변경을 UNDO 데이터를 이용하여 **역순(Reverse Order)**으로 취소하는 프로세스입니다.\n\n### 롤백의 유형\n\n| 유형 | 발생 조건 | 처리 주체 |\n|---|---|---|\n| **사용자 롤백 (User Rollback)** | ROLLBACK 명령 실행 | 서버 프로세스 |\n| **Savepoint 롤백** | ROLLBACK TO SAVEPOINT 명령 | 서버 프로세스 |\n| **문장 수준 롤백 (Statement-Level Rollback)** | DML 실행 중 에러 발생 (예: 제약조건 위반) | 서버 프로세스 |\n| **시스템 롤백 / 인스턴스 복구 (Instance Recovery)** | 인스턴스 비정상 종료 후 재기동 시 | SMON 프로세스 |\n| **Dead Transaction Recovery** | 서버 프로세스가 비정상 종료되어 트랜잭션이 미완료 상태 | SMON 프로세스 (백그라운드) |\n\n### 사용자 롤백의 내부 동작 단계\n\n1. 서버 프로세스가 UNDO 세그먼트에서 해당 트랜잭션의 **마지막 UNDO 레코드**를 찾음 (UBA 체인 이용)\n2. UNDO 레코드의 Before Image를 데이터 블록에 **역순으로 적용**\n3. 각 UNDO 적용도 **Redo 로그에 기록** (롤백 작업도 복구 가능해야 하므로)\n4. 모든 UNDO 레코드 적용 완료 후, 트랜잭션 테이블의 상태를 **COMMITTED(롤백 완료)**로 변경\n5. 사용한 UNDO 공간은 즉시 재사용 가능 상태가 됨\n\n### Savepoint 롤백\n\n**SAVEPOINT**는 트랜잭션 내에서 중간 지점을 표시하여, 부분 롤백을 가능하게 합니다:\n\n```sql\nSAVEPOINT sp1;\n-- DML 작업들...\nSAVEPOINT sp2;\n-- DML 작업들...\nROLLBACK TO SAVEPOINT sp1;  -- sp1 이후의 모든 변경을 롤백\n```\n\n- Savepoint 이후의 UNDO 레코드만 역적용\n- 트랜잭션 자체는 종료되지 않고 계속 진행 가능\n- Savepoint 이후에 획득한 **행 수준 잠금(Row Lock)**은 해제됨\n- Savepoint 이전의 잠금은 유지\n\n### 인스턴스 복구와 롤백 (Instance Recovery)\n\n인스턴스가 비정상 종료 후 재기동되면 SMON 프로세스가 2단계 복구를 수행합니다:\n\n| 단계 | 이름 | 동작 |\n|---|---|---|\n| 1단계 | **Roll Forward (Cache Recovery)** | Redo Log를 적용하여 커밋된/커밋되지 않은 모든 변경을 재적용 |\n| 2단계 | **Roll Back (Transaction Recovery)** | UNDO 데이터를 이용하여 커밋되지 않은 트랜잭션을 롤백 |\n\n### Dead Transaction Recovery\n\n서버 프로세스가 비정상 종료(예: kill)되면 해당 프로세스가 처리 중이던 트랜잭션은 **Dead Transaction**이 됩니다:\n\n- **PMON** 프로세스가 Dead 프로세스를 감지\n- PMON이 해당 트랜잭션을 **DEAD**로 마킹\n- **SMON** 프로세스가 백그라운드에서 Dead Transaction을 롤백\n- SMON의 롤백은 **점진적(Gradual)**으로 수행되어 시스템 부하를 최소화\n- 다른 세션이 Dead Transaction의 잠금 블록에 접근하면 해당 세션이 **즉시 롤백을 수행**할 수도 있음\n\n### 롤백 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$TRANSACTION** | USED_UBLK(사용 UNDO 블록), USED_UREC(사용 UNDO 레코드) — 롤백 진행 시 감소 |\n| **V$FAST_START_TRANSACTIONS** | 병렬 롤백 대상 트랜잭션의 복구 진행 상황 |\n| **V$FAST_START_SERVERS** | 병렬 롤백 서버 프로세스 상태 |",
+          "key_points": [
+            "롤백은 UNDO 레코드를 역순(Reverse Order)으로 적용하여 변경을 취소하는 프로세스",
+            "롤백 작업 자체도 Redo 로그에 기록되어 장애 복구 시 롤백 상태도 복구 가능",
+            "SAVEPOINT를 사용하면 트랜잭션 내 부분 롤백이 가능하며, 이후 잠금만 해제됨",
+            "인스턴스 복구는 Roll Forward(Redo 적용) → Roll Back(UNDO 적용) 2단계로 수행",
+            "Dead Transaction은 PMON이 감지하고 SMON이 백그라운드에서 점진적으로 롤백",
+            "V$TRANSACTION의 USED_UBLK/USED_UREC 감소를 통해 롤백 진행 상황 모니터링 가능",
+            "FAST_START_PARALLEL_ROLLBACK 파라미터로 병렬 롤백 서버 수 제어"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s07",
+      "title": "ORA-01555: Snapshot Too Old 에러 (ORA-01555 Error)",
+      "sqlExamplesIds": ["sql11", "sql12"],
+      "content": "ORA-01555는 Oracle에서 가장 대표적인 UNDO 관련 에러로, 읽기 일관성을 유지하기 위해 필요한 UNDO 데이터가 이미 덮어쓰여진 경우 발생합니다.",
+      "subsections": [
+        {
+          "title": "ORA-01555의 원인과 대응 (ORA-01555 Causes and Solutions)",
+          "content": "**ORA-01555: snapshot too old**는 쿼리가 읽기 일관성을 유지하기 위해 필요한 **과거 시점의 UNDO 데이터가 이미 다른 트랜잭션에 의해 덮어쓰여진** 경우 발생합니다.\n\n### 발생 메커니즘\n\n1. 세션 A가 긴 쿼리를 실행 (Query SCN = 1000)\n2. 세션 B가 해당 데이터를 변경하고 COMMIT (SCN = 1500)\n3. 세션 A가 해당 블록을 읽으려 할 때, Block SCN = 1500 > Query SCN = 1000\n4. CR 블록을 생성하기 위해 SCN 1000 시점의 UNDO 데이터가 필요\n5. **그러나 해당 UNDO 데이터가 이미 덮어쓰여져 존재하지 않음**\n6. → ORA-01555 발생\n\n### 주요 원인\n\n| 원인 | 설명 |\n|---|---|\n| **UNDO 테이블스페이스 크기 부족** | UNDO 공간이 작아 Unexpired UNDO가 빨리 재사용됨 |\n| **UNDO_RETENTION 설정 부족** | 보존 기간이 너무 짧아 필요한 UNDO가 만료됨 |\n| **장기 실행 쿼리 (Long-running Query)** | 쿼리 실행 시간이 UNDO 보존 기간보다 길 경우 |\n| **대량 DML 발생** | 짧은 시간에 대량의 UNDO가 생성되어 기존 UNDO를 빠르게 덮어씀 |\n| **Fetch across Commit** | 커서를 열어 놓고 DML + COMMIT 후 계속 FETCH하는 패턴 |\n| **지연된 블록 클린아웃** | 블록 클린아웃(Block Cleanout) 시 필요한 UNDO가 없는 경우 |\n\n### 대응 방안\n\n| 방안 | 설명 |\n|---|---|\n| **UNDO 테이블스페이스 확장** | 더 많은 UNDO 데이터를 보존할 수 있도록 공간 확보 |\n| **UNDO_RETENTION 값 증가** | 장기 쿼리 실행 시간을 고려하여 보존 기간 연장 |\n| **RETENTION GUARANTEE 설정** | Unexpired UNDO의 강제 재사용을 방지 |\n| **쿼리 최적화** | 장기 실행 쿼리를 튜닝하여 실행 시간 단축 |\n| **Fetch across Commit 패턴 제거** | 커서 OPEN → DML → COMMIT → FETCH 패턴을 개선 |\n| **UNDO Advisor 활용** | V$UNDOSTAT 기반으로 최적 UNDO 크기 산정 |\n\n### 블록 클린아웃 (Block Cleanout)과 ORA-01555\n\n**블록 클린아웃(Block Cleanout)**은 COMMIT 후에 변경된 데이터 블록의 ITL 엔트리를 정리하는 작업입니다:\n\n- **즉시 클린아웃 (Fast Commit Cleanout)**: COMMIT 시 버퍼 캐시에 있는 블록은 즉시 ITL을 갱신\n- **지연 클린아웃 (Delayed Block Cleanout)**: 버퍼 캐시에서 밀려난 블록은 다음 접근 시 ITL을 갱신\n  - 지연 클린아웃 시 UNDO 세그먼트의 트랜잭션 테이블을 참조하여 커밋 SCN을 확인\n  - 트랜잭션 테이블 정보가 이미 덮어쓰여졌으면 ORA-01555 발생 가능\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$UNDOSTAT** | SSOLDERRCNT 컬럼으로 ORA-01555 발생 횟수 확인 |\n| **V$UNDOSTAT** | MAXQUERYLEN 컬럼으로 가장 긴 쿼리 실행 시간(초) 확인 |",
+          "key_points": [
+            "ORA-01555는 CR 블록 생성에 필요한 UNDO 데이터가 덮어쓰여진 경우 발생",
+            "주요 원인: UNDO 공간 부족, RETENTION 부족, 장기 쿼리, 대량 DML, Fetch across Commit",
+            "RETENTION GUARANTEE 설정으로 Unexpired UNDO 덮어쓰기를 차단하여 예방 가능",
+            "지연 블록 클린아웃(Delayed Block Cleanout) 시 트랜잭션 테이블 조회 실패도 원인",
+            "V$UNDOSTAT의 SSOLDERRCNT로 ORA-01555 발생 횟수 모니터링",
+            "UNDO Advisor(DBMS_UNDO_ADV 패키지)로 최적 UNDO 크기와 RETENTION 산정"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s08",
+      "title": "Flashback 기능과 UNDO (Flashback Features and UNDO)",
+      "sqlExamplesIds": ["sql13", "sql14", "sql15"],
+      "content": "Oracle의 Flashback 기능은 UNDO 데이터를 활용하여 과거 시점의 데이터를 조회하거나 복원하는 강력한 기능입니다.",
+      "subsections": [
+        {
+          "title": "UNDO 기반 Flashback 기능 (UNDO-based Flashback Features)",
+          "content": "**Flashback 기능**은 논리적 오류(사용자 실수 등)를 빠르게 복구하기 위한 기능 집합으로, 대부분 UNDO 데이터를 기반으로 동작합니다.\n\n### UNDO 기반 Flashback 기능 분류\n\n| 기능 | 설명 | UNDO 의존 |\n|---|---|---|\n| **Flashback Query** | 과거 시점의 데이터를 SELECT로 조회 | O |\n| **Flashback Version Query** | 특정 기간 동안의 행 변경 이력을 조회 | O |\n| **Flashback Transaction Query** | 특정 트랜잭션이 수행한 변경 내역 조회 | O |\n| **Flashback Table** | 테이블을 과거 시점으로 복원 | O |\n| **Flashback Drop** | DROP된 테이블을 Recycle Bin에서 복원 | X (Recycle Bin) |\n| **Flashback Database** | 전체 DB를 과거 시점으로 복원 | X (Flashback Log) |\n\n### Flashback Query\n\n`AS OF` 절을 사용하여 과거 시점의 데이터를 조회합니다:\n\n```sql\n-- SCN 기준 조회\nSELECT * FROM employees AS OF SCN 12345678;\n-- Timestamp 기준 조회\nSELECT * FROM employees AS OF TIMESTAMP\n  TO_TIMESTAMP('2026-04-06 10:00:00', 'YYYY-MM-DD HH24:MI:SS');\n```\n\n내부적으로 읽기 일관성과 동일한 메커니즘(CR 블록 생성)을 사용하며, 지정된 시점의 UNDO 데이터가 존재해야 합니다.\n\n### Flashback Version Query\n\n`VERSIONS BETWEEN` 절을 사용하여 특정 기간 동안 행이 어떻게 변경되었는지 이력을 조회합니다:\n\n```sql\nSELECT versions_startscn, versions_endscn, versions_operation,\n       employee_id, salary\nFROM employees\nVERSIONS BETWEEN TIMESTAMP\n  TO_TIMESTAMP('2026-04-06 09:00:00', 'YYYY-MM-DD HH24:MI:SS')\n  AND TO_TIMESTAMP('2026-04-06 12:00:00', 'YYYY-MM-DD HH24:MI:SS')\nWHERE employee_id = 100;\n```\n\n| 의사 컬럼 | 설명 |\n|---|---|\n| **VERSIONS_STARTSCN/STARTTIME** | 해당 버전이 시작된 SCN/시간 |\n| **VERSIONS_ENDSCN/ENDTIME** | 해당 버전이 종료된 SCN/시간 |\n| **VERSIONS_OPERATION** | I(Insert), U(Update), D(Delete) |\n| **VERSIONS_XID** | 변경을 수행한 트랜잭션 ID |\n\n### Flashback Transaction Query\n\n`FLASHBACK_TRANSACTION_QUERY` 뷰를 사용하여 특정 트랜잭션의 변경 내역과 UNDO SQL을 조회합니다:\n\n```sql\nSELECT xid, operation, table_name, undo_sql\nFROM flashback_transaction_query\nWHERE xid = HEXTORAW('0007001A00000457');\n```\n\n- **UNDO_SQL** 컬럼에 변경을 되돌리기 위한 SQL이 자동 생성됨\n- Supplemental Logging이 활성화되어야 정확한 UNDO_SQL 생성 가능\n\n### Flashback Table\n\n테이블 전체를 과거 시점으로 복원합니다:\n\n```sql\nALTER TABLE employees ENABLE ROW MOVEMENT;\nFLASHBACK TABLE employees TO TIMESTAMP\n  TO_TIMESTAMP('2026-04-06 10:00:00', 'YYYY-MM-DD HH24:MI:SS');\n```\n\n- **ROW MOVEMENT**를 활성화해야 ROWID 변경이 가능\n- 내부적으로 UNDO 데이터를 이용하여 DML을 역적용\n- UNDO_RETENTION 범위 내에서만 복원 가능\n\n### Flashback 기능의 UNDO_RETENTION 의존성\n\n모든 UNDO 기반 Flashback 기능은 **UNDO_RETENTION** 기간 내에서만 동작합니다. 과거 시점이 UNDO_RETENTION을 초과하거나 해당 UNDO가 이미 덮어쓰여졌으면 ORA-01555 또는 관련 에러가 발생합니다.\n\n| 조건 | 결과 |\n|---|---|\n| 요청 시점의 UNDO 존재 | 정상 조회/복원 |\n| 요청 시점의 UNDO 만료/덮어씀 | ORA-01555 또는 ORA-08180 에러 |\n| RETENTION GUARANTEE 설정 | 보존이 보장되므로 Flashback 성공 가능성 높음 |",
+          "key_points": [
+            "Flashback Query, Version Query, Transaction Query, Flashback Table은 모두 UNDO 데이터 기반",
+            "Flashback Drop(Recycle Bin)과 Flashback Database(Flashback Log)는 UNDO와 무관",
+            "AS OF SCN/TIMESTAMP 절로 과거 시점 데이터를 SELECT로 조회 가능",
+            "VERSIONS BETWEEN으로 행 변경 이력(Insert/Update/Delete)을 추적 가능",
+            "FLASHBACK_TRANSACTION_QUERY 뷰는 UNDO_SQL 컬럼으로 자동 복원 SQL 제공",
+            "Flashback Table은 ROW MOVEMENT 활성화가 필수 전제 조건",
+            "모든 UNDO 기반 Flashback은 UNDO_RETENTION 범위 내에서만 동작"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "UNDO 테이블스페이스 및 파라미터 확인",
+      "sql": "SELECT name, value\nFROM v$parameter\nWHERE name IN ('undo_management', 'undo_tablespace', 'undo_retention')\nORDER BY name;",
+      "description": "현재 UNDO 관련 파라미터(관리 모드, 활성 테이블스페이스, 보존 기간)를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "DBA_UNDO_EXTENTS로 UNDO Extent 상태별 현황 확인",
+      "sql": "SELECT tablespace_name, status,\n       COUNT(*) AS extent_count,\n       ROUND(SUM(bytes) / 1024 / 1024, 2) AS total_mb\nFROM dba_undo_extents\nGROUP BY tablespace_name, status\nORDER BY tablespace_name, status;",
+      "description": "UNDO 테이블스페이스의 Extent를 ACTIVE, UNEXPIRED, EXPIRED 상태별로 집계하여 UNDO 공간 사용 현황을 파악합니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "V$ROLLSTAT으로 UNDO 세그먼트 통계 조회",
+      "sql": "SELECT r.usn, n.name, r.status,\n       r.rssize / 1024 / 1024 AS size_mb,\n       r.writes / 1024 / 1024 AS writes_mb,\n       r.xacts AS active_txns,\n       r.shrinks, r.wraps, r.extends\nFROM v$rollstat r\nJOIN v$rollname n ON r.usn = n.usn\nORDER BY r.usn;",
+      "description": "각 UNDO 세그먼트의 크기, 쓰기량, 활성 트랜잭션 수, Shrink/Wrap/Extend 횟수를 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "V$TRANSACTION으로 활성 트랜잭션의 UNDO 사용량 확인",
+      "sql": "SELECT t.xidusn AS undo_seg_num,\n       t.xidslot AS slot,\n       t.xidsqn AS seq,\n       t.status,\n       t.used_ublk AS used_undo_blocks,\n       t.used_urec AS used_undo_records,\n       t.start_time,\n       s.username, s.sid, s.serial#\nFROM v$transaction t\nJOIN v$session s ON t.ses_addr = s.saddr\nORDER BY t.used_ublk DESC;",
+      "description": "현재 활성 트랜잭션이 사용 중인 UNDO 블록 수, UNDO 레코드 수, 시작 시간 및 세션 정보를 조회합니다. 롤백 진행 시 USED_UBLK 값이 감소하는 것을 관찰할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "DBA_ROLLBACK_SEGS로 UNDO 세그먼트 메타데이터 조회",
+      "sql": "SELECT segment_name, segment_id, tablespace_name,\n       status, initial_extent, next_extent\nFROM dba_rollback_segs\nORDER BY segment_id;",
+      "description": "모든 UNDO(롤백) 세그먼트의 이름, ID, 소속 테이블스페이스, 상태 등 메타데이터를 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "V$UNDOSTAT으로 UNDO 사용 통계 및 ORA-01555 발생 이력 조회",
+      "sql": "SELECT TO_CHAR(begin_time, 'YYYY-MM-DD HH24:MI') AS begin_time,\n       TO_CHAR(end_time, 'HH24:MI') AS end_time,\n       undotsn, undoblks,\n       txncount AS txn_count,\n       maxquerylen AS max_query_sec,\n       maxconcurrency AS max_concurrency,\n       ssolderrcnt AS ora_01555_count,\n       nospaceerrcnt AS no_space_err_count,\n       tuned_undoretention AS tuned_retention_sec\nFROM v$undostat\nWHERE rownum <= 24\nORDER BY begin_time DESC;",
+      "description": "10분 간격의 UNDO 사용 통계를 조회합니다. ORA-01555 발생 횟수(SSOLDERRCNT), 가장 긴 쿼리 시간(MAXQUERYLEN), 자동 튜닝된 RETENTION 값(TUNED_UNDORETENTION) 등을 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "UNDO Advisor를 이용한 최적 UNDO 크기 산정",
+      "sql": "-- 최근 분석 기간 동안 필요한 UNDO 테이블스페이스 크기 조회\nSELECT d.undo_size / 1024 / 1024 AS current_undo_mb,\n       SUBSTR(e.value, 1, 25) AS db_block_size,\n       d.undo_size / TO_NUMBER(e.value) AS undo_blocks,\n       s.maxquerylen AS max_query_len_sec,\n       s.maxconcurrency AS max_concurrency,\n       ROUND((s.undoblks * TO_NUMBER(e.value) * s.maxquerylen) /\n             (d.undo_size), 2) AS undo_pressure_ratio\nFROM (SELECT SUM(bytes) AS undo_size\n      FROM dba_data_files\n      WHERE tablespace_name = (SELECT value FROM v$parameter WHERE name = 'undo_tablespace')) d,\n     v$parameter e,\n     (SELECT MAX(maxquerylen) AS maxquerylen,\n             MAX(maxconcurrency) AS maxconcurrency,\n             SUM(undoblks) / COUNT(*) AS undoblks\n      FROM v$undostat) s\nWHERE e.name = 'db_block_size';",
+      "description": "현재 UNDO 테이블스페이스 크기와 사용 통계를 분석하여, UNDO 압박(Pressure) 비율을 계산합니다. 비율이 1에 가까울수록 UNDO 공간이 부족한 상태입니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "읽기 일관성 관련 통계 조회 (consistent gets vs db block gets)",
+      "sql": "SELECT name, value\nFROM v$sysstat\nWHERE name IN (\n  'consistent gets',\n  'consistent gets from cache',\n  'db block gets',\n  'physical reads',\n  'consistent changes'\n)\nORDER BY name;",
+      "description": "consistent gets(CR 모드 읽기)와 db block gets(Current 모드 읽기)를 비교하여 읽기 일관성 관련 동작 빈도를 파악합니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "트랜잭션 격리 수준 설정 (SERIALIZABLE)",
+      "sql": "-- 트랜잭션 수준 읽기 일관성 설정\nSET TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n-- 이후 모든 쿼리는 이 트랜잭션 시작 시점의 일관된 데이터를 조회\nSELECT * FROM employees WHERE department_id = 10;\n-- COMMIT 또는 ROLLBACK으로 트랜잭션 종료\nCOMMIT;",
+      "description": "SERIALIZABLE 격리 수준을 설정하여, 트랜잭션 내 모든 쿼리가 트랜잭션 시작 시점의 일관된 데이터를 조회하도록 합니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "SAVEPOINT를 이용한 부분 롤백",
+      "sql": "INSERT INTO employees (employee_id, first_name, last_name, email, hire_date, job_id)\nVALUES (9001, 'John', 'Doe', 'JDOE', SYSDATE, 'IT_PROG');\nSAVEPOINT sp_after_insert;\n\nUPDATE employees SET salary = 50000 WHERE employee_id = 9001;\nSAVEPOINT sp_after_update;\n\nDELETE FROM employees WHERE employee_id = 100;\n-- 실수를 깨닫고 DELETE만 롤백\nROLLBACK TO SAVEPOINT sp_after_update;\n-- INSERT와 UPDATE는 유지된 상태\nCOMMIT;",
+      "description": "SAVEPOINT를 설정하여 트랜잭션 내 특정 시점으로 부분 롤백하는 예시입니다. sp_after_update 이후의 DELETE만 롤백되고, INSERT와 UPDATE는 유지됩니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "V$UNDOSTAT에서 ORA-01555 발생 이력 상세 분석",
+      "sql": "SELECT TO_CHAR(begin_time, 'YYYY-MM-DD HH24:MI') AS period_start,\n       ssolderrcnt AS snapshot_too_old_count,\n       maxquerylen AS longest_query_sec,\n       tuned_undoretention AS auto_tuned_retention,\n       undoblks AS undo_blocks_consumed\nFROM v$undostat\nWHERE ssolderrcnt > 0\nORDER BY begin_time DESC;",
+      "description": "ORA-01555(Snapshot Too Old)가 발생한 시간대와 당시의 가장 긴 쿼리 실행 시간, 자동 튜닝된 UNDO RETENTION 값을 조회하여 원인을 분석합니다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "RETENTION GUARANTEE 설정 및 확인",
+      "sql": "-- 현재 RETENTION 보장 모드 확인\nSELECT tablespace_name, contents, retention\nFROM dba_tablespaces\nWHERE contents = 'UNDO';\n\n-- GUARANTEE 모드로 변경\nALTER TABLESPACE undotbs1 RETENTION GUARANTEE;\n\n-- NOGUARANTEE로 복원\n-- ALTER TABLESPACE undotbs1 RETENTION NOGUARANTEE;",
+      "description": "UNDO 테이블스페이스의 RETENTION GUARANTEE 설정을 확인하고 변경합니다. GUARANTEE 모드에서는 UNDO_RETENTION 기간 내의 UNDO가 절대 덮어쓰이지 않아 ORA-01555를 방지합니다."
+    },
+    {
+      "sqlExamplesId": "sql13",
+      "title": "Flashback Query — 과거 시점 데이터 조회",
+      "sql": "-- 5분 전 시점의 데이터 조회\nSELECT employee_id, salary, department_id\nFROM employees AS OF TIMESTAMP (SYSTIMESTAMP - INTERVAL '5' MINUTE)\nWHERE department_id = 10;\n\n-- 현재 데이터와 비교\nSELECT e_now.employee_id,\n       e_now.salary AS current_salary,\n       e_past.salary AS past_salary,\n       e_now.salary - e_past.salary AS diff\nFROM employees e_now\nJOIN employees AS OF TIMESTAMP (SYSTIMESTAMP - INTERVAL '5' MINUTE) e_past\n  ON e_now.employee_id = e_past.employee_id\nWHERE e_now.salary <> e_past.salary;",
+      "description": "AS OF TIMESTAMP를 사용하여 5분 전 시점의 데이터를 조회하고, 현재 데이터와 비교하여 변경된 행을 식별합니다."
+    },
+    {
+      "sqlExamplesId": "sql14",
+      "title": "Flashback Version Query — 행 변경 이력 추적",
+      "sql": "SELECT versions_startscn, versions_endscn,\n       versions_operation,\n       versions_xid,\n       employee_id, salary, job_id\nFROM employees\nVERSIONS BETWEEN TIMESTAMP\n  SYSTIMESTAMP - INTERVAL '1' HOUR AND SYSTIMESTAMP\nWHERE employee_id = 100\nORDER BY versions_startscn;",
+      "description": "최근 1시간 동안 employee_id=100 행의 모든 변경 버전(Insert/Update/Delete)을 시간순으로 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql15",
+      "title": "Flashback Transaction Query — 트랜잭션별 변경 내역 및 UNDO SQL 조회",
+      "sql": "SELECT xid, start_scn, commit_scn,\n       operation, table_name, table_owner,\n       undo_sql\nFROM flashback_transaction_query\nWHERE table_owner = 'HR'\n  AND table_name = 'EMPLOYEES'\n  AND commit_scn > (SELECT current_scn - 10000 FROM v$database)\nORDER BY commit_scn DESC;",
+      "description": "HR.EMPLOYEES 테이블에 대한 최근 트랜잭션의 변경 내역과 자동 생성된 UNDO SQL을 조회합니다. UNDO SQL을 실행하면 해당 변경을 되돌릴 수 있습니다."
+    }
+  ],
+  "keywords": [
+    "UNDO データ (UNDO Data)",
+    "UNDO セグメント (UNDO Segment)",
+    "UNDO 表領域 (UNDO Tablespace)",
+    "ロールバック (Rollback)",
+    "読取り一貫性 (Read Consistency)",
+    "Before Image (変更前イメージ)",
+    "CR ブロック (Consistent Read Block)",
+    "SCN (System Change Number)",
+    "トランザクションテーブル (Transaction Table)",
+    "UNDO_RETENTION",
+    "UNDO_MANAGEMENT",
+    "UNDO_TABLESPACE",
+    "RETENTION GUARANTEE",
+    "ORA-01555 Snapshot Too Old",
+    "Flashback Query",
+    "Flashback Version Query",
+    "Flashback Transaction Query",
+    "Flashback Table",
+    "ITL (Interested Transaction List)",
+    "UBA (UNDO Block Address)",
+    "V$UNDOSTAT",
+    "V$TRANSACTION",
+    "V$ROLLSTAT",
+    "DBA_UNDO_EXTENTS",
+    "SMON (System Monitor)",
+    "Dead Transaction Recovery",
+    "Block Cleanout (ブロッククリーンアウト)",
+    "Delayed Block Cleanout",
+    "Multi-Version Read Consistency (MVRC)",
+    "UNDO Auto-Tuning"
+  ]
+}

@@ -1,0 +1,345 @@
+{
+  "id": "05_02",
+  "title": "경로 및 블록 관리 (Datafile Relocation and Block Size Management)",
+  "chapter": "05. 스토리지 최적화 및 테이블스페이스",
+  "description": "Oracle Database에서 데이터 파일의 온라인/오프라인 이동(ALTER DATABASE MOVE DATAFILE, ALTER DATABASE RENAME FILE) 조작 방법과 내부 동작 메커니즘, 표준 및 비표준 블록 사이즈(DB_BLOCK_SIZE, DB_nK_CACHE_SIZE) 지정 및 관리, 데이터 블록의 내부 구조(블록 헤더, 행 데이터, 프리 스페이스), ROWID 구조를 상세히 다룹니다.",
+  "oracle26ai_changes": [
+    "Oracle 26ai에서 ALTER DATABASE MOVE DATAFILE 명령의 병렬 처리(Parallel Copy) 성능이 개선되어, 대용량 데이터 파일 이동 시 소요 시간이 단축되었습니다.",
+    "ASM(Automatic Storage Management) 환경에서 데이터 파일 이동 시 자동 미러링 재구성(Automatic Rebalance) 로직이 최적화되었습니다.",
+    "Oracle 26ai에서 비표준 블록 사이즈 테이블스페이스의 Transportable Tablespace 호환성이 강화되어, 크로스 플랫폼 이동 시 블록 사이즈 검증이 자동화되었습니다.",
+    "데이터 블록 내부의 In-Memory Column Store 통합이 강화되어, 블록 레벨에서 컬럼 형식 데이터 접근이 최적화되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "데이터 파일 관리 개요 (Overview of Datafile Management)",
+      "content": "**데이터 파일(Datafile / データ・ファイル)**은 Oracle Database의 물리적 저장 구조에서 핵심 구성 요소로, 테이블스페이스의 데이터를 디스크에 실제로 저장하는 OS 파일입니다. 테이블스페이스와 데이터 파일의 관계, 데이터 파일의 상태 관리, 저장 옵션을 이해하는 것은 스토리지 최적화의 기본입니다.\n\n## 데이터 파일 관리의 핵심 개념\n\n| 개념 | 설명 |\n|---|---|\n| **데이터 파일 (Datafile)** | 테이블스페이스의 데이터를 물리적으로 저장하는 OS 파일 |\n| **테이블스페이스 (Tablespace)** | 하나 이상의 데이터 파일로 구성된 논리적 저장 단위 |\n| **온라인 (Online)** | 데이터 파일이 정상적으로 사용 가능한 상태 |\n| **오프라인 (Offline)** | 데이터 파일이 사용 불가능한 상태 (유지보수, 복구 등) |\n| **ASM (Automatic Storage Management)** | Oracle 전용 볼륨 매니저 및 파일 시스템 |\n| **파일 시스템 저장 (File System Storage)** | OS 파일 시스템에 직접 저장하는 방식 |\n\n## 데이터 파일 이동 방식 비교\n\n| 구분 | 온라인 이동 (Online Move) | 오프라인 이동 (Offline Move) |\n|---|---|---|\n| **구문** | ALTER DATABASE MOVE DATAFILE | ALTER DATABASE RENAME FILE / ALTER TABLESPACE RENAME DATAFILE |\n| **서비스 중단** | 불필요 (DML 계속 가능) | 필요 (테이블스페이스 오프라인) |\n| **파일 복사** | Oracle이 자동 수행 (섀도 복사) | DBA가 OS 레벨에서 수동 복사 |\n| **원본 파일 삭제** | 기본적으로 자동 삭제 | DBA가 수동 삭제 |\n| **ASM↔FS 이동** | 지원 | 지원 |\n| **최소 버전** | Oracle 12c 이상 | 모든 버전 |\n| **사용 사례** | 운영 중 스토리지 마이그레이션 | 유지보수 윈도우 내 이동 |\n\n## 저장 유형 비교\n\n| 구분 | ASM 저장 | 파일 시스템 저장 |\n|---|---|---|\n| **관리 방식** | Oracle이 자동 관리 | OS/DBA가 수동 관리 |\n| **경로 형식** | +DATA/orcl/datafile/... | /u01/oradata/orcl/... |\n| **미러링** | ASM 자체 미러링 (Normal/High) | OS RAID 또는 별도 미러링 |\n| **로드 밸런싱** | ASM 디스크 간 자동 밸런싱 | 수동 배치 필요 |\n| **RAC 공유** | 기본 지원 | 공유 파일 시스템 필요 (OCFS2, NFS 등) |",
+      "sqlExamplesIds": [],
+      "subsections": [
+        {
+          "title": "테이블스페이스와 데이터 파일의 관계 (Tablespace and Datafile Relationship)",
+          "content": "Oracle Database에서 **테이블스페이스(Tablespace)**는 논리적 저장 단위이고, **데이터 파일(Datafile)**은 물리적 저장 단위입니다. 하나의 테이블스페이스는 하나 이상의 데이터 파일로 구성되며, 하나의 데이터 파일은 정확히 하나의 테이블스페이스에만 속합니다.\n\n### 관계 매핑\n\n```\nDatabase\n├── Tablespace: SYSTEM\n│   └── Datafile: /u01/oradata/orcl/system01.dbf\n├── Tablespace: SYSAUX\n│   └── Datafile: /u01/oradata/orcl/sysaux01.dbf\n├── Tablespace: USERS\n│   ├── Datafile: /u01/oradata/orcl/users01.dbf\n│   └── Datafile: /u01/oradata/orcl/users02.dbf\n└── Tablespace: UNDOTBS1\n    └── Datafile: /u01/oradata/orcl/undotbs01.dbf\n```\n\n### 데이터 파일 상태\n\n| 상태 | 설명 | V$DATAFILE.STATUS |\n|---|---|---|\n| **ONLINE** | 정상 사용 가능 | ONLINE |\n| **OFFLINE** | 사용 불가 (유지보수/복구) | OFFLINE |\n| **RECOVER** | 미디어 복구 필요 | RECOVER |\n| **SYSOFF** | SYSTEM 테이블스페이스의 오프라인 상태 | SYSOFF |\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `DBA_DATA_FILES` | 데이터 파일 정보 (파일명, 크기, 테이블스페이스, 자동확장 등) |\n| `V$DATAFILE` | 컨트롤 파일 기반 데이터 파일 정보 (상태, SCN 등) |\n| `V$DATAFILE_HEADER` | 데이터 파일 헤더 정보 |\n| `DBA_TABLESPACES` | 테이블스페이스 정보 |\n| `V$TABLESPACE` | 테이블스페이스 번호 및 이름 |\n| `DBA_TEMP_FILES` | 임시 파일 정보 |",
+          "key_points": [
+            "하나의 테이블스페이스는 1개 이상의 데이터 파일로 구성되며, 데이터 파일은 정확히 하나의 테이블스페이스에만 속하는 1:N 관계",
+            "DBA_DATA_FILES 뷰로 데이터 파일 경로, 크기, 자동확장 상태, 소속 테이블스페이스 조회 가능",
+            "V$DATAFILE의 STATUS 컬럼으로 데이터 파일 상태(ONLINE/OFFLINE/RECOVER) 확인",
+            "V$DATAFILE_HEADER 뷰로 데이터 파일 헤더의 SCN, 체크포인트 정보 조회 가능",
+            "SYSTEM 및 UNDO 테이블스페이스의 데이터 파일은 오프라인으로 전환할 수 없음"
+          ]
+        },
+        {
+          "title": "ASM 저장과 파일 시스템 저장 (ASM Storage vs File System Storage)",
+          "content": "Oracle Database의 데이터 파일은 **ASM(Automatic Storage Management / 自動ストレージ管理)** 또는 **파일 시스템(File System / ファイル・システム)**에 저장할 수 있습니다. ASM은 Oracle이 제공하는 전용 볼륨 매니저 겸 파일 시스템으로, 디스크 관리를 자동화합니다.\n\n### ASM 구조\n\n```\nASM Instance\n├── Disk Group: +DATA (Normal Redundancy)\n│   ├── ASM Disk: /dev/sdb1\n│   ├── ASM Disk: /dev/sdc1\n│   └── ASM Disk: /dev/sdd1\n└── Disk Group: +FRA (High Redundancy)\n    ├── ASM Disk: /dev/sde1\n    ├── ASM Disk: /dev/sdf1\n    └── ASM Disk: /dev/sdg1\n```\n\n### ASM 파일 경로 형식\n\nASM에서 데이터 파일의 경로는 다음 형식을 따릅니다:\n\n```\n+<디스크 그룹>/<데이터베이스>/<파일 유형>/<파일명>\n예: +DATA/orcl26ai/datafile/users.301.1234567890\n```\n\n### ASM 미러링 수준\n\n| 미러링 수준 | 설명 | 최소 Failure Group | 허용 장애 수 |\n|---|---|---|---|\n| **External Redundancy** | 외부 미러링 (RAID 등에 의존) | 1 | 0 |\n| **Normal Redundancy** | 2-way 미러링 | 2 | 1 |\n| **High Redundancy** | 3-way 미러링 | 3 | 2 |\n| **Flex Redundancy** | 파일별 미러링 수준 지정 가능 | 3 | 가변 |\n\n### ASM과 파일 시스템 간 데이터 파일 이동\n\nOracle 12c 이상에서는 ALTER DATABASE MOVE DATAFILE을 사용하여 **ASM↔파일 시스템 간 온라인 이동**이 가능합니다. 이를 통해 서비스 중단 없이 저장 방식을 변경할 수 있습니다.\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `V$ASM_DISKGROUP` | ASM 디스크 그룹 정보 |\n| `V$ASM_DISK` | ASM 디스크 정보 |\n| `V$ASM_FILE` | ASM 파일 정보 |\n| `V$ASM_ALIAS` | ASM 파일 별칭 정보 |",
+          "key_points": [
+            "ASM(Automatic Storage Management)은 Oracle 전용 볼륨 매니저로 디스크 관리를 자동화",
+            "ASM 파일 경로는 +<디스크그룹>/<DB>/<파일유형>/<파일명> 형식으로 OS 경로와 상이",
+            "ASM 미러링 수준: External(미러링 없음), Normal(2-way), High(3-way), Flex(파일별 지정)",
+            "Oracle 12c 이상에서 ALTER DATABASE MOVE DATAFILE로 ASM↔파일 시스템 간 온라인 이동 가능",
+            "V$ASM_DISKGROUP, V$ASM_DISK 등의 동적 성능 뷰로 ASM 상태 모니터링 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s02",
+      "title": "온라인 데이터 파일 이동 (Online Datafile Move / オンライン中のデータ・ファイル移動)",
+      "content": "Oracle 12c부터 도입된 **ALTER DATABASE MOVE DATAFILE** 명령은 데이터베이스를 중단하지 않고 데이터 파일의 물리적 위치를 변경할 수 있는 기능입니다. 이동 중에도 DML(INSERT, UPDATE, DELETE) 작업이 계속 허용되므로, 운영 환경에서 서비스 중단 없이 스토리지 마이그레이션이 가능합니다.\n\n## ALTER DATABASE MOVE DATAFILE 구문\n\n```sql\nALTER DATABASE MOVE DATAFILE '<원본 경로>' TO '<대상 경로>'\n  [REUSE] [KEEP];\n```\n\n## 주요 옵션\n\n| 옵션 | 설명 |\n|---|---|\n| **TO '<대상 경로>'** | 이동할 새 위치 지정 |\n| **REUSE** | 대상 경로에 기존 파일이 있으면 덮어쓰기 허용 |\n| **KEEP** | 이동 완료 후 원본 파일을 삭제하지 않고 유지 |\n| **(옵션 없음)** | TO 없이 사용 시 같은 이름으로 재생성 (ASM 리밸런싱 등에 활용) |",
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02",
+        "sql03"
+      ],
+      "subsections": [
+        {
+          "title": "온라인 이동의 내부 동작 과정 — 섀도 복사 메커니즘 (Shadow Copy Mechanism)",
+          "content": "ALTER DATABASE MOVE DATAFILE 명령의 내부 동작은 **섀도 복사(Shadow Copy) 메커니즘**을 기반으로 합니다. 이 메커니즘은 데이터 파일 이동 중에도 DML 작업을 중단하지 않고 계속 처리할 수 있도록 설계되었습니다.\n\n### 내부 동작 과정 (단계별)\n\n```\n1. 대상 위치에 섀도 파일(Shadow File) 생성\n   ↓\n2. 원본 데이터 파일의 블록을 섀도 파일로 순차 복사 시작\n   ↓\n3. 복사 중 발생하는 DML 변경 사항은 원본 + 섀도 파일 양쪽에 기록\n   (이중 쓰기 / Dual Write)\n   ↓\n4. 모든 블록 복사 완료\n   ↓\n5. 컨트롤 파일의 데이터 파일 경로를 새 위치로 갱신\n   (아주 짧은 순간 파일 잠금 발생)\n   ↓\n6. 원본 파일 삭제 (KEEP 옵션이 없는 경우)\n   ↓\n7. 이동 완료\n```\n\n### 이중 쓰기(Dual Write) 메커니즘\n\n복사가 진행되는 동안 해당 데이터 파일에 대한 DML 변경은 **원본 파일과 섀도 파일 양쪽에 동시에 기록**됩니다. 이를 통해 복사 완료 시점에 섀도 파일이 원본과 완전히 동일한 상태를 유지합니다.\n\n| 단계 | 읽기(SELECT) | 쓰기(DML) | 파일 상태 |\n|---|---|---|---|\n| **복사 시작 전** | 원본에서 읽기 | 원본에 쓰기 | 원본만 존재 |\n| **복사 진행 중** | 원본에서 읽기 | 원본 + 섀도 양쪽에 쓰기 | 원본 + 섀도 공존 |\n| **복사 완료 직후** | 섀도(새 파일)에서 읽기 | 섀도(새 파일)에 쓰기 | 경로 전환 완료 |\n| **원본 삭제 후** | 새 파일에서 읽기 | 새 파일에 쓰기 | 새 파일만 존재 |\n\n### 성능 영향\n\n- 복사 진행 중 **이중 쓰기로 인한 I/O 오버헤드** 발생 (약 10~20% 추가 I/O)\n- 대용량 데이터 파일 이동 시 충분한 I/O 대역폭 확보 필요\n- 복사 속도는 소스/대상 스토리지의 I/O 성능에 의존\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `V$SESSION_LONGOPS` | 데이터 파일 이동 작업의 진행 상태 모니터링 |\n| `V$DATAFILE` | 데이터 파일 현재 경로 및 상태 확인 |\n| `DBA_DATA_FILES` | 데이터 파일 상세 정보 조회 |\n| `V$COPY_CORRUPTION` | 복사 중 발견된 손상 블록 정보 |",
+          "key_points": [
+            "섀도 복사(Shadow Copy) 메커니즘: 대상 위치에 섀도 파일을 생성하고 블록 단위로 순차 복사",
+            "복사 진행 중 이중 쓰기(Dual Write)로 원본과 섀도 파일 양쪽에 DML 변경 사항 기록",
+            "복사 완료 시 컨트롤 파일의 경로를 새 위치로 갱신하고, KEEP 옵션 없으면 원본 자동 삭제",
+            "이동 중 DML(INSERT, UPDATE, DELETE) 및 SELECT 작업이 계속 가능하여 서비스 중단 불필요",
+            "이중 쓰기로 인해 약 10~20% 추가 I/O 오버헤드 발생 가능",
+            "V$SESSION_LONGOPS 뷰로 대용량 데이터 파일 이동의 진행 상태를 실시간 모니터링 가능",
+            "경로 전환 시 아주 짧은 순간의 파일 잠금(Lock)이 발생하지만 사실상 무중단"
+          ]
+        },
+        {
+          "title": "REUSE 옵션과 KEEP 옵션 (REUSE and KEEP Options)",
+          "content": "ALTER DATABASE MOVE DATAFILE 명령에서 **REUSE** 옵션과 **KEEP** 옵션은 파일 처리 방식을 제어하는 핵심 옵션입니다.\n\n### REUSE 옵션\n\n**REUSE** 옵션은 대상 경로에 이미 파일이 존재할 때 해당 파일을 **덮어쓰기(Overwrite)**하도록 허용합니다. REUSE 없이 대상 경로에 파일이 이미 존재하면 오류가 발생합니다.\n\n| 상황 | REUSE 없음 | REUSE 있음 |\n|---|---|---|\n| **대상 경로에 파일 없음** | 정상 이동 | 정상 이동 |\n| **대상 경로에 파일 있음** | ORA-01119 오류 발생 | 기존 파일 덮어쓰기 후 이동 |\n\n### KEEP 옵션\n\n**KEEP** 옵션은 이동 완료 후 **원본 파일을 삭제하지 않고 유지**합니다. 기본 동작은 이동 완료 후 원본 파일을 자동으로 삭제합니다.\n\n| 상황 | KEEP 없음 (기본) | KEEP 있음 |\n|---|---|---|\n| **이동 완료 후 원본** | 자동 삭제 | 유지 (수동 삭제 필요) |\n| **사용 사례** | 일반적 이동 | 백업 목적 또는 롤백 대비 |\n\n### 옵션 조합\n\n```sql\n-- 기본: 대상에 파일 없어야 하고, 완료 후 원본 삭제\nALTER DATABASE MOVE DATAFILE '/old/users01.dbf'\n  TO '/new/users01.dbf';\n\n-- REUSE: 대상에 기존 파일이 있어도 덮어쓰기\nALTER DATABASE MOVE DATAFILE '/old/users01.dbf'\n  TO '/new/users01.dbf' REUSE;\n\n-- KEEP: 완료 후 원본 유지\nALTER DATABASE MOVE DATAFILE '/old/users01.dbf'\n  TO '/new/users01.dbf' KEEP;\n\n-- REUSE + KEEP: 덮어쓰기 허용 + 원본 유지\nALTER DATABASE MOVE DATAFILE '/old/users01.dbf'\n  TO '/new/users01.dbf' REUSE KEEP;\n```\n\n### 파일 시스템 권한 요구 사항\n\n- Oracle 프로세스가 **대상 디렉토리에 쓰기 권한** 필요\n- REUSE 사용 시 대상 파일에 대한 **덮어쓰기 권한** 필요\n- 원본 삭제 시(KEEP 미사용) 원본 디렉토리에 대한 **삭제 권한** 필요",
+          "key_points": [
+            "REUSE 옵션: 대상 경로에 이미 파일이 존재할 때 덮어쓰기(Overwrite) 허용",
+            "REUSE 없이 대상 경로에 파일이 있으면 ORA-01119 오류 발생",
+            "KEEP 옵션: 이동 완료 후 원본 파일을 삭제하지 않고 유지 (백업/롤백 대비용)",
+            "기본 동작(KEEP 미사용)은 이동 완료 후 원본 파일 자동 삭제",
+            "REUSE와 KEEP 옵션은 동시에 사용 가능 (REUSE KEEP)",
+            "Oracle 프로세스가 대상 디렉토리에 쓰기 권한, 원본 디렉토리에 삭제 권한 필요"
+          ]
+        },
+        {
+          "title": "ASM과 파일 시스템 간 온라인 이동 (Online Move between ASM and File System)",
+          "content": "ALTER DATABASE MOVE DATAFILE 명령을 사용하면 **ASM 저장소에서 파일 시스템으로**, 또는 **파일 시스템에서 ASM 저장소로** 데이터 파일을 온라인 상태에서 이동할 수 있습니다. 이 기능은 스토리지 아키텍처 변경 시 서비스 중단 없이 마이그레이션을 수행할 수 있어 매우 유용합니다.\n\n### 이동 시나리오\n\n| 시나리오 | 소스 | 대상 | 구문 예시 |\n|---|---|---|---|\n| **FS → ASM** | /u01/oradata/users01.dbf | +DATA | ALTER DATABASE MOVE DATAFILE '/u01/oradata/users01.dbf' TO '+DATA' |\n| **ASM → FS** | +DATA/orcl/datafile/users.301.xxx | /u02/oradata/ | ALTER DATABASE MOVE DATAFILE '+DATA/...' TO '/u02/oradata/users01.dbf' |\n| **ASM → ASM** | +DATA/orcl/... | +DATA2/orcl/... | ALTER DATABASE MOVE DATAFILE '+DATA/...' TO '+DATA2' |\n| **FS → FS** | /u01/oradata/users01.dbf | /u02/oradata/users01.dbf | ALTER DATABASE MOVE DATAFILE '/u01/...' TO '/u02/...' |\n\n### ASM으로 이동 시 특이 사항\n\n- ASM으로 이동 시 **대상 경로에 디스크 그룹 이름만 지정**하면 Oracle이 자동으로 OMF(Oracle Managed Files) 형식의 파일명을 생성\n- ASM 디스크 그룹의 **가용 공간이 충분한지** 사전 확인 필요\n- 이동 후 ASM의 자동 리밸런싱(Rebalance)이 백그라운드에서 수행될 수 있음\n\n### 제한 사항\n\n| 제한 사항 | 설명 |\n|---|---|\n| **SYSTEM 테이블스페이스** | 온라인 이동 가능 (12.2 이상) |\n| **활성 UNDO 테이블스페이스** | 온라인 이동 가능 |\n| **임시 파일 (Tempfile)** | ALTER DATABASE MOVE DATAFILE 대상 아님 (별도 재생성 필요) |\n| **읽기 전용 테이블스페이스** | 온라인 이동 가능 |\n| **오프라인 데이터 파일** | MOVE DATAFILE 사용 불가 (온라인 상태 필요) |",
+          "key_points": [
+            "ALTER DATABASE MOVE DATAFILE로 ASM↔파일 시스템 간 양방향 온라인 이동 가능",
+            "ASM으로 이동 시 디스크 그룹 이름만 지정하면 OMF 형식으로 파일명 자동 생성",
+            "ASM 간 이동(+DATA → +DATA2)도 지원되어 디스크 그룹 마이그레이션 가능",
+            "SYSTEM, UNDO 테이블스페이스의 데이터 파일도 온라인 이동 가능 (12.2 이상)",
+            "임시 파일(Tempfile)은 ALTER DATABASE MOVE DATAFILE 대상이 아니며 별도 재생성 필요",
+            "오프라인 상태의 데이터 파일은 MOVE DATAFILE 사용 불가 (반드시 온라인 상태여야 함)"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "오프라인 데이터 파일 이동 (Offline Datafile Move / オフライン・データ・ファイル移動)",
+      "content": "온라인 이동(MOVE DATAFILE)이 도입되기 전 전통적으로 사용되던 방식으로, 테이블스페이스를 **오프라인(Offline)**으로 전환한 후 OS 레벨에서 파일을 복사하고, 데이터 딕셔너리(컨트롤 파일)의 경로 정보를 갱신하는 방식입니다.\n\n## 오프라인 이동 방법 비교\n\n| 구분 | ALTER DATABASE RENAME FILE | ALTER TABLESPACE RENAME DATAFILE |\n|---|---|---|\n| **사용 조건** | DB가 MOUNT 상태이거나 데이터 파일이 오프라인 | 테이블스페이스가 오프라인 |\n| **적용 범위** | 모든 데이터 파일 (SYSTEM 포함) | 비-SYSTEM 테이블스페이스 |\n| **갱신 대상** | 컨트롤 파일 | 컨트롤 파일 |\n| **파일 복사** | DBA가 OS 레벨에서 수동 수행 | DBA가 OS 레벨에서 수동 수행 |\n| **사용 시점** | MOUNT 상태에서 SYSTEM 파일 이동 시 | OPEN 상태에서 비-SYSTEM 파일 이동 시 |",
+      "sqlExamplesIds": [
+        "sql04",
+        "sql05"
+      ],
+      "subsections": [
+        {
+          "title": "ALTER DATABASE RENAME FILE (MOUNT 상태 이동)",
+          "content": "**ALTER DATABASE RENAME FILE** 명령은 데이터베이스가 **MOUNT 상태**일 때 사용하는 오프라인 이동 방법입니다. SYSTEM 테이블스페이스를 포함한 모든 데이터 파일의 경로를 변경할 수 있습니다.\n\n### 수행 절차\n\n```\n1. 데이터베이스 종료 (SHUTDOWN)\n   ↓\n2. OS 레벨에서 데이터 파일을 새 위치로 복사\n   $ cp /old_path/system01.dbf /new_path/system01.dbf\n   ↓\n3. 데이터베이스를 MOUNT 상태로 기동\n   STARTUP MOUNT\n   ↓\n4. 컨트롤 파일의 경로 정보 갱신\n   ALTER DATABASE RENAME FILE '/old_path/system01.dbf'\n     TO '/new_path/system01.dbf';\n   ↓\n5. 데이터베이스 오픈\n   ALTER DATABASE OPEN;\n   ↓\n6. 원본 파일 수동 삭제\n   $ rm /old_path/system01.dbf\n```\n\n### 중요 사항\n\n| 항목 | 설명 |\n|---|---|\n| **파일 복사 시점** | RENAME FILE 실행 전에 반드시 OS 복사 완료 |\n| **RENAME FILE 역할** | 실제 파일을 이동하지 않음 — 컨트롤 파일의 경로 정보만 갱신 |\n| **SYSTEM 파일 이동** | 반드시 MOUNT 상태에서 수행 (OPEN 상태 불가) |\n| **리두 로그 파일** | ALTER DATABASE RENAME FILE로 리두 로그 파일 경로도 변경 가능 |\n| **원본 파일** | 자동 삭제되지 않으므로 DBA가 수동 삭제 필요 |\n\n### 관련 파라미터\n\n- **DB_CREATE_FILE_DEST**: OMF 사용 시 기본 데이터 파일 생성 경로\n- **CONTROL_FILES**: 컨트롤 파일 위치 (RENAME FILE 정보가 저장되는 곳)",
+          "key_points": [
+            "ALTER DATABASE RENAME FILE은 실제 파일을 이동하지 않고 컨트롤 파일의 경로 정보만 갱신",
+            "반드시 OS 레벨에서 파일 복사를 먼저 완료한 후 RENAME FILE 실행",
+            "SYSTEM 테이블스페이스 데이터 파일 이동 시 반드시 MOUNT 상태에서 수행",
+            "리두 로그 파일(Redo Log File)의 경로 변경에도 동일 명령 사용 가능",
+            "원본 파일은 자동 삭제되지 않으므로 DBA가 수동으로 삭제 필요",
+            "RENAME FILE 전에 파일 복사가 완료되지 않으면 DB OPEN 시 오류 발생"
+          ]
+        },
+        {
+          "title": "ALTER TABLESPACE RENAME DATAFILE (OPEN 상태 이동)",
+          "content": "**ALTER TABLESPACE ... RENAME DATAFILE** 명령은 데이터베이스가 **OPEN 상태**에서 특정 테이블스페이스의 데이터 파일 경로를 변경하는 방법입니다. 단, 해당 테이블스페이스를 먼저 **오프라인(Offline)**으로 전환해야 합니다.\n\n### 수행 절차\n\n```\n1. 테이블스페이스를 오프라인으로 전환\n   ALTER TABLESPACE users OFFLINE;\n   ↓\n2. OS 레벨에서 데이터 파일을 새 위치로 복사\n   $ cp /old_path/users01.dbf /new_path/users01.dbf\n   ↓\n3. 컨트롤 파일의 경로 정보 갱신\n   ALTER TABLESPACE users RENAME DATAFILE\n     '/old_path/users01.dbf' TO '/new_path/users01.dbf';\n   ↓\n4. 테이블스페이스를 온라인으로 전환\n   ALTER TABLESPACE users ONLINE;\n   ↓\n5. 원본 파일 수동 삭제\n   $ rm /old_path/users01.dbf\n```\n\n### ALTER DATABASE RENAME FILE과의 비교\n\n| 구분 | ALTER DATABASE RENAME FILE | ALTER TABLESPACE RENAME DATAFILE |\n|---|---|---|\n| **DB 상태** | MOUNT 필요 | OPEN 가능 |\n| **서비스 영향** | 전체 DB 다운 | 해당 테이블스페이스만 오프라인 |\n| **SYSTEM TS** | 이동 가능 | 이동 불가 (오프라인 불가) |\n| **UNDO TS** | 이동 가능 | 이동 불가 (활성 UNDO 오프라인 불가) |\n| **권한** | ALTER DATABASE | ALTER TABLESPACE |\n\n### 제한 사항\n\n- **SYSTEM 테이블스페이스**: 오프라인 전환 불가 → 이 방법 사용 불가\n- **활성 UNDO 테이블스페이스**: 오프라인 전환 불가 → 이 방법 사용 불가\n- **기본 임시 테이블스페이스**: 다른 임시 테이블스페이스로 전환 후 오프라인 가능",
+          "key_points": [
+            "ALTER TABLESPACE RENAME DATAFILE은 DB OPEN 상태에서 사용 가능하지만, 해당 테이블스페이스 오프라인 필수",
+            "SYSTEM 테이블스페이스는 오프라인 전환 불가능하므로 이 방법으로 이동 불가",
+            "활성 UNDO 테이블스페이스도 오프라인 불가 → ALTER DATABASE RENAME FILE(MOUNT 상태) 사용 필요",
+            "OS 레벨 파일 복사 완료 후 RENAME DATAFILE 실행해야 하며, 순서가 바뀌면 온라인 전환 시 오류",
+            "테이블스페이스가 오프라인인 동안 해당 테이블스페이스의 객체에 대한 DML 불가",
+            "원본 파일은 자동 삭제되지 않으므로 DBA가 수동으로 정리 필요"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "데이터 블록 구조 (Data Block Structure / データ・ブロックの構造)",
+      "content": "**데이터 블록(Data Block / データ・ブロック)**은 Oracle Database가 데이터를 읽고 쓰는 **최소 I/O 단위**입니다. 데이터 블록의 내부 구조를 이해하면 스토리지 효율성 최적화, 행 체이닝/마이그레이션 문제 진단, 공간 관리에 대한 깊은 이해가 가능합니다.\n\n## 데이터 블록 내부 구조\n\n```\n+------------------------------------------+\n|           블록 헤더 (Block Header)          |\n|  ┌──────────────────────────────────────┐ |\n|  │ 공통 헤더 (Common Header)              │ |\n|  │ - 블록 유형, 블록 주소(DBA)            │ |\n|  │ - SCN (System Change Number)          │ |\n|  ├──────────────────────────────────────┤ |\n|  │ 트랜잭션 헤더 (Transaction Header)     │ |\n|  │ - ITL (Interested Transaction List)   │ |\n|  │ - 트랜잭션 슬롯 (INITRANS/MAXTRANS)   │ |\n|  ├──────────────────────────────────────┤ |\n|  │ 테이블 디렉토리 (Table Directory)      │ |\n|  │ - 블록에 데이터가 있는 테이블 정보     │ |\n|  ├──────────────────────────────────────┤ |\n|  │ 행 디렉토리 (Row Directory)            │ |\n|  │ - 블록 내 각 행의 오프셋 정보          │ |\n|  └──────────────────────────────────────┘ |\n+------------------------------------------+\n|         프리 스페이스 (Free Space)          |\n|  - 새로운 행 삽입 또는 기존 행 갱신에 사용  |\n|  - PCTFREE에 의해 예약 공간 관리           |\n+------------------------------------------+\n|          행 데이터 (Row Data)              |\n|  ┌──────────────────────────────────────┐ |\n|  │ Row #1: 행 헤더 + 컬럼 데이터          │ |\n|  │ Row #2: 행 헤더 + 컬럼 데이터          │ |\n|  │ Row #3: 행 헤더 + 컬럼 데이터          │ |\n|  │ ...                                   │ |\n|  └──────────────────────────────────────┘ |\n+------------------------------------------+\n```\n\n## 블록 구성 요소 요약\n\n| 구성 요소 | 설명 | 위치 |\n|---|---|---|\n| **공통 헤더 (Common Header)** | 블록 유형, 블록 주소(DBA), SCN 정보 | 블록 상단 |\n| **트랜잭션 헤더 (Transaction Header)** | ITL(Interested Transaction List), 트랜잭션 슬롯 | 헤더 영역 |\n| **테이블 디렉토리 (Table Directory)** | 블록에 데이터가 있는 테이블 정보 (클러스터 시 복수) | 헤더 영역 |\n| **행 디렉토리 (Row Directory)** | 각 행의 블록 내 오프셋(위치) 배열 | 헤더 영역 |\n| **프리 스페이스 (Free Space)** | 행 삽입/갱신에 사용 가능한 빈 공간 | 중간 영역 |\n| **행 데이터 (Row Data)** | 실제 행 헤더 + 컬럼 데이터 | 블록 하단 |",
+      "sqlExamplesIds": [
+        "sql06"
+      ],
+      "subsections": [
+        {
+          "title": "블록 헤더 구성 요소 (Block Header Components)",
+          "content": "데이터 블록의 **헤더(Header)**는 블록 관리에 필요한 메타데이터를 저장하는 영역으로, 블록의 상단에 위치합니다.\n\n### 공통 헤더 (Common Header)\n\n| 필드 | 설명 |\n|---|---|\n| **블록 유형 (Block Type)** | 데이터 블록, 인덱스 블록, UNDO 블록 등 구분 |\n| **블록 주소 (DBA)** | Data Block Address — 파일 번호 + 블록 번호로 구성 |\n| **SCN (System Change Number)** | 블록이 마지막으로 변경된 시점의 SCN |\n| **체크섬 (Checksum)** | 블록 무결성 검증용 (DB_BLOCK_CHECKSUM 파라미터) |\n| **시퀀스 번호** | 블록 변경 순서 추적 |\n\n### ITL (Interested Transaction List)\n\nITL은 블록에서 **현재 활성 트랜잭션을 추적**하는 목록입니다. 각 ITL 엔트리(슬롯)에는 하나의 트랜잭션 정보가 기록됩니다.\n\n| ITL 관련 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **INITRANS** | 블록 생성 시 초기 할당되는 ITL 슬롯 수 | 테이블: 1, 인덱스: 2 |\n| **MAXTRANS** | 블록의 최대 ITL 슬롯 수 (10g 이후 255 고정) | 255 |\n\nITL 슬롯이 부족하면 **ITL 대기(enq: TX - allocate ITL entry)** 이벤트가 발생합니다. 동시에 많은 트랜잭션이 같은 블록을 갱신하는 경우 INITRANS 값을 높이면 경합을 줄일 수 있습니다.\n\n### 행 디렉토리 (Row Directory)\n\n행 디렉토리는 블록 내 각 행의 **오프셋(Offset)**을 저장하는 배열입니다. 각 엔트리는 2바이트를 차지하며, 행이 삭제되어도 해당 엔트리는 즉시 재사용되지 않습니다.\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| `DB_BLOCK_CHECKSUM` | 블록 체크섬 활성화 (TYPICAL/FULL/OFF) |\n| `DB_BLOCK_CHECKING` | 블록 내부 무결성 검사 수준 (OFF/LOW/MEDIUM/FULL) |\n| `DB_BLOCK_SIZE` | 블록 크기 (생성 후 변경 불가) |",
+          "key_points": [
+            "블록 헤더는 공통 헤더, 트랜잭션 헤더(ITL), 테이블 디렉토리, 행 디렉토리로 구성",
+            "DBA(Data Block Address)는 파일 번호 + 블록 번호로 구성되어 블록을 고유하게 식별",
+            "ITL(Interested Transaction List)은 블록 내 활성 트랜잭션을 추적하는 목록",
+            "ITL 슬롯 부족 시 enq: TX - allocate ITL entry 대기 이벤트 발생 가능",
+            "INITRANS로 초기 ITL 슬롯 수를 지정하며, MAXTRANS는 10g 이후 255로 고정",
+            "행 디렉토리는 각 행의 블록 내 오프셋을 2바이트 엔트리로 저장",
+            "DB_BLOCK_CHECKSUM 파라미터로 블록 체크섬을 활성화하여 무결성 검증 가능"
+          ]
+        },
+        {
+          "title": "프리 스페이스와 공간 관리 — PCTFREE/PCTUSED (Free Space Management)",
+          "content": "데이터 블록 내의 **프리 스페이스(Free Space)**는 새로운 행의 삽입이나 기존 행의 갱신(UPDATE로 컬럼 크기 증가)에 사용됩니다. **PCTFREE**와 **PCTUSED** 파라미터는 블록의 공간 사용 전략을 제어합니다.\n\n### PCTFREE (Percent Free)\n\nPCTFREE는 블록 내에서 **UPDATE 작업을 위해 예약하는 빈 공간의 비율**입니다. 블록의 사용률이 (100 - PCTFREE)%에 도달하면 해당 블록은 프리 리스트(Free List)에서 제거되어 새로운 INSERT가 불가능합니다.\n\n| 항목 | 설명 |\n|---|---|\n| **기본값** | 10 (10%) |\n| **역할** | UPDATE 시 행 크기 증가에 대비한 예약 공간 |\n| **값이 높을 때** | 공간 낭비 증가, 행 마이그레이션 감소 |\n| **값이 낮을 때** | 공간 효율 증가, 행 마이그레이션 위험 증가 |\n\n### PCTUSED (Percent Used)\n\nPCTUSED는 블록이 프리 리스트에 **다시 추가되는 기준 사용률**입니다. DELETE 작업으로 블록 사용률이 PCTUSED 이하로 내려가면 해당 블록이 프리 리스트에 다시 추가되어 INSERT가 가능해집니다.\n\n| 항목 | 설명 |\n|---|---|\n| **기본값** | 40 (40%) |\n| **역할** | 블록 재사용 기준점 |\n| **ASSM 환경** | PCTUSED 무시됨 (비트맵으로 자동 관리) |\n\n### PCTFREE와 PCTUSED의 동작 흐름\n\n```\nINSERT 시:\n  블록 사용률 < (100 - PCTFREE)% → INSERT 허용\n  블록 사용률 >= (100 - PCTFREE)% → 프리 리스트에서 제거, INSERT 불가\n\nDELETE 시:\n  블록 사용률 > PCTUSED% → 프리 리스트에 추가하지 않음\n  블록 사용률 <= PCTUSED% → 프리 리스트에 다시 추가, INSERT 가능\n```\n\n### 행 체이닝과 행 마이그레이션\n\n| 현상 | 원인 | 설명 |\n|---|---|---|\n| **행 체이닝 (Row Chaining)** | 행 크기 > 블록 크기 | 행이 처음부터 여러 블록에 걸쳐 저장 |\n| **행 마이그레이션 (Row Migration)** | UPDATE로 행 크기 증가, PCTFREE 부족 | 행이 다른 블록으로 이동, 원래 위치에 포인터 남음 |\n\n행 마이그레이션이 발생하면 원래 블록의 행 디렉토리에 **새 블록을 가리키는 포인터**가 남아, SELECT 시 추가 I/O가 발생합니다. PCTFREE를 적절히 설정하여 행 마이그레이션을 최소화하는 것이 중요합니다.\n\n### ASSM(Automatic Segment Space Management)과의 관계\n\n**ASSM(자동 세그먼트 공간 관리)** 환경에서는 프리 리스트 대신 **비트맵(Bitmap)**으로 블록의 가용 공간을 관리합니다. ASSM 환경에서는 PCTUSED 파라미터가 무시되며, PCTFREE만 유효합니다.\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `DBA_TABLES` | PCT_FREE, PCT_USED 설정값 조회 |\n| `DBA_TAB_STATISTICS` | 테이블 통계 (체인 행 수 등) |\n| `V$SYSSTAT` | 'table fetch continued row' — 행 체이닝/마이그레이션에 의한 추가 I/O 횟수 |",
+          "key_points": [
+            "PCTFREE(기본값 10%)는 UPDATE를 위해 예약하는 빈 공간 비율로, 블록 사용률이 (100-PCTFREE)%에 도달하면 INSERT 불가",
+            "PCTUSED(기본값 40%)는 블록이 프리 리스트에 다시 추가되는 기준 사용률",
+            "ASSM(Automatic Segment Space Management) 환경에서는 PCTUSED가 무시되고 비트맵으로 관리",
+            "행 체이닝(Row Chaining): 행 크기가 블록 크기보다 클 때 여러 블록에 걸쳐 저장",
+            "행 마이그레이션(Row Migration): UPDATE로 행 크기 증가 시 다른 블록으로 이동, 원래 위치에 포인터 남김",
+            "행 마이그레이션은 SELECT 시 추가 I/O를 유발하므로 PCTFREE 적절히 설정 필요",
+            "V$SYSSTAT의 'table fetch continued row' 통계로 체이닝/마이그레이션 영향 모니터링"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "표준 블록 사이즈 (Standard Block Size / 標準ブロック・サイズ)",
+      "content": "**표준 블록 사이즈(Standard Block Size / 標準ブロック・サイズ)**는 Oracle Database 생성 시 **DB_BLOCK_SIZE** 초기화 파라미터로 지정되며, 데이터베이스의 기본 I/O 단위를 결정합니다. 한번 설정되면 데이터베이스를 재생성하지 않는 한 **변경할 수 없습니다**.\n\n## DB_BLOCK_SIZE 파라미터\n\n| 항목 | 설명 |\n|---|---|\n| **파라미터명** | DB_BLOCK_SIZE |\n| **설정 시점** | CREATE DATABASE 시 (이후 변경 불가) |\n| **기본값** | 8192 (8KB) |\n| **허용 값** | 2048, 4096, 8192, 16384, 32768 (2KB, 4KB, 8KB, 16KB, 32KB) |\n| **적용 대상** | SYSTEM, SYSAUX, UNDO, 기본 TEMP 테이블스페이스 및 기본 영구 테이블스페이스 |\n| **관련 캐시** | DB_CACHE_SIZE (SGA의 기본 버퍼 캐시) |",
+      "sqlExamplesIds": [
+        "sql07"
+      ],
+      "subsections": [
+        {
+          "title": "DB_BLOCK_SIZE 결정 기준 (Choosing the Standard Block Size)",
+          "content": "DB_BLOCK_SIZE는 데이터베이스의 워크로드 특성에 따라 결정해야 합니다. 한번 설정하면 변경할 수 없으므로 신중한 선택이 필요합니다.\n\n### 블록 사이즈별 특성 비교\n\n| 블록 사이즈 | OLTP 적합도 | DW/DSS 적합도 | 공간 오버헤드 | I/O 효율 |\n|---|---|---|---|---|\n| **2KB** | 낮음 | 매우 낮음 | 높음 (헤더 비율 높음) | 소량 랜덤 읽기에 유리 |\n| **4KB** | 보통 | 낮음 | 보통 | 소규모 행에 적합 |\n| **8KB (기본)** | 높음 | 보통 | 균형 | 범용적 최적 |\n| **16KB** | 보통 | 높음 | 낮음 | 대용량 순차 읽기에 유리 |\n| **32KB** | 낮음 | 높음 | 매우 낮음 | LOB/대용량 행에 적합 |\n\n### 워크로드별 권장 사항\n\n| 워크로드 유형 | 권장 블록 사이즈 | 이유 |\n|---|---|---|\n| **OLTP (소량 랜덤 I/O)** | 8KB | 작은 행 데이터, 버퍼 캐시 효율성 |\n| **DW/DSS (대량 순차 I/O)** | 16KB ~ 32KB | Full Table Scan 효율, 큰 행 수용 |\n| **혼합 워크로드** | 8KB | 범용 최적 |\n| **LOB 저장 중심** | 16KB ~ 32KB | LOB 인라인 저장 효율 |\n\n### 블록 사이즈와 OS 블록 사이즈\n\n- Oracle 블록 사이즈는 **OS 블록 사이즈(일반적으로 512B 또는 4KB)의 배수**여야 함\n- 일반적으로 OS 블록 사이즈 이상이어야 효율적\n\n### DB_CACHE_SIZE 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **DB_CACHE_SIZE** | 표준 블록 사이즈의 버퍼 캐시 크기 (SGA 내) |\n| **동적 변경** | ALTER SYSTEM SET DB_CACHE_SIZE = ... 가능 |\n| **자동 관리** | SGA_TARGET 또는 MEMORY_TARGET 설정 시 자동 조절 |\n\n```sql\n-- 현재 블록 사이즈 확인\nSHOW PARAMETER db_block_size;\n\n-- 버퍼 캐시 크기 확인\nSHOW PARAMETER db_cache_size;\n```",
+          "key_points": [
+            "DB_BLOCK_SIZE는 CREATE DATABASE 시 설정되며 이후 변경 불가 (데이터베이스 재생성 필요)",
+            "기본값은 8KB(8192바이트)이며, 2KB, 4KB, 8KB, 16KB, 32KB 중 선택 가능",
+            "OLTP 환경에서는 8KB가 일반적, DW/DSS 환경에서는 16KB~32KB가 효율적",
+            "SYSTEM, SYSAUX, UNDO, 기본 TEMP 테이블스페이스는 반드시 표준 블록 사이즈 사용",
+            "DB_CACHE_SIZE 파라미터가 표준 블록 사이즈의 버퍼 캐시 크기를 제어",
+            "Oracle 블록 사이즈는 OS 블록 사이즈의 배수여야 함",
+            "SGA_TARGET 또는 MEMORY_TARGET 설정 시 DB_CACHE_SIZE는 자동 조절됨"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "비표준 블록 사이즈 (Non-Standard Block Size / 非標準ブロック・サイズ)",
+      "content": "Oracle Database에서는 표준 블록 사이즈(DB_BLOCK_SIZE) 외에 **비표준 블록 사이즈(Non-Standard Block Size / 非標準ブロック・サイズ)**를 사용하는 테이블스페이스를 생성할 수 있습니다. 이를 위해 **DB_nK_CACHE_SIZE** 파라미터를 설정하여 SGA 내에 별도의 버퍼 캐시를 할당해야 합니다.\n\n## DB_nK_CACHE_SIZE 파라미터\n\n| 파라미터 | 블록 사이즈 | 설명 |\n|---|---|---|\n| **DB_2K_CACHE_SIZE** | 2KB | 2KB 블록용 버퍼 캐시 크기 |\n| **DB_4K_CACHE_SIZE** | 4KB | 4KB 블록용 버퍼 캐시 크기 |\n| **DB_8K_CACHE_SIZE** | 8KB | 8KB 블록용 버퍼 캐시 크기 (DB_BLOCK_SIZE=8KB이면 사용 불가) |\n| **DB_16K_CACHE_SIZE** | 16KB | 16KB 블록용 버퍼 캐시 크기 |\n| **DB_32K_CACHE_SIZE** | 32KB | 32KB 블록용 버퍼 캐시 크기 |\n\n> **주의**: DB_BLOCK_SIZE와 동일한 사이즈의 DB_nK_CACHE_SIZE는 설정할 수 없습니다. 예: DB_BLOCK_SIZE=8192이면 DB_8K_CACHE_SIZE 설정 불가.\n\n## 비표준 블록 사이즈 테이블스페이스 생성\n\n```sql\n-- 16KB 블록용 버퍼 캐시 할당\nALTER SYSTEM SET DB_16K_CACHE_SIZE = 64M;\n\n-- 16KB 블록 사이즈 테이블스페이스 생성\nCREATE TABLESPACE ts_16k\n  DATAFILE '/u01/oradata/orcl/ts_16k01.dbf' SIZE 500M\n  BLOCKSIZE 16K;\n```",
+      "sqlExamplesIds": [
+        "sql08",
+        "sql09"
+      ],
+      "subsections": [
+        {
+          "title": "DB_nK_CACHE_SIZE 설정과 SGA 메모리 관리 (DB_nK_CACHE_SIZE and SGA Memory)",
+          "content": "비표준 블록 사이즈를 사용하려면 **DB_nK_CACHE_SIZE** 파라미터를 설정하여 SGA 내에 해당 블록 사이즈 전용 **버퍼 캐시(Buffer Cache)**를 할당해야 합니다. 이 캐시는 표준 블록 사이즈의 DB_CACHE_SIZE와 별도로 관리됩니다.\n\n### SGA 버퍼 캐시 구조\n\n```\nSGA (System Global Area)\n├── Shared Pool\n├── Buffer Cache\n│   ├── Default Cache (DB_CACHE_SIZE) — 표준 블록 사이즈 (8KB)\n│   ├── 2K Cache (DB_2K_CACHE_SIZE) — 비표준 2KB 블록\n│   ├── 4K Cache (DB_4K_CACHE_SIZE) — 비표준 4KB 블록\n│   ├── 16K Cache (DB_16K_CACHE_SIZE) — 비표준 16KB 블록\n│   └── 32K Cache (DB_32K_CACHE_SIZE) — 비표준 32KB 블록\n├── Redo Log Buffer\n└── Large Pool, Java Pool, Streams Pool ...\n```\n\n### 메모리 관리 동작\n\n| 메모리 관리 방식 | DB_nK_CACHE_SIZE 동작 |\n|---|---|\n| **수동 메모리 관리** | DBA가 직접 크기 설정 |\n| **ASMM (SGA_TARGET)** | DB_nK_CACHE_SIZE는 **자동 조절되지 않음** — 명시적 설정 필수 |\n| **AMM (MEMORY_TARGET)** | DB_nK_CACHE_SIZE는 **자동 조절되지 않음** — 명시적 설정 필수 |\n\n> **중요**: SGA_TARGET이나 MEMORY_TARGET을 사용하는 자동 메모리 관리 환경에서도 DB_nK_CACHE_SIZE는 **자동으로 조절되지 않습니다**. DBA가 명시적으로 크기를 설정해야 하며, 이 크기는 SGA_TARGET에서 차감됩니다.\n\n### 동적 변경\n\n```sql\n-- 16KB 캐시 크기를 128MB로 변경 (동적)\nALTER SYSTEM SET DB_16K_CACHE_SIZE = 128M;\n\n-- 비표준 캐시 제거 (0으로 설정)\n-- 주의: 해당 블록 사이즈의 테이블스페이스가 없어야 함\nALTER SYSTEM SET DB_16K_CACHE_SIZE = 0;\n```\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `V$BUFFER_POOL` | 버퍼 풀별 크기 및 블록 수 확인 |\n| `V$BUFFER_POOL_STATISTICS` | 버퍼 풀별 히트율, 물리적/논리적 읽기 통계 |\n| `V$SGA_DYNAMIC_COMPONENTS` | SGA 동적 구성 요소별 현재 크기 |\n| `V$SGASTAT` | SGA 메모리 사용 상세 |",
+          "key_points": [
+            "DB_nK_CACHE_SIZE는 SGA 내에 비표준 블록 사이즈 전용 버퍼 캐시를 별도로 할당",
+            "DB_BLOCK_SIZE와 동일한 사이즈의 DB_nK_CACHE_SIZE는 설정할 수 없음 (예: 8KB 표준이면 DB_8K_CACHE_SIZE 불가)",
+            "SGA_TARGET/MEMORY_TARGET 자동 메모리 관리 환경에서도 DB_nK_CACHE_SIZE는 자동 조절되지 않음 — 명시적 설정 필수",
+            "DB_nK_CACHE_SIZE로 할당된 크기는 SGA_TARGET에서 차감되어 기본 캐시 가용 공간이 줄어듦",
+            "비표준 캐시가 0이면 해당 블록 사이즈의 테이블스페이스를 온라인으로 전환할 수 없음",
+            "V$BUFFER_POOL, V$BUFFER_POOL_STATISTICS 뷰로 각 블록 사이즈별 버퍼 캐시 상태 모니터링"
+          ]
+        },
+        {
+          "title": "비표준 블록 사이즈 사용 사례 (Use Cases for Non-Standard Block Sizes)",
+          "content": "비표준 블록 사이즈는 특수한 목적이 있을 때만 사용하며, 일반적으로 대부분의 테이블스페이스는 표준 블록 사이즈를 사용합니다.\n\n### 주요 사용 사례\n\n| 사용 사례 | 설명 | 권장 블록 사이즈 |\n|---|---|---|\n| **Transportable Tablespace** | 블록 사이즈가 다른 DB 간 테이블스페이스 이동 시 | 소스 DB의 블록 사이즈에 맞춤 |\n| **대용량 LOB 저장** | LOB 데이터의 인라인 저장 효율 향상 | 16KB ~ 32KB |\n| **대용량 행 테이블** | 행 체이닝 방지 (행 크기 > 블록 크기인 경우) | 16KB ~ 32KB |\n| **DW/DSS 전용 테이블** | Full Table Scan 효율 향상 | 16KB ~ 32KB |\n| **인덱스 전용 테이블스페이스** | 인덱스 높이(Height) 감소 | 16KB |\n\n### Transportable Tablespace 시나리오\n\n**Transportable Tablespace(トランスポータブル・テーブルスペース)**를 사용하여 다른 데이터베이스에서 테이블스페이스를 가져올 때, 소스 데이터베이스의 블록 사이즈가 대상 데이터베이스의 표준 블록 사이즈와 다르면 **비표준 블록 사이즈 캐시**를 설정해야 합니다.\n\n```\n소스 DB (블록 사이즈: 16KB)\n  └── Tablespace: SALES_DATA (16KB 블록)\n       ↓ EXPDP + 데이터 파일 복사\n대상 DB (표준 블록 사이즈: 8KB)\n  └── DB_16K_CACHE_SIZE = 64M 설정 필요\n       └── Tablespace: SALES_DATA (16KB 블록) 플러그인\n```\n\n### 비표준 블록 사이즈의 제한 사항\n\n| 제한 사항 | 설명 |\n|---|---|\n| **SYSTEM 테이블스페이스** | 반드시 표준 블록 사이즈 |\n| **SYSAUX 테이블스페이스** | 반드시 표준 블록 사이즈 |\n| **UNDO 테이블스페이스** | 반드시 표준 블록 사이즈 |\n| **기본 TEMP 테이블스페이스** | 반드시 표준 블록 사이즈 |\n| **자동 메모리 관리** | DB_nK_CACHE_SIZE는 ASMM/AMM으로 자동 관리되지 않음 |\n| **추가 메모리 소비** | 각 비표준 캐시마다 SGA에서 별도 메모리 할당 |\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `DBA_TABLESPACES` | BLOCK_SIZE 컬럼으로 각 테이블스페이스의 블록 사이즈 확인 |\n| `V$TRANSPORTABLE_PLATFORM` | Transportable Tablespace 지원 플랫폼 목록 |",
+          "key_points": [
+            "비표준 블록 사이즈의 가장 대표적 사용 사례는 Transportable Tablespace로 다른 DB에서 가져올 때",
+            "SYSTEM, SYSAUX, UNDO, 기본 TEMP 테이블스페이스는 반드시 표준 블록 사이즈만 사용 가능",
+            "대용량 LOB 저장이나 행 체이닝 방지를 위해 16KB~32KB 비표준 블록 사이즈 활용 가능",
+            "DW/DSS 환경에서 Full Table Scan 효율을 높이기 위해 큰 블록 사이즈 사용 가능",
+            "비표준 블록 사이즈마다 별도의 SGA 메모리(DB_nK_CACHE_SIZE)가 필요하므로 메모리 계획 중요",
+            "DBA_TABLESPACES의 BLOCK_SIZE 컬럼으로 각 테이블스페이스의 블록 사이즈 확인 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s07",
+      "title": "ROWID 구조 (ROWID Structure / ROWID 情報)",
+      "content": "**ROWID(Row Identifier)**는 Oracle Database에서 테이블 내 각 행(Row)의 **물리적 위치를 고유하게 식별하는 주소**입니다. ROWID는 데이터 파일, 블록, 블록 내 위치를 직접 가리키므로 **가장 빠른 행 접근 방법**을 제공합니다.\n\n## ROWID 구성 요소 (Extended ROWID)\n\nOracle 8 이후 사용되는 **확장 ROWID(Extended ROWID)**는 18자의 Base64 인코딩 문자열로, 다음 4가지 요소로 구성됩니다.\n\n```\nROWID: OOOOOO FFF BBBBBB RRR\n       ──────  ── ────── ───\n         ①     ②   ③    ④\n\n① Data Object Number (6자리): 세그먼트(테이블/파티션)의 고유 번호\n② Relative File Number (3자리): 테이블스페이스 내 상대 파일 번호\n③ Block Number (6자리): 데이터 파일 내 블록 번호\n④ Row Number (3자리): 블록 내 행 번호 (0부터 시작)\n```\n\n## ROWID 구성 요소 상세\n\n| 구성 요소 | 길이 (Base64) | 설명 | DBMS_ROWID 함수 |\n|---|---|---|---|\n| **Data Object Number** | 6자리 | 세그먼트의 DATA_OBJECT_ID | ROWID_OBJECT(rowid) |\n| **Relative File Number** | 3자리 | 테이블스페이스 내 상대 파일 번호 | ROWID_RELATIVE_FNO(rowid) |\n| **Block Number** | 6자리 | 파일 내 블록 번호 | ROWID_BLOCK_NUMBER(rowid) |\n| **Row Number** | 3자리 | 블록 내 행 번호 (행 디렉토리 슬롯) | ROWID_ROW_NUMBER(rowid) |",
+      "sqlExamplesIds": [
+        "sql10",
+        "sql11"
+      ],
+      "subsections": [
+        {
+          "title": "ROWID의 내부 동작과 활용 (ROWID Internal Behavior and Usage)",
+          "content": "ROWID는 테이블의 **의사 컬럼(Pseudocolumn)**으로, 실제 테이블에 저장되지는 않지만 SELECT 문에서 조회할 수 있습니다. ROWID는 행의 물리적 주소를 직접 가리키므로 인덱스 스캔 후 테이블 접근 시 핵심적인 역할을 합니다.\n\n### ROWID 접근 메커니즘\n\n```\n인덱스 스캔 (Index Scan)\n  ↓ 인덱스 리프 노드에서 ROWID 획득\nROWID로 직접 블록 접근\n  ↓ Relative File Number → 데이터 파일 식별\n  ↓ Block Number → 블록 위치 계산\n  ↓ Row Number → 행 디렉토리에서 오프셋 조회\n행 데이터 반환\n```\n\n### ROWID와 데이터 파일 이동의 관계\n\n| 작업 | ROWID 변경 여부 | 이유 |\n|---|---|---|\n| **ALTER DATABASE MOVE DATAFILE** | 변경 없음 | Relative File Number가 동일 (테이블스페이스 내 상대 번호) |\n| **테이블 재구성 (ALTER TABLE MOVE)** | **변경됨** | 행이 새로운 블록에 재배치 |\n| **파티션 이동** | **변경됨** | 새로운 세그먼트에 행 재배치 |\n| **Online Table Redefinition** | **변경됨** | 새로운 테이블로 행 복사 |\n| **INSERT/DELETE** | 해당 행의 ROWID 변경 없음/소멸 | 행 수준의 변경 |\n| **행 마이그레이션** | 변경 없음 (원래 ROWID 유지) | 원래 위치에 포인터 남김 |\n\n### Restricted ROWID vs Extended ROWID\n\n| 구분 | Restricted ROWID (구버전) | Extended ROWID (8 이후) |\n|---|---|---|\n| **형식** | BBBBBBBB.RRRR.FFFF | OOOOOOFFFBBBBBBRRR |\n| **구성** | 블록.행.파일 | 객체번호+파일+블록+행 |\n| **길이** | 6바이트 | 10바이트 |\n| **파일 수 제한** | 1022개 | 4096개 (테이블스페이스당) |\n| **객체 식별** | 불가 | Data Object Number로 가능 |\n\n### ROWID의 특수 동작\n\n- **IOT(Index-Organized Table)**: 물리적 ROWID 대신 **논리적 ROWID(Logical ROWID)**를 사용하며, Primary Key 기반 주소\n- **외부 테이블(External Table)**: ROWID가 존재하지 않음\n- **뷰(View)**: 기반 테이블의 ROWID를 상속 (조인 뷰는 제외)\n\n### 관련 뷰 및 패키지\n\n| 뷰/패키지 | 설명 |\n|---|---|\n| `DBMS_ROWID` | ROWID 분석용 패키지 (ROWID_OBJECT, ROWID_RELATIVE_FNO, ROWID_BLOCK_NUMBER, ROWID_ROW_NUMBER) |\n| `DBA_OBJECTS` | DATA_OBJECT_ID 컬럼으로 세그먼트의 데이터 객체 번호 확인 |\n| `DBA_DATA_FILES` | RELATIVE_FNO 컬럼으로 상대 파일 번호 확인 |",
+          "key_points": [
+            "ROWID는 의사 컬럼(Pseudocolumn)으로 테이블에 실제 저장되지 않지만 SELECT로 조회 가능",
+            "인덱스 스캔 후 테이블 접근 시 ROWID를 통해 직접 블록을 찾아가므로 가장 빠른 접근 방법",
+            "ALTER DATABASE MOVE DATAFILE 시 ROWID는 변경되지 않음 (Relative File Number가 동일하므로)",
+            "ALTER TABLE MOVE, 파티션 이동, Online Redefinition 시 ROWID가 변경됨 — 인덱스 재구축 필요",
+            "행 마이그레이션 발생 시 원래 ROWID는 유지되며, 원래 위치에 새 블록을 가리키는 포인터가 남음",
+            "DBMS_ROWID 패키지로 ROWID를 Data Object Number, File Number, Block Number, Row Number로 분해 가능",
+            "IOT(Index-Organized Table)는 물리적 ROWID 대신 Primary Key 기반 논리적 ROWID 사용",
+            "Extended ROWID(10바이트)는 테이블스페이스당 최대 4096개 데이터 파일 지원"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "title": "온라인 데이터 파일 이동 (Online Datafile Move)",
+      "description": "ALTER DATABASE MOVE DATAFILE을 사용하여 서비스 중단 없이 데이터 파일의 물리적 위치를 변경합니다.",
+      "sql": "-- 현재 데이터 파일 경로 확인\nSELECT file_name, tablespace_name, bytes/1024/1024 AS size_mb\nFROM dba_data_files\nWHERE tablespace_name = 'USERS';\n\n-- 데이터 파일을 새 경로로 온라인 이동\nALTER DATABASE MOVE DATAFILE\n  '/u01/oradata/orcl26ai/users01.dbf'\n  TO '/u02/oradata/orcl26ai/users01.dbf';\n\n-- 이동 후 경로 확인\nSELECT file_name, tablespace_name\nFROM dba_data_files\nWHERE tablespace_name = 'USERS';",
+      "sqlExamplesId": "sql01"
+    },
+    {
+      "title": "REUSE 및 KEEP 옵션을 사용한 온라인 이동",
+      "description": "대상 경로에 기존 파일이 있을 때 REUSE로 덮어쓰기하고, KEEP으로 원본을 유지합니다.",
+      "sql": "-- REUSE: 대상 위치에 기존 파일이 있어도 덮어쓰기\nALTER DATABASE MOVE DATAFILE\n  '/u01/oradata/orcl26ai/users01.dbf'\n  TO '/u02/oradata/orcl26ai/users01.dbf' REUSE;\n\n-- KEEP: 이동 후 원본 파일 유지 (백업 목적)\nALTER DATABASE MOVE DATAFILE\n  '/u01/oradata/orcl26ai/data01.dbf'\n  TO '/u02/oradata/orcl26ai/data01.dbf' KEEP;\n\n-- REUSE + KEEP 조합\nALTER DATABASE MOVE DATAFILE\n  '/u01/oradata/orcl26ai/idx01.dbf'\n  TO '/u02/oradata/orcl26ai/idx01.dbf' REUSE KEEP;",
+      "sqlExamplesId": "sql02"
+    },
+    {
+      "title": "ASM과 파일 시스템 간 데이터 파일 이동",
+      "description": "ASM 디스크 그룹과 파일 시스템 간 양방향으로 데이터 파일을 온라인 이동합니다.",
+      "sql": "-- 파일 시스템 → ASM 이동\nALTER DATABASE MOVE DATAFILE\n  '/u01/oradata/orcl26ai/users01.dbf'\n  TO '+DATA';\n\n-- ASM → 파일 시스템 이동\nALTER DATABASE MOVE DATAFILE\n  '+DATA/orcl26ai/datafile/users.301.1234567890'\n  TO '/u02/oradata/orcl26ai/users01.dbf';\n\n-- ASM 디스크 그룹 간 이동\nALTER DATABASE MOVE DATAFILE\n  '+DATA/orcl26ai/datafile/users.301.1234567890'\n  TO '+DATA2';",
+      "sqlExamplesId": "sql03"
+    },
+    {
+      "title": "오프라인 이동 — ALTER DATABASE RENAME FILE (MOUNT 상태)",
+      "description": "DB를 MOUNT 상태로 기동하여 데이터 파일 경로를 변경합니다. SYSTEM 테이블스페이스 이동 시 사용합니다.",
+      "sql": "-- 1. 데이터베이스 종료\nSHUTDOWN IMMEDIATE;\n\n-- 2. OS 레벨에서 파일 복사 (SQL*Plus 외부에서 실행)\n-- $ cp /u01/oradata/orcl26ai/system01.dbf /u02/oradata/orcl26ai/system01.dbf\n\n-- 3. MOUNT 상태로 기동\nSTARTUP MOUNT;\n\n-- 4. 컨트롤 파일의 경로 정보 갱신\nALTER DATABASE RENAME FILE\n  '/u01/oradata/orcl26ai/system01.dbf'\n  TO '/u02/oradata/orcl26ai/system01.dbf';\n\n-- 5. 데이터베이스 오픈\nALTER DATABASE OPEN;\n\n-- 6. 변경 확인\nSELECT file_name FROM dba_data_files\nWHERE tablespace_name = 'SYSTEM';",
+      "sqlExamplesId": "sql04"
+    },
+    {
+      "title": "오프라인 이동 — ALTER TABLESPACE RENAME DATAFILE (OPEN 상태)",
+      "description": "DB를 OPEN 상태로 유지하면서 테이블스페이스를 오프라인으로 전환 후 데이터 파일 경로를 변경합니다.",
+      "sql": "-- 1. 테이블스페이스 오프라인\nALTER TABLESPACE users OFFLINE;\n\n-- 2. OS 레벨에서 파일 복사 (SQL*Plus 외부에서 실행)\n-- $ cp /u01/oradata/orcl26ai/users01.dbf /u02/oradata/orcl26ai/users01.dbf\n\n-- 3. 경로 갱신\nALTER TABLESPACE users RENAME DATAFILE\n  '/u01/oradata/orcl26ai/users01.dbf'\n  TO '/u02/oradata/orcl26ai/users01.dbf';\n\n-- 4. 테이블스페이스 온라인\nALTER TABLESPACE users ONLINE;\n\n-- 5. 확인\nSELECT file_name, status FROM dba_data_files\nWHERE tablespace_name = 'USERS';",
+      "sqlExamplesId": "sql05"
+    },
+    {
+      "title": "데이터 블록 정보 조회 및 덤프",
+      "description": "데이터 블록의 내부 구조를 확인하기 위한 블록 정보 조회 및 블록 덤프 방법입니다.",
+      "sql": "-- 특정 테이블의 블록 사용 정보 확인\nSELECT segment_name, blocks, bytes/1024/1024 AS size_mb,\n       extents, tablespace_name\nFROM dba_segments\nWHERE segment_name = 'EMPLOYEES' AND owner = 'HR';\n\n-- 블록 크기 확인\nSELECT tablespace_name, block_size\nFROM dba_tablespaces;\n\n-- 특정 행의 ROWID로 블록 정보 추출\nSELECT ROWID,\n       DBMS_ROWID.ROWID_RELATIVE_FNO(ROWID) AS file_no,\n       DBMS_ROWID.ROWID_BLOCK_NUMBER(ROWID) AS block_no,\n       DBMS_ROWID.ROWID_ROW_NUMBER(ROWID) AS row_no\nFROM hr.employees\nWHERE ROWNUM <= 5;\n\n-- 블록 덤프 (진단 목적)\nALTER SYSTEM DUMP DATAFILE 7 BLOCK 100;",
+      "sqlExamplesId": "sql06"
+    },
+    {
+      "title": "표준 블록 사이즈 및 버퍼 캐시 확인",
+      "description": "현재 데이터베이스의 표준 블록 사이즈와 DB_CACHE_SIZE 설정을 확인합니다.",
+      "sql": "-- 표준 블록 사이즈 확인\nSHOW PARAMETER db_block_size;\n\n-- 버퍼 캐시 크기 확인\nSHOW PARAMETER db_cache_size;\n\n-- 현재 SGA 내 버퍼 캐시 실제 크기 확인\nSELECT component, current_size/1024/1024 AS size_mb\nFROM v$sga_dynamic_components\nWHERE component LIKE '%buffer cache%';\n\n-- 버퍼 풀 통계 확인 (히트율)\nSELECT name, block_size,\n       1 - (physical_reads / NULLIF(db_block_gets + consistent_gets, 0)) AS hit_ratio\nFROM v$buffer_pool_statistics\nWHERE db_block_gets + consistent_gets > 0;",
+      "sqlExamplesId": "sql07"
+    },
+    {
+      "title": "비표준 블록 사이즈 캐시 설정 및 테이블스페이스 생성",
+      "description": "DB_nK_CACHE_SIZE 파라미터를 설정하고 비표준 블록 사이즈 테이블스페이스를 생성합니다.",
+      "sql": "-- 16KB 블록 사이즈용 버퍼 캐시 할당\nALTER SYSTEM SET DB_16K_CACHE_SIZE = 64M;\n\n-- 32KB 블록 사이즈용 버퍼 캐시 할당\nALTER SYSTEM SET DB_32K_CACHE_SIZE = 32M;\n\n-- 16KB 블록 사이즈 테이블스페이스 생성\nCREATE TABLESPACE ts_dw_16k\n  DATAFILE '/u01/oradata/orcl26ai/ts_dw_16k01.dbf' SIZE 1G\n  BLOCKSIZE 16K\n  EXTENT MANAGEMENT LOCAL\n  SEGMENT SPACE MANAGEMENT AUTO;\n\n-- 32KB 블록 사이즈 테이블스페이스 생성\nCREATE TABLESPACE ts_lob_32k\n  DATAFILE '/u01/oradata/orcl26ai/ts_lob_32k01.dbf' SIZE 500M\n  BLOCKSIZE 32K;\n\n-- 비표준 블록 사이즈 캐시 설정 확인\nSHOW PARAMETER db_16k_cache_size;\nSHOW PARAMETER db_32k_cache_size;",
+      "sqlExamplesId": "sql08"
+    },
+    {
+      "title": "Transportable Tablespace를 위한 비표준 캐시 설정",
+      "description": "다른 DB에서 16KB 블록 사이즈 테이블스페이스를 가져올 때 필요한 설정입니다.",
+      "sql": "-- 대상 DB에서 16KB 캐시 설정 (소스 DB의 블록 사이즈에 맞춤)\nALTER SYSTEM SET DB_16K_CACHE_SIZE = 128M;\n\n-- 테이블스페이스 메타데이터 임포트 (Data Pump)\n-- $ impdp system/password directory=dp_dir \\\n--   dumpfile=sales_ts.dmp transport_datafiles='/u01/oradata/sales01.dbf'\n\n-- 임포트 후 테이블스페이스 상태 확인\nSELECT tablespace_name, block_size, status\nFROM dba_tablespaces\nWHERE block_size != (SELECT value FROM v$parameter WHERE name = 'db_block_size');\n\n-- 비표준 블록 사이즈 테이블스페이스 조회\nSELECT tablespace_name, block_size\nFROM dba_tablespaces\nORDER BY block_size;",
+      "sqlExamplesId": "sql09"
+    },
+    {
+      "title": "ROWID 분석 — DBMS_ROWID 패키지 활용",
+      "description": "DBMS_ROWID 패키지를 사용하여 ROWID를 구성 요소별로 분해하여 분석합니다.",
+      "sql": "-- ROWID 구성 요소 분해\nSELECT ROWID,\n       DBMS_ROWID.ROWID_OBJECT(ROWID)       AS data_object_id,\n       DBMS_ROWID.ROWID_RELATIVE_FNO(ROWID) AS relative_file_no,\n       DBMS_ROWID.ROWID_BLOCK_NUMBER(ROWID)  AS block_number,\n       DBMS_ROWID.ROWID_ROW_NUMBER(ROWID)    AS row_number,\n       DBMS_ROWID.ROWID_TYPE(ROWID)          AS rowid_type\nFROM hr.employees\nWHERE ROWNUM <= 10;\n\n-- Data Object ID 검증\nSELECT object_name, data_object_id\nFROM dba_objects\nWHERE object_name = 'EMPLOYEES' AND owner = 'HR';\n\n-- 상대 파일 번호 검증\nSELECT file_name, relative_fno, tablespace_name\nFROM dba_data_files\nWHERE tablespace_name = 'USERS';",
+      "sqlExamplesId": "sql10"
+    },
+    {
+      "title": "데이터 파일 이동 진행 상태 모니터링",
+      "description": "V$SESSION_LONGOPS 뷰를 사용하여 데이터 파일 이동 작업의 진행 상태를 실시간으로 모니터링합니다.",
+      "sql": "-- 데이터 파일 이동 진행 상태 모니터링\nSELECT sid, serial#, opname,\n       ROUND(sofar/totalwork*100, 2) AS pct_complete,\n       sofar, totalwork,\n       time_remaining AS est_seconds_remaining,\n       elapsed_seconds\nFROM v$session_longops\nWHERE opname LIKE '%MOVE%'\n  AND sofar < totalwork;\n\n-- 데이터 파일 상태 확인\nSELECT file#, name, status, bytes/1024/1024 AS size_mb\nFROM v$datafile\nORDER BY file#;\n\n-- 행 체이닝/마이그레이션 통계 확인\nSELECT name, value\nFROM v$sysstat\nWHERE name = 'table fetch continued row';",
+      "sqlExamplesId": "sql11"
+    }
+  ],
+  "keywords": [
+    "ALTER DATABASE MOVE DATAFILE / オンライン・データファイル移動",
+    "REUSE 옵션 / REUSE オプション",
+    "KEEP 옵션 / KEEP オプション",
+    "섀도 복사 메커니즘 / Shadow Copy Mechanism",
+    "이중 쓰기 / Dual Write",
+    "ALTER DATABASE RENAME FILE / データファイル名変更",
+    "ALTER TABLESPACE RENAME DATAFILE / テーブルスペース・リネーム",
+    "오프라인 데이터 파일 이동 / オフライン・データファイル移動",
+    "데이터 블록 / Data Block / データ・ブロック",
+    "블록 헤더 / Block Header",
+    "ITL (Interested Transaction List)",
+    "PCTFREE / PCTUSED",
+    "행 체이닝 / Row Chaining / 行連鎖",
+    "행 마이그레이션 / Row Migration / 行移行",
+    "DB_BLOCK_SIZE / 標準ブロック・サイズ",
+    "DB_nK_CACHE_SIZE / 非標準ブロック・キャッシュ",
+    "DB_CACHE_SIZE / デフォルト・バッファ・キャッシュ",
+    "비표준 블록 사이즈 / Non-Standard Block Size / 非標準ブロック・サイズ",
+    "Transportable Tablespace / トランスポータブル・テーブルスペース",
+    "ROWID / 行識別子",
+    "DBMS_ROWID 패키지",
+    "Data Object Number / データ・オブジェクト番号",
+    "Relative File Number / 相対ファイル番号",
+    "ASM (Automatic Storage Management) / 自動ストレージ管理",
+    "V$SESSION_LONGOPS",
+    "V$BUFFER_POOL_STATISTICS",
+    "DBA_DATA_FILES / DBA_TABLESPACES",
+    "ASSM (Automatic Segment Space Management) / 自動セグメント領域管理"
+  ]
+}

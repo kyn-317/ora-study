@@ -1,0 +1,338 @@
+{
+  "id": "02_04",
+  "title": "파라미터 및 복제 관리 (PDB Parameters & Cloning)",
+  "chapter": "02. 멀티테넌트 아키텍처 (CDB 및 PDB 구성)",
+  "description": "멀티테넌트 환경에서 PDB별 독립적 초기화 파라미터 제어 방법과 보안 제한을 위한 Lockdown Profile, 그리고 로컬 클론, 원격 클론(Remote Clone), Refreshable Clone, Snapshot Copy 등 다양한 PDB 복제 방법의 아키텍처와 운영 절차를 상세히 다룹니다.",
+  "oracle26ai_changes": [
+    "Oracle 26ai에서 PDB Lockdown Profile의 세분화된 제어가 강화되어, 네트워크 접근 및 OS 명령 실행에 대한 보다 정밀한 제한이 가능합니다.",
+    "Refreshable Clone PDB의 SWITCHOVER 기능이 개선되어, 소스 PDB와 클론 PDB 간 역할 전환 시 다운타임이 최소화되었습니다.",
+    "PDB 클론 시 키스토어(Keystore) 관련 자동화가 향상되어, TDE(Transparent Data Encryption)가 적용된 PDB의 원격 클론이 더욱 간편해졌습니다.",
+    "DBCA를 이용한 PDB 클론 작업에서 자동 스토리지 관리(ASM) 환경의 지원이 강화되었습니다.",
+    "Snapshot Copy PDB에서 Copy-on-Write 메커니즘의 성능이 개선되어 대규모 데이터베이스의 빠른 프로비저닝이 가능합니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "PDB 파라미터 및 복제 개요 (Overview of PDB Parameters & Cloning)",
+      "sqlExamplesIds": [],
+      "content": "멀티테넌트 아키텍처에서 **PDB(Pluggable Database)**는 CDB(Container Database) 내에서 독립적으로 운영되는 데이터베이스 단위입니다. 각 PDB는 자체적인 초기화 파라미터를 설정할 수 있으며, 다양한 방법으로 복제(클론)할 수 있습니다.\n\n## PDB 파라미터 관리 vs PDB 복제 비교\n\n| 구분 | PDB 파라미터 관리 | PDB 복제 (Cloning) |\n|---|---|---|\n| **목적** | PDB별 독립적 시스템 설정 | PDB의 사본 생성 (개발/테스트/DR) |\n| **주요 대상** | 초기화 파라미터 (init.ora) | PDB 전체 데이터 및 메타데이터 |\n| **변경 범위** | 메모리/SPFILE 단위 | 데이터 파일 단위 |\n| **관련 권한** | ALTER SYSTEM 권한 | CREATE PLUGGABLE DATABASE 권한 |\n| **보안 통제** | Lockdown Profile | 사전 조건(호환성, 문자셋 등) |\n\n## PDB 복제 방법 종합 비교\n\n| 복제 방법 | 소스 위치 | 소스 상태 | 동기화 | 주요 용도 |\n|---|---|---|---|---|\n| **로컬 클론 (Local Clone)** | 동일 CDB | READ ONLY 또는 READ WRITE(핫 클론) | 1회성 | 개발/테스트 환경 구축 |\n| **원격 클론 (Remote Clone)** | 다른 CDB (DB Link) | READ ONLY 또는 READ WRITE(핫 클론) | 1회성 | 크로스 서버 복제 |\n| **Refreshable Clone** | 동일/다른 CDB | READ WRITE 가능 | 주기적 동기화 | 준 실시간 DR, 보고용 |\n| **Snapshot Copy** | 동일 CDB | READ ONLY | 1회성 (CoW) | 빠른 프로비저닝, 테스트 |\n| **PDB Relocate** | 다른 CDB | READ WRITE | 이관 완료 시 삭제 | 무중단 PDB 이관 |\n| **DBCA 클론** | GUI 기반 | 다양 | 1회성 | GUI 선호 환경 |",
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "PDB별 초기화 파라미터 관리 (PDB-Level Initialization Parameters)",
+      "sqlExamplesIds": ["sql01", "sql02", "sql03"],
+      "content": "멀티테넌트 환경에서 각 PDB는 CDB 루트와 독립적으로 일부 초기화 파라미터를 설정할 수 있습니다. 이를 통해 PDB별 워크로드 특성에 맞는 최적화가 가능합니다.\n\n### 파라미터 수준별 분류\n\n| 수준 | 설명 | 예시 |\n|---|---|---|\n| **CDB 레벨 전용** | CDB 루트에서만 설정 가능, 모든 PDB에 동일 적용 | SGA_TARGET, PGA_AGGREGATE_TARGET, DB_BLOCK_SIZE |\n| **PDB 레벨 가능** | PDB별 독립 설정 가능 (ISPDB_MODIFIABLE=TRUE) | OPEN_CURSORS, CURSOR_SHARING, OPTIMIZER_MODE |\n| **CDB+PDB 동시** | CDB에서 기본값, PDB에서 오버라이드 가능 | NLS 관련 파라미터, RESULT_CACHE_MAX_SIZE |",
+      "subsections": [
+        {
+          "title": "ISPDB_MODIFIABLE 컬럼과 파라미터 식별 (ISPDB_MODIFIABLE Column)",
+          "content": "**ISPDB_MODIFIABLE** 컬럼은 `V$PARAMETER` 및 `V$SYSTEM_PARAMETER` 뷰에 존재하며, 해당 파라미터가 PDB 수준에서 변경 가능한지를 나타냅니다.\n\n### ISPDB_MODIFIABLE 값의 의미\n\n| 값 | 의미 | 설명 |\n|---|---|---|\n| **TRUE** | PDB 수준 변경 가능 | ALTER SYSTEM SET ... CONTAINER=CURRENT로 PDB별 독립 설정 가능 |\n| **FALSE** | CDB 루트에서만 변경 가능 | PDB에서 변경 시도 시 ORA-65040 오류 발생 |\n\n### 파라미터 식별을 위한 주요 뷰\n\n| 뷰 | 설명 | 범위 |\n|---|---|---|\n| **V$PARAMETER** | 현재 세션에서 유효한 파라미터 값 | 세션 레벨 |\n| **V$SYSTEM_PARAMETER** | 시스템 전체(인스턴스) 레벨 파라미터 | 인스턴스 레벨 |\n| **V$SYSTEM_PARAMETER2** | 다중 값 파라미터를 행별로 분리 표시 | 인스턴스 레벨 |\n| **CDB_PARAMETERS** (DBA 뷰 없음) | CDB 전체의 파라미터 정보 (12.2+) | CDB 전체 |\n\n### PDB에서 변경 가능한 주요 파라미터 예시\n\n```\nPDB에서 변경 가능 (ISPDB_MODIFIABLE=TRUE)\n├── OPEN_CURSORS\n├── CURSOR_SHARING\n├── OPTIMIZER_MODE\n├── OPTIMIZER_INDEX_COST_ADJ\n├── NLS_LANGUAGE, NLS_TERRITORY\n├── RESULT_CACHE_MAX_SIZE\n├── PDB_FILE_NAME_CONVERT\n├── MAX_STRING_SIZE\n├── STAR_TRANSFORMATION_ENABLED\n├── QUERY_REWRITE_ENABLED\n└── TEMP_UNDO_ENABLED\n\nPDB에서 변경 불가 (ISPDB_MODIFIABLE=FALSE)\n├── SGA_TARGET / SGA_MAX_SIZE\n├── PGA_AGGREGATE_TARGET\n├── DB_BLOCK_SIZE\n├── LOG_BUFFER\n├── CONTROL_FILES\n├── DB_NAME\n├── COMPATIBLE\n└── UNDO_TABLESPACE (CDB 통합 UNDO 모드 시)\n```\n\nPDB별 파라미터를 확인할 때는 해당 PDB에 접속한 상태에서 `V$PARAMETER`를 조회하거나, CDB 루트에서 `V$SYSTEM_PARAMETER`의 `CON_ID` 컬럼을 이용하여 특정 PDB의 파라미터를 확인할 수 있습니다. `ISPDB_MODIFIABLE`이 TRUE인 파라미터만 PDB 레벨에서 독립적으로 설정할 수 있으며, 약 300여 개의 파라미터 중 상당수가 PDB 수준에서 변경 가능합니다.",
+          "key_points": [
+            "ISPDB_MODIFIABLE=TRUE인 파라미터만 PDB 수준에서 독립적으로 설정 가능",
+            "V$PARAMETER는 세션 레벨, V$SYSTEM_PARAMETER는 인스턴스 레벨 파라미터 정보 제공",
+            "ISPDB_MODIFIABLE=FALSE인 파라미터를 PDB에서 변경 시 ORA-65040 오류 발생",
+            "SGA_TARGET, DB_BLOCK_SIZE 등 인스턴스 전체에 영향을 미치는 파라미터는 CDB 루트에서만 변경 가능",
+            "CON_ID 컬럼을 통해 CDB 루트에서 각 PDB의 파라미터 값을 확인 가능",
+            "NLS 관련 파라미터, OPTIMIZER 관련 파라미터 등은 대부분 PDB 수준에서 변경 가능"
+          ]
+        },
+        {
+          "title": "PDB 레벨 파라미터 설정 (ALTER SYSTEM SET ... CONTAINER=CURRENT)",
+          "content": "PDB별 독립적인 파라미터 설정은 `ALTER SYSTEM SET` 명령에 `CONTAINER` 절을 사용하여 수행합니다. PDB에 직접 접속한 상태에서 파라미터를 변경하면 해당 PDB에만 적용됩니다.\n\n### CONTAINER 절의 옵션\n\n| CONTAINER 값 | 설명 | 사용 위치 |\n|---|---|---|\n| **CURRENT** | 현재 접속한 컨테이너(PDB)에만 적용 | PDB 또는 CDB$ROOT |\n| **ALL** | CDB 루트 + 모든 PDB에 적용 | CDB$ROOT에서만 사용 가능 |\n\n### 파라미터 적용 범위 (SCOPE)\n\n| SCOPE 값 | 설명 | 효과 |\n|---|---|---|\n| **MEMORY** | 현재 실행 중인 인스턴스에만 적용 | PDB 재시작 시 소실 |\n| **SPFILE** | SPFILE에 기록, 다음 재시작 시 적용 | 즉시 반영되지 않음 |\n| **BOTH** | MEMORY + SPFILE 모두 적용 (기본값) | 즉시 반영 + 영구 보존 |\n\n### PDB 파라미터 저장 메커니즘\n\nPDB에서 설정한 파라미터는 CDB의 SPFILE에 **PDB-specific 섹션**으로 저장됩니다. SPFILE 내부에는 PDB의 GUID를 기반으로 파라미터가 구분되어 저장되며, PDB가 열릴 때 해당 PDB의 파라미터가 로드됩니다.\n\n```\nSPFILE 내부 구조 (개념도)\n├── CDB 루트 파라미터\n│   ├── *.sga_target=4G\n│   ├── *.open_cursors=300\n│   └── ...\n├── PDB1 (GUID: ABC123...)\n│   ├── *.open_cursors=500\n│   └── *.cursor_sharing=FORCE\n├── PDB2 (GUID: DEF456...)\n│   ├── *.open_cursors=200\n│   └── *.optimizer_mode=FIRST_ROWS_10\n└── ...\n```\n\n### PDB 파라미터 변경 절차\n\n1. 해당 PDB에 접속 (ALTER SESSION SET CONTAINER = pdb_name 또는 직접 접속)\n2. `SHOW PARAMETER` 또는 `V$PARAMETER`로 현재 값 확인\n3. `ALTER SYSTEM SET parameter_name = value SCOPE=BOTH` 실행\n4. 변경 확인\n\n### 파라미터 초기화 (CDB 기본값으로 되돌리기)\n\nPDB에서 설정한 파라미터를 CDB 루트의 기본값으로 되돌리려면 `ALTER SYSTEM RESET` 명령을 사용합니다:\n\n```sql\nALTER SYSTEM RESET open_cursors SCOPE=BOTH;\n```\n\n이 명령은 SPFILE에서 해당 PDB의 파라미터 항목을 제거하여, CDB 루트의 값을 상속받도록 합니다. PDB 레벨에서 설정된 파라미터가 없으면 자동으로 CDB 루트의 값이 적용됩니다.",
+          "key_points": [
+            "ALTER SYSTEM SET ... CONTAINER=CURRENT로 현재 PDB에만 파라미터 적용",
+            "CONTAINER=ALL은 CDB$ROOT에서만 사용 가능하며 모든 컨테이너에 적용",
+            "SCOPE=BOTH(기본값)는 즉시 반영 + SPFILE에 영구 저장",
+            "PDB 파라미터는 SPFILE 내에 PDB GUID 기반으로 구분 저장",
+            "ALTER SYSTEM RESET으로 PDB 파라미터를 CDB 루트 기본값으로 복원 가능",
+            "PDB에 명시적 설정이 없으면 CDB 루트의 파라미터 값을 자동 상속"
+          ]
+        },
+        {
+          "title": "CDB 레벨 vs PDB 레벨 파라미터 우선순위 (Parameter Precedence)",
+          "content": "멀티테넌트 환경에서 파라미터 값이 결정되는 우선순위는 명확한 계층 구조를 따릅니다. PDB 레벨에서 명시적으로 설정된 값이 CDB 루트의 값보다 우선합니다.\n\n### 파라미터 우선순위 계층\n\n```\n파라미터 적용 우선순위 (높은 순)\n│\n├── 1순위: ALTER SESSION SET (세션 레벨)\n│         → 현재 세션에서만 유효, 세션 종료 시 소멸\n│\n├── 2순위: PDB 레벨 ALTER SYSTEM SET\n│         → 해당 PDB 내 모든 세션에 적용\n│\n├── 3순위: CDB 루트 ALTER SYSTEM SET\n│         → PDB에 명시적 설정이 없는 경우 적용\n│\n└── 4순위: Oracle 기본값 (Default)\n          → CDB 루트에도 명시적 설정이 없는 경우 적용\n```\n\n### 우선순위 동작 시나리오\n\n| 시나리오 | CDB 루트 값 | PDB 레벨 값 | 실제 적용 값 |\n|---|---|---|---|\n| PDB 설정 없음 | 300 | (없음) | 300 (CDB 상속) |\n| PDB 명시적 설정 | 300 | 500 | 500 (PDB 우선) |\n| PDB RESET 실행 | 300 | (제거됨) | 300 (CDB 상속 복원) |\n| CDB에서 ALL로 변경 | 400 | 500 | 500 (PDB 설정 유지) |\n\n### CONTAINER=ALL 동작의 주의사항\n\nCDB 루트에서 `CONTAINER=ALL`로 파라미터를 변경하면:\n- CDB 루트의 값은 변경됩니다.\n- PDB에 **이미 명시적 설정이 있는 경우**, 해당 PDB의 값은 변경되지 않습니다.\n- PDB에 **명시적 설정이 없는 경우**, CDB 루트의 새 값을 상속받습니다.\n\n이 동작은 PDB의 독립성을 보장하기 위한 설계입니다. PDB 관리자가 의도적으로 설정한 값이 CDB 관리자의 일괄 변경에 의해 덮어쓰기되지 않습니다.\n\n### 파라미터 상태 확인 방법\n\nPDB에서 명시적으로 설정된 파라미터와 CDB로부터 상속받은 파라미터를 구분하려면 `V$SYSTEM_PARAMETER`의 **ISDEFAULT** 컬럼을 활용합니다:\n- **ISDEFAULT=TRUE**: CDB 루트의 기본값을 상속받고 있음\n- **ISDEFAULT=FALSE**: PDB에서 명시적으로 설정한 값",
+          "key_points": [
+            "PDB 레벨 설정이 CDB 루트 설정보다 우선 적용됨 (PDB 우선순위)",
+            "CONTAINER=ALL로 변경해도 PDB에 명시적 설정이 있으면 덮어쓰지 않음",
+            "ALTER SESSION SET은 세션 레벨로 가장 높은 우선순위",
+            "V$SYSTEM_PARAMETER의 ISDEFAULT 컬럼으로 상속 여부 확인 가능",
+            "PDB에 명시적 설정이 없으면 자동으로 CDB 루트의 값을 상속"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "PDB Lockdown Profile (보안 제한 프로파일)",
+      "sqlExamplesIds": ["sql04", "sql05"],
+      "content": "**PDB Lockdown Profile**은 멀티테넌트 환경에서 PDB의 특정 기능 사용을 제한하여 보안을 강화하는 메커니즘입니다. CDB 관리자가 PDB 관리자의 권한을 세분화하여 통제할 수 있습니다.",
+      "subsections": [
+        {
+          "title": "Lockdown Profile의 정의와 역할 (Lockdown Profile Definition)",
+          "content": "**Lockdown Profile**은 PDB 내에서 사용할 수 있는 기능(Feature)을 제한하는 명명된 규칙 집합입니다. Oracle 12c Release 2(12.2)에서 도입되었으며, CDB의 보안 정책을 중앙에서 관리할 수 있게 해줍니다.\n\n### Lockdown Profile의 구성\n\n| 구성 요소 | 설명 | 예시 |\n|---|---|---|\n| **DISABLE STATEMENT** | 특정 SQL 문 실행 제한 | ALTER SYSTEM, ALTER SESSION |\n| **DISABLE FEATURE** | 특정 기능 사용 제한 | NETWORK_ACCESS, OS_ACCESS |\n| **DISABLE OPTION** | 특정 데이터베이스 옵션 제한 | PARTITIONING, ADVANCED_SECURITY |\n| **ENABLE STATEMENT** | Lockdown에서 특정 문 허용 (예외) | ALTER SYSTEM SET ... |\n\n### Lockdown Profile의 동작 원리\n\n1. CDB 관리자가 CDB$ROOT에서 Lockdown Profile을 생성합니다.\n2. 필요한 제한 규칙(DISABLE STATEMENT/FEATURE/OPTION)을 추가합니다.\n3. 특정 PDB에 Lockdown Profile을 할당합니다 (ALTER SYSTEM SET PDB_LOCKDOWN).\n4. PDB 사용자가 제한된 기능을 사용하려 하면 ORA-01031 또는 ORA-65203 오류가 발생합니다.\n\n### 주요 제한 가능 항목\n\n| 제한 카테고리 | 제한 항목 예시 | 설명 |\n|---|---|---|\n| **네트워크 접근** | UTL_HTTP, UTL_TCP, UTL_SMTP | PDB에서 외부 네트워크 통신 차단 |\n| **OS 접근** | UTL_FILE, DBMS_SCHEDULER(외부 작업) | PDB에서 OS 파일/명령 접근 차단 |\n| **파라미터 변경** | ALTER SYSTEM SET | 특정 파라미터 변경 제한 |\n| **옵션 사용** | Database Vault, Label Security 등 | 특정 유료 옵션 사용 제한 |\n\n### Lockdown Profile 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_LOCKDOWN_PROFILES** | 정의된 모든 Lockdown Profile 및 규칙 조회 |\n| **V$PARAMETER** (PDB_LOCKDOWN) | 현재 PDB에 할당된 Lockdown Profile 확인 |\n| **CDB_LOCKDOWN_PROFILES** | CDB 전체의 Lockdown Profile 정보 |\n\nLockdown Profile은 CDB$ROOT에서만 생성/수정할 수 있으며, PDB 관리자는 자신의 PDB에 할당된 Lockdown Profile을 변경하거나 해제할 수 없습니다. 이를 통해 CDB 관리자가 보안 정책을 중앙에서 일관되게 관리할 수 있습니다.",
+          "key_points": [
+            "Lockdown Profile은 PDB 내 기능 사용을 제한하는 명명된 규칙 집합",
+            "DISABLE STATEMENT/FEATURE/OPTION 세 가지 유형의 제한 규칙 제공",
+            "CDB$ROOT에서만 생성/수정 가능하며, PDB 관리자는 변경 불가",
+            "PDB_LOCKDOWN 파라미터로 특정 PDB에 할당",
+            "제한된 기능 사용 시 ORA-01031 또는 ORA-65203 오류 발생",
+            "DBA_LOCKDOWN_PROFILES 뷰로 정의된 규칙 조회 가능",
+            "네트워크 접근, OS 접근, 파라미터 변경, 옵션 사용 등 다양한 카테고리 제한 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "PDB 클론 방법 개요 (PDB Cloning Methods Overview)",
+      "sqlExamplesIds": ["sql06"],
+      "content": "PDB 클론은 기존 PDB의 완전한 복사본을 생성하는 작업입니다. 개발/테스트 환경 구축, 재해 복구(DR), 보고용 데이터베이스 구성 등에 사용됩니다.",
+      "subsections": [
+        {
+          "title": "로컬 클론 (Local Clone)",
+          "content": "**로컬 클론(Local Clone)**은 동일한 CDB 내에서 기존 PDB의 복사본을 생성하는 가장 기본적인 클론 방법입니다. `CREATE PLUGGABLE DATABASE ... FROM` 구문을 사용합니다.\n\n### 로컬 클론 동작 절차\n\n1. 소스 PDB를 **READ ONLY** 모드로 변경합니다 (또는 핫 클론 사용).\n2. `CREATE PLUGGABLE DATABASE new_pdb FROM source_pdb` 실행합니다.\n3. Oracle이 소스 PDB의 데이터 파일을 새 위치에 복사합니다.\n4. 새 PDB의 메타데이터(딕셔너리)가 CDB 딕셔너리에 등록됩니다.\n5. 새 PDB를 OPEN하여 사용합니다.\n\n### 핫 클론 (Hot Clone)\n\nOracle 12c Release 2(12.2)부터 소스 PDB가 **READ WRITE** 모드인 상태에서도 클론이 가능합니다. 이를 **핫 클론(Hot Clone)**이라고 합니다.\n\n| 구분 | 콜드 클론 (기존 방식) | 핫 클론 (12.2+) |\n|---|---|---|\n| **소스 PDB 상태** | READ ONLY 필수 | READ WRITE 가능 |\n| **서비스 중단** | 소스 PDB 읽기 전용으로 전환 필요 | 서비스 중단 없음 |\n| **동작 원리** | 데이터 파일 직접 복사 | 데이터 파일 복사 + Redo 적용 |\n| **전제 조건** | 없음 | 로컬 UNDO 모드 + ARCHIVELOG 모드 |\n\n핫 클론은 내부적으로 다음과 같이 동작합니다:\n1. 클론 시작 시점의 SCN을 기록합니다.\n2. 소스 PDB의 데이터 파일을 복사합니다 (이 동안 소스 PDB는 계속 READ WRITE).\n3. 복사 시작 이후 발생한 Redo를 클론에 적용하여 일관성을 확보합니다.\n4. 클론 완료 후 새 PDB가 독립적으로 동작합니다.\n\n### 로컬 클론의 주요 옵션\n\n| 옵션 | 설명 |\n|---|---|\n| **FILE_NAME_CONVERT** | 소스 데이터 파일 경로를 새 경로로 변환 |\n| **CREATE_FILE_DEST** | Oracle Managed Files(OMF) 사용 시 대상 디렉토리 지정 |\n| **NO DATA** | 데이터 없이 메타데이터(스키마/구조)만 복제 |\n| **STORAGE UNLIMITED/제한** | 새 PDB의 저장 공간 제한 설정 |\n| **TEMPFILE REUSE** | 기존 임시 파일 재사용 |",
+          "key_points": [
+            "로컬 클론은 동일 CDB 내에서 CREATE PLUGGABLE DATABASE ... FROM으로 수행",
+            "핫 클론(12.2+)은 소스 PDB가 READ WRITE 상태에서도 클론 가능",
+            "핫 클론은 로컬 UNDO 모드 + ARCHIVELOG 모드가 전제 조건",
+            "FILE_NAME_CONVERT로 데이터 파일 경로 변환 지정",
+            "NO DATA 옵션으로 메타데이터만 복제 가능 (빈 스키마 복제)"
+          ]
+        },
+        {
+          "title": "클론 시 사전 조건 및 제약사항 (Cloning Prerequisites & Restrictions)",
+          "content": "PDB 클론을 수행하기 위해서는 여러 사전 조건과 제약사항을 만족해야 합니다. 이를 충족하지 않으면 클론 작업이 실패하거나 비정상적으로 동작할 수 있습니다.\n\n### 공통 사전 조건\n\n| 항목 | 요구사항 | 확인 방법 |\n|---|---|---|\n| **문자셋 호환성** | 소스와 대상 CDB의 문자셋이 동일하거나 호환 가능 | NLS_DATABASE_PARAMETERS |\n| **Endian 형식** | 동일 플랫폼 또는 동일 Endian 형식 | V$TRANSPORTABLE_PLATFORM |\n| **COMPATIBLE 파라미터** | 대상 CDB의 COMPATIBLE이 소스 이상 | SHOW PARAMETER compatible |\n| **데이터 파일 경로** | 대상 위치에 충분한 공간 + 경로 존재 | OS 레벨 확인 |\n| **CDB OPEN 상태** | 대상 CDB가 READ WRITE 모드로 OPEN | V$DATABASE |\n| **권한** | CREATE PLUGGABLE DATABASE 시스템 권한 | DBA_SYS_PRIVS |\n\n### 핫 클론 추가 전제 조건\n\n| 항목 | 요구사항 |\n|---|---|\n| **UNDO 모드** | 로컬 UNDO 모드 (LOCAL_UNDO_ENABLED=TRUE) |\n| **ARCHIVELOG 모드** | CDB가 ARCHIVELOG 모드로 운영 |\n| **Keystore** | TDE 사용 시 Keystore가 OPEN 상태 |\n\n### 원격 클론 추가 전제 조건\n\n| 항목 | 요구사항 |\n|---|---|\n| **DB Link** | 소스 CDB/PDB에 대한 유효한 DB Link |\n| **리스너** | 소스 데이터베이스의 리스너가 활성 상태 |\n| **공통 사용자** | DB Link 사용자가 소스 CDB의 공통 사용자 (CREATE PLUGGABLE DATABASE 권한 보유) |\n\n### 주요 제약사항\n\n- PDB 클론 중 소스 PDB의 **구조 변경(DDL)**은 가능하지만 권장하지 않음\n- 동일 CDB에 **같은 이름의 PDB**는 존재 불가\n- PDB에 **암호화된 테이블스페이스**가 있으면 Keystore 관련 추가 작업 필요\n- **MAX_PDBS** 파라미터가 설정된 경우 최대 PDB 수 초과 불가\n- PDB 클론 시 **DBID**와 **GUID**는 새로 생성됨 (고유성 보장)",
+          "key_points": [
+            "소스와 대상 CDB의 문자셋이 동일하거나 호환 가능해야 함",
+            "핫 클론은 로컬 UNDO 모드 + ARCHIVELOG 모드 필수",
+            "원격 클론은 유효한 DB Link와 소스의 공통 사용자 권한 필요",
+            "COMPATIBLE 파라미터는 대상 CDB가 소스 이상이어야 함",
+            "클론 시 DBID와 GUID는 새로 생성되어 고유성 보장",
+            "MAX_PDBS 파라미터로 CDB 내 최대 PDB 수 제한 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "원격 클론 (Remote Clone via DB Link)",
+      "sqlExamplesIds": ["sql07", "sql08"],
+      "content": "**원격 클론(Remote Clone)**은 DB Link를 이용하여 다른 CDB에 있는 PDB를 현재 CDB로 복제하는 방법입니다. 서로 다른 서버 간의 PDB 복제에 사용됩니다.",
+      "subsections": [
+        {
+          "title": "원격 클론 아키텍처 및 절차 (Remote Clone Architecture & Procedure)",
+          "content": "원격 클론은 네트워크를 통해 소스 CDB의 PDB 데이터를 대상 CDB로 전송하여 새로운 PDB를 생성합니다. Oracle Net을 통한 데이터 전송이 수행되므로 네트워크 대역폭과 안정성이 중요합니다.\n\n### 원격 클론의 전체 아키텍처\n\n```\n[소스 CDB (서버 A)]                    [대상 CDB (서버 B)]\n┌─────────────────┐                    ┌─────────────────┐\n│  CDB$ROOT       │                    │  CDB$ROOT       │\n│  ├── PDB$SEED   │                    │  ├── PDB$SEED   │\n│  ├── PDB_SRC ◄──┼── DB Link ────────┼──┤               │\n│  │  (소스 PDB)  │   (Oracle Net)    │  │               │\n│  └── ...        │                    │  ├── PDB_CLONE  │\n│                 │                    │  │  (새 PDB)     │\n│  리스너 활성    │                    │  └── ...        │\n└─────────────────┘                    └─────────────────┘\n```\n\n### 원격 클론 수행 절차\n\n1. **소스 CDB에서**: 공통 사용자(Common User)를 생성하고 `CREATE PLUGGABLE DATABASE` 권한을 부여합니다.\n2. **대상 CDB에서**: 소스 CDB 또는 PDB에 대한 DB Link를 생성합니다.\n3. **소스 PDB 상태 확인**: READ ONLY로 변경하거나, 핫 클론을 위해 READ WRITE 상태 유지합니다.\n4. **대상 CDB에서**: `CREATE PLUGGABLE DATABASE ... FROM ... @dblink` 실행합니다.\n5. Oracle이 네트워크를 통해 데이터 파일을 전송하고 새 PDB를 생성합니다.\n6. 새 PDB를 OPEN합니다.\n\n### DB Link 구성 방식\n\n| DB Link 대상 | 사용 조건 | 장점 |\n|---|---|---|\n| **CDB 루트** | 공통 사용자로 접속 | 여러 PDB 클론 가능 |\n| **개별 PDB** | 해당 PDB 직접 접속 | 단일 PDB 클론 시 직관적 |\n\n### 원격 클론 시 데이터 전송 동작\n\n- 데이터 파일은 Oracle Net을 통해 **블록 단위**로 전송됩니다.\n- 전송 중 네트워크 오류가 발생하면 클론 작업이 실패합니다.\n- 대규모 데이터베이스의 경우 전송 시간이 길어질 수 있으므로, 핫 클론 방식이 서비스 중단을 최소화할 수 있습니다.\n- TDE(Transparent Data Encryption)가 적용된 PDB의 원격 클론 시, 소스와 대상의 Keystore 설정이 필요합니다.\n\n### 원격 핫 클론\n\n원격 클론도 핫 클론 방식을 지원합니다. 소스 PDB가 READ WRITE 상태에서 원격 클론을 수행하면:\n- 소스 CDB가 **ARCHIVELOG 모드** + **로컬 UNDO 모드**여야 합니다.\n- 데이터 파일 전송 후 Redo 로그를 네트워크를 통해 전송하여 일관성을 확보합니다.",
+          "key_points": [
+            "원격 클론은 DB Link를 통해 다른 CDB의 PDB를 현재 CDB로 복제",
+            "소스 CDB에 공통 사용자(Common User)와 CREATE PLUGGABLE DATABASE 권한 필요",
+            "데이터 파일은 Oracle Net을 통해 블록 단위로 전송",
+            "원격 핫 클론도 지원되며 ARCHIVELOG + 로컬 UNDO 모드 필요",
+            "TDE 적용 PDB의 원격 클론 시 Keystore 설정 필요",
+            "DB Link는 CDB 루트 또는 개별 PDB를 대상으로 구성 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "Refreshable Clone PDB (주기적 동기화 클론)",
+      "sqlExamplesIds": ["sql09", "sql10", "sql11"],
+      "content": "**Refreshable Clone PDB**는 소스 PDB의 변경 사항을 주기적으로 동기화할 수 있는 특수한 형태의 PDB 클론입니다. 준 실시간 재해 복구(DR)나 보고용 데이터베이스 용도로 활용됩니다.",
+      "subsections": [
+        {
+          "title": "Refreshable Clone 개념 및 동작 원리 (Refreshable Clone Concepts)",
+          "content": "Refreshable Clone PDB는 일반 클론과 달리, 생성 후에도 소스 PDB와의 **연결을 유지**하며 주기적으로 데이터를 동기화합니다. 클론 PDB는 **READ ONLY** 모드로만 열 수 있으며, 새로고침(Refresh) 시 소스 PDB의 최신 변경 사항이 반영됩니다.\n\n### Refreshable Clone의 동작 원리\n\n1. 초기 클론 생성 시 소스 PDB의 전체 데이터를 복사합니다.\n2. `REFRESH MODE`에 따라 자동 또는 수동으로 Redo 로그를 적용하여 동기화합니다.\n3. 새로고침(Refresh) 동안 Redo 데이터가 소스 PDB에서 전송되어 적용됩니다.\n4. 새로고침이 완료되면 클론 PDB는 최신 데이터를 반영한 상태가 됩니다.\n\n### REFRESH MODE 옵션\n\n| 모드 | 설명 | 사용 시점 |\n|---|---|---|\n| **MANUAL** | 수동으로 `ALTER PLUGGABLE DATABASE ... REFRESH` 실행 시에만 동기화 | 필요할 때만 동기화, 제어 필요 시 |\n| **EVERY n MINUTES** | 지정된 간격(분)으로 자동 동기화 | 정기적 자동 동기화 필요 시 |\n| **NONE** | 새로고침 비활성화 (일반 PDB로 전환) | 더 이상 동기화 불필요 시 |\n\n### Refreshable Clone의 상태 전이\n\n```\n[소스 PDB: READ WRITE]\n         │\n         ▼ (초기 클론 생성)\n[Refreshable Clone: MOUNTED]\n         │\n         ▼ (OPEN)\n[Refreshable Clone: READ ONLY]\n         │\n    ┌─────┴─────┐\n    ▼           ▼\n  REFRESH     SWITCHOVER\n  (동기화)    (역할 전환)\n    │           │\n    ▼           ▼\n[READ ONLY]  [READ WRITE]\n(최신 데이터) (일반 PDB로 전환)\n```\n\n### REFRESH 실행 시 내부 동작\n\n1. 클론 PDB가 **CLOSE** 됩니다 (READ ONLY에서 MOUNTED로 전환).\n2. 소스 PDB에서 마지막 Refresh 이후의 **Redo 데이터**를 전송받습니다.\n3. 전송받은 Redo 데이터를 클론 PDB의 데이터 파일에 **적용(Apply)**합니다.\n4. 적용 완료 후 클론 PDB를 **READ ONLY**로 다시 OPEN합니다.\n\n### 제약사항\n\n- Refreshable Clone PDB는 **READ ONLY**로만 열 수 있음 (READ WRITE 불가)\n- 소스 PDB가 **ARCHIVELOG 모드**에서 운영되어야 함\n- 소스 PDB가 삭제되면 Refreshable Clone은 더 이상 Refresh 불가\n- REFRESH 수행 중에는 클론 PDB에 접속 불가",
+          "key_points": [
+            "Refreshable Clone PDB는 소스 PDB와 주기적 동기화가 가능한 특수 클론",
+            "REFRESH MODE는 MANUAL(수동), EVERY n MINUTES(자동), NONE(비활성화) 세 가지",
+            "클론 PDB는 READ ONLY로만 열 수 있으며 READ WRITE 불가",
+            "REFRESH 시 소스 PDB의 Redo 데이터를 전송받아 적용",
+            "소스 PDB가 ARCHIVELOG 모드에서 운영되어야 함",
+            "REFRESH 수행 중에는 클론 PDB 접속 불가 (CLOSE 상태)"
+          ]
+        },
+        {
+          "title": "Refreshable Clone SWITCHOVER (역할 전환)",
+          "content": "**SWITCHOVER**는 Refreshable Clone PDB와 소스 PDB의 역할을 교환하는 기능입니다. Oracle 12c Release 2(12.2)부터 지원되며, 클론 PDB를 READ WRITE 모드의 운영 PDB로 전환할 수 있습니다.\n\n### SWITCHOVER 동작 절차\n\n1. **SWITCHOVER 실행 전**: 클론 PDB에서 최종 REFRESH를 수행하여 최신 데이터를 동기화합니다.\n2. **SWITCHOVER 실행**: `ALTER PLUGGABLE DATABASE pdb_clone REFRESH MODE SWITCHOVER` 실행합니다.\n3. **역할 전환**:\n   - 기존 소스 PDB → Refreshable Clone PDB (READ ONLY)로 전환\n   - 기존 클론 PDB → 새로운 소스 PDB (READ WRITE)로 전환\n4. **역할 전환 완료**: 이후 동기화 방향이 반대로 전환됩니다.\n\n### SWITCHOVER vs 일반 전환 비교\n\n| 구분 | SWITCHOVER | REFRESH MODE NONE 전환 |\n|---|---|---|\n| **동기화 연결** | 유지 (방향만 반대) | 완전 해제 |\n| **소스 PDB 상태** | Refreshable Clone으로 전환 | 변경 없음 |\n| **복원 가능** | 재 SWITCHOVER로 복원 가능 | 복원 불가 |\n| **사용 시점** | DR 전환, 롤링 업그레이드 | 영구적 PDB 독립 |\n\n### SWITCHOVER 활용 시나리오\n\n- **재해 복구(DR)**: 운영 PDB 장애 시 Refreshable Clone으로 SWITCHOVER하여 서비스 연속성 확보\n- **롤링 업그레이드**: 클론에서 패치 적용 후 SWITCHOVER로 무중단 업그레이드\n- **유지보수**: 운영 PDB의 유지보수 작업 시 클론으로 서비스를 전환\n\n### SWITCHOVER 전제 조건\n\n- 클론 PDB와 소스 PDB 모두 동일한 CDB에 있거나, DB Link로 연결되어 있어야 합니다.\n- 최종 REFRESH가 성공적으로 완료되어야 합니다.\n- 소스 PDB가 READ WRITE 모드이고 활성 트랜잭션이 없어야 합니다.\n- ARCHIVELOG 모드가 활성화되어 있어야 합니다.",
+          "key_points": [
+            "SWITCHOVER는 소스 PDB와 Refreshable Clone의 역할을 교환하는 기능",
+            "SWITCHOVER 후 동기화 방향이 반대로 전환됨",
+            "재해 복구(DR), 롤링 업그레이드, 유지보수 시 활용 가능",
+            "SWITCHOVER 전 최종 REFRESH 수행 필요",
+            "REFRESH MODE NONE 전환과 달리 SWITCHOVER는 동기화 연결 유지"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s07",
+      "title": "Snapshot Copy PDB (스냅샷 기반 클론)",
+      "sqlExamplesIds": ["sql12"],
+      "content": "**Snapshot Copy PDB**는 스토리지 레벨의 스냅샷 기능을 활용하여 매우 빠르게 PDB를 복제하는 방법입니다. 데이터 파일의 물리적 복사 없이 즉시 클론을 생성할 수 있습니다.",
+      "subsections": [
+        {
+          "title": "Snapshot Copy 아키텍처 및 동작 (Snapshot Copy Architecture)",
+          "content": "Snapshot Copy PDB는 **Copy-on-Write(CoW)** 또는 스토리지의 스냅샷 기능을 이용하여 데이터 파일을 실제로 복사하지 않고 클론을 생성합니다. 소스 PDB의 데이터 파일에 대한 **참조(Reference)**만 생성하고, 변경이 발생할 때만 해당 블록을 복사합니다.\n\n### Snapshot Copy의 동작 원리\n\n```\n[소스 PDB 데이터 파일]\n┌────────────────────────────┐\n│ Block 1 │ Block 2 │ Block 3 │ ... │\n└────────────────────────────┘\n         ▲            ▲\n         │ (참조)     │ (참조)\n┌────────────────────────────┐\n│ Snapshot Clone PDB         │\n│ Block 1 → 소스 참조        │\n│ Block 2 → 소스 참조        │\n│ Block 3 → 복사본 (변경됨)  │\n└────────────────────────────┘\n```\n\n1. 클론 생성 시 **스냅샷만 생성** — 데이터 파일 복사 없음 (거의 즉시 완료)\n2. 클론 PDB에서 읽기 작업 시 소스의 원본 블록을 참조합니다.\n3. 클론 PDB에서 쓰기 작업 시 해당 블록만 **새로운 위치에 복사 후 변경** (Copy-on-Write)\n4. 시간이 지남에 따라 변경된 블록만 추가 스토리지를 사용합니다.\n\n### Snapshot Copy 지원 스토리지\n\n| 스토리지 유형 | 요구사항 | 비고 |\n|---|---|---|\n| **ACFS (ASM Cluster File System)** | ACFS 기반 데이터 파일 | Oracle 권장 |\n| **Direct NFS (dNFS)** | NFS 스토리지의 스냅샷 기능 | NFS 서버 지원 필요 |\n| **기타 스냅샷 지원 스토리지** | 스토리지 벤더의 스냅샷 API | Oracle과 호환 필요 |\n\n### Snapshot Copy의 주요 특성\n\n| 특성 | 설명 |\n|---|---|\n| **생성 속도** | 거의 즉시 (데이터 크기 무관) |\n| **초기 디스크 사용량** | 거의 없음 (메타데이터만) |\n| **시간에 따른 디스크 사용** | 변경된 블록 수에 비례하여 증가 |\n| **클론 PDB 모드** | READ WRITE 가능 |\n| **소스 PDB 의존성** | 소스 PDB 삭제 시 클론도 영향받음 |\n\n### 제약사항\n\n- **ACFS** 또는 스냅샷을 지원하는 스토리지에서만 사용 가능\n- 소스 PDB의 데이터 파일이 삭제되면 클론 PDB도 영향을 받음\n- Snapshot Copy PDB를 **다른 스토리지로 이동**하려면 전체 데이터 파일 복사가 필요\n- **CLONEDB** 파라미터(비-ACFS 환경)나 **SNAPSHOT COPY** 절을 사용하여 생성\n- `CREATE PLUGGABLE DATABASE ... SNAPSHOT COPY` 구문 사용",
+          "key_points": [
+            "Copy-on-Write(CoW) 메커니즘으로 데이터 파일을 물리적으로 복사하지 않음",
+            "클론 생성이 거의 즉시 완료 — 데이터 크기에 무관",
+            "ACFS 또는 스냅샷 지원 스토리지에서만 사용 가능",
+            "변경된 블록만 추가 스토리지를 사용하여 공간 효율적",
+            "소스 PDB 데이터 파일에 의존하므로, 소스 삭제 시 클론에 영향",
+            "CREATE PLUGGABLE DATABASE ... SNAPSHOT COPY 구문으로 생성"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s08",
+      "title": "DBCA를 이용한 PDB 클론 및 관련 뷰 (DBCA Cloning & Related Views)",
+      "sqlExamplesIds": ["sql13", "sql14"],
+      "content": "**DBCA(Database Configuration Assistant)**는 GUI 기반의 PDB 관리 도구로, 명령행 대신 시각적 인터페이스를 통해 PDB 클론 작업을 수행할 수 있습니다.",
+      "subsections": [
+        {
+          "title": "DBCA를 이용한 PDB 클론 (PDB Cloning with DBCA)",
+          "content": "DBCA는 Oracle Database의 생성, 관리, 삭제를 위한 GUI 도구이며, PDB 클론 작업도 지원합니다. 명령행에서 직접 SQL을 실행하는 것이 불편한 경우 DBCA를 활용할 수 있습니다.\n\n### DBCA PDB 클론 절차\n\n1. **DBCA 실행**: `dbca` 명령으로 DBCA를 시작합니다.\n2. **작업 선택**: \"Manage Pluggable Databases\" 선택합니다.\n3. **PDB 작업 선택**: \"Clone a PDB\" 선택합니다.\n4. **소스 데이터베이스 선택**: 소스 CDB와 PDB를 지정합니다.\n5. **클론 PDB 정보 입력**: 새 PDB 이름, 관리자 자격증명, 데이터 파일 위치 등을 지정합니다.\n6. **스토리지 옵션**: FILE_NAME_CONVERT 또는 OMF 설정합니다.\n7. **확인 및 실행**: 설정을 확인하고 클론을 실행합니다.\n\n### DBCA 명령행 모드 (Silent Mode)\n\nDBCA는 GUI 없이 **사일런트 모드(Silent Mode)**로도 실행할 수 있습니다:\n\n```\ndbca -silent\n  -createPluggableDatabase\n  -sourceDB CDB1\n  -pdbName PDB_CLONE\n  -createPDBFrom PDB\n  -pdbCopyFrom PDB_SRC\n  -pdbStorageMAXSizeInMB 10240\n  -createNewPDBAdminUser true\n  -pdbAdminUserName pdb_admin\n  -pdbAdminPassword password123\n```\n\n### DBCA vs SQL 명령 비교\n\n| 구분 | DBCA | SQL 명령 |\n|---|---|---|\n| **인터페이스** | GUI 또는 사일런트 모드 | SQL*Plus, SQL Developer |\n| **유연성** | 제한적 (제공된 옵션만) | 높음 (모든 절 사용 가능) |\n| **자동화** | 사일런트 모드로 스크립트 가능 | 완전 스크립트 가능 |\n| **오류 처리** | GUI에서 시각적 피드백 | ORA 오류 코드 직접 확인 |\n| **원격 클론** | 제한적 지원 | 완전 지원 |",
+          "key_points": [
+            "DBCA는 GUI 기반의 PDB 관리 도구로 클론 작업 지원",
+            "사일런트 모드(-silent)로 명령행에서 스크립트 기반 실행 가능",
+            "Manage Pluggable Databases → Clone a PDB로 클론 수행",
+            "SQL 명령에 비해 유연성은 낮지만 직관적인 인터페이스 제공",
+            "원격 클론은 SQL 명령이 더 완전한 지원 제공"
+          ]
+        },
+        {
+          "title": "PDB 관련 주요 뷰 (PDB-Related Views)",
+          "content": "PDB 파라미터 및 복제 관리에 필요한 주요 딕셔너리 뷰와 동적 성능 뷰를 정리합니다. 이 뷰들을 통해 PDB의 상태, 파라미터, 클론 정보 등을 모니터링할 수 있습니다.\n\n### 파라미터 관련 뷰\n\n| 뷰 | 설명 | 주요 컬럼 |\n|---|---|---|\n| **V$PARAMETER** | 현재 세션의 파라미터 값 | NAME, VALUE, ISPDB_MODIFIABLE, ISDEFAULT |\n| **V$SYSTEM_PARAMETER** | 시스템 레벨 파라미터 값 | NAME, VALUE, ISPDB_MODIFIABLE, CON_ID |\n| **V$SYSTEM_PARAMETER2** | 다중 값 파라미터 행별 표시 | NAME, VALUE, ORDINAL |\n\n### PDB 상태 관련 뷰\n\n| 뷰 | 설명 | 주요 컬럼 |\n|---|---|---|\n| **CDB_PDBS** | CDB 내 모든 PDB 정보 | PDB_NAME, STATUS, CON_ID, CREATION_SCN |\n| **DBA_PDBS** | 현재 컨테이너의 PDB 정보 | PDB_NAME, STATUS, OPEN_MODE |\n| **V$PDBS** | PDB 동적 상태 정보 | NAME, OPEN_MODE, RESTRICTED, CON_ID |\n| **DBA_PDB_SAVED_STATES** | 저장된 PDB 상태 정보 | PDB_NAME, STATE, RESTRICTED |\n| **V$CONTAINERS** | 모든 컨테이너 정보 | NAME, CON_ID, OPEN_MODE, TOTAL_SIZE |\n\n### 클론/이력 관련 뷰\n\n| 뷰 | 설명 | 주요 컬럼 |\n|---|---|---|\n| **DBA_PDB_HISTORY** | PDB 생성/변경 이력 | PDB_NAME, OPERATION, OP_TIMESTAMP |\n| **CDB_PROPERTIES** | CDB/PDB 속성 정보 | PROPERTY_NAME, PROPERTY_VALUE, CON_ID |\n| **V$DATABASE** | 데이터베이스 전체 정보 | CDB, CON_ID |\n\n### Lockdown Profile 관련 뷰\n\n| 뷰 | 설명 | 주요 컬럼 |\n|---|---|---|\n| **DBA_LOCKDOWN_PROFILES** | Lockdown Profile 규칙 조회 | PROFILE_NAME, RULE_TYPE, RULE, STATUS |\n| **CDB_LOCKDOWN_PROFILES** | CDB 전체 Lockdown 정보 | PROFILE_NAME, RULE_TYPE, CON_ID |\n\nPDB 모니터링 시에는 CDB$ROOT에서 `V$` 뷰의 **CON_ID** 컬럼을 활용하여 특정 PDB의 정보를 필터링할 수 있습니다. CON_ID=0은 CDB 전체, CON_ID=1은 CDB$ROOT, CON_ID=2는 PDB$SEED, CON_ID >= 3은 사용자 PDB를 나타냅니다.",
+          "key_points": [
+            "V$PARAMETER/V$SYSTEM_PARAMETER로 PDB별 파라미터 값 및 ISPDB_MODIFIABLE 확인",
+            "CDB_PDBS와 V$PDBS로 PDB의 상태 및 오픈 모드 모니터링",
+            "DBA_PDB_SAVED_STATES로 저장된 PDB 상태 정보 확인",
+            "DBA_PDB_HISTORY로 PDB 생성/변경 이력 추적",
+            "DBA_LOCKDOWN_PROFILES로 Lockdown Profile 규칙 조회",
+            "CON_ID 컬럼으로 CDB 루트에서 특정 PDB 정보 필터링 (CON_ID >= 3이 사용자 PDB)"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "PDB에서 변경 가능한 파라미터 조회 (ISPDB_MODIFIABLE)",
+      "sql": "SELECT name, value, ispdb_modifiable, isdefault\nFROM v$system_parameter\nWHERE ispdb_modifiable = 'TRUE'\nORDER BY name;",
+      "description": "V$SYSTEM_PARAMETER 뷰에서 ISPDB_MODIFIABLE=TRUE인 파라미터를 조회하여, PDB 수준에서 독립적으로 변경 가능한 파라미터 목록을 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "PDB별 파라미터 값 비교 (CON_ID 기반)",
+      "sql": "SELECT con_id, name, value, isdefault\nFROM v$system_parameter\nWHERE name IN ('open_cursors', 'cursor_sharing', 'optimizer_mode')\nORDER BY name, con_id;",
+      "description": "CDB$ROOT에서 V$SYSTEM_PARAMETER를 조회하여 각 PDB(CON_ID)별로 파라미터 값이 어떻게 설정되어 있는지 비교합니다. ISDEFAULT 컬럼으로 명시적 설정 여부를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "PDB 레벨 파라미터 설정 및 확인",
+      "sql": "-- PDB에 접속한 상태에서\nALTER SYSTEM SET open_cursors = 500 SCOPE=BOTH;\nALTER SYSTEM SET cursor_sharing = 'FORCE' SCOPE=BOTH;\n\n-- 변경 확인\nSHOW PARAMETER open_cursors;\nSHOW PARAMETER cursor_sharing;\n\n-- CDB 기본값으로 복원\nALTER SYSTEM RESET open_cursors SCOPE=BOTH;",
+      "description": "PDB에 접속한 상태에서 ALTER SYSTEM SET으로 PDB 레벨 파라미터를 변경하고, SHOW PARAMETER로 확인합니다. ALTER SYSTEM RESET으로 CDB 기본값으로 복원할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "Lockdown Profile 생성 및 규칙 추가",
+      "sql": "-- CDB$ROOT에서 실행\n-- Lockdown Profile 생성\nCREATE LOCKDOWN PROFILE secure_pdb_profile;\n\n-- ALTER SYSTEM 문 제한\nALTER LOCKDOWN PROFILE secure_pdb_profile\n  DISABLE STATEMENT = ('ALTER SYSTEM')\n  CLAUSE = ('SET')\n  OPTION ALL EXCEPT = ('cursor_sharing', 'optimizer_mode');\n\n-- 네트워크 접근 제한\nALTER LOCKDOWN PROFILE secure_pdb_profile\n  DISABLE FEATURE = ('UTL_HTTP', 'UTL_TCP', 'UTL_SMTP');\n\n-- PDB에 Lockdown Profile 할당\nALTER SESSION SET CONTAINER = pdb1;\nALTER SYSTEM SET pdb_lockdown = 'SECURE_PDB_PROFILE' SCOPE=BOTH;",
+      "description": "CDB$ROOT에서 Lockdown Profile을 생성하고, ALTER SYSTEM SET 문을 특정 파라미터만 허용하도록 제한하며, 네트워크 관련 유틸리티 패키지를 비활성화합니다. 이후 특정 PDB에 할당합니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "Lockdown Profile 규칙 조회",
+      "sql": "-- Lockdown Profile 목록 및 규칙 조회\nSELECT profile_name, rule_type, rule, clause,\n       clause_option, status, users\nFROM dba_lockdown_profiles\nORDER BY profile_name, rule_type;\n\n-- 현재 PDB에 적용된 Lockdown Profile 확인\nSHOW PARAMETER pdb_lockdown;",
+      "description": "DBA_LOCKDOWN_PROFILES 뷰에서 정의된 Lockdown Profile의 규칙을 조회하고, 현재 PDB에 적용된 Lockdown Profile을 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "로컬 PDB 클론 (콜드/핫 클론)",
+      "sql": "-- 콜드 클론: 소스 PDB를 READ ONLY로 변경 후 클론\nALTER PLUGGABLE DATABASE pdb_src CLOSE IMMEDIATE;\nALTER PLUGGABLE DATABASE pdb_src OPEN READ ONLY;\n\nCREATE PLUGGABLE DATABASE pdb_clone FROM pdb_src\n  FILE_NAME_CONVERT = ('/oradata/CDB1/pdb_src/', '/oradata/CDB1/pdb_clone/');\n\nALTER PLUGGABLE DATABASE pdb_clone OPEN;\n\n-- 핫 클론 (12.2+): 소스 PDB가 READ WRITE 상태에서 클론\nCREATE PLUGGABLE DATABASE pdb_hot_clone FROM pdb_src\n  FILE_NAME_CONVERT = ('/oradata/CDB1/pdb_src/', '/oradata/CDB1/pdb_hot_clone/');",
+      "description": "로컬 PDB 클론 예시입니다. 콜드 클론은 소스 PDB를 READ ONLY로 변경한 후 수행하고, 핫 클론(12.2+)은 소스 PDB가 READ WRITE 상태에서도 클론이 가능합니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "원격 클론을 위한 DB Link 생성",
+      "sql": "-- 소스 CDB에서 공통 사용자 생성 및 권한 부여\n-- (소스 CDB에서 실행)\nCREATE USER c##clone_user IDENTIFIED BY clone_pass CONTAINER=ALL;\nGRANT CREATE SESSION, CREATE PLUGGABLE DATABASE TO c##clone_user CONTAINER=ALL;\n\n-- 대상 CDB에서 DB Link 생성\n-- (대상 CDB에서 실행)\nCREATE DATABASE LINK remote_cdb_link\n  CONNECT TO c##clone_user IDENTIFIED BY clone_pass\n  USING '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=source_host)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=CDB1)))';",
+      "description": "원격 클론을 위한 사전 준비 작업입니다. 소스 CDB에 공통 사용자를 생성하고 필요한 권한을 부여한 후, 대상 CDB에서 소스 CDB로의 DB Link를 생성합니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "원격 PDB 클론 실행",
+      "sql": "-- 대상 CDB에서 원격 클론 실행\nCREATE PLUGGABLE DATABASE pdb_remote_clone FROM pdb_src@remote_cdb_link\n  FILE_NAME_CONVERT = ('/oradata/CDB_SRC/pdb_src/', '/oradata/CDB_DST/pdb_remote_clone/');\n\n-- 새 PDB 열기\nALTER PLUGGABLE DATABASE pdb_remote_clone OPEN;\n\n-- PDB 상태 확인\nSELECT pdb_name, status, con_id FROM cdb_pdbs WHERE pdb_name = 'PDB_REMOTE_CLONE';",
+      "description": "대상 CDB에서 DB Link를 이용하여 원격 소스 PDB를 클론합니다. @dblink 구문으로 원격 PDB를 참조하며, FILE_NAME_CONVERT로 로컬 경로를 지정합니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "Refreshable Clone PDB 생성 (자동/수동 모드)",
+      "sql": "-- 자동 새로고침 (10분 간격)\nCREATE PLUGGABLE DATABASE pdb_refresh_auto FROM pdb_src@remote_cdb_link\n  FILE_NAME_CONVERT = ('/oradata/CDB_SRC/pdb_src/', '/oradata/CDB_DST/pdb_refresh_auto/')\n  REFRESH MODE EVERY 10 MINUTES;\n\n-- 수동 새로고침\nCREATE PLUGGABLE DATABASE pdb_refresh_manual FROM pdb_src@remote_cdb_link\n  FILE_NAME_CONVERT = ('/oradata/CDB_SRC/pdb_src/', '/oradata/CDB_DST/pdb_refresh_manual/')\n  REFRESH MODE MANUAL;\n\n-- Refreshable Clone PDB 열기 (READ ONLY만 가능)\nALTER PLUGGABLE DATABASE pdb_refresh_auto OPEN READ ONLY;",
+      "description": "Refreshable Clone PDB를 자동(EVERY n MINUTES) 및 수동(MANUAL) 모드로 생성하는 예시입니다. Refreshable Clone은 READ ONLY로만 열 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "Refreshable Clone 수동 새로고침 및 모드 변경",
+      "sql": "-- 수동 새로고침 실행\nALTER PLUGGABLE DATABASE pdb_refresh_manual CLOSE;\nALTER PLUGGABLE DATABASE pdb_refresh_manual REFRESH;\nALTER PLUGGABLE DATABASE pdb_refresh_manual OPEN READ ONLY;\n\n-- 새로고침 간격 변경 (수동 → 자동 5분)\nALTER PLUGGABLE DATABASE pdb_refresh_manual\n  REFRESH MODE EVERY 5 MINUTES;\n\n-- 새로고침 비활성화 (일반 PDB로 전환)\nALTER PLUGGABLE DATABASE pdb_refresh_manual CLOSE;\nALTER PLUGGABLE DATABASE pdb_refresh_manual\n  REFRESH MODE NONE;\nALTER PLUGGABLE DATABASE pdb_refresh_manual OPEN;",
+      "description": "Refreshable Clone PDB의 수동 새로고침 실행, 새로고침 모드 변경, 그리고 REFRESH MODE NONE으로 일반 PDB로 전환하는 방법을 보여줍니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "Refreshable Clone SWITCHOVER 실행",
+      "sql": "-- SWITCHOVER 전 최종 동기화\nALTER PLUGGABLE DATABASE pdb_refresh_auto CLOSE;\nALTER PLUGGABLE DATABASE pdb_refresh_auto REFRESH;\n\n-- SWITCHOVER 실행 (역할 전환)\nALTER PLUGGABLE DATABASE pdb_refresh_auto\n  REFRESH MODE SWITCHOVER;\n\n-- SWITCHOVER 후 새로운 소스 PDB로 OPEN\nALTER PLUGGABLE DATABASE pdb_refresh_auto OPEN;",
+      "description": "Refreshable Clone PDB의 SWITCHOVER를 수행하여 소스 PDB와 클론 PDB의 역할을 교환합니다. SWITCHOVER 전 최종 REFRESH를 수행하여 데이터 동기화를 완료합니다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "Snapshot Copy PDB 생성",
+      "sql": "-- Snapshot Copy PDB 생성 (ACFS 환경)\nCREATE PLUGGABLE DATABASE pdb_snap FROM pdb_src\n  SNAPSHOT COPY;\n\nALTER PLUGGABLE DATABASE pdb_snap OPEN;\n\n-- Snapshot Copy PDB 확인\nSELECT pdb_name, status, snapshot_parent_con_id\nFROM cdb_pdbs\nWHERE pdb_name = 'PDB_SNAP';",
+      "description": "ACFS 환경에서 Snapshot Copy PDB를 생성합니다. SNAPSHOT COPY 절을 사용하면 데이터 파일의 물리적 복사 없이 Copy-on-Write 방식으로 즉시 클론이 생성됩니다."
+    },
+    {
+      "sqlExamplesId": "sql13",
+      "title": "PDB 상태 및 이력 조회",
+      "sql": "-- 모든 PDB 상태 조회\nSELECT con_id, name, open_mode, restricted, total_size\nFROM v$pdbs\nORDER BY con_id;\n\n-- PDB 이력 조회\nSELECT pdb_name, operation, op_timestamp, cloned_from_pdb_name\nFROM dba_pdb_history\nORDER BY op_timestamp DESC;\n\n-- 저장된 PDB 상태 확인\nSELECT con_name, instance_name, state, restricted\nFROM dba_pdb_saved_states;",
+      "description": "V$PDBS로 현재 PDB 상태를 조회하고, DBA_PDB_HISTORY로 PDB 생성/변경 이력을 확인하며, DBA_PDB_SAVED_STATES로 저장된 상태 정보를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql14",
+      "title": "CDB_PDBS를 이용한 PDB 복제 정보 확인",
+      "sql": "-- PDB 복제 관련 정보 조회\nSELECT pdb_name, status, con_id,\n       creation_scn, refresh_mode, refresh_interval\nFROM cdb_pdbs\nORDER BY con_id;\n\n-- PDB의 데이터 파일 정보 확인\nSELECT con_id, file_name, tablespace_name, bytes/1024/1024 AS size_mb\nFROM cdb_data_files\nORDER BY con_id, file_name;",
+      "description": "CDB_PDBS 뷰에서 PDB의 복제 관련 정보(REFRESH_MODE, REFRESH_INTERVAL 등)를 조회하고, CDB_DATA_FILES로 각 PDB의 데이터 파일 정보를 확인합니다."
+    }
+  ],
+  "keywords": [
+    "ISPDB_MODIFIABLE",
+    "V$PARAMETER",
+    "V$SYSTEM_PARAMETER",
+    "ALTER SYSTEM SET",
+    "CONTAINER=CURRENT",
+    "CONTAINER=ALL",
+    "PDB Lockdown Profile",
+    "PDB_LOCKDOWN",
+    "DBA_LOCKDOWN_PROFILES",
+    "Local Clone",
+    "Remote Clone",
+    "Hot Clone",
+    "DB Link",
+    "Refreshable Clone PDB",
+    "REFRESH MODE",
+    "SWITCHOVER",
+    "Snapshot Copy PDB",
+    "Copy-on-Write",
+    "DBCA",
+    "CDB_PDBS",
+    "DBA_PDB_SAVED_STATES",
+    "FILE_NAME_CONVERT",
+    "CREATE PLUGGABLE DATABASE",
+    "ALTER SYSTEM RESET",
+    "SCOPE",
+    "ARCHIVELOG",
+    "Local UNDO",
+    "TEMP_UNDO_ENABLED",
+    "Common User",
+    "V$PDBS",
+    "DBA_PDB_HISTORY"
+  ]
+}

@@ -1,0 +1,310 @@
+{
+  "id": "05_01",
+  "title": "테이블스페이스 구조 (Tablespace Structure)",
+  "chapter": "05. 스토리지 최적화 및 테이블스페이스",
+  "description": "Oracle Database의 논리적 저장 구조에서 테이블스페이스의 역할과 계층 구조를 이해하고, SMALLFILE 테이블스페이스와 BIGFILE 테이블스페이스의 구조적 차이, 데이터 파일 자동 확장(AUTOEXTEND) 메커니즘, 생성 구문 및 기본 테이블스페이스 설정 방법을 상세히 다룹니다.",
+  "oracle26ai_changes": [
+    "Oracle 26ai에서 BIGFILE 테이블스페이스의 기본 사용이 더욱 권장되며, ASM(Automatic Storage Management) 및 OMF(Oracle Managed Files) 환경에서 BIGFILE이 기본 테이블스페이스 타입으로 자동 설정되는 동작이 강화되었습니다.",
+    "Oracle 26ai에서 테이블스페이스 관련 동적 성능 뷰(V$TABLESPACE, V$DATAFILE)에 추가 메트릭이 포함되어 스토리지 모니터링 가시성이 향상되었습니다.",
+    "Oracle 26ai에서 DBMS_SPACE 패키지의 테이블스페이스 공간 분석 기능이 개선되어, AI 기반 자동 확장 권고(Auto-Extend Recommendation) 기능이 추가되었습니다.",
+    "PDB 격리(PDB Isolation) 환경에서 테이블스페이스 생성 시 BIGFILE/SMALLFILE 기본 타입 설정이 PDB 레벨에서 독립적으로 관리 가능하도록 개선되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "테이블스페이스 개요 (Tablespace Overview)",
+      "content": "**테이블스페이스(Tablespace)**는 Oracle Database의 **논리적 저장 구조(Logical Storage Structure)**에서 가장 큰 단위로, 데이터베이스 객체(테이블, 인덱스, LOB 등)가 저장되는 논리적 컨테이너입니다. 테이블스페이스는 하나 이상의 **데이터 파일(Datafile)**로 구성되어 물리적 저장 장치와 연결됩니다.\n\n## 논리적/물리적 저장 구조 계층\n\n```\nDatabase (데이터베이스)\n └── Tablespace (테이블스페이스) ─── 논리적 최상위\n      ├── Segment (세그먼트) ─── 테이블, 인덱스 등 객체 단위\n      │    ├── Extent (익스텐트) ─── 연속된 블록의 집합\n      │    │    ├── Data Block (데이터 블록) ─── I/O 최소 단위\n      │    │    ├── Data Block\n      │    │    └── ...\n      │    ├── Extent\n      │    └── ...\n      └── Datafile (데이터 파일) ─── 물리적 파일 대응\n           └── OS Block ─── 운영체제 블록\n```\n\n## 논리적 구조와 물리적 구조의 관계\n\n| 논리적 구조 | 물리적 구조 | 관계 |\n|---|---|---|\n| **Database** | 데이터 파일, 제어 파일, 리두 로그 파일 | 1:N (하나의 DB에 여러 물리 파일) |\n| **Tablespace** | 데이터 파일(Datafile) | 1:N (SMALLFILE) 또는 1:1 (BIGFILE) |\n| **Segment** | 데이터 파일 내 공간 | 하나의 세그먼트는 여러 데이터 파일에 걸칠 수 있음 |\n| **Extent** | 데이터 파일 내 연속 블록 | 하나의 익스텐트는 단일 데이터 파일 내에 존재 |\n| **Data Block** | OS 블록 | 1:N (하나의 DB 블록 = 여러 OS 블록) |\n\n## 기본 테이블스페이스 종류\n\n| 테이블스페이스 | 용도 | 필수 여부 | 특징 |\n|---|---|---|---|\n| **SYSTEM** | 데이터 딕셔너리 저장 | 필수 | SYS 소유, 항상 ONLINE, SMALLFILE |\n| **SYSAUX** | SYSTEM의 보조 구성요소 저장 | 필수 | AWR, Enterprise Manager 등의 데이터 |\n| **TEMP** | 임시 세그먼트(정렬, 해시 조인 등) | 필수 | TEMPORARY 테이블스페이스, 재사용 가능 |\n| **UNDO** | 언두 데이터(트랜잭션 롤백용) | 필수 | 자동 관리(AUM), UNDO_TABLESPACE 파라미터 |\n| **USERS** | 사용자 데이터 기본 저장소 | 선택 | 기본 영구 테이블스페이스로 지정 가능 |",
+      "sqlExamplesIds": ["sql01", "sql02"],
+      "subsections": [
+        {
+          "title": "논리적 저장 구조 계층 (Logical Storage Hierarchy)",
+          "content": "Oracle Database의 논리적 저장 구조는 **테이블스페이스(Tablespace) → 세그먼트(Segment) → 익스텐트(Extent) → 데이터 블록(Data Block)**의 4단계 계층으로 구성됩니다.\n\n### 각 계층의 정의와 역할\n\n| 계층 | 정의 | 역할 | 크기 결정 |\n|---|---|---|---|\n| **Tablespace** | 논리적 저장 공간의 최상위 컨테이너 | 세그먼트를 그룹화하여 관리 단위 제공 | 데이터 파일 크기의 합 |\n| **Segment** | 특정 데이터베이스 객체에 할당된 익스텐트 집합 | 테이블, 인덱스, LOB 등 객체별 공간 관리 | 자동 또는 수동 확장 |\n| **Extent** | 논리적으로 연속된 데이터 블록의 집합 | 공간 할당의 기본 단위 (한 번에 할당/해제) | UNIFORM 또는 AUTOALLOCATE |\n| **Data Block** | Oracle I/O 작업의 최소 단위 | 행 데이터, 인덱스 엔트리 등 실제 데이터 저장 | DB_BLOCK_SIZE 파라미터 |\n\n### 세그먼트 유형\n\n| 세그먼트 유형 | 설명 | 예시 |\n|---|---|---|\n| **테이블 세그먼트 (Table Segment)** | 테이블 데이터 저장 | 일반 힙 테이블 |\n| **인덱스 세그먼트 (Index Segment)** | 인덱스 데이터 저장 | B-Tree, Bitmap 인덱스 |\n| **임시 세그먼트 (Temporary Segment)** | 정렬, 해시 조인 시 임시 데이터 | ORDER BY, GROUP BY 처리 |\n| **언두 세그먼트 (Undo Segment)** | 트랜잭션 롤백 데이터 | 자동 관리(AUM) |\n| **LOB 세그먼트 (LOB Segment)** | 대용량 객체 데이터 | CLOB, BLOB 데이터 |\n| **클러스터 세그먼트 (Cluster Segment)** | 클러스터 테이블 데이터 | 테이블 클러스터 |\n\n### 익스텐트 관리 방식\n\n| 관리 방식 | 설명 | 장점 |\n|---|---|---|\n| **AUTOALLOCATE** | Oracle이 자동으로 익스텐트 크기 결정 (64KB, 1MB, 8MB, 64MB) | 관리 편의, 대부분의 환경에 적합 |\n| **UNIFORM** | 모든 익스텐트 크기가 동일 (기본 1MB) | 동일 크기로 예측 가능한 공간 관리 |\n\n### 데이터 블록 구조\n\n```\n┌─────────────────────────────┐\n│ Block Header                │ ← 블록 주소, 세그먼트 유형, SCN\n│   ├── Fixed Header          │\n│   ├── Variable Header       │ ← 트랜잭션 슬롯(ITL)\n│   └── Table Directory       │ ← 클러스터 테이블용\n├─────────────────────────────┤\n│ Row Directory               │ ← 각 행의 오프셋 정보\n├─────────────────────────────┤\n│ Free Space                  │ ← 새 행/업데이트용 여유 공간\n├─────────────────────────────┤\n│ Row Data                    │ ← 실제 행 데이터\n└─────────────────────────────┘\n```\n\n### 관련 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **DB_BLOCK_SIZE** | 데이터 블록 크기 (DB 생성 시 결정, 변경 불가) | 8192 (8KB) |\n| **DB_nK_CACHE_SIZE** | 비표준 블록 크기 캐시 설정 (n = 2, 4, 16, 32) | 0 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `DBA_SEGMENTS` | 세그먼트 정보 (BYTES, BLOCKS, EXTENTS) |\n| `DBA_EXTENTS` | 익스텐트 상세 정보 (FILE_ID, BLOCK_ID, BYTES) |\n| `DBA_FREE_SPACE` | 테이블스페이스의 여유 공간 정보 |\n| `V$DATAFILE` | 데이터 파일 정보 |",
+          "key_points": [
+            "논리적 저장 구조는 Tablespace → Segment → Extent → Data Block 4단계 계층",
+            "익스텐트(Extent)는 공간 할당/해제의 기본 단위이며, 반드시 단일 데이터 파일 내에 존재",
+            "데이터 블록(Data Block)은 I/O 최소 단위이며, DB_BLOCK_SIZE 파라미터로 결정 (DB 생성 후 변경 불가)",
+            "익스텐트 관리 방식은 AUTOALLOCATE(자동)와 UNIFORM(균등) 두 가지",
+            "세그먼트는 테이블, 인덱스, 임시, 언두, LOB, 클러스터 등 다양한 유형으로 분류",
+            "하나의 세그먼트는 동일 테이블스페이스 내 여러 데이터 파일에 걸쳐 익스텐트를 가질 수 있음"
+          ]
+        },
+        {
+          "title": "기본 제공 테이블스페이스 (Default Tablespaces)",
+          "content": "Oracle Database 생성 시 자동으로 생성되는 기본 테이블스페이스들은 데이터베이스 운영의 핵심 역할을 수행합니다. 각 테이블스페이스는 특정 목적을 가지며, 함부로 삭제하거나 변경해서는 안 됩니다.\n\n### 기본 테이블스페이스 상세\n\n| 테이블스페이스 | 데이터 파일 | 용도 | 삭제 가능 여부 |\n|---|---|---|---|\n| **SYSTEM** | system01.dbf | 데이터 딕셔너리, PL/SQL 패키지 | 불가 |\n| **SYSAUX** | sysaux01.dbf | AWR, ADDM, Advisor, EM Repository | 불가 |\n| **TEMP** | temp01.dbf | 정렬, 해시 조인, 임시 테이블 | 대체 후 가능 |\n| **UNDOTBS1** | undotbs01.dbf | 언두 데이터 (트랜잭션 롤백, CR) | 대체 후 가능 |\n| **USERS** | users01.dbf | 사용자 데이터 기본 저장 | 가능 (기본 TS 변경 후) |\n\n### SYSTEM 테이블스페이스\n\n- **데이터 딕셔너리(Data Dictionary)**의 물리적 저장소\n- SYS 스키마 소유의 기본 테이블(TAB$, OBJ$, COL$ 등) 저장\n- **항상 ONLINE** 상태 유지 필수 — OFFLINE 시 DB 운영 불가\n- **SYSTEM 테이블스페이스에 사용자 객체 생성 비권장** — 공간 경합 및 관리 복잡성 증가\n\n### SYSAUX 테이블스페이스\n\n- Oracle 10g에서 도입, SYSTEM의 보조(Auxiliary) 역할\n- 이전에 별도 테이블스페이스를 사용하던 구성 요소들을 통합\n- **주요 거주 구성 요소**: AWR(Automatic Workload Repository), ADDM, SQL Tuning Advisor, Oracle Text, Spatial, XDB 등\n- `V$SYSAUX_OCCUPANTS` 뷰로 거주 구성 요소 확인 가능\n\n### TEMP 테이블스페이스\n\n- **TEMPORARY** 유형의 테이블스페이스\n- 정렬(Sort), 해시 조인(Hash Join), Global Temporary Table 데이터 저장\n- **TEMPFILE**을 사용 (일반 DATAFILE과 구분)\n- 임시 세그먼트는 세션 종료 시 자동 해제\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `DBA_TABLESPACES` | 모든 테이블스페이스 정보 |\n| `V$TABLESPACE` | 테이블스페이스 동적 정보 (TS#, NAME) |\n| `DATABASE_PROPERTIES` | DEFAULT_PERMANENT_TABLESPACE 등 확인 |\n| `V$SYSAUX_OCCUPANTS` | SYSAUX 거주 구성 요소 목록 |",
+          "key_points": [
+            "SYSTEM 테이블스페이스는 데이터 딕셔너리의 물리적 저장소로 항상 ONLINE 유지 필수",
+            "SYSAUX는 SYSTEM의 보조 역할로 AWR, ADDM 등 Oracle 내부 구성 요소 데이터를 저장",
+            "TEMP 테이블스페이스는 TEMPORARY 유형으로 TEMPFILE을 사용하며, 정렬/해시 조인 시 임시 데이터 저장",
+            "UNDO 테이블스페이스는 트랜잭션 롤백 및 읽기 일관성(Consistent Read)을 위한 언두 데이터 저장",
+            "USERS 테이블스페이스는 사용자 데이터의 기본 저장소이며, DATABASE_PROPERTIES에서 기본 영구 TS 확인 가능",
+            "SYSTEM 테이블스페이스에 사용자 객체를 생성하는 것은 공간 경합 및 관리 복잡성으로 인해 비권장"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s02",
+      "title": "SMALLFILE 테이블스페이스 (SMALLFILE Tablespace / SMALLFILE 表領域)",
+      "content": "**SMALLFILE 테이블스페이스**는 Oracle Database의 **전통적인(기본) 테이블스페이스 유형**으로, 하나의 테이블스페이스에 **여러 개의 데이터 파일(Datafile)**을 포함할 수 있습니다. Oracle Database 생성 시 별도의 설정이 없으면 SMALLFILE이 기본 테이블스페이스 타입입니다.\n\n## SMALLFILE 테이블스페이스 핵심 특성\n\n| 특성 | 값 |\n|---|---|\n| **데이터 파일 수** | 테이블스페이스당 최대 1,022개 |\n| **데이터 파일 최대 크기** | 블록 크기에 따라 다름 (아래 표 참조) |\n| **ROWID 내 파일 번호** | 10비트 (최대 1,022개 파일 식별) |\n| **ROWID 내 블록 번호** | 22비트 (파일당 최대 약 4백만 블록) |\n| **기본 설정 여부** | Oracle 기본 테이블스페이스 타입 |\n\n## 블록 크기별 SMALLFILE 데이터 파일 최대 크기\n\n| DB_BLOCK_SIZE | 데이터 파일 최대 크기 | 테이블스페이스 최대 크기 (1,022 파일 기준) |\n|---|---|---|\n| **2KB** | 8GB | 약 8TB |\n| **4KB** | 16GB | 약 16TB |\n| **8KB (기본)** | 32GB | 약 32TB |\n| **16KB** | 64GB | 약 64TB |\n| **32KB** | 128GB | 약 128TB |",
+      "sqlExamplesIds": ["sql03", "sql04"],
+      "subsections": [
+        {
+          "title": "SMALLFILE 테이블스페이스의 정의 및 구조 (Definition and Structure)",
+          "content": "SMALLFILE 테이블스페이스는 **하나 이상의 데이터 파일(Datafile)**로 구성되는 전통적인 테이블스페이스 유형입니다. 'SMALLFILE'이라는 이름은 각 데이터 파일의 크기가 상대적으로 작다는 의미가 아니라, BIGFILE과 구분하기 위한 명칭입니다.\n\n### SMALLFILE의 내부 구조\n\n```\nSMALLFILE Tablespace (예: USERS)\n ├── Datafile 1: users01.dbf (10GB)\n ├── Datafile 2: users02.dbf (10GB)\n ├── Datafile 3: users03.dbf (10GB)\n └── Datafile 4: users04.dbf (5GB)\n     총 크기: 35GB\n```\n\n### ROWID 구조 (SMALLFILE)\n\nSMALLFILE 테이블스페이스에서 **ROWID(Row Identifier)**는 다음과 같은 구조를 가집니다:\n\n| 구성 요소 | 비트 수 | 설명 |\n|---|---|---|\n| **Data Object Number** | 32비트 | 세그먼트를 식별하는 객체 번호 |\n| **Relative File Number** | 10비트 | 테이블스페이스 내 데이터 파일 번호 (최대 1,022) |\n| **Block Number** | 22비트 | 데이터 파일 내 블록 번호 (최대 약 4,194,304) |\n| **Row Number** | 16비트 | 블록 내 행 번호 (최대 65,536) |\n\nROWID 인코딩 형식: `OOOOOOFFFBBBBBBRRR` (Base64 인코딩, 18자리)\n\n- **OOOOOO**: Data Object Number (6자리)\n- **FFF**: Relative File Number (3자리)\n- **BBBBBB**: Block Number (6자리)\n- **RRR**: Row Number (3자리)\n\n### SMALLFILE의 데이터 파일 관리\n\n데이터 파일은 테이블스페이스 생성 후에도 추가/삭제/크기 변경이 가능합니다.\n\n```sql\n-- 데이터 파일 추가\nALTER TABLESPACE users ADD DATAFILE '/u01/app/oracle/oradata/users02.dbf' SIZE 10G;\n\n-- 데이터 파일 크기 변경 (수동)\nALTER DATABASE DATAFILE '/u01/app/oracle/oradata/users01.dbf' RESIZE 20G;\n\n-- 데이터 파일 삭제 (빈 파일만 가능)\nALTER TABLESPACE users DROP DATAFILE '/u01/app/oracle/oradata/users02.dbf';\n```\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **DB_FILES** | 인스턴스에서 열 수 있는 최대 데이터 파일 수 (기본 200) |\n| **DB_BLOCK_SIZE** | 데이터 블록 크기 (데이터 파일 최대 크기에 영향) |\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `DBA_TABLESPACES` | BIGFILE 컬럼으로 SMALLFILE/BIGFILE 구분 (NO = SMALLFILE) |\n| `DBA_DATA_FILES` | 데이터 파일 상세 정보 (크기, 자동 확장 여부 등) |\n| `V$DATAFILE` | 데이터 파일 동적 성능 정보 |",
+          "key_points": [
+            "SMALLFILE 테이블스페이스는 하나의 테이블스페이스에 최대 1,022개의 데이터 파일을 포함 가능",
+            "ROWID에서 Relative File Number에 10비트를 할당하여 최대 1,022개 파일 식별",
+            "ROWID에서 Block Number에 22비트를 할당하여 파일당 최대 약 4백만(2^22) 블록까지 지원",
+            "DB_BLOCK_SIZE가 8KB일 때 데이터 파일 최대 크기는 약 32GB, 테이블스페이스 최대 크기는 약 32TB",
+            "데이터 파일은 ADD DATAFILE로 추가, ALTER DATABASE DATAFILE ... RESIZE로 크기 변경 가능",
+            "DB_FILES 파라미터로 인스턴스에서 열 수 있는 최대 데이터 파일 수를 제한"
+          ]
+        },
+        {
+          "title": "SMALLFILE 테이블스페이스의 사용 사례 및 운영 (Use Cases and Operations)",
+          "content": "SMALLFILE 테이블스페이스는 전통적인 파일 시스템(Non-ASM) 환경에서 가장 널리 사용되며, 여러 데이터 파일을 통해 유연한 공간 관리가 가능합니다.\n\n### 주요 사용 사례\n\n| 사용 사례 | 설명 |\n|---|---|\n| **일반 파일 시스템 환경** | ASM/OMF를 사용하지 않는 전통적 환경 |\n| **여러 디스크에 분산** | 다수 데이터 파일을 서로 다른 디스크에 배치하여 I/O 분산 |\n| **점진적 공간 확장** | 필요시 데이터 파일을 하나씩 추가하며 공간 확장 |\n| **기존 시스템 유지보수** | 오래된 Oracle 환경에서 업그레이드 없이 유지 |\n| **소규모/중규모 DB** | 테이블스페이스 크기가 수 TB 이하인 환경 |\n\n### SMALLFILE 테이블스페이스의 장단점\n\n| 구분 | 내용 |\n|---|---|\n| **장점** | 여러 데이터 파일로 유연한 I/O 분산 가능 |\n| **장점** | 개별 데이터 파일 단위로 세밀한 관리 가능 (OFFLINE, RESIZE) |\n| **장점** | 파일 시스템 제한(단일 파일 최대 크기)에 유연하게 대응 |\n| **단점** | 대용량 테이블스페이스 시 다수의 데이터 파일 관리 필요 |\n| **단점** | 데이터 파일 수가 많아지면 관리 복잡성 증가 |\n| **단점** | 일부 DDL(크기 변경 등)이 데이터 파일 단위로만 가능 |\n\n### 운영 시 주의사항\n\n1. **DB_FILES 파라미터**: 전체 데이터베이스에서 사용 가능한 최대 데이터 파일 수를 제한합니다. SMALLFILE 테이블스페이스를 많이 사용하면 이 한계에 도달할 수 있으므로 적절한 값 설정이 필요합니다.\n2. **제어 파일(Control File)**: 모든 데이터 파일 정보가 제어 파일에 기록되므로, 데이터 파일이 많으면 제어 파일의 크기와 관리 부담이 증가합니다.\n3. **RMAN 백업**: 데이터 파일 수가 많을수록 백업/복구 시 관리해야 할 단위가 많아집니다.",
+          "key_points": [
+            "SMALLFILE은 Non-ASM 전통적 파일 시스템 환경에서 기본적으로 사용되는 테이블스페이스 유형",
+            "여러 데이터 파일을 서로 다른 디스크에 배치하여 I/O 분산이 가능한 것이 핵심 장점",
+            "DB_FILES 파라미터로 인스턴스 전체의 최대 데이터 파일 수를 제한하므로, SMALLFILE이 많으면 한계 도달 가능",
+            "모든 데이터 파일 정보가 제어 파일에 기록되어 파일 수가 많으면 제어 파일 관리 부담 증가",
+            "대용량 환경에서는 데이터 파일 관리 복잡성이 높아지므로 BIGFILE 테이블스페이스 검토 필요"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "BIGFILE 테이블스페이스 (BIGFILE Tablespace / BIGFILE 表領域)",
+      "content": "**BIGFILE 테이블스페이스**는 Oracle 10g에서 도입된 테이블스페이스 유형으로, **단일 데이터 파일(Single Datafile)**로만 구성됩니다. 하나의 매우 큰 데이터 파일을 사용하여 테라바이트~엑사바이트 규모의 대용량 데이터를 관리할 수 있으며, **ASM(Automatic Storage Management)** 또는 **OMF(Oracle Managed Files)** 환경에서 특히 유용합니다.\n\n## BIGFILE 테이블스페이스 핵심 특성\n\n| 특성 | 값 |\n|---|---|\n| **데이터 파일 수** | 테이블스페이스당 정확히 **1개** |\n| **ROWID 내 파일 번호** | 사용하지 않음 (0비트 또는 고정) |\n| **ROWID 내 블록 번호** | 32비트 (최대 약 42억 블록) |\n| **최대 블록 수** | 4,294,967,296 (2^32) 블록 |\n| **기본 설정 여부** | 비기본 (명시적 지정 또는 SET DEFAULT BIGFILE 필요) |\n\n## 블록 크기별 BIGFILE 데이터 파일 최대 크기\n\n| DB_BLOCK_SIZE | BIGFILE 최대 크기 | SMALLFILE 최대 크기 (비교) |\n|---|---|---|\n| **2KB** | 8TB | 8GB |\n| **4KB** | 16TB | 16GB |\n| **8KB (기본)** | 32TB | 32GB |\n| **16KB** | 64TB | 64GB |\n| **32KB** | 128TB | 128GB |",
+      "sqlExamplesIds": ["sql05", "sql06"],
+      "subsections": [
+        {
+          "title": "BIGFILE 테이블스페이스의 정의 및 구조 (Definition and Structure)",
+          "content": "BIGFILE 테이블스페이스는 **정확히 하나의 데이터 파일**만 가질 수 있으며, 그 데이터 파일의 크기를 매우 크게 설정할 수 있습니다. ROWID에서 파일 번호 비트를 블록 번호에 재할당하여, 단일 파일 내에서 훨씬 많은 블록을 주소 지정할 수 있습니다.\n\n### BIGFILE의 내부 구조\n\n```\nBIGFILE Tablespace (예: BIG_DATA)\n └── Datafile 1: big_data01.dbf (최대 32TB, 8KB 블록 기준)\n     총 크기: 최대 32TB (단일 파일)\n```\n\n### ROWID 구조 (BIGFILE) — SMALLFILE과의 핵심 차이\n\n| 구성 요소 | SMALLFILE | BIGFILE | 차이 |\n|---|---|---|---|\n| **Data Object Number** | 32비트 | 32비트 | 동일 |\n| **Relative File Number** | 10비트 | 0비트 (사용 안 함) | BIGFILE은 파일이 1개이므로 불필요 |\n| **Block Number** | 22비트 | 32비트 | BIGFILE이 10비트 추가 확보 |\n| **Row Number** | 16비트 | 16비트 | 동일 |\n\nBIGFILE 테이블스페이스에서는 파일 번호에 사용되던 **10비트를 블록 번호에 재할당**합니다. 이로 인해:\n- SMALLFILE: 파일당 최대 2^22 = **약 4백만 블록**\n- BIGFILE: 파일당 최대 2^32 = **약 42억 블록**\n\n블록 크기가 8KB일 때:\n- SMALLFILE 파일 최대 크기: 4,194,304 × 8KB = **약 32GB**\n- BIGFILE 파일 최대 크기: 4,294,967,296 × 8KB = **약 32TB**\n\n### BIGFILE 제한 사항\n\n| 제한 사항 | 설명 |\n|---|---|\n| **데이터 파일 추가 불가** | ALTER TABLESPACE ... ADD DATAFILE 사용 불가 |\n| **데이터 파일 삭제 불가** | ALTER TABLESPACE ... DROP DATAFILE 사용 불가 |\n| **파일 시스템 제한** | 기반 파일 시스템/OS가 대용량 파일을 지원해야 함 |\n| **Non-ASM 환경** | 단일 파일에 I/O가 집중되어 병목 가능성 |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **DB_BLOCK_SIZE** | 블록 크기에 따라 BIGFILE 최대 크기 결정 |\n| **DB_FILES** | BIGFILE에서도 데이터 파일 1개가 DB_FILES 카운트에 포함 |",
+          "key_points": [
+            "BIGFILE 테이블스페이스는 정확히 하나의 데이터 파일만 포함 가능 — ADD DATAFILE 사용 불가",
+            "ROWID에서 파일 번호(10비트)를 블록 번호에 재할당하여 블록 번호가 32비트로 확장",
+            "8KB 블록 기준 BIGFILE 최대 크기는 약 32TB로, SMALLFILE 단일 파일(32GB)의 약 1,000배",
+            "기반 파일 시스템/OS가 대용량 파일을 지원해야 BIGFILE 사용 가능",
+            "BIGFILE에서도 데이터 파일 1개가 DB_FILES 카운트에 포함됨",
+            "Non-ASM 환경에서 단일 파일에 I/O가 집중될 수 있어 병목 가능성 주의"
+          ]
+        },
+        {
+          "title": "BIGFILE과 ASM/OMF의 관계 (BIGFILE with ASM and OMF)",
+          "content": "BIGFILE 테이블스페이스는 **ASM(Automatic Storage Management)** 또는 **OMF(Oracle Managed Files)** 환경에서 사용할 때 최대의 효과를 발휘합니다. ASM은 자체적으로 스트라이핑(Striping)과 미러링(Mirroring)을 수행하므로, 단일 데이터 파일이라도 여러 물리적 디스크에 걸쳐 I/O가 분산됩니다.\n\n### ASM 환경에서 BIGFILE의 동작\n\n```\nBIGFILE Tablespace\n └── Single Datafile (논리적으로 1개)\n      └── ASM Disk Group\n           ├── ASM Disk 1 ─── Allocation Unit (AU) 스트라이핑\n           ├── ASM Disk 2 ─── Allocation Unit (AU) 스트라이핑\n           ├── ASM Disk 3 ─── Allocation Unit (AU) 스트라이핑\n           └── ASM Disk 4 ─── Allocation Unit (AU) 스트라이핑\n```\n\n### ASM/OMF 환경에서의 이점\n\n| 이점 | 설명 |\n|---|---|\n| **I/O 자동 분산** | ASM이 AU 단위로 스트라이핑하여 단일 파일이라도 다중 디스크에 분산 |\n| **관리 간소화** | 데이터 파일 이름/경로를 Oracle이 자동 관리 (OMF) |\n| **자동 리밸런싱** | 디스크 추가/제거 시 ASM이 자동으로 데이터 재분배 |\n| **기본 타입 자동 설정** | ASM/OMF 환경에서는 BIGFILE이 기본 테이블스페이스 타입이 될 수 있음 |\n\n### OMF(Oracle Managed Files) 연동\n\nOMF를 사용하면 데이터 파일의 이름과 경로를 Oracle이 자동으로 생성/관리합니다.\n\n```sql\n-- OMF 경로 설정\nALTER SYSTEM SET DB_CREATE_FILE_DEST = '+DATA' SCOPE=BOTH;\n\n-- OMF + BIGFILE 테이블스페이스 생성 (파일 이름/경로 자동)\nCREATE BIGFILE TABLESPACE big_data;\n```\n\n### Non-ASM 환경에서 BIGFILE 사용 시 주의사항\n\n| 주의사항 | 설명 |\n|---|---|\n| **I/O 병목** | 단일 파일에 모든 I/O가 집중되어 디스크 병목 가능 |\n| **파일 시스템 제한** | OS/파일 시스템이 대용량 파일을 지원해야 함 |\n| **백업 시간** | 단일 대용량 파일의 백업/복구 시간이 길어질 수 있음 |\n| **병렬 I/O 불가** | 여러 데이터 파일로 분산된 병렬 I/O가 불가 |\n\n### BIGFILE이 기본 타입이 되는 조건\n\nOracle Database에서 다음 조건이 충족되면 BIGFILE이 기본 테이블스페이스 타입으로 설정될 수 있습니다:\n\n1. `ALTER DATABASE SET DEFAULT BIGFILE TABLESPACE;` 명시적 실행\n2. ASM + OMF 조합 사용 시 Oracle이 BIGFILE을 권장\n3. DBCA(Database Configuration Assistant)에서 ASM 선택 시 BIGFILE 기본 적용",
+          "key_points": [
+            "ASM은 AU(Allocation Unit) 단위 스트라이핑으로 단일 BIGFILE 데이터 파일도 다중 디스크에 I/O 분산",
+            "OMF 사용 시 BIGFILE 데이터 파일의 이름/경로를 Oracle이 자동으로 생성 및 관리",
+            "Non-ASM 환경에서 BIGFILE 사용 시 단일 파일에 I/O가 집중되어 병목 가능성 존재",
+            "ALTER DATABASE SET DEFAULT BIGFILE TABLESPACE로 데이터베이스의 기본 테이블스페이스 타입 변경 가능",
+            "ASM + OMF 조합 환경에서 BIGFILE 사용이 Oracle의 권장 구성",
+            "DBCA에서 ASM 스토리지를 선택하면 BIGFILE이 기본 테이블스페이스 타입으로 적용"
+          ]
+        },
+        {
+          "title": "BIGFILE 테이블스페이스 관리 편의성 (Management Convenience)",
+          "content": "BIGFILE 테이블스페이스는 SMALLFILE과 달리 **테이블스페이스 레벨에서 직접 크기 조정**이 가능합니다. SMALLFILE에서는 데이터 파일 단위로만 크기를 변경할 수 있지만, BIGFILE에서는 테이블스페이스 자체에 대해 RESIZE, AUTOEXTEND 등의 명령을 실행할 수 있습니다.\n\n### BIGFILE 전용 DDL 명령어\n\n| 명령어 | BIGFILE | SMALLFILE | 설명 |\n|---|---|---|---|\n| `ALTER TABLESPACE ... RESIZE` | O | X | 테이블스페이스 레벨 크기 변경 |\n| `ALTER TABLESPACE ... AUTOEXTEND` | O | X | 테이블스페이스 레벨 자동 확장 설정 |\n| `ALTER TABLESPACE ... ADD DATAFILE` | X | O | 데이터 파일 추가 (BIGFILE 불가) |\n| `ALTER TABLESPACE ... DROP DATAFILE` | X | O | 데이터 파일 삭제 (BIGFILE 불가) |\n| `ALTER DATABASE DATAFILE ... RESIZE` | O (가능) | O | 데이터 파일 레벨 크기 변경 |\n\n### BIGFILE 테이블스페이스 관리 예시\n\n```sql\n-- BIGFILE 테이블스페이스 크기 변경 (테이블스페이스 레벨)\nALTER TABLESPACE big_data RESIZE 500G;\n\n-- BIGFILE 테이블스페이스 자동 확장 설정 (테이블스페이스 레벨)\nALTER TABLESPACE big_data AUTOEXTEND ON NEXT 1G MAXSIZE 2T;\n\n-- SMALLFILE에서는 동일 작업을 데이터 파일 단위로 수행해야 함\n-- ALTER DATABASE DATAFILE '/u01/data/users01.dbf' RESIZE 20G;\n-- ALTER DATABASE DATAFILE '/u01/data/users01.dbf' AUTOEXTEND ON NEXT 100M MAXSIZE 30G;\n```\n\n### 관리 편의성 비교\n\n| 관리 항목 | SMALLFILE | BIGFILE |\n|---|---|---|\n| **공간 확장** | 데이터 파일별로 개별 관리 | 테이블스페이스 레벨 단일 명령 |\n| **자동 확장 설정** | 데이터 파일별 개별 설정 | 테이블스페이스 레벨 단일 설정 |\n| **크기 모니터링** | 여러 파일의 크기를 합산 | 단일 파일 크기 = 테이블스페이스 크기 |\n| **파일 경로 관리** | 여러 파일 경로 관리 | 하나의 파일 경로만 관리 |\n| **RMAN 백업** | 파일별 병렬 백업 가능 | 단일 파일 백업 (멀티섹션 백업으로 보완) |",
+          "key_points": [
+            "BIGFILE은 ALTER TABLESPACE ... RESIZE로 테이블스페이스 레벨에서 직접 크기 변경 가능",
+            "BIGFILE은 ALTER TABLESPACE ... AUTOEXTEND로 테이블스페이스 레벨에서 자동 확장 설정 가능",
+            "SMALLFILE은 ALTER DATABASE DATAFILE 명령으로 데이터 파일 단위로만 관리해야 함",
+            "BIGFILE에서는 ADD DATAFILE / DROP DATAFILE 명령 사용 불가",
+            "RMAN에서 BIGFILE 단일 대용량 파일은 멀티섹션 백업(Multisection Backup)으로 병렬 처리 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "SMALLFILE vs BIGFILE 비교 (SMALLFILE vs BIGFILE Comparison)",
+      "content": "SMALLFILE 테이블스페이스와 BIGFILE 테이블스페이스의 주요 차이를 종합적으로 비교합니다. 시험에서는 두 유형의 구조적 차이, 관리 방식의 차이, 적합한 사용 환경을 정확히 구분하는 것이 중요합니다.\n\n## 종합 비교표\n\n| 비교 항목 | SMALLFILE | BIGFILE |\n|---|---|---|\n| **도입 버전** | Oracle 초기부터 | Oracle 10g (10.1) |\n| **데이터 파일 수** | 최대 1,022개 | 정확히 1개 |\n| **ROWID 파일 번호 비트** | 10비트 | 0비트 (사용 안 함) |\n| **ROWID 블록 번호 비트** | 22비트 | 32비트 |\n| **파일당 최대 블록 수** | 약 4백만 (2^22) | 약 42억 (2^32) |\n| **8KB 블록 시 파일 최대 크기** | 약 32GB | 약 32TB |\n| **8KB 블록 시 TS 최대 크기** | 약 32TB (1,022 파일) | 약 32TB (1 파일) |\n| **크기 변경 단위** | 데이터 파일 레벨 | 테이블스페이스 레벨 가능 |\n| **자동 확장 설정 단위** | 데이터 파일 레벨 | 테이블스페이스 레벨 가능 |\n| **ADD/DROP DATAFILE** | 가능 | 불가 |\n| **I/O 분산** | 여러 파일로 자연 분산 | ASM에 의존 |\n| **기본 타입** | 기본값 | 명시적 설정 필요 |\n| **권장 환경** | 일반 파일 시스템 | ASM + OMF |\n| **RMAN 병렬 백업** | 파일별 자연 병렬화 | 멀티섹션 백업 필요 |",
+      "sqlExamplesIds": ["sql07"],
+      "subsections": [
+        {
+          "title": "구조적 차이 상세 분석 (Structural Difference Analysis)",
+          "content": "SMALLFILE과 BIGFILE의 가장 핵심적인 차이는 **ROWID 구조**에서 비롯됩니다. 이 차이가 데이터 파일 수, 최대 크기, 관리 방식의 모든 차이를 결정합니다.\n\n### ROWID 비트 할당 비교\n\n```\nSMALLFILE ROWID (80비트 = 10바이트):\n┌──────────────────┬────────────┬──────────────────┬────────────┐\n│ Object Number    │ File Number│ Block Number     │ Row Number │\n│   32비트         │  10비트    │   22비트         │  16비트    │\n└──────────────────┴────────────┴──────────────────┴────────────┘\n\nBIGFILE ROWID (80비트 = 10바이트):\n┌──────────────────┬─────────────────────────────────┬────────────┐\n│ Object Number    │ Block Number (Encoded)           │ Row Number │\n│   32비트         │          32비트                  │  16비트    │\n└──────────────────┴─────────────────────────────────┴────────────┘\n```\n\n### 크기 계산 예시\n\nDB_BLOCK_SIZE = 8KB (8,192 bytes) 기준:\n\n**SMALLFILE 단일 데이터 파일 최대 크기:**\n- 2^22 블록 × 8,192 바이트 = 4,194,304 × 8,192 = 34,359,738,368 바이트 ≈ **32GB**\n\n**SMALLFILE 테이블스페이스 최대 크기:**\n- 32GB × 1,022 파일 ≈ **32,704GB ≈ 약 32TB**\n\n**BIGFILE 단일 데이터 파일(= 테이블스페이스) 최대 크기:**\n- 2^32 블록 × 8,192 바이트 = 4,294,967,296 × 8,192 = 35,184,372,088,832 바이트 ≈ **32TB**\n\n### 결론: 최대 용량은 동일하지만 구조가 다르다\n\n8KB 블록 기준으로 SMALLFILE(1,022파일)과 BIGFILE(1파일)의 **테이블스페이스 최대 크기는 거의 동일(약 32TB)**합니다. 차이는 그 용량을 **여러 파일로 나누어 저장하느냐(SMALLFILE)** 아니면 **단일 파일에 저장하느냐(BIGFILE)**입니다.\n\n### 선택 가이드라인\n\n| 환경/조건 | 권장 유형 | 이유 |\n|---|---|---|\n| ASM + OMF 사용 | **BIGFILE** | ASM이 I/O 분산 처리, 관리 간소화 |\n| 일반 파일 시스템 | **SMALLFILE** | 여러 파일로 I/O 분산, 파일 시스템 제한 대응 |\n| 초대용량 테이블스페이스 | **BIGFILE** | 데이터 파일 관리 오버헤드 감소 |\n| RAC 환경 + ASM | **BIGFILE** | ASM의 클러스터 파일 시스템 기능 활용 |\n| OS 파일 크기 제한 있음 | **SMALLFILE** | 여러 작은 파일로 제한 회피 |",
+          "key_points": [
+            "ROWID의 파일 번호 10비트를 블록 번호에 재할당하는 것이 BIGFILE의 핵심 구조적 차이",
+            "8KB 블록 기준 SMALLFILE TS 최대(약 32TB)와 BIGFILE TS 최대(약 32TB)는 거의 동일한 용량",
+            "SMALLFILE은 여러 파일에 분산 저장, BIGFILE은 단일 파일에 집중 저장이라는 구조적 차이",
+            "ASM + OMF 환경에서는 BIGFILE이 권장, 일반 파일 시스템에서는 SMALLFILE이 기본",
+            "RAC + ASM 환경에서도 BIGFILE이 권장되며 ASM 클러스터 파일 시스템 기능 활용 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "데이터 파일 자동 확장 (AUTOEXTEND / データ・ファイルの自動拡張機能)",
+      "content": "**AUTOEXTEND(자동 확장)**는 데이터 파일의 공간이 부족할 때 Oracle이 자동으로 데이터 파일 크기를 확장하는 기능입니다. 테이블스페이스의 공간 부족으로 인한 ORA-01653, ORA-01654 등의 오류를 방지하며, 스토리지 관리의 자동화를 제공합니다.\n\n## AUTOEXTEND 핵심 요소\n\n| 요소 | 설명 | 구문 |\n|---|---|---|\n| **AUTOEXTEND ON** | 자동 확장 활성화 | AUTOEXTEND ON |\n| **AUTOEXTEND OFF** | 자동 확장 비활성화 | AUTOEXTEND OFF |\n| **NEXT** | 확장 시 증가 크기 | NEXT 100M |\n| **MAXSIZE** | 최대 확장 한계 | MAXSIZE 30G |\n| **MAXSIZE UNLIMITED** | 파일 시스템/블록 크기 한계까지 확장 | MAXSIZE UNLIMITED |",
+      "sqlExamplesIds": ["sql08", "sql09"],
+      "subsections": [
+        {
+          "title": "AUTOEXTEND 메커니즘 상세 (AUTOEXTEND Mechanism Details)",
+          "content": "AUTOEXTEND는 데이터 파일에 새로운 익스텐트를 할당해야 하는데 **현재 파일에 충분한 여유 공간이 없을 때** 자동으로 트리거됩니다.\n\n### AUTOEXTEND 동작 프로세스\n\n1. **공간 요청 발생**: 세그먼트가 새로운 익스텐트를 할당 요청\n2. **여유 공간 확인**: 데이터 파일의 현재 여유 공간 확인\n3. **공간 부족 감지**: 여유 공간이 부족하면 AUTOEXTEND 설정 확인\n4. **자동 확장 실행**: AUTOEXTEND ON이면 NEXT 크기만큼 파일 확장\n5. **MAXSIZE 확인**: 확장 후 크기가 MAXSIZE를 초과하지 않는지 검증\n6. **확장 완료/실패**: 성공 시 익스텐트 할당 진행, 실패 시 ORA 오류 발생\n\n### AUTOEXTEND 관련 ORA 오류\n\n| 오류 코드 | 설명 | 원인 |\n|---|---|---|\n| **ORA-01653** | 테이블 세그먼트 확장 실패 | 테이블스페이스 공간 부족 + AUTOEXTEND OFF 또는 MAXSIZE 도달 |\n| **ORA-01654** | 인덱스 세그먼트 확장 실패 | 동일 원인 |\n| **ORA-01652** | 임시 세그먼트 확장 실패 | TEMP 테이블스페이스 공간 부족 |\n| **ORA-01688** | AUTOEXTEND 한계 도달 | MAXSIZE에 도달하여 더 이상 확장 불가 |\n\n### SMALLFILE vs BIGFILE의 AUTOEXTEND 설정 차이\n\n| 항목 | SMALLFILE | BIGFILE |\n|---|---|---|\n| **설정 대상** | 개별 데이터 파일 | 테이블스페이스 또는 데이터 파일 |\n| **설정 구문** | `ALTER DATABASE DATAFILE ... AUTOEXTEND` | `ALTER TABLESPACE ... AUTOEXTEND` 가능 |\n| **여러 파일 관리** | 각 파일별 개별 설정 필요 | 단일 파일이므로 한 번만 설정 |\n\n### AUTOEXTEND 설정 구문\n\n```sql\n-- 테이블스페이스 생성 시 AUTOEXTEND 설정 (SMALLFILE)\nCREATE TABLESPACE app_data\n  DATAFILE '/u01/app/oracle/oradata/app_data01.dbf' SIZE 1G\n  AUTOEXTEND ON NEXT 100M MAXSIZE 10G;\n\n-- 기존 데이터 파일에 AUTOEXTEND 설정\nALTER DATABASE DATAFILE '/u01/app/oracle/oradata/app_data01.dbf'\n  AUTOEXTEND ON NEXT 100M MAXSIZE 10G;\n\n-- AUTOEXTEND 비활성화\nALTER DATABASE DATAFILE '/u01/app/oracle/oradata/app_data01.dbf'\n  AUTOEXTEND OFF;\n\n-- BIGFILE 테이블스페이스 레벨 AUTOEXTEND\nALTER TABLESPACE big_data AUTOEXTEND ON NEXT 1G MAXSIZE 10T;\n```\n\n### 관련 뷰\n\n| 뷰 | 주요 컬럼 | 설명 |\n|---|---|---|\n| `DBA_DATA_FILES` | AUTOEXTENSIBLE, MAXBYTES, INCREMENT_BY | 데이터 파일 자동 확장 정보 |\n| `DBA_TEMP_FILES` | AUTOEXTENSIBLE, MAXBYTES, INCREMENT_BY | 임시 파일 자동 확장 정보 |\n| `V$DATAFILE` | -- | 데이터 파일 동적 정보 |\n\n### MAXSIZE UNLIMITED의 실제 의미\n\nMAXSIZE UNLIMITED를 지정하면 무한히 커지는 것이 아니라, **데이터 파일의 물리적 최대 크기까지** 확장됩니다:\n- SMALLFILE: DB_BLOCK_SIZE × 2^22 (8KB 블록 기준 약 32GB)\n- BIGFILE: DB_BLOCK_SIZE × 2^32 (8KB 블록 기준 약 32TB)\n- 실제로는 OS/파일 시스템 제한에 먼저 도달할 수 있음",
+          "key_points": [
+            "AUTOEXTEND는 데이터 파일에 여유 공간이 부족할 때 NEXT 크기만큼 자동으로 파일을 확장",
+            "MAXSIZE로 최대 확장 한계를 지정하며, UNLIMITED는 파일의 물리적 최대 크기까지 확장 의미",
+            "SMALLFILE은 ALTER DATABASE DATAFILE 단위로, BIGFILE은 ALTER TABLESPACE 레벨로 AUTOEXTEND 설정 가능",
+            "AUTOEXTEND OFF 상태에서 공간 부족 시 ORA-01653(테이블)/ORA-01654(인덱스) 오류 발생",
+            "DBA_DATA_FILES 뷰의 AUTOEXTENSIBLE, MAXBYTES, INCREMENT_BY 컬럼으로 자동 확장 상태 확인",
+            "MAXSIZE UNLIMITED도 실제로는 블록 크기와 ROWID 구조에 의한 물리적 한계가 존재"
+          ]
+        },
+        {
+          "title": "AUTOEXTEND 운영 전략 (AUTOEXTEND Operational Strategy)",
+          "content": "AUTOEXTEND는 편리한 기능이지만, 무분별하게 사용하면 디스크 공간 고갈, 파일 시스템 단편화 등의 문제를 초래할 수 있습니다. 운영 환경에서는 적절한 전략이 필요합니다.\n\n### AUTOEXTEND 운영 권장 사항\n\n| 항목 | 권장 설정 | 이유 |\n|---|---|---|\n| **AUTOEXTEND** | ON | 공간 부족으로 인한 서비스 중단 방지 |\n| **NEXT 크기** | 100MB ~ 1GB (환경에 따라) | 너무 작으면 빈번한 확장, 너무 크면 낭비 |\n| **MAXSIZE** | 반드시 명시적 설정 | UNLIMITED 사용 시 디스크 공간 전체 소진 위험 |\n| **모니터링** | 정기적 공간 사용률 확인 | 80% 이상 사용 시 사전 조치 |\n\n### NEXT 크기 결정 기준\n\n| 데이터 증가 패턴 | 권장 NEXT 크기 | 설명 |\n|---|---|---|\n| **대량 데이터 적재(Batch)** | 500MB ~ 1GB | 빈번한 확장 방지 |\n| **일반 OLTP** | 100MB ~ 256MB | 적절한 확장 빈도 유지 |\n| **소규모 테이블** | 10MB ~ 50MB | 공간 낭비 최소화 |\n| **TEMP 테이블스페이스** | 256MB ~ 1GB | 정렬/해시 조인 시 급격한 확장 대비 |\n\n### 디스크 공간 고갈 방지 전략\n\n1. **MAXSIZE 반드시 설정**: UNLIMITED 사용을 지양하고 적절한 상한 설정\n2. **알림 설정**: 테이블스페이스 사용률 80%, 90% 임계치에서 알림 발송\n3. **정기 모니터링**: DBA_DATA_FILES와 DBA_FREE_SPACE를 활용한 정기 점검\n4. **용량 계획**: 데이터 증가 추세를 분석하여 사전 용량 확보\n5. **OMF + ASM**: 가능하면 자동 스토리지 관리로 수동 관리 부담 감소",
+          "key_points": [
+            "운영 환경에서 AUTOEXTEND ON + 명시적 MAXSIZE 설정이 권장되며, UNLIMITED 사용은 디스크 고갈 위험",
+            "NEXT 크기는 데이터 증가 패턴에 따라 100MB~1GB 범위에서 적절히 설정",
+            "테이블스페이스 사용률 80% 이상 시 사전 조치를 위한 모니터링 알림 설정 권장",
+            "NEXT 크기가 너무 작으면 빈번한 확장으로 성능 저하, 너무 크면 공간 낭비 발생",
+            "DBA_FREE_SPACE와 DBA_DATA_FILES를 활용한 정기적 공간 모니터링이 필수"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "테이블스페이스 생성 구문 및 옵션 (Tablespace Creation Syntax and Options)",
+      "content": "테이블스페이스 생성은 **CREATE TABLESPACE** 문을 사용하며, SMALLFILE/BIGFILE 지정, 데이터 파일 경로/크기, 자동 확장, 익스텐트 관리 방식 등 다양한 옵션을 포함합니다.\n\n## CREATE TABLESPACE 기본 구문\n\n```sql\nCREATE [SMALLFILE | BIGFILE] TABLESPACE tablespace_name\n  DATAFILE 'file_path' SIZE size\n  [AUTOEXTEND ON NEXT increment MAXSIZE max_size | AUTOEXTEND OFF]\n  [EXTENT MANAGEMENT LOCAL [AUTOALLOCATE | UNIFORM SIZE size]]\n  [SEGMENT SPACE MANAGEMENT AUTO | MANUAL]\n  [BLOCKSIZE n]\n  [LOGGING | NOLOGGING]\n  [ONLINE | OFFLINE]\n  [ENCRYPTION ... ENCRYPT];\n```",
+      "sqlExamplesIds": ["sql03", "sql05", "sql06", "sql10"],
+      "subsections": [
+        {
+          "title": "생성 구문 상세 옵션 (Creation Syntax Detail Options)",
+          "content": "CREATE TABLESPACE 문의 주요 절(Clause)과 옵션을 상세히 분석합니다.\n\n### 주요 옵션 상세\n\n| 옵션 | 설명 | 기본값 |\n|---|---|---|\n| **SMALLFILE / BIGFILE** | 테이블스페이스 유형 지정 | DB 기본 타입 (보통 SMALLFILE) |\n| **DATAFILE** | 데이터 파일 경로 및 크기 지정 | 필수 (OMF 제외) |\n| **SIZE** | 초기 데이터 파일 크기 | 필수 지정 |\n| **AUTOEXTEND** | 자동 확장 설정 | OFF |\n| **EXTENT MANAGEMENT LOCAL** | 로컬 관리 익스텐트 (비트맵) | LOCAL (딕셔너리 관리는 비권장) |\n| **AUTOALLOCATE** | Oracle이 익스텐트 크기 자동 결정 | 기본값 |\n| **UNIFORM SIZE** | 균등 크기 익스텐트 | 지정 시 적용 (기본 1MB) |\n| **SEGMENT SPACE MANAGEMENT** | 세그먼트 내 여유 공간 관리 방식 | AUTO (ASSM) |\n| **BLOCKSIZE** | 비표준 블록 크기 사용 | DB_BLOCK_SIZE |\n| **LOGGING / NOLOGGING** | 리두 로그 기록 여부 | LOGGING |\n\n### 익스텐트 관리 방식 (Extent Management)\n\n| 관리 방식 | 설명 | 특징 |\n|---|---|---|\n| **LOCAL AUTOALLOCATE** | 비트맵으로 관리, Oracle이 크기 결정 | 대부분의 환경에 적합, 기본값 |\n| **LOCAL UNIFORM** | 비트맵으로 관리, 모든 익스텐트 동일 크기 | 예측 가능한 공간 관리, TEMP에 유리 |\n| **DICTIONARY** | 데이터 딕셔너리로 관리 | 구버전 호환, 성능 저하로 비권장 |\n\n### 세그먼트 공간 관리 방식 (Segment Space Management)\n\n| 관리 방식 | 설명 | 특징 |\n|---|---|---|\n| **AUTO (ASSM)** | 비트맵으로 블록의 여유 공간 추적 | 동시성 우수, 기본값, 권장 |\n| **MANUAL (Freelist)** | 프리리스트로 여유 블록 관리 | 구버전 호환, 동시성 저하 가능 |\n\n### SMALLFILE 생성 예시\n\n```sql\n-- 기본적인 SMALLFILE 테이블스페이스 생성\nCREATE SMALLFILE TABLESPACE app_data\n  DATAFILE '/u01/app/oracle/oradata/orcl/app_data01.dbf' SIZE 1G\n  AUTOEXTEND ON NEXT 100M MAXSIZE 10G\n  EXTENT MANAGEMENT LOCAL AUTOALLOCATE\n  SEGMENT SPACE MANAGEMENT AUTO;\n\n-- 여러 데이터 파일로 생성\nCREATE TABLESPACE sales_data\n  DATAFILE\n    '/u01/oradata/sales01.dbf' SIZE 5G,\n    '/u02/oradata/sales02.dbf' SIZE 5G,\n    '/u03/oradata/sales03.dbf' SIZE 5G\n  AUTOEXTEND ON NEXT 500M MAXSIZE 20G;\n```\n\n### BIGFILE 생성 예시\n\n```sql\n-- BIGFILE 테이블스페이스 생성\nCREATE BIGFILE TABLESPACE warehouse_data\n  DATAFILE '/u01/app/oracle/oradata/orcl/warehouse01.dbf' SIZE 100G\n  AUTOEXTEND ON NEXT 1G MAXSIZE 5T;\n\n-- ASM + OMF 환경에서 BIGFILE 생성 (파일 경로 자동)\nCREATE BIGFILE TABLESPACE big_archive\n  DATAFILE SIZE 50G\n  AUTOEXTEND ON NEXT 1G MAXSIZE UNLIMITED;\n```\n\n### TEMPORARY 테이블스페이스 생성\n\n```sql\n-- 임시 테이블스페이스 생성 (TEMPFILE 사용)\nCREATE TEMPORARY TABLESPACE temp_data\n  TEMPFILE '/u01/app/oracle/oradata/orcl/temp_data01.dbf' SIZE 2G\n  AUTOEXTEND ON NEXT 256M MAXSIZE 10G\n  EXTENT MANAGEMENT LOCAL UNIFORM SIZE 1M;\n\n-- BIGFILE 임시 테이블스페이스\nCREATE BIGFILE TEMPORARY TABLESPACE big_temp\n  TEMPFILE SIZE 10G AUTOEXTEND ON NEXT 1G MAXSIZE 100G;\n```",
+          "key_points": [
+            "CREATE TABLESPACE 시 SMALLFILE/BIGFILE 미지정 시 데이터베이스의 기본 타입(보통 SMALLFILE) 적용",
+            "EXTENT MANAGEMENT LOCAL이 기본값이며, AUTOALLOCATE(자동)와 UNIFORM(균등) 중 선택 가능",
+            "SEGMENT SPACE MANAGEMENT AUTO(ASSM)가 기본값이며, 비트맵 방식으로 동시성 우수",
+            "TEMPORARY 테이블스페이스는 DATAFILE 대신 TEMPFILE 키워드를 사용",
+            "OMF 환경에서는 DATAFILE에 파일 경로 없이 SIZE만 지정하여 생성 가능",
+            "SMALLFILE은 DATAFILE 절에 여러 파일을 쉼표로 구분하여 동시 생성 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s07",
+      "title": "기본 테이블스페이스 설정 (Default Tablespace Configuration)",
+      "content": "Oracle Database에서는 **사용자의 기본 테이블스페이스(DEFAULT TABLESPACE)**와 **데이터베이스 레벨의 기본 테이블스페이스 타입(BIGFILE/SMALLFILE)**을 설정할 수 있습니다. 이 설정은 새 사용자 생성 시 및 테이블스페이스 생성 시 기본 동작에 영향을 줍니다.\n\n## 기본 설정 유형\n\n| 설정 유형 | 설명 | 변경 구문 |\n|---|---|---|\n| **DB 기본 영구 TS** | 사용자의 기본 영구 테이블스페이스 | ALTER DATABASE DEFAULT TABLESPACE |\n| **DB 기본 임시 TS** | 사용자의 기본 임시 테이블스페이스 | ALTER DATABASE DEFAULT TEMPORARY TABLESPACE |\n| **DB 기본 TS 타입** | SMALLFILE 또는 BIGFILE | ALTER DATABASE SET DEFAULT [BIGFILE|SMALLFILE] TABLESPACE |\n| **사용자별 기본 TS** | 개별 사용자의 기본 테이블스페이스 | ALTER USER ... DEFAULT TABLESPACE |",
+      "sqlExamplesIds": ["sql10", "sql11"],
+      "subsections": [
+        {
+          "title": "데이터베이스 레벨 기본 설정 (Database-Level Default Settings)",
+          "content": "데이터베이스 레벨에서 설정하는 기본 테이블스페이스는 **새로 생성되는 사용자**에게 자동 적용되며, 기본 테이블스페이스 타입은 **CREATE TABLESPACE 시 SMALLFILE/BIGFILE을 명시하지 않을 때** 적용됩니다.\n\n### 기본 영구 테이블스페이스 (DEFAULT PERMANENT TABLESPACE)\n\n사용자 생성 시 DEFAULT TABLESPACE를 명시하지 않으면 데이터베이스의 기본 영구 테이블스페이스가 적용됩니다. 이 설정이 없으면 **SYSTEM 테이블스페이스**가 기본값이 되어 사용자 데이터가 SYSTEM에 저장되는 문제가 발생합니다.\n\n```sql\n-- 기본 영구 테이블스페이스 변경\nALTER DATABASE DEFAULT TABLESPACE users;\n\n-- 현재 설정 확인\nSELECT PROPERTY_VALUE\nFROM DATABASE_PROPERTIES\nWHERE PROPERTY_NAME = 'DEFAULT_PERMANENT_TABLESPACE';\n```\n\n### 기본 임시 테이블스페이스 (DEFAULT TEMPORARY TABLESPACE)\n\n```sql\n-- 기본 임시 테이블스페이스 변경\nALTER DATABASE DEFAULT TEMPORARY TABLESPACE temp;\n\n-- 현재 설정 확인\nSELECT PROPERTY_VALUE\nFROM DATABASE_PROPERTIES\nWHERE PROPERTY_NAME = 'DEFAULT_TEMP_TABLESPACE';\n```\n\n### 기본 테이블스페이스 타입 (DEFAULT BIGFILE/SMALLFILE)\n\nCREATE TABLESPACE 시 SMALLFILE/BIGFILE을 명시하지 않을 때 적용되는 기본 타입을 설정합니다.\n\n```sql\n-- BIGFILE을 기본 타입으로 설정\nALTER DATABASE SET DEFAULT BIGFILE TABLESPACE;\n\n-- SMALLFILE을 기본 타입으로 복원\nALTER DATABASE SET DEFAULT SMALLFILE TABLESPACE;\n\n-- 현재 기본 타입 확인\nSELECT PROPERTY_VALUE\nFROM DATABASE_PROPERTIES\nWHERE PROPERTY_NAME = 'DEFAULT_TBS_TYPE';\n```\n\n### 관련 뷰 및 확인 방법\n\n| 확인 항목 | 뷰/쿼리 | 컬럼/값 |\n|---|---|---|\n| **기본 영구 TS** | DATABASE_PROPERTIES | PROPERTY_NAME = 'DEFAULT_PERMANENT_TABLESPACE' |\n| **기본 임시 TS** | DATABASE_PROPERTIES | PROPERTY_NAME = 'DEFAULT_TEMP_TABLESPACE' |\n| **기본 TS 타입** | DATABASE_PROPERTIES | PROPERTY_NAME = 'DEFAULT_TBS_TYPE' |\n| **사용자별 기본 TS** | DBA_USERS | DEFAULT_TABLESPACE, TEMPORARY_TABLESPACE |\n| **TS의 BIGFILE 여부** | DBA_TABLESPACES | BIGFILE 컬럼 (YES/NO) |\n\n### 사용자별 기본 테이블스페이스 설정\n\n```sql\n-- 사용자의 기본 테이블스페이스 변경\nALTER USER app_user DEFAULT TABLESPACE app_data;\n\n-- 사용자의 기본 임시 테이블스페이스 변경\nALTER USER app_user TEMPORARY TABLESPACE temp_data;\n```\n\n### 우선순위\n\n1. **사용자 레벨 설정** (ALTER USER ... DEFAULT TABLESPACE) — 최우선\n2. **CREATE USER 시 명시** (CREATE USER ... DEFAULT TABLESPACE) — 생성 시점\n3. **DB 레벨 기본 설정** (ALTER DATABASE DEFAULT TABLESPACE) — 미지정 시 적용\n4. **SYSTEM 테이블스페이스** — 모든 설정이 없을 때의 최종 기본값",
+          "key_points": [
+            "ALTER DATABASE DEFAULT TABLESPACE로 DB 레벨 기본 영구 테이블스페이스 설정 — 미설정 시 SYSTEM이 기본값",
+            "ALTER DATABASE SET DEFAULT BIGFILE/SMALLFILE TABLESPACE로 CREATE TABLESPACE의 기본 타입 설정",
+            "DATABASE_PROPERTIES 뷰에서 DEFAULT_PERMANENT_TABLESPACE, DEFAULT_TEMP_TABLESPACE, DEFAULT_TBS_TYPE 확인 가능",
+            "사용자의 기본 TS 우선순위: 사용자 레벨 > CREATE USER 시 명시 > DB 레벨 기본 > SYSTEM",
+            "DBA_TABLESPACES의 BIGFILE 컬럼(YES/NO)으로 각 테이블스페이스의 BIGFILE 여부 확인",
+            "기본 영구 TS를 반드시 USERS 등으로 설정하여 사용자 데이터가 SYSTEM에 저장되는 것을 방지해야 함"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "테이블스페이스 전체 정보 조회 (Tablespace Information Query)",
+      "sql": "SELECT\n  t.TABLESPACE_NAME,\n  t.BIGFILE,\n  t.STATUS,\n  t.CONTENTS,\n  t.EXTENT_MANAGEMENT,\n  t.ALLOCATION_TYPE,\n  t.SEGMENT_SPACE_MANAGEMENT,\n  t.BLOCK_SIZE,\n  t.LOGGING\nFROM DBA_TABLESPACES t\nORDER BY t.TABLESPACE_NAME;",
+      "description": "DBA_TABLESPACES 뷰에서 모든 테이블스페이스의 BIGFILE 여부, 상태, 유형(PERMANENT/TEMPORARY/UNDO), 익스텐트 관리 방식, 세그먼트 공간 관리 방식 등을 종합적으로 조회합니다. BIGFILE 컬럼이 'YES'이면 BIGFILE, 'NO'이면 SMALLFILE 테이블스페이스입니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "테이블스페이스 사용 현황 및 여유 공간 조회 (Tablespace Usage and Free Space)",
+      "sql": "SELECT\n  t.TABLESPACE_NAME,\n  t.BIGFILE,\n  ROUND(d.TOTAL_MB, 2) AS TOTAL_MB,\n  ROUND(d.TOTAL_MB - NVL(f.FREE_MB, 0), 2) AS USED_MB,\n  ROUND(NVL(f.FREE_MB, 0), 2) AS FREE_MB,\n  ROUND((d.TOTAL_MB - NVL(f.FREE_MB, 0)) / d.TOTAL_MB * 100, 2) AS USED_PCT\nFROM DBA_TABLESPACES t\nJOIN (\n  SELECT TABLESPACE_NAME, SUM(BYTES) / 1024 / 1024 AS TOTAL_MB\n  FROM DBA_DATA_FILES\n  GROUP BY TABLESPACE_NAME\n) d ON t.TABLESPACE_NAME = d.TABLESPACE_NAME\nLEFT JOIN (\n  SELECT TABLESPACE_NAME, SUM(BYTES) / 1024 / 1024 AS FREE_MB\n  FROM DBA_FREE_SPACE\n  GROUP BY TABLESPACE_NAME\n) f ON t.TABLESPACE_NAME = f.TABLESPACE_NAME\nORDER BY USED_PCT DESC;",
+      "description": "각 테이블스페이스의 전체 크기, 사용량, 여유 공간, 사용률(%)을 조회합니다. DBA_DATA_FILES와 DBA_FREE_SPACE를 조인하여 SMALLFILE/BIGFILE 구분 없이 사용 현황을 파악할 수 있습니다. 사용률이 높은 순으로 정렬하여 공간 부족 위험이 있는 테이블스페이스를 쉽게 식별합니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "SMALLFILE 테이블스페이스 생성 (Create SMALLFILE Tablespace)",
+      "sql": "-- 단일 데이터 파일로 SMALLFILE 테이블스페이스 생성\nCREATE SMALLFILE TABLESPACE app_data\n  DATAFILE '/u01/app/oracle/oradata/orcl26ai/app_data01.dbf' SIZE 1G\n  AUTOEXTEND ON NEXT 100M MAXSIZE 10G\n  EXTENT MANAGEMENT LOCAL AUTOALLOCATE\n  SEGMENT SPACE MANAGEMENT AUTO;\n\n-- 여러 데이터 파일로 SMALLFILE 테이블스페이스 생성\nCREATE TABLESPACE sales_data\n  DATAFILE\n    '/u01/oradata/sales01.dbf' SIZE 5G AUTOEXTEND ON NEXT 500M MAXSIZE 20G,\n    '/u02/oradata/sales02.dbf' SIZE 5G AUTOEXTEND ON NEXT 500M MAXSIZE 20G;",
+      "description": "SMALLFILE 테이블스페이스 생성 예시입니다. SMALLFILE 키워드는 기본값이므로 생략 가능합니다. EXTENT MANAGEMENT LOCAL AUTOALLOCATE와 SEGMENT SPACE MANAGEMENT AUTO는 기본값이지만 명시적으로 작성하는 것이 명확합니다. 여러 데이터 파일을 쉼표로 구분하여 동시에 생성할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "데이터 파일 추가 및 크기 변경 (Add Datafile and Resize)",
+      "sql": "-- SMALLFILE 테이블스페이스에 데이터 파일 추가\nALTER TABLESPACE app_data\n  ADD DATAFILE '/u01/app/oracle/oradata/orcl26ai/app_data02.dbf' SIZE 2G\n  AUTOEXTEND ON NEXT 200M MAXSIZE 10G;\n\n-- 데이터 파일 크기 수동 변경 (확장)\nALTER DATABASE DATAFILE '/u01/app/oracle/oradata/orcl26ai/app_data01.dbf'\n  RESIZE 5G;\n\n-- 데이터 파일 크기 수동 변경 (축소 — 사용 중인 공간 이하로 불가)\nALTER DATABASE DATAFILE '/u01/app/oracle/oradata/orcl26ai/app_data01.dbf'\n  RESIZE 500M;",
+      "description": "SMALLFILE 테이블스페이스에 데이터 파일을 추가하고, 기존 데이터 파일의 크기를 변경하는 구문입니다. RESIZE는 확장뿐 아니라 축소도 가능하지만, 현재 사용 중인 공간(High Water Mark) 이하로는 축소할 수 없습니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "BIGFILE 테이블스페이스 생성 및 관리 (Create and Manage BIGFILE Tablespace)",
+      "sql": "-- BIGFILE 테이블스페이스 생성\nCREATE BIGFILE TABLESPACE warehouse_data\n  DATAFILE '/u01/app/oracle/oradata/orcl26ai/warehouse01.dbf' SIZE 100G\n  AUTOEXTEND ON NEXT 1G MAXSIZE 5T;\n\n-- BIGFILE 테이블스페이스 레벨 크기 변경\nALTER TABLESPACE warehouse_data RESIZE 200G;\n\n-- BIGFILE 테이블스페이스 레벨 자동 확장 변경\nALTER TABLESPACE warehouse_data\n  AUTOEXTEND ON NEXT 2G MAXSIZE 10T;",
+      "description": "BIGFILE 테이블스페이스의 생성 및 관리 예시입니다. BIGFILE은 SMALLFILE과 달리 ALTER TABLESPACE 레벨에서 직접 RESIZE 및 AUTOEXTEND 설정이 가능합니다. ADD DATAFILE은 사용할 수 없으며, 단일 파일의 크기만 조정합니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "ASM/OMF 환경에서 BIGFILE 생성 (BIGFILE with ASM/OMF)",
+      "sql": "-- OMF 파일 생성 경로 설정\nALTER SYSTEM SET DB_CREATE_FILE_DEST = '+DATA' SCOPE=BOTH;\n\n-- OMF 환경에서 BIGFILE 테이블스페이스 생성 (파일 경로 자동)\nCREATE BIGFILE TABLESPACE big_archive\n  DATAFILE SIZE 50G\n  AUTOEXTEND ON NEXT 1G MAXSIZE UNLIMITED;\n\n-- BIGFILE 임시 테이블스페이스 생성 (OMF)\nCREATE BIGFILE TEMPORARY TABLESPACE big_temp\n  TEMPFILE SIZE 10G\n  AUTOEXTEND ON NEXT 1G MAXSIZE 100G;",
+      "description": "ASM 디스크 그룹(+DATA)을 DB_CREATE_FILE_DEST로 설정하면, OMF(Oracle Managed Files)가 데이터 파일의 이름과 경로를 자동으로 생성합니다. BIGFILE + OMF 조합은 관리 편의성이 가장 높은 구성입니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "데이터 파일 상세 정보 조회 (Datafile Detail Information)",
+      "sql": "SELECT\n  df.FILE_ID,\n  df.FILE_NAME,\n  df.TABLESPACE_NAME,\n  ts.BIGFILE,\n  ROUND(df.BYTES / 1024 / 1024, 2) AS SIZE_MB,\n  ROUND(df.MAXBYTES / 1024 / 1024, 2) AS MAX_SIZE_MB,\n  df.AUTOEXTENSIBLE,\n  df.INCREMENT_BY * ts.BLOCK_SIZE / 1024 / 1024 AS INCREMENT_MB,\n  df.STATUS\nFROM DBA_DATA_FILES df\nJOIN DBA_TABLESPACES ts ON df.TABLESPACE_NAME = ts.TABLESPACE_NAME\nORDER BY df.TABLESPACE_NAME, df.FILE_ID;",
+      "description": "모든 데이터 파일의 상세 정보를 조회합니다. DBA_DATA_FILES와 DBA_TABLESPACES를 조인하여 각 파일의 크기, 최대 크기, 자동 확장 여부, 확장 증분 크기, BIGFILE 여부 등을 한 번에 확인할 수 있습니다. INCREMENT_BY는 블록 수로 저장되므로 BLOCK_SIZE를 곱하여 MB 단위로 변환합니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "AUTOEXTEND 설정 확인 및 변경 (AUTOEXTEND Configuration Check and Change)",
+      "sql": "-- AUTOEXTEND 설정 상태 확인\nSELECT\n  FILE_NAME,\n  TABLESPACE_NAME,\n  AUTOEXTENSIBLE,\n  ROUND(BYTES / 1024 / 1024) AS CURRENT_SIZE_MB,\n  ROUND(MAXBYTES / 1024 / 1024) AS MAX_SIZE_MB,\n  INCREMENT_BY AS INCREMENT_BLOCKS\nFROM DBA_DATA_FILES\nWHERE AUTOEXTENSIBLE = 'YES'\nORDER BY TABLESPACE_NAME;\n\n-- AUTOEXTEND가 OFF인 데이터 파일 확인 (위험 감지)\nSELECT FILE_NAME, TABLESPACE_NAME, ROUND(BYTES / 1024 / 1024) AS SIZE_MB\nFROM DBA_DATA_FILES\nWHERE AUTOEXTENSIBLE = 'NO'\nORDER BY TABLESPACE_NAME;\n\n-- AUTOEXTEND ON으로 변경\nALTER DATABASE DATAFILE '/u01/app/oracle/oradata/orcl26ai/app_data01.dbf'\n  AUTOEXTEND ON NEXT 100M MAXSIZE 20G;",
+      "description": "데이터 파일의 AUTOEXTEND 설정 상태를 확인하고 변경하는 SQL입니다. AUTOEXTENSIBLE이 'NO'인 파일은 공간 부족 시 자동 확장되지 않으므로 ORA-01653/ORA-01654 오류가 발생할 수 있어 사전 점검이 중요합니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "테이블스페이스 자동 확장 가능 최대 크기 조회 (Tablespace Maximum Extensible Size)",
+      "sql": "SELECT\n  t.TABLESPACE_NAME,\n  t.BIGFILE,\n  ROUND(d.CURRENT_MB, 2) AS CURRENT_MB,\n  ROUND(d.MAX_MB, 2) AS MAX_EXTENSIBLE_MB,\n  ROUND(d.CURRENT_MB - NVL(f.FREE_MB, 0), 2) AS USED_MB,\n  ROUND((d.CURRENT_MB - NVL(f.FREE_MB, 0)) / d.MAX_MB * 100, 2) AS USED_PCT_OF_MAX\nFROM DBA_TABLESPACES t\nJOIN (\n  SELECT TABLESPACE_NAME,\n    SUM(BYTES) / 1024 / 1024 AS CURRENT_MB,\n    SUM(CASE WHEN AUTOEXTENSIBLE = 'YES' THEN MAXBYTES ELSE BYTES END) / 1024 / 1024 AS MAX_MB\n  FROM DBA_DATA_FILES\n  GROUP BY TABLESPACE_NAME\n) d ON t.TABLESPACE_NAME = d.TABLESPACE_NAME\nLEFT JOIN (\n  SELECT TABLESPACE_NAME, SUM(BYTES) / 1024 / 1024 AS FREE_MB\n  FROM DBA_FREE_SPACE\n  GROUP BY TABLESPACE_NAME\n) f ON t.TABLESPACE_NAME = f.TABLESPACE_NAME\nWHERE t.CONTENTS = 'PERMANENT'\nORDER BY USED_PCT_OF_MAX DESC;",
+      "description": "AUTOEXTEND를 고려한 테이블스페이스의 실질적 최대 확장 가능 크기와 현재 사용률을 조회합니다. AUTOEXTENSIBLE이 YES인 파일은 MAXBYTES를, NO인 파일은 현재 BYTES를 최대 크기로 산정합니다. 이를 통해 현재 사용량이 최대 확장 가능 크기의 몇 %인지 파악할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "기본 테이블스페이스 설정 확인 및 변경 (Default Tablespace Configuration)",
+      "sql": "-- 데이터베이스 기본 설정 조회\nSELECT PROPERTY_NAME, PROPERTY_VALUE\nFROM DATABASE_PROPERTIES\nWHERE PROPERTY_NAME IN (\n  'DEFAULT_PERMANENT_TABLESPACE',\n  'DEFAULT_TEMP_TABLESPACE',\n  'DEFAULT_TBS_TYPE'\n)\nORDER BY PROPERTY_NAME;\n\n-- 기본 영구 테이블스페이스 변경\nALTER DATABASE DEFAULT TABLESPACE users;\n\n-- 기본 임시 테이블스페이스 변경\nALTER DATABASE DEFAULT TEMPORARY TABLESPACE temp;\n\n-- 기본 테이블스페이스 타입을 BIGFILE로 변경\nALTER DATABASE SET DEFAULT BIGFILE TABLESPACE;",
+      "description": "DATABASE_PROPERTIES 뷰에서 기본 영구 테이블스페이스, 기본 임시 테이블스페이스, 기본 테이블스페이스 타입(SMALLFILE/BIGFILE) 설정을 조회하고 변경하는 SQL입니다. DEFAULT_TBS_TYPE이 'BIGFILE'이면 CREATE TABLESPACE 시 SMALLFILE/BIGFILE 미지정 시 BIGFILE로 생성됩니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "V$TABLESPACE 및 V$DATAFILE 동적 뷰 조회 (Dynamic Performance Views)",
+      "sql": "-- V$TABLESPACE 동적 뷰 조회\nSELECT TS#, NAME, BIGFILE, FLASHBACK_ON\nFROM V$TABLESPACE\nORDER BY TS#;\n\n-- V$DATAFILE 동적 뷰 조회\nSELECT\n  FILE#,\n  TS#,\n  NAME,\n  STATUS,\n  ROUND(BYTES / 1024 / 1024) AS SIZE_MB,\n  ROUND(CREATE_BYTES / 1024 / 1024) AS INITIAL_SIZE_MB,\n  BLOCK_SIZE\nFROM V$DATAFILE\nORDER BY TS#, FILE#;\n\n-- V$TEMPFILE 동적 뷰 조회 (임시 파일)\nSELECT\n  FILE#,\n  TS#,\n  NAME,\n  STATUS,\n  ROUND(BYTES / 1024 / 1024) AS SIZE_MB,\n  BLOCK_SIZE\nFROM V$TEMPFILE\nORDER BY TS#;",
+      "description": "V$TABLESPACE, V$DATAFILE, V$TEMPFILE 동적 성능 뷰를 활용한 테이블스페이스 및 데이터 파일 모니터링 SQL입니다. V$TABLESPACE의 BIGFILE 컬럼으로 BIGFILE 여부를, V$DATAFILE의 STATUS로 파일 상태를 확인할 수 있습니다. 제어 파일 기반의 실시간 정보를 제공합니다."
+    }
+  ],
+  "keywords": [
+    "테이블스페이스 (Tablespace / 表領域)",
+    "SMALLFILE 테이블스페이스 (SMALLFILE Tablespace / SMALLFILE 表領域)",
+    "BIGFILE 테이블스페이스 (BIGFILE Tablespace / BIGFILE 表領域)",
+    "데이터 파일 (Datafile / データ・ファイル)",
+    "AUTOEXTEND (自動拡張機能)",
+    "ROWID",
+    "세그먼트 (Segment)",
+    "익스텐트 (Extent)",
+    "데이터 블록 (Data Block)",
+    "DB_BLOCK_SIZE",
+    "DB_FILES",
+    "EXTENT MANAGEMENT LOCAL",
+    "AUTOALLOCATE",
+    "UNIFORM SIZE",
+    "SEGMENT SPACE MANAGEMENT AUTO (ASSM)",
+    "ASM (Automatic Storage Management)",
+    "OMF (Oracle Managed Files)",
+    "DB_CREATE_FILE_DEST",
+    "DBA_TABLESPACES",
+    "DBA_DATA_FILES",
+    "DBA_FREE_SPACE",
+    "V$TABLESPACE",
+    "V$DATAFILE",
+    "DATABASE_PROPERTIES",
+    "DEFAULT_TBS_TYPE",
+    "DEFAULT_PERMANENT_TABLESPACE",
+    "MAXSIZE",
+    "TEMPFILE",
+    "ALTER TABLESPACE RESIZE",
+    "CREATE BIGFILE TABLESPACE"
+  ]
+}

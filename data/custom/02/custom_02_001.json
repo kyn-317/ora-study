@@ -1,0 +1,83 @@
+[
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_001",
+    "title": "DBCAのテンプレート機能について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Seedテンプレートはデータファイルを含むテンプレートであり、データファイルのコピー方式を使用するため迅速なデータベース作成が可能である。",
+      "B) Non-Seedテンプレートはデータファイルを含むテンプレートであり、既存のデータベース構造をそのまま複製する。",
+      "C) テンプレートファイルは$ORACLE_HOME/assistants/dbca/templates/ディレクトリに保存される。",
+      "D) DBCAではCustom Templateを作成することはできず、事前定義されたテンプレートのみ使用する必要がある。",
+      "E) テンプレートファイルの拡張子はSeedテンプレートもNon-Seedテンプレートも同じ .dbt である。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답 분석:\nA) 정답 — Seed Template은 데이터 파일을 포함하는 템플릿으로, 데이터 파일 복사 방식으로 빠른 데이터베이스 생성이 가능합니다.\nC) 정답 — 템플릿 파일은 $ORACLE_HOME/assistants/dbca/templates/ 디렉토리에 저장됩니다.\n\n오답 분석:\nB) 오답 — Non-Seed Template은 데이터 파일을 포함하지 않고 구성 정보만 포함하며, 완전히 새로 생성하는 방식입니다. 설명이 Seed Template과 반대로 되어 있습니다.\nD) 오답 — DBCA에서는 기존 데이터베이스에서 구조를 추출하여 Custom Template을 생성할 수 있습니다.\nE) 오답 — Seed Template은 .dbc 확장자, Non-Seed Template은 .dbt 확장자를 사용하며, 서로 다릅니다.\n\n핵심 개념: DBCA 템플릿은 Seed(.dbc, 데이터 파일 포함), Non-Seed(.dbt, 구성 정보만), Custom(기존 DB에서 추출) 3가지 유형이 있으며, $ORACLE_HOME/assistants/dbca/templates/에 저장됩니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_002",
+    "title": "Enterprise Manager Cloud Controlのアーキテクチャについて正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) Enterprise Manager Cloud Controlは2層アーキテクチャで構成され、OMS(Oracle Management Service)と管理リポジトリの2つのコンポーネントのみで動作する。",
+      "B) Management Agentは管理対象ホストに設置されるプロセスで、メトリックの収集と管理作業の実行を担当する。",
+      "C) OMS(Oracle Management Service)はApache HTTP Server上で動作し、Webインターフェースを提供する。",
+      "D) Management Repositoryには専用のOracle Databaseは不要であり、テキストファイルにメタデータが保存される。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답 분석:\nB) 정답 — Management Agent는 각 관리 대상 호스트에 설치되는 경량 프로세스로, 데이터베이스와 OS 등의 메트릭을 수집하여 OMS에 전송하고, 관리 작업(기동/종료, 패치 등)을 호스트에서 실행하는 역할을 합니다.\n\n오답 분석:\nA) 오답 — EM Cloud Control은 2층이 아닌 3-tier 아키텍처로 구성됩니다. 웹 브라우저, OMS(Oracle Management Service), Management Repository, 그리고 Management Agent가 핵심 구성요소입니다.\nC) 오답 — OMS는 Apache HTTP Server가 아닌 WebLogic Server 위에서 동작합니다.\nD) 오답 — Management Repository는 텍스트 파일이 아닌 전용 Oracle Database에 OMS 구성 정보, 수집된 메트릭, 경고 이력 등을 저장합니다.\n\n핵심 개념: EM Cloud Control은 3-tier 아키텍처(웹 브라우저 → OMS(WebLogic 기반) → Management Repository(Oracle DB))로 구성되며, Management Agent가 각 호스트에서 메트릭 수집과 작업 실행을 담당합니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_003",
+    "title": "SQL DeveloperとSQL*Plusの機能比較として正しい内容を述べているのはどれになりますか(2つ選択してください)。",
+    "options": [
+      "A) SQL*Plusはリモートデータベースへの接続時にJDBC Thin Driverを使用するため、Oracle Net Servicesの構成は不要である。",
+      "B) SQL DeveloperはJDBC Thin Driverを使用するため、Oracle Clientの別途インストールなしでデータベースに接続できる。",
+      "C) SQL*Plusはデータベースの起動および停止が可能であるが、SQL DeveloperではSTARTUP/SHUTDOWNコマンドに相当する機能は提供されていない。",
+      "D) SQL Developerはコマンドラインインターフェースであり、GUIベースの操作は提供していない。",
+      "E) SQL*PlusはJava環境が必要であるが、SQL DeveloperはOracle Homeに含まれているためJavaは不要である。"
+    ],
+    "answer": [
+      "B",
+      "C"
+    ],
+    "explanation": "정답: B, C\nB) 정답 — SQL Developer는 JDBC Thin Driver를 기본으로 사용하므로 별도의 Oracle Client 설치 없이 데이터베이스에 접속할 수 있습니다.\n\nC) 정답 — SQL*Plus는 STARTUP/SHUTDOWN 명령으로 데이터베이스 기동/종료가 가능하지만, SQL Developer에서는 이에 상당하는 기능이 제공되지 않아 DB의 기동/종료를 수행할 수 없습니다.\n\nA) 오답 — SQL*Plus는 JDBC Thin Driver가 아닌 OCI(Oracle Call Interface)를 사용하여 데이터베이스에 접속합니다. JDBC Thin Driver를 사용하는 것은 SQL Developer입니다. 또한 SQL*Plus에서 원격 데이터베이스에 접속하려면 Oracle Net Services 구성(tnsnames.ora 또는 Easy Connect 등)이 필요합니다.\n\nD) 오답 — SQL Developer는 명령줄 인터페이스가 아닌 GUI(그래픽 사용자 인터페이스) 기반의 데스크톱 애플리케이션입니다.\n\nE) 오답 — 설명이 반대입니다. SQL Developer가 Java(JDK) 기반이며, SQL*Plus는 Oracle Home에 포함되어 있어 별도 Java 환경이 불필요합니다.\n\n핵심 개념: SQL Developer는 Java 기반 무료 GUI 도구로 JDBC Thin Driver를 사용하여 Oracle Client 없이 접속 가능하며, SQL*Plus는 OCI 기반 CLI 도구로 Oracle Net Services를 통해 원격 접속하고 DB 기동/종료가 가능합니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_004",
+    "title": "RMANのバックアップ管理機能に関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) RMANのバックアップメタデータはデフォルトで制御ファイルに保存されるが、オプションでリカバリ・カタログを別途構成することもできる。",
+      "B) RMANは全体バックアップのみをサポートしており、増分バックアップはOSユーティリティを使用する必要がある。",
+      "C) リカバリ・カタログを使用する場合、バックアップメタデータの保存期間はCONTROL_FILE_RECORD_KEEP_TIMEパラメータによって制限される。",
+      "D) RMANではバックアップ保存ポリシー(RETENTION POLICY)を設定することはできず、すべてのバックアップを手動で管理する必要がある。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답 분석:\nA) 정답 — RMAN의 백업 메타데이터는 기본적으로 Control File에 저장되며, 선택적으로 Recovery Catalog(별도 DB)를 구성하여 사용할 수 있습니다.\n\n오답 분석:\nB) 오답 — RMAN은 전체 백업뿐만 아니라 증분 백업(Level 0, Level 1)도 지원합니다. 오히려 OS 유틸리티(cp, tar 등)를 사용한 수동 백업에서는 증분 백업이 불가합니다.\nC) 오답 — CONTROL_FILE_RECORD_KEEP_TIME 파라미터에 의해 보존 기간이 제한되는 것은 Control File에 저장된 메타데이터입니다. Recovery Catalog를 사용하면 메타데이터 보존 기간이 무제한입니다.\nD) 오답 — RMAN에서는 RETENTION POLICY(예: REDUNDANCY 2, RECOVERY WINDOW OF 7 DAYS)를 설정하여 백업 보존 정책을 자동으로 관리할 수 있습니다.\n\n핵심 개념: RMAN 백업 메타데이터는 기본적으로 Control File에 저장되고, Recovery Catalog 구성 시 무제한 보존 및 Stored Script, 다중 DB 중앙 관리 등 추가 기능을 사용할 수 있습니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_005",
+    "title": "SQL*PlusのSHUTDOWNモードについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SHUTDOWN IMMEDIATEは未コミットのトランザクションをロールバックした後にデータベースを終了し、次回起動時にインスタンス・リカバリは不要である。",
+      "B) SHUTDOWN ABORTはチェックポイントを実行してからデータベースを強制終了するため、次回起動時にインスタンス・リカバリは不要である。",
+      "C) SHUTDOWN NORMALは新しい接続をブロックし、現在接続中のすべてのセッションが終了するまで待機してからデータベースを終了する。",
+      "D) SHUTDOWN TRANSACTIONALは現在実行中のトランザクションを即座に中断し、ロールバックしてからデータベースを終了する。",
+      "E) SHUTDOWN IMMEDIATEは現在接続中のすべてのセッションが終了するまで待機してからデータベースを終了する。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답 분석:\nA) 정답 — SHUTDOWN IMMEDIATE는 새 접속을 차단하고, 현재 실행 중인 문장을 중단하며, 미커밋 트랜잭션을 롤백한 후 체크포인트를 수행하고 종료합니다. 깨끗한 종료이므로 다음 기동 시 인스턴스 복구가 불필요합니다.\nC) 정답 — SHUTDOWN NORMAL은 기본 종료 모드로, 새 접속을 차단하고 현재 접속 중인 모든 세션이 종료될 때까지 대기한 후 데이터베이스를 종료합니다.\n\n오답 분석:\nB) 오답 — SHUTDOWN ABORT는 체크포인트를 수행하지 않고 즉시 강제 종료합니다. 따라서 다음 기동 시 인스턴스 복구(Instance Recovery)가 필요합니다.\nD) 오답 — SHUTDOWN TRANSACTIONAL은 현재 실행 중인 트랜잭션을 즉시 중단하지 않고, 현재 트랜잭션이 완료될 때까지 기다린 후 세션을 종료하고 데이터베이스를 종료합니다.\nE) 오답 — 모든 세션이 종료될 때까지 대기하는 것은 SHUTDOWN NORMAL의 동작입니다. SHUTDOWN IMMEDIATE는 현재 세션을 대기하지 않고 문장을 중단하고 미커밋 트랜잭션을 롤백합니다.\n\n핵심 개념: SHUTDOWN 모드는 NORMAL(세션 대기), TRANSACTIONAL(트랜잭션 완료 대기), IMMEDIATE(즉시 롤백 후 종료), ABORT(강제 종료)의 4가지가 있으며, ABORT만 다음 기동 시 인스턴스 복구가 필요합니다."
+  }
+]

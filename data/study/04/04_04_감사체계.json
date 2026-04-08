@@ -1,0 +1,247 @@
+{
+  "id": "04_04",
+  "title": "감사 체계 (Auditing System)",
+  "chapter": "04. 보안, 권한 및 감사 (Security & Auditing)",
+  "description": "Oracle Database의 감사(Auditing) 체계를 다루며, 통합 감사(Unified Auditing)의 정책 설정 및 관리, 강제(필수) 감사 항목, 파인 그레인 감사(Fine-Grained Auditing)의 조건별 상세 추적 메커니즘을 상세히 설명합니다.",
+  "oracle26ai_changes": [
+    "Oracle 26ai에서 통합 감사 정책의 JSON 기반 구성 및 내보내기/가져오기 기능이 강화되어, 멀티테넌트 환경에서 감사 정책의 일괄 배포가 용이해졌습니다.",
+    "AI Vector Search 관련 작업(벡터 인덱스 생성, 벡터 검색 쿼리 등)에 대한 감사 이벤트가 추가되어, 새로운 AI 워크로드에 대한 감사 추적이 가능합니다.",
+    "DBMS_AUDIT_MGMT 패키지에 자동 감사 트레일 아카이브 및 정리를 위한 스케줄링 기능이 개선되어, 대용량 감사 데이터 관리 효율성이 향상되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "감사 개요 (Overview of Auditing)",
+      "content": "Oracle Database 감사(Auditing)는 데이터베이스에서 수행되는 활동을 기록하고 추적하는 보안 메커니즘입니다. 감사는 규제 준수(Compliance), 보안 침해 탐지, 사용자 활동 모니터링, 책임 추적(Accountability)을 위해 필수적으로 사용됩니다.\n\n## Oracle Database 감사의 필요성\n\n| 목적 | 설명 |\n|---|---|\n| **규제 준수 (Compliance)** | SOX, HIPAA, GDPR, PCI-DSS 등 법적/산업 규제 요건 충족 |\n| **보안 침해 탐지** | 비인가 접근, 데이터 유출 시도 등 이상 행위 탐지 |\n| **책임 추적 (Accountability)** | 누가, 언제, 무엇을 했는지 기록하여 책임 소재 파악 |\n| **포렌식 분석 (Forensic Analysis)** | 보안 사고 발생 시 원인 분석 및 영향 범위 파악 |\n| **내부 통제 (Internal Control)** | 권한 남용 방지 및 정책 준수 모니터링 |\n\n## Oracle Database 감사 유형 분류\n\n| 감사 유형 | 설명 | 특징 |\n|---|---|---|\n| **통합 감사 (Unified Auditing)** | Oracle 12c부터 도입된 단일화된 감사 프레임워크 | 정책 기반, 단일 감사 트레일, 권장 방식 |\n| **강제 감사 (Mandatory Auditing)** | 비활성화할 수 없는 필수 감사 항목 | SYSDBA/SYSOPER 접속, DB 기동/종료 등 |\n| **파인 그레인 감사 (FGA)** | 특정 열/행 수준의 세밀한 조건부 감사 | SELECT 문 감사 가능, 핸들러 프로시저 지원 |\n| **전통적 감사 (Traditional Auditing)** | Oracle 11g 이전의 AUDIT/NOAUDIT 방식 | 레거시, Unified Auditing으로 대체 권장 |\n\n## 감사 아키텍처 개요\n\n```\n사용자 활동 (User Activity)\n       |\n       v\n감사 정책 평가 (Audit Policy Evaluation)\n       |\n       v\n감사 레코드 생성 (Audit Record Generation)\n       |\n       v\n감사 트레일 저장 (Audit Trail Storage)\n  - AUDSYS.AUD$UNIFIED (통합 감사)\n  - OS 파일 (강제 감사, $ORACLE_BASE/audit)\n       |\n       v\n감사 트레일 조회 (Audit Trail Query)\n  - UNIFIED_AUDIT_TRAIL 뷰\n  - DBA_FGA_AUDIT_TRAIL 뷰\n```",
+      "sqlExamplesIds": [],
+      "subsections": [
+        {
+          "title": "감사 아키텍처 및 데이터 흐름 (Audit Architecture and Data Flow)",
+          "content": "Oracle Database의 감사 아키텍처는 **감사 정책 정의 계층**, **감사 레코드 생성 계층**, **감사 트레일 저장 계층**, **감사 데이터 조회/관리 계층**으로 구성됩니다. 통합 감사(Unified Auditing)에서는 모든 감사 레코드가 AUDSYS 스키마의 내부 테이블에 기록되며, UNIFIED_AUDIT_TRAIL 뷰를 통해 조회됩니다.\n\n### 감사 데이터 흐름 상세\n\n1. **정책 정의 단계**: DBA가 CREATE AUDIT POLICY 문으로 감사 정책을 생성하고, AUDIT POLICY 문으로 활성화합니다.\n2. **이벤트 캡처 단계**: 데이터베이스 커널이 SQL 실행 시 활성화된 감사 정책과 대조하여 감사 대상 여부를 판단합니다.\n3. **레코드 생성 단계**: 감사 대상으로 판정된 이벤트에 대해 감사 레코드가 SGA의 감사 버퍼에 기록됩니다.\n4. **트레일 저장 단계**: 감사 버퍼의 레코드가 주기적으로 AUDSYS 스키마의 내부 테이블(AUD$UNIFIED)에 플러시(Flush)됩니다.\n5. **조회/분석 단계**: AUDIT_VIEWER 또는 AUDIT_ADMIN 롤을 가진 사용자가 UNIFIED_AUDIT_TRAIL 뷰로 감사 데이터를 조회합니다.\n\n### 감사 관련 주요 딕셔너리 뷰\n\n| 뷰 이름 | 설명 |\n|---|---|\n| **UNIFIED_AUDIT_TRAIL** | 통합 감사 트레일 전체 조회 |\n| **AUDIT_UNIFIED_POLICIES** | 정의된 통합 감사 정책 목록 |\n| **AUDIT_UNIFIED_ENABLED_POLICIES** | 활성화된 감사 정책 및 적용 대상 |\n| **DBA_AUDIT_POLICIES** | FGA 감사 정책 목록 |\n| **DBA_FGA_AUDIT_TRAIL** | FGA 감사 트레일 조회 |\n| **DBA_COMMON_AUDIT_TRAIL** | 통합 + FGA 감사 트레일 통합 조회 |\n| **V$XML_AUDIT_TRAIL** | XML 형식 감사 트레일 (전통적 감사) |\n\n### 감사 관련 초기화 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **AUDIT_TRAIL** | 전통적 감사 트레일 대상 (Unified Auditing에서는 미사용) | DB |\n| **AUDIT_SYS_OPERATIONS** | SYS 사용자 작업 감사 여부 | TRUE |\n| **AUDIT_SYSLOG_LEVEL** | 감사 레코드를 syslog로 전송할 레벨 (Linux) | 미설정 |\n| **UNIFIED_AUDIT_SGA_QUEUE_SIZE** | SGA 내 감사 큐 크기 (레코드 수) | 1048576 |\n| **UNIFIED_AUDIT_SYSTEMLOG** | 감사 레코드를 OS syslog로도 기록할지 여부 | FALSE |",
+          "key_points": [
+            "통합 감사 레코드는 SGA의 감사 버퍼에 먼저 기록된 후 AUDSYS 스키마의 AUD$UNIFIED 테이블로 플러시됨",
+            "UNIFIED_AUDIT_TRAIL 뷰는 모든 통합 감사 레코드를 단일 뷰로 제공하는 핵심 조회 인터페이스",
+            "AUDIT_UNIFIED_POLICIES 뷰로 정의된 정책을, AUDIT_UNIFIED_ENABLED_POLICIES 뷰로 활성화된 정책을 확인",
+            "UNIFIED_AUDIT_SGA_QUEUE_SIZE 파라미터로 SGA 내 감사 큐 크기를 조정하여 성능과 기록 즉시성 간 균형 조절 가능",
+            "AUDIT_SYS_OPERATIONS 파라미터가 TRUE이면 SYS 사용자의 모든 작업이 OS 감사 트레일에 기록됨"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s02",
+      "title": "통합 감사 (Unified Auditing)",
+      "content": "통합 감사(Unified Auditing)는 Oracle 12c부터 도입된 단일화된 감사 프레임워크로, 기존의 여러 감사 방식(DB 감사, OS 감사, XML 감사, FGA 등)을 **하나의 감사 트레일**로 통합합니다. Oracle 26ai에서는 통합 감사가 **기본(Default)** 감사 방식이며, 정책 기반(Policy-Based) 접근으로 감사 대상을 유연하게 정의할 수 있습니다.\n\n## 통합 감사 vs 전통적 감사 비교\n\n| 항목 | 통합 감사 (Unified) | 전통적 감사 (Traditional) |\n|---|---|---|\n| **도입 버전** | Oracle 12c~ | Oracle 10g 이전~ |\n| **감사 트레일** | 단일 (UNIFIED_AUDIT_TRAIL) | 분산 (DB, OS, XML 별도) |\n| **정책 기반** | CREATE AUDIT POLICY로 정책 정의 | AUDIT 문으로 개별 지정 |\n| **성능** | SGA 큐 기반 비동기 기록 (우수) | 동기 기록 (상대적 부하) |\n| **관리** | AUDIT_ADMIN / AUDIT_VIEWER 롤 | DBA 롤 또는 AUDIT SYSTEM |\n| **SYS 감사** | 통합 트레일에 포함 가능 | 별도 OS 파일에만 기록 |\n| **조건부 감사** | WHEN 절로 조건 지정 가능 | 제한적 |\n\n## AUDSYS 스키마\n\nAUDSYS는 통합 감사 트레일 데이터를 저장하는 전용 내부 스키마입니다.\n\n| 항목 | 설명 |\n|---|---|\n| **소유 객체** | AUD$UNIFIED 테이블 (감사 레코드 저장) |\n| **테이블스페이스** | AUDSYS 데이터는 SYSAUX 테이블스페이스에 저장 (변경 가능) |\n| **접근 제한** | 직접 로그인 불가, UNIFIED_AUDIT_TRAIL 뷰를 통해서만 조회 |\n| **보호** | DROP, ALTER 불가 (Oracle 내부 보호) |\n\n## 혼합 모드 vs 순수 통합 감사 모드\n\n| 모드 | 설명 | 확인 방법 |\n|---|---|---|\n| **혼합 모드 (Mixed Mode)** | 전통적 감사와 통합 감사가 공존. 기본 설치 시 이 모드 | V$OPTION에서 'Unified Auditing' = FALSE |\n| **순수 통합 감사 모드 (Pure)** | 오직 통합 감사만 동작. 전통적 감사 비활성화 | V$OPTION에서 'Unified Auditing' = TRUE |\n\n순수 통합 감사 모드로 전환하려면 Oracle 바이너리를 재링크(relink)해야 합니다:\n\n```bash\n# 순수 통합 감사 모드 전환 (Linux)\ncd $ORACLE_HOME/rdbms/lib\nmake -f ins_rdbms.mk uniaud_on ioracle ORACLE_HOME=$ORACLE_HOME\n```",
+      "sqlExamplesIds": ["sql01", "sql02", "sql03", "sql04", "sql05"],
+      "subsections": [
+        {
+          "title": "감사 정책 생성 및 관리 (Creating and Managing Audit Policies)",
+          "content": "통합 감사 정책은 CREATE AUDIT POLICY 문으로 생성합니다. 하나의 정책에 여러 감사 대상(권한, 액션, 롤)을 포함할 수 있으며, 조건(WHEN 절)을 지정하여 특정 상황에서만 감사가 동작하도록 설정할 수 있습니다. 정책을 생성한 후에는 반드시 AUDIT POLICY 문으로 활성화해야 실제 감사가 수행됩니다.\n\n### 감사 정책 유형\n\n| 정책 유형 | 설명 | 예시 |\n|---|---|---|\n| **권한 감사 (Privilege Auditing)** | 시스템 권한 사용 시 감사 | PRIVILEGES CREATE TABLE, DROP ANY TABLE |\n| **액션 감사 (Action Auditing)** | 특정 SQL 동작 수행 시 감사 | ACTIONS DELETE ON hr.employees |\n| **롤 감사 (Role Auditing)** | 특정 롤에 포함된 모든 권한 사용 시 감사 | ROLES dba, resource |\n| **컴포넌트 감사 (Component Auditing)** | Oracle Label Security, RMAN 등 컴포넌트 활동 감사 | ACTIONS COMPONENT=DATAPUMP EXPORT |\n\n### 감사 정책 DDL 문법\n\n```sql\n-- 기본 문법\nCREATE AUDIT POLICY policy_name\n  { PRIVILEGES privilege1 [, privilege2 ...] }\n  { ACTIONS action1 [ON schema.object] [, action2 ...] }\n  { ROLES role1 [, role2 ...] }\n  [WHEN 'condition' EVALUATE PER {STATEMENT | SESSION | INSTANCE}]\n  [CONTAINER = {CURRENT | ALL}];\n\n-- 정책 수정\nALTER AUDIT POLICY policy_name\n  ADD PRIVILEGES privilege1\n  DROP ACTIONS action1;\n\n-- 정책 삭제\nDROP AUDIT POLICY policy_name;\n```\n\n### 감사 정책 활성화/비활성화\n\n```sql\n-- 모든 사용자에게 적용\nAUDIT POLICY policy_name;\n\n-- 특정 사용자에게만 적용\nAUDIT POLICY policy_name BY user1, user2;\n\n-- 특정 사용자를 제외하고 적용\nAUDIT POLICY policy_name EXCEPT user1;\n\n-- 비활성화\nNOAUDIT POLICY policy_name;\nNOAUDIT POLICY policy_name BY user1;\n```\n\n### WHEN 절을 사용한 조건부 감사\n\nWHEN 절을 사용하면 특정 조건에서만 감사가 수행되어 감사 데이터의 양을 줄이고 성능 영향을 최소화할 수 있습니다.\n\n| EVALUATE PER 옵션 | 설명 |\n|---|---|\n| **STATEMENT** | 각 SQL 문 실행 시마다 조건 평가 |\n| **SESSION** | 세션 시작 시 한 번만 조건 평가 |\n| **INSTANCE** | 인스턴스 수준에서 조건 평가 |\n\n사용 가능한 조건 함수: SYS_CONTEXT('USERENV', 'IP_ADDRESS'), SYS_CONTEXT('USERENV', 'SESSION_USER'), SYS_CONTEXT('USERENV', 'CLIENT_PROGRAM_NAME') 등.",
+          "key_points": [
+            "CREATE AUDIT POLICY로 정책 생성 후 반드시 AUDIT POLICY로 활성화해야 실제 감사 수행",
+            "하나의 정책에 PRIVILEGES, ACTIONS, ROLES를 조합하여 복합 감사 조건 정의 가능",
+            "WHEN 절과 EVALUATE PER 옵션으로 조건부 감사를 설정하여 감사 데이터 양과 성능 영향 최소화",
+            "AUDIT POLICY ... BY user로 특정 사용자에게만, EXCEPT로 특정 사용자를 제외하고 적용 가능",
+            "ALTER AUDIT POLICY로 기존 정책에 ADD/DROP으로 감사 대상 추가/제거 가능",
+            "CONTAINER = ALL로 CDB 전체에 공통 감사 정책 적용 가능 (멀티테넌트 환경)"
+          ]
+        },
+        {
+          "title": "사전 정의 감사 정책 (Predefined Audit Policies)",
+          "content": "Oracle Database는 보안 모범 사례에 기반한 **사전 정의 감사 정책(Predefined Audit Policies)**을 제공합니다. 이 정책들은 Oracle이 권장하는 감사 항목을 포함하고 있으며, 즉시 활성화하여 사용할 수 있습니다. 일부 정책은 데이터베이스 생성 시 자동으로 활성화됩니다.\n\n### 사전 정의 감사 정책 목록\n\n| 정책 이름 | 설명 | 기본 활성화 |\n|---|---|---|\n| **ORA_SECURECONFIG** | 주요 보안 관련 시스템 권한 및 명령 감사. ALTER SYSTEM, CREATE USER, DROP USER, GRANT, REVOKE 등 포함 | 예 (자동 활성화) |\n| **ORA_LOGON_FAILURES** | 로그인 실패(인증 실패) 이벤트 감사 | 예 (자동 활성화) |\n| **ORA_DATABASE_PARAMETER** | ALTER SYSTEM을 통한 데이터베이스 파라미터 변경 감사 | 아니오 |\n| **ORA_ACCOUNT_MGMT** | 사용자 계정 관리 작업(CREATE/ALTER/DROP USER, GRANT, REVOKE) 감사 | 아니오 |\n| **ORA_CIS_RECOMMENDATIONS** | CIS(Center for Internet Security) 벤치마크 권장 항목 감사. ORA_SECURECONFIG 상위 호환 | 아니오 |\n| **ORA_RAS_POLICY_MGMT** | Real Application Security 정책 관리 작업 감사 | 아니오 |\n| **ORA_RAS_SESSION_MGMT** | Real Application Security 세션 관리 작업 감사 | 아니오 |\n| **ORA_DV_AUDPOL** | Database Vault 관련 감사 정책 (Database Vault 설치 시) | 아니오 |\n| **ORA_DV_AUDPOL2** | Database Vault 추가 감사 정책 (Database Vault 설치 시) | 아니오 |\n\n### ORA_SECURECONFIG 정책 상세\n\nORA_SECURECONFIG는 가장 중요한 사전 정의 정책으로, 다음과 같은 항목을 감사합니다:\n\n- 시스템 권한: ALTER SYSTEM, AUDIT SYSTEM, CREATE USER, DROP USER, ALTER USER, CREATE ROLE, DROP ROLE, ALTER ROLE, GRANT, REVOKE 등\n- 작업: CREATE DIRECTORY, ALTER DATABASE LINK, ALTER PUBLIC DATABASE LINK 등\n- 보안 관련 DDL: ALTER ANY TABLE, DROP ANY TABLE, CREATE ANY PROCEDURE 등\n\n이 정책은 데이터베이스 보안의 기본 방어선으로, 비활성화하지 않는 것이 강력히 권장됩니다.",
+          "key_points": [
+            "ORA_SECURECONFIG와 ORA_LOGON_FAILURES는 데이터베이스 생성 시 자동으로 활성화되는 사전 정의 정책",
+            "ORA_CIS_RECOMMENDATIONS는 CIS 벤치마크 기반으로 ORA_SECURECONFIG보다 포괄적인 감사 항목 포함",
+            "ORA_ACCOUNT_MGMT는 사용자 계정 관리(CREATE/ALTER/DROP USER) 작업을 전문적으로 감사",
+            "ORA_DATABASE_PARAMETER는 ALTER SYSTEM을 통한 파라미터 변경을 추적하여 구성 변경 이력 관리에 유용",
+            "사전 정의 정책은 ALTER AUDIT POLICY로 수정할 수 없으며, 활성화/비활성화만 가능",
+            "Database Vault가 설치된 환경에서는 ORA_DV_AUDPOL, ORA_DV_AUDPOL2 정책이 추가로 제공됨"
+          ]
+        },
+        {
+          "title": "감사 관리 롤 (Audit Administration Roles)",
+          "content": "통합 감사 시스템은 **직무 분리(Separation of Duties)** 원칙에 따라 감사 관리와 감사 조회를 별도의 롤로 분리합니다. 이를 통해 DBA와 감사 관리자의 권한을 명확히 구분하여, DBA가 자신의 활동에 대한 감사 기록을 임의로 변경하거나 삭제하는 것을 방지합니다.\n\n### AUDIT_ADMIN vs AUDIT_VIEWER 롤 비교\n\n| 항목 | AUDIT_ADMIN | AUDIT_VIEWER |\n|---|---|---|\n| **목적** | 감사 정책 생성, 수정, 삭제 및 감사 트레일 관리 | 감사 트레일 조회 전용 |\n| **CREATE AUDIT POLICY** | 가능 | 불가 |\n| **ALTER AUDIT POLICY** | 가능 | 불가 |\n| **DROP AUDIT POLICY** | 가능 | 불가 |\n| **AUDIT / NOAUDIT** | 가능 | 불가 |\n| **UNIFIED_AUDIT_TRAIL 조회** | 가능 | 가능 |\n| **DBMS_AUDIT_MGMT 실행** | 가능 | 불가 |\n| **감사 트레일 정리(Purge)** | 가능 | 불가 |\n| **대상 사용자** | 보안 관리자, 감사 관리자 | 감사관, 감사 조회 담당자 |\n\n### 롤 부여 방법\n\n```sql\n-- 감사 관리자에게 AUDIT_ADMIN 롤 부여\nGRANT AUDIT_ADMIN TO security_admin;\n\n-- 감사 조회 담당자에게 AUDIT_VIEWER 롤 부여\nGRANT AUDIT_VIEWER TO auditor_user;\n```\n\n### 직무 분리의 중요성\n\n전통적 감사에서는 DBA 롤을 가진 사용자가 감사 설정과 감사 트레일 모두에 접근할 수 있었으나, 통합 감사에서는 AUDIT_ADMIN/AUDIT_VIEWER 롤을 통해 감사 관리 기능이 DBA 롤에서 분리되었습니다. 이 구조는 내부 감사(Internal Audit) 요건과 규제 준수(Compliance)에 핵심적인 역할을 합니다.\n\n| 시나리오 | 전통적 감사 | 통합 감사 |\n|---|---|---|\n| DBA가 감사 정책 변경 | DBA 롤로 가능 | AUDIT_ADMIN 필요 (DBA 롤 불충분) |\n| DBA가 감사 트레일 조회 | DBA 롤로 가능 | AUDIT_VIEWER 또는 AUDIT_ADMIN 필요 |\n| DBA가 감사 트레일 삭제 | DBA 롤로 가능 | AUDIT_ADMIN + DBMS_AUDIT_MGMT 필요 |",
+          "key_points": [
+            "AUDIT_ADMIN 롤은 감사 정책의 생성/수정/삭제 및 감사 트레일 관리(정리/아카이브) 권한을 포함",
+            "AUDIT_VIEWER 롤은 감사 트레일 조회 전용으로, 정책 변경이나 트레일 삭제 권한이 없음",
+            "DBA 롤만으로는 통합 감사 정책 관리 및 감사 트레일 조회가 불가능하여 직무 분리 실현",
+            "보안 모범 사례상 AUDIT_ADMIN은 보안 관리자에게, AUDIT_VIEWER는 감사 조회 담당자에게 부여",
+            "DBMS_AUDIT_MGMT 패키지를 통한 감사 트레일 정리(Purge)는 AUDIT_ADMIN 롤 보유자만 수행 가능"
+          ]
+        },
+        {
+          "title": "감사 트레일 관리 (Audit Trail Management with DBMS_AUDIT_MGMT)",
+          "content": "통합 감사 트레일은 시간이 지남에 따라 크기가 증가하므로, DBMS_AUDIT_MGMT 패키지를 사용하여 주기적으로 관리해야 합니다. 이 패키지는 감사 트레일의 아카이브 타임스탬프 설정, 정리(Purge), 저장 위치 변경 등의 기능을 제공합니다.\n\n### DBMS_AUDIT_MGMT 주요 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **SET_LAST_ARCHIVE_TIMESTAMP** | 아카이브가 완료된 마지막 시점 지정 (이 시점 이전 레코드만 정리 가능) |\n| **CLEAN_AUDIT_TRAIL** | 아카이브 타임스탬프 이전의 감사 레코드 삭제 |\n| **SET_AUDIT_TRAIL_PROPERTY** | 감사 트레일 속성 변경 (저장 위치, 크기 제한 등) |\n| **SET_AUDIT_TRAIL_LOCATION** | 감사 트레일 테이블스페이스 변경 |\n| **CREATE_PURGE_JOB** | 자동 정리 스케줄러 작업 생성 |\n| **DROP_PURGE_JOB** | 자동 정리 작업 삭제 |\n| **IS_CLEANUP_INITIALIZED** | 정리 초기화 여부 확인 |\n| **INIT_CLEANUP** | 감사 트레일 정리 초기화 |\n\n### 감사 트레일 정리 절차\n\n```\n1. SET_LAST_ARCHIVE_TIMESTAMP로 아카이브 완료 시점 설정\n    ↓\n2. CLEAN_AUDIT_TRAIL로 해당 시점 이전 레코드 삭제\n    ↓\n3. (선택) CREATE_PURGE_JOB으로 자동 정리 스케줄 설정\n```\n\n### 감사 트레일 저장 위치 관리\n\n기본적으로 통합 감사 트레일은 SYSAUX 테이블스페이스에 저장됩니다. 감사 데이터가 대량으로 발생하는 환경에서는 전용 테이블스페이스로 이동하는 것이 권장됩니다.\n\n| 관련 뷰 | 설명 |\n|---|---|\n| **DBA_AUDIT_MGMT_CLEANUP_JOBS** | 자동 정리 작업 목록 |\n| **DBA_AUDIT_MGMT_CLEAN_EVENTS** | 정리 작업 실행 이력 |\n| **DBA_AUDIT_MGMT_LAST_ARCH_TS** | 설정된 마지막 아카이브 타임스탬프 |",
+          "key_points": [
+            "DBMS_AUDIT_MGMT.SET_LAST_ARCHIVE_TIMESTAMP으로 아카이브 완료 시점을 먼저 설정해야 CLEAN_AUDIT_TRAIL 실행 가능",
+            "CLEAN_AUDIT_TRAIL은 아카이브 타임스탬프 이전의 감사 레코드만 삭제하여 데이터 손실 방지",
+            "CREATE_PURGE_JOB으로 자동 정리 스케줄러 작업을 생성하여 주기적 감사 트레일 관리 가능",
+            "통합 감사 트레일 기본 저장 위치는 SYSAUX 테이블스페이스이며, SET_AUDIT_TRAIL_LOCATION으로 전용 테이블스페이스로 이동 가능",
+            "DBMS_AUDIT_MGMT 패키지 사용 자체가 강제 감사 대상이므로, 패키지 사용 이력이 자동으로 기록됨",
+            "DBA_AUDIT_MGMT_CLEANUP_JOBS 뷰로 자동 정리 작업의 상태와 스케줄을 확인 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "강제 감사 (Mandatory Auditing)",
+      "content": "강제 감사(Mandatory Auditing)는 감사 설정 여부와 관계없이 **항상 기록되는** 감사 항목입니다. 이 항목들은 NOAUDIT 문이나 감사 정책 비활성화로도 비활성화할 수 없으며, 데이터베이스 보안의 최소 감사 기준선(Baseline)을 제공합니다.\n\n## 강제 감사 대상 항목\n\n| 강제 감사 항목 | 설명 |\n|---|---|\n| **SYSDBA/SYSOPER 접속** | AS SYSDBA 또는 AS SYSOPER로의 모든 접속(성공/실패) |\n| **데이터베이스 기동 (STARTUP)** | 데이터베이스 인스턴스 기동 이벤트 |\n| **데이터베이스 종료 (SHUTDOWN)** | 데이터베이스 인스턴스 종료 이벤트 |\n| **DBMS_AUDIT_MGMT 패키지 사용** | 감사 트레일 관리 패키지의 모든 프로시저 호출 |\n\n## 강제 감사 레코드 저장 위치\n\n| 모드 | 저장 위치 |\n|---|---|\n| **순수 통합 감사 모드** | UNIFIED_AUDIT_TRAIL (AUDSYS 스키마) |\n| **혼합 모드** | OS 감사 파일 ($ORACLE_BASE/audit/ 또는 Windows 이벤트 로그) |\n| **데이터베이스 미기동 시** | OS 감사 파일 (DB 기동 전이므로 DB 내 기록 불가) |\n\n## 강제 감사의 존재 이유\n\n강제 감사는 다음과 같은 상황을 방지하기 위해 설계되었습니다:\n\n1. **감사 우회 방지**: 관리자 권한 접속 기록을 삭제하거나 감사를 비활성화하여 추적을 피하는 행위 방지\n2. **감사 트레일 무결성 보호**: DBMS_AUDIT_MGMT 사용 기록을 남겨, 감사 트레일 자체의 조작 시도 추적\n3. **기동/종료 추적**: 비인가 기동/종료로 인한 서비스 중단 탐지",
+      "sqlExamplesIds": ["sql06"],
+      "subsections": [
+        {
+          "title": "강제 감사 항목 상세 및 저장 메커니즘 (Mandatory Audit Items and Storage Mechanism)",
+          "content": "강제 감사 항목은 Oracle Database 커널 레벨에서 하드코딩되어 있어, 어떤 감사 설정 변경으로도 비활성화할 수 없습니다. 이는 데이터베이스 보안의 최후 방어선으로 기능합니다.\n\n### SYSDBA/SYSOPER 접속 감사 상세\n\nSYSDBA 및 SYSOPER 접속은 가장 높은 수준의 관리자 권한이므로, 모든 접속 시도(성공/실패 모두)가 기록됩니다.\n\n| 기록 항목 | 설명 |\n|---|---|\n| **접속 사용자 (OS User)** | OS 레벨의 사용자 계정 |\n| **접속 시각 (Timestamp)** | 접속 시도 시각 |\n| **접속 결과 (Status)** | 성공(0) 또는 실패(오류 코드) |\n| **접속 권한 (Privilege)** | SYSDBA, SYSOPER, SYSBACKUP, SYSDG, SYSKM 등 |\n| **클라이언트 정보** | 터미널, 호스트, IP 주소 |\n| **인스턴스 이름** | 접속 대상 인스턴스 |\n\n### DBMS_AUDIT_MGMT 사용 감사\n\nDBMS_AUDIT_MGMT 패키지의 모든 프로시저 호출이 강제 감사 대상입니다. 이는 감사 트레일 자체의 무결성을 보장하기 위한 것으로, 누가 감사 트레일을 정리(Purge)했는지, 아카이브 타임스탬프를 언제 변경했는지 등을 추적합니다.\n\n### 데이터베이스 기동/종료 감사\n\n데이터베이스 기동 시에는 아직 데이터베이스가 열려 있지 않으므로, 기동 관련 강제 감사 레코드는 먼저 OS 감사 파일에 기록됩니다. 데이터베이스가 완전히 열린 후, 순수 통합 감사 모드에서는 OS 파일의 레코드가 UNIFIED_AUDIT_TRAIL로 로드됩니다.\n\n### 강제 감사 레코드 확인\n\n```sql\n-- SYSDBA 접속 감사 레코드 확인\nSELECT event_timestamp, dbusername, action_name,\n       authentication_type, os_username, userhost\nFROM   unified_audit_trail\nWHERE  action_name = 'LOGON'\nAND    dbusername = 'SYS'\nORDER BY event_timestamp DESC;\n\n-- DBMS_AUDIT_MGMT 사용 이력 확인\nSELECT event_timestamp, dbusername, action_name,\n       sql_text, unified_audit_policies\nFROM   unified_audit_trail\nWHERE  sql_text LIKE '%DBMS_AUDIT_MGMT%'\nORDER BY event_timestamp DESC;\n```\n\n### 강제 감사 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$OPTION** | 통합 감사 모드 확인 (Unified Auditing = TRUE/FALSE) |\n| **V$INSTANCE** | 인스턴스 기동 시각 및 상태 확인 |\n| **V$DIAG_INFO** | 진단 파일(강제 감사 파일 포함) 경로 확인 |",
+          "key_points": [
+            "SYSDBA, SYSOPER, SYSBACKUP, SYSDG, SYSKM 등 모든 관리자 권한 접속이 성공/실패와 무관하게 강제로 감사됨",
+            "DBMS_AUDIT_MGMT 패키지의 모든 프로시저 호출이 강제 감사되어, 감사 트레일 조작 시도를 추적 가능",
+            "데이터베이스 기동(STARTUP)과 종료(SHUTDOWN) 이벤트는 항상 기록되며, 기동 시에는 OS 파일에 먼저 기록",
+            "강제 감사 항목은 Oracle 커널에 하드코딩되어 NOAUDIT 문이나 정책 비활성화로 해제 불가",
+            "혼합 모드에서 강제 감사 레코드는 OS 감사 파일($ORACLE_BASE/audit/)에 저장됨",
+            "순수 통합 감사 모드에서는 모든 강제 감사 레코드가 UNIFIED_AUDIT_TRAIL에서 조회 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "파인 그레인 감사 (Fine-Grained Auditing, FGA)",
+      "content": "파인 그레인 감사(Fine-Grained Auditing, FGA)는 **특정 열(Column)** 및 **특정 행(Row)**에 대한 접근을 세밀하게 감사하는 기능입니다. 통합 감사 정책이 SQL 문 단위의 감사라면, FGA는 SQL 문이 **어떤 데이터에** 접근했는지까지 추적할 수 있어 민감한 데이터 보호에 핵심적입니다.\n\n## FGA vs 통합 감사 정책 비교\n\n| 항목 | 통합 감사 정책 | FGA |\n|---|---|---|\n| **감사 단위** | SQL 문, 권한, 롤 수준 | 열(Column), 행(Row) 수준 |\n| **SELECT 감사** | 제한적 (테이블 단위) | 가능 (특정 열/행 조건) |\n| **조건 지정** | WHEN 절 (세션/인스턴스 속성) | audit_condition (SQL WHERE 조건) |\n| **핸들러** | 미지원 | 핸들러 프로시저 호출 가능 |\n| **설정 방법** | CREATE AUDIT POLICY | DBMS_FGA.ADD_POLICY |\n| **트레일** | UNIFIED_AUDIT_TRAIL | UNIFIED_AUDIT_TRAIL + DBA_FGA_AUDIT_TRAIL |\n| **MERGE 감사** | 지원 | 지원 (내부적으로 INSERT/UPDATE/DELETE로 분리) |\n\n## FGA 동작 원리\n\n```\nSQL 문 실행\n    ↓\nFGA 정책의 audit_condition 평가\n    ↓ (조건 충족 시)\n감사 열(audit_column) 접근 여부 확인\n    ↓ (접근 시)\nALL_COLUMNS / ANY_COLUMNS 조건 평가\n    ↓ (조건 충족 시)\n감사 레코드 생성 + (선택) 핸들러 프로시저 실행\n    ↓\n감사 트레일에 기록 (SQL_TEXT, SQL_BIND 포함)\n```",
+      "sqlExamplesIds": ["sql07", "sql08", "sql09", "sql10"],
+      "subsections": [
+        {
+          "title": "FGA 정책 생성 및 관리 (DBMS_FGA Package)",
+          "content": "FGA 정책은 DBMS_FGA 패키지의 프로시저를 사용하여 생성, 활성화, 비활성화, 삭제합니다. 하나의 테이블에 여러 FGA 정책을 동시에 적용할 수 있으며, 각 정책은 독립적으로 동작합니다.\n\n### DBMS_FGA 패키지 주요 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **ADD_POLICY** | FGA 정책 생성 및 추가 |\n| **DROP_POLICY** | FGA 정책 삭제 |\n| **ENABLE_POLICY** | FGA 정책 활성화 |\n| **DISABLE_POLICY** | FGA 정책 비활성화 |\n\n### ADD_POLICY 파라미터 상세\n\n| 파라미터 | 설명 | 필수 여부 |\n|---|---|---|\n| **object_schema** | 감사 대상 객체 스키마 | 예 |\n| **object_name** | 감사 대상 테이블/뷰 이름 | 예 |\n| **policy_name** | 정책 이름 (고유해야 함) | 예 |\n| **audit_condition** | 행 조건 (WHERE 절과 동일 문법). NULL이면 모든 행 | 아니오 |\n| **audit_column** | 감사 대상 열 목록 (쉼표 구분). NULL이면 모든 열 | 아니오 |\n| **handler_schema** | 핸들러 프로시저 스키마 | 아니오 |\n| **handler_module** | 핸들러 프로시저 이름 (감사 이벤트 발생 시 자동 호출) | 아니오 |\n| **enable** | 생성 시 즉시 활성화 여부 (기본값: TRUE) | 아니오 |\n| **statement_types** | 감사할 DML 유형 (SELECT, INSERT, UPDATE, DELETE, MERGE) | 아니오 |\n| **audit_trail** | 트레일 유형 (DB, XML, DB+EXTENDED, XML+EXTENDED) | 아니오 |\n| **audit_column_opts** | ALL_COLUMNS 또는 ANY_COLUMNS (기본값: ANY_COLUMNS) | 아니오 |\n| **policy_owner** | 정책 소유자 (멀티테넌트 환경) | 아니오 |\n\n### audit_column_opts: ALL_COLUMNS vs ANY_COLUMNS\n\n| 옵션 | 설명 |\n|---|---|\n| **DBMS_FGA.ANY_COLUMNS** | audit_column에 지정된 열 중 **하나라도** 접근하면 감사 발생 (기본값) |\n| **DBMS_FGA.ALL_COLUMNS** | audit_column에 지정된 열을 **모두** 접근해야 감사 발생 |\n\n### FGA 정책 관리 예시\n\n```sql\n-- FGA 정책 비활성화\nBEGIN\n  DBMS_FGA.DISABLE_POLICY(\n    object_schema => 'HR',\n    object_name   => 'EMPLOYEES',\n    policy_name   => 'FGA_EMP_SALARY'\n  );\nEND;\n/\n\n-- FGA 정책 재활성화\nBEGIN\n  DBMS_FGA.ENABLE_POLICY(\n    object_schema => 'HR',\n    object_name   => 'EMPLOYEES',\n    policy_name   => 'FGA_EMP_SALARY'\n  );\nEND;\n/\n\n-- FGA 정책 삭제\nBEGIN\n  DBMS_FGA.DROP_POLICY(\n    object_schema => 'HR',\n    object_name   => 'EMPLOYEES',\n    policy_name   => 'FGA_EMP_SALARY'\n  );\nEND;\n/\n```",
+          "key_points": [
+            "DBMS_FGA.ADD_POLICY로 FGA 정책을 생성하며, audit_condition(행 조건)과 audit_column(열 조건)을 지정",
+            "ANY_COLUMNS(기본값)는 지정된 열 중 하나라도 접근 시 감사, ALL_COLUMNS는 모든 열 접근 시에만 감사",
+            "handler_module 파라미터로 감사 이벤트 발생 시 자동 호출될 핸들러 프로시저를 지정 가능",
+            "statement_types에 SELECT, INSERT, UPDATE, DELETE, MERGE를 지정하여 감사 대상 DML 유형 결정",
+            "enable 파라미터가 기본 TRUE이므로, ADD_POLICY 호출 시 정책이 즉시 활성화됨",
+            "하나의 테이블에 여러 FGA 정책을 동시에 적용할 수 있으며, 각 정책은 독립적으로 평가됨"
+          ]
+        },
+        {
+          "title": "FGA 감사 대상 DML 및 MERGE 문 처리 (Supported Operations and MERGE Auditing)",
+          "content": "FGA는 SELECT, INSERT, UPDATE, DELETE, MERGE 문에 대해 감사를 수행할 수 있습니다. 특히 SELECT 문 감사는 FGA의 핵심 차별점으로, 통합 감사 정책에서는 특정 열/행 수준의 SELECT 감사가 어렵기 때문에 민감 데이터 조회 추적에 FGA가 필수적입니다.\n\n### DML 유형별 FGA 동작\n\n| DML 유형 | audit_condition 평가 | audit_column 평가 | 설명 |\n|---|---|---|---|\n| **SELECT** | 반환 행이 조건 충족 시 | 조회 열이 감사 대상 열 포함 시 | 데이터 조회 감사의 핵심 |\n| **INSERT** | 삽입 행이 조건 충족 시 | 삽입 열이 감사 대상 열 포함 시 | 새 데이터 입력 추적 |\n| **UPDATE** | 변경 전/후 행이 조건 충족 시 | 변경 열이 감사 대상 열 포함 시 | 데이터 변경 추적 |\n| **DELETE** | 삭제 행이 조건 충족 시 | audit_column 무시 (모든 열 관련) | 데이터 삭제 추적 |\n| **MERGE** | INSERT/UPDATE/DELETE로 분리 평가 | 각 DML별 개별 평가 | 내부적으로 분리 처리 |\n\n### MERGE 문 감사 처리 방식\n\nMERGE 문은 단일 SQL 문이지만, 내부적으로 INSERT, UPDATE, DELETE 작업의 조합으로 실행됩니다. FGA에서 MERGE 문은 다음과 같이 처리됩니다:\n\n1. MERGE 문의 WHEN MATCHED 절은 UPDATE 또는 DELETE로 감사됨\n2. MERGE 문의 WHEN NOT MATCHED 절은 INSERT로 감사됨\n3. statement_types에 'MERGE'를 지정하면 INSERT, UPDATE, DELETE 모두에 대해 감사 수행\n4. 각 분리된 DML별로 audit_condition과 audit_column이 개별 평가됨\n\n### SELECT 문 데이터 조회 감사의 중요성\n\n| 시나리오 | FGA 활용 |\n|---|---|\n| **개인정보 조회 추적** | 주민등록번호, 카드번호 등 민감 열 접근 시 감사 |\n| **급여 정보 접근 통제** | SALARY 열 조회 시 특정 직급 이상만 허용 여부와 무관하게 감사 |\n| **의료 데이터 열람 기록** | 환자 진료 기록 조회를 HIPAA 규제 충족을 위해 기록 |\n| **금융 거래 데이터 조회** | 고액 거래 레코드 조회 시 자동 감사 |",
+          "key_points": [
+            "FGA는 SELECT, INSERT, UPDATE, DELETE, MERGE 5가지 DML 유형에 대해 감사 가능",
+            "SELECT 문 감사는 FGA의 핵심 차별점으로, 민감 데이터 조회 추적에 필수적",
+            "MERGE 문은 내부적으로 INSERT/UPDATE/DELETE로 분리되어 각각 독립적으로 감사 평가됨",
+            "DELETE 문의 경우 audit_column이 무시되며 모든 열 관련 삭제가 감사 대상",
+            "audit_condition은 SQL WHERE 절과 동일한 문법으로, 특정 행에 대한 접근만 선별적으로 감사 가능"
+          ]
+        },
+        {
+          "title": "FGA 핸들러 프로시저 및 감사 트레일 조회 (FGA Handler and Audit Trail)",
+          "content": "FGA 핸들러 프로시저는 감사 이벤트가 발생할 때 자동으로 호출되는 PL/SQL 프로시저입니다. 핸들러를 활용하면 감사 레코드 기록 외에 추가적인 조치(이메일 알림, 커스텀 로그 기록 등)를 수행할 수 있습니다. FGA 감사 트레일은 DBA_FGA_AUDIT_TRAIL 뷰 또는 UNIFIED_AUDIT_TRAIL 뷰를 통해 조회합니다.\n\n### 핸들러 프로시저 시그니처\n\nFGA 핸들러 프로시저는 반드시 다음 4개의 IN 파라미터를 가져야 합니다:\n\n```sql\nCREATE OR REPLACE PROCEDURE fga_handler (\n  object_schema  IN VARCHAR2,  -- 감사 대상 객체 스키마\n  object_name    IN VARCHAR2,  -- 감사 대상 객체 이름\n  policy_name    IN VARCHAR2,  -- 트리거된 FGA 정책 이름\n  -- Oracle이 자동으로 값을 전달\n) AS\nBEGIN\n  -- 커스텀 로직 (알림, 로그 기록 등)\n  INSERT INTO audit_alert_log (schema_name, table_name, policy, alert_time)\n  VALUES (object_schema, object_name, policy_name, SYSTIMESTAMP);\n  COMMIT;\nEND;\n/\n```\n\n### FGA 감사 트레일 주요 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_FGA_AUDIT_TRAIL** | FGA 전용 감사 트레일. SQL_TEXT, SQL_BIND, SCN 등 상세 정보 포함 |\n| **DBA_AUDIT_POLICIES** | 정의된 FGA 정책 목록 (상태, 조건, 대상 열 등) |\n| **UNIFIED_AUDIT_TRAIL** | 통합 감사 트레일에서 FGA 이벤트도 확인 가능 (FGA_POLICY_NAME 열) |\n| **DBA_COMMON_AUDIT_TRAIL** | 통합 + FGA 감사 트레일 통합 조회 |\n\n### DBA_FGA_AUDIT_TRAIL 주요 열\n\n| 열 이름 | 설명 |\n|---|---|\n| **TIMESTAMP** | 감사 이벤트 발생 시각 |\n| **DB_USER** | SQL 실행 사용자 |\n| **OS_USER** | OS 사용자 이름 |\n| **OBJECT_SCHEMA** | 대상 객체 스키마 |\n| **OBJECT_NAME** | 대상 객체 이름 |\n| **POLICY_NAME** | 트리거된 FGA 정책 이름 |\n| **SQL_TEXT** | 실행된 SQL 문 전체 텍스트 |\n| **SQL_BIND** | SQL 바인드 변수 값 |\n| **SCN** | System Change Number |\n| **STATEMENT_TYPE** | DML 유형 (SELECT, INSERT, UPDATE, DELETE) |\n| **EXTENDED_TIMESTAMP** | 타임존 포함 상세 타임스탬프 |\n\n### DBA_AUDIT_POLICIES 주요 열\n\n| 열 이름 | 설명 |\n|---|---|\n| **OBJECT_SCHEMA** | 정책 대상 스키마 |\n| **OBJECT_NAME** | 정책 대상 객체 |\n| **POLICY_NAME** | 정책 이름 |\n| **POLICY_TEXT** | 감사 조건 (audit_condition) |\n| **POLICY_COLUMN** | 감사 대상 열 목록 |\n| **ENABLED** | 활성화 여부 (YES/NO) |\n| **SEL / INS / UPD / DEL** | 각 DML 유형 감사 여부 (YES/NO) |\n| **AUDIT_COLUMN_OPTS** | ALL_COLUMNS 또는 ANY_COLUMNS |",
+          "key_points": [
+            "FGA 핸들러 프로시저는 object_schema, object_name, policy_name 3개의 IN 파라미터를 필수로 가져야 함",
+            "DBA_FGA_AUDIT_TRAIL 뷰에서 SQL_TEXT, SQL_BIND 열을 통해 실행된 SQL 문과 바인드 변수 값까지 확인 가능",
+            "DBA_AUDIT_POLICIES 뷰로 FGA 정책의 상태, 조건, 대상 열, DML 유형별 감사 설정을 확인 가능",
+            "UNIFIED_AUDIT_TRAIL의 FGA_POLICY_NAME 열에서 FGA 이벤트를 통합 감사 트레일에서도 확인 가능",
+            "핸들러 프로시저 내에서 COMMIT을 사용하면 자율 트랜잭션(Autonomous Transaction)으로 처리됨",
+            "DBA_COMMON_AUDIT_TRAIL 뷰는 통합 감사와 FGA 감사 트레일을 하나의 뷰로 통합 조회 가능"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "통합 감사 정책 생성 - 권한 및 액션 감사",
+      "sql": "-- 권한 감사 정책 생성\nCREATE AUDIT POLICY pol_priv_audit\n  PRIVILEGES CREATE TABLE, DROP ANY TABLE, ALTER USER\n  ACTIONS DELETE ON hr.employees,\n          UPDATE ON hr.employees;\n\n-- 롤 감사 정책 생성\nCREATE AUDIT POLICY pol_dba_role_audit\n  ROLES dba;",
+      "description": "CREATE AUDIT POLICY 문으로 통합 감사 정책을 생성합니다. PRIVILEGES 절로 시스템 권한 사용을, ACTIONS 절로 특정 객체에 대한 DML을, ROLES 절로 특정 롤에 포함된 모든 권한 사용을 감사 대상으로 지정합니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "조건부 감사 정책 생성 (WHEN 절)",
+      "sql": "-- IP 주소 기반 조건부 감사 정책\nCREATE AUDIT POLICY pol_external_access\n  PRIVILEGES SELECT ANY TABLE\n  ACTIONS SELECT ON hr.employees\n  WHEN 'SYS_CONTEXT(''USERENV'', ''IP_ADDRESS'') NOT IN (''192.168.1.0'', ''10.0.0.0'')'\n  EVALUATE PER SESSION;",
+      "description": "WHEN 절을 사용하여 특정 조건(예: 외부 IP에서의 접속)에서만 감사가 수행되도록 조건부 감사 정책을 생성합니다. EVALUATE PER SESSION은 세션 시작 시 한 번만 조건을 평가합니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "감사 정책 활성화/비활성화 (AUDIT / NOAUDIT POLICY)",
+      "sql": "-- 모든 사용자에게 감사 정책 적용\nAUDIT POLICY pol_priv_audit;\n\n-- 특정 사용자에게만 적용\nAUDIT POLICY pol_priv_audit BY hr, scott;\n\n-- 특정 사용자 제외\nAUDIT POLICY pol_external_access EXCEPT sys, system;\n\n-- 정책 비활성화\nNOAUDIT POLICY pol_priv_audit;\nNOAUDIT POLICY pol_priv_audit BY hr;\n\n-- 활성화된 정책 확인\nSELECT policy_name, enabled_option, entity_name, entity_type\nFROM   audit_unified_enabled_policies\nORDER BY policy_name;",
+      "description": "AUDIT POLICY 문으로 감사 정책을 활성화하고, NOAUDIT POLICY 문으로 비활성화합니다. BY 절로 특정 사용자에게만 적용하거나, EXCEPT 절로 특정 사용자를 제외할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "UNIFIED_AUDIT_TRAIL 조회",
+      "sql": "-- 최근 감사 이벤트 조회\nSELECT event_timestamp, dbusername, action_name,\n       object_schema, object_name, sql_text,\n       unified_audit_policies, return_code\nFROM   unified_audit_trail\nWHERE  event_timestamp > SYSTIMESTAMP - INTERVAL '24' HOUR\nORDER BY event_timestamp DESC\nFETCH FIRST 50 ROWS ONLY;\n\n-- 특정 정책에 의해 감사된 이벤트 조회\nSELECT event_timestamp, dbusername, action_name,\n       object_schema, object_name, sql_text\nFROM   unified_audit_trail\nWHERE  unified_audit_policies = 'POL_PRIV_AUDIT'\nORDER BY event_timestamp DESC;\n\n-- 로그인 실패 감사 이벤트 조회\nSELECT event_timestamp, dbusername, action_name,\n       os_username, userhost, return_code\nFROM   unified_audit_trail\nWHERE  action_name = 'LOGON'\nAND    return_code != 0\nORDER BY event_timestamp DESC;",
+      "description": "UNIFIED_AUDIT_TRAIL 뷰를 사용하여 통합 감사 트레일을 조회합니다. event_timestamp, dbusername, action_name, sql_text, return_code 등의 열로 감사 이벤트의 상세 정보를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "감사 정책 메타데이터 조회",
+      "sql": "-- 정의된 모든 감사 정책 확인\nSELECT policy_name, audit_option, audit_option_type,\n       object_schema, object_name, object_type\nFROM   audit_unified_policies\nORDER BY policy_name;\n\n-- 활성화된 정책과 적용 대상 확인\nSELECT policy_name, enabled_option, entity_name,\n       entity_type, success, failure\nFROM   audit_unified_enabled_policies\nORDER BY policy_name;\n\n-- 통합 감사 모드 확인 (Pure vs Mixed)\nSELECT parameter, value\nFROM   v$option\nWHERE  parameter = 'Unified Auditing';",
+      "description": "AUDIT_UNIFIED_POLICIES 뷰로 정의된 감사 정책의 상세 내용을, AUDIT_UNIFIED_ENABLED_POLICIES 뷰로 활성화된 정책과 적용 대상을 확인합니다. V$OPTION으로 순수/혼합 통합 감사 모드를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "DBMS_AUDIT_MGMT를 사용한 감사 트레일 관리",
+      "sql": "-- 1. 아카이브 타임스탬프 설정 (7일 이전 데이터 정리 준비)\nBEGIN\n  DBMS_AUDIT_MGMT.SET_LAST_ARCHIVE_TIMESTAMP(\n    audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,\n    last_archive_time => SYSTIMESTAMP - INTERVAL '7' DAY\n  );\nEND;\n/\n\n-- 2. 감사 트레일 정리 (아카이브 타임스탬프 이전 레코드 삭제)\nBEGIN\n  DBMS_AUDIT_MGMT.CLEAN_AUDIT_TRAIL(\n    audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,\n    use_last_arch_timestamp => TRUE\n  );\nEND;\n/\n\n-- 3. 자동 정리 작업 생성 (매일 실행)\nBEGIN\n  DBMS_AUDIT_MGMT.CREATE_PURGE_JOB(\n    audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,\n    audit_trail_purge_interval => 24,  -- 시간 단위 (24시간마다)\n    audit_trail_purge_name => 'DAILY_AUDIT_PURGE',\n    use_last_arch_timestamp => TRUE\n  );\nEND;\n/\n\n-- 감사 트레일 테이블스페이스 이동\nBEGIN\n  DBMS_AUDIT_MGMT.SET_AUDIT_TRAIL_LOCATION(\n    audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,\n    audit_trail_location_value => 'AUDIT_TS'\n  );\nEND;\n/",
+      "description": "DBMS_AUDIT_MGMT 패키지를 사용하여 감사 트레일을 관리합니다. SET_LAST_ARCHIVE_TIMESTAMP로 아카이브 시점을 설정하고, CLEAN_AUDIT_TRAIL로 정리하며, CREATE_PURGE_JOB으로 자동 정리 작업을 생성합니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "FGA 정책 생성 - 급여 데이터 조회 감사 (DBMS_FGA.ADD_POLICY)",
+      "sql": "-- 급여(SALARY) 열에 대한 SELECT 감사\n-- 급여가 10000 이상인 행 조회 시 감사\nBEGIN\n  DBMS_FGA.ADD_POLICY(\n    object_schema   => 'HR',\n    object_name     => 'EMPLOYEES',\n    policy_name     => 'FGA_EMP_SALARY',\n    audit_condition => 'SALARY >= 10000',\n    audit_column    => 'SALARY, COMMISSION_PCT',\n    handler_schema  => NULL,\n    handler_module  => NULL,\n    enable          => TRUE,\n    statement_types => 'SELECT, UPDATE',\n    audit_trail     => DBMS_FGA.DB + DBMS_FGA.EXTENDED,\n    audit_column_opts => DBMS_FGA.ANY_COLUMNS\n  );\nEND;\n/",
+      "description": "DBMS_FGA.ADD_POLICY로 HR.EMPLOYEES 테이블의 SALARY, COMMISSION_PCT 열에 대해, 급여가 10000 이상인 행의 SELECT 및 UPDATE를 감사하는 FGA 정책을 생성합니다. ANY_COLUMNS 옵션으로 두 열 중 하나라도 접근 시 감사됩니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "FGA 정책 생성 - MERGE 문 감사",
+      "sql": "-- MERGE 문 감사를 위한 FGA 정책\nBEGIN\n  DBMS_FGA.ADD_POLICY(\n    object_schema   => 'HR',\n    object_name     => 'EMPLOYEES',\n    policy_name     => 'FGA_EMP_MERGE',\n    audit_condition => NULL,  -- 모든 행 대상\n    audit_column    => 'SALARY, DEPARTMENT_ID',\n    enable          => TRUE,\n    statement_types => 'MERGE',\n    audit_column_opts => DBMS_FGA.ALL_COLUMNS\n  );\nEND;\n/\n\n-- MERGE 문 실행 시 FGA 감사 발생\nMERGE INTO hr.employees e\nUSING hr.emp_updates u ON (e.employee_id = u.employee_id)\nWHEN MATCHED THEN\n  UPDATE SET e.salary = u.new_salary, e.department_id = u.new_dept_id\nWHEN NOT MATCHED THEN\n  INSERT (employee_id, first_name, last_name, salary, department_id)\n  VALUES (u.employee_id, u.first_name, u.last_name, u.new_salary, u.new_dept_id);",
+      "description": "MERGE 문에 대한 FGA 정책을 생성합니다. statement_types에 'MERGE'를 지정하면 내부적으로 INSERT, UPDATE, DELETE로 분리되어 각각 감사됩니다. ALL_COLUMNS 옵션으로 SALARY와 DEPARTMENT_ID 모두 접근해야 감사됩니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "FGA 감사 트레일 조회 (DBA_FGA_AUDIT_TRAIL, DBA_AUDIT_POLICIES)",
+      "sql": "-- FGA 감사 트레일 조회\nSELECT timestamp, db_user, os_user,\n       object_schema, object_name, policy_name,\n       sql_text, sql_bind, statement_type, scn\nFROM   dba_fga_audit_trail\nWHERE  policy_name = 'FGA_EMP_SALARY'\nORDER BY timestamp DESC;\n\n-- FGA 정책 목록 및 상태 조회\nSELECT object_schema, object_name, policy_name,\n       policy_text, policy_column, enabled,\n       sel, ins, upd, del, audit_column_opts\nFROM   dba_audit_policies\nORDER BY object_schema, object_name;\n\n-- 통합 감사 트레일에서 FGA 이벤트 조회\nSELECT event_timestamp, dbusername, action_name,\n       object_schema, object_name, fga_policy_name,\n       sql_text\nFROM   unified_audit_trail\nWHERE  fga_policy_name IS NOT NULL\nORDER BY event_timestamp DESC;",
+      "description": "DBA_FGA_AUDIT_TRAIL 뷰에서 FGA 감사 레코드를, DBA_AUDIT_POLICIES 뷰에서 FGA 정책 목록과 상태를 조회합니다. UNIFIED_AUDIT_TRAIL에서도 FGA_POLICY_NAME 열로 FGA 이벤트를 확인할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "FGA 핸들러 프로시저를 활용한 감사 알림 정책",
+      "sql": "-- 감사 알림 로그 테이블 생성\nCREATE TABLE security_admin.fga_alerts (\n  alert_id      NUMBER GENERATED ALWAYS AS IDENTITY,\n  schema_name   VARCHAR2(128),\n  table_name    VARCHAR2(128),\n  policy_name   VARCHAR2(128),\n  alert_time    TIMESTAMP DEFAULT SYSTIMESTAMP,\n  session_user  VARCHAR2(128),\n  ip_address    VARCHAR2(45)\n);\n\n-- 핸들러 프로시저 생성\nCREATE OR REPLACE PROCEDURE security_admin.fga_alert_handler (\n  p_schema  IN VARCHAR2,\n  p_object  IN VARCHAR2,\n  p_policy  IN VARCHAR2\n) AS\n  PRAGMA AUTONOMOUS_TRANSACTION;\nBEGIN\n  INSERT INTO security_admin.fga_alerts\n    (schema_name, table_name, policy_name, session_user, ip_address)\n  VALUES\n    (p_schema, p_object, p_policy,\n     SYS_CONTEXT('USERENV', 'SESSION_USER'),\n     SYS_CONTEXT('USERENV', 'IP_ADDRESS'));\n  COMMIT;\nEND;\n/\n\n-- 핸들러 프로시저를 사용하는 FGA 정책 생성\nBEGIN\n  DBMS_FGA.ADD_POLICY(\n    object_schema   => 'HR',\n    object_name     => 'EMPLOYEES',\n    policy_name     => 'FGA_EMP_ALERT',\n    audit_condition => 'DEPARTMENT_ID = 10',\n    audit_column    => 'SALARY',\n    handler_schema  => 'SECURITY_ADMIN',\n    handler_module  => 'FGA_ALERT_HANDLER',\n    enable          => TRUE,\n    statement_types => 'SELECT, UPDATE, DELETE'\n  );\nEND;\n/",
+      "description": "FGA 핸들러 프로시저를 생성하여 감사 이벤트 발생 시 자동으로 커스텀 알림 테이블에 기록합니다. PRAGMA AUTONOMOUS_TRANSACTION을 사용하여 핸들러의 DML이 원본 트랜잭션과 독립적으로 커밋됩니다."
+    }
+  ],
+  "keywords": [
+    "통합 감사 (Unified Auditing)",
+    "감사 정책 (Audit Policy)",
+    "CREATE AUDIT POLICY",
+    "AUDIT POLICY",
+    "NOAUDIT POLICY",
+    "UNIFIED_AUDIT_TRAIL",
+    "AUDSYS 스키마",
+    "AUDIT_ADMIN 롤",
+    "AUDIT_VIEWER 롤",
+    "강제 감사 (Mandatory Auditing)",
+    "파인 그레인 감사 (Fine-Grained Auditing, FGA)",
+    "DBMS_FGA.ADD_POLICY",
+    "DBMS_AUDIT_MGMT",
+    "CLEAN_AUDIT_TRAIL",
+    "SET_LAST_ARCHIVE_TIMESTAMP",
+    "ORA_SECURECONFIG",
+    "ORA_LOGON_FAILURES",
+    "SYSDBA 접속 감사",
+    "감사 트레일 (Audit Trail)",
+    "DBA_FGA_AUDIT_TRAIL",
+    "DBA_AUDIT_POLICIES",
+    "AUDIT_UNIFIED_POLICIES",
+    "AUDIT_UNIFIED_ENABLED_POLICIES",
+    "조건부 감사 (WHEN 절)",
+    "핸들러 프로시저 (Handler Procedure)",
+    "ALL_COLUMNS / ANY_COLUMNS",
+    "MERGE 문 감사",
+    "권한 감사 (Privilege Auditing)",
+    "액션 감사 (Action Auditing)",
+    "롤 감사 (Role Auditing)",
+    "혼합 모드 (Mixed Mode)",
+    "순수 통합 감사 (Pure Unified Auditing)",
+    "CREATE_PURGE_JOB"
+  ]
+}

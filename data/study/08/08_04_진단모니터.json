@@ -1,0 +1,296 @@
+{
+  "id": "08_04",
+  "title": "진단 모니터 (Diagnostic Monitor - ADDM)",
+  "chapter": "08. 성능 모니터링, 어드바이저 및 자동 관리 태스크",
+  "description": "ADDM(Automatic Database Diagnostic Monitor)의 아키텍처, 분석 메커니즘, 구성 방법, PDB 레벨 ADDM 활성화, 보고서 생성 및 해석, 수동 분석 절차를 포괄적으로 다룹니다. AWR 스냅샷 기반의 자동 성능 진단과 권장 사항 도출 원리, Oracle 26ai 환경에서의 PDB 독립 ADDM 운영을 포함합니다.",
+  "oracle26ai_changes": [
+    "Oracle 23ai/26ai에서 PDB 레벨 AWR(AWR_PDB_AUTOFLUSH_ENABLED)이 기본 활성화되어, PDB별 독립적인 ADDM 분석이 별도 설정 없이 가능합니다.",
+    "DBMS_ADDM 패키지가 강화되어 PDB 컨텍스트에서 직접 ADDM 태스크를 생성하고 분석할 수 있으며, CDB 루트에서 전체 PDB에 대한 통합 진단도 지원합니다.",
+    "Machine Learning 기반 이상 탐지(Anomaly Detection)와 ADDM의 연계가 강화되어, 기존 규칙 기반 진단을 보완하는 예측적 권장 사항이 제공됩니다.",
+    "Real-Time ADDM 기능이 확장되어, 데이터베이스 행(Hang) 상태에서도 진단 분석을 수행할 수 있습니다.",
+    "ADDM 권장 사항에 SQL Plan Management(SPM) 자동 적용, Automatic Indexing 연계 등 자율 운영(Autonomous) 기능과의 통합 권장이 추가되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "ADDM 개요 및 아키텍처 (ADDM Overview and Architecture)",
+      "sqlExamplesIds": ["sql01"],
+      "content": "**ADDM(Automatic Database Diagnostic Monitor)**은 Oracle Database에 내장된 자동 성능 진단 엔진으로, AWR(Automatic Workload Repository) 스냅샷 데이터를 분석하여 성능 문제의 근본 원인을 식별하고 해결 권장 사항을 제시합니다. ADDM은 **MMON(Manageability Monitor)** 백그라운드 프로세스에 의해 매 AWR 스냅샷 후 자동으로 실행됩니다.\n\n## ADDM의 핵심 목적\n\n| 목적 | 설명 |\n|---|---|\n| **자동 성능 진단** | AWR 스냅샷 간 성능 데이터를 자동 분석하여 문제 식별 |\n| **근본 원인 분석 (Root Cause Analysis)** | 증상이 아닌 근본 원인까지 추적하여 진단 |\n| **영향도 정량화 (Impact Quantification)** | DB Time 기준으로 각 문제의 영향도를 수치화 |\n| **실행 가능한 권장 사항** | 구체적인 해결 방안을 예상 효과와 함께 제시 |\n| **사전 예방적 모니터링** | 정기적 분석으로 문제가 심각해지기 전에 감지 |\n\n## ADDM 아키텍처 구성요소\n\n| 구성요소 | 역할 |\n|---|---|\n| **AWR (Automatic Workload Repository)** | 성능 통계 데이터의 저장소. ADDM의 입력 데이터 소스 |\n| **MMON (Manageability Monitor)** | AWR 스냅샷 수집 및 ADDM 분석을 트리거하는 백그라운드 프로세스 |\n| **MMNL (Manageability Monitor Light)** | MMON 보조 프로세스. ASH 버퍼 플러시 등 경량 태스크 담당 |\n| **Advisor Framework** | ADDM을 포함한 어드바이저 인프라. DBMS_ADVISOR 패키지로 접근 |\n| **ADDM 분석 엔진** | DB Time 분해(Decomposition) 기반 성능 분석 로직 |\n| **DBA_ADVISOR_* 뷰** | ADDM 분석 결과(Finding, Recommendation)를 조회하는 딕셔너리 뷰 |\n\n## ADDM 자동 실행 흐름\n\n```\nMMON 프로세스: AWR 스냅샷 수집 (기본 1시간 간격)\n    │\n    ▼\nAWR 스냅샷 완료\n    │\n    ▼\nMMON이 자동으로 ADDM 분석 태스크 생성\n    │\n    ▼\nADDM 엔진: 직전 2개 스냅샷 간 데이터 분석\n    ├── DB Time 분해 (CPU Time, Wait Time)\n    ├── 상위 성능 소비 요소 식별\n    ├── 근본 원인 추적 (Root Cause Drill-Down)\n    └── 권장 사항 생성 (Recommendations)\n    │\n    ▼\n분석 결과를 AWR 리포지토리에 저장\n    │\n    ▼\nEnterprise Manager 또는 DBA_ADVISOR_* 뷰를 통해 조회 가능\n```\n\n## ADDM vs 기타 진단 도구 비교\n\n| 도구 | 분석 시점 | 분석 대상 | 자동/수동 | 데이터 소스 |\n|---|---|---|---|---|\n| **ADDM** | 사후 분석 (AWR 기반) | 전체 데이터베이스 성능 | 자동 + 수동 | AWR 스냅샷 |\n| **ASH (Active Session History)** | 실시간/과거 | 활성 세션 활동 | 수동 조회 | V$ACTIVE_SESSION_HISTORY |\n| **AWR 리포트** | 사후 분석 | 통계 요약 | 수동 | AWR 스냅샷 |\n| **Real-Time ADDM** | 실시간 | 현재 성능 문제 | 수동 | SGA 내 통계 |\n| **SQL Tuning Advisor** | 수동 분석 | 개별 SQL 문 | 수동 | SQL 실행 통계 |",
+      "subsections": [
+        {
+          "title": "ADDM의 정의, 역할 및 내부 동작 원리 (ADDM Definition, Role, and Internal Operation)",
+          "content": "**ADDM(Automatic Database Diagnostic Monitor)**은 Oracle Database 10g에서 도입된 자기 진단 엔진(Self-Diagnostic Engine)으로, DBA가 수동으로 수행해야 했던 성능 진단 작업을 자동화합니다. ADDM은 **DB Time** 메트릭을 핵심 분석 축으로 사용하여, 데이터베이스에서 소비되는 시간을 계층적으로 분해(Decompose)하고 가장 큰 영향을 미치는 성능 문제를 식별합니다.\n\n### DB Time 개념\n\n**DB Time**은 데이터베이스가 사용자 요청을 처리하는 데 소비한 총 시간으로, 모든 비유휴(Non-Idle) 세션의 경과 시간 합산입니다. ADDM은 이 DB Time을 다음과 같이 분해합니다:\n\n| DB Time 구성요소 | 설명 |\n|---|---|\n| **CPU Time** | CPU에서 실제로 연산을 수행한 시간 |\n| **User I/O Wait** | 데이터 파일 I/O 대기 시간 |\n| **Concurrency Wait** | 락, 래치 등 동시성 자원 대기 시간 |\n| **Application Wait** | 애플리케이션 레벨 대기 (row lock 등) |\n| **Commit Wait** | 커밋 관련 대기 (log file sync 등) |\n| **Network Wait** | 네트워크 관련 대기 시간 |\n| **Configuration Wait** | 구성 문제로 인한 대기 (undersized log buffer 등) |\n| **Other Wait** | 기타 분류의 대기 이벤트 |\n\n### MMON 프로세스의 역할\n\n**MMON(Manageability Monitor)**은 ADDM의 핵심 실행 주체입니다:\n\n1. **AWR 스냅샷 수집**: 기본 1시간(3600초) 간격으로 성능 통계를 SGA에서 AWR 리포지토리(SYSAUX 테이블스페이스)로 저장\n2. **ADDM 분석 트리거**: 각 스냅샷 완료 후 자동으로 ADDM 분석 태스크를 생성하고 실행\n3. **서버 생성 알림(Server-Generated Alerts)**: 임계값 초과 시 알림 생성\n4. **ASH 플러시**: MMNL과 협력하여 ASH 데이터를 디스크에 기록\n\n### ADDM 분석 프로세스 상세\n\n1. **데이터 수집**: 연속된 두 AWR 스냅샷 간의 차이값(Delta) 계산\n2. **DB Time 분해**: 전체 DB Time을 구성요소별로 분해\n3. **문제 식별**: 각 구성요소의 DB Time 비중을 평가하여 유의미한 문제 식별\n4. **근본 원인 추적**: 증상(Symptom)에서 근본 원인(Root Cause)까지 하향식(Top-Down) 분석\n5. **영향도 계산**: 각 문제가 전체 DB Time에서 차지하는 비율을 정량화\n6. **권장 사항 생성**: 문제 해결을 위한 구체적인 조치와 예상 효과(Benefit) 산출\n7. **결과 저장**: 분석 결과를 AWR 리포지토리에 저장\n\n### 관련 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **STATISTICS_LEVEL** | AWR/ADDM 활성화 제어 (TYPICAL/ALL/BASIC) | TYPICAL |\n| **CONTROL_MANAGEMENT_PACK_ACCESS** | Diagnostic+Tuning Pack 라이선스 제어 | DIAGNOSTIC+TUNING |\n| **AWR_SNAPSHOT_TIME_OFFSET** | 스냅샷 수집 시간 오프셋 | 0 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$ADVISOR_PROGRESS** | ADDM 태스크를 포함한 어드바이저 태스크 진행 상태 |\n| **DBA_ADVISOR_TASKS** | 생성된 ADDM 태스크 목록 및 상태 |\n| **DBA_ADVISOR_FINDINGS** | ADDM이 식별한 성능 문제(Finding) 목록 |\n| **DBA_ADVISOR_RECOMMENDATIONS** | ADDM의 권장 사항 목록 |\n| **V$INSTANCE** | MMON 프로세스 상태 확인용 |\n\n### 특수 동작 케이스\n\n- **STATISTICS_LEVEL=BASIC** 설정 시 AWR 스냅샷과 ADDM이 모두 비활성화됨\n- **인스턴스 시작 직후** 첫 번째 AWR 스냅샷이 수집되기 전까지는 ADDM 분석이 수행되지 않음\n- **RAC 환경**에서 ADDM은 Database-wide 분석과 Instance-level 분석을 모두 지원\n- **Data Guard Standby**에서는 Physical Standby에서의 ADDM 분석이 제한적",
+          "key_points": [
+            "ADDM은 AWR 스냅샷 기반의 자동 성능 진단 엔진으로 MMON 프로세스가 매 스냅샷 후 자동 실행",
+            "DB Time을 핵심 메트릭으로 사용하여 CPU Time, Wait Time 등으로 계층적 분해(Decomposition) 분석 수행",
+            "STATISTICS_LEVEL=TYPICAL 이상이어야 AWR/ADDM이 활성화되며, BASIC 설정 시 비활성화",
+            "MMON은 AWR 스냅샷 수집, ADDM 분석 트리거, 서버 알림 생성 등 관리성 기능의 핵심 프로세스",
+            "분석 결과는 DBA_ADVISOR_TASKS, DBA_ADVISOR_FINDINGS, DBA_ADVISOR_RECOMMENDATIONS 뷰로 조회",
+            "ADDM은 증상(Symptom)이 아닌 근본 원인(Root Cause)까지 하향식(Top-Down)으로 추적하는 것이 핵심 설계 철학"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s02",
+      "title": "ADDM 분석 메커니즘 (ADDM Analysis Mechanism)",
+      "sqlExamplesIds": ["sql02", "sql03"],
+      "content": "ADDM의 분석 메커니즘은 **DB Time 분해(DB Time Decomposition)** 방법론에 기반합니다. ADDM은 성능 문제를 **Finding**(발견)으로 분류하고, 각 Finding에 대해 **Recommendation**(권장 사항)을 생성합니다.",
+      "subsections": [
+        {
+          "title": "DB Time 분석 및 Finding 유형 (DB Time Analysis and Finding Types)",
+          "content": "ADDM은 **하향식 분석(Top-Down Analysis)** 방법론을 사용합니다. 전체 DB Time에서 시작하여 점점 세부적인 원인으로 좁혀가는 방식입니다. 이 접근법은 DBA가 일반적으로 수행하는 성능 분석 절차를 자동화한 것입니다.\n\n### DB Time 분석 절차\n\n1. **전체 DB Time 산출**: 분석 기간 동안의 총 DB Time 계산\n2. **대분류 분해**: CPU Time vs Wait Time으로 1차 분해\n3. **Wait Class 분해**: Wait Time을 대기 클래스(User I/O, Concurrency, Application 등)별로 분해\n4. **개별 대기 이벤트 분석**: 각 대기 클래스 내 상위 대기 이벤트 식별\n5. **SQL 레벨 분석**: 가장 많은 DB Time을 소비하는 SQL 문 식별\n6. **세그먼트 레벨 분석**: 핫(Hot) 세그먼트 식별\n\n### Finding 유형 (Finding Types)\n\nADDM이 생성하는 Finding은 세 가지 유형으로 분류됩니다:\n\n| Finding 유형 | 설명 | 예시 |\n|---|---|---|\n| **Problem (문제)** | DB Time에 직접적 영향을 미치는 근본 원인 | \"Top SQL by DB Time\", \"I/O throughput 병목\" |\n| **Symptom (증상)** | 문제로 인해 나타나는 현상. 다른 Problem의 결과일 수 있음 | \"높은 CPU 사용률\", \"과도한 대기 시간\" |\n| **Information (정보)** | 성능에 직접 영향은 없지만 알아야 할 정보 | \"DB 파라미터 변경 감지\", \"새 SQL Plan 감지\" |\n\n### ADDM이 감지하는 주요 문제 카테고리\n\n| 카테고리 | 상세 항목 |\n|---|---|\n| **CPU 병목** | 높은 CPU 사용률, CPU 부족, 비효율적 SQL의 과도한 CPU 사용 |\n| **메모리 부족** | Undersized SGA 구성요소 (Buffer Cache, Shared Pool, PGA 등) |\n| **I/O 병목** | 높은 I/O 대기, 느린 디스크 응답, 핫 데이터 파일 |\n| **RAC 관련** | Global Cache 대기, Interconnect 병목 |\n| **구성 문제** | 부적절한 파라미터 설정, 로그 파일 크기 부족 |\n| **SQL 성능** | 고부하 SQL, 비효율적 실행 계획, 과도한 파싱 |\n| **동시성** | Lock Contention, Latch Contention, Buffer Busy Wait |\n| **애플리케이션 레벨** | Row Lock 대기, 커서 공유 실패, 과도한 커밋 |\n| **네트워크** | SQL*Net 대기, 과도한 라운드 트립 |\n\n### 영향도 계산 (Impact Calculation)\n\n각 Finding의 영향도는 **DB Time 기준**으로 정량화됩니다:\n\n| 영향도 메트릭 | 설명 |\n|---|---|\n| **Impact (영향도)** | 해당 문제가 전체 DB Time에서 차지하는 비율(%) |\n| **Impact in seconds** | DB Time 초 단위 절대값 |\n| **Benefit (예상 효과)** | 권장 사항을 적용했을 때 절약 가능한 DB Time |\n\nADDM은 기본적으로 전체 DB Time의 **1% 이상**을 차지하는 문제만 보고합니다. 이 임계값은 `DBMS_ADVISOR.SET_DEFAULT_TASK_PARAMETER`로 조정할 수 있습니다.\n\n### 관련 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **DBTIME_THRESHOLD** | ADDM Finding으로 보고할 최소 DB Time 비율(%) | 1 |\n| **VALID_TABLE_SIZE_MIN_MB** | 세그먼트 분석 시 최소 테이블 크기(MB) | 10 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_ADVISOR_FINDINGS** | Finding 상세 정보 (유형, 영향도, 메시지) |\n| **DBA_ADVISOR_FINDING_NAMES** | Finding 이름 목록 |\n| **V$ACTIVE_SESSION_HISTORY** | ADDM 분석의 기반이 되는 활성 세션 이력 |\n| **DBA_HIST_ACTIVE_SESS_HISTORY** | AWR에 저장된 ASH 데이터 |",
+          "key_points": [
+            "ADDM은 하향식 분석(Top-Down Analysis)으로 전체 DB Time에서 세부 원인까지 계층적으로 추적",
+            "Finding 유형은 Problem(근본 원인), Symptom(증상), Information(정보)의 3가지로 분류",
+            "영향도(Impact)는 전체 DB Time 대비 비율(%)과 절대 시간(초)으로 정량화",
+            "기본적으로 DB Time의 1% 이상을 차지하는 문제만 보고하며, DBTIME_THRESHOLD로 조정 가능",
+            "CPU 병목, 메모리 부족, I/O 병목, SQL 성능, 동시성, 구성 문제 등 광범위한 카테고리를 자동 감지",
+            "ADDM은 Symptom(증상)과 Problem(근본 원인)을 구분하여 DBA가 실제 원인에 집중할 수 있도록 함"
+          ]
+        },
+        {
+          "title": "권장 사항 유형 및 분류 (Recommendation Types and Classification)",
+          "content": "ADDM이 생성하는 **Recommendation(권장 사항)**은 식별된 문제를 해결하기 위한 구체적인 조치 방안입니다. 각 권장 사항에는 **예상 효과(Benefit)**가 DB Time 절약량으로 포함되며, 하나의 Finding에 여러 개의 대안적 Recommendation이 제시될 수 있습니다.\n\n### 권장 사항 유형 (Recommendation Types)\n\n| 유형 | 설명 | 예시 |\n|---|---|---|\n| **Hardware Changes** | 하드웨어 자원 추가/변경 | CPU 추가, I/O 대역폭 증가, 메모리 확장 |\n| **Database Configuration** | 데이터베이스 파라미터/구성 변경 | SGA 구성요소 크기 조정, Redo Log 크기 변경, 파라미터 수정 |\n| **Schema Changes** | 스키마 객체 변경 | 인덱스 생성, 파티셔닝, 테이블 재구성 |\n| **Application Changes** | 애플리케이션 코드/SQL 변경 | SQL 튜닝, Bind Variable 사용, 커넥션 풀링 |\n| **Other** | 기타 조치 | SQL Tuning Advisor 실행 권장, SQL Plan Baseline 고려 등 |\n\n### Recommendation 구성 요소\n\nADDM Recommendation은 계층적 구조를 가집니다:\n\n```\nFinding (발견된 문제)\n├── Recommendation 1 (대안 1)\n│   ├── Action 1.1 (구체적 조치)\n│   ├── Action 1.2\n│   └── Rationale 1 (근거/이유)\n├── Recommendation 2 (대안 2)\n│   ├── Action 2.1\n│   └── Rationale 2\n└── Benefit: 예상 DB Time 절약량\n```\n\n| 구성 요소 | 설명 |\n|---|---|\n| **Recommendation** | 하나의 해결 방안. 여러 Action으로 구성될 수 있음 |\n| **Action** | 구체적인 실행 조치. SQL 문, 파라미터 변경 등 |\n| **Rationale** | 해당 권장 사항을 제안하는 근거와 분석 배경 |\n| **Benefit** | 권장 사항 적용 시 예상되는 DB Time 절약 효과 |\n\n### Recommendation 우선순위 결정\n\nADDM은 Benefit(예상 효과)이 큰 순서대로 권장 사항을 정렬합니다:\n\n1. **Benefit 크기**: DB Time 절약량이 큰 권장 사항이 우선\n2. **구현 용이성**: Hardware > Configuration > Schema > Application 순으로 구현 난이도 고려\n3. **부작용 최소화**: 다른 워크로드에 미치는 영향을 고려\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_ADVISOR_RECOMMENDATIONS** | 권장 사항 목록 (Benefit, Finding 매핑) |\n| **DBA_ADVISOR_ACTIONS** | 각 권장 사항의 구체적 실행 조치 |\n| **DBA_ADVISOR_RATIONALE** | 권장 사항의 근거/이유 |\n| **DBA_ADVISOR_OBJECTS** | 권장 사항과 관련된 데이터베이스 객체 |\n\n### 특수 동작 케이스\n\n- **하나의 Finding에 복수 Recommendation**: 대안적 해결책이 제시될 수 있으며, DBA가 상황에 맞게 선택\n- **Cascade 효과**: 하나의 문제 해결이 다른 Finding의 영향도도 감소시킬 수 있음\n- **SQL Tuning Advisor 연계**: SQL 성능 관련 Finding 시 자동으로 SQL Tuning Advisor 실행을 Action으로 제안\n- **Automatic Indexing 연계 (Oracle 26ai)**: 인덱스 관련 권장 시 Automatic Indexing 기능 활용을 Action으로 포함",
+          "key_points": [
+            "Recommendation은 Hardware, Configuration, Schema, Application의 4대 유형으로 분류",
+            "각 Recommendation은 Action(구체적 조치)과 Rationale(근거)로 구성되며 Benefit(예상 효과) 포함",
+            "하나의 Finding에 여러 대안적 Recommendation이 제시될 수 있어 DBA가 상황에 맞게 선택",
+            "Benefit(DB Time 절약량)이 큰 순서대로 우선순위가 정렬됨",
+            "DBA_ADVISOR_RECOMMENDATIONS, DBA_ADVISOR_ACTIONS, DBA_ADVISOR_RATIONALE 뷰로 상세 조회",
+            "SQL 관련 Finding은 SQL Tuning Advisor 실행을, 인덱스 관련은 Automatic Indexing을 Action으로 연계"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "ADDM 구성 및 제어 (ADDM Configuration and Control)",
+      "sqlExamplesIds": ["sql04", "sql05"],
+      "content": "ADDM의 동작은 초기화 파라미터, DBMS_ADVISOR 패키지의 태스크 파라미터, AWR 스냅샷 설정 등으로 제어됩니다. 적절한 구성을 통해 ADDM의 분석 범위, 빈도, 상세도를 조정할 수 있습니다.",
+      "subsections": [
+        {
+          "title": "ADDM 관련 초기화 파라미터 및 제어 (ADDM Initialization Parameters and Control)",
+          "content": "ADDM의 활성화와 동작 범위는 여러 초기화 파라미터에 의해 제어됩니다. 핵심 파라미터인 **STATISTICS_LEVEL**과 **CONTROL_MANAGEMENT_PACK_ACCESS**가 ADDM의 활성화 여부를 결정합니다.\n\n### 핵심 제어 파라미터\n\n| 파라미터 | 설명 | 기본값 | 영향 |\n|---|---|---|---|\n| **STATISTICS_LEVEL** | 통계 수집 레벨 | TYPICAL | BASIC 시 ADDM 비활성화 |\n| **CONTROL_MANAGEMENT_PACK_ACCESS** | 관리 팩 라이선스 제어 | DIAGNOSTIC+TUNING | NONE 시 ADDM 비활성화 |\n| **DB_CPU_COUNT** | ADDM이 참조하는 CPU 수 | 시스템 CPU 수 | CPU 관련 권장 사항에 영향 |\n\n### STATISTICS_LEVEL 설정별 ADDM 동작\n\n| 설정값 | AWR 스냅샷 | ADDM | ASH | 기타 |\n|---|---|---|---|---|\n| **BASIC** | 비활성화 | **비활성화** | 비활성화 | 대부분의 자동 관리 기능 비활성화 |\n| **TYPICAL (기본)** | 활성화 | **활성화** | 활성화 | 표준 수준의 자동 관리 |\n| **ALL** | 활성화 | **활성화** | 활성화 | 추가 통계 수집 (OS 통계, Plan 통계 등) |\n\n### CONTROL_MANAGEMENT_PACK_ACCESS 설정\n\n| 설정값 | 사용 가능 기능 |\n|---|---|\n| **NONE** | Diagnostic Pack, Tuning Pack 기능 모두 비활성화. ADDM 비활성화 |\n| **DIAGNOSTIC** | Diagnostic Pack 기능만 사용 가능. ADDM 활성화, SQL Tuning Advisor 비활성화 |\n| **DIAGNOSTIC+TUNING (기본)** | 모든 기능 사용 가능. ADDM + SQL Tuning Advisor 모두 활성화 |\n\n### DBMS_ADVISOR를 이용한 ADDM 태스크 파라미터 설정\n\n**DBMS_ADVISOR.SET_DEFAULT_TASK_PARAMETER** 프로시저로 ADDM의 기본 태스크 파라미터를 변경할 수 있습니다:\n\n| 태스크 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **DBTIME_THRESHOLD** | Finding으로 보고할 최소 DB Time 비율(%) | 1 |\n| **VALID_TABLE_SIZE_MIN_MB** | 세그먼트 관련 권장 사항의 최소 테이블 크기(MB) | 10 |\n| **EXECUTION_DAYS_TO_EXPIRE** | ADDM 태스크 결과 보존 기간(일) | 30 |\n\n### AWR 스냅샷 설정과 ADDM\n\nADDM은 AWR 스냅샷에 의존하므로, AWR 스냅샷 설정이 ADDM의 분석 빈도와 범위에 직접 영향을 미칩니다:\n\n| AWR 설정 항목 | 기본값 | ADDM 영향 |\n|---|---|---|\n| **스냅샷 간격 (Interval)** | 3600초 (1시간) | ADDM 분석 빈도 결정 |\n| **보존 기간 (Retention)** | 8일 (691200초) | ADDM 결과 보존 기간 |\n| **Top N SQL** | DEFAULT | 스냅샷에 포함되는 SQL 수 |\n\n### ADDM 비활성화 방법\n\n| 방법 | 명령 | 영향 범위 |\n|---|---|---|\n| **STATISTICS_LEVEL 변경** | `ALTER SYSTEM SET STATISTICS_LEVEL = BASIC;` | AWR, ASH 포함 전체 비활성화 |\n| **Management Pack 제한** | `ALTER SYSTEM SET CONTROL_MANAGEMENT_PACK_ACCESS = NONE;` | ADDM, AWR 접근 차단 |\n| **자동 태스크 비활성화** | DBMS_AUTO_TASK_ADMIN 사용 | ADDM 자동 실행만 비활성화 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$STATISTICS_LEVEL** | 현재 STATISTICS_LEVEL에 의해 활성화된 기능 목록 |\n| **DBA_HIST_WR_CONTROL** | AWR 스냅샷 설정 (간격, 보존 기간) |\n| **DBA_ADVISOR_DEF_PARAMETERS** | ADDM 기본 태스크 파라미터 설정값 |\n| **V$PARAMETER** | 현재 초기화 파라미터 값 |\n\n### 특수 동작 케이스\n\n- **STATISTICS_LEVEL을 BASIC으로 변경해도** 이미 수집된 AWR 데이터와 ADDM 결과는 삭제되지 않음\n- **동적 변경 가능**: STATISTICS_LEVEL은 ALTER SYSTEM/ALTER SESSION으로 즉시 변경 가능\n- **라이선스 미보유 시** CONTROL_MANAGEMENT_PACK_ACCESS=NONE 설정이 법적으로 필요하며, ADDM 관련 뷰 접근도 차단됨",
+          "key_points": [
+            "STATISTICS_LEVEL=TYPICAL(기본) 이상이어야 ADDM이 활성화되며, BASIC 설정 시 AWR과 함께 비활성화",
+            "CONTROL_MANAGEMENT_PACK_ACCESS 파라미터로 Diagnostic Pack 라이선스에 따른 기능 제어",
+            "DBMS_ADVISOR.SET_DEFAULT_TASK_PARAMETER로 DBTIME_THRESHOLD(기본 1%) 등 분석 기준 조정",
+            "AWR 스냅샷 간격(기본 1시간)이 ADDM 자동 분석 빈도를 결정",
+            "AWR 보존 기간(기본 8일)이 과거 ADDM 결과 조회 가능 기간을 결정",
+            "V$STATISTICS_LEVEL 뷰로 현재 활성화된 자동 관리 기능 목록을 확인 가능",
+            "STATISTICS_LEVEL 변경은 동적(ALTER SYSTEM)으로 즉시 적용되며 기존 데이터는 보존"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "PDB 레벨 ADDM (PDB-Level ADDM)",
+      "sqlExamplesIds": ["sql06", "sql07"],
+      "content": "Oracle 멀티테넌트(Multitenant) 환경에서 PDB(Pluggable Database)별 독립적인 ADDM 분석을 수행하려면 PDB 레벨의 AWR이 활성화되어야 합니다. Oracle 26ai에서는 PDB 레벨 AWR이 기본 활성화되어 별도 설정 없이 PDB 독립 ADDM이 가능합니다.",
+      "subsections": [
+        {
+          "title": "PDB 레벨 AWR 및 ADDM 활성화 (PDB-Level AWR and ADDM Activation)",
+          "content": "전통적으로 CDB(Container Database) 환경에서 AWR 스냅샷은 CDB 루트($CDB$ROOT) 레벨에서만 수집되었으며, ADDM 분석도 CDB 전체 워크로드를 대상으로 수행되었습니다. 그러나 PDB별 독립적인 성능 분석이 필요한 경우, PDB 레벨의 AWR 스냅샷 수집과 ADDM 분석이 가능합니다.\n\n### PDB 레벨 AWR 활성화 메커니즘\n\n| 파라미터 | 설명 | 기본값 (Oracle 26ai) |\n|---|---|---|\n| **AWR_PDB_AUTOFLUSH_ENABLED** | PDB 레벨 AWR 자동 스냅샷 활성화 | TRUE |\n| **AWR_SNAPSHOT_TIME_OFFSET** | PDB 스냅샷 시간 오프셋(초) | 0 |\n\n### Oracle 버전별 PDB AWR 동작\n\n| Oracle 버전 | PDB AWR 기본값 | ADDM PDB 지원 |\n|---|---|---|\n| **12c** | 지원 안 함 | CDB 레벨만 |\n| **18c~19c** | AWR_PDB_AUTOFLUSH_ENABLED=FALSE | 수동 활성화 필요 |\n| **21c** | FALSE (기본) | 수동 활성화 필요 |\n| **23ai/26ai** | **TRUE (기본)** | **자동 활성화** |\n\n### PDB 레벨 AWR 활성화 절차 (Oracle 21c 이하)\n\n1. CDB 루트 또는 해당 PDB에서 AWR_PDB_AUTOFLUSH_ENABLED 파라미터를 TRUE로 설정\n2. PDB별 독립적인 AWR 스냅샷이 수집되기 시작\n3. 다음 AWR 스냅샷부터 PDB 레벨 ADDM 분석이 자동 수행\n\n### PDB 레벨 AWR 스냅샷 관리\n\n**DBMS_WORKLOAD_REPOSITORY** 패키지를 PDB 컨텍스트에서 사용하여 PDB별 스냅샷을 관리합니다:\n\n| 프로시저 | 설명 |\n|---|---|\n| **CREATE_SNAPSHOT** | PDB 레벨 수동 스냅샷 생성 |\n| **MODIFY_SNAPSHOT_SETTINGS** | PDB 스냅샷 간격/보존 기간 변경 |\n| **DROP_SNAPSHOT_RANGE** | PDB 스냅샷 범위 삭제 |\n| **AWR_REPORT_HTML/TEXT** | PDB AWR 리포트 생성 |\n\n### CDB vs PDB ADDM 비교\n\n| 항목 | CDB 레벨 ADDM | PDB 레벨 ADDM |\n|---|---|---|\n| **분석 범위** | CDB 전체 워크로드 | 해당 PDB 워크로드만 |\n| **AWR 데이터 소스** | CDB 루트 AWR | PDB 로컬 AWR |\n| **Finding 범위** | 전체 인스턴스 성능 | PDB 특정 성능 |\n| **권장 사항 범위** | 인스턴스 레벨 구성 포함 | PDB에서 변경 가능한 항목만 |\n| **MMON 동작** | CDB 루트에서 실행 | PDB 컨텍스트로 전환하여 실행 |\n| **결과 저장 위치** | CDB 루트 AWR | PDB 로컬 AWR |\n| **Enterprise Manager** | CDB 홈에서 조회 | PDB 홈에서 조회 |\n\n### PDB 레벨 ADDM의 제한 사항\n\n| 제한 사항 | 설명 |\n|---|---|\n| **인스턴스 레벨 파라미터** | CDB 레벨에서만 변경 가능한 파라미터에 대한 권장 사항은 PDB ADDM에서 제한적 |\n| **공유 자원 분석** | SGA, CPU 등 CDB 전체 공유 자원의 병목은 PDB ADDM에서 정확히 분석 불가 |\n| **SYSAUX 공간** | PDB별 AWR 데이터 저장으로 SYSAUX 테이블스페이스 사용량 증가 |\n| **오버헤드** | 각 PDB에서 스냅샷 수집 및 ADDM 분석으로 추가 부하 발생 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_HIST_SNAPSHOT** | PDB 레벨 AWR 스냅샷 목록 |\n| **DBA_HIST_WR_CONTROL** | PDB AWR 스냅샷 설정 |\n| **V$CON_SYSSTAT** | 컨테이너별 시스템 통계 |\n| **V$PDBS** | PDB 상태 정보 |\n| **CDB_ADVISOR_TASKS** | CDB 전체 ADDM 태스크 조회 |\n\n### 특수 동작 케이스\n\n- **PDB 종료 시**: PDB가 MOUNTED 상태이면 해당 PDB의 AWR 스냅샷 수집과 ADDM 분석이 중단됨\n- **PDB Relocate/Clone 후**: 이전 AWR 데이터는 유지되지만 스냅샷 ID 연속성이 끊길 수 있음\n- **Resource Manager 연계**: PDB ADDM에서 CDB Resource Manager에 의한 자원 제한이 성능 영향으로 감지될 수 있음",
+          "key_points": [
+            "Oracle 26ai에서 AWR_PDB_AUTOFLUSH_ENABLED=TRUE가 기본이므로 PDB 레벨 ADDM이 자동 활성화",
+            "Oracle 21c 이하에서는 AWR_PDB_AUTOFLUSH_ENABLED=TRUE를 명시적으로 설정해야 PDB ADDM 사용 가능",
+            "PDB ADDM은 해당 PDB 워크로드만 분석하며, CDB 공유 자원(SGA, CPU) 분석은 제한적",
+            "DBMS_WORKLOAD_REPOSITORY 패키지를 PDB 컨텍스트에서 사용하여 PDB 스냅샷 관리",
+            "PDB별 AWR 데이터 저장으로 SYSAUX 테이블스페이스 사용량 증가에 주의 필요",
+            "PDB ADDM 권장 사항은 해당 PDB에서 변경 가능한 항목(PDB 수정 가능 파라미터 등)으로 한정"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "ADDM 보고서 생성 및 해석 (ADDM Report Generation and Interpretation)",
+      "sqlExamplesIds": ["sql08", "sql09", "sql10"],
+      "content": "ADDM 분석 결과는 **텍스트 보고서**, **Enterprise Manager 그래픽 인터페이스**, **딕셔너리 뷰 조회** 등 다양한 방법으로 확인할 수 있습니다. 가장 일반적인 방법은 `addmrpt.sql` 스크립트 또는 `DBMS_ADDM` 패키지를 사용하는 것입니다.",
+      "subsections": [
+        {
+          "title": "ADDM 보고서 생성 방법 및 구조 (ADDM Report Generation Methods and Structure)",
+          "content": "ADDM 보고서는 분석 기간 동안의 성능 문제와 권장 사항을 체계적으로 정리한 문서입니다. 생성 방법에 따라 텍스트, HTML, Enterprise Manager 그래픽 형태로 제공됩니다.\n\n### ADDM 보고서 생성 방법\n\n| 방법 | 사용 도구 | 특징 |\n|---|---|---|\n| **addmrpt.sql** | SQL*Plus 스크립트 | 대화형으로 스냅샷 선택, 텍스트 보고서 생성 |\n| **DBMS_ADDM** | PL/SQL 패키지 | 프로그래밍 방식, 유연한 분석 기간 설정 |\n| **DBMS_ADVISOR.GET_TASK_REPORT** | PL/SQL 함수 | 기존 ADDM 태스크의 보고서를 TEXT/HTML/XML로 생성 |\n| **Enterprise Manager** | 웹 UI | 그래픽 보고서, 드릴다운 분석, 이력 비교 |\n| **Cloud Control** | EM Cloud Control | 다수 DB 통합 관리, 트렌드 분석 |\n\n### addmrpt.sql 스크립트 사용\n\n`$ORACLE_HOME/rdbms/admin/addmrpt.sql` 스크립트는 SQL*Plus에서 실행하며, 대화형으로 분석할 스냅샷 범위를 선택합니다:\n\n```\n절차:\n1. SQL*Plus에서 @$ORACLE_HOME/rdbms/admin/addmrpt.sql 실행\n2. 분석할 인스턴스 번호(DBID) 선택\n3. 시작 스냅샷 ID(begin_snap) 선택\n4. 종료 스냅샷 ID(end_snap) 선택\n5. 보고서 파일명 지정\n6. 텍스트 보고서가 지정된 파일로 출력\n```\n\n### ADDM 보고서 구조\n\n| 섹션 | 내용 |\n|---|---|\n| **Header** | ADDM 리포트 제목, 분석 기간, DB 정보 |\n| **Summary** | 전체 DB Time 요약, 주요 Finding 목록과 영향도(%) |\n| **Findings** | 각 Finding의 상세 설명, 영향도, 관련 통계 |\n| **Recommendations** | 각 Finding에 대한 권장 사항, Action, Rationale, Benefit |\n| **Additional Information** | 보조 정보, Wait Class 통계, SQL 통계 등 |\n| **Footer** | 분석 완료 정보, 참고 사항 |\n\n### DBMS_ADDM 패키지 주요 프로시저\n\n| 프로시저/함수 | 설명 |\n|---|---|\n| **ANALYZE_DB** | 전체 데이터베이스(또는 RAC 인스턴스) ADDM 분석 수행 |\n| **ANALYZE_INST** | 특정 인스턴스의 ADDM 분석 수행 |\n| **ANALYZE_PARTIAL** | RAC 환경에서 일부 인스턴스 분석 |\n| **DELETE** | ADDM 태스크 삭제 |\n| **GET_REPORT** | ADDM 분석 결과 보고서 생성 |\n\n### DBMS_ADVISOR.GET_TASK_REPORT 출력 형식\n\n| 형식 | 파라미터 | 설명 |\n|---|---|---|\n| **TEXT** | 'TEXT' | 일반 텍스트 형식 |\n| **HTML** | 'HTML' | HTML 형식 (웹 브라우저로 조회) |\n| **XML** | 'XML' | XML 형식 (프로그래밍 처리용) |\n\n### Enterprise Manager에서의 ADDM 조회\n\nOracle Enterprise Manager (EM)는 ADDM 결과를 그래픽으로 표시합니다:\n\n1. **Performance Hub**: DB Time 그래프에서 특정 시간대 클릭 → ADDM 결과 표시\n2. **ADDM 탭**: 시간순 ADDM Finding 목록, 영향도 차트\n3. **드릴다운**: Finding → Recommendation → Action 순으로 상세 정보 확인\n4. **이력 비교**: 과거 ADDM 결과와 비교하여 트렌드 파악\n\n### 보고서 해석 핵심 포인트\n\n| 확인 항목 | 의미 |\n|---|---|\n| **DB Time 총량** | 분석 기간 동안 데이터베이스 부하의 절대적 크기 |\n| **Finding 영향도 (%)** | 전체 DB Time 대비 해당 문제의 비중 |\n| **Impact (초)** | 해당 문제로 소비된 DB Time의 절대값 |\n| **Benefit (초)** | 권장 사항 적용 시 절약 가능한 DB Time |\n| **Finding 유형** | Problem vs Symptom 구분 — Problem에 집중 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_ADVISOR_TASKS** | ADDM 태스크 목록 (TASK_NAME, STATUS, CREATED 등) |\n| **DBA_ADVISOR_LOG** | ADDM 태스크 실행 로그 (실행 시간, 상태, 에러) |\n| **DBA_ADVISOR_FINDINGS** | Finding 상세 (TYPE, IMPACT, MESSAGE) |\n| **DBA_ADVISOR_RECOMMENDATIONS** | 권장 사항 상세 (BENEFIT, FINDING_ID) |\n| **DBA_ADVISOR_ACTIONS** | 구체적 실행 조치 (COMMAND, ATTR1~6) |\n\n### 특수 동작 케이스\n\n- **Finding이 없는 경우**: 분석 기간 동안 유의미한 성능 문제가 없었음을 의미 (\"No significant performance problem was found\")\n- **Symptom만 있는 경우**: 증상은 감지되었으나 ADDM이 근본 원인을 특정하지 못한 경우\n- **RAC 환경**: Database-level ADDM 리포트와 Instance-level ADDM 리포트가 별도로 생성됨",
+          "key_points": [
+            "addmrpt.sql 스크립트는 SQL*Plus에서 대화형으로 스냅샷 범위를 선택하여 텍스트 보고서를 생성",
+            "DBMS_ADDM 패키지의 ANALYZE_DB/ANALYZE_INST 프로시저로 프로그래밍 방식의 ADDM 분석 수행",
+            "DBMS_ADVISOR.GET_TASK_REPORT로 TEXT/HTML/XML 형식의 보고서 생성 가능",
+            "보고서는 Summary → Findings → Recommendations → Actions 순의 계층적 구조",
+            "Finding의 Impact(영향도)와 Recommendation의 Benefit(예상 효과)이 우선순위 결정의 핵심",
+            "Enterprise Manager에서는 Performance Hub를 통해 그래픽 ADDM 결과를 드릴다운 분석 가능",
+            "Finding이 없는 보고서는 분석 기간 동안 유의미한 성능 문제가 없었음을 의미"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "수동 ADDM 분석 (Manual ADDM Analysis)",
+      "sqlExamplesIds": ["sql11", "sql12", "sql13"],
+      "content": "ADDM은 기본적으로 매 AWR 스냅샷 후 자동 실행되지만, DBA가 특정 시간 범위를 지정하여 수동으로 ADDM 분석을 수행할 수도 있습니다. 수동 분석은 과거의 특정 성능 문제를 조사하거나, 자동 분석 기간과 다른 범위를 분석할 때 유용합니다.",
+      "subsections": [
+        {
+          "title": "수동 ADDM 태스크 생성 및 실행 (Manual ADDM Task Creation and Execution)",
+          "content": "수동 ADDM 분석은 **DBMS_ADVISOR** 패키지 또는 **DBMS_ADDM** 패키지를 사용하여 ADDM 태스크를 직접 생성하고 실행하는 방식입니다. 이를 통해 자동 ADDM이 다루지 않는 시간 범위(예: 여러 스냅샷에 걸친 장기간)를 분석할 수 있습니다.\n\n### DBMS_ADVISOR를 이용한 수동 ADDM 태스크 절차\n\n1. **태스크 생성**: `DBMS_ADVISOR.CREATE_TASK('ADDM', task_name)` — ADDM 유형의 어드바이저 태스크 생성\n2. **파라미터 설정**: `DBMS_ADVISOR.SET_TASK_PARAMETER` — 시작/종료 스냅샷 ID 등 분석 범위 설정\n3. **태스크 실행**: `DBMS_ADVISOR.EXECUTE_TASK(task_name)` — ADDM 분석 실행\n4. **결과 조회**: `DBMS_ADVISOR.GET_TASK_REPORT` 또는 딕셔너리 뷰 조회\n5. **태스크 삭제** (선택): `DBMS_ADVISOR.DELETE_TASK(task_name)` — 분석 태스크 정리\n\n### DBMS_ADVISOR 주요 파라미터\n\n| 태스크 파라미터 | 설명 |\n|---|---|\n| **START_SNAPSHOT** | 분석 시작 AWR 스냅샷 ID |\n| **END_SNAPSHOT** | 분석 종료 AWR 스냅샷 ID |\n| **INSTANCE** | 분석할 인스턴스 번호 (RAC 환경) |\n| **DB_ID** | 분석 대상 데이터베이스 ID |\n| **DBTIME_THRESHOLD** | 보고 임계값 (DB Time %) |\n\n### DBMS_ADDM을 이용한 수동 분석\n\n**DBMS_ADDM** 패키지는 ADDM에 특화된 인터페이스를 제공합니다:\n\n| 프로시저 | 설명 | 사용 시나리오 |\n|---|---|---|\n| **ANALYZE_DB** | 전체 DB 분석 (RAC: 모든 인스턴스) | 가장 일반적인 수동 분석 |\n| **ANALYZE_INST** | 특정 인스턴스 분석 | RAC에서 특정 노드 분석 |\n| **ANALYZE_PARTIAL** | 일부 인스턴스 분석 | RAC에서 선택적 노드 분석 |\n\n### 분석 결과 비교\n\n수동 ADDM 분석을 통해 서로 다른 시간대의 결과를 비교할 수 있습니다:\n\n| 비교 항목 | 방법 |\n|---|---|\n| **정상 시간대 vs 문제 시간대** | 두 시간대의 ADDM 결과를 비교하여 차이점 식별 |\n| **변경 전 vs 변경 후** | 구성 변경 전후의 ADDM 결과 비교로 효과 측정 |\n| **일별/주별 패턴** | 동일 시간대의 ADDM 결과를 일별/주별로 비교하여 트렌드 파악 |\n\n### Real-Time ADDM\n\n**Real-Time ADDM**은 AWR 스냅샷 없이 현재 SGA의 성능 데이터를 직접 분석하는 기능입니다:\n\n| 항목 | 일반 ADDM | Real-Time ADDM |\n|---|---|---|\n| **데이터 소스** | AWR 스냅샷 (디스크) | SGA 메모리 (실시간) |\n| **분석 시점** | 과거 (스냅샷 기간) | 현재 |\n| **사용 시나리오** | 사후 분석, 정기 진단 | 긴급 성능 문제, DB 행(Hang) 상태 |\n| **호출 방법** | DBMS_ADDM, addmrpt.sql | Enterprise Manager, DBMS_ADDM |\n| **제한 사항** | 스냅샷이 있어야 함 | SGA 데이터만 사용하므로 범위 제한 |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **OPTIMIZER_DYNAMIC_SAMPLING** | SQL 분석 시 동적 샘플링 레벨 |\n| **_ADDM_AUTO_ENABLE** | ADDM 자동 실행 활성화 (Hidden) |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_ADVISOR_TASKS** | 수동 생성 태스크 포함 전체 태스크 목록 |\n| **DBA_ADVISOR_EXECUTIONS** | 태스크 실행 이력 |\n| **DBA_ADVISOR_FINDINGS** | 분석 결과 Finding 목록 |\n| **DBA_ADVISOR_RECOMMENDATIONS** | 분석 결과 Recommendation 목록 |\n| **DBA_HIST_SNAPSHOT** | 사용 가능한 AWR 스냅샷 목록 (수동 분석 시 스냅샷 ID 확인용) |\n\n### 특수 동작 케이스\n\n- **여러 스냅샷에 걸친 분석**: START_SNAPSHOT과 END_SNAPSHOT을 넓게 지정하면 장기간 분석 가능. 단, 너무 긴 기간은 분석 정밀도 저하\n- **삭제된 스냅샷**: AWR 보존 기간이 지나 삭제된 스냅샷은 분석 불가. ORA-13508 에러 발생\n- **수동 스냅샷 사용**: DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT으로 즉시 스냅샷을 생성한 후 분석 가능\n- **태스크 재실행**: 동일 태스크를 RESET 후 재실행하여 다른 파라미터로 분석 가능",
+          "key_points": [
+            "DBMS_ADVISOR.CREATE_TASK('ADDM', task_name)으로 수동 ADDM 태스크를 생성하고 EXECUTE_TASK로 실행",
+            "START_SNAPSHOT과 END_SNAPSHOT 파라미터로 분석할 AWR 스냅샷 범위를 지정",
+            "DBMS_ADDM 패키지의 ANALYZE_DB/ANALYZE_INST로 더 간편한 수동 분석 가능",
+            "Real-Time ADDM은 AWR 없이 SGA 메모리 데이터를 직접 분석하여 현재 성능 문제를 진단",
+            "서로 다른 시간대의 ADDM 결과를 비교하여 변경 효과 측정이나 트렌드 파악 가능",
+            "AWR 보존 기간이 지난 스냅샷은 분석 불가하므로 중요한 스냅샷은 보존 기간을 연장하거나 별도 보관",
+            "수동 스냅샷(CREATE_SNAPSHOT)을 생성한 직후 분석하면 현재 상태를 즉시 진단 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s07",
+      "title": "Oracle 권장 성능 튜닝 방법론 및 계획 (Oracle Recommended Performance Tuning Methodology and Planning)",
+      "content": "Oracle은 데이터베이스 성능 튜닝에 대해 **하향식(Top-Down)** 접근 방법론을 권장합니다. 이 방법론은 가장 높은 효과를 기대할 수 있는 애플리케이션/SQL 수준의 튜닝부터 시작하여, 인스턴스 튜닝, OS/하드웨어 튜닝 순으로 진행합니다. 성능 모니터링은 DBA가 병목 지점을 식별하고 문제를 수정하기 위해 반드시 수행해야 하는 필수 활동입니다.\n\n### Oracle 권장 성능 튜닝 우선순위 (하향식)\n\n| 우선순위 | 튜닝 영역 | 설명 | 예상 효과 |\n|---|---|---|---|\n| **1 (최우선)** | 애플리케이션/SQL 튜닝 | SQL 문 최적화, 인덱스 전략, 애플리케이션 설계 개선 | 가장 높은 효과. 수십~수백 배 성능 개선 가능 |\n| **2** | 인스턴스 튜닝 | 메모리 구성(SGA/PGA), 초기화 파라미터 조정, I/O 분산 | 중간 수준 효과. 수 배~수십 퍼센트 개선 |\n| **3** | OS/하드웨어 튜닝 | CPU 추가, 메모리 확장, 스토리지 업그레이드, 네트워크 최적화 | 제한적 효과. 근본적 병목 해소는 어려울 수 있음 |\n\n### 하향식(Top-Down) vs 보텀업(Bottom-Up) 접근\n\n| 구분 | 하향식 (Top-Down) - Oracle 권장 | 보텀업 (Bottom-Up) |\n|---|---|---|\n| **시작점** | 애플리케이션/SQL 레벨 | OS/하드웨어 레벨 |\n| **근거** | 대부분의 성능 문제는 비효율적 SQL/설계에서 발생 | 리소스 부족이 문제라고 가정 |\n| **비용 효율** | 높음 (소프트웨어 변경으로 해결) | 낮음 (하드웨어 투자 필요) |\n| **Oracle 권장** | **권장** | 비권장 |\n\n### 성능 계획 시 고려 사항\n\n| 고려 영역 | 세부 항목 |\n|---|---|\n| **네트워크 환경** | 네트워크 대역폭, 지연 시간(Latency), 클라이언트-서버 간 라운드트립, 네트워크 프로토콜 |\n| **하드웨어/OS 구성** | CPU 수 및 속도, 메모리 크기, 스토리지 I/O 성능, OS 커널 파라미터 |\n| **데이터베이스 구성** | SGA/PGA 크기, 테이블스페이스 레이아웃, Redo Log 구성, 아카이브 모드, 초기화 파라미터 |\n| **애플리케이션 설계** | SQL 작성 품질, 인덱스 전략, 커넥션 풀링, 트랜잭션 관리, 바인드 변수 사용 |\n\n### 성능 모니터링의 역할\n\n| 역할 | 설명 |\n|---|---|\n| **병목 지점 식별** | CPU, I/O, 메모리, 네트워크 등 성능 병목 구간 식별 |\n| **문제 수정** | 식별된 병목에 대한 해결 방안 수립 및 적용 |\n| **기준선 설정** | 정상 상태의 성능 기준선(Baseline)을 설정하여 이상 감지의 기준으로 활용 |\n| **용량 계획** | 향후 리소스 요구량 예측 및 확장 계획 수립 |\n| **변경 영향 평가** | 시스템 변경 전후의 성능 차이를 측정하여 변경 효과 검증 |",
+      "sqlExamplesIds": [],
+      "subsections": [
+        {
+          "title": "Oracle 성능 튜닝 방법론 상세 및 ADDM과의 연계 (Detailed Tuning Methodology and ADDM Integration)",
+          "content": "Oracle의 하향식 성능 튜닝 방법론은 ADDM의 분석 철학과도 직접적으로 연결됩니다. ADDM은 DB Time을 하향식으로 분해하여 가장 큰 영향을 미치는 문제부터 보고하며, 이는 Oracle의 성능 튜닝 우선순위와 일치합니다.\n\n### 1단계: 애플리케이션/SQL 튜닝 (최우선)\n\n| 튜닝 활동 | 설명 | 관련 도구 |\n|---|---|---|\n| **SQL 최적화** | 비효율적 SQL 식별 및 재작성 | SQL Tuning Advisor, SQL Monitor |\n| **인덱스 전략** | 적절한 인덱스 생성/제거 | SQL Access Advisor, Automatic Indexing |\n| **실행 계획 관리** | 최적 실행 계획 고정/유도 | SQL Plan Management (SPM) |\n| **바인드 변수 사용** | 하드 파싱 감소를 위한 바인드 변수 적용 | CURSOR_SHARING 파라미터 |\n| **애플리케이션 설계** | 커넥션 풀링, 적절한 커밋 주기, 배치 처리 | 애플리케이션 레벨 변경 |\n\n### 2단계: 인스턴스 튜닝\n\n| 튜닝 활동 | 설명 | 관련 도구 |\n|---|---|---|\n| **메모리 구성** | SGA, PGA, Buffer Cache 크기 최적화 | Memory Advisor, ADDM |\n| **파라미터 조정** | 초기화 파라미터 최적화 | ADDM 권고, V$SYSTEM_PARAMETER |\n| **I/O 분산** | 데이터 파일, Redo Log, 아카이브 로그의 I/O 분산 | AWR 보고서, I/O 통계 |\n| **동시성 관리** | 래치, 락 경합 해소 | ASH, AWR, V$LATCH |\n\n### 3단계: OS/하드웨어 튜닝\n\n| 튜닝 활동 | 설명 | 관련 도구 |\n|---|---|---|\n| **CPU 리소스** | CPU 추가, 프로세스 우선순위 조정 | OS 모니터링 (top, vmstat) |\n| **메모리 확장** | 물리적 메모리 추가 | OS 메모리 통계 |\n| **스토리지 최적화** | SSD 전환, RAID 구성 변경, ASM 활용 | ASM, I/O 캘리브레이션 |\n| **네트워크 최적화** | 대역폭 증가, SDN 프로토콜 최적화 | SQL*Net 통계 |\n\n### ADDM과 튜닝 방법론의 연계\n\nADDM의 분석 결과는 자연스럽게 Oracle 권장 튜닝 방법론의 우선순위를 반영합니다:\n\n| ADDM 권고 유형 | 튜닝 방법론 단계 |\n|---|---|\n| **Top SQL, SQL Tuning Advisor 실행 권고** | 1단계: 애플리케이션/SQL 튜닝 |\n| **SGA/PGA 크기 조정, 파라미터 변경 권고** | 2단계: 인스턴스 튜닝 |\n| **CPU 추가, I/O 대역폭 증가 권고** | 3단계: OS/하드웨어 튜닝 |\n\n### 관련 파라미터 및 뷰\n\n| 항목 | 설명 |\n|---|---|\n| **V$SYS_TIME_MODEL** | DB Time, CPU Time 등 시간 모델 통계 |\n| **V$SYSTEM_EVENT** | 시스템 전체 대기 이벤트 통계 |\n| **V$SQL** | SQL 실행 통계 (Elapsed Time, CPU Time, Buffer Gets 등) |\n| **DBA_HIST_SYSSTAT** | AWR에 저장된 시스템 통계 이력 |",
+          "key_points": [
+            "Oracle은 보텀업이 아닌 하향식(Top-Down) 성능 튜닝 접근 방법론을 권장하며, 애플리케이션/SQL 튜닝이 최우선",
+            "성능 튜닝 우선순위는 애플리케이션/SQL 튜닝 > 인스턴스 튜닝 > OS/하드웨어 튜닝 순서",
+            "대부분의 성능 문제는 비효율적 SQL이나 부적절한 애플리케이션 설계에서 기인하므로 SQL 튜닝의 효과가 가장 큼",
+            "성능 계획 시 네트워크 환경, 하드웨어/OS 구성, 데이터베이스 구성, 애플리케이션 설계를 종합적으로 고려",
+            "ADDM의 하향식 DB Time 분해 분석은 Oracle 권장 튜닝 방법론의 우선순위와 자연스럽게 일치",
+            "성능 모니터링은 병목 지점 식별, 문제 수정, 기준선 설정, 용량 계획을 위해 DBA의 필수 활동",
+            "하드웨어 추가는 마지막 수단이며, 근본적인 SQL/설계 문제를 해결하지 않으면 하드웨어 증설의 효과가 제한적"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "ADDM 자동 실행 상태 및 최근 태스크 확인",
+      "sql": "-- ADDM 자동 태스크 상태 확인\nSELECT client_name, status, consumer_group,\n       window_group\nFROM   DBA_AUTOTASK_CLIENT\nWHERE  client_name = 'auto optimizer stats collection'\n   OR  client_name LIKE '%addm%'\n   OR  client_name LIKE '%ADDM%';\n\n-- 최근 ADDM 태스크 목록 확인\nSELECT task_id, task_name, status,\n       TO_CHAR(created, 'YYYY-MM-DD HH24:MI:SS') AS created,\n       TO_CHAR(last_modified, 'YYYY-MM-DD HH24:MI:SS') AS last_modified,\n       advisor_name\nFROM   DBA_ADVISOR_TASKS\nWHERE  advisor_name = 'ADDM'\nORDER BY created DESC\nFETCH FIRST 10 ROWS ONLY;",
+      "description": "DBA_AUTOTASK_CLIENT 뷰에서 ADDM 자동 태스크의 활성화 상태를 확인하고, DBA_ADVISOR_TASKS 뷰에서 최근 생성된 ADDM 분석 태스크 목록을 조회합니다. status가 COMPLETED이면 정상 완료된 분석입니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "ADDM Finding 및 영향도 조회",
+      "sql": "-- 최근 ADDM 태스크의 Finding 조회\nSELECT f.task_id, f.finding_id, f.type,\n       f.impact_type, f.impact,\n       ROUND(f.impact / t.other_info * 100, 1) AS impact_pct,\n       f.message\nFROM   DBA_ADVISOR_FINDINGS f\nJOIN   (\n         SELECT task_id,\n                TO_NUMBER(EXTRACTVALUE(\n                  XMLTYPE(execution_end_comment),\n                  '//stat[@name=\"DB Time\"]/@value'\n                )) AS other_info\n         FROM   DBA_ADVISOR_TASKS\n         WHERE  advisor_name = 'ADDM'\n           AND  status = 'COMPLETED'\n         ORDER BY created DESC\n         FETCH FIRST 1 ROW ONLY\n       ) t ON f.task_id = t.task_id\nWHERE  f.impact > 0\nORDER BY f.impact DESC;\n\n-- 간단한 Finding 조회 (최근 태스크)\nSELECT f.task_id, f.finding_id, f.type,\n       f.impact, f.message\nFROM   DBA_ADVISOR_FINDINGS f\nWHERE  f.task_id = (\n         SELECT MAX(task_id)\n         FROM   DBA_ADVISOR_TASKS\n         WHERE  advisor_name = 'ADDM'\n           AND  status = 'COMPLETED'\n       )\nORDER BY f.impact DESC;",
+      "description": "DBA_ADVISOR_FINDINGS 뷰에서 가장 최근 완료된 ADDM 태스크의 Finding을 영향도(Impact) 순으로 조회합니다. type 컬럼이 PROBLEM이면 근본 원인, SYMPTOM이면 증상, INFORMATION이면 참고 정보입니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "ADDM Recommendation 및 Action 조회",
+      "sql": "-- 최근 ADDM 태스크의 Recommendation 조회\nSELECT r.task_id, r.rec_id, r.finding_id,\n       r.type AS rec_type, r.benefit,\n       a.action_id, a.command, a.message AS action_message,\n       a.attr1, a.attr2, a.attr3\nFROM   DBA_ADVISOR_RECOMMENDATIONS r\nJOIN   DBA_ADVISOR_ACTIONS a\n       ON r.task_id = a.task_id\n      AND r.rec_id  = a.rec_id\nWHERE  r.task_id = (\n         SELECT MAX(task_id)\n         FROM   DBA_ADVISOR_TASKS\n         WHERE  advisor_name = 'ADDM'\n           AND  status = 'COMPLETED'\n       )\nORDER BY r.benefit DESC, r.rec_id, a.action_id;\n\n-- Recommendation의 Rationale(근거) 조회\nSELECT r.task_id, r.rec_id, r.finding_id,\n       rt.message AS rationale_message\nFROM   DBA_ADVISOR_RECOMMENDATIONS r\nJOIN   DBA_ADVISOR_RATIONALE rt\n       ON r.task_id = rt.task_id\n      AND r.rec_id  = rt.rec_id\nWHERE  r.task_id = (\n         SELECT MAX(task_id)\n         FROM   DBA_ADVISOR_TASKS\n         WHERE  advisor_name = 'ADDM'\n           AND  status = 'COMPLETED'\n       )\nORDER BY r.rec_id;",
+      "description": "DBA_ADVISOR_RECOMMENDATIONS, DBA_ADVISOR_ACTIONS, DBA_ADVISOR_RATIONALE 뷰를 조인하여 ADDM 권장 사항의 상세 내용(Action 명령, 예상 효과, 근거)을 확인합니다. benefit 값이 클수록 우선순위가 높은 권장 사항입니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "ADDM 관련 초기화 파라미터 확인",
+      "sql": "-- ADDM/AWR 관련 핵심 파라미터 확인\nSELECT name, value, isdefault, ismodified,\n       description\nFROM   V$PARAMETER\nWHERE  name IN (\n         'statistics_level',\n         'control_management_pack_access',\n         'awr_pdb_autoflush_enabled',\n         'awr_snapshot_time_offset'\n       )\nORDER BY name;\n\n-- STATISTICS_LEVEL에 의해 활성화된 기능 확인\nSELECT statistics_name, session_status,\n       system_status, activation_level,\n       session_settable\nFROM   V$STATISTICS_LEVEL\nWHERE  statistics_name IN (\n         'Automatic Database Diagnostic Monitor',\n         'AWR Snapshots',\n         'Active Session History',\n         'Timed Statistics',\n         'Timed OS Statistics'\n       )\nORDER BY statistics_name;",
+      "description": "V$PARAMETER 뷰에서 ADDM과 AWR의 핵심 제어 파라미터 값을 확인하고, V$STATISTICS_LEVEL 뷰에서 현재 STATISTICS_LEVEL 설정에 의해 ADDM이 활성화되어 있는지 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "ADDM 기본 태스크 파라미터 조회 및 설정",
+      "sql": "-- 현재 ADDM 기본 태스크 파라미터 조회\nSELECT parameter_name, parameter_value,\n       parameter_type, description\nFROM   DBA_ADVISOR_DEF_PARAMETERS\nWHERE  advisor_name = 'ADDM'\nORDER BY parameter_name;\n\n-- ADDM DBTIME_THRESHOLD 변경 (기본 1% → 0.5%)\nBEGIN\n  DBMS_ADVISOR.SET_DEFAULT_TASK_PARAMETER(\n    advisor_name  => 'ADDM',\n    parameter     => 'DBTIME_THRESHOLD',\n    value         => 0.5\n  );\nEND;\n/\n\n-- AWR 스냅샷 설정 확인\nSELECT dbid, snap_interval, retention,\n       topnsql\nFROM   DBA_HIST_WR_CONTROL;\n\n-- AWR 스냅샷 간격을 30분, 보존을 15일로 변경\nBEGIN\n  DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS(\n    retention  => 15 * 24 * 60,   -- 15일(분 단위)\n    interval   => 30              -- 30분\n  );\nEND;\n/",
+      "description": "DBA_ADVISOR_DEF_PARAMETERS 뷰에서 ADDM의 기본 분석 파라미터를 조회하고, DBMS_ADVISOR.SET_DEFAULT_TASK_PARAMETER로 DBTIME_THRESHOLD를 변경합니다. 또한 AWR 스냅샷 간격과 보존 기간을 DBMS_WORKLOAD_REPOSITORY로 조정합니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "PDB 레벨 AWR 및 ADDM 활성화",
+      "sql": "-- PDB에서 AWR_PDB_AUTOFLUSH_ENABLED 확인\nSHOW PARAMETER awr_pdb_autoflush_enabled;\n\n-- PDB 레벨 AWR 활성화 (Oracle 21c 이하에서 필요)\nALTER SYSTEM SET AWR_PDB_AUTOFLUSH_ENABLED = TRUE SCOPE = BOTH;\n\n-- PDB 레벨 AWR 스냅샷 설정 변경\nBEGIN\n  DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS(\n    retention  => 10080,     -- 7일 (분 단위)\n    interval   => 60,        -- 60분\n    dbid       => NULL        -- 현재 PDB\n  );\nEND;\n/\n\n-- PDB의 AWR 스냅샷 확인\nSELECT snap_id, dbid, instance_number,\n       TO_CHAR(begin_interval_time, 'YYYY-MM-DD HH24:MI') AS begin_time,\n       TO_CHAR(end_interval_time, 'YYYY-MM-DD HH24:MI') AS end_time,\n       snap_level, con_id\nFROM   DBA_HIST_SNAPSHOT\nWHERE  con_id = SYS_CONTEXT('USERENV', 'CON_ID')\nORDER BY snap_id DESC\nFETCH FIRST 10 ROWS ONLY;",
+      "description": "PDB 컨텍스트에서 AWR_PDB_AUTOFLUSH_ENABLED 파라미터를 확인하고 활성화합니다. DBMS_WORKLOAD_REPOSITORY로 PDB 레벨의 스냅샷 설정을 변경하고, DBA_HIST_SNAPSHOT에서 PDB의 스냅샷 수집 현황을 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "PDB 레벨 ADDM 보고서 생성",
+      "sql": "-- PDB에서 수동 ADDM 분석 수행\nDECLARE\n  v_task_name  VARCHAR2(100) := 'PDB_ADDM_MANUAL_' || TO_CHAR(SYSDATE, 'YYYYMMDD_HH24MISS');\n  v_task_desc  VARCHAR2(200) := 'PDB 레벨 수동 ADDM 분석';\n  v_begin_snap NUMBER;\n  v_end_snap   NUMBER;\nBEGIN\n  -- 최근 2개 스냅샷 ID 조회\n  SELECT MAX(snap_id) INTO v_end_snap\n  FROM   DBA_HIST_SNAPSHOT\n  WHERE  con_id = SYS_CONTEXT('USERENV', 'CON_ID');\n\n  SELECT MAX(snap_id) INTO v_begin_snap\n  FROM   DBA_HIST_SNAPSHOT\n  WHERE  snap_id < v_end_snap\n    AND  con_id = SYS_CONTEXT('USERENV', 'CON_ID');\n\n  -- ADDM 태스크 생성 및 실행\n  DBMS_ADDM.ANALYZE_DB(\n    task_name    => v_task_name,\n    begin_snap   => v_begin_snap,\n    end_snap     => v_end_snap,\n    db_id        => NULL    -- 현재 DB\n  );\n\n  DBMS_OUTPUT.PUT_LINE('ADDM Task: ' || v_task_name);\n  DBMS_OUTPUT.PUT_LINE('Snap Range: ' || v_begin_snap || ' ~ ' || v_end_snap);\nEND;\n/\n\n-- PDB ADDM 결과 보고서 출력\nSELECT DBMS_ADVISOR.GET_TASK_REPORT(\n         task_name => (SELECT MAX(task_name)\n                       FROM DBA_ADVISOR_TASKS\n                       WHERE advisor_name = 'ADDM'\n                         AND status = 'COMPLETED'),\n         type      => 'TEXT'\n       ) AS addm_report\nFROM   DUAL;",
+      "description": "PDB 컨텍스트에서 DBMS_ADDM.ANALYZE_DB를 사용하여 수동 ADDM 분석을 수행합니다. 최근 2개의 PDB 레벨 AWR 스냅샷 사이의 성능을 분석하고, DBMS_ADVISOR.GET_TASK_REPORT로 텍스트 보고서를 생성합니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "addmrpt.sql을 이용한 ADDM 보고서 생성",
+      "sql": "-- SQL*Plus에서 실행\n-- @$ORACLE_HOME/rdbms/admin/addmrpt.sql\n\n-- 사용 가능한 스냅샷 목록 확인 (addmrpt.sql 실행 전)\nSELECT snap_id, dbid, instance_number,\n       TO_CHAR(begin_interval_time, 'YYYY-MM-DD HH24:MI:SS') AS begin_time,\n       TO_CHAR(end_interval_time, 'YYYY-MM-DD HH24:MI:SS') AS end_time,\n       snap_level, flush_elapsed\nFROM   DBA_HIST_SNAPSHOT\nWHERE  instance_number = SYS_CONTEXT('USERENV', 'INSTANCE')\nORDER BY snap_id DESC\nFETCH FIRST 20 ROWS ONLY;\n\n-- 특정 ADDM 태스크의 보고서를 HTML로 생성\nSELECT DBMS_ADVISOR.GET_TASK_REPORT(\n         task_name => 'ADDM:3456789012_1_100',\n         type      => 'HTML',\n         level     => 'ALL'\n       ) AS addm_html_report\nFROM   DUAL;",
+      "description": "addmrpt.sql 스크립트 실행 전에 DBA_HIST_SNAPSHOT에서 사용 가능한 스냅샷 목록을 확인합니다. DBMS_ADVISOR.GET_TASK_REPORT에 level='ALL'을 지정하면 모든 상세 정보가 포함된 보고서를 생성합니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "ADDM Finding 상세 분석 및 관련 객체 조회",
+      "sql": "-- 특정 ADDM 태스크의 Finding과 관련 객체 상세 조회\nSELECT f.task_id, f.finding_id, f.type AS finding_type,\n       f.impact, f.message AS finding_message,\n       o.object_id AS advisor_obj_id,\n       o.type AS obj_type,\n       o.attr1 AS obj_owner,\n       o.attr2 AS obj_name,\n       o.attr3 AS obj_type_detail,\n       o.attr4 AS sql_id\nFROM   DBA_ADVISOR_FINDINGS f\nLEFT JOIN DBA_ADVISOR_OBJECTS o\n       ON f.task_id    = o.task_id\n      AND f.finding_id = o.finding_id\nWHERE  f.task_id = (\n         SELECT MAX(task_id)\n         FROM   DBA_ADVISOR_TASKS\n         WHERE  advisor_name = 'ADDM'\n           AND  status = 'COMPLETED'\n       )\nORDER BY f.impact DESC, f.finding_id;\n\n-- SQL 관련 Finding의 SQL 문 확인\nSELECT o.attr4 AS sql_id,\n       s.sql_text,\n       s.executions,\n       ROUND(s.elapsed_time/1e6, 2) AS elapsed_sec,\n       ROUND(s.cpu_time/1e6, 2) AS cpu_sec\nFROM   DBA_ADVISOR_OBJECTS o\nJOIN   V$SQL s ON o.attr4 = s.sql_id\nWHERE  o.task_id = (\n         SELECT MAX(task_id)\n         FROM   DBA_ADVISOR_TASKS\n         WHERE  advisor_name = 'ADDM'\n           AND  status = 'COMPLETED'\n       )\n  AND  o.type = 'SQL'\n  AND  ROWNUM <= 10;",
+      "description": "DBA_ADVISOR_FINDINGS와 DBA_ADVISOR_OBJECTS를 조인하여 ADDM Finding과 관련된 데이터베이스 객체(SQL, 세그먼트 등)를 상세 조회합니다. SQL 관련 Finding의 경우 V$SQL과 조인하여 실제 SQL 문과 실행 통계를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "ADDM 태스크 이력 및 실행 로그 조회",
+      "sql": "-- ADDM 태스크 실행 이력 조회\nSELECT t.task_id, t.task_name, t.status,\n       TO_CHAR(t.created, 'YYYY-MM-DD HH24:MI:SS') AS created,\n       TO_CHAR(t.last_modified, 'YYYY-MM-DD HH24:MI:SS') AS last_modified,\n       t.execution_start,\n       t.execution_end,\n       l.status AS log_status,\n       l.execution_start AS exec_start,\n       l.execution_end AS exec_end\nFROM   DBA_ADVISOR_TASKS t\nLEFT JOIN DBA_ADVISOR_LOG l\n       ON t.task_id = l.task_id\nWHERE  t.advisor_name = 'ADDM'\nORDER BY t.created DESC\nFETCH FIRST 20 ROWS ONLY;\n\n-- ADDM 태스크의 Finding 수 요약\nSELECT t.task_name,\n       COUNT(CASE WHEN f.type = 'PROBLEM' THEN 1 END) AS problems,\n       COUNT(CASE WHEN f.type = 'SYMPTOM' THEN 1 END) AS symptoms,\n       COUNT(CASE WHEN f.type = 'INFORMATION' THEN 1 END) AS informations,\n       COUNT(r.rec_id) AS recommendations\nFROM   DBA_ADVISOR_TASKS t\nLEFT JOIN DBA_ADVISOR_FINDINGS f\n       ON t.task_id = f.task_id\nLEFT JOIN DBA_ADVISOR_RECOMMENDATIONS r\n       ON t.task_id = r.task_id\nWHERE  t.advisor_name = 'ADDM'\n  AND  t.status = 'COMPLETED'\nGROUP BY t.task_name\nORDER BY t.task_name DESC\nFETCH FIRST 10 ROWS ONLY;",
+      "description": "DBA_ADVISOR_TASKS와 DBA_ADVISOR_LOG를 조인하여 ADDM 태스크의 실행 이력과 상태를 확인합니다. 또한 각 태스크별 Problem, Symptom, Information Finding 수와 Recommendation 수를 요약하여 분석 결과의 규모를 파악합니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "수동 ADDM 태스크 생성 및 실행 (DBMS_ADVISOR)",
+      "sql": "-- 수동 ADDM 태스크 생성 및 실행 (DBMS_ADVISOR 사용)\nDECLARE\n  v_task_name  VARCHAR2(100) := 'MY_ADDM_ANALYSIS';\n  v_task_id    NUMBER;\nBEGIN\n  -- 1. ADDM 태스크 생성\n  DBMS_ADVISOR.CREATE_TASK(\n    advisor_name  => 'ADDM',\n    task_name     => v_task_name,\n    task_desc     => '특정 기간 수동 ADDM 분석'\n  );\n\n  -- 2. 분석할 스냅샷 범위 설정\n  DBMS_ADVISOR.SET_TASK_PARAMETER(\n    task_name  => v_task_name,\n    parameter  => 'START_SNAPSHOT',\n    value      => 100   -- 시작 스냅샷 ID\n  );\n  DBMS_ADVISOR.SET_TASK_PARAMETER(\n    task_name  => v_task_name,\n    parameter  => 'END_SNAPSHOT',\n    value      => 110   -- 종료 스냅샷 ID\n  );\n\n  -- 3. (선택) DB Time 임계값 조정\n  DBMS_ADVISOR.SET_TASK_PARAMETER(\n    task_name  => v_task_name,\n    parameter  => 'DBTIME_THRESHOLD',\n    value      => 0.5   -- 0.5% 이상의 문제만 보고\n  );\n\n  -- 4. 태스크 실행\n  DBMS_ADVISOR.EXECUTE_TASK(v_task_name);\n\n  DBMS_OUTPUT.PUT_LINE('ADDM 분석 완료: ' || v_task_name);\nEND;\n/\n\n-- 5. 결과 보고서 조회\nSELECT DBMS_ADVISOR.GET_TASK_REPORT('MY_ADDM_ANALYSIS', 'TEXT') AS report\nFROM   DUAL;",
+      "description": "DBMS_ADVISOR 패키지를 사용하여 수동 ADDM 태스크를 단계별로 생성합니다. CREATE_TASK로 태스크를 생성하고, SET_TASK_PARAMETER로 스냅샷 범위와 임계값을 설정한 후, EXECUTE_TASK로 분석을 실행합니다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "DBMS_ADDM을 이용한 간편 수동 분석",
+      "sql": "-- DBMS_ADDM.ANALYZE_DB를 이용한 간편한 전체 DB 분석\nVARIABLE v_task VARCHAR2(100);\nBEGIN\n  :v_task := 'QUICK_ADDM_' || TO_CHAR(SYSDATE, 'YYYYMMDD_HH24MISS');\n  DBMS_ADDM.ANALYZE_DB(\n    task_name    => :v_task,\n    begin_snap   => 100,\n    end_snap     => 120\n  );\nEND;\n/\n\n-- 결과 조회\nSELECT DBMS_ADVISOR.GET_TASK_REPORT(:v_task, 'TEXT') AS report\nFROM   DUAL;\n\n-- RAC 환경: 특정 인스턴스 분석\nDECLARE\n  v_task_name VARCHAR2(100) := 'RAC_INST2_ADDM';\nBEGIN\n  DBMS_ADDM.ANALYZE_INST(\n    task_name      => v_task_name,\n    begin_snap     => 100,\n    end_snap       => 120,\n    instance_number => 2    -- 인스턴스 2만 분석\n  );\nEND;\n/\n\n-- 분석 완료 후 태스크 삭제 (정리)\nBEGIN\n  DBMS_ADVISOR.DELETE_TASK('QUICK_ADDM_20260407_143000');\nEND;\n/",
+      "description": "DBMS_ADDM 패키지의 ANALYZE_DB, ANALYZE_INST 프로시저를 사용한 간편한 수동 ADDM 분석 방법입니다. DBMS_ADVISOR보다 단순한 인터페이스로 전체 DB 또는 특정 인스턴스를 분석할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql13",
+      "title": "AWR 스냅샷 수동 생성 및 즉시 ADDM 분석",
+      "sql": "-- 현재 시점의 AWR 스냅샷 즉시 생성\nDECLARE\n  v_snap_id NUMBER;\nBEGIN\n  v_snap_id := DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT;\n  DBMS_OUTPUT.PUT_LINE('생성된 스냅샷 ID: ' || v_snap_id);\nEND;\n/\n\n-- 작업 후 다시 스냅샷 생성\n-- (성능 문제 재현 후 실행)\nDECLARE\n  v_snap_id NUMBER;\nBEGIN\n  v_snap_id := DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT;\n  DBMS_OUTPUT.PUT_LINE('생성된 스냅샷 ID: ' || v_snap_id);\nEND;\n/\n\n-- 두 스냅샷 사이의 ADDM 분석\nDECLARE\n  v_task_name VARCHAR2(100) := 'IMMEDIATE_ADDM';\n  v_begin_snap NUMBER;\n  v_end_snap   NUMBER;\nBEGIN\n  -- 최근 2개 스냅샷 조회\n  SELECT snap_id INTO v_end_snap\n  FROM   (SELECT snap_id FROM DBA_HIST_SNAPSHOT\n          ORDER BY snap_id DESC)\n  WHERE  ROWNUM = 1;\n\n  SELECT snap_id INTO v_begin_snap\n  FROM   (SELECT snap_id FROM DBA_HIST_SNAPSHOT\n          WHERE snap_id < v_end_snap\n          ORDER BY snap_id DESC)\n  WHERE  ROWNUM = 1;\n\n  DBMS_ADDM.ANALYZE_DB(\n    task_name  => v_task_name,\n    begin_snap => v_begin_snap,\n    end_snap   => v_end_snap\n  );\n\n  DBMS_OUTPUT.PUT_LINE('분석 완료: ' || v_begin_snap || ' ~ ' || v_end_snap);\nEND;\n/\n\n-- 결과 확인\nSELECT DBMS_ADVISOR.GET_TASK_REPORT('IMMEDIATE_ADDM', 'TEXT') AS report\nFROM   DUAL;",
+      "description": "성능 문제 재현 전후로 AWR 스냅샷을 수동 생성(DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT)하고, 해당 구간에 대해 즉시 ADDM 분석을 수행합니다. 특정 작업의 성능 영향을 정밀하게 분석할 때 유용합니다."
+    }
+  ],
+  "keywords": [
+    "ADDM",
+    "Automatic Database Diagnostic Monitor",
+    "자동 데이터베이스 진단 모니터",
+    "AWR",
+    "Automatic Workload Repository",
+    "DB Time",
+    "MMON",
+    "Manageability Monitor",
+    "Finding",
+    "Recommendation",
+    "Action",
+    "Rationale",
+    "Impact",
+    "Benefit",
+    "STATISTICS_LEVEL",
+    "CONTROL_MANAGEMENT_PACK_ACCESS",
+    "DBMS_ADVISOR",
+    "DBMS_ADDM",
+    "addmrpt.sql",
+    "DBMS_WORKLOAD_REPOSITORY",
+    "AWR_PDB_AUTOFLUSH_ENABLED",
+    "PDB 레벨 ADDM",
+    "DBTIME_THRESHOLD",
+    "Real-Time ADDM",
+    "DBA_ADVISOR_TASKS",
+    "DBA_ADVISOR_FINDINGS",
+    "DBA_ADVISOR_RECOMMENDATIONS",
+    "DBA_ADVISOR_ACTIONS",
+    "DBA_ADVISOR_RATIONALE",
+    "DBA_HIST_SNAPSHOT",
+    "Top-Down Analysis",
+    "Root Cause Analysis",
+    "DB Time Decomposition",
+    "Performance Hub",
+    "Top-Down Tuning Methodology",
+    "Application Tuning",
+    "Instance Tuning",
+    "OS Hardware Tuning",
+    "Performance Planning",
+    "V$SYS_TIME_MODEL",
+    "V$SYSTEM_EVENT",
+    "Capacity Planning",
+    "Baseline"
+  ]
+}

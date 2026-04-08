@@ -1,0 +1,85 @@
+[
+  {
+    "chapter": "データの移動",
+    "number": "C_09_006",
+    "title": "Data Pump Export(expdp)のExportモードに関して正しく述べているものを選択してください。(2つ選択してください)",
+    "options": [
+      "A) SCHEMASモードはデフォルトのExportモードであり、パラメータを指定しない場合は接続ユーザー自身のスキーマがExportされる。",
+      "B) FULLモードを使用するにはEXP_FULL_DATABASE以外に、さらにSYSDBA権限が必要である。",
+      "C) TABLESモードでは、指定したテーブルとその関連オブジェクト(インデックス、制約など)がExportされる。",
+      "D) TABLESPACESモードは指定した表領域自体のデータファイルをコピーするため、メタデータのみのExportはできない。",
+      "E) TRANSPORTABLEモードではデータとメタデータの両方がダンプ・ファイルに格納される。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답 해설:\n\nA) 정답: SCHEMAS 모드는 Data Pump Export의 기본(디폴트) 모드입니다. 별도의 모드 파라미터를 지정하지 않으면, 접속 사용자 자신의 스키마에 속한 모든 객체가 Export됩니다.\n\nC) 정답: TABLES 모드(TABLES=schema.table1 형태)를 사용하면, 지정한 테이블과 해당 테이블에 관련된 인덱스, 제약조건, 트리거 등의 종속 객체가 함께 Export됩니다.\n\n오답 해설:\n\nB) 오답: FULL 모드를 실행하려면 EXP_FULL_DATABASE 롤이 필요하지만, 반드시 SYSDBA 권한까지 필요한 것은 아닙니다. EXP_FULL_DATABASE 롤만으로 FULL Export를 수행할 수 있습니다.\n\nD) 오답: TABLESPACES 모드는 지정한 테이블스페이스에 '속한 객체'를 Export하는 것이지, 데이터파일 자체를 복사하는 것이 아닙니다. 또한 CONTENT=METADATA_ONLY와 조합하면 메타데이터만 Export할 수 있습니다.\n\nE) 오답: TRANSPORTABLE 모드(TRANSPORT_TABLESPACES)에서는 메타데이터만 덤프 파일에 기록됩니다. 실제 데이터는 데이터파일을 물리적으로 복사하여 이동시키며, 덤프 파일에는 데이터가 포함되지 않습니다.\n\n핵심 개념: Data Pump Export는 FULL, SCHEMAS(기본), TABLES, TABLESPACES, TRANSPORTABLE 5가지 모드를 제공하며, 각 모드에 따라 Export 범위와 필요 권한이 달라집니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_007",
+    "title": "Data Pump Import(impdp)のTABLE_EXISTS_ACTIONパラメータに関して正しく述べているものを選択してください。(2つ選択してください)",
+    "options": [
+      "A) TABLE_EXISTS_ACTIONのデフォルト値はAPPENDであり、既存テーブルにデータが追加される。",
+      "B) TRUNCATE値を使用すると、既存テーブルをDROPしてから再作成し、データをインポートする。",
+      "C) REPLACE値を使用すると、既存テーブルがDROPされ再作成された後にデータがインポートされるため、関連するインデックスや制約も削除される。",
+      "D) SKIP値を使用すると、テーブル構造のDDLはスキップされるがデータのみインポートされる。",
+      "E) APPEND値を使用した場合、重複キーが存在するとエラーが発生する可能性がある。"
+    ],
+    "answer": [
+      "C",
+      "E"
+    ],
+    "explanation": "정답 해설:\n\nC) 정답: REPLACE는 기존 테이블을 DROP한 후 CREATE TABLE DDL을 실행하여 재생성하고, 데이터를 Import합니다. DROP TABLE에 의해 기존 테이블에 연결된 인덱스, 제약조건, 트리거 등의 종속 객체도 함께 삭제됩니다.\n\nE) 정답: APPEND는 기존 데이터를 유지하면서 새 데이터를 추가합니다. 이 과정에서 PRIMARY KEY나 UNIQUE 제약조건이 있는 경우, 기존 데이터와 Import 데이터 간에 키 값이 중복되면 에러가 발생할 수 있습니다.\n\n오답 해설:\n\nA) 오답: TABLE_EXISTS_ACTION의 기본값은 APPEND가 아니라 'SKIP'입니다. SKIP은 대상 테이블이 이미 존재하면 해당 테이블의 DDL과 데이터 모두를 건너뜁니다.\n\nB) 오답: TRUNCATE는 기존 테이블을 DROP하지 않습니다. 테이블 구조는 그대로 유지하면서 TRUNCATE TABLE(DDL)을 실행하여 기존 데이터만 삭제한 후 Import 데이터를 적재합니다. 테이블을 DROP 후 재작성하는 것은 REPLACE입니다.\n\nD) 오답: SKIP은 테이블이 이미 존재하는 경우 DDL과 데이터 모두를 건너뜁니다. 데이터만 Import되는 것이 아니라, 해당 테이블에 대한 처리 자체가 완전히 생략됩니다.\n\n핵심 개념: TABLE_EXISTS_ACTION은 SKIP(기본값, 전체 생략), APPEND(데이터 추가), TRUNCATE(기존 데이터 삭제 후 적재, 구조 유지), REPLACE(DROP+CREATE 후 적재) 4가지 옵션을 제공합니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_008",
+    "title": "SQL*Loaderの実行時に生成されるファイルについて正しく述べているものを選択してください。(2つ選択してください)",
+    "options": [
+      "A) Badファイルには、WHEN句の条件に一致しなかったレコードが記録される。",
+      "B) Discardファイルには、WHEN句の条件に一致しなかったレコードが記録される。",
+      "C) ログ・ファイルにはロードの統計情報やエラー情報が記録され、デフォルトでは制御ファイル名と同じ名前で.log拡張子で作成される。",
+      "D) ERRORSパラメータのデフォルト値は0であり、1件のエラーが発生するとロードが即座に中断される。",
+      "E) Badファイルのデフォルト拡張子は.dscである。"
+    ],
+    "answer": [
+      "B",
+      "C"
+    ],
+    "explanation": "정답 해설:\n\nB) 정답: Discard 파일에는 WHEN 절의 조건에 일치하지 않아 폐기된(discard) 레코드가 기록됩니다. 데이터 변환이나 형식 오류와는 관계없이, 단순히 로드 조건을 만족하지 못한 레코드가 여기에 저장됩니다.\n\nC) 정답: 로그 파일에는 SQL*Loader 실행 결과의 통계 정보(로드된 행 수, 거부된 행 수, 폐기된 행 수 등)와 에러 정보가 기록됩니다. 기본적으로 컨트롤 파일명과 동일한 이름에 .log 확장자로 생성됩니다.\n\n오답 해설:\n\nA) 오답: Bad 파일에 기록되는 것은 WHEN 조건 불일치 레코드가 아니라, 데이터 타입 변환 실패나 형식 오류 등으로 '거부된(rejected)' 레코드입니다. WHEN 조건 불일치 레코드는 Discard 파일에 기록됩니다.\n\nD) 오답: ERRORS 파라미터의 기본값은 0이 아니라 50입니다. 허용된 에러 수(기본 50건)를 초과하면 로드가 중단되며, 50건 이내의 에러는 Bad 파일에 기록되면서 로드가 계속됩니다.\n\nE) 오답: Bad 파일의 기본 확장자는 .dsc가 아니라 '.bad'입니다. .dsc는 Discard 파일의 확장자입니다.\n\n핵심 개념: SQL*Loader는 실행 시 로그 파일(.log, 통계/에러 정보), Bad 파일(.bad, 변환 실패 레코드), Discard 파일(.dsc, WHEN 조건 불일치 레코드)을 생성하며, ERRORS 파라미터(기본 50)로 허용 에러 수를 제어합니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_009",
+    "title": "Data PumpのEXCLUDEパラメータとINCLUDEパラメータに関して正しく述べているものを選択してください。",
+    "options": [
+      "A) EXCLUDEとINCLUDEは同一のexpdp/impdpコマンド内で同時に使用することができる。",
+      "B) EXCLUDE=TABLEを指定して特定のテーブルを除外すると、そのテーブルに関連するインデックスやトリガーも自動的に除外される。",
+      "C) INCLUDEパラメータはExport(expdp)でのみ使用可能であり、Import(impdp)では使用できない。",
+      "D) EXCLUDEパラメータで使用可能なオブジェクト・タイプはDBA_OBJECTSビューで確認することができる。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답 해설:\n\nB) 정답: EXCLUDE=TABLE로 특정 테이블을 제외하면, 해당 테이블에 종속된 인덱스, 제약조건, 트리거 등의 관련 객체도 자동으로 제외됩니다. 이는 Data Pump가 객체 간의 종속 관계를 인식하여 처리하기 때문입니다.\n\n오답 해설:\n\nA) 오답: EXCLUDE와 INCLUDE는 동일한 명령어 내에서 동시에 사용할 수 없습니다. 하나의 expdp/impdp 명령에서 EXCLUDE 또는 INCLUDE 중 하나만 선택하여 사용해야 합니다. 단, 동일한 파라미터(EXCLUDE 또는 INCLUDE)를 여러 번 지정하는 것은 가능합니다.\n\nC) 오답: INCLUDE 파라미터는 Export(expdp)와 Import(impdp) 모두에서 사용할 수 있습니다. Import 시에는 Export된 덤프 파일에서 Import할 객체를 추가로 필터링하는 데 사용됩니다.\n\nD) 오답: EXCLUDE/INCLUDE에서 사용 가능한 객체 타입은 DBA_OBJECTS 뷰가 아니라, DATABASE_EXPORT_OBJECTS, SCHEMA_EXPORT_OBJECTS, TABLE_EXPORT_OBJECTS 뷰에서 확인합니다. 이 뷰들은 Data Pump에서 지원하는 객체 경로(object_path)를 제공합니다.\n\n핵심 개념: EXCLUDE와 INCLUDE는 동시 사용 불가이며, 종속 객체는 자동으로 함께 제외/포함됩니다. 사용 가능한 객체 타입은 DATABASE_EXPORT_OBJECTS 등의 전용 뷰에서 확인합니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_010",
+    "title": "Data Pumpのアーキテクチャと機能に関して正しく述べているものを選択してください。(2つ選択してください)",
+    "options": [
+      "A) Data Pumpはクライアント側で動作するユーティリティであり、expdp/impdpコマンドがデータの読み書きを直接実行する。",
+      "B) NETWORK_LINKパラメータを使用すると、ダンプ・ファイルを介さずにデータベース・リンク経由でソースDBから直接データをインポートできる。",
+      "C) PARALLELパラメータで複数のWorkerプロセスを指定した場合、DUMPFILEに%Uを使用すると自動的に番号付きの複数ダンプ・ファイルが生成される。",
+      "D) Data Pumpのダンプ・ファイル(.dmp)は旧来のexp/impユーティリティのダンプ・ファイルと互換性がある。",
+      "E) EXIT_CLIENTコマンドを実行するとData Pumpジョブが即座に終了し、すべてのリソースが解放される。"
+    ],
+    "answer": [
+      "B",
+      "C"
+    ],
+    "explanation": "정답 해설:\n\nB) 정답: NETWORK_LINK 파라미터를 사용하면 데이터베이스 링크(DB Link)를 통해 소스 데이터베이스에서 직접 데이터를 Import할 수 있습니다. 이 경우 덤프 파일을 생성하거나 전송할 필요가 없으며, 네트워크를 통해 직접 데이터를 이동시킵니다.\n\nC) 정답: PARALLEL 파라미터로 여러 Worker 프로세스를 지정할 때, DUMPFILE에 %U 치환 변수를 사용하면 Worker별로 자동 번호가 부여된 다중 덤프 파일(예: exp_01.dmp, exp_02.dmp 등)이 생성됩니다. 이를 통해 병렬 Export/Import의 I/O 성능을 극대화할 수 있습니다.\n\n오답 해설:\n\nA) 오답: Data Pump는 '서버 측(Server-Side)'에서 동작하는 유틸리티입니다. expdp/impdp는 커맨드 라인 클라이언트로서 DBMS_DATAPUMP PL/SQL 패키지를 호출할 뿐이며, 실제 데이터 읽기/쓰기는 데이터베이스 서버 내부의 Master Control Process와 Worker 프로세스가 수행합니다.\n\nD) 오답: Data Pump의 덤프 파일(.dmp)은 기존 exp/imp 유틸리티의 덤프 파일과 호환되지 않습니다. 두 유틸리티는 서로 다른 독자적인 바이너리 형식을 사용하므로, Data Pump로 생성한 덤프 파일을 imp로 읽거나 그 반대도 불가능합니다.\n\nE) 오답: EXIT_CLIENT는 클라이언트를 작업에서 분리(Detach)하는 명령이며, 작업 자체는 서버에서 계속 실행됩니다. Data Pump는 서버 측에서 독립적으로 동작하므로, 클라이언트 연결이 해제되어도 작업은 중단되지 않습니다. 나중에 ATTACH로 재연결하여 모니터링할 수 있습니다.\n\n핵심 개념: Data Pump는 서버 측 유틸리티로, NETWORK_LINK를 통한 덤프 파일 없는 직접 Import, PARALLEL+%U를 활용한 병렬 처리, EXIT_CLIENT에 의한 클라이언트 분리 후에도 서버에서 작업이 지속되는 특성을 가집니다."
+  }
+]

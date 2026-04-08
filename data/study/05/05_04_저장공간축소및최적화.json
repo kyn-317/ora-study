@@ -1,0 +1,308 @@
+{
+  "id": "05_04",
+  "title": "저장 공간 축소 및 최적화 (Space Reclamation and Storage Optimization)",
+  "chapter": "05. 스토리지 최적화 및 테이블스페이스",
+  "description": "Oracle Database에서 발생하는 저장 공간 낭비의 원인(HWM 미조정, 행 이동/체이닝, 삭제 후 미회수 등)을 분석하고, 세그먼트 축소(SHRINK SPACE), 데이터 압축(Basic/Advanced/HCC), Direct-Path Insert, 인덱스 UNUSABLE 상태 관리 등 공간 최적화 기법의 내부 동작 원리와 실무 적용 방법을 상세히 설명합니다.",
+  "oracle26ai_changes": [
+    "Oracle 26ai에서 Automatic Segment Advisor가 AI 기반 분석으로 개선되어, 공간 낭비가 심한 세그먼트를 자동으로 식별하고 SHRINK 권고를 보다 정밀하게 제공합니다.",
+    "Advanced Row Compression의 압축 알고리즘이 개선되어 AI/ML 워크로드에서 발생하는 벡터 데이터 테이블에 대한 압축 효율이 향상되었습니다.",
+    "In-Memory Column Store와 연계한 Hybrid Columnar Compression의 자동 티어링(Auto-Tiering) 기능이 강화되어, 접근 빈도에 따라 압축 레벨이 자동으로 조정됩니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "저장 공간 최적화 개요 (Space Optimization Overview)",
+      "content": "Oracle Database에서 저장 공간은 시간이 지남에 따라 다양한 원인으로 비효율적으로 사용될 수 있습니다. 효과적인 공간 관리는 스토리지 비용 절감, 풀 테이블 스캔 성능 향상, I/O 감소, 백업/복구 시간 단축에 직접적으로 기여합니다.\n\n## 공간 낭비의 주요 원인\n\n| 원인 | 설명 | 영향 |\n|---|---|---|\n| **DELETE 후 미회수** | DELETE로 행을 삭제해도 HWM(High Water Mark)은 하향되지 않음 | Full Table Scan 시 불필요한 빈 블록까지 읽음 |\n| **Row Migration** | UPDATE로 행 크기가 증가하여 원래 블록에 들어가지 않아 다른 블록으로 이동 | 단일 행 접근 시 추가 I/O 발생 |\n| **Row Chaining** | 행 크기가 블록 크기보다 커서 여러 블록에 걸쳐 저장 | 행 접근 시 항상 다중 블록 I/O 필요 |\n| **PCTFREE 부적절 설정** | 블록 내 여유 공간이 너무 적거나 많음 | Migration 증가 또는 공간 낭비 |\n| **비효율적 데이터 타입** | VARCHAR2에 불필요한 큰 크기 지정, 비정규화 | 블록당 저장 행 수 감소 |\n| **단편화 (Fragmentation)** | 반복적인 INSERT/DELETE로 블록 내 여유 공간 산재 | 공간은 있으나 활용 불가 |\n\n## 공간 최적화 기법 총괄 비교\n\n| 기법 | 목적 | HWM 하향 | 온라인 가능 | 주요 전제조건 |\n|---|---|---|---|---|\n| **SHRINK SPACE** | 세그먼트 내 데이터 재배치 후 HWM 하향 | 예 | 예 | ROW MOVEMENT ENABLE |\n| **SHRINK SPACE COMPACT** | 데이터 재배치만 수행 (HWM 미하향) | 아니오 | 예 | ROW MOVEMENT ENABLE |\n| **TRUNCATE TABLE** | 모든 행 삭제 + HWM 초기화 | 예 (초기화) | 아니오 (DDL) | 없음 |\n| **ALTER TABLE MOVE** | 테이블을 새 세그먼트로 재생성 | 예 (새 세그먼트) | 예 (Online 지원) | 인덱스 REBUILD 필요 |\n| **Basic Compression** | Direct-Path Insert 데이터 압축 | 해당없음 | 해당없음 | Direct-Path Insert만 |\n| **Advanced Compression** | 모든 DML 데이터 압축 | 해당없음 | 해당없음 | 라이선스 필요 |\n| **HCC** | 높은 압축률의 열 기반 압축 | 해당없음 | 해당없음 | Exadata/ZFS Storage |\n| **INDEX UNUSABLE** | 인덱스 세그먼트 삭제로 공간 회수 | 해당없음 | 예 | REBUILD로 복구 필요 |\n\n## 공간 최적화 워크플로우\n\n```\n1. 공간 낭비 식별 (Space Waste Identification)\n   - Segment Advisor 실행\n   - DBA_SEGMENTS, DBA_FREE_SPACE 조회\n   - DBMS_SPACE.SPACE_USAGE_EXTENDED 활용\n       |\n       v\n2. 원인 분석 (Root Cause Analysis)\n   - Row Migration/Chaining 여부 → V$SYSSTAT 'table fetch continued row'\n   - HWM 위치 확인 → DBMS_SPACE.SPACE_USAGE\n   - 단편화 수준 확인 → 실제 데이터 대비 세그먼트 크기 비교\n       |\n       v\n3. 최적화 기법 선택 (Optimization Method Selection)\n   - 온라인 요구 → SHRINK SPACE\n   - 대량 데이터 적재 → Basic/Advanced Compression\n   - 전체 재구성 → ALTER TABLE MOVE + INDEX REBUILD\n   - 전체 삭제 → TRUNCATE TABLE\n       |\n       v\n4. 실행 및 검증 (Execute and Verify)\n   - 세그먼트 크기 변화 확인\n   - 성능 테스트 (Full Table Scan 시간 비교)\n```",
+      "sqlExamplesIds": [
+        "sql01"
+      ],
+      "subsections": [
+        {
+          "title": "공간 분석 도구 및 딕셔너리 뷰 (Space Analysis Tools and Dictionary Views)",
+          "content": "Oracle Database는 세그먼트의 공간 사용 현황을 분석하기 위한 다양한 도구와 딕셔너리 뷰를 제공합니다. 정확한 공간 분석은 최적화 기법 선택의 기초가 됩니다.\n\n### DBMS_SPACE 패키지 주요 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **SPACE_USAGE** | ASSM(Automatic Segment Space Management) 세그먼트의 블록 상태별 분류 (full, 75-100%, 50-75%, 25-50%, 0-25%, empty) |\n| **SPACE_USAGE_EXTENDED** | 확장된 공간 사용 정보 (Oracle 26ai 개선) |\n| **CREATE_TABLE_COST** | 테이블 생성 시 예상 공간 추정 |\n| **CREATE_INDEX_COST** | 인덱스 생성 시 예상 공간 추정 |\n\n### Segment Advisor\n\nSegment Advisor는 공간 낭비가 심한 세그먼트를 자동으로 식별하고 축소 권고를 제공하는 Oracle의 자동화 도구입니다.\n\n| 항목 | 설명 |\n|---|---|\n| **자동 실행** | Auto Segment Advisor는 유지보수 윈도우(Maintenance Window)에서 자동 실행 |\n| **수동 실행** | DBMS_ADVISOR 패키지로 수동 실행 가능 |\n| **관련 뷰** | DBA_ADVISOR_FINDINGS, DBA_ADVISOR_RECOMMENDATIONS, DBA_ADVISOR_ACTIONS |\n| **권고 유형** | SHRINK SPACE, ALTER TABLE MOVE, 압축 적용 등 |\n\n### 공간 분석 관련 주요 딕셔너리 뷰\n\n| 뷰 이름 | 설명 |\n|---|---|\n| **DBA_SEGMENTS** | 세그먼트별 크기(BYTES, BLOCKS, EXTENTS) 정보 |\n| **DBA_EXTENTS** | 세그먼트의 개별 익스텐트 정보 |\n| **DBA_FREE_SPACE** | 테이블스페이스 내 여유 공간 정보 |\n| **DBA_TABLES** | 테이블 통계 (NUM_ROWS, BLOCKS, AVG_ROW_LEN, COMPRESSION 등) |\n| **DBA_TAB_MODIFICATIONS** | 마지막 통계 수집 이후 DML 변경량 |\n| **V$SYSSTAT** | 시스템 통계 ('table fetch continued row' 등) |\n| **V$SEGMENT_STATISTICS** | 세그먼트별 I/O 통계 |",
+          "key_points": [
+            "DBMS_SPACE.SPACE_USAGE는 ASSM 세그먼트의 블록을 상태별(full, 75-100%, 50-75% 등)로 분류하여 공간 사용 효율을 정밀 분석",
+            "Segment Advisor는 유지보수 윈도우에서 자동 실행되며, DBA_ADVISOR_FINDINGS 뷰로 축소 권고 확인 가능",
+            "DBA_SEGMENTS의 BYTES와 DBA_TABLES의 NUM_ROWS * AVG_ROW_LEN 비교로 실제 데이터 대비 세그먼트 낭비율 추정 가능",
+            "V$SYSSTAT의 'table fetch continued row' 값이 높으면 Row Migration/Chaining이 심각한 상태를 의미",
+            "DBA_TAB_MODIFICATIONS로 마지막 통계 수집 이후 INSERT/UPDATE/DELETE 횟수를 확인하여 공간 변화 추정"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s02",
+      "title": "HWM (High Water Mark, 최고수위표)",
+      "content": "HWM(High Water Mark, 最高水位標)은 세그먼트 내에서 데이터가 기록된 적이 있는 가장 높은 위치(블록)를 나타내는 표식입니다. Oracle은 Full Table Scan 시 HWM까지의 모든 블록을 읽으므로, DELETE로 행을 삭제해도 HWM이 하향되지 않으면 불필요한 빈 블록까지 스캔하게 됩니다. HWM 관리는 공간 최적화의 핵심입니다.\n\n## HWM의 종류\n\n| 종류 | 설명 | 적용 환경 |\n|---|---|---|\n| **High HWM** | 세그먼트에서 포맷된 블록의 최고 위치. 이 위치 이상의 블록은 사용된 적 없음 | ASSM, MSSM 공통 |\n| **Low HWM** | ASSM 환경에서 Low HWM 이하의 블록은 모두 포맷 완료 상태. Low HWM과 High HWM 사이 블록은 일부만 포맷됨 | ASSM 전용 |\n\n## ASSM에서의 Low HWM과 High HWM\n\n```\n세그먼트 시작                                                세그먼트 끝\n|===============|=======?=======|-------------------|\n|  모든 블록     | 일부 블록만    |  사용된 적 없는    |\n|  포맷 완료     | 포맷됨        |  블록              |\n|               |               |                   |\n          Low HWM         High HWM\n\n= : 포맷된(사용된) 블록\n? : 포맷되었거나 되지 않은 블록 (혼합 영역)\n- : 사용된 적 없는 블록\n```\n\n## Full Table Scan과 HWM의 관계\n\nOracle이 Full Table Scan을 수행할 때, **HWM 아래의 모든 블록**을 읽습니다. DELETE 문은 행 데이터를 제거하지만 HWM을 하향시키지 않으므로, 대량 삭제 후에도 Full Table Scan 성능은 개선되지 않습니다.\n\n| 작업 | HWM 변화 | 공간 회수 | Full Scan 성능 |\n|---|---|---|---|\n| **DELETE** | 변화 없음 | 블록 내 공간만 재사용 가능 | 개선 없음 |\n| **TRUNCATE** | 초기화 (최저로) | 모든 익스텐트 해제 (MINEXTENTS 제외) | 즉시 개선 |\n| **SHRINK SPACE** | 하향 | 데이터 재배치 후 HWM 하향 | 점진적 개선 |\n| **ALTER TABLE MOVE** | 초기화 (새 세그먼트) | 새 세그먼트에 데이터 재배치 | 즉시 개선 |\n| **DROP TABLE** | 해당없음 (세그먼트 삭제) | 전체 세그먼트 해제 | 해당없음 |",
+      "sqlExamplesIds": [
+        "sql02"
+      ],
+      "subsections": [
+        {
+          "title": "HWM의 내부 동작 원리 (Internal Mechanism of HWM)",
+          "content": "HWM은 세그먼트 헤더 블록에 기록되며, 세그먼트에 새로운 데이터가 삽입될 때 필요에 따라 상향됩니다. ASSM(Automatic Segment Space Management) 환경에서는 비트맵 블록이 각 데이터 블록의 상태(빈 공간 비율)를 관리하며, Low HWM과 High HWM을 구분합니다.\n\n### HWM 이동 시나리오\n\n| 시나리오 | HWM 변화 | 설명 |\n|---|---|---|\n| **INSERT (일반)** | 상향 가능 | 기존 빈 블록이 없으면 HWM 이상의 새 블록을 포맷하여 사용 |\n| **INSERT /*+ APPEND */** | 항상 상향 | Direct-Path Insert는 항상 HWM 위에 기록 |\n| **DELETE** | 변화 없음 | HWM은 절대 자동으로 하향되지 않음 |\n| **UPDATE (크기 증가)** | 변화 없음 ~ 상향 | Row Migration 발생 시 새 블록 필요하면 상향 가능 |\n| **TRUNCATE** | 초기화 | 세그먼트의 첫 번째 익스텐트 시작점으로 초기화 |\n| **SHRINK SPACE** | 하향 | 데이터 재배치 후 명시적으로 하향 |\n\n### HWM 아래 빈 블록의 재사용\n\nDELETE로 빈 블록이 된 HWM 아래의 블록은 향후 INSERT 시 재사용됩니다. ASSM에서는 비트맵이 블록의 여유 공간 상태를 추적하므로, 새로운 INSERT가 발생하면 HWM 아래의 여유 공간이 있는 블록에 먼저 삽입을 시도합니다.\n\n### MSSM vs ASSM에서의 HWM 관리\n\n| 항목 | MSSM (Manual) | ASSM (Automatic) |\n|---|---|---|\n| **여유 공간 관리** | Freelist 사용 | 비트맵 블록 사용 |\n| **HWM 유형** | 단일 HWM | Low HWM + High HWM |\n| **PCTFREE/PCTUSED** | 둘 다 사용 | PCTFREE만 사용 |\n| **동시성** | Freelist 경합 가능 | 비트맵 기반 높은 동시성 |\n| **SHRINK SPACE 지원** | 미지원 | 지원 |\n\n### 관련 초기화 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **DB_BLOCK_SIZE** | 데이터 블록 크기. HWM 단위와 직접 관련 | 8192 (8KB) |\n| **DEFERRED_SEGMENT_CREATION** | 테이블 생성 시 세그먼트 생성을 첫 INSERT까지 지연 | TRUE |",
+          "key_points": [
+            "HWM은 세그먼트 헤더 블록에 기록되며, DELETE 문으로는 절대 자동 하향되지 않음",
+            "ASSM 환경에서는 Low HWM(모든 블록 포맷 완료)과 High HWM(포맷된 최고 블록) 두 가지를 구분하여 관리",
+            "Full Table Scan은 High HWM까지의 모든 블록을 읽으므로, 대량 DELETE 후 HWM 미하향 시 불필요한 I/O 발생",
+            "Direct-Path Insert(INSERT /*+ APPEND */)는 항상 HWM 위에 기록하므로, 기존 빈 블록을 재사용하지 않고 HWM을 상향",
+            "TRUNCATE는 HWM을 세그먼트 시작점으로 초기화하며 DELETE보다 훨씬 빠르지만 DDL이므로 ROLLBACK 불가",
+            "SHRINK SPACE는 데이터 재배치 후 HWM을 하향하는 유일한 온라인 방법 (ROW MOVEMENT ENABLE 전제)",
+            "ASSM에서만 SHRINK SPACE가 지원되며, MSSM(Freelist 기반) 환경에서는 사용 불가"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "세그먼트 축소 (Segment Shrink)",
+      "content": "세그먼트 축소(Segment Shrink)는 ALTER TABLE ... SHRINK SPACE 명령으로 세그먼트 내의 데이터를 재배치하여 빈 공간을 통합하고 HWM을 하향시키는 **온라인 공간 회수 기법**입니다. 이 작업은 DML이 동시에 수행되는 중에도 실행할 수 있으며, 인덱스가 자동으로 유지관리됩니다.\n\n## SHRINK SPACE 변형 비교\n\n| 명령 | 데이터 재배치 | HWM 하향 | 인덱스 유지 | 사용 시나리오 |\n|---|---|---|---|---|\n| **SHRINK SPACE** | 예 | 예 | 자동 유지 | 일반적인 공간 회수 |\n| **SHRINK SPACE COMPACT** | 예 | 아니오 | 자동 유지 | 재배치만 수행, HWM 하향은 별도 시점 |\n| **SHRINK SPACE CASCADE** | 예 | 예 | 자동 유지 + 종속 인덱스도 SHRINK | 테이블과 인덱스 동시 축소 |\n\n## SHRINK SPACE 동작 원리\n\n```\n[단계 1: 데이터 재배치 (Compaction Phase)]\n- 세그먼트 끝쪽(HWM 부근)의 행 데이터를 세그먼트 앞쪽 빈 블록으로 이동\n- 행 이동 시 ROWID가 변경됨 → ROW MOVEMENT가 ENABLE이어야 함\n- 인덱스의 ROWID 참조가 자동으로 업데이트됨\n- 이 단계에서 DML 동시 수행 가능 (온라인)\n\n           이동 전                        이동 후\n|■□■□□■□□|■■□□□□□□|    →    |■■■■□□□□|□□□□□□□□|\n  블록 내 산재된 데이터           앞쪽으로 압축\n\n[단계 2: HWM 하향 (HWM Adjustment Phase)]\n- 빈 블록이 된 세그먼트 끝 부분의 HWM을 하향\n- 이 단계에서 짧은 순간 테이블 레벨 잠금(Exclusive Lock) 획득\n- HWM 하향 후 빈 익스텐트가 데이터파일에 반환\n\n|■■■■□□□□|□□□□□□□□|    →    |■■■■□□□□|\n      HWM ↑ (이전)                 HWM ↑ (하향됨)\n```\n\n## SHRINK SPACE COMPACT의 활용\n\nSHRINK SPACE COMPACT는 **데이터 재배치만 수행**하고 HWM 하향을 수행하지 않습니다. 재배치 단계는 오래 걸릴 수 있으나 DML 동시성에 영향이 적고, HWM 하향 단계는 짧지만 Exclusive Lock이 필요합니다. 따라서 **업무 시간에 COMPACT를 수행**하고, **유지보수 윈도우에서 SHRINK SPACE**로 HWM을 하향시키는 2단계 전략이 실무에서 활용됩니다.",
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04"
+      ],
+      "subsections": [
+        {
+          "title": "SHRINK SPACE 전제조건 및 제약사항 (Prerequisites and Restrictions)",
+          "content": "SHRINK SPACE는 강력한 온라인 공간 회수 기능이지만, 몇 가지 전제조건과 제약사항이 있습니다.\n\n### 전제조건\n\n| 전제조건 | 설명 |\n|---|---|\n| **ROW MOVEMENT ENABLE** | 테이블에 행 이동(Row Movement)이 활성화되어 있어야 함. SHRINK는 행을 재배치하며 ROWID가 변경되므로 필수 |\n| **ASSM 테이블스페이스** | Automatic Segment Space Management를 사용하는 테이블스페이스에 있어야 함. MSSM(Manual) 환경에서는 불가 |\n| **세그먼트 유형** | 힙 구조(Heap-Organized) 테이블, LOB 세그먼트, IOT(Index-Organized Table), Materialized View 등 지원 |\n\n### 제약사항\n\n| 제약사항 | 설명 |\n|---|---|\n| **Function-Based Index** | 함수 기반 인덱스가 있는 테이블은 SHRINK 불가 (Oracle 12c 이전) → Oracle 12c 이후 지원 |\n| **ROWID 기반 Materialized View** | ROWID 기반 MV의 마스터 테이블은 SHRINK 불가 |\n| **Compressed Table** | 이미 압축된 테이블은 SHRINK SPACE 불가 |\n| **클러스터 테이블** | 클러스터에 포함된 테이블은 불가 |\n| **LONG 타입 열** | LONG 또는 LONG RAW 열이 있는 테이블은 불가 |\n| **SecureFile LOB** | SecureFile LOB은 SHRINK SPACE 지원, BasicFile LOB은 제한적 |\n\n### ROW MOVEMENT의 의미와 영향\n\nROW MOVEMENT를 ENABLE하면 Oracle이 행의 물리적 위치(ROWID)를 변경할 수 있게 됩니다.\n\n| 항목 | 설명 |\n|---|---|\n| **정의** | 행의 ROWID가 변경되는 것을 허용하는 테이블 속성 |\n| **사용처** | SHRINK SPACE, 파티션 테이블의 UPDATE 시 행 이동, Flashback Table |\n| **영향** | ROWID를 직접 참조하는 애플리케이션에 영향 가능 |\n| **트리거** | AFTER ROW 트리거에서 :OLD.ROWID ≠ :NEW.ROWID가 될 수 있음 |\n| **Flashback** | ROW MOVEMENT 활성화 시 Flashback Table도 사용 가능 |",
+          "key_points": [
+            "SHRINK SPACE 수행 전 반드시 ALTER TABLE ... ENABLE ROW MOVEMENT를 실행하여 행 이동을 허용해야 함",
+            "ASSM(Automatic Segment Space Management) 테이블스페이스에서만 SHRINK SPACE 지원, MSSM에서는 사용 불가",
+            "이미 압축(Compressed)된 테이블, LONG 타입 열이 있는 테이블, 클러스터 테이블은 SHRINK 불가",
+            "SHRINK SPACE는 행의 ROWID를 변경하므로, ROWID를 직접 하드코딩한 애플리케이션이 있으면 주의 필요",
+            "SHRINK SPACE COMPACT는 데이터 재배치만 수행(DML 영향 최소), 이후 SHRINK SPACE로 HWM만 하향하는 2단계 전략 권장",
+            "SHRINK SPACE CASCADE는 테이블뿐 아니라 종속 인덱스, LOB 세그먼트까지 함께 축소"
+          ]
+        },
+        {
+          "title": "ALTER TABLE MOVE와의 비교 (Comparison with ALTER TABLE MOVE)",
+          "content": "세그먼트 축소의 대안으로 ALTER TABLE MOVE가 있습니다. 이 명령은 테이블 데이터를 새로운 세그먼트에 재구성(reorganize)하여 공간을 회수합니다. Oracle 12c Release 2부터는 **Online Table Move**가 지원되어 DML 동시 수행이 가능합니다.\n\n### SHRINK SPACE vs ALTER TABLE MOVE 비교\n\n| 항목 | SHRINK SPACE | ALTER TABLE MOVE |\n|---|---|---|\n| **동작 방식** | 기존 세그먼트 내 데이터 재배치 | 새 세그먼트에 데이터 복사 후 기존 세그먼트 삭제 |\n| **HWM 관리** | 기존 세그먼트의 HWM 하향 | 새 세그먼트에서 최적 HWM 설정 |\n| **임시 공간** | 추가 공간 불필요 | 새 세그먼트를 위한 추가 공간 필요 |\n| **인덱스 영향** | 자동 유지관리 (유효 상태 유지) | 인덱스 UNUSABLE → REBUILD 필요 (Online Move 시 자동 유지) |\n| **온라인 수행** | 예 (기본) | 예 (ONLINE 키워드 사용, 12c R2+) |\n| **ROW MOVEMENT** | ENABLE 필요 | 불필요 |\n| **압축 변경** | 불가 | MOVE 시 압축 옵션 변경 가능 |\n| **테이블스페이스 변경** | 불가 | MOVE 시 다른 테이블스페이스로 이동 가능 |\n| **MSSM 환경** | 미지원 | 지원 |\n\n### ALTER TABLE MOVE 구문\n\n```sql\n-- 기본 MOVE (오프라인, 인덱스 UNUSABLE)\nALTER TABLE hr.employees MOVE;\n\n-- Online MOVE (DML 동시 수행 가능, 인덱스 자동 유지, 12c R2+)\nALTER TABLE hr.employees MOVE ONLINE;\n\n-- 다른 테이블스페이스로 이동 + 압축\nALTER TABLE hr.employees MOVE TABLESPACE new_ts\n  ROW STORE COMPRESS ADVANCED;\n\n-- 파티션 단위 이동\nALTER TABLE sales MOVE PARTITION sales_2025 ONLINE;\n```\n\n### 선택 가이드\n\n| 상황 | 권장 기법 |\n|---|---|\n| 소규모 공간 회수, DML 중단 불가 | SHRINK SPACE |\n| 대규모 재구성, 테이블스페이스 변경 필요 | ALTER TABLE MOVE ONLINE |\n| 압축 방식 변경이 필요 | ALTER TABLE MOVE ... COMPRESS |\n| MSSM 환경 | ALTER TABLE MOVE (SHRINK 불가) |\n| 추가 디스크 공간 부족 | SHRINK SPACE (추가 공간 불필요) |",
+          "key_points": [
+            "ALTER TABLE MOVE는 새 세그먼트를 생성하므로 추가 디스크 공간이 필요하지만, SHRINK SPACE는 기존 세그먼트 내에서 동작하여 추가 공간 불필요",
+            "ALTER TABLE MOVE(비Online)는 인덱스를 UNUSABLE로 만들므로 반드시 REBUILD 필요, Online MOVE는 인덱스 자동 유지",
+            "ALTER TABLE MOVE는 테이블스페이스 변경, 압축 옵션 변경이 동시에 가능하여 대규모 재구성에 적합",
+            "Oracle 12c R2부터 ALTER TABLE MOVE ONLINE이 지원되어 DML 동시 수행 가능",
+            "MSSM 환경에서는 SHRINK SPACE가 불가하므로 ALTER TABLE MOVE가 유일한 대안"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "행 이동과 행 체이닝 (Row Migration and Row Chaining)",
+      "content": "행 이동(Row Migration, 行移行)과 행 체이닝(Row Chaining, 行連鎖)은 Oracle 블록 내에서 행 데이터가 효율적으로 저장되지 못하는 두 가지 현상입니다. 두 현상 모두 단일 행 접근 시 추가적인 I/O를 발생시켜 성능을 저하시킵니다.\n\n## Row Migration vs Row Chaining 비교\n\n| 항목 | Row Migration (行移行) | Row Chaining (行連鎖) |\n|---|---|---|\n| **정의** | UPDATE로 행 크기가 증가하여 원래 블록에 들어가지 않아 **전체 행**이 다른 블록으로 이동 | 행의 전체 크기가 블록 크기보다 커서 **여러 블록에 걸쳐** 저장 |\n| **원인** | PCTFREE 부족 + UPDATE로 행 크기 증가 | 행 크기 > 블록 가용 크기 (많은 열 또는 큰 열) |\n| **원래 블록** | 새 위치를 가리키는 포인터(Row Piece Pointer)만 남음 | 첫 번째 행 조각(Row Piece)이 저장됨 |\n| **해결 방법** | PCTFREE 증가, SHRINK SPACE, ALTER TABLE MOVE | 더 큰 블록 크기 사용, 테이블 재설계 |\n| **예방 가능** | 예 (PCTFREE 적절 설정) | 구조적 원인이므로 예방 어려움 |\n| **성능 영향** | 인덱스를 통한 접근 시 추가 I/O (포인터 추적) | 항상 다중 블록 I/O 필요 |\n\n## Row Migration 발생 메커니즘\n\n```\n[초기 상태: PCTFREE = 10%]\n블록 A: |■■■■■■■■■□| (90% 사용, 10% 여유 = PCTFREE)\n              ↑ 행 R1 (100 bytes)\n\n[UPDATE로 행 R1 크기 증가: 100 → 300 bytes]\n블록 A: |포인터→B |■■■■■□□| (원래 블록에 포인터만 남음)\n블록 B: |■■■■■■■■□□| (행 R1 전체가 이동됨, 300 bytes)\n\n[인덱스 접근 시]\nIndex → 블록 A (포인터 발견) → 블록 B (실제 데이터) = 2회 I/O\n```\n\n## Row Chaining 발생 메커니즘\n\n```\n[행 크기 > 블록 가용 크기]\n행 R2: 15,000 bytes (블록 가용 크기: 8,000 bytes)\n\n블록 C: |Row Piece 1 (8,000 bytes) → 블록 D|\n블록 D: |Row Piece 2 (7,000 bytes)          |\n\n[행 접근 시]\n항상 블록 C + 블록 D를 모두 읽어야 함 = 2회 이상 I/O\n```",
+      "sqlExamplesIds": [
+        "sql05",
+        "sql06"
+      ],
+      "subsections": [
+        {
+          "title": "Row Migration/Chaining 탐지 방법 (Detection Methods)",
+          "content": "Row Migration과 Row Chaining은 성능 문제의 원인이 될 수 있으므로, 정기적으로 모니터링하고 탐지하는 것이 중요합니다.\n\n### V$SYSSTAT을 이용한 탐지\n\nV$SYSSTAT의 'table fetch continued row' 통계는 행 접근 시 다른 블록으로의 추가 접근(continued fetch)이 발생한 횟수를 나타냅니다. 이 값이 지속적으로 증가하면 Migration 또는 Chaining이 심각한 상태입니다.\n\n### ANALYZE TABLE을 이용한 탐지\n\nANALYZE TABLE ... LIST CHAINED ROWS 명령은 Migration 또는 Chaining이 발생한 행의 ROWID를 CHAINED_ROWS 테이블에 기록합니다.\n\n```sql\n-- CHAINED_ROWS 테이블 생성 (최초 1회)\n@$ORACLE_HOME/rdbms/admin/utlchain.sql\n\n-- Chained/Migrated 행 탐지\nANALYZE TABLE hr.employees LIST CHAINED ROWS INTO CHAINED_ROWS;\n\n-- 결과 확인\nSELECT COUNT(*) FROM CHAINED_ROWS WHERE TABLE_NAME = 'EMPLOYEES';\n```\n\n### DBA_TABLES의 CHAIN_CNT 열\n\nDBMS_STATS.GATHER_TABLE_STATS 또는 ANALYZE TABLE 실행 후, DBA_TABLES의 CHAIN_CNT 열에서 Chained/Migrated 행 수를 확인할 수 있습니다.\n\n### 탐지 방법 비교\n\n| 방법 | 범위 | 정보 수준 | 부하 |\n|---|---|---|---|\n| **V$SYSSTAT** | 인스턴스 전체 | 누적 카운터 (총 횟수) | 없음 (실시간 조회) |\n| **ANALYZE TABLE LIST CHAINED ROWS** | 특정 테이블 | 개별 행 ROWID | 높음 (Full Scan 필요) |\n| **DBA_TABLES.CHAIN_CNT** | 특정 테이블 | 총 행 수 | 통계 수집 시 (중간) |\n| **DBMS_SPACE.SPACE_USAGE** | 특정 세그먼트 | 블록 상태별 분류 | 낮음 |",
+          "key_points": [
+            "V$SYSSTAT의 'table fetch continued row' 통계로 인스턴스 전체의 Migration/Chaining 발생 빈도를 실시간 모니터링 가능",
+            "ANALYZE TABLE ... LIST CHAINED ROWS는 Migration/Chaining된 개별 행의 ROWID를 CHAINED_ROWS 테이블에 기록",
+            "CHAINED_ROWS 테이블은 $ORACLE_HOME/rdbms/admin/utlchain.sql 스크립트로 사전 생성 필요",
+            "DBA_TABLES.CHAIN_CNT는 통계 수집(DBMS_STATS) 후 해당 테이블의 Chained/Migrated 행 총 수를 제공",
+            "Row Migration은 SHRINK SPACE나 ALTER TABLE MOVE로 해결 가능하지만, Row Chaining은 블록 크기 변경이나 테이블 재설계가 필요"
+          ]
+        },
+        {
+          "title": "PCTFREE와 Row Migration의 관계 (PCTFREE and Row Migration)",
+          "content": "PCTFREE는 Oracle 데이터 블록에서 향후 UPDATE를 위해 예약하는 여유 공간의 비율(%)입니다. PCTFREE 설정이 행 크기 증가 패턴에 비해 너무 낮으면 Row Migration이 빈번하게 발생합니다.\n\n### PCTFREE 동작 원리\n\n| 단계 | 설명 |\n|---|---|\n| **INSERT 단계** | 블록 사용률이 (100 - PCTFREE)%에 도달하면 해당 블록은 INSERT 대상에서 제외 |\n| **UPDATE 단계** | PCTFREE 영역을 포함한 블록 전체 공간을 UPDATE에 사용 |\n| **Migration 발생** | UPDATE 후 행 크기가 블록의 남은 공간(PCTFREE 포함)보다 크면 Migration 발생 |\n\n```\n[PCTFREE = 10% 예시]\n블록 크기: 8KB, PCTFREE: 10% (800 bytes)\n\nINSERT 완료 후:\n|■■■■■■■■■□| (90% 데이터, 10% PCTFREE 예약)\n\nUPDATE 시 여유 공간 = PCTFREE(800 bytes) + 행 원래 크기\n→ 이 공간 초과 시 Migration 발생\n```\n\n### PCTFREE 설정 가이드\n\n| 상황 | 권장 PCTFREE | 이유 |\n|---|---|---|\n| **UPDATE가 거의 없는 테이블** | 0~5% | 공간 절약 (INSERT Only) |\n| **일반적인 OLTP 테이블** | 10% (기본값) | 적절한 균형 |\n| **UPDATE로 행 크기가 자주 증가하는 테이블** | 20~40% | Migration 방지 |\n| **VARCHAR2 열이 많고 초기값이 NULL인 경우** | 20~30% | 향후 UPDATE로 크기 증가 예상 |\n\n### PCTUSED (MSSM 환경 전용)\n\nPCTUSED는 MSSM(Manual Segment Space Management) 환경에서만 사용되며, 블록 사용률이 PCTUSED% 이하로 내려가면 다시 INSERT 대상(Freelist)에 등록됩니다. ASSM 환경에서는 비트맵이 자동으로 관리하므로 PCTUSED가 무시됩니다.\n\n| 파라미터 | MSSM | ASSM |\n|---|---|---|\n| **PCTFREE** | 사용 | 사용 |\n| **PCTUSED** | 사용 | 무시 |",
+          "key_points": [
+            "PCTFREE는 블록 내 UPDATE를 위한 예약 공간 비율이며, 기본값은 10%",
+            "INSERT는 블록 사용률이 (100 - PCTFREE)%에 도달하면 해당 블록을 건너뛰고, PCTFREE 영역은 UPDATE 전용",
+            "PCTFREE가 너무 낮으면 UPDATE 시 Row Migration 빈번 발생, 너무 높으면 블록당 저장 행 수 감소로 공간 낭비",
+            "UPDATE가 거의 없는 INSERT Only 테이블은 PCTFREE를 0~5%로 낮춰 공간 활용도를 극대화할 수 있음",
+            "PCTUSED는 MSSM 환경에서만 유효하며, ASSM 환경에서는 비트맵 기반으로 자동 관리되므로 무시됨",
+            "Row Migration 해결을 위해 PCTFREE 증가 후 ALTER TABLE MOVE 또는 SHRINK SPACE로 기존 Migration 정리 필요"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "데이터 압축 (Data Compression)",
+      "content": "Oracle Database는 테이블 데이터를 압축하여 저장 공간을 절약하고, I/O를 줄여 성능을 향상시키는 다양한 압축 기법을 제공합니다. 압축은 동일 블록 내 중복 값을 제거하는 원리로 동작하며, 압축 레벨에 따라 적용 가능한 DML 유형과 필요 라이선스가 달라집니다.\n\n## 압축 유형 비교\n\n| 압축 유형 | 키워드 | 적용 DML | 압축률 | 라이선스 | CPU 오버헤드 |\n|---|---|---|---|---|---|\n| **Basic Compression** | ROW STORE COMPRESS BASIC | Direct-Path Insert만 | 2~3x | Enterprise Edition 기본 포함 | 낮음 |\n| **Advanced Row Compression** | ROW STORE COMPRESS ADVANCED | 모든 DML (INSERT, UPDATE, DELETE) | 2~4x | Advanced Compression Option | 중간 |\n| **HCC Query Low** | COLUMN STORE COMPRESS FOR QUERY LOW | Direct-Path Insert만 | 6~10x | Exadata/ZFS Storage | 높음 (조회 시 해제) |\n| **HCC Query High** | COLUMN STORE COMPRESS FOR QUERY HIGH | Direct-Path Insert만 | 8~15x | Exadata/ZFS Storage | 높음 |\n| **HCC Archive Low** | COLUMN STORE COMPRESS FOR ARCHIVE LOW | Direct-Path Insert만 | 10~20x | Exadata/ZFS Storage | 매우 높음 |\n| **HCC Archive High** | COLUMN STORE COMPRESS FOR ARCHIVE HIGH | Direct-Path Insert만 | 15~50x | Exadata/ZFS Storage | 매우 높음 |\n\n## 압축 원리 (블록 레벨 중복 제거)\n\n```\n[비압축 블록]\nRow 1: SALES, TOKYO, 2025-01-01, 1000\nRow 2: SALES, TOKYO, 2025-01-02, 2000\nRow 3: SALES, OSAKA, 2025-01-01, 1500\nRow 4: SALES, TOKYO, 2025-01-03, 3000\n\n[ROW STORE COMPRESS 후]\nSymbol Table: {1:SALES, 2:TOKYO, 3:OSAKA, 4:2025-01-01}\nRow 1: 1, 2, 4, 1000\nRow 2: 1, 2, 2025-01-02, 2000\nRow 3: 1, 3, 4, 1500\nRow 4: 1, 2, 2025-01-03, 3000\n→ 중복 값이 심볼 테이블 참조로 대체되어 공간 절약\n```\n\n## HCC (Hybrid Columnar Compression)\n\nHCC는 행 기반이 아닌 **열 기반(Columnar)** 압축으로, Compression Unit(CU)이라는 단위로 여러 블록을 묶어 열별로 압축합니다. 동일 열의 데이터가 모여 있으므로 중복 제거 효과가 극대화됩니다.\n\n```\n[HCC Compression Unit 구조]\nCU (Compression Unit) = 여러 Oracle 블록\n|  Col1 압축 데이터  |  Col2 압축 데이터  |  Col3 압축 데이터  |\n|  (SALES, SALES..) |  (TOKYO, OSAKA..) |  (날짜 데이터...)   |\n→ 열별로 유사한 데이터가 모여 있어 높은 압축률 달성\n```",
+      "sqlExamplesIds": [
+        "sql07",
+        "sql08"
+      ],
+      "subsections": [
+        {
+          "title": "Basic Compression (ROW STORE COMPRESS BASIC)",
+          "content": "Basic Compression은 Oracle Enterprise Edition에 기본 포함된 압축 기능으로, **Direct-Path Insert 작업에서만** 데이터를 압축합니다. 일반 INSERT, UPDATE로는 압축되지 않으며, 기존 비압축 데이터를 압축하려면 ALTER TABLE MOVE COMPRESS를 수행해야 합니다.\n\n### Direct-Path Insert 작업 유형\n\nBasic Compression이 적용되는 Direct-Path Insert 작업은 다음과 같습니다:\n\n| 작업 | 설명 |\n|---|---|\n| **INSERT /*+ APPEND */ ... SELECT** | APPEND 힌트를 사용한 INSERT-SELECT |\n| **CREATE TABLE AS SELECT (CTAS)** | 테이블 생성과 동시에 데이터 삽입 |\n| **SQL*Loader Direct Path** | sqlldr에서 DIRECT=TRUE 옵션 |\n| **ALTER TABLE MOVE COMPRESS** | 테이블 이동 시 압축 적용 |\n| **PDML (Parallel DML)** | 병렬 INSERT 작업 |\n\n### Basic Compression의 제약사항\n\n| 제약사항 | 설명 |\n|---|---|\n| **일반 INSERT** | 압축 적용 안 됨 (비압축 상태로 저장) |\n| **UPDATE** | 업데이트된 행은 비압축 상태로 저장됨 |\n| **혼합 상태** | 동일 테이블 내 압축된 블록과 비압축 블록이 공존 가능 |\n| **OLTP 부적합** | 일반 DML이 많은 OLTP 환경에서는 효과 제한적 |\n\n### 관련 딕셔너리 뷰\n\n| 뷰/열 | 설명 |\n|---|---|\n| **DBA_TABLES.COMPRESSION** | 'ENABLED' 또는 'DISABLED' |\n| **DBA_TABLES.COMPRESS_FOR** | 'BASIC', 'ADVANCED', 'QUERY LOW/HIGH', 'ARCHIVE LOW/HIGH' 등 |\n| **DBA_TAB_PARTITIONS.COMPRESSION** | 파티션 레벨 압축 상태 |\n| **DBMS_COMPRESSION.GET_COMPRESSION_RATIO** | 압축률 사전 추정 |",
+          "key_points": [
+            "Basic Compression(ROW STORE COMPRESS BASIC)은 Enterprise Edition에 포함되며 별도 라이선스 불필요",
+            "Direct-Path Insert(INSERT /*+ APPEND */, CTAS, SQL*Loader Direct Path)에서만 압축이 적용됨",
+            "일반 INSERT/UPDATE로 변경된 행은 비압축 상태로 저장되어 동일 테이블 내 압축/비압축 블록이 혼재 가능",
+            "기존 비압축 데이터를 압축하려면 ALTER TABLE MOVE ROW STORE COMPRESS BASIC 수행 필요",
+            "DBA_TABLES의 COMPRESSION과 COMPRESS_FOR 열로 테이블의 압축 상태 및 유형 확인 가능",
+            "DBMS_COMPRESSION.GET_COMPRESSION_RATIO로 압축 적용 전 예상 압축률을 사전에 추정 가능"
+          ]
+        },
+        {
+          "title": "Advanced Row Compression 및 HCC (Advanced Row Compression and HCC)",
+          "content": "Advanced Row Compression은 **모든 DML(INSERT, UPDATE, DELETE)** 작업에서 데이터를 압축 상태로 유지하는 기능으로, OLTP 환경에 적합합니다. HCC(Hybrid Columnar Compression)는 Exadata 등 특정 스토리지에서만 사용 가능한 열 기반 고압축 기법입니다.\n\n### Advanced Row Compression 동작 원리\n\n| 항목 | 설명 |\n|---|---|\n| **압축 시점** | 블록이 일정 수준 채워지면 백그라운드에서 자동 압축(Batch Compression) |\n| **INSERT** | 초기에는 비압축으로 삽입 → 블록이 채워지면 블록 단위 압축 수행 |\n| **UPDATE** | 업데이트된 행도 압축 유지 (필요 시 블록 재압축) |\n| **읽기 성능** | CPU 오버헤드 발생하나, I/O 감소 효과가 더 큰 경우 순이익 |\n| **라이선스** | Advanced Compression Option (별도 구매) |\n\n### HCC 상세\n\n| 항목 | 설명 |\n|---|---|\n| **Compression Unit (CU)** | 여러 Oracle 블록을 묶어 하나의 압축 단위로 관리 (기본 32KB) |\n| **열 기반 압축** | CU 내에서 열별로 데이터를 모아 압축하여 동일 열의 중복 데이터 제거 극대화 |\n| **지원 스토리지** | Oracle Exadata, ZFS Storage Appliance, Pillar Axiom 등 |\n| **DML 제약** | 일반 DML 수행 시 해당 CU가 비압축 상태로 전환될 수 있음 |\n| **재압축** | ALTER TABLE MOVE COMPRESS로 재압축 필요 |\n\n### 압축 유형별 활용 시나리오\n\n| 시나리오 | 권장 압축 유형 |\n|---|---|\n| OLTP (빈번한 DML) | Advanced Row Compression |\n| 데이터 웨어하우스 (대량 적재) | Basic Compression 또는 HCC Query |\n| 아카이브/히스토리 데이터 | HCC Archive Low/High |\n| Exadata 환경 조회 최적화 | HCC Query Low/High |\n| 비용 절감만 필요 (Direct-Path만) | Basic Compression |",
+          "key_points": [
+            "Advanced Row Compression(ROW STORE COMPRESS ADVANCED)은 모든 DML에서 압축을 유지하며 Advanced Compression Option 라이선스 필요",
+            "Advanced Compression은 블록이 일정 수준 채워지면 배치(Batch) 방식으로 자동 압축을 수행하여 DML 성능 영향 최소화",
+            "HCC(Hybrid Columnar Compression)는 Compression Unit(CU) 단위로 열 기반 압축을 수행하여 10~50배 압축률 달성 가능",
+            "HCC는 Oracle Exadata, ZFS Storage Appliance 등 특정 스토리지에서만 지원",
+            "HCC 환경에서 일반 DML이 발생하면 해당 CU가 비압축 상태로 전환될 수 있으므로, 주기적인 ALTER TABLE MOVE로 재압축 필요",
+            "압축 유형 선택은 DML 패턴(OLTP vs DW), 스토리지 환경(Exadata 여부), 라이선스 보유 여부에 따라 결정"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "Direct-Path Insert",
+      "content": "Direct-Path Insert는 데이터를 SGA의 Buffer Cache를 경유하지 않고 **HWM 위의 새로운 블록에 직접 기록**하는 고속 데이터 적재 방식입니다. INSERT /*+ APPEND */ 힌트로 사용하며, Redo 생성을 최소화하는 NOLOGGING 옵션과 결합하면 대량 데이터 적재 성능을 극대화할 수 있습니다.\n\n## 일반 INSERT vs Direct-Path Insert 비교\n\n| 항목 | 일반 INSERT (Conventional) | Direct-Path Insert |\n|---|---|---|\n| **데이터 경로** | SGA Buffer Cache → 데이터파일 | 직접 데이터파일 (Buffer Cache 우회) |\n| **기록 위치** | HWM 이하 빈 블록 재사용 | 항상 HWM 위 새로운 블록 |\n| **HWM 변화** | 빈 블록 없으면 상향 | 항상 상향 |\n| **Redo 생성** | 항상 생성 | LOGGING 시 생성, NOLOGGING 시 최소화 |\n| **Undo 생성** | 항상 생성 | 최소 (Extent Map 수준) |\n| **Buffer Cache 오염** | 많은 블록이 캐시에 올라감 | 캐시 오염 없음 |\n| **속도** | 상대적 느림 | 매우 빠름 (대량 적재) |\n| **동시 DML** | 가능 | 테이블 레벨 Exclusive Lock (TM Lock) |\n| **트리거** | 실행됨 | 실행됨 (12c 이후) |\n\n## Direct-Path Insert 동작 흐름\n\n```\n[일반 INSERT]\nSQL → Server Process → SGA Buffer Cache → DBWR → 데이터파일\n                         (HWM 이하 빈 블록)\n\n[Direct-Path Insert]\nSQL → Server Process → 데이터파일 (HWM 위 직접 기록)\n                         (Buffer Cache 우회)\n```",
+      "sqlExamplesIds": [
+        "sql09",
+        "sql10"
+      ],
+      "subsections": [
+        {
+          "title": "Direct-Path Insert 내부 동작 및 제약사항 (Internal Mechanism and Restrictions)",
+          "content": "Direct-Path Insert는 성능상 큰 이점이 있지만, 내부 동작 특성으로 인한 여러 제약사항을 이해해야 합니다.\n\n### 내부 동작 상세\n\n| 단계 | 설명 |\n|---|---|\n| **1. TM Lock 획득** | 테이블에 Exclusive DML Lock(TM Lock, Mode 6) 획득. 다른 DML 차단 |\n| **2. HWM 확인** | 현재 HWM 위치 확인 |\n| **3. 새 블록 할당** | HWM 위에 새로운 익스텐트/블록 할당 |\n| **4. 직접 기록** | 데이터를 Buffer Cache를 거치지 않고 직접 데이터파일에 기록 |\n| **5. HWM 상향** | 기록 완료 후 HWM 상향 |\n| **6. COMMIT 전 제약** | COMMIT 전까지 해당 테이블에 SELECT 불가 (ORA-12838) |\n\n### NOLOGGING 옵션\n\nDirect-Path Insert와 NOLOGGING 옵션을 결합하면 Redo Log 생성을 크게 줄일 수 있습니다.\n\n| 설정 | Redo 생성 | Data Guard 영향 | 복구 가능 |\n|---|---|---|---|\n| **LOGGING (기본)** | 전체 Redo 생성 | Standby에 전파됨 | 완전 복구 가능 |\n| **NOLOGGING** | 최소 Redo (Extent Invalidation만) | Standby에 데이터 미전파 | 불완전 복구 (데이터 손실) |\n| **FORCE LOGGING (DB 레벨)** | NOLOGGING 무시, 강제 Redo 생성 | Standby 보호 | 완전 복구 가능 |\n\n### 제약사항\n\n| 제약사항 | 설명 |\n|---|---|\n| **테이블 레벨 잠금** | Direct-Path Insert 중 다른 세션의 DML 차단 (Exclusive TM Lock) |\n| **COMMIT 전 SELECT 불가** | 동일 세션에서 COMMIT 전 해당 테이블 SELECT 시 ORA-12838 오류 |\n| **빈 블록 미재사용** | HWM 이하 빈 블록을 재사용하지 않아 세그먼트 크기 증가 가능 |\n| **클러스터 테이블 불가** | 클러스터에 포함된 테이블에는 사용 불가 |\n| **참조 무결성 제약** | Foreign Key가 있는 테이블에서는 Direct-Path가 무시될 수 있음 |\n| **IOT (Index-Organized Table)** | IOT에서는 Direct-Path Insert 지원되지 않음 |\n\n### 관련 파라미터\n\n| 파라미터 | 설명 | 기본값 |\n|---|---|---|\n| **FORCE_LOGGING** | 데이터베이스/테이블스페이스 레벨에서 NOLOGGING 무시 강제 | FALSE |\n| **PARALLEL_FORCE_LOCAL** | 병렬 DML의 로컬 실행 강제 | FALSE |",
+          "key_points": [
+            "Direct-Path Insert는 테이블에 Exclusive DML Lock(TM Lock Mode 6)을 획득하므로, 수행 중 다른 세션의 DML이 차단됨",
+            "COMMIT 전 동일 세션에서 해당 테이블을 SELECT하면 ORA-12838 오류 발생",
+            "NOLOGGING 설정 시 Redo 생성이 최소화되어 속도 향상, 단 Data Guard Standby에 데이터 미전파 및 복구 불가",
+            "FORCE LOGGING이 DB 또는 테이블스페이스 레벨에서 활성화되면 NOLOGGING이 무시되고 강제로 Redo 생성",
+            "Direct-Path Insert는 HWM 이하 빈 블록을 재사용하지 않으므로, 반복 사용 시 세그먼트 크기가 불필요하게 증가할 수 있음",
+            "Foreign Key 참조 무결성 제약이 있는 테이블에서는 Direct-Path Insert가 Conventional Insert로 자동 전환될 수 있음"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s07",
+      "title": "인덱스 UNUSABLE 상태 관리 (Index UNUSABLE State Management)",
+      "content": "인덱스를 UNUSABLE 상태로 설정하면 인덱스의 세그먼트(물리적 저장 공간)가 삭제되어 디스크 공간이 회수됩니다. UNUSABLE 인덱스는 DML 시 유지관리되지 않아 오버헤드가 제거되며, 필요 시 REBUILD로 복구할 수 있습니다.\n\n## 인덱스 상태 종류\n\n| 상태 | 설명 | 세그먼트 | DML 유지 | 쿼리 사용 |\n|---|---|---|---|---|\n| **VALID (USABLE)** | 정상 상태 | 존재 | 예 | 예 |\n| **UNUSABLE** | 사용 불가 상태, 세그먼트 삭제됨 | 삭제 | 아니오 | 불가 |\n| **INVISIBLE** | 옵티마이저에 보이지 않으나 유지관리됨 | 존재 | 예 | 기본 불가 (힌트로 가능) |\n\n## UNUSABLE로 인한 세그먼트 삭제\n\n```\n[USABLE 상태]\nIndex Segment: |■■■■■■■■| (인덱스 데이터 저장, 공간 점유)\n\n[ALTER INDEX ... UNUSABLE 실행 후]\nIndex Segment: (삭제됨, 공간 회수)\nData Dictionary: 인덱스 메타데이터만 유지 (구조 정의, 열 정보 등)\n\n[ALTER INDEX ... REBUILD 실행 후]\nIndex Segment: |■■■■■■■■| (새로 생성, 데이터 재구성)\n```\n\n## UNUSABLE 인덱스와 DML 관계\n\nUNUSABLE 상태의 인덱스가 있을 때 DML을 수행하면, SKIP_UNUSABLE_INDEXES 파라미터에 따라 동작이 달라집니다.\n\n| SKIP_UNUSABLE_INDEXES | DML 동작 | 설명 |\n|---|---|---|\n| **TRUE (기본값)** | DML 정상 수행 | UNUSABLE 인덱스를 건너뛰고 DML 실행 |\n| **FALSE** | ORA-01502 오류 | UNUSABLE 인덱스가 있으면 DML 실패 |",
+      "sqlExamplesIds": [
+        "sql11",
+        "sql12"
+      ],
+      "subsections": [
+        {
+          "title": "UNUSABLE 인덱스 관리 상세 (UNUSABLE Index Management Details)",
+          "content": "UNUSABLE 인덱스는 대량 데이터 적재 시 인덱스 유지관리 오버헤드를 제거하거나, 사용하지 않는 인덱스의 공간을 회수하는 데 활용됩니다.\n\n### UNUSABLE 인덱스 활용 시나리오\n\n| 시나리오 | 설명 |\n|---|---|\n| **대량 데이터 적재** | 적재 전 인덱스 UNUSABLE → 적재 완료 → REBUILD (적재 속도 향상) |\n| **공간 회수** | 사용하지 않는 인덱스를 UNUSABLE로 설정하여 공간 회수 (DROP 대신) |\n| **인덱스 재구성** | 단편화가 심한 인덱스를 UNUSABLE → REBUILD로 재구성 |\n| **파티션 관리** | 특정 파티션의 로컬 인덱스만 UNUSABLE → 해당 파티션만 REBUILD |\n\n### TRUNCATE TABLE과 인덱스 영향\n\nTRUNCATE TABLE은 모든 데이터를 삭제하지만, **인덱스를 UNUSABLE로 만들지 않습니다**. 인덱스의 데이터도 함께 삭제되고, 인덱스는 빈 상태로 VALID를 유지합니다.\n\n| DDL 작업 | 글로벌 인덱스 | 로컬 인덱스 |\n|---|---|---|\n| **TRUNCATE TABLE** | VALID 유지 (비어있음) | VALID 유지 (비어있음) |\n| **ALTER TABLE DROP PARTITION** | UNUSABLE (UPDATE INDEXES 미사용 시) | 해당 파티션 인덱스 삭제 |\n| **ALTER TABLE MOVE** | UNUSABLE | UNUSABLE |\n| **ALTER TABLE MOVE ONLINE** | VALID 유지 | VALID 유지 |\n\n### 파티션 인덱스에서의 UNUSABLE\n\n파티션 테이블의 인덱스는 파티션 단위로 UNUSABLE/REBUILD가 가능합니다.\n\n| 인덱스 유형 | UNUSABLE 범위 | REBUILD 범위 |\n|---|---|---|\n| **로컬 인덱스 (Local Index)** | 개별 파티션 단위 UNUSABLE 가능 | 개별 파티션 단위 REBUILD 가능 |\n| **글로벌 인덱스 (Global Index)** | 전체 인덱스만 UNUSABLE | 전체 인덱스만 REBUILD |\n| **글로벌 파티션 인덱스** | 개별 파티션 단위 UNUSABLE 가능 | 개별 파티션 단위 REBUILD 가능 |\n\n### REBUILD 옵션\n\n| 옵션 | 설명 |\n|---|---|\n| **ALTER INDEX ... REBUILD** | 기존 인덱스 데이터를 읽어 재구성 (인덱스가 UNUSABLE이면 테이블 풀 스캔) |\n| **ALTER INDEX ... REBUILD ONLINE** | 온라인 재구성 (DML 동시 수행 가능) |\n| **ALTER INDEX ... REBUILD TABLESPACE ts** | 다른 테이블스페이스에 재구성 |\n| **ALTER INDEX ... REBUILD PARALLEL n** | 병렬 재구성 |\n| **ALTER INDEX ... REBUILD NOLOGGING** | Redo 최소화 재구성 |\n\n### 관련 딕셔너리 뷰\n\n| 뷰 | 열 | 설명 |\n|---|---|---|\n| **DBA_INDEXES** | STATUS | 'VALID', 'UNUSABLE', 'N/A' (파티션 인덱스) |\n| **DBA_IND_PARTITIONS** | STATUS | 파티션 레벨 인덱스 상태 |\n| **DBA_IND_SUBPARTITIONS** | STATUS | 서브파티션 레벨 인덱스 상태 |\n| **V$OBJECT_USAGE** | USED | 인덱스 사용 여부 모니터링 |",
+          "key_points": [
+            "ALTER INDEX ... UNUSABLE은 인덱스 세그먼트를 삭제하여 디스크 공간을 즉시 회수하며, 메타데이터만 딕셔너리에 유지",
+            "SKIP_UNUSABLE_INDEXES가 TRUE(기본값)이면 UNUSABLE 인덱스가 있어도 DML이 정상 수행, FALSE이면 ORA-01502 오류",
+            "TRUNCATE TABLE은 인덱스를 UNUSABLE로 만들지 않고 빈 상태로 VALID를 유지",
+            "ALTER TABLE MOVE(비Online)는 테이블의 모든 인덱스를 UNUSABLE로 만들므로 이후 REBUILD 필수",
+            "로컬 인덱스는 파티션 단위로 UNUSABLE/REBUILD가 가능하여 대규모 파티션 테이블 관리에 유연성 제공",
+            "ALTER INDEX ... REBUILD ONLINE은 DML 동시 수행이 가능한 온라인 재구성으로, 서비스 중단 없이 인덱스 복구 가능",
+            "대량 데이터 적재 시 인덱스 UNUSABLE → 적재 → REBUILD 전략으로 적재 속도를 크게 향상 가능"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "title": "세그먼트 공간 사용 현황 분석 (Segment Space Usage Analysis)",
+      "description": "DBMS_SPACE.SPACE_USAGE를 사용하여 테이블 세그먼트의 블록 상태별 공간 사용 현황을 분석하고, 공간 낭비 수준을 파악합니다.",
+      "sqlExamplesId": "sql01",
+      "sql": "-- 세그먼트 공간 사용 현황 분석\nDECLARE\n  l_unformatted_blocks  NUMBER;\n  l_unformatted_bytes   NUMBER;\n  l_fs1_blocks          NUMBER; -- 0-25% 사용\n  l_fs1_bytes           NUMBER;\n  l_fs2_blocks          NUMBER; -- 25-50% 사용\n  l_fs2_bytes           NUMBER;\n  l_fs3_blocks          NUMBER; -- 50-75% 사용\n  l_fs3_bytes           NUMBER;\n  l_fs4_blocks          NUMBER; -- 75-100% 사용\n  l_fs4_bytes           NUMBER;\n  l_full_blocks         NUMBER; -- 100% 사용\n  l_full_bytes          NUMBER;\nBEGIN\n  DBMS_SPACE.SPACE_USAGE(\n    segment_owner      => 'HR',\n    segment_name       => 'EMPLOYEES',\n    segment_type       => 'TABLE',\n    unformatted_blocks => l_unformatted_blocks,\n    unformatted_bytes  => l_unformatted_bytes,\n    fs1_blocks         => l_fs1_blocks,\n    fs1_bytes          => l_fs1_bytes,\n    fs2_blocks         => l_fs2_blocks,\n    fs2_bytes          => l_fs2_bytes,\n    fs3_blocks         => l_fs3_blocks,\n    fs3_bytes          => l_fs3_bytes,\n    fs4_blocks         => l_fs4_blocks,\n    fs4_bytes          => l_fs4_bytes,\n    full_blocks        => l_full_blocks,\n    full_bytes         => l_full_bytes\n  );\n  DBMS_OUTPUT.PUT_LINE('Full Blocks (100%):    ' || l_full_blocks);\n  DBMS_OUTPUT.PUT_LINE('75-100% Used Blocks:   ' || l_fs4_blocks);\n  DBMS_OUTPUT.PUT_LINE('50-75% Used Blocks:    ' || l_fs3_blocks);\n  DBMS_OUTPUT.PUT_LINE('25-50% Used Blocks:    ' || l_fs2_blocks);\n  DBMS_OUTPUT.PUT_LINE('0-25% Used Blocks:     ' || l_fs1_blocks);\n  DBMS_OUTPUT.PUT_LINE('Unformatted Blocks:    ' || l_unformatted_blocks);\nEND;\n/\n\n-- 세그먼트 크기 대비 실제 데이터 비율 확인\nSELECT s.segment_name,\n       s.bytes / 1024 / 1024 AS segment_size_mb,\n       t.num_rows * t.avg_row_len / 1024 / 1024 AS estimated_data_mb,\n       ROUND((1 - (t.num_rows * t.avg_row_len) / NULLIF(s.bytes, 0)) * 100, 1) AS waste_pct\nFROM   dba_segments s\nJOIN   dba_tables t ON s.segment_name = t.table_name AND s.owner = t.owner\nWHERE  s.owner = 'HR'\n  AND  s.segment_type = 'TABLE'\nORDER BY waste_pct DESC;"
+    },
+    {
+      "title": "HWM 확인 및 DELETE vs TRUNCATE 비교 (HWM Verification and DELETE vs TRUNCATE)",
+      "description": "테이블의 HWM 위치를 확인하고, DELETE와 TRUNCATE 후의 HWM 변화를 비교합니다.",
+      "sqlExamplesId": "sql02",
+      "sql": "-- HWM 확인: DBA_SEGMENTS의 BLOCKS vs 실제 사용 블록 비교\nSELECT t.table_name,\n       t.blocks AS stats_blocks,        -- 통계 기준 블록 수 (HWM 이하)\n       t.empty_blocks,                  -- HWM 이상 빈 블록 수\n       s.blocks AS segment_blocks,      -- 세그먼트 전체 블록 수\n       t.num_rows,\n       t.avg_row_len\nFROM   dba_tables t\nJOIN   dba_segments s ON t.table_name = s.segment_name AND t.owner = s.owner\nWHERE  t.owner = 'HR' AND t.table_name = 'EMPLOYEES';\n\n-- DELETE 후 HWM 변화 확인 (HWM 미변경)\nDELETE FROM hr.test_table WHERE department_id = 10;\nCOMMIT;\n-- 통계 재수집\nEXEC DBMS_STATS.GATHER_TABLE_STATS('HR', 'TEST_TABLE');\n-- HWM 확인 → BLOCKS 값 변화 없음\nSELECT blocks, num_rows FROM dba_tables\nWHERE owner = 'HR' AND table_name = 'TEST_TABLE';\n\n-- TRUNCATE 후 HWM 변화 확인 (HWM 초기화)\nTRUNCATE TABLE hr.test_table;\n-- HWM 확인 → BLOCKS 값 크게 감소 (거의 0)\nSELECT segment_name, blocks, bytes / 1024 AS size_kb\nFROM   dba_segments\nWHERE  owner = 'HR' AND segment_name = 'TEST_TABLE';\n\n-- V$SYSSTAT에서 continued row fetch 확인\nSELECT name, value\nFROM   v$sysstat\nWHERE  name = 'table fetch continued row';"
+    },
+    {
+      "title": "SHRINK SPACE 실행 (Segment Shrink Execution)",
+      "description": "ROW MOVEMENT 활성화 후 SHRINK SPACE를 실행하여 세그먼트 공간을 회수하는 전체 절차입니다.",
+      "sqlExamplesId": "sql03",
+      "sql": "-- 1. 현재 세그먼트 크기 확인\nSELECT segment_name, bytes / 1024 / 1024 AS size_mb, blocks\nFROM   dba_segments\nWHERE  owner = 'HR' AND segment_name = 'EMPLOYEES';\n\n-- 2. ROW MOVEMENT 활성화 (SHRINK 전제조건)\nALTER TABLE hr.employees ENABLE ROW MOVEMENT;\n\n-- 3. ROW MOVEMENT 상태 확인\nSELECT table_name, row_movement\nFROM   dba_tables\nWHERE  owner = 'HR' AND table_name = 'EMPLOYEES';\n-- 결과: ROW_MOVEMENT = 'ENABLED'\n\n-- 4-A. SHRINK SPACE 실행 (데이터 재배치 + HWM 하향)\nALTER TABLE hr.employees SHRINK SPACE;\n\n-- 4-B. 또는 2단계 전략 (업무 시간 / 유지보수 시간 분리)\n-- 업무 시간: 데이터 재배치만 (DML 영향 최소)\nALTER TABLE hr.employees SHRINK SPACE COMPACT;\n-- 유지보수 시간: HWM 하향 (짧은 Exclusive Lock)\nALTER TABLE hr.employees SHRINK SPACE;\n\n-- 4-C. CASCADE 옵션 (종속 인덱스도 함께 축소)\nALTER TABLE hr.employees SHRINK SPACE CASCADE;\n\n-- 5. 축소 후 세그먼트 크기 확인\nSELECT segment_name, bytes / 1024 / 1024 AS size_mb, blocks\nFROM   dba_segments\nWHERE  owner = 'HR' AND segment_name = 'EMPLOYEES';"
+    },
+    {
+      "title": "Segment Advisor를 이용한 축소 권고 확인 (Segment Advisor Recommendations)",
+      "description": "Segment Advisor를 수동으로 실행하여 공간 낭비 세그먼트를 식별하고 축소 권고를 확인합니다.",
+      "sqlExamplesId": "sql04",
+      "sql": "-- Segment Advisor 수동 실행\nDECLARE\n  l_task_name  VARCHAR2(100) := 'SHRINK_ADVISOR_HR';\n  l_task_id    NUMBER;\n  l_object_id  NUMBER;\nBEGIN\n  -- 태스크 생성\n  DBMS_ADVISOR.CREATE_TASK(\n    advisor_name => 'Segment Advisor',\n    task_name    => l_task_name,\n    task_id      => l_task_id\n  );\n  -- 분석 대상 세그먼트 지정\n  DBMS_ADVISOR.CREATE_OBJECT(\n    task_name   => l_task_name,\n    object_type => 'TABLE',\n    attr1       => 'HR',\n    attr2       => 'EMPLOYEES',\n    attr3       => NULL,\n    attr4       => NULL,\n    attr5       => NULL,\n    object_id   => l_object_id\n  );\n  -- 태스크 실행\n  DBMS_ADVISOR.EXECUTE_TASK(task_name => l_task_name);\nEND;\n/\n\n-- 권고 결과 확인\nSELECT f.task_name, f.finding_name, f.message\nFROM   dba_advisor_findings f\nWHERE  f.task_name = 'SHRINK_ADVISOR_HR';\n\n-- 권장 액션 확인\nSELECT r.task_name, a.command, a.attr1, a.attr2, a.message\nFROM   dba_advisor_recommendations r\nJOIN   dba_advisor_actions a ON r.task_name = a.task_name\n  AND  r.rec_id = a.rec_id\nWHERE  r.task_name = 'SHRINK_ADVISOR_HR';\n\n-- Auto Segment Advisor 결과 확인 (자동 실행된 것)\nSELECT tablespace_name, segment_owner, segment_name, segment_type,\n       allocated_space / 1024 / 1024 AS alloc_mb,\n       used_space / 1024 / 1024 AS used_mb,\n       reclaimable_space / 1024 / 1024 AS reclaimable_mb,\n       recommendations\nFROM   dba_advisor_findings f\nJOIN   dba_segments s ON f.more_info LIKE '%' || s.segment_name || '%'\nWHERE  f.task_name LIKE 'AUTO_SPACE_ADVISOR%';"
+    },
+    {
+      "title": "Row Migration/Chaining 탐지 및 모니터링 (Row Migration/Chaining Detection)",
+      "description": "Row Migration과 Row Chaining을 탐지하기 위한 다양한 방법과 모니터링 쿼리입니다.",
+      "sqlExamplesId": "sql05",
+      "sql": "-- 1. V$SYSSTAT에서 continued row fetch 모니터링\nSELECT name, value\nFROM   v$sysstat\nWHERE  name = 'table fetch continued row';\n\n-- 2. CHAINED_ROWS 테이블 생성 (최초 1회)\n-- @$ORACLE_HOME/rdbms/admin/utlchain.sql\nCREATE TABLE chained_rows (\n  owner_name         VARCHAR2(128),\n  table_name         VARCHAR2(128),\n  cluster_name       VARCHAR2(128),\n  partition_name     VARCHAR2(128),\n  subpartition_name  VARCHAR2(128),\n  head_rowid         ROWID,\n  analyze_timestamp  DATE\n);\n\n-- 3. ANALYZE TABLE로 Chained/Migrated 행 탐지\nANALYZE TABLE hr.employees LIST CHAINED ROWS INTO chained_rows;\n\n-- 탐지 결과 확인\nSELECT table_name, COUNT(*) AS chained_migrated_rows\nFROM   chained_rows\nWHERE  table_name = 'EMPLOYEES'\nGROUP BY table_name;\n\n-- 4. DBA_TABLES에서 CHAIN_CNT 확인\nEXEC DBMS_STATS.GATHER_TABLE_STATS('HR', 'EMPLOYEES');\n\nSELECT table_name, num_rows, chain_cnt,\n       ROUND(chain_cnt / NULLIF(num_rows, 0) * 100, 2) AS chain_pct\nFROM   dba_tables\nWHERE  owner = 'HR' AND table_name = 'EMPLOYEES';\n\n-- 5. 전체 스키마에서 Migration/Chaining 비율이 높은 테이블 조회\nSELECT table_name, num_rows, chain_cnt,\n       ROUND(chain_cnt / NULLIF(num_rows, 0) * 100, 2) AS chain_pct\nFROM   dba_tables\nWHERE  owner = 'HR'\n  AND  chain_cnt > 0\nORDER BY chain_pct DESC;"
+    },
+    {
+      "title": "Row Migration 해결 (Resolving Row Migration)",
+      "description": "Row Migration이 발생한 테이블을 SHRINK SPACE 또는 ALTER TABLE MOVE로 정리하는 방법입니다.",
+      "sqlExamplesId": "sql06",
+      "sql": "-- 방법 1: SHRINK SPACE로 해결 (온라인, 추가 공간 불필요)\nALTER TABLE hr.employees ENABLE ROW MOVEMENT;\nALTER TABLE hr.employees SHRINK SPACE;\n\n-- 방법 2: ALTER TABLE MOVE로 해결 (테이블 재구성)\n-- 오프라인 MOVE (인덱스 REBUILD 필요)\nALTER TABLE hr.employees MOVE;\n-- 인덱스 상태 확인\nSELECT index_name, status FROM dba_indexes\nWHERE table_name = 'EMPLOYEES' AND owner = 'HR';\n-- UNUSABLE 인덱스 REBUILD\nALTER INDEX hr.emp_pk REBUILD;\nALTER INDEX hr.emp_name_idx REBUILD;\n\n-- 온라인 MOVE (인덱스 자동 유지, 12c R2+)\nALTER TABLE hr.employees MOVE ONLINE;\n\n-- 방법 3: PCTFREE 증가 후 MOVE로 향후 Migration 방지\nALTER TABLE hr.employees PCTFREE 20;\nALTER TABLE hr.employees MOVE ONLINE;\n\n-- 해결 후 Migration 상태 재확인\nTRUNCATE TABLE chained_rows;\nANALYZE TABLE hr.employees LIST CHAINED ROWS INTO chained_rows;\nSELECT COUNT(*) AS remaining_chained_rows FROM chained_rows\nWHERE table_name = 'EMPLOYEES';"
+    },
+    {
+      "title": "Basic Compression 적용 (Basic Compression Implementation)",
+      "description": "테이블에 Basic Compression을 적용하고, Direct-Path Insert로 압축된 데이터를 적재합니다.",
+      "sqlExamplesId": "sql07",
+      "sql": "-- 1. 압축 테이블 생성\nCREATE TABLE hr.employees_compressed\n  ROW STORE COMPRESS BASIC\nAS SELECT * FROM hr.employees WHERE 1=0;\n\n-- 2. Direct-Path Insert로 압축 적재\nINSERT /*+ APPEND */ INTO hr.employees_compressed\nSELECT * FROM hr.employees;\nCOMMIT;\n\n-- 3. 기존 테이블에 압축 적용 (ALTER TABLE MOVE)\nALTER TABLE hr.sales_history MOVE ROW STORE COMPRESS BASIC;\n\n-- 4. CTAS로 압축 테이블 생성\nCREATE TABLE hr.orders_archive\n  ROW STORE COMPRESS BASIC\n  TABLESPACE archive_ts\nAS SELECT * FROM hr.orders WHERE order_date < DATE '2024-01-01';\n\n-- 5. 압축 상태 확인\nSELECT table_name, compression, compress_for\nFROM   dba_tables\nWHERE  owner = 'HR'\n  AND  table_name IN ('EMPLOYEES_COMPRESSED', 'SALES_HISTORY', 'ORDERS_ARCHIVE');\n\n-- 6. 압축률 사전 추정\nDECLARE\n  l_compression_ratio  NUMBER;\n  l_compressed_blocks  NUMBER;\n  l_uncompressed_blocks NUMBER;\n  l_rows_sampled       NUMBER;\nBEGIN\n  DBMS_COMPRESSION.GET_COMPRESSION_RATIO(\n    scratchtbsname  => 'USERS',\n    ownname         => 'HR',\n    objname         => 'EMPLOYEES',\n    subobjname      => NULL,\n    comptype        => DBMS_COMPRESSION.COMP_BASIC,\n    blkcnt_cmp      => l_compressed_blocks,\n    blkcnt_uncmp    => l_uncompressed_blocks,\n    row_cmp         => l_rows_sampled,\n    row_uncmp       => l_rows_sampled,\n    cmp_ratio       => l_compression_ratio\n  );\n  DBMS_OUTPUT.PUT_LINE('Compression Ratio: ' || ROUND(l_compression_ratio, 2) || 'x');\nEND;\n/"
+    },
+    {
+      "title": "Advanced Row Compression 적용 (Advanced Row Compression)",
+      "description": "Advanced Row Compression을 적용하여 모든 DML에서 압축을 유지하는 설정 방법입니다.",
+      "sqlExamplesId": "sql08",
+      "sql": "-- 1. Advanced Compression으로 테이블 생성\nCREATE TABLE hr.transactions (\n  txn_id      NUMBER,\n  txn_date    DATE,\n  customer_id NUMBER,\n  amount      NUMBER(10,2),\n  status      VARCHAR2(20)\n)\nROW STORE COMPRESS ADVANCED\nTABLESPACE users;\n\n-- 2. 기존 테이블의 압축 방식 변경\nALTER TABLE hr.orders MOVE ONLINE ROW STORE COMPRESS ADVANCED;\n\n-- 3. 파티션 테이블에서 파티션별 압축 설정\nCREATE TABLE hr.sales (\n  sale_id    NUMBER,\n  sale_date  DATE,\n  amount     NUMBER\n)\nPARTITION BY RANGE (sale_date) (\n  PARTITION p_2024  VALUES LESS THAN (DATE '2025-01-01')\n    ROW STORE COMPRESS ADVANCED,\n  PARTITION p_2025  VALUES LESS THAN (DATE '2026-01-01')\n    ROW STORE COMPRESS ADVANCED,\n  PARTITION p_2026  VALUES LESS THAN (DATE '2027-01-01')\n    NOCOMPRESS\n);\n\n-- 4. 압축 상태 상세 확인\nSELECT table_name, partition_name, compression, compress_for\nFROM   dba_tab_partitions\nWHERE  table_owner = 'HR' AND table_name = 'SALES';\n\n-- 5. 압축 전후 크기 비교\nSELECT segment_name, partition_name,\n       bytes / 1024 / 1024 AS size_mb\nFROM   dba_segments\nWHERE  owner = 'HR' AND segment_name = 'SALES'\nORDER BY partition_name;"
+    },
+    {
+      "title": "Direct-Path Insert 실행 및 확인 (Direct-Path Insert Execution)",
+      "description": "Direct-Path Insert의 실행 방법과 HWM 변화, 세그먼트 크기 증가를 확인합니다.",
+      "sqlExamplesId": "sql09",
+      "sql": "-- 1. Direct-Path Insert (APPEND 힌트)\nINSERT /*+ APPEND */ INTO hr.target_table\nSELECT * FROM hr.source_table;\nCOMMIT;\n\n-- 2. CTAS (Create Table As Select) - 자동 Direct-Path\nCREATE TABLE hr.target_ctas AS\nSELECT * FROM hr.source_table;\n\n-- 3. 병렬 Direct-Path Insert\nALTER SESSION ENABLE PARALLEL DML;\nINSERT /*+ APPEND PARALLEL(t, 4) */ INTO hr.target_table t\nSELECT /*+ PARALLEL(s, 4) */ * FROM hr.source_table s;\nCOMMIT;\n\n-- 4. Direct-Path Insert 확인 (V$SQL 통계)\nSELECT sql_id, sql_text, direct_writes\nFROM   v$sql\nWHERE  sql_text LIKE '%APPEND%target_table%'\n  AND  ROWNUM <= 5;\n\n-- 5. HWM 위 기록 확인 (세그먼트 크기 변화)\nSELECT segment_name, blocks, bytes / 1024 / 1024 AS size_mb\nFROM   dba_segments\nWHERE  owner = 'HR' AND segment_name = 'TARGET_TABLE';"
+    },
+    {
+      "title": "NOLOGGING 설정과 Direct-Path Insert (NOLOGGING with Direct-Path Insert)",
+      "description": "NOLOGGING 옵션과 Direct-Path Insert를 결합하여 대량 데이터 적재 시 Redo 생성을 최소화합니다.",
+      "sqlExamplesId": "sql10",
+      "sql": "-- 1. 테이블 NOLOGGING 설정\nALTER TABLE hr.staging_table NOLOGGING;\n\n-- NOLOGGING 상태 확인\nSELECT table_name, logging\nFROM   dba_tables\nWHERE  owner = 'HR' AND table_name = 'STAGING_TABLE';\n-- 결과: LOGGING = 'NO'\n\n-- 2. Redo 생성량 확인 (적재 전)\nSELECT value AS redo_before FROM v$mystat ms\nJOIN   v$statname sn ON ms.statistic# = sn.statistic#\nWHERE  sn.name = 'redo size';\n\n-- 3. NOLOGGING + Direct-Path Insert 실행\nINSERT /*+ APPEND */ INTO hr.staging_table\nSELECT * FROM hr.large_source_table;\nCOMMIT;\n\n-- 4. Redo 생성량 확인 (적재 후)\nSELECT value AS redo_after FROM v$mystat ms\nJOIN   v$statname sn ON ms.statistic# = sn.statistic#\nWHERE  sn.name = 'redo size';\n\n-- 5. FORCE LOGGING 확인 (DB/테이블스페이스 레벨)\nSELECT force_logging FROM v$database;\nSELECT tablespace_name, force_logging\nFROM   dba_tablespaces\nWHERE  tablespace_name = 'USERS';\n\n-- 6. 적재 완료 후 LOGGING으로 복원 (권장)\nALTER TABLE hr.staging_table LOGGING;\n\n-- 7. Data Guard 환경에서 NOLOGGING 블록 확인\nSELECT file#, block#, blocks\nFROM   v$datafile_header\nWHERE  unrecoverable_change# > 0;"
+    },
+    {
+      "title": "인덱스 UNUSABLE 설정 및 REBUILD (Index UNUSABLE and REBUILD)",
+      "description": "인덱스를 UNUSABLE로 설정하여 공간을 회수하고, REBUILD로 복구하는 절차입니다.",
+      "sqlExamplesId": "sql11",
+      "sql": "-- 1. 인덱스를 UNUSABLE로 설정\nALTER INDEX hr.emp_dept_idx UNUSABLE;\n\n-- 2. 인덱스 상태 확인\nSELECT index_name, status, segment_created\nFROM   dba_indexes\nWHERE  owner = 'HR' AND index_name = 'EMP_DEPT_IDX';\n-- 결과: STATUS = 'UNUSABLE', SEGMENT_CREATED = 'NO' (세그먼트 삭제됨)\n\n-- 3. SKIP_UNUSABLE_INDEXES 확인\nSHOW PARAMETER skip_unusable_indexes;\n-- 결과: TRUE (기본값) → UNUSABLE 인덱스가 있어도 DML 가능\n\n-- 4. UNUSABLE 상태에서 DML 수행 (SKIP_UNUSABLE_INDEXES=TRUE)\nINSERT INTO hr.employees (employee_id, last_name, department_id)\nVALUES (999, 'TEST', 10);  -- 정상 수행\nCOMMIT;\n\n-- 5. 인덱스 REBUILD\nALTER INDEX hr.emp_dept_idx REBUILD;\n\n-- 온라인 REBUILD\nALTER INDEX hr.emp_dept_idx REBUILD ONLINE;\n\n-- 다른 테이블스페이스에 REBUILD\nALTER INDEX hr.emp_dept_idx REBUILD TABLESPACE new_idx_ts;\n\n-- 병렬 + NOLOGGING REBUILD\nALTER INDEX hr.emp_dept_idx REBUILD PARALLEL 4 NOLOGGING;\n\n-- 6. REBUILD 후 상태 확인\nSELECT index_name, status, segment_created, tablespace_name\nFROM   dba_indexes\nWHERE  owner = 'HR' AND index_name = 'EMP_DEPT_IDX';\n-- 결과: STATUS = 'VALID', SEGMENT_CREATED = 'YES'"
+    },
+    {
+      "title": "파티션 인덱스 UNUSABLE 관리 (Partition Index UNUSABLE Management)",
+      "description": "파티션 테이블에서 파티션 단위로 인덱스를 UNUSABLE로 설정하고 관리하는 방법입니다.",
+      "sqlExamplesId": "sql12",
+      "sql": "-- 1. 로컬 인덱스의 특정 파티션만 UNUSABLE\nALTER INDEX hr.sales_local_idx\n  MODIFY PARTITION sales_p_2024 UNUSABLE;\n\n-- 2. 파티션 인덱스 상태 확인\nSELECT index_name, partition_name, status\nFROM   dba_ind_partitions\nWHERE  index_owner = 'HR' AND index_name = 'SALES_LOCAL_IDX'\nORDER BY partition_name;\n\n-- 3. 해당 파티션만 REBUILD\nALTER INDEX hr.sales_local_idx\n  REBUILD PARTITION sales_p_2024 ONLINE;\n\n-- 4. ALTER TABLE DROP PARTITION 후 글로벌 인덱스 영향\nALTER TABLE hr.sales DROP PARTITION sales_p_old;\n-- 글로벌 인덱스 확인 → UNUSABLE 가능\nSELECT index_name, status\nFROM   dba_indexes\nWHERE  owner = 'HR' AND table_name = 'SALES'\n  AND  partitioned = 'NO';  -- 글로벌 인덱스\n\n-- 5. UPDATE INDEXES로 글로벌 인덱스 자동 유지\nALTER TABLE hr.sales DROP PARTITION sales_p_old\n  UPDATE INDEXES;\n\n-- 6. 모든 UNUSABLE 인덱스 일괄 조회\nSELECT owner, index_name, table_name, status\nFROM   dba_indexes\nWHERE  status = 'UNUSABLE'\nUNION ALL\nSELECT index_owner, index_name, NULL, status\nFROM   dba_ind_partitions\nWHERE  status = 'UNUSABLE';"
+    }
+  ],
+  "keywords": [
+    "HWM (High Water Mark, 最高水位標)",
+    "Low HWM",
+    "SHRINK SPACE",
+    "SHRINK SPACE COMPACT",
+    "SHRINK SPACE CASCADE",
+    "ROW MOVEMENT (行移動)",
+    "Row Migration (行移行)",
+    "Row Chaining (行連鎖)",
+    "PCTFREE",
+    "ROW STORE COMPRESS BASIC",
+    "ROW STORE COMPRESS ADVANCED",
+    "HCC (Hybrid Columnar Compression)",
+    "Direct-Path Insert",
+    "NOLOGGING",
+    "FORCE LOGGING",
+    "UNUSABLE (인덱스 상태)",
+    "SKIP_UNUSABLE_INDEXES",
+    "ALTER TABLE MOVE",
+    "TRUNCATE TABLE",
+    "Segment Advisor",
+    "DBMS_SPACE",
+    "DBMS_COMPRESSION",
+    "table fetch continued row",
+    "ANALYZE TABLE LIST CHAINED ROWS",
+    "Compression Unit (CU)"
+  ]
+}

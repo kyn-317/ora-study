@@ -1,0 +1,85 @@
+[
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_006",
+    "title": "Oracle AI Databaseの起動オプションであるSTARTUP RESTRICTおよびSTARTUP FORCEについて正しい内容を述べているものを選択してください。(2つ選択してください)",
+    "options": [
+      "A) STARTUP RESTRICTで起動すると、CREATE SESSION権限を持つすべてのユーザーがデータベースに接続できる。",
+      "B) STARTUP FORCEは、内部的にSHUTDOWN ABORTを実行してからSTARTUPを実行する。",
+      "C) STARTUP RESTRICTで起動した後に制限モードを解除するには、データベースの再起動が必要である。",
+      "D) すでにOPEN状態のデータベースに対して、ALTER SYSTEM ENABLE RESTRICTED SESSIONを実行すると、既存の接続中のセッションも即座に切断される。",
+      "E) STARTUP RESTRICTで起動した場合、RESTRICTED SESSION権限を持つユーザーのみが接続可能となる。"
+    ],
+    "answer": [
+      "B",
+      "E"
+    ],
+    "explanation": "정답:\nB) STARTUP FORCE는 내부적으로 SHUTDOWN ABORT를 수행한 후 STARTUP을 실행합니다. 비정상 종료 상태에서 재기동할 때 사용됩니다.\nE) STARTUP RESTRICT로 기동하면 CREATE SESSION + RESTRICTED SESSION 시스템 권한을 가진 사용자만 접속할 수 있습니다.\n\n오답 분석:\nA) STARTUP RESTRICT 모드에서는 CREATE SESSION 권한만으로는 접속할 수 없습니다. 반드시 RESTRICTED SESSION 권한도 함께 필요합니다.\nC) 제한 모드는 재기동 없이 ALTER SYSTEM DISABLE RESTRICTED SESSION 명령으로 해제할 수 있습니다.\nD) ALTER SYSTEM ENABLE RESTRICTED SESSION을 실행해도 기존 접속 중인 세션은 유지됩니다. 새로운 접속만 제한됩니다.\n\n핵심 개념: STARTUP RESTRICT는 유지보수 시 일반 사용자 접속을 차단하기 위한 모드이며, STARTUP FORCE는 비정상 종료 상태에서 SHUTDOWN ABORT + STARTUP을 한 번에 수행하는 편의 기능입니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_007",
+    "title": "Oracle AI DatabaseのCKPT(チェックポイント)プロセスとチェックポイントの仕組みについて正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) CKPTプロセスは、ダーティ・バッファを直接データ・ファイルに書き込む役割を担っている。",
+      "B) フル・チェックポイントは、ログ・スイッチが発生するたびに自動的に実行される。",
+      "C) FAST_START_MTTR_TARGETパラメータを設定すると、インスタンス・リカバリの目標時間(秒)に応じてインクリメンタル・チェックポイントの頻度が自動的に調整される。",
+      "D) CKPTプロセスはデータ・ファイル・ヘッダーを更新するが、制御ファイルは更新しない。",
+      "E) チェックポイントはデータベースの停止時にのみ実行される処理であり、データベースの稼働中には発生しない。"
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "정답: C) FAST_START_MTTR_TARGET 파라미터는 인스턴스 리커버리에 걸리는 목표 시간(초)을 지정하며, Oracle은 이 목표를 달성하기 위해 Incremental Checkpoint의 빈도를 자동으로 조정합니다. V$INSTANCE_RECOVERY 뷰에서 예상 복구 시간을 확인할 수 있습니다.\n\n오답 분석:\nA) CKPT 프로세스는 직접 데이터 블록을 디스크에 기록하지 않습니다. 더티 버퍼를 데이터 파일에 기록하는 것은 DBWn(Database Writer) 프로세스의 역할입니다. CKPT는 DBWn에 기록을 요청하고, 완료 후 데이터 파일 헤더와 컨트롤 파일을 갱신합니다.\nB) 로그 스위치 시 발생하는 것은 Thread Checkpoint이며, Full Checkpoint가 아닙니다. Full Checkpoint는 ALTER SYSTEM CHECKPOINT 명령이나 정상 SHUTDOWN(NORMAL/TRANSACTIONAL/IMMEDIATE) 시 수행됩니다.\nD) CKPT 프로세스는 데이터 파일 헤더뿐만 아니라 컨트롤 파일도 갱신합니다. 마지막 체크포인트 SCN과 체크포인트 시간을 양쪽 모두에 기록합니다.\nE) 체크포인트는 데이터베이스 가동 중에도 Incremental Checkpoint, Thread Checkpoint 등이 지속적으로 발생합니다.\n\n핵심 개념: CKPT 프로세스는 데이터 파일 헤더와 컨트롤 파일을 갱신하는 역할이며, 실제 더티 버퍼 기록은 DBWn이 수행합니다. Full/Incremental/Thread/Tablespace 4가지 체크포인트 유형이 있습니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_008",
+    "title": "Oracle AI Databaseの自動ワークロード・リポジトリ(AWR)に関して正しい内容を述べているものを選択してください。(2つ選択してください)",
+    "options": [
+      "A) AWRスナップショットはMMONバックグラウンド・プロセスによって自動的に生成され、デフォルトで60分間隔で収集される。",
+      "B) AWRスナップショットのデータはSYSTEM表領域に格納される。",
+      "C) 初期化パラメータSTATISTICS_LEVELをBASICに設定しても、AWRの自動スナップショット収集は停止しない。",
+      "D) AWRスナップショットのデフォルトの保持期間は30日である。",
+      "E) AWRはV$ビューの実行時統計をスナップショットとしてディスクに永続的に保存するため、インスタンス再起動後も過去のパフォーマンス・データを分析できる。"
+    ],
+    "answer": [
+      "A",
+      "E"
+    ],
+    "explanation": "정답:\nA) AWR 스냅샷은 MMON(Manageability Monitor) 백그라운드 프로세스가 자동으로 생성하며, 기본 수집 간격은 60분입니다.\nE) AWR은 V$ 뷰의 실시간 통계를 주기적으로 스냅샷하여 SYSAUX 테이블스페이스에 영구 저장합니다. 따라서 인스턴스 재시작 후에도 과거 성능 데이터를 분석할 수 있습니다.\n\n오답 분석:\nB) AWR 스냅샷 데이터는 SYSTEM 테이블스페이스가 아닌 SYSAUX 테이블스페이스에 저장됩니다. WRM$_(메타데이터)와 WRH$_(이력 데이터) 테이블에 저장되며, DBA_HIST_ 뷰를 통해 조회할 수 있습니다.\nC) STATISTICS_LEVEL을 BASIC으로 설정하면 AWR 자동 스냅샷 수집이 비활성화됩니다. ADDM, ASH 등 관련 기능도 모두 비활성화되므로 TYPICAL(기본값)을 유지하는 것이 권장됩니다.\nD) AWR 스냅샷의 기본 보존 기간은 30일이 아닌 8일입니다. DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS 프로시저로 보존 기간을 변경할 수 있습니다.\n\n핵심 개념: AWR은 MMON 프로세스가 기본 60분 간격으로 V$ 뷰 통계를 SYSAUX 테이블스페이스에 스냅샷으로 저장하며, 기본 보존 기간은 8일입니다. STATISTICS_LEVEL=TYPICAL 이상에서만 동작합니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_009",
+    "title": "Oracle AI Databaseの自動診断リポジトリ(ADR)およびADRCI(ADR Command Interpreter)に関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) ADRCIはデータベースが起動していない状態では使用することができない。",
+      "B) ADRのディレクトリ構造は、DIAGNOSTIC_DESTパラメータで指定されたベース・ディレクトリの配下にdiag/rdbms/<db_name>/<instance_name>/の階層で構成される。",
+      "C) ADR内のProblemとIncidentは同じ概念であり、1つのエラーに対して1つのProblemと1つのIncidentが生成される。",
+      "D) ADR内の診断データは手動で削除する以外に方法がなく、自動的にパージされることはない。",
+      "E) ADRCIのSHOW ALERTコマンドではアラート・ログの最新情報のみ表示され、全体のアラート・ログ内容は確認できない。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B) ADR은 DIAGNOSTIC_DEST 파라미터(기본 $ORACLE_BASE)로 지정된 베이스 디렉터리 하위에 diag/rdbms/<db_name>/<instance_name>/ 구조로 구성됩니다. 이 ADR Home 내에 alert/(XML Alert Log), trace/(텍스트 Alert Log 및 Trace 파일), incident/(인시던트 덤프) 등의 서브 디렉터리가 존재합니다.\n\n오답 분석:\nA) ADRCI는 파일 시스템 기반의 ADR 데이터를 직접 접근하는 CLI 도구이므로, 데이터베이스가 기동되지 않은 상태에서도 사용할 수 있습니다. SQL*Plus 없이도 진단 데이터에 접근 가능합니다.\nC) Problem과 Incident는 다른 개념입니다. Problem은 반복 가능한 오류 유형(예: ORA-600 [kdsgrp1])이고, Incident는 해당 Problem의 개별 발생 건으로 고유 Incident ID가 부여됩니다. 하나의 Problem에 여러 Incident가 매핑될 수 있습니다.\nD) ADR의 진단 데이터는 MMON 프로세스에 의해 자동으로 퍼지됩니다. 기본적으로 Incident와 Trace 파일은 30일 후 자동 삭제됩니다. ADRCI의 PURGE 명령으로 수동 정리도 가능합니다.\nE) ADRCI의 SHOW ALERT 명령으로 전체 Alert Log를 확인할 수 있으며, SHOW ALERT -tail -f 옵션으로 실시간 모니터링(tail -f와 동일 효과)도 가능합니다.\n\n핵심 개념: ADR은 파일 시스템 기반의 통합 진단 데이터 저장소이며, ADRCI를 통해 DB 미기동 상태에서도 Alert Log, Trace 파일, Incident 정보에 접근할 수 있습니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_010",
+    "title": "Oracle AI DatabaseのDBWn(Database Writer)プロセスがダーティ・バッファをデータ・ファイルに書き込むトリガー条件として正しいものを選択してください。(2つ選択してください)",
+    "options": [
+      "A) ユーザーがCOMMIT文を実行したとき、該当トランザクションのダーティ・バッファが即座にデータ・ファイルに書き込まれる。",
+      "B) サーバー・プロセスがバッファ・キャッシュ内でフリー・バッファを見つけられないとき、DBWnに書き込みを要求する。",
+      "C) LGWRプロセスがREDOログ・バッファをオンラインREDOログ・ファイルに書き込む前に、DBWnが先にダーティ・バッファを書き込む。",
+      "D) CKPTプロセスによるチェックポイント・イベントが発生したとき、DBWnはダーティ・バッファをデータ・ファイルに書き込む。",
+      "E) サーバー・プロセスが直接ダーティ・バッファをデータ・ファイルに書き込み、DBWnはその結果を管理するのみである。"
+    ],
+    "answer": [
+      "B",
+      "D"
+    ],
+    "explanation": "정답:\nB) 서버 프로세스가 Buffer Cache에서 Free Buffer를 찾지 못하면 DBWn에 기록을 요청합니다. DBWn이 더티 버퍼를 기록하여 Free Buffer를 확보합니다.\nD) CKPT 프로세스가 체크포인트 이벤트를 요청하면 DBWn은 더티 버퍼를 데이터 파일에 기록합니다. 그 후 CKPT가 데이터 파일 헤더와 컨트롤 파일을 갱신합니다.\n\n오답 분석:\nA) COMMIT 실행 시 LGWR이 Redo Log Buffer를 온라인 Redo Log 파일에 기록하지만, DBWn이 즉시 더티 버퍼를 데이터 파일에 기록하지는 않습니다. DBWn의 기록은 체크포인트, Free Buffer 부족, 3초 타임아웃 등의 조건에 의해 비동기적으로 수행됩니다.\nC) Write-Ahead Logging 원칙에 따라 LGWR이 Redo를 먼저 기록한 후에 DBWn이 데이터 블록을 기록합니다. 순서가 반대로 설명되어 있습니다.\nE) 서버 프로세스는 데이터 파일에 직접 쓰기를 수행하지 않습니다. 더티 버퍼를 데이터 파일에 기록하는 것은 오직 DBWn의 역할이며, 서버 프로세스가 직접 기록하지 않는 이유는 I/O 대기에 의한 사용자 응답 시간 저하를 방지하기 위함입니다.\n\n핵심 개념: DBWn은 체크포인트 발생, Dirty Buffer 임계값 초과, Free Buffer 부족, 3초 타임아웃 등의 조건에서 더티 버퍼를 데이터 파일에 비동기적으로 기록합니다. COMMIT 시에는 LGWR만 Redo를 기록하며, DBWn의 기록과는 별개입니다."
+  }
+]

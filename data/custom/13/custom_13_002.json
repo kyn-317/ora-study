@@ -1,0 +1,70 @@
+[
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_006",
+    "title": "ADDMが生成するRecommendation(勧告事項)の構造と特性について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) ADDMのRecommendationは、Hardware Changes、Database Configuration、Schema Changes、Application Changesの4つの主要な勧告事項タイプに分類される。",
+      "B) 1つのFindingに対して、ADDMは必ず1つのRecommendationのみを生成する。",
+      "C) 各Recommendationには、予想効果(Benefit)がDB Time節約量として含まれており、Benefitが大きい順にリストが優先順位付けされる。",
+      "D) RecommendationのAction(具体的な実行措置)は、DBA_ADVISOR_FINDINGS ビューのみで確認できる。",
+      "E) ADDMのRecommendationは実行計画の固定のみを提案し、パラメータ変更の提案は行わない。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "해설:\n\n정답:\nA) ADDM의 Recommendation은 Hardware Changes(하드웨어 변경), Database Configuration(데이터베이스 구성 변경), Schema Changes(스키마 변경), Application Changes(애플리케이션 변경)의 4가지 주요 유형으로 분류됩니다.\nC) 각 Recommendation에는 예상 효과(Benefit)가 DB Time 절약량으로 포함되며, Benefit이 큰 순서대로 우선순위가 정렬됩니다. DBA는 이를 기준으로 가장 효과가 큰 권고부터 적용할 수 있습니다.\n\n오답:\nB) 하나의 Finding에 대해 ADDM은 여러 개의 대안적 Recommendation을 생성할 수 있습니다. DBA는 상황에 맞게 적절한 대안을 선택할 수 있습니다.\nD) Recommendation의 Action(구체적 실행 조치)은 DBA_ADVISOR_FINDINGS가 아니라 DBA_ADVISOR_ACTIONS 뷰에서 확인합니다. DBA_ADVISOR_FINDINGS는 Finding(발견 사항) 정보를 저장합니다.\nE) ADDM의 Recommendation은 실행 계획 고정만이 아니라, SGA/PGA 크기 조정, 파라미터 변경, 인덱스 생성, SQL Tuning Advisor 실행 권고 등 다양한 유형의 조치를 제안합니다.\n\n핵심 개념: ADDM Recommendation은 Finding → Recommendation → Action → Rationale의 계층 구조를 가지며, Benefit(DB Time 절약량) 기준으로 우선순위가 결정됩니다. 하나의 Finding에 여러 대안적 Recommendation이 제시될 수 있습니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_007",
+    "title": "ADDMの分析で使用されるDB Timeの構成要素について正しく述べているものを選択してください。",
+    "options": [
+      "A) DB Timeはデータベースのアイドル・セッションを含むすべてのセッションの経過時間の合計である。",
+      "B) DB TimeはCPU TimeとWait Timeに大別でき、Wait Timeはさらに User I/O Wait、Concurrency Wait、Application Waitなどの待機クラスに分解される。",
+      "C) DB Timeの分解分析において、ADDMはボトムアップ方式で個別の待機イベントから全体像へ分析する。",
+      "D) DB Timeの値はV$SYS_TIME_MODELビューでは確認できず、AWRレポートでのみ確認できる。"
+    ],
+    "answer": ["B"],
+    "explanation": "해설:\n\n정답:\nB) DB Time은 크게 CPU Time과 Wait Time으로 1차 분해됩니다. Wait Time은 다시 User I/O Wait(데이터 파일 I/O 대기), Concurrency Wait(락/래치 대기), Application Wait(Row Lock 등), Commit Wait(log file sync), Network Wait, Configuration Wait 등의 대기 클래스로 세분화됩니다.\n\n오답:\nA) DB Time은 모든 세션이 아니라 비유휴(Non-Idle) 세션의 경과 시간 합산입니다. 유휴(Idle) 세션의 대기 시간은 DB Time에 포함되지 않습니다.\nC) ADDM은 보텀업(Bottom-Up)이 아니라 하향식(Top-Down) 분석 방법론을 사용합니다. 전체 DB Time에서 시작하여 CPU Time vs Wait Time으로 분해한 후, 대기 클래스, 개별 대기 이벤트, SQL 레벨, 세그먼트 레벨 순으로 점점 세부적으로 좁혀갑니다.\nD) DB Time은 V$SYS_TIME_MODEL 뷰에서 확인할 수 있으며, AWR 보고서에서도 확인 가능합니다. V$SYS_TIME_MODEL은 DB Time, CPU Time 등 시간 모델 통계를 제공하는 동적 성능 뷰입니다.\n\n핵심 개념: DB Time = CPU Time + Wait Time이며, ADDM은 이를 하향식(Top-Down)으로 분해하여 가장 큰 영향을 미치는 성능 문제를 식별합니다. DB Time은 비유휴 세션만을 대상으로 합니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_008",
+    "title": "DBMS_STATSパッケージを使用したオプティマイザ統計の管理について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) LOCK_TABLE_STATSプロシージャでテーブルの統計をロックすると、自動統計収集タスクを含むすべての統計変更がブロックされる。",
+      "B) GATHER_TABLE_STATSのestimate_percentパラメータのデフォルトは100(全件スキャン)である。",
+      "C) RESTORE_TABLE_STATSプロシージャを使用して、特定の時点のオプティマイザ統計に復元することができる。",
+      "D) 統計が古い(Stale)と判定される基準は、デフォルトでテーブル全体の行の1%以上が変更された場合である。",
+      "E) オプティマイザ統計の収集にはANALYZEコマンドの使用がOracleによって公式に推奨されている。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "해설:\n\n정답:\nA) LOCK_TABLE_STATS 프로시저로 테이블 통계를 잠그면, 자동 통계 수집 작업(auto optimizer stats collection)을 포함한 모든 통계 변경이 차단됩니다. 잠금을 해제하려면 UNLOCK_TABLE_STATS를 사용합니다.\nC) RESTORE_TABLE_STATS 프로시저를 사용하여 as_of_timestamp 파라미터로 특정 시점의 통계로 복원할 수 있습니다. 통계 변경 후 성능이 저하된 경우, 이전 통계로 롤백하는 데 유용합니다.\n\n오답:\nB) GATHER_TABLE_STATS의 estimate_percent 파라미터의 기본값은 100(전체 스캔)이 아니라 DBMS_STATS.AUTO_SAMPLE_SIZE입니다. 이는 옵티마이저가 자동으로 최적의 샘플링 비율을 결정하도록 합니다.\nD) 통계가 노후화(Stale)로 판정되는 기본 임계값은 1%가 아니라 10%(STALE_PERCENT의 기본값)입니다. 테이블 전체 행의 10% 이상이 변경되면 통계가 Stale 상태로 표시됩니다.\nE) ANALYZE 명령어가 아니라 DBMS_STATS 패키지의 사용이 Oracle에서 공식적으로 권장하는 통계 수집 방법입니다. DBMS_STATS는 ANALYZE보다 기능이 풍부하고 정확합니다.\n\n핵심 개념: DBMS_STATS는 Oracle 공식 권장 통계 수집 도구이며, LOCK/UNLOCK으로 통계 보호, RESTORE로 이전 시점 복원이 가능합니다. 노후화 판정 기준은 기본 10%(STALE_PERCENT)입니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_009",
+    "title": "ADDMレポートの生成方法について正しく述べているものを選択してください。",
+    "options": [
+      "A) addmrpt.sqlスクリプトはSQL*Plusで実行し、対話形式で分析するスナップショット範囲を選択して、テキスト形式のレポートを生成する。",
+      "B) DBMS_ADVISOR.GET_TASK_REPORTは、TEXT形式のみに対応しておりHTML形式やXML形式には対応していない。",
+      "C) DBMS_ADDM パッケージのANALYZE_DBプロシージャは、特定のPDBのみを対象にした分析には使用できない。",
+      "D) Enterprise Managerでは、ADDMの分析結果はテキスト形式でのみ表示される。"
+    ],
+    "answer": ["A"],
+    "explanation": "해설:\n\n정답:\nA) addmrpt.sql 스크립트는 $ORACLE_HOME/rdbms/admin/addmrpt.sql 경로에 있으며, SQL*Plus에서 대화형으로 실행합니다. 분석할 인스턴스, 시작 스냅샷 ID, 종료 스냅샷 ID, 보고서 파일명을 선택하여 텍스트 형식의 ADDM 보고서를 생성합니다.\n\n오답:\nB) DBMS_ADVISOR.GET_TASK_REPORT는 TEXT 형식뿐만 아니라 HTML 형식과 XML 형식도 지원합니다. 파라미터로 'TEXT', 'HTML', 'XML' 중 원하는 출력 형식을 지정할 수 있습니다.\nC) DBMS_ADDM 패키지의 ANALYZE_DB는 전체 데이터베이스 분석에 사용되며, ANALYZE_INST는 특정 인스턴스 분석에 사용됩니다. PDB 컨텍스트에서 실행하면 해당 PDB에 대한 분석이 가능합니다.\nD) Enterprise Manager에서는 ADDM 결과를 텍스트 형식이 아니라 그래픽(GUI) 형식으로 표시합니다. Performance Hub를 통해 DB Time 그래프에서 특정 시간대를 클릭하고, Finding → Recommendation → Action 순으로 드릴다운 분석이 가능합니다.\n\n핵심 개념: ADDM 보고서는 addmrpt.sql(텍스트), DBMS_ADDM(프로그래밍 방식), DBMS_ADVISOR.GET_TASK_REPORT(TEXT/HTML/XML), Enterprise Manager(그래픽) 등 다양한 방법으로 생성 및 조회할 수 있습니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_010",
+    "title": "Real-Time ADDMと通常のADDMの比較について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Real-Time ADDMは、AWRスナップショットのデータに基づいて過去の性能問題を分析する。",
+      "B) 通常のADDMは、連続した2つのAWRスナップショット間のデータの差分(Delta)を分析する。",
+      "C) Real-Time ADDMは、AWRスナップショットなしでSGAメモリ内の性能データを直接分析でき、データベースが行(Hang)状態にある場合にも診断分析が可能な場合がある。",
+      "D) 通常のADDMの手動分析を行うには、必ずデータベースの再起動が必要である。",
+      "E) Real-Time ADDMの分析結果はDBA_ADVISOR_FINDINGSビューにのみ保存される。"
+    ],
+    "answer": ["B", "C"],
+    "explanation": "해설:\n\n정답:\nB) 통상적인 ADDM은 연속된 2개의 AWR 스냅샷 간의 차이값(Delta)을 계산하여 분석합니다. MMON 프로세스가 AWR 스냅샷 수집 후 자동으로 직전 2개 스냅샷 간의 데이터를 분석합니다.\nC) Real-Time ADDM은 AWR 스냅샷 없이 현재 SGA 메모리의 성능 데이터를 직접 분석하는 기능입니다. 데이터베이스가 행(Hang) 상태에서도 진단 분석을 수행할 수 있어, 긴급한 성능 문제 대응에 유용합니다.\n\n오답:\nA) Real-Time ADDM은 과거의 AWR 스냅샷이 아니라 현재 SGA 메모리의 실시간 성능 데이터를 직접 분석합니다. 과거 분석은 통상적인 ADDM의 역할입니다.\nD) 통상적인 ADDM의 수동 분석은 데이터베이스 재시작이 필요하지 않습니다. DBMS_ADVISOR.CREATE_TASK('ADDM', task_name)로 태스크를 생성하고 START_SNAPSHOT/END_SNAPSHOT 파라미터를 설정한 후 EXECUTE_TASK로 실행하면 됩니다.\nE) Real-Time ADDM의 분석 결과는 DBA_ADVISOR_FINDINGS 뷰에만 저장되는 것이 아니라, Enterprise Manager 인터페이스 또는 DBMS_ADDM 패키지를 통해서도 조회할 수 있습니다. 또한 Real-Time ADDM은 SGA 데이터를 사용하므로 범위가 제한적입니다.\n\n핵심 개념: 통상적인 ADDM은 AWR 스냅샷(디스크) 기반의 사후 분석이고, Real-Time ADDM은 SGA 메모리 기반의 실시간 분석입니다. Real-Time ADDM은 DB Hang 상태에서도 진단이 가능한 것이 핵심 차별점입니다."
+  }
+]

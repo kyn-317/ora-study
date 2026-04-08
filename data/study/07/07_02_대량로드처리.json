@@ -1,0 +1,377 @@
+{
+  "id": "07_02",
+  "title": "대량 로드 처리 (SQL*Loader)",
+  "chapter": "07. 데이터 이동 (데이터 로드/추출)",
+  "description": "SQL*Loader는 외부 파일의 데이터를 Oracle 데이터베이스 테이블에 고속으로 로드하는 클라이언트 유틸리티로, 컨트롤 파일 기반의 전통적 모드와 Oracle 26ai에서 강화된 Express Mode를 통해 대량 데이터 적재를 효율적으로 수행한다.",
+  "oracle26ai_changes": [
+    "Express Mode에서 JSON 및 확장 데이터 타입 지원 강화",
+    "멀티스레딩(MULTITHREADING) 옵션의 기본 동작 최적화",
+    "Direct Path Load 시 Autonomous Database 환경에서의 자동 병렬 처리 개선",
+    "SQL*Loader 로그 파일의 JSON 형식 출력 옵션 추가"
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "SQL*Loader 개요 및 아키텍처 (SQL*Loader Overview and Architecture)",
+      "content": "SQL*Loader는 Oracle 데이터베이스에 외부 데이터 파일을 로드하기 위한 **클라이언트 측 유틸리티(Client-Side Utility)**이다. 플랫 파일(CSV, 고정 길이 등)의 데이터를 하나 이상의 Oracle 테이블에 고속으로 적재할 수 있으며, Conventional Path와 Direct Path 두 가지 로드 방식을 지원한다.",
+      "sqlExamplesIds": ["sql01", "sql02"],
+      "subsections": [
+        {
+          "title": "정의 및 역할 (Definition and Role)",
+          "content": "**SQL*Loader**는 Oracle이 제공하는 대표적인 벌크 데이터 로딩 도구로, `$ORACLE_HOME/bin/sqlldr` 실행 파일로 제공된다. 외부 소스 시스템에서 생성된 플랫 파일(Flat File)을 Oracle 테이블에 적재하는 것이 주요 목적이다.\n\n**SQL*Loader의 핵심 역할:**\n\n| 역할 | 설명 |\n|------|------|\n| **대량 데이터 로드** | 수백만~수억 건의 레코드를 고속으로 적재 |\n| **데이터 변환** | 로드 시 SQL 함수를 적용하여 데이터 변환 가능 |\n| **다중 테이블 로드** | 하나의 데이터 파일에서 여러 테이블에 동시 로드 |\n| **조건부 로드** | WHEN 절을 사용하여 특정 조건의 레코드만 선택적 로드 |\n| **에러 처리** | Bad 파일과 Discard 파일을 통한 체계적 에러 관리 |\n\nSQL*Loader는 **컨트롤 파일(Control File)**을 통해 데이터 파일의 형식, 대상 테이블, 필드 매핑 등을 정의하며, Oracle 26ai에서는 컨트롤 파일 없이도 사용할 수 있는 **Express Mode**가 크게 강화되었다.",
+          "key_points": [
+            "SQL*Loader는 $ORACLE_HOME/bin/sqlldr에 위치한 클라이언트 측 유틸리티이다",
+            "플랫 파일(CSV, 고정 길이, 가변 길이)을 Oracle 테이블에 로드한다",
+            "컨트롤 파일로 데이터 형식과 매핑을 정의한다",
+            "Conventional Path와 Direct Path 두 가지 로드 방식을 제공한다",
+            "WHEN 절을 통한 조건부 로드가 가능하다",
+            "하나의 데이터 파일에서 여러 테이블로 동시 로드가 가능하다",
+            "Bad 파일과 Discard 파일로 에러 레코드를 체계적으로 관리한다",
+            "Oracle 26ai에서 Express Mode가 대폭 강화되었다"
+          ]
+        },
+        {
+          "title": "내부 동작 원리 (Internal Operation Mechanism)",
+          "content": "SQL*Loader의 실행 과정은 다음과 같은 단계로 이루어진다.\n\n**1단계: 초기화 (Initialization)**\n- `sqlldr` 프로세스가 시작되고, 컨트롤 파일(또는 Express Mode의 경우 테이블 DDL)을 파싱한다\n- Oracle 데이터베이스에 연결하여 대상 테이블의 메타데이터를 확인한다\n- 로그 파일, Bad 파일, Discard 파일의 경로를 설정한다\n\n**2단계: 데이터 읽기 (Data Reading)**\n- **READSIZE** 파라미터에 지정된 크기만큼 데이터 파일을 버퍼로 읽어들인다\n- 레코드 구분자(줄바꿈 등)에 따라 개별 레코드를 파싱한다\n- 필드 구분자에 따라 각 필드를 분리한다\n\n**3단계: 데이터 변환 및 검증 (Data Conversion and Validation)**\n- 컨트롤 파일의 필드 정의에 따라 데이터 타입 변환을 수행한다\n- WHEN 절이 있으면 조건을 평가하여 로드 대상 여부를 결정한다\n- 변환 실패 레코드는 **Bad 파일**에 기록한다\n- WHEN 조건 불만족 레코드는 **Discard 파일**에 기록한다\n\n**4단계: 데이터 적재 (Data Loading)**\n- **Conventional Path**: SQL INSERT 문을 사용하여 SGA의 버퍼 캐시를 통해 데이터를 적재한다\n- **Direct Path**: SQL 레이어를 우회하여 데이터 블록을 직접 포맷하고 HWM 위에 기록한다\n\n**5단계: 후처리 (Post-processing)**\n- 커밋을 수행하고, 인덱스를 재구축한다(Direct Path의 경우)\n- 로그 파일에 통계 정보를 기록한다\n\n| 구성 요소 | 파일 확장자 | 역할 |\n|-----------|------------|------|\n| **컨트롤 파일** | .ctl | 로드 규칙 정의 |\n| **데이터 파일** | .dat, .csv | 원본 데이터 |\n| **로그 파일** | .log | 실행 결과 및 통계 |\n| **Bad 파일** | .bad | 거부된 레코드 |\n| **Discard 파일** | .dsc | 조건 불만족 레코드 |",
+          "key_points": [
+            "실행 과정: 초기화 -> 데이터 읽기 -> 변환/검증 -> 적재 -> 후처리",
+            "READSIZE만큼 데이터를 버퍼로 읽어 레코드와 필드를 파싱한다",
+            "Conventional Path는 SQL INSERT를 통해 SGA 버퍼 캐시를 경유한다",
+            "Direct Path는 SQL 레이어를 우회하여 데이터 블록을 직접 생성한다",
+            "변환 실패 레코드는 Bad 파일, 조건 불만족은 Discard 파일에 기록된다",
+            "로그 파일에는 로드 통계 및 에러 정보가 기록된다"
+          ]
+        },
+        {
+          "title": "내부 구조 및 분류 (Internal Structure and Classification)",
+          "content": "SQL*Loader의 주요 구성 요소와 분류 체계는 다음과 같다.\n\n**실행 모드 분류:**\n\n| 모드 | 설명 | 컨트롤 파일 필요 |\n|------|------|------------------|\n| **기본 모드 (Standard Mode)** | 컨트롤 파일을 사용하여 데이터 매핑을 명시적으로 정의 | 필요 |\n| **Express Mode** | 테이블 DDL에서 자동으로 컬럼 매핑을 유추 | 불필요 |\n\n**로드 경로 분류:**\n\n| 로드 경로 | SQL 사용 | Redo 생성 | 속도 | 제약조건 확인 | 트리거 실행 |\n|-----------|----------|-----------|------|---------------|-------------|\n| **Conventional Path** | INSERT 사용 | 전체 Redo | 보통 | 실시간 확인 | 실행됨 |\n| **Direct Path** | 우회 | 최소 Redo | 고속 | 로드 후 확인 | 실행 안됨 |\n| **Direct Path Parallel** | 우회 | 최소 Redo | 최고속 | 로드 후 확인 | 실행 안됨 |\n\n**데이터 파일 형식 분류:**\n\n| 형식 | 설명 | 예시 |\n|------|------|------|\n| **고정 길이 (Fixed Length)** | 각 필드가 고정된 바이트 위치를 가짐 | POSITION(1:10) |\n| **구분자 방식 (Delimited)** | 필드 간 구분자로 분리 | FIELDS TERMINATED BY ',' |\n| **가변 길이 (Variable Length)** | 레코드 앞에 길이 정보를 포함 | VARCHARC, VARRAWC |",
+          "key_points": [
+            "Standard Mode는 컨트롤 파일 필수, Express Mode는 불필요",
+            "Conventional Path는 SQL INSERT를 사용하여 완전한 Redo를 생성한다",
+            "Direct Path는 SQL 레이어를 우회하여 최소 Redo로 고속 로드한다",
+            "Direct Path Parallel은 여러 세션이 동시에 Direct Path 로드를 수행한다",
+            "데이터 파일 형식: 고정 길이, 구분자 방식, 가변 길이를 지원한다"
+          ]
+        },
+        {
+          "title": "관련 파라미터 (Related Parameters)",
+          "content": "SQL*Loader의 주요 커맨드라인 파라미터는 다음과 같다.\n\n| 파라미터 | 기본값 | 설명 |\n|----------|--------|------|\n| **USERID** | - | 접속 정보 (username/password@connect_string) |\n| **CONTROL** | - | 컨트롤 파일 경로 |\n| **DATA** | 컨트롤 파일 내 지정 | 데이터 파일 경로 |\n| **LOG** | control명.log | 로그 파일 경로 |\n| **BAD** | control명.bad | Bad 파일 경로 |\n| **DISCARD** | - | Discard 파일 경로 |\n| **DISCARDMAX** | ALL | 허용할 최대 discard 수 |\n| **DIRECT** | FALSE | Direct Path 사용 여부 |\n| **PARALLEL** | FALSE | 병렬 Direct Path 사용 여부 |\n| **SKIP** | 0 | 건너뛸 시작 레코드 수 |\n| **LOAD** | ALL | 로드할 최대 레코드 수 |\n| **ERRORS** | 50 | 허용할 최대 에러 수 |\n| **ROWS** | Conventional: 256, Direct: all | 커밋 간격(행 수) |\n| **BINDSIZE** | 1048576 (1MB) | Conventional Path의 바인드 배열 크기 |\n| **READSIZE** | 1048576 (1MB) | 읽기 버퍼 크기 |\n| **MULTITHREADING** | 플랫폼 의존 | 멀티스레딩 사용 여부 |\n| **COLUMNARRAYROWS** | 5000 | Direct Path 컬럼 배열 행 수 |\n| **STREAMSIZE** | 256000 | Direct Path 스트림 버퍼 크기 |\n| **TABLE** | - | Express Mode에서 대상 테이블명 |\n| **DATE_FORMAT** | - | Express Mode에서 날짜 형식 |\n| **CHARACTERSET** | - | 데이터 파일 문자셋 |\n| **EXTERNAL_TABLE** | NOT_USED | 외부 테이블 방식으로 변환 여부 |\n\n**성능 관련 초기화 파라미터:**\n\n| 파라미터 | 설명 |\n|----------|------|\n| **DB_WRITER_PROCESSES** | Direct Path에서 쓰기 프로세스 수에 영향 |\n| **PARALLEL_MAX_SERVERS** | 병렬 Direct Path의 최대 서버 프로세스 수 |\n| **UNDO_RETENTION** | Conventional Path에서 Undo 보존 기간 |",
+          "key_points": [
+            "DIRECT=TRUE로 Direct Path Load를 활성화한다",
+            "PARALLEL=TRUE로 병렬 Direct Path Load를 수행한다 (DIRECT=TRUE 필수)",
+            "ROWS는 커밋 간격으로 Conventional Path에서 기본값은 256이다",
+            "BINDSIZE와 READSIZE는 기본 1MB로, 증가시키면 성능이 향상될 수 있다",
+            "ERRORS는 기본 50으로, 허용 에러 수 초과 시 로드가 중단된다",
+            "SKIP은 재시작 시 이미 로드된 행을 건너뛸 때 사용한다",
+            "MULTITHREADING은 Oracle 26ai에서 기본 동작이 최적화되었다"
+          ]
+        },
+        {
+          "title": "관련 동적 성능 뷰 (Related Dynamic Performance Views)",
+          "content": "SQL*Loader 작업 모니터링에 사용할 수 있는 주요 뷰는 다음과 같다.\n\n| 뷰 | 설명 |\n|----|------|\n| **V$SESSION** | 현재 SQL*Loader 세션의 상태 확인 |\n| **V$SESSION_LONGOPS** | 장시간 실행 중인 Direct Path Load 진행률 모니터링 |\n| **V$SQL** | Conventional Path에서 실행 중인 INSERT 문 확인 |\n| **V$LOCK** | SQL*Loader 실행 중 발생하는 락 정보 |\n| **V$TRANSACTION** | 현재 활성 트랜잭션의 Undo 사용량 확인 |\n| **V$SYSSTAT** | 시스템 전체의 로드 관련 통계 |\n| **V$MYSTAT** | 현재 세션의 통계 정보 |\n| **DBA_INDEXES** | Direct Path Load 후 인덱스 상태(UNUSABLE) 확인 |\n| **DBA_CONSTRAINTS** | 로드 후 제약조건 상태 확인 |\n| **V$DIRECT_PATH_ADVISOR** | Direct Path Load의 성능 권고 정보 |\n\n**Direct Path Load 후 확인이 필요한 딕셔너리 뷰:**\n\n```sql\n-- 인덱스 상태 확인\nSELECT index_name, status FROM DBA_INDEXES WHERE table_name = 'TARGET_TABLE';\n\n-- 제약조건 상태 확인  \nSELECT constraint_name, status FROM DBA_CONSTRAINTS WHERE table_name = 'TARGET_TABLE';\n```\n\nDirect Path Load는 인덱스를 **UNUSABLE** 상태로 만들 수 있으므로, 로드 완료 후 반드시 인덱스 상태를 확인하고 필요시 재구축해야 한다.",
+          "key_points": [
+            "V$SESSION_LONGOPS로 Direct Path Load 진행률을 실시간 모니터링할 수 있다",
+            "V$SQL로 Conventional Path의 INSERT 문 실행 상태를 확인한다",
+            "Direct Path Load 후 DBA_INDEXES에서 인덱스 상태(UNUSABLE)를 반드시 확인한다",
+            "V$LOCK으로 로드 중 발생하는 테이블 락 상황을 모니터링한다",
+            "V$TRANSACTION으로 Conventional Path의 Undo 사용량을 확인한다"
+          ]
+        },
+        {
+          "title": "다른 구성요소와의 관계 (Relationship with Other Components)",
+          "content": "SQL*Loader는 데이터베이스의 여러 구성 요소와 밀접하게 상호작용한다.\n\n**Redo Log와의 관계:**\n- **Conventional Path**: 모든 변경에 대해 완전한 Redo 로그를 생성한다. ARCHIVELOG 모드에서 완전한 복구가 가능하다.\n- **Direct Path**: 기본적으로 최소 Redo만 생성하며, `NOLOGGING` 옵션 사용 시 Redo를 거의 생성하지 않는다. 복구 시 주의가 필요하다.\n\n**Undo (Rollback)와의 관계:**\n- Conventional Path는 Undo를 생성하므로 롤백이 가능하다\n- Direct Path는 HWM 위에 쓰기 때문에 Undo를 최소화한다\n\n**인덱스와의 관계:**\n- Conventional Path: 인덱스가 실시간으로 유지보수된다\n- Direct Path: 인덱스가 로드 완료 후 일괄 갱신되며, 실패 시 UNUSABLE로 표시된다\n\n**제약조건과 트리거:**\n\n| 항목 | Conventional Path | Direct Path |\n|------|-------------------|-------------|\n| **NOT NULL** | 실시간 확인 | 실시간 확인 |\n| **UNIQUE** | 실시간 확인 | 로드 후 확인 |\n| **CHECK** | 실시간 확인 | 로드 후 확인 |\n| **FOREIGN KEY** | 실시간 확인 | 기본 비활성화 |\n| **INSERT 트리거** | 실행됨 | 실행 안됨 |\n\n**External Table과의 비교:**\n\n| 항목 | SQL*Loader | External Table |\n|------|------------|----------------|\n| **실행 위치** | 클라이언트 | 서버 |\n| **SQL 사용** | sqlldr 명령어 | SELECT문으로 조회 |\n| **병렬 처리** | PARALLEL 옵션 | Oracle 병렬 쿼리 |\n| **데이터 변환** | 제한적 SQL 함수 | 완전한 SQL 지원 |\n| **DML 지원** | INSERT만 | INSERT AS SELECT |",
+          "key_points": [
+            "Conventional Path는 완전한 Redo를 생성하고, Direct Path는 최소 Redo를 생성한다",
+            "Direct Path는 Undo를 최소화하여 롤백이 불가능하다",
+            "Direct Path Load 후 인덱스가 UNUSABLE 상태가 될 수 있다",
+            "Conventional Path만 INSERT 트리거를 실행한다",
+            "Direct Path는 UNIQUE/CHECK 제약조건을 로드 후에 확인한다",
+            "External Table은 서버 측에서 SQL로 접근하는 대안적 방식이다"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s02",
+      "title": "컨트롤 파일 구조와 문법 (Control File Structure and Syntax)",
+      "content": "SQL*Loader **컨트롤 파일(Control File)**은 데이터 로드의 모든 규칙을 정의하는 텍스트 파일로, 데이터 파일의 위치, 형식, 대상 테이블, 필드 매핑, 로드 조건 등을 기술한다. 확장자는 관례적으로 `.ctl`을 사용한다.",
+      "sqlExamplesIds": ["sql03", "sql04", "sql05"],
+      "subsections": [
+        {
+          "title": "컨트롤 파일 기본 문법 (Control File Basic Syntax)",
+          "content": "컨트롤 파일은 다음과 같은 기본 구조를 가진다.\n\n```\nLOAD DATA\nINFILE 'data_file_path'\n[BADFILE 'bad_file_path']\n[DISCARDFILE 'discard_file_path']\n[DISCARDMAX n]\n[INSERT | APPEND | REPLACE | TRUNCATE]\nINTO TABLE table_name\n[WHEN condition]\n[FIELDS TERMINATED BY 'delimiter' [OPTIONALLY ENCLOSED BY 'enclosure']]\n[TRAILING NULLCOLS]\n(\n  column_name [data_type] [NULL IF | BLANKS],\n  ...\n)\n```\n\n**핵심 키워드 설명:**\n\n| 키워드 | 설명 |\n|--------|------|\n| **LOAD DATA** | 컨트롤 파일의 시작을 표시 |\n| **INFILE** | 데이터 파일의 경로 지정 (여러 개 가능) |\n| **BADFILE** | 거부된 레코드를 저장할 파일 경로 |\n| **DISCARDFILE** | 조건 불만족 레코드를 저장할 파일 경로 |\n| **INTO TABLE** | 데이터를 로드할 대상 테이블 |\n| **FIELDS TERMINATED BY** | 필드 구분자 지정 (예: ',' 또는 '\\t') |\n| **OPTIONALLY ENCLOSED BY** | 필드 감싸기 문자 (예: '\"') |\n| **TRAILING NULLCOLS** | 데이터가 부족한 후행 컬럼을 NULL로 처리 |\n\n**데이터 파일 지정 방법:**\n- `INFILE 'file.dat'` — 외부 파일 지정\n- `INFILE *` — 컨트롤 파일 내에 데이터 포함 (BEGINDATA 키워드 뒤에 기술)\n- 여러 `INFILE` 절로 다수의 데이터 파일을 순차적으로 로드 가능",
+          "key_points": [
+            "LOAD DATA는 컨트롤 파일의 시작을 표시하는 필수 키워드이다",
+            "INFILE로 데이터 파일 경로를 지정하며, INFILE *는 인라인 데이터를 의미한다",
+            "FIELDS TERMINATED BY로 CSV 등 구분자 방식 파일의 구분자를 지정한다",
+            "OPTIONALLY ENCLOSED BY로 필드 감싸기 문자를 지정한다",
+            "TRAILING NULLCOLS는 데이터가 부족한 컬럼을 NULL로 자동 처리한다",
+            "여러 INFILE 절로 다수의 데이터 파일을 하나의 컨트롤 파일로 로드할 수 있다"
+          ]
+        },
+        {
+          "title": "필드 사양 (Field Specifications)",
+          "content": "컨트롤 파일에서 각 컬럼에 대한 필드 사양을 다양하게 지정할 수 있다.\n\n**위치 기반 지정 (고정 길이 파일):**\n```\ncolumn_name POSITION(start:end) datatype\n```\n\n**필드 데이터 타입 지정:**\n\n| 데이터 타입 | 설명 | 사용 예 |\n|-------------|------|--------|\n| **CHAR(n)** | 문자 데이터 (n바이트) | emp_name CHAR(30) |\n| **INTEGER** | 바이너리 정수 | dept_id INTEGER |\n| **EXTERNAL INTEGER** | 텍스트 형식 정수 | emp_id INTEGER EXTERNAL |\n| **DECIMAL(p,s)** | 바이너리 소수 | salary DECIMAL(8,2) |\n| **DATE 'format'** | 날짜 데이터 | hire_date DATE 'YYYY-MM-DD' |\n| **TIMESTAMP** | 타임스탬프 | created_ts TIMESTAMP |\n| **FLOAT** | 부동소수점 | rate FLOAT EXTERNAL |\n\n**특수 필드 유형:**\n\n| 유형 | 설명 | 사용 예 |\n|------|------|--------|\n| **SEQUENCE** | 자동 증가 시퀀스 값 | id SEQUENCE(1, 1) |\n| **CONSTANT** | 고정 상수 값 | status CONSTANT 'ACTIVE' |\n| **FILLER** | 읽되 로드하지 않는 필드 | skip_col FILLER |\n| **SYSDATE** | 현재 시스템 날짜 | load_date SYSDATE |\n| **RECNUM** | 레코드 번호 | row_num RECNUM |\n\n**NULL 처리:**\n- `NULLIF column_name = BLANKS` — 공백이면 NULL로 처리\n- `NULLIF column_name = '특정값'` — 특정 값이면 NULL로 처리\n- `DEFAULTIF column_name = BLANKS` — 공백이면 기본값으로 처리\n\n**SQL 함수 적용:**\n```\ncolumn_name \"UPPER(:column_name)\"  -- 대문자 변환\ncolumn_name \"TO_NUMBER(:column_name, '999,999')\"  -- 숫자 변환\ncolumn_name \":col1 || '-' || :col2\"  -- 컬럼 결합\n```",
+          "key_points": [
+            "POSITION(start:end)으로 고정 길이 파일의 필드 위치를 지정한다",
+            "DATE 'format'으로 날짜 형식을 명시적으로 지정해야 한다",
+            "SEQUENCE로 자동 증가 값을, CONSTANT로 고정 값을 삽입할 수 있다",
+            "FILLER 타입은 데이터를 읽지만 테이블에 로드하지 않는다",
+            "NULLIF BLANKS로 공백 데이터를 NULL로 처리한다",
+            "SQL 함수를 적용하여 로드 시 데이터 변환이 가능하다",
+            "RECNUM으로 레코드 순번을 자동 할당할 수 있다"
+          ]
+        },
+        {
+          "title": "WHEN 절과 다중 테이블 로드 (WHEN Clause and Multiple Table Loading)",
+          "content": "SQL*Loader는 조건부 로드와 다중 테이블 로드를 지원하여 복잡한 데이터 적재 시나리오를 처리할 수 있다.\n\n**WHEN 절 — 조건부 로드:**\n```\nINTO TABLE employees\nWHEN (record_type = 'EMP')\n```\n\n- WHEN 절은 레코드의 특정 위치나 필드 값을 기준으로 조건을 평가한다\n- 조건을 만족하지 않는 레코드는 **Discard 파일**에 기록된다\n- 위치 기반 조건: `WHEN (1:3) = 'EMP'` (1~3바이트가 'EMP'인 경우)\n- 필드 기반 조건: `WHEN record_type = 'EMP'`\n- AND/OR로 복합 조건 가능: `WHEN (type = 'A') AND (status = '1')`\n\n**다중 INTO TABLE — 하나의 파일에서 여러 테이블 로드:**\n\n```\nLOAD DATA\nINFILE 'mixed_data.dat'\nINTO TABLE employees\nWHEN (1:3) = 'EMP'\n(\n  record_type FILLER POSITION(1:3),\n  emp_id POSITION(4:10),\n  emp_name POSITION(11:40)\n)\nINTO TABLE departments\nWHEN (1:3) = 'DEP'\n(\n  record_type FILLER POSITION(1:3),\n  dept_id POSITION(4:10),\n  dept_name POSITION(11:40)\n)\n```\n\n이 기법은 하나의 데이터 파일에 여러 유형의 레코드가 혼재되어 있을 때, 레코드 유형에 따라 서로 다른 테이블에 분배하여 로드할 수 있게 한다.\n\n**다중 테이블 로드의 유형:**\n\n| 유형 | 설명 |\n|------|------|\n| **조건 분기형** | WHEN 절로 레코드를 다른 테이블에 분배 |\n| **동일 레코드 분할형** | 하나의 레코드를 여러 테이블에 동시 로드 |\n| **순차 로드형** | 여러 INFILE과 INTO TABLE을 순차적으로 처리 |",
+          "key_points": [
+            "WHEN 절은 위치 기반(WHEN (1:3)='EMP') 또는 필드 기반 조건을 지원한다",
+            "WHEN 조건 불만족 레코드는 Discard 파일에 기록된다",
+            "여러 INTO TABLE 절로 하나의 파일에서 다중 테이블 로드가 가능하다",
+            "AND/OR로 복합 조건을 구성할 수 있다",
+            "동일 레코드를 여러 테이블에 동시에 로드하는 것도 가능하다"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "Express Mode (Express Mode)",
+      "content": "SQL*Loader **Express Mode**는 컨트롤 파일 없이 간편하게 데이터를 로드할 수 있는 모드로, 대상 테이블의 DDL(컬럼 정의)에서 자동으로 필드 매핑을 유추한다. Oracle 26ai에서 더욱 강화된 이 모드는 1Z0-182 시험의 핵심 출제 포인트이다.",
+      "sqlExamplesIds": ["sql06", "sql07"],
+      "subsections": [
+        {
+          "title": "Express Mode 정의 및 사용법 (Express Mode Definition and Usage)",
+          "content": "**Express Mode**는 Oracle 12c부터 도입된 SQL*Loader의 간소화된 실행 모드로, **컨트롤 파일을 자동으로 생성**하여 사용자가 별도의 컨트롤 파일을 작성하지 않아도 된다.\n\n**Express Mode 실행 조건:**\n1. `sqlldr` 명령에서 `CONTROL` 파라미터를 생략한다\n2. `TABLE` 파라미터로 대상 테이블을 지정한다\n3. 데이터 파일은 `DATA` 파라미터로 지정하거나, `테이블명.dat` 또는 `테이블명.csv` 파일이 현재 디렉토리에 존재해야 한다\n\n**기본 실행 형식:**\n```bash\nsqlldr userid=hr/password TABLE=employees DATA=employees.csv\n```\n\n**Express Mode의 자동 매핑 규칙:**\n\n| 항목 | 기본 동작 |\n|------|----------|\n| **필드 구분자** | 쉼표(,)로 구분 (CSV 형식) |\n| **필드 감싸기** | 선택적으로 큰따옴표(\")로 감싸기 |\n| **컬럼 순서** | 테이블 DDL의 컬럼 정의 순서대로 매핑 |\n| **날짜 형식** | DATE_FORMAT 파라미터 또는 NLS_DATE_FORMAT 사용 |\n| **로드 방식** | 기본적으로 APPEND 모드 |\n| **문자셋** | 데이터베이스 문자셋 사용 |\n\n**Express Mode에서 지원하는 데이터 타입:**\n\n| 데이터 타입 | 지원 여부 | 비고 |\n|-------------|-----------|------|\n| **VARCHAR2** | 지원 | 기본 매핑 타입 |\n| **NUMBER** | 지원 | 자동 변환 |\n| **DATE** | 지원 | DATE_FORMAT 필요 |\n| **TIMESTAMP** | 지원 | 형식 지정 가능 |\n| **CLOB** | 지원 | 인라인 데이터 |\n| **BLOB** | 미지원 | 컨트롤 파일 필요 |\n| **JSON** | 지원 (26ai) | Oracle 26ai에서 추가 |\n\n**Express Mode와 Standard Mode 비교:**\n\n| 항목 | Express Mode | Standard Mode |\n|------|-------------|---------------|\n| **컨트롤 파일** | 자동 생성 | 수동 작성 |\n| **설정 유연성** | 제한적 | 완전 제어 |\n| **사용 난이도** | 매우 간편 | 전문 지식 필요 |\n| **WHEN 절** | 미지원 | 지원 |\n| **다중 테이블** | 미지원 | 지원 |\n| **필드 변환** | 제한적 | SQL 함수 가능 |\n| **적합 용도** | 단순 CSV 로드 | 복잡한 데이터 매핑 |",
+          "key_points": [
+            "Express Mode는 CONTROL 파라미터를 생략하고 TABLE 파라미터를 지정하여 활성화한다",
+            "컨트롤 파일을 자동 생성하여 테이블 DDL 기반으로 컬럼을 매핑한다",
+            "기본적으로 CSV 형식(쉼표 구분, 큰따옴표 감싸기)을 가정한다",
+            "데이터 파일 미지정 시 테이블명.dat 또는 테이블명.csv를 자동으로 검색한다",
+            "기본 로드 방식은 APPEND(기존 데이터에 추가)이다",
+            "WHEN 절, 다중 테이블 로드 등 고급 기능은 지원하지 않는다",
+            "Oracle 26ai에서 JSON 타입 등 확장 데이터 타입 지원이 추가되었다",
+            "시험에서 Express Mode 관련 문제가 자주 출제되므로 실행 조건을 정확히 기억해야 한다"
+          ]
+        },
+        {
+          "title": "Express Mode 고급 옵션 및 특수 케이스 (Express Mode Advanced Options and Edge Cases)",
+          "content": "Express Mode에서도 다양한 커맨드라인 옵션을 활용하여 세밀한 제어가 가능하다.\n\n**날짜 형식 지정:**\n```bash\nsqlldr hr/password TABLE=employees DATA=emp.csv DATE_FORMAT='YYYY-MM-DD'\n```\n\n**Direct Path로 Express Mode 실행:**\n```bash\nsqlldr hr/password TABLE=employees DATA=emp.csv DIRECT=TRUE\n```\n\n**문자셋 지정:**\n```bash\nsqlldr hr/password TABLE=employees DATA=emp.csv CHARACTERSET=UTF8\n```\n\n**특수 동작 케이스:**\n\n| 상황 | 동작 |\n|------|------|\n| **테이블에 VIRTUAL 컬럼 존재** | VIRTUAL 컬럼은 자동으로 건너뜀 |\n| **테이블에 INVISIBLE 컬럼 존재** | INVISIBLE 컬럼은 매핑에서 제외 |\n| **데이터 파일 컬럼 수 < 테이블 컬럼 수** | 부족한 컬럼은 NULL로 처리 |\n| **데이터 파일 컬럼 수 > 테이블 컬럼 수** | 초과 컬럼은 무시됨 |\n| **NOT NULL 컬럼에 데이터 없음** | Bad 파일에 기록 |\n| **컬럼 내 구분자 포함** | 큰따옴표로 감싸서 처리 |\n\n**Express Mode에서 자동 생성되는 컨트롤 파일 확인:**\n\nExpress Mode로 실행하면 SQL*Loader가 자동으로 생성한 컨트롤 파일의 내용이 로그 파일에 포함된다. 이를 통해 자동 매핑이 올바른지 확인할 수 있다.\n\n**Express Mode 사용 시 주의사항:**\n- 테이블이 반드시 먼저 존재해야 한다 (DDL 기반 매핑)\n- 데이터 파일의 컬럼 순서가 테이블의 컬럼 순서와 일치해야 한다\n- 복잡한 데이터 변환이 필요한 경우 Standard Mode를 사용해야 한다\n- Identity 컬럼이 있는 경우 해당 컬럼의 데이터를 데이터 파일에서 제외하거나 적절히 처리해야 한다",
+          "key_points": [
+            "DATE_FORMAT 파라미터로 날짜 형식을 Express Mode에서도 지정할 수 있다",
+            "DIRECT=TRUE와 Express Mode를 조합하여 고속 로드가 가능하다",
+            "VIRTUAL 컬럼과 INVISIBLE 컬럼은 자동 매핑에서 제외된다",
+            "데이터 파일의 컬럼 순서가 테이블 DDL 정의 순서와 일치해야 한다",
+            "로그 파일에서 자동 생성된 컨트롤 파일 내용을 확인할 수 있다",
+            "테이블이 사전에 존재해야 Express Mode를 사용할 수 있다"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "로드 방식과 로드 모드 (Loading Methods and Load Modes)",
+      "content": "SQL*Loader는 데이터를 테이블에 적재하는 **로드 방식(Path)**과 기존 데이터 처리를 결정하는 **로드 모드(Mode)**를 구분하여 제공한다. 이 두 가지 개념을 정확히 이해하는 것이 시험에서 중요하다.",
+      "sqlExamplesIds": ["sql08", "sql09"],
+      "subsections": [
+        {
+          "title": "Conventional Path Load vs Direct Path Load (Conventional Path Load vs Direct Path Load)",
+          "content": "**Conventional Path Load**는 SQL INSERT 문을 통해 데이터를 로드하는 표준 방식이다.\n\n**Conventional Path의 동작 과정:**\n1. SQL*Loader가 **바인드 배열(Bind Array)**에 레코드를 수집한다\n2. BINDSIZE 또는 ROWS에 지정된 양만큼 채워지면 **INSERT 문을 실행**한다\n3. INSERT 문은 Oracle의 일반적인 SQL 처리 경로를 따른다\n4. SGA의 **버퍼 캐시**를 통해 데이터 블록에 기록된다\n5. **Redo Log**에 완전한 변경 기록이 생성된다\n6. **Undo**가 생성되어 롤백이 가능하다\n7. 모든 제약조건이 실시간으로 확인된다\n8. INSERT 트리거가 정상적으로 실행된다\n\n**Direct Path Load**는 SQL 레이어를 완전히 우회하여 데이터 블록을 직접 포맷하는 고속 방식이다.\n\n**Direct Path의 동작 과정:**\n1. SQL*Loader가 **컬럼 배열(Column Array)**에 데이터를 수집한다\n2. Oracle의 **Direct Path API**를 사용하여 데이터 블록을 직접 포맷한다\n3. 포맷된 블록을 테이블의 **HWM(High Water Mark) 위에 직접 기록**한다\n4. SQL 파싱, 버퍼 캐시, Undo 생성을 모두 건너뛴다\n5. Redo는 최소한으로만 생성한다 (NOLOGGING 시 거의 없음)\n6. 인덱스는 로드 완료 후 일괄 재구축한다\n\n**상세 비교:**\n\n| 항목 | Conventional Path | Direct Path |\n|------|-------------------|-------------|\n| **SQL 처리** | INSERT 문 실행 | SQL 우회 |\n| **버퍼 캐시** | 사용 | 미사용 |\n| **Redo 생성** | 전체 | 최소 (NOLOGGING 시 거의 없음) |\n| **Undo 생성** | 생성 | 미생성 |\n| **인덱스 유지** | 실시간 | 로드 후 재구축 |\n| **트리거** | 실행됨 | 실행 안됨 |\n| **제약조건** | 실시간 확인 | 로드 후 확인 |\n| **테이블 락** | Row-level 락 | 테이블-level 락 |\n| **다른 DML 가능** | 가능 | 불가 |\n| **클러스터 테이블** | 지원 | 미지원 |\n| **속도** | 보통 | 2~10배 빠름 |\n| **복구 가능성** | 완전 복구 가능 | NOLOGGING 시 제한 |\n\n**Direct Path Parallel:**\n```bash\nsqlldr userid=hr/password control=load.ctl DIRECT=TRUE PARALLEL=TRUE\n```\n- 여러 SQL*Loader 세션이 동시에 Direct Path Load를 수행한다\n- 각 세션이 서로 다른 임시 세그먼트에 데이터를 기록한다\n- 로드 완료 후 임시 세그먼트가 테이블에 병합된다\n- PARALLEL 사용 시 DIRECT=TRUE가 반드시 필요하다",
+          "key_points": [
+            "Conventional Path는 SQL INSERT를 사용하여 버퍼 캐시를 통해 데이터를 기록한다",
+            "Direct Path는 SQL 레이어를 우회하여 HWM 위에 데이터 블록을 직접 기록한다",
+            "Direct Path는 Conventional Path보다 2~10배 빠르다",
+            "Direct Path는 트리거를 실행하지 않고 제약조건을 로드 후 확인한다",
+            "Direct Path는 테이블 레벨 락을 사용하여 다른 DML을 차단한다",
+            "PARALLEL 사용 시 반드시 DIRECT=TRUE를 함께 지정해야 한다",
+            "Direct Path + NOLOGGING 조합은 가장 빠르지만 복구가 제한된다",
+            "클러스터 테이블은 Direct Path Load를 지원하지 않는다"
+          ]
+        },
+        {
+          "title": "로드 모드: INSERT, APPEND, REPLACE, TRUNCATE (Load Modes)",
+          "content": "SQL*Loader의 **로드 모드(Load Mode)**는 대상 테이블에 기존 데이터가 있을 때의 처리 방식을 결정한다.\n\n**로드 모드 상세 비교:**\n\n| 모드 | 테이블 상태 요건 | 동작 | 기존 데이터 |\n|------|------------------|------|-------------|\n| **INSERT** | 비어 있어야 함 | INSERT 수행 | 데이터 있으면 에러 발생 |\n| **APPEND** | 상관 없음 | 기존 데이터 뒤에 추가 | 유지 |\n| **REPLACE** | 상관 없음 | DELETE 후 INSERT | 모두 삭제 (DELETE 사용) |\n| **TRUNCATE** | 상관 없음 | TRUNCATE 후 INSERT | 모두 삭제 (TRUNCATE 사용) |\n\n**각 모드의 상세 동작:**\n\n**1. INSERT 모드 (기본값):**\n- 테이블이 **비어 있어야** 한다\n- 테이블에 데이터가 있으면 `ORA-26002` 에러가 발생한다\n- 초기 데이터 적재 시 가장 안전한 모드이다\n\n**2. APPEND 모드:**\n- 기존 데이터를 유지하면서 **새 데이터를 추가**한다\n- Express Mode의 **기본 로드 모드**이다\n- 가장 많이 사용되는 모드이며, 일상적인 데이터 적재에 적합하다\n- 시험에서 \"기존 데이터에 추가\" 관련 문제의 핵심 키워드이다\n\n**3. REPLACE 모드:**\n- 기존 데이터를 **DELETE 문**으로 삭제한 후 새 데이터를 INSERT한다\n- DELETE이므로 **Undo가 생성**되고 **롤백이 가능**하다\n- 대량 데이터가 있는 테이블에서는 DELETE가 느릴 수 있다\n- 테이블에 대한 **DELETE 권한**이 필요하다\n\n**4. TRUNCATE 모드:**\n- 기존 데이터를 **TRUNCATE TABLE**로 제거한 후 새 데이터를 INSERT한다\n- TRUNCATE는 **DDL 문**이므로 Undo를 생성하지 않아 DELETE보다 빠르다\n- **롤백이 불가능**하므로 주의가 필요하다\n- 테이블에 대한 **DROP 권한** 또는 **TRUNCATE 권한**이 필요하다\n\n**REPLACE vs TRUNCATE 비교:**\n\n| 항목 | REPLACE | TRUNCATE |\n|------|---------|----------|\n| **삭제 방식** | DELETE (DML) | TRUNCATE (DDL) |\n| **Undo 생성** | 생성 | 미생성 |\n| **롤백 가능** | 가능 | 불가 |\n| **속도** | 느림 (대량 데이터) | 빠름 |\n| **필요 권한** | DELETE | DROP/TRUNCATE |\n| **HWM 변경** | 유지 | 리셋 |",
+          "key_points": [
+            "INSERT 모드는 테이블이 비어 있어야 하며, 기본 로드 모드이다",
+            "APPEND 모드는 기존 데이터를 유지하면서 새 데이터를 추가한다",
+            "REPLACE 모드는 DELETE 후 INSERT로, Undo가 생성되어 롤백이 가능하다",
+            "TRUNCATE 모드는 TRUNCATE TABLE 후 INSERT로, 롤백이 불가능하다",
+            "Express Mode의 기본 로드 모드는 APPEND이다",
+            "REPLACE는 DELETE 권한, TRUNCATE는 DROP/TRUNCATE 권한이 필요하다",
+            "TRUNCATE는 HWM을 리셋하지만 REPLACE는 HWM을 유지한다"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "에러 처리 및 로그 분석 (Error Handling and Log Analysis)",
+      "content": "SQL*Loader는 **Bad 파일**, **Discard 파일**, **로그 파일**의 세 가지 출력 파일을 통해 체계적인 에러 처리와 실행 결과 분석을 지원한다.",
+      "sqlExamplesIds": ["sql10", "sql11"],
+      "subsections": [
+        {
+          "title": "Bad 파일과 Discard 파일 (Bad File and Discard File)",
+          "content": "**Bad 파일 (.bad):**\n\nBad 파일에는 다음과 같은 이유로 **거부된 레코드(Rejected Records)**가 기록된다.\n\n| 거부 사유 | 설명 |\n|-----------|------|\n| **데이터 타입 불일치** | 숫자 컬럼에 문자 데이터 등 |\n| **NOT NULL 위반** | 필수 컬럼에 NULL 값 |\n| **UNIQUE 제약조건 위반** | 중복 키 값 |\n| **CHECK 제약조건 위반** | 검증 조건 불만족 |\n| **데이터 길이 초과** | 컬럼 크기보다 큰 데이터 |\n| **날짜 형식 불일치** | DATE 형식과 데이터 불일치 |\n\n- Bad 파일의 형식은 원본 데이터 파일과 동일하다\n- Bad 파일의 레코드를 수정한 후 다시 SQL*Loader로 로드할 수 있다\n- `ERRORS` 파라미터(기본 50)로 허용 에러 수를 제한하며, 초과 시 로드가 중단된다\n- `ERRORS=0`으로 설정하면 첫 번째 에러에서 즉시 중단된다\n- `ERRORS=999999999`로 설정하면 사실상 무제한 에러를 허용한다\n\n**Discard 파일 (.dsc):**\n\nDiscard 파일에는 **WHEN 절의 조건을 만족하지 않는 레코드**가 기록된다.\n\n- `DISCARDFILE` 파라미터로 경로를 지정해야 생성된다\n- `DISCARDMAX` 파라미터로 최대 discard 수를 제한할 수 있다\n- DISCARDMAX를 초과하면 로드가 중단된다\n- WHEN 절이 없으면 Discard 파일은 생성되지 않는다\n\n**레코드 처리 흐름:**\n```\n원본 레코드 → [형식 검증] → 실패 → Bad 파일\n                ↓ 성공\n            [WHEN 조건] → 불만족 → Discard 파일\n                ↓ 만족\n            [DB 제약조건] → 위반 → Bad 파일\n                ↓ 통과\n            테이블에 로드 완료\n```",
+          "key_points": [
+            "Bad 파일에는 데이터 타입 불일치, 제약조건 위반 등으로 거부된 레코드가 기록된다",
+            "Discard 파일에는 WHEN 조건을 만족하지 않는 레코드가 기록된다",
+            "ERRORS 파라미터(기본 50)로 허용 에러 수를 제한한다",
+            "Bad 파일의 형식은 원본 데이터와 동일하여 수정 후 재로드가 가능하다",
+            "DISCARDFILE을 명시적으로 지정해야 Discard 파일이 생성된다",
+            "WHEN 절이 없으면 Discard 파일은 생성되지 않는다"
+          ]
+        },
+        {
+          "title": "로그 파일 분석 및 성능 튜닝 (Log File Analysis and Performance Tuning)",
+          "content": "SQL*Loader **로그 파일**은 실행 결과, 통계 정보, 에러 상세를 기록하는 핵심 파일이다.\n\n**로그 파일의 주요 섹션:**\n\n| 섹션 | 내용 |\n|------|------|\n| **Header** | SQL*Loader 버전, 실행 시간, 연결 정보 |\n| **Control File** | 사용된 컨트롤 파일 내용 (Express Mode 시 자동 생성 내용) |\n| **Table Information** | 대상 테이블명, 로드 모드 |\n| **Column Mapping** | 각 컬럼의 데이터 타입과 매핑 정보 |\n| **Statistics** | 로드 행 수, 건너뛴 행 수, 거부 행 수, Discard 행 수 |\n| **Elapsed Time** | 총 소요 시간 |\n| **Error Messages** | 발생한 에러의 상세 메시지 |\n\n**로그 파일 통계 예시:**\n```\nTable EMPLOYEES:\n  12500 Rows successfully loaded.\n  35 Rows not loaded due to data errors.\n  150 Rows not loaded because all WHEN clauses were failed.\n  0 Rows not loaded because all fields were null.\n\nTotal logical records skipped:    0\nTotal logical records read:       12685\nTotal logical records rejected:   35\nTotal logical records discarded:  150\n\nElapsed time was:     00:00:45.23\nCPU time was:         00:00:12.56\n```\n\n**성능 튜닝 파라미터:**\n\n| 파라미터 | 기본값 | 튜닝 방향 | 효과 |\n|----------|--------|-----------|------|\n| **DIRECT** | FALSE | TRUE로 변경 | SQL 우회로 2~10배 성능 향상 |\n| **PARALLEL** | FALSE | TRUE로 변경 | 병렬 Direct Path로 추가 성능 향상 |\n| **ROWS** | 256 (Conv.) | 증가 (5000~10000) | 커밋 빈도 감소로 오버헤드 절감 |\n| **BINDSIZE** | 1MB | 증가 (10~64MB) | 바인드 배열 크기 증가 |\n| **READSIZE** | 1MB | 증가 (10~64MB) | 읽기 버퍼 크기 증가 |\n| **COLUMNARRAYROWS** | 5000 | 증가 | Direct Path 컬럼 배열 행 수 |\n| **STREAMSIZE** | 256000 | 증가 | Direct Path 스트림 버퍼 |\n| **MULTITHREADING** | 플랫폼 의존 | TRUE | 읽기/변환 병렬 실행 |\n| **NOLOGGING** | - | 테이블에 설정 | Redo 최소화 (Direct Path 시) |\n\n**성능 튜닝 우선순위:**\n1. **DIRECT=TRUE** 적용 (가장 큰 효과)\n2. **NOLOGGING** 설정 (Direct Path 시)\n3. **BINDSIZE, READSIZE** 증가 (Conventional Path 시)\n4. **ROWS** 증가 (커밋 오버헤드 감소)\n5. **PARALLEL=TRUE** 적용 (대규모 데이터 시)\n6. **MULTITHREADING=TRUE** 적용",
+          "key_points": [
+            "로그 파일에는 실행 통계, 에러 상세, 컬럼 매핑 정보가 기록된다",
+            "성능 튜닝의 최우선은 DIRECT=TRUE 적용이다",
+            "Conventional Path에서는 BINDSIZE와 READSIZE 증가가 효과적이다",
+            "Direct Path에서는 NOLOGGING 설정이 추가적인 성능 향상을 가져온다",
+            "ROWS 값 증가로 커밋 빈도를 줄여 오버헤드를 절감한다",
+            "MULTITHREADING은 데이터 읽기와 변환을 병렬로 처리한다",
+            "로그 파일의 통계로 로드 성공/실패/Discard 건수를 확인한다"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "기타 로드 유틸리티와의 비교 (Comparison with Other Loading Utilities)",
+      "content": "Oracle은 SQL*Loader 외에도 **External Table**과 **Data Pump**를 제공하며, 각 도구의 특성을 이해하고 적절한 상황에서 선택하는 것이 중요하다.",
+      "sqlExamplesIds": ["sql12"],
+      "subsections": [
+        {
+          "title": "SQL*Loader vs External Table vs Data Pump 비교 (Comparison)",
+          "content": "Oracle에서 대량 데이터를 로드하는 세 가지 주요 방법을 상세히 비교한다.\n\n**종합 비교표:**\n\n| 항목 | SQL*Loader | External Table | Data Pump (impdp) |\n|------|------------|----------------|--------------------|\n| **실행 위치** | 클라이언트 | 서버 | 서버 |\n| **데이터 소스** | 플랫 파일 | 플랫 파일 | 덤프 파일 (.dmp) |\n| **SQL 접근** | sqlldr 명령어 | SELECT 문 | impdp 명령어 |\n| **Direct Path** | 지원 | 지원 (ORACLE_LOADER) | 지원 |\n| **병렬 처리** | PARALLEL 옵션 | Oracle Parallel Query | PARALLEL 옵션 |\n| **데이터 변환** | 제한적 SQL 함수 | 완전한 SQL 지원 | 제한적 |\n| **조건부 로드** | WHEN 절 | WHERE 절 | QUERY 옵션 |\n| **네트워크 전송** | 불필요 (클라이언트) | 서버에 파일 필요 | 네트워크 모드 지원 |\n| **Oracle 간 이동** | 미지원 | 미지원 | 지원 |\n| **메타데이터 포함** | 미포함 | 미포함 | 포함 |\n| **Express Mode** | 지원 | 해당 없음 | 해당 없음 |\n\n**사용 시나리오별 권장 도구:**\n\n| 시나리오 | 권장 도구 | 이유 |\n|----------|-----------|------|\n| **간단한 CSV 파일 로드** | SQL*Loader Express Mode | 가장 간편 |\n| **복잡한 데이터 매핑** | SQL*Loader Standard Mode | 유연한 컨트롤 파일 |\n| **SQL로 데이터 접근 필요** | External Table | SELECT 문 사용 가능 |\n| **ETL 파이프라인** | External Table | CTAS/INSERT AS SELECT 가능 |\n| **Oracle 간 데이터 이동** | Data Pump | 메타데이터 포함 이동 |\n| **대규모 일회성 로드** | SQL*Loader Direct Path | 최고 성능 |\n| **정기적 배치 로드** | External Table | SQL 스크립트로 자동화 용이 |\n\n**External Table의 ORACLE_LOADER 접근 드라이버:**\n\nExternal Table은 내부적으로 SQL*Loader의 엔진을 사용한다. `ORACLE_LOADER` 접근 드라이버로 생성된 외부 테이블은 SQL*Loader의 컨트롤 파일 문법과 유사한 정의를 사용한다.\n\n```sql\nCREATE TABLE ext_emp (\n  emp_id NUMBER,\n  emp_name VARCHAR2(50)\n)\nORGANIZATION EXTERNAL (\n  TYPE ORACLE_LOADER\n  DEFAULT DIRECTORY ext_dir\n  ACCESS PARAMETERS (\n    RECORDS DELIMITED BY NEWLINE\n    FIELDS TERMINATED BY ','\n  )\n  LOCATION ('emp.csv')\n);\n```\n\n**SQL*Loader EXTERNAL_TABLE 파라미터:**\n\n`EXTERNAL_TABLE` 파라미터를 사용하면 SQL*Loader가 외부 테이블 방식으로 로드를 수행하거나, 외부 테이블 DDL을 생성할 수 있다.\n\n| 값 | 동작 |\n|----|------|\n| **NOT_USED** | 기본값, 일반 SQL*Loader 실행 |\n| **GENERATE_ONLY** | 외부 테이블 DDL만 생성 (실행 안 함) |\n| **EXECUTE** | 외부 테이블 방식으로 로드 실행 |",
+          "key_points": [
+            "SQL*Loader는 클라이언트 측, External Table과 Data Pump는 서버 측에서 실행된다",
+            "External Table은 SQL SELECT로 접근하여 완전한 SQL 변환이 가능하다",
+            "Data Pump는 Oracle 간 메타데이터 포함 이동에 적합하다",
+            "External Table은 내부적으로 ORACLE_LOADER 드라이버(SQL*Loader 엔진)를 사용한다",
+            "EXTERNAL_TABLE=GENERATE_ONLY로 외부 테이블 DDL을 자동 생성할 수 있다",
+            "간단한 CSV 로드는 Express Mode, 복잡한 ETL은 External Table이 권장된다"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "기본 sqlldr 명령어 실행 (Basic sqlldr Command)",
+      "sql": "sqlldr userid=hr/password@orcl control=emp_load.ctl log=emp_load.log bad=emp_load.bad",
+      "description": "SQL*Loader의 가장 기본적인 실행 형태이다. userid로 접속 정보를 지정하고, control로 컨트롤 파일, log로 로그 파일, bad로 Bad 파일 경로를 각각 지정한다. 실행 결과는 로그 파일에 기록되며, 거부된 레코드는 Bad 파일에 저장된다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "sqlldr 도움말 및 버전 확인 (sqlldr Help and Version)",
+      "sql": "-- SQL*Loader 도움말 표시 (모든 파라미터 목록 확인)\nsqlldr help=y\n\n-- SQL*Loader 버전 확인\nsqlldr version=y\n\n-- 파라미터를 파라미터 파일로 전달\nsqlldr parfile=load_params.par",
+      "description": "sqlldr help=y 명령으로 모든 사용 가능한 파라미터 목록을 확인할 수 있다. parfile 옵션을 사용하면 자주 사용하는 파라미터를 파일에 저장하고 재사용할 수 있어 복잡한 로드 작업에 유용하다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "구분자 방식 컨트롤 파일 예제 (Delimited Control File Example)",
+      "sql": "-- emp_load.ctl 컨트롤 파일 내용\nLOAD DATA\nINFILE 'employees.csv'\nBADFILE 'employees.bad'\nDISCARDFILE 'employees.dsc'\nAPPEND\nINTO TABLE employees\nFIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'\nTRAILING NULLCOLS\n(\n  employee_id    INTEGER EXTERNAL,\n  first_name     CHAR(50),\n  last_name      CHAR(50),\n  email          CHAR(100),\n  hire_date      DATE 'YYYY-MM-DD',\n  salary         DECIMAL EXTERNAL,\n  department_id  INTEGER EXTERNAL NULLIF department_id = BLANKS\n)\n\n-- 실행 명령\nsqlldr userid=hr/password control=emp_load.ctl",
+      "description": "CSV 형식 데이터 파일을 로드하는 컨트롤 파일 예제이다. FIELDS TERMINATED BY ','로 쉼표 구분자를, OPTIONALLY ENCLOSED BY '\"'로 큰따옴표 감싸기를 지정한다. TRAILING NULLCOLS는 데이터 부족 시 NULL 처리를 하며, NULLIF BLANKS로 공백을 NULL로 변환한다. APPEND 모드로 기존 데이터에 추가한다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "고정 길이 컨트롤 파일 예제 (Fixed Length Control File Example)",
+      "sql": "-- fixed_load.ctl 컨트롤 파일 내용\nLOAD DATA\nINFILE 'employees_fixed.dat'\nINSERT\nINTO TABLE employees\n(\n  employee_id   POSITION(1:5)    INTEGER EXTERNAL,\n  first_name    POSITION(6:25)   CHAR,\n  last_name     POSITION(26:45)  CHAR,\n  hire_date     POSITION(46:55)  DATE 'YYYY-MM-DD',\n  salary        POSITION(56:65)  DECIMAL EXTERNAL,\n  dept_id       POSITION(66:70)  INTEGER EXTERNAL\n)\n\n-- 실행 명령\nsqlldr userid=hr/password control=fixed_load.ctl",
+      "description": "고정 길이(Fixed Length) 데이터 파일을 로드하는 컨트롤 파일 예제이다. POSITION(start:end)으로 각 필드의 바이트 위치를 명시적으로 지정한다. INSERT 모드이므로 테이블이 비어 있어야 하며, 데이터가 이미 존재하면 에러가 발생한다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "다중 테이블 로드 및 특수 필드 예제 (Multi-Table Load with Special Fields)",
+      "sql": "-- multi_load.ctl 컨트롤 파일 내용\nLOAD DATA\nINFILE 'mixed_data.dat'\nAPPEND\nINTO TABLE employees\nWHEN (1:3) = 'EMP'\nFIELDS TERMINATED BY '|'\n(\n  record_type   FILLER,\n  employee_id   SEQUENCE(MAX, 1),\n  first_name    CHAR(50),\n  last_name     CHAR(50) \"UPPER(:last_name)\",\n  hire_date     SYSDATE,\n  load_seq      RECNUM,\n  status        CONSTANT 'ACTIVE'\n)\nINTO TABLE departments\nWHEN (1:3) = 'DEP'\nFIELDS TERMINATED BY '|'\n(\n  record_type   FILLER,\n  department_id INTEGER EXTERNAL,\n  dept_name     CHAR(100)\n)\n\n-- 실행 명령\nsqlldr userid=hr/password control=multi_load.ctl",
+      "description": "하나의 데이터 파일에서 여러 테이블에 조건부로 로드하는 고급 예제이다. WHEN 절로 레코드 유형(1~3바이트)에 따라 employees 또는 departments 테이블로 분배한다. FILLER는 읽지만 로드하지 않는 필드, SEQUENCE는 자동 증가, SYSDATE는 현재 일자, RECNUM은 레코드 번호, CONSTANT는 고정값을 삽입한다. UPPER() SQL 함수로 로드 시 데이터를 변환한다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "Express Mode 기본 실행 (Express Mode Basic Execution)",
+      "sql": "-- 기본 Express Mode 실행 (컨트롤 파일 없이)\nsqlldr userid=hr/password TABLE=employees DATA=employees.csv\n\n-- 날짜 형식 지정과 함께 Express Mode 실행\nsqlldr userid=hr/password TABLE=employees DATA=employees.csv DATE_FORMAT='YYYY-MM-DD'\n\n-- 데이터 파일 미지정 시 (테이블명.csv 또는 테이블명.dat를 자동 검색)\nsqlldr userid=hr/password TABLE=employees\n\n-- Express Mode + Direct Path\nsqlldr userid=hr/password TABLE=employees DATA=employees.csv DIRECT=TRUE\n\n-- Express Mode + 에러 허용 및 로그 파일 지정\nsqlldr userid=hr/password TABLE=employees DATA=employees.csv ERRORS=100 LOG=emp_express.log",
+      "description": "Express Mode는 CONTROL 파라미터를 생략하고 TABLE 파라미터를 지정하면 자동으로 활성화된다. 테이블의 DDL에서 컬럼 순서와 타입을 유추하여 자동으로 매핑한다. 기본적으로 CSV 형식(쉼표 구분, 큰따옴표 감싸기)을 가정하며, APPEND 모드로 동작한다. DATE_FORMAT으로 날짜 형식을, DIRECT=TRUE로 고속 로드를 활성화할 수 있다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "Express Mode 문자셋 및 고급 옵션 (Express Mode with Advanced Options)",
+      "sql": "-- UTF8 문자셋 데이터 파일 로드\nsqlldr userid=hr/password TABLE=employees DATA=emp_utf8.csv CHARACTERSET=UTF8\n\n-- 로드 건수 제한 및 건너뛰기\nsqlldr userid=hr/password TABLE=employees DATA=employees.csv SKIP=100 LOAD=5000\n\n-- 멀티스레딩 활성화\nsqlldr userid=hr/password TABLE=employees DATA=employees.csv MULTITHREADING=TRUE\n\n-- 외부 테이블 DDL 자동 생성\nsqlldr userid=hr/password TABLE=employees DATA=employees.csv EXTERNAL_TABLE=GENERATE_ONLY",
+      "description": "Express Mode에서도 다양한 고급 옵션을 사용할 수 있다. CHARACTERSET으로 데이터 파일의 문자셋을 지정하고, SKIP과 LOAD로 레코드 범위를 제한한다. MULTITHREADING=TRUE로 병렬 처리를 활성화하면 대용량 파일 처리 성능이 향상된다. EXTERNAL_TABLE=GENERATE_ONLY는 SQL*Loader 대신 외부 테이블로 로드하기 위한 DDL을 자동 생성한다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "Direct Path Load 실행 (Direct Path Load Execution)",
+      "sql": "-- Direct Path Load 기본 실행\nsqlldr userid=hr/password control=emp_load.ctl DIRECT=TRUE\n\n-- Direct Path + 병렬 로드 (여러 세션 동시 실행)\n-- 세션 1:\nsqlldr userid=hr/password control=emp_load1.ctl DIRECT=TRUE PARALLEL=TRUE\n-- 세션 2:\nsqlldr userid=hr/password control=emp_load2.ctl DIRECT=TRUE PARALLEL=TRUE\n\n-- Direct Path + NOLOGGING 테이블 설정 (로드 전)\nALTER TABLE employees NOLOGGING;\nsqlldr userid=hr/password control=emp_load.ctl DIRECT=TRUE\nALTER TABLE employees LOGGING;\n\n-- Direct Path 후 인덱스 재구축\nALTER INDEX emp_pk REBUILD;\nALTER INDEX emp_name_idx REBUILD;",
+      "description": "DIRECT=TRUE로 Direct Path Load를 활성화하면 SQL 레이어를 우회하여 데이터 블록을 직접 생성한다. PARALLEL=TRUE를 추가하면 여러 세션이 동시에 Direct Path Load를 수행할 수 있다 (반드시 DIRECT=TRUE와 함께). NOLOGGING 설정을 추가하면 Redo 생성을 최소화하여 최고 성능을 달성한다. Direct Path Load 후에는 반드시 인덱스 상태를 확인하고 필요시 재구축해야 한다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "로드 모드별 실행 예제 (Load Mode Examples)",
+      "sql": "-- INSERT 모드 (테이블이 비어 있어야 함)\nLOAD DATA\nINFILE 'employees.csv'\nINSERT\nINTO TABLE employees\nFIELDS TERMINATED BY ','\n(employee_id, first_name, last_name)\n\n-- APPEND 모드 (기존 데이터에 추가)\nLOAD DATA\nINFILE 'new_employees.csv'\nAPPEND\nINTO TABLE employees\nFIELDS TERMINATED BY ','\n(employee_id, first_name, last_name)\n\n-- REPLACE 모드 (DELETE 후 INSERT)\nLOAD DATA\nINFILE 'employees_full.csv'\nREPLACE\nINTO TABLE employees\nFIELDS TERMINATED BY ','\n(employee_id, first_name, last_name)\n\n-- TRUNCATE 모드 (TRUNCATE 후 INSERT)\nLOAD DATA\nINFILE 'employees_full.csv'\nTRUNCATE\nINTO TABLE employees\nFIELDS TERMINATED BY ','\n(employee_id, first_name, last_name)",
+      "description": "4가지 로드 모드의 컨트롤 파일 예제이다. INSERT는 빈 테이블에만 가능(데이터 존재 시 에러), APPEND는 기존 데이터를 유지하면서 추가, REPLACE는 DELETE문으로 기존 데이터 삭제 후 INSERT(롤백 가능), TRUNCATE는 TRUNCATE TABLE로 제거 후 INSERT(롤백 불가, 더 빠름)한다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "SQL*Loader 세션 모니터링 (Monitoring SQL*Loader Sessions)",
+      "sql": "-- 현재 실행 중인 SQL*Loader 세션 확인\nSELECT s.sid, s.serial#, s.username, s.program, s.status,\n       s.sql_id, s.event\nFROM V$SESSION s\nWHERE s.program LIKE '%sqlldr%'\n   OR s.module LIKE '%SQL*Loader%';\n\n-- Direct Path Load 진행률 모니터링\nSELECT sid, opname, target, sofar, totalwork,\n       ROUND(sofar/NULLIF(totalwork,0)*100, 2) AS pct_complete,\n       time_remaining AS est_seconds_remaining\nFROM V$SESSION_LONGOPS\nWHERE opname LIKE '%SQL*Loader%'\n  AND sofar <> totalwork;\n\n-- 로드 중 락 정보 확인\nSELECT l.sid, l.type, l.lmode, l.request,\n       o.object_name, o.object_type\nFROM V$LOCK l\nJOIN DBA_OBJECTS o ON l.id1 = o.object_id\nWHERE l.type IN ('TM', 'TX')\n  AND l.sid IN (SELECT sid FROM V$SESSION WHERE program LIKE '%sqlldr%');",
+      "description": "V$SESSION에서 SQL*Loader 프로세스를 식별하고, V$SESSION_LONGOPS에서 Direct Path Load의 실시간 진행률을 모니터링한다. V$LOCK 뷰에서 로드 중 발생하는 테이블 락(TM)과 트랜잭션 락(TX) 정보를 확인하여 다른 세션과의 경합 상황을 파악할 수 있다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "Direct Path Load 후 인덱스 및 제약조건 확인 (Post-Load Index and Constraint Check)",
+      "sql": "-- Direct Path Load 후 인덱스 상태 확인\nSELECT index_name, index_type, status\nFROM DBA_INDEXES\nWHERE table_name = 'EMPLOYEES'\n  AND owner = 'HR';\n\n-- UNUSABLE 인덱스 재구축\nALTER INDEX hr.emp_pk REBUILD;\nALTER INDEX hr.emp_name_idx REBUILD PARALLEL 4;\n\n-- 제약조건 상태 확인\nSELECT constraint_name, constraint_type, status, validated\nFROM DBA_CONSTRAINTS\nWHERE table_name = 'EMPLOYEES'\n  AND owner = 'HR';\n\n-- 비활성화된 제약조건 재활성화\nALTER TABLE hr.employees ENABLE VALIDATE CONSTRAINT emp_dept_fk;\n\n-- 로드 후 테이블 통계 갱신\nEXEC DBMS_STATS.GATHER_TABLE_STATS('HR', 'EMPLOYEES');",
+      "description": "Direct Path Load 후에는 인덱스가 UNUSABLE 상태가 될 수 있으므로 DBA_INDEXES에서 상태를 반드시 확인한다. UNUSABLE 인덱스는 ALTER INDEX REBUILD로 재구축하며, PARALLEL 옵션으로 병렬 재구축이 가능하다. DBA_CONSTRAINTS에서 제약조건 상태를 확인하고, 비활성화된 제약조건을 ENABLE VALIDATE로 재활성화한다. 로드 후 DBMS_STATS.GATHER_TABLE_STATS로 통계를 갱신하여 옵티마이저가 최적의 실행 계획을 생성하도록 한다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "External Table과의 비교 - ORACLE_LOADER 예제 (External Table Comparison)",
+      "sql": "-- 디렉토리 오브젝트 생성\nCREATE OR REPLACE DIRECTORY ext_data_dir AS '/u01/data';\nGRANT READ ON DIRECTORY ext_data_dir TO hr;\n\n-- External Table 생성 (SQL*Loader의 ORACLE_LOADER 드라이버 사용)\nCREATE TABLE hr.ext_employees (\n  employee_id   NUMBER,\n  first_name    VARCHAR2(50),\n  last_name     VARCHAR2(50),\n  email         VARCHAR2(100),\n  hire_date     DATE,\n  salary        NUMBER\n)\nORGANIZATION EXTERNAL (\n  TYPE ORACLE_LOADER\n  DEFAULT DIRECTORY ext_data_dir\n  ACCESS PARAMETERS (\n    RECORDS DELIMITED BY NEWLINE\n    BADFILE ext_data_dir:'emp_ext.bad'\n    LOGFILE ext_data_dir:'emp_ext.log'\n    FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'\n    MISSING FIELD VALUES ARE NULL\n    (\n      employee_id, first_name, last_name,\n      email, hire_date DATE 'YYYY-MM-DD', salary\n    )\n  )\n  LOCATION ('employees.csv')\n)\nREJECT LIMIT UNLIMITED;\n\n-- External Table을 통한 데이터 조회 및 로드\nSELECT * FROM hr.ext_employees WHERE salary > 5000;\n\n-- External Table에서 실제 테이블로 CTAS 로드\nCREATE TABLE hr.employees_new AS\nSELECT * FROM hr.ext_employees;\n\n-- SQL*Loader에서 External Table DDL 자동 생성\n-- sqlldr userid=hr/password control=emp_load.ctl EXTERNAL_TABLE=GENERATE_ONLY",
+      "description": "External Table은 ORACLE_LOADER 접근 드라이버를 사용하여 플랫 파일을 SQL로 직접 조회할 수 있게 한다. SQL*Loader와 유사한 문법(FIELDS TERMINATED BY, OPTIONALLY ENCLOSED BY 등)을 사용하지만, SELECT 문으로 접근이 가능하여 WHERE 조건, JOIN, 집계 등 SQL의 모든 기능을 활용할 수 있다. CTAS(CREATE TABLE AS SELECT)로 실제 테이블에 데이터를 적재할 수 있다. SQL*Loader의 EXTERNAL_TABLE=GENERATE_ONLY 옵션으로 컨트롤 파일을 External Table DDL로 자동 변환할 수도 있다."
+    }
+  ],
+  "keywords": [
+    "SQL*Loader",
+    "sqlldr",
+    "Express Mode",
+    "Control File",
+    "LOAD DATA",
+    "INFILE",
+    "INTO TABLE",
+    "FIELDS TERMINATED BY",
+    "Conventional Path Load",
+    "Direct Path Load",
+    "INSERT Mode",
+    "APPEND Mode",
+    "REPLACE Mode",
+    "TRUNCATE Mode",
+    "Bad File",
+    "Discard File",
+    "WHEN Clause",
+    "BINDSIZE",
+    "READSIZE",
+    "ROWS",
+    "DIRECT",
+    "PARALLEL",
+    "MULTITHREADING",
+    "TRAILING NULLCOLS",
+    "SEQUENCE",
+    "FILLER",
+    "CONSTANT",
+    "NULLIF BLANKS",
+    "External Table",
+    "ORACLE_LOADER",
+    "EXTERNAL_TABLE",
+    "COLUMNARRAYROWS",
+    "STREAMSIZE",
+    "NOLOGGING",
+    "HWM (High Water Mark)",
+    "V$SESSION_LONGOPS",
+    "DBA_INDEXES",
+    "POSITION",
+    "OPTIONALLY ENCLOSED BY",
+    "DATE_FORMAT"
+  ]
+}

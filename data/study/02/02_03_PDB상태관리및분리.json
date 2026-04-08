@@ -1,0 +1,333 @@
+{
+  "id": "02_03",
+  "title": "PDB 상태 관리 및 분리 (PDB State Management & Unplugging)",
+  "chapter": "02. 멀티테넌트 아키텍처 (CDB 및 PDB 구성)",
+  "description": "PDB의 오픈 모드(READ WRITE, READ ONLY, MOUNTED) 상태 전환, SAVE STATE/DISCARD STATE를 통한 CDB 재시작 시 자동 오픈 설정, PDB Unplug/Plug In 과정, 단일 아카이브 파일(.pdb)과 XML 메타데이터 방식의 비교, 호환성 검사 및 PDB 삭제까지 PDB 라이프사이클 관리 전반을 다룹니다.",
+  "oracle26ai_changes": [
+    "Oracle 23ai부터 PDB를 Unplug할 때 단일 아카이브 파일(.pdb) 형식이 기본 권장 방식으로 자리잡았으며, 압축 옵션이 향상되었습니다.",
+    "Oracle 26ai에서는 PDB의 SAVE STATE 메커니즘이 CDB Fleet Management와 통합되어, 중앙 관리 환경에서 여러 CDB에 걸친 PDB 상태를 일괄 관리할 수 있습니다.",
+    "PDB Plug In 시 호환성 검사(DBMS_PDB.CHECK_PLUG_COMPATIBILITY)에 새로운 검증 항목이 추가되어, 캐릭터셋 및 Endian 호환성 외에 컴포넌트 버전 불일치도 세밀하게 감지합니다.",
+    "Oracle 26ai에서 PDB_PLUG_IN_VIOLATIONS 뷰에 자동 해결 가능한 위반 사항(AUTO_FIXABLE 컬럼)이 추가되어 Plug In 후 자동 수정 프로세스가 지원됩니다.",
+    "PDB 오픈 시 RESTRICTED 모드의 세분화가 이루어져, READ ONLY WITH APPLY 모드에서 Active Data Guard 환경의 PDB 관리가 더욱 유연해졌습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "PDB 상태 관리 개요 (PDB State Management Overview)",
+      "content": "PDB(Pluggable Database)는 CDB(Container Database) 내에서 독립적으로 **오픈 모드(Open Mode)**를 가지며, CDB의 시작/종료와는 별도로 각 PDB의 상태를 개별적으로 관리할 수 있습니다.\n\nPDB의 라이프사이클에서 상태 관리와 분리(Unplug)는 핵심적인 운영 작업입니다.\n\n### PDB 상태 관리 핵심 구성요소\n\n| 구성요소 | 설명 |\n|---|---|\n| **PDB 오픈 모드** | READ WRITE, READ ONLY, MOUNTED 세 가지 기본 모드 |\n| **SAVE STATE** | CDB 재시작 시 PDB를 이전 오픈 모드로 자동 복원 |\n| **DISCARD STATE** | 저장된 PDB 상태 정보를 삭제하여 수동 오픈으로 전환 |\n| **Unplug** | PDB를 CDB에서 분리하여 이동 가능한 형태로 변환 |\n| **Plug In** | 분리된 PDB를 다른 CDB에 연결 |\n| **DROP** | PDB를 완전히 삭제 |\n\n### PDB 상태 전환 흐름\n\n```\n                    ┌─────────────┐\n         ┌─────────│  MOUNTED     │─────────┐\n         │         └──────┬──────┘         │\n         │                │                │\n    CLOSE │          OPEN  │          OPEN  │ READ ONLY\n         │                │                │\n         │         ┌──────▼──────┐         │\n         │         │ READ WRITE  │◄────────┘\n         │         └──────┬──────┘\n         │                │\n         │         ┌──────▼──────┐\n         └────────►│ READ ONLY   │\n                   └─────────────┘\n```\n\n### CDB 시작 시 PDB 기본 동작\n\nCDB가 시작(STARTUP)되면, **CDB$ROOT**는 OPEN 상태가 되지만 모든 PDB는 기본적으로 **MOUNTED** 상태로 유지됩니다. PDB를 사용하려면 수동으로 오픈하거나, **SAVE STATE** 기능 또는 **트리거(Trigger)**를 사용하여 자동 오픈을 구성해야 합니다.\n\n| 자동 오픈 방법 | 설명 | 권장 여부 |\n|---|---|---|\n| **SAVE STATE** | Oracle 제공 공식 메커니즘, PDB별 상태 저장 | 권장 |\n| **AFTER STARTUP 트리거** | CDB 레벨 트리거로 모든 PDB 일괄 오픈 | 대안 |\n| **수동 오픈** | DBA가 직접 ALTER PLUGGABLE DATABASE 실행 | 비권장 (운영) |",
+      "sqlExamplesIds": ["sql01", "sql02"],
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "PDB 오픈 모드 (PDB Open Modes)",
+      "content": "PDB는 세 가지 기본 오픈 모드를 가지며, 각 모드에서 허용되는 작업이 다릅니다. 오픈 모드는 `V$PDBS` 뷰의 `OPEN_MODE` 컬럼으로 확인할 수 있습니다.",
+      "sqlExamplesIds": ["sql01", "sql02", "sql03"],
+      "subsections": [
+        {
+          "title": "READ WRITE 모드 (읽기/쓰기 모드)",
+          "content": "PDB가 **완전히 활성화**된 상태로, 모든 읽기 및 쓰기 작업이 가능한 모드입니다. 운영 환경(Production)에서 일반적으로 사용하는 모드입니다.\n\n### 특성 및 동작\n\n| 항목 | 설명 |\n|---|---|\n| **DML 허용** | INSERT, UPDATE, DELETE, MERGE 모두 가능 |\n| **DDL 허용** | CREATE, ALTER, DROP 등 스키마 변경 가능 |\n| **데이터 파일** | 읽기 및 쓰기 모두 가능 |\n| **Redo Log 생성** | 변경 사항에 대한 Redo 로그가 생성됨 |\n| **복구 가능** | 미디어 복구, PITR(Point-In-Time Recovery) 가능 |\n\n### 오픈 구문\n\n```sql\n-- 현재 PDB에 접속한 상태에서\nALTER PLUGGABLE DATABASE OPEN;\n\n-- CDB$ROOT에서 특정 PDB를 오픈\nALTER PLUGGABLE DATABASE pdb_name OPEN;\n\n-- 모든 PDB를 READ WRITE로 오픈\nALTER PLUGGABLE DATABASE ALL OPEN;\n\n-- 특정 PDB 여러 개를 동시에 오픈\nALTER PLUGGABLE DATABASE pdb1, pdb2 OPEN;\n```\n\n### RESTRICTED 모드\n\nREAD WRITE 모드에서 **RESTRICTED** 옵션을 추가하면, **RESTRICTED SESSION** 권한을 가진 사용자만 접속할 수 있습니다. 유지보수 작업 시 유용합니다.\n\n```sql\nALTER PLUGGABLE DATABASE pdb_name OPEN READ WRITE RESTRICTED;\n```\n\n### FORCE 옵션\n\n이미 오픈된 PDB의 모드를 변경할 때, 먼저 CLOSE하지 않고 직접 모드를 전환할 수 있습니다.\n\n```sql\n-- READ ONLY → READ WRITE로 직접 전환\nALTER PLUGGABLE DATABASE pdb_name OPEN READ WRITE FORCE;\n```\n\nFORCE를 사용하면 내부적으로 PDB를 닫았다가 새 모드로 다시 오픈하는 작업이 자동으로 수행됩니다.",
+          "key_points": [
+            "READ WRITE는 PDB의 기본 운영 모드로, 모든 DML/DDL 작업이 허용됨",
+            "ALTER PLUGGABLE DATABASE ... OPEN 구문으로 오픈하며, ALL 키워드로 전체 PDB 일괄 오픈 가능",
+            "RESTRICTED 옵션을 추가하면 RESTRICTED SESSION 권한이 있는 사용자만 접속 가능",
+            "FORCE 옵션으로 CLOSE 없이 모드 전환이 가능하며, 내부적으로 자동 재시작됨",
+            "READ WRITE 모드에서만 Redo Log가 생성되어 변경 사항을 추적함",
+            "Oracle RAC 환경에서는 INSTANCES 절로 특정 인스턴스에서만 오픈 가능"
+          ]
+        },
+        {
+          "title": "READ ONLY 모드 (읽기 전용 모드)",
+          "content": "PDB에 대해 **읽기 작업만 허용**되는 모드입니다. 데이터의 변경(DML)이 차단되므로, 보고서 쿼리 전용 환경이나 데이터 보호가 필요한 경우에 사용합니다.\n\n### 특성 및 동작\n\n| 항목 | 설명 |\n|---|---|\n| **DML 허용** | 불가 (INSERT, UPDATE, DELETE 차단) |\n| **DDL 허용** | 대부분 불가 (데이터 파일 변경을 수반하는 DDL 차단) |\n| **SELECT** | 허용 |\n| **임시 테이블스페이스** | 쓰기 가능 (정렬, 임시 데이터용) |\n| **Redo Log 생성** | 최소한으로 생성 (로컬 Undo 관련 제외) |\n\n### 오픈 구문\n\n```sql\n-- 특정 PDB를 READ ONLY로 오픈\nALTER PLUGGABLE DATABASE pdb_name OPEN READ ONLY;\n\n-- 모든 PDB를 READ ONLY로 오픈\nALTER PLUGGABLE DATABASE ALL OPEN READ ONLY;\n```\n\n### READ ONLY WITH APPLY\n\nActive Data Guard 환경에서 스탠바이 데이터베이스의 PDB를 읽기 전용으로 오픈하면서 동시에 Redo Apply를 계속 수행하는 모드입니다.\n\n```sql\nALTER PLUGGABLE DATABASE pdb_name OPEN READ ONLY WITH APPLY;\n```\n\n### 사용 사례\n\n- **보고서 전용 서버**: 운영 DB의 부하를 줄이기 위해 보고서 쿼리를 READ ONLY PDB로 분리\n- **데이터 보호**: 중요 데이터의 의도치 않은 변경 방지\n- **Active Data Guard Standby**: 스탠바이 환경에서 읽기 전용 서비스 제공\n- **Refreshable Clone PDB**: 원본과 주기적으로 동기화되는 클론 PDB",
+          "key_points": [
+            "READ ONLY 모드에서는 SELECT만 허용되며, DML과 대부분의 DDL이 차단됨",
+            "임시 테이블스페이스에 대한 쓰기는 READ ONLY 모드에서도 허용됨",
+            "READ ONLY WITH APPLY 모드는 Active Data Guard에서 읽기 서비스와 Redo Apply를 동시에 수행",
+            "보고서 전용 서버, 데이터 보호, Standby 환경 등에서 주로 활용",
+            "FORCE 옵션을 사용하면 READ WRITE에서 READ ONLY로 직접 전환 가능"
+          ]
+        },
+        {
+          "title": "MOUNTED 모드 (마운트 모드)",
+          "content": "PDB가 **CDB에 등록되어 있지만 오픈되지 않은 상태**입니다. CDB 시작 후 PDB의 기본 상태이며, 데이터 파일에 대한 접근이 제한됩니다.\n\n### 특성 및 동작\n\n| 항목 | 설명 |\n|---|---|\n| **사용자 접속** | 불가 (관리자도 일반 쿼리 불가) |\n| **DML/DDL** | 불가 |\n| **SELECT** | 불가 |\n| **관리 작업** | 일부 가능 (데이터 파일 이동, 미디어 복구 등) |\n| **데이터 파일** | 닫혀 있음 |\n\n### CLOSE 구문\n\nPDB를 MOUNTED 상태로 전환(닫기)하려면 CLOSE를 사용합니다.\n\n```sql\n-- 현재 접속된 PDB를 닫기\nALTER PLUGGABLE DATABASE CLOSE IMMEDIATE;\n\n-- CDB$ROOT에서 특정 PDB 닫기\nALTER PLUGGABLE DATABASE pdb_name CLOSE IMMEDIATE;\n\n-- 모든 PDB 닫기\nALTER PLUGGABLE DATABASE ALL CLOSE IMMEDIATE;\n```\n\n**IMMEDIATE** 옵션을 생략하면, 활성 세션이 있을 경우 해당 세션이 종료될 때까지 대기합니다. IMMEDIATE를 사용하면 활성 세션을 강제로 종료하고 즉시 닫습니다.\n\n### MOUNTED 상태에서 가능한 작업\n\n| 작업 | 가능 여부 | 설명 |\n|---|---|---|\n| **미디어 복구** | 가능 | RMAN으로 PDB 레벨 복구 수행 |\n| **데이터 파일 이동** | 가능 | ALTER DATABASE MOVE DATAFILE |\n| **Unplug** | 가능 | PDB 분리 작업의 전제 조건 |\n| **DROP** | 가능 | PDB 삭제 |\n| **일반 쿼리** | 불가 | 사용자 데이터 접근 차단 |\n\n### Oracle RAC에서의 CLOSE 동작\n\nOracle RAC 환경에서 PDB를 닫을 때는 기본적으로 **현재 인스턴스에서만** 닫힙니다. 모든 인스턴스에서 닫으려면 `ALL INSTANCES` 절이 필요합니다.\n\n```sql\n-- 모든 RAC 인스턴스에서 닫기\nALTER PLUGGABLE DATABASE pdb_name CLOSE IMMEDIATE INSTANCES=ALL;\n```",
+          "key_points": [
+            "MOUNTED는 CDB 시작 후 PDB의 기본 상태로, 사용자 접속 및 쿼리가 불가능함",
+            "ALTER PLUGGABLE DATABASE ... CLOSE IMMEDIATE로 PDB를 MOUNTED 상태로 전환",
+            "IMMEDIATE 옵션 없이 CLOSE하면 활성 세션 종료를 대기하고, IMMEDIATE는 강제 종료",
+            "MOUNTED 상태에서 미디어 복구, 데이터 파일 이동, Unplug, DROP이 가능",
+            "Unplug 작업의 전제 조건으로, PDB는 반드시 MOUNTED(CLOSE) 상태여야 함",
+            "RAC 환경에서는 INSTANCES=ALL 절로 모든 인스턴스에서 닫아야 완전한 CLOSE"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "SAVE STATE / DISCARD STATE 메커니즘 (PDB State Preservation)",
+      "content": "CDB를 재시작(SHUTDOWN → STARTUP)하면, 모든 PDB는 기본적으로 **MOUNTED** 상태로 돌아갑니다. **SAVE STATE**는 PDB의 현재 오픈 모드를 저장하여, CDB 재시작 후 자동으로 해당 모드로 복원하는 메커니즘입니다.",
+      "sqlExamplesIds": ["sql04", "sql05"],
+      "subsections": [
+        {
+          "title": "SAVE STATE의 동작 원리 (How SAVE STATE Works)",
+          "content": "SAVE STATE를 실행하면, PDB의 현재 오픈 모드 정보가 **CDB$ROOT의 데이터 딕셔너리**에 영구적으로 저장됩니다. CDB가 다시 시작될 때, Oracle은 저장된 상태 정보를 읽어 해당 PDB를 자동으로 이전 오픈 모드로 전환합니다.\n\n### 내부 동작 단계\n\n1. DBA가 PDB를 원하는 모드(READ WRITE 등)로 오픈합니다.\n2. `ALTER PLUGGABLE DATABASE ... SAVE STATE`를 실행합니다.\n3. Oracle은 PDB의 GUID, 현재 오픈 모드, 인스턴스 이름 등을 **CDB$ROOT의 내부 테이블(PDB_SAVED_STATES$)**에 저장합니다.\n4. CDB가 재시작(SHUTDOWN → STARTUP)됩니다.\n5. CDB$ROOT가 OPEN된 후, Oracle은 PDB_SAVED_STATES$ 테이블을 조회합니다.\n6. 저장된 상태가 있는 PDB는 자동으로 해당 오픈 모드로 전환됩니다.\n7. 저장된 상태가 없는 PDB는 MOUNTED 상태로 유지됩니다.\n\n### SAVE STATE 구문\n\n```sql\n-- 특정 PDB의 상태 저장\nALTER PLUGGABLE DATABASE pdb_name SAVE STATE;\n\n-- 모든 PDB의 상태 저장\nALTER PLUGGABLE DATABASE ALL SAVE STATE;\n\n-- 특정 PDB를 제외하고 저장\nALTER PLUGGABLE DATABASE ALL EXCEPT pdb_name SAVE STATE;\n```\n\n### 저장되는 정보\n\n| 저장 항목 | 설명 |\n|---|---|\n| **PDB GUID** | PDB의 고유 식별자 |\n| **오픈 모드** | READ WRITE, READ ONLY 등 |\n| **RESTRICTED 여부** | RESTRICTED 모드 여부 |\n| **인스턴스 이름** | Oracle RAC에서 어떤 인스턴스에서 오픈할지 |\n\n### 주의사항\n\n- SAVE STATE는 **현재 오픈된 상태에서만** 실행 가능합니다. MOUNTED 상태에서는 실행 불가합니다.\n- SAVE STATE를 여러 번 실행하면 **마지막 상태**로 덮어씁니다.\n- SAVE STATE는 **영구적(Persistent)**입니다. 명시적으로 DISCARD STATE를 실행하기 전까지 유지됩니다.\n- Oracle RAC 환경에서는 SAVE STATE가 **인스턴스별로 저장**되므로, 특정 인스턴스에서만 오픈되도록 설정할 수 있습니다.",
+          "key_points": [
+            "SAVE STATE는 PDB의 오픈 모드를 CDB$ROOT의 데이터 딕셔너리에 영구 저장하는 메커니즘",
+            "CDB 재시작 시 저장된 상태에 따라 PDB가 자동으로 이전 오픈 모드로 복원됨",
+            "MOUNTED 상태에서는 SAVE STATE를 실행할 수 없으며, 반드시 오픈된 상태에서 실행해야 함",
+            "ALL 키워드로 모든 PDB를 일괄 저장하거나, ALL EXCEPT로 특정 PDB를 제외 가능",
+            "SAVE STATE는 영구적이며, DISCARD STATE를 실행하기 전까지 유지됨",
+            "Oracle RAC에서는 인스턴스별로 상태가 저장되어 세밀한 제어가 가능"
+          ]
+        },
+        {
+          "title": "DISCARD STATE의 동작 원리 (How DISCARD STATE Works)",
+          "content": "DISCARD STATE는 이전에 SAVE STATE로 저장된 PDB의 상태 정보를 **삭제**하는 명령입니다. DISCARD STATE 실행 후에는 CDB 재시작 시 해당 PDB가 자동으로 오픈되지 않고 **MOUNTED** 상태로 유지됩니다.\n\n### DISCARD STATE 구문\n\n```sql\n-- 특정 PDB의 저장된 상태 삭제\nALTER PLUGGABLE DATABASE pdb_name DISCARD STATE;\n\n-- 모든 PDB의 저장된 상태 삭제\nALTER PLUGGABLE DATABASE ALL DISCARD STATE;\n```\n\n### SAVE STATE vs DISCARD STATE 비교\n\n| 항목 | SAVE STATE | DISCARD STATE |\n|---|---|---|\n| **목적** | PDB 오픈 모드를 저장 | 저장된 오픈 모드를 삭제 |\n| **CDB 재시작 후** | PDB가 저장된 모드로 자동 오픈 | PDB가 MOUNTED 상태 유지 |\n| **실행 조건** | PDB가 OPEN 상태 | PDB가 OPEN 또는 MOUNTED 상태 |\n| **영속성** | 영구적 (DISCARD 전까지) | 즉시 적용 |\n| **영향 범위** | 지정된 PDB(또는 ALL) | 지정된 PDB(또는 ALL) |\n\n### DBA_PDB_SAVED_STATES 뷰\n\n저장된 PDB 상태 정보를 조회할 수 있는 딕셔너리 뷰입니다.\n\n| 컬럼 | 설명 |\n|---|---|\n| **CON_NAME** | PDB 이름 |\n| **CON_ID** | 컨테이너 ID |\n| **CON_UID** | 컨테이너 고유 ID |\n| **INSTANCE_NAME** | 인스턴스 이름 (RAC 환경) |\n| **STATE** | 저장된 오픈 모드 (OPEN, READ ONLY 등) |\n| **RESTRICTED** | RESTRICTED 모드 여부 (YES/NO) |\n\n```sql\n-- 저장된 PDB 상태 조회\nSELECT con_name, instance_name, state, restricted\nFROM dba_pdb_saved_states;\n```\n\n이 뷰에 행(Row)이 존재하는 PDB는 CDB 재시작 시 자동으로 오픈됩니다. 행이 없으면 MOUNTED 상태를 유지합니다.",
+          "key_points": [
+            "DISCARD STATE는 SAVE STATE로 저장된 PDB 상태 정보를 딕셔너리에서 삭제",
+            "DISCARD STATE 후 CDB 재시작 시 해당 PDB는 MOUNTED 상태로 유지됨",
+            "DISCARD STATE는 OPEN 또는 MOUNTED 상태 모두에서 실행 가능",
+            "DBA_PDB_SAVED_STATES 뷰로 저장된 상태를 조회할 수 있음",
+            "DBA_PDB_SAVED_STATES에 행이 존재하면 자동 오픈, 없으면 수동 오픈 필요"
+          ]
+        },
+        {
+          "title": "STARTUP 트리거를 이용한 자동 오픈 (Alternative: AFTER STARTUP Trigger)",
+          "content": "SAVE STATE 외에도, CDB 레벨의 **AFTER STARTUP ON DATABASE 트리거**를 사용하여 CDB 시작 시 모든 PDB를 자동으로 오픈할 수 있습니다. 이 방법은 SAVE STATE보다 단순하지만, 개별 PDB에 대한 세밀한 제어가 어렵습니다.\n\n### 트리거 생성 예시\n\n```sql\nCREATE OR REPLACE TRIGGER open_all_pdbs\n  AFTER STARTUP ON DATABASE\nBEGIN\n  EXECUTE IMMEDIATE 'ALTER PLUGGABLE DATABASE ALL OPEN';\nEND;\n/\n```\n\n### SAVE STATE vs STARTUP 트리거 비교\n\n| 항목 | SAVE STATE | STARTUP 트리거 |\n|---|---|---|\n| **설정 단위** | PDB 개별 | 전체 PDB 일괄 |\n| **오픈 모드 제어** | PDB별로 다른 모드 가능 | 모든 PDB 동일 모드 |\n| **RAC 인스턴스 제어** | 인스턴스별 제어 가능 | 제어 어려움 |\n| **관리 편의성** | 약간 복잡 | 단순 |\n| **Oracle 권장** | 권장 | 대안 |\n| **유지보수** | 딕셔너리 기반, 자동 관리 | 트리거 코드 관리 필요 |\n\n### 주의사항\n\n- STARTUP 트리거와 SAVE STATE를 **동시에 사용**할 수 있으나, 트리거가 먼저 실행됩니다.\n- 트리거 방식은 PDB 오픈 실패 시 에러 핸들링이 중요합니다. 하나의 PDB 오픈 실패가 전체 트리거를 중단시킬 수 있으므로 예외 처리를 추가해야 합니다.\n- Oracle은 SAVE STATE를 공식적으로 권장하며, 트리거는 레거시 또는 특수 환경에서의 대안으로 간주합니다.",
+          "key_points": [
+            "AFTER STARTUP ON DATABASE 트리거로 CDB 시작 시 모든 PDB를 일괄 자동 오픈 가능",
+            "트리거 방식은 SAVE STATE보다 단순하지만, PDB별 세밀한 모드 제어가 어려움",
+            "트리거에서 PDB 오픈 실패 시 예외 처리를 추가하지 않으면 전체 트리거가 중단될 수 있음",
+            "Oracle은 SAVE STATE를 공식 권장 방법으로 제시하며, 트리거는 대안으로 간주"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "PDB Unplug (PDB 분리)",
+      "content": "PDB Unplug는 PDB를 CDB에서 **분리(Detach)**하여 이동 가능한 형태로 만드는 작업입니다. Unplug된 PDB는 다른 CDB에 Plug In할 수 있어, PDB 이동(Migration) 및 배포의 핵심 메커니즘입니다.",
+      "sqlExamplesIds": ["sql06", "sql07", "sql08"],
+      "subsections": [
+        {
+          "title": "Unplug 프로세스 상세 (Unplug Process Detail)",
+          "content": "PDB를 Unplug하면 PDB의 메타데이터가 XML 파일 또는 단일 아카이브 파일(.pdb)로 내보내집니다. Unplug 후 PDB는 CDB 내에서 **UNPLUGGED** 상태가 되며, 더 이상 오픈할 수 없고 **DROP만 가능**합니다.\n\n### Unplug 전제 조건\n\n1. PDB가 반드시 **CLOSE(MOUNTED)** 상태여야 합니다.\n2. PDB는 **정상적으로 종료**된 상태여야 합니다 (ABORT로 종료되면 복구 필요).\n3. Unplug를 수행하려면 **SYSDBA** 또는 **SYSOPER** 권한이 필요합니다.\n4. CDB$ROOT에 접속한 상태에서 실행해야 합니다.\n\n### Unplug 내부 동작 단계\n\n1. Oracle이 PDB의 메타데이터(데이터 파일 경로, 테이블스페이스, 사용자, 권한 등)를 수집합니다.\n2. 수집된 메타데이터를 지정된 형식(XML 또는 .pdb 아카이브)으로 내보냅니다.\n3. PDB의 상태가 CDB의 데이터 딕셔너리에서 **UNPLUGGED**로 변경됩니다.\n4. PDB의 데이터 파일은 **원래 위치에 그대로 유지**됩니다 (XML 방식의 경우).\n5. 단일 아카이브(.pdb) 방식에서는 데이터 파일이 아카이브 파일 내에 포함됩니다.\n\n### Unplug 출력 형식 비교\n\n| 항목 | XML 메타데이터 (.xml) | 단일 아카이브 (.pdb) |\n|---|---|---|\n| **파일 구성** | XML 파일 + 별도 데이터 파일 | 단일 압축 파일 (메타데이터 + 데이터 파일) |\n| **이동성** | 데이터 파일을 별도로 복사해야 함 | 단일 파일만 복사하면 됨 |\n| **디스크 공간** | 추가 공간 불필요 (기존 파일 참조) | 아카이브 파일 크기만큼 추가 공간 필요 |\n| **속도** | 빠름 (메타데이터만 생성) | 느림 (데이터 파일 압축/복사) |\n| **사용 사례** | 동일 서버 내 이동 | 서버 간 이동, 배포 |\n| **Oracle 권장** | 로컬 작업 시 | 이동/배포 시 권장 |\n\n### UNPLUGGED 상태의 특성\n\nUnplug 후 PDB는 CDB의 데이터 딕셔너리에 **UNPLUGGED** 상태로 남아 있습니다.\n\n| 특성 | 설명 |\n|---|---|\n| **오픈 불가** | ALTER PLUGGABLE DATABASE ... OPEN 실행 불가 |\n| **DROP만 가능** | DROP PLUGGABLE DATABASE로 딕셔너리에서 제거 |\n| **데이터 파일** | 원래 위치에 존재 (DROP 시 KEEP/INCLUDING 선택) |\n| **CDB_PDBS 상태** | STATUS 컬럼이 'UNPLUGGED'로 표시 |\n| **V$PDBS** | OPEN_MODE가 'MOUNTED'로 표시 |\n\n```sql\n-- UNPLUGGED 상태 확인\nSELECT pdb_name, status FROM cdb_pdbs WHERE status = 'UNPLUGGED';\n```",
+          "key_points": [
+            "Unplug 전에 PDB는 반드시 CLOSE(MOUNTED) 상태여야 하며, 정상 종료가 필요",
+            "Unplug 시 XML 메타데이터 파일 또는 단일 아카이브(.pdb) 파일 형식 중 선택 가능",
+            "XML 방식은 메타데이터만 내보내고 데이터 파일은 원래 위치에 유지됨",
+            "단일 아카이브(.pdb) 방식은 메타데이터와 데이터 파일을 하나의 압축 파일로 통합",
+            "UNPLUGGED 상태의 PDB는 오픈할 수 없으며, DROP만 가능",
+            "CDB_PDBS 뷰의 STATUS 컬럼으로 UNPLUGGED 상태를 확인 가능"
+          ]
+        },
+        {
+          "title": "XML 메타데이터 방식 vs 단일 아카이브 파일(.pdb) 방식 (XML vs PDB Archive)",
+          "content": "PDB Unplug 시 출력 형식은 파일 확장자에 의해 결정됩니다. **.xml** 확장자를 지정하면 XML 메타데이터만 생성되고, **.pdb** 확장자를 지정하면 단일 아카이브 파일이 생성됩니다.\n\n### XML 메타데이터 방식 (.xml)\n\n```sql\nALTER PLUGGABLE DATABASE pdb_name\n  UNPLUG INTO '/u01/app/oracle/pdb_name.xml';\n```\n\n- XML 파일에는 PDB의 메타데이터(데이터 파일 경로, 테이블스페이스 정보, DBID, 캐릭터셋 등)만 저장됩니다.\n- 데이터 파일은 **원래 경로에 그대로 유지**되며, XML 파일에 해당 경로가 기록됩니다.\n- Plug In 시 XML 파일과 데이터 파일이 **모두 접근 가능**해야 합니다.\n- 동일 서버에서 PDB를 이동하거나, 공유 스토리지(ASM, NFS 등) 환경에서 유용합니다.\n\n### 단일 아카이브 파일 방식 (.pdb)\n\n```sql\nALTER PLUGGABLE DATABASE pdb_name\n  UNPLUG INTO '/u01/app/oracle/pdb_name.pdb';\n```\n\n- .pdb 파일은 XML 메타데이터와 모든 데이터 파일을 **하나의 압축 아카이브**로 통합합니다.\n- 내부적으로 **ZIP 형식**을 사용하므로, 표준 ZIP 도구로 내용을 확인할 수 있습니다.\n- 파일 하나만 복사하면 되므로 **서버 간 이동이 매우 편리**합니다.\n- 아카이브 생성 시 데이터 파일을 압축/복사하므로, XML 방식보다 **시간과 디스크 공간이 더 소요**됩니다.\n\n### 상세 비교표\n\n| 비교 항목 | XML (.xml) | 아카이브 (.pdb) |\n|---|---|---|\n| **생성 파일** | XML 1개 + 기존 데이터 파일 참조 | 단일 .pdb 파일 |\n| **데이터 파일 처리** | 기존 위치 유지 (참조) | 아카이브 내 복사/포함 |\n| **이동 시 필요 작업** | XML + 데이터 파일 모두 복사 | .pdb 파일 1개만 복사 |\n| **디스크 추가 사용** | 없음 (XML만 추가) | 데이터 파일 크기만큼 추가 |\n| **생성 속도** | 빠름 (메타데이터만) | 느림 (데이터 복사+압축) |\n| **Plug In 시** | XML + 데이터 파일 경로 지정 | .pdb 파일 경로만 지정 |\n| **압축** | 없음 | ZIP 압축 적용 |\n| **적합 환경** | 동일 서버, 공유 스토리지 | 원격 서버 이동, 배포 |",
+          "key_points": [
+            "파일 확장자(.xml 또는 .pdb)로 Unplug 출력 형식이 결정됨",
+            "XML 방식은 메타데이터만 생성하고 데이터 파일은 원래 경로에 유지됨",
+            "단일 아카이브(.pdb)는 ZIP 형식으로 메타데이터와 데이터 파일을 통합 압축",
+            ".pdb 파일은 서버 간 이동 시 파일 하나만 복사하면 되어 이동성이 뛰어남",
+            "아카이브 방식은 데이터 파일 크기만큼 추가 디스크 공간이 필요하며 생성 시간이 오래 걸림",
+            "동일 서버 내 작업은 XML, 원격 서버 이동/배포는 .pdb 아카이브가 적합"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "PDB Plug In (PDB 연결)",
+      "content": "PDB Plug In은 Unplug된 PDB 또는 Non-CDB를 CDB에 **연결(Attach)**하는 작업입니다. CREATE PLUGGABLE DATABASE ... USING 구문을 사용하며, Plug In 전에 호환성 검사를 수행해야 합니다.",
+      "sqlExamplesIds": ["sql09", "sql10", "sql11"],
+      "subsections": [
+        {
+          "title": "호환성 검사 (Compatibility Check with DBMS_PDB)",
+          "content": "PDB를 다른 CDB에 Plug In하기 전에, 원본 PDB와 대상 CDB 간의 **호환성**을 검사해야 합니다. **DBMS_PDB.CHECK_PLUG_COMPATIBILITY** 함수를 사용하여 사전에 호환성 문제를 감지할 수 있습니다.\n\n### 검사 항목\n\n| 검사 항목 | 설명 |\n|---|---|\n| **데이터베이스 버전** | 원본과 대상의 Oracle 버전 호환성 |\n| **캐릭터셋 (Character Set)** | 캐릭터셋 호환성 (서브셋/슈퍼셋 관계) |\n| **Endian 형식** | 플랫폼 Endian 호환성 (빅 엔디안 vs 리틀 엔디안) |\n| **데이터베이스 옵션** | 설치된 컴포넌트/옵션 호환성 |\n| **Patch 수준** | 적용된 패치의 호환성 |\n| **COMPATIBLE 파라미터** | COMPATIBLE 파라미터 값의 호환성 |\n| **테이블스페이스 암호화** | 암호화 키 호환성 |\n\n### DBMS_PDB.CHECK_PLUG_COMPATIBILITY 사용법\n\n```sql\n-- 호환성 검사 실행\nSET SERVEROUTPUT ON\nDECLARE\n  l_result BOOLEAN;\nBEGIN\n  l_result := DBMS_PDB.CHECK_PLUG_COMPATIBILITY(\n    pdb_descr_file => '/u01/app/oracle/pdb_name.xml',\n    pdb_name       => 'NEW_PDB_NAME'\n  );\n  IF l_result THEN\n    DBMS_OUTPUT.PUT_LINE('호환성 검사 통과 - Plug In 가능');\n  ELSE\n    DBMS_OUTPUT.PUT_LINE('호환성 문제 발견 - PDB_PLUG_IN_VIOLATIONS 확인 필요');\n  END IF;\nEND;\n/\n```\n\n### PDB_PLUG_IN_VIOLATIONS 뷰\n\n호환성 검사 결과(위반 사항)는 **PDB_PLUG_IN_VIOLATIONS** 뷰에 기록됩니다.\n\n| 컬럼 | 설명 |\n|---|---|\n| **TIME** | 위반 감지 시각 |\n| **NAME** | PDB 이름 |\n| **CAUSE** | 위반 원인 카테고리 |\n| **TYPE** | 위반 유형 (ERROR, WARNING) |\n| **ERROR_NUMBER** | Oracle 에러 번호 |\n| **LINE** | 상세 위반 내용 |\n| **STATUS** | 위반 상태 (PENDING, RESOLVED) |\n| **ACTION** | 권장 조치 사항 |\n| **MESSAGE** | 상세 메시지 |\n\n```sql\n-- 위반 사항 조회\nSELECT name, cause, type, message, status, action\nFROM pdb_plug_in_violations\nWHERE name = 'NEW_PDB_NAME'\nORDER BY time DESC;\n```\n\n### 위반 유형별 처리\n\n| TYPE | 의미 | 처리 |\n|---|---|---|\n| **ERROR** | Plug In 차단 — 해결 필수 | 원인을 분석하고 해결 후 재시도 |\n| **WARNING** | Plug In 가능하나 주의 필요 | PDB 오픈 후 자동 또는 수동 조치 |\n\nWARNING 유형의 위반은 PDB를 오픈하면 Oracle이 **자동으로 해결**하는 경우가 많습니다 (예: 패치 수준 차이에 따른 컴포넌트 업그레이드).",
+          "key_points": [
+            "DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수로 Plug In 전 호환성을 사전 검사",
+            "캐릭터셋, Endian, 데이터베이스 버전, 컴포넌트, 패치 수준 등을 검증",
+            "검사 결과는 PDB_PLUG_IN_VIOLATIONS 뷰에 기록되며 ERROR와 WARNING 유형으로 분류",
+            "ERROR 유형은 Plug In이 차단되므로 반드시 해결해야 하며, WARNING은 오픈 후 자동 해결 가능",
+            "호환성 검사는 XML 메타데이터 파일 또는 .pdb 아카이브 파일 모두에 적용 가능",
+            "Oracle 26ai에서 AUTO_FIXABLE 컬럼이 추가되어 자동 수정 가능 여부를 확인 가능"
+          ]
+        },
+        {
+          "title": "Plug In 프로세스 상세 (Plug In Process Detail)",
+          "content": "호환성 검사를 통과한 후, **CREATE PLUGGABLE DATABASE ... USING** 구문으로 PDB를 CDB에 연결합니다. XML 파일 또는 .pdb 아카이브 파일을 사용할 수 있습니다.\n\n### Plug In 구문 (XML 메타데이터 사용)\n\n```sql\nCREATE PLUGGABLE DATABASE new_pdb_name\n  USING '/u01/app/oracle/pdb_name.xml'\n  SOURCE_FILE_NAME_CONVERT = ('/u01/original/', '/u02/new/')\n  FILE_NAME_CONVERT = ('/u01/original/', '/u02/new/');\n```\n\n### Plug In 구문 (.pdb 아카이브 사용)\n\n```sql\nCREATE PLUGGABLE DATABASE new_pdb_name\n  USING '/u01/app/oracle/pdb_name.pdb'\n  SOURCE_FILE_NAME_CONVERT = NONE\n  FILE_NAME_CONVERT = ('/u01/original/', '/u02/new/');\n```\n\n### 주요 절(Clauses) 설명\n\n| 절 | 설명 |\n|---|---|\n| **USING** | XML 또는 .pdb 파일 경로 지정 |\n| **SOURCE_FILE_NAME_CONVERT** | 원본 데이터 파일 경로를 새 경로로 매핑 (XML 방식에서 주로 사용) |\n| **FILE_NAME_CONVERT** | 대상 CDB에서의 데이터 파일 경로 지정 |\n| **COPY** | 데이터 파일을 새 위치로 복사 (기본값: NOCOPY) |\n| **NOCOPY** | 데이터 파일을 원래 위치에서 사용 (기본값) |\n| **MOVE** | 데이터 파일을 새 위치로 이동 (원본 삭제) |\n| **CREATE_FILE_DEST** | Oracle Managed Files 경로 지정 |\n| **TEMPFILE REUSE** | 기존 임시 파일 재사용 |\n\n### Plug In 후 필수 단계\n\n1. **PDB를 OPEN합니다** — PDB를 처음 오픈하면 Oracle이 자동으로 데이터 딕셔너리를 동기화합니다.\n2. **PDB_PLUG_IN_VIOLATIONS 확인** — WARNING 유형의 위반이 있는지 확인합니다.\n3. **noncdb_to_pdb.sql 실행** (Non-CDB를 Plug In한 경우) — Non-CDB의 메타데이터를 CDB 환경에 맞게 변환합니다.\n4. **PDB를 READ WRITE로 오픈** — `ALTER PLUGGABLE DATABASE new_pdb_name OPEN;`\n\n### Plug In 내부 동작\n\n1. Oracle이 XML/.pdb 파일에서 메타데이터를 읽습니다.\n2. 대상 CDB의 데이터 딕셔너리에 PDB 정보를 등록합니다.\n3. 데이터 파일을 지정된 방식(COPY/NOCOPY/MOVE)으로 처리합니다.\n4. PDB에 새로운 DBID와 GUID를 할당합니다.\n5. PDB가 MOUNTED 상태로 생성됩니다.\n6. PDB를 처음 오픈하면, Oracle이 PDB의 딕셔너리를 CDB$ROOT와 동기화하고, 필요한 업그레이드/패치를 적용합니다.",
+          "key_points": [
+            "CREATE PLUGGABLE DATABASE ... USING 구문으로 XML 또는 .pdb 파일을 지정하여 Plug In",
+            "FILE_NAME_CONVERT로 데이터 파일 경로를 대상 환경에 맞게 변환",
+            "COPY/NOCOPY/MOVE 옵션으로 데이터 파일의 처리 방식을 지정",
+            "Plug In 후 PDB를 처음 오픈하면 Oracle이 자동으로 딕셔너리 동기화 수행",
+            "Non-CDB를 Plug In한 경우 noncdb_to_pdb.sql 스크립트 실행이 필요",
+            "Plug In 후 PDB_PLUG_IN_VIOLATIONS 뷰에서 WARNING을 확인하고 필요 시 조치"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s06",
+      "title": "PDB 삭제 (DROP PLUGGABLE DATABASE)",
+      "content": "PDB 삭제는 CDB에서 PDB를 **완전히 제거**하는 작업입니다. DROP PLUGGABLE DATABASE 구문을 사용하며, 데이터 파일의 처리 방식을 선택할 수 있습니다.",
+      "sqlExamplesIds": ["sql12", "sql13"],
+      "subsections": [
+        {
+          "title": "DROP PLUGGABLE DATABASE 상세 (DROP PDB Detail)",
+          "content": "PDB를 삭제하면 CDB의 데이터 딕셔너리에서 해당 PDB에 대한 모든 정보가 제거됩니다. 삭제 시 **데이터 파일을 함께 삭제할지(INCLUDING DATAFILES)** 또는 **유지할지(KEEP DATAFILES)**를 지정할 수 있습니다.\n\n### 전제 조건\n\n| 조건 | 설명 |\n|---|---|\n| **PDB 상태** | MOUNTED(CLOSE) 또는 UNPLUGGED 상태여야 함 |\n| **권한** | SYSDBA 권한 필요 |\n| **접속 위치** | CDB$ROOT에서 실행 |\n| **OPEN 불가** | READ WRITE/READ ONLY 상태에서는 DROP 불가 |\n\n### DROP 구문\n\n```sql\n-- 데이터 파일 포함 삭제 (완전 삭제)\nDROP PLUGGABLE DATABASE pdb_name INCLUDING DATAFILES;\n\n-- 데이터 파일 유지 삭제 (딕셔너리만 제거)\nDROP PLUGGABLE DATABASE pdb_name KEEP DATAFILES;\n```\n\n### INCLUDING DATAFILES vs KEEP DATAFILES 비교\n\n| 항목 | INCLUDING DATAFILES | KEEP DATAFILES |\n|---|---|---|\n| **데이터 파일** | 물리적으로 삭제됨 | 원래 위치에 유지 |\n| **딕셔너리 정보** | 삭제됨 | 삭제됨 |\n| **복구 가능** | 불가능 (파일 삭제됨) | 데이터 파일로 복구 가능 |\n| **사용 시나리오** | PDB를 완전히 폐기할 때 | Unplug 후 DROP 시 (데이터 파일 보존) |\n| **기본값** | OMF 환경에서 기본값 | 비OMF 환경에서 기본값 |\n\n### Unplug 후 DROP 패턴\n\nPDB를 다른 CDB로 이동하는 일반적인 패턴:\n\n```\n1. PDB CLOSE (MOUNTED 상태로 전환)\n   └── ALTER PLUGGABLE DATABASE pdb_name CLOSE IMMEDIATE;\n\n2. PDB Unplug (메타데이터 내보내기)\n   └── ALTER PLUGGABLE DATABASE pdb_name UNPLUG INTO '...xml/pdb';\n\n3. PDB DROP (딕셔너리에서 제거, 데이터 파일 유지)\n   └── DROP PLUGGABLE DATABASE pdb_name KEEP DATAFILES;\n\n4. 대상 CDB에서 Plug In\n   └── CREATE PLUGGABLE DATABASE ... USING '...';\n```\n\n이 패턴에서 KEEP DATAFILES를 사용하는 이유는, Unplug 시 XML 메타데이터에 **데이터 파일 경로가 기록**되어 있으므로, 데이터 파일을 삭제하면 Plug In이 불가능해지기 때문입니다.\n\n### Oracle Managed Files (OMF) 환경에서의 동작\n\nOMF를 사용하는 환경에서는 DROP PLUGGABLE DATABASE 시 기본적으로 **INCLUDING DATAFILES**가 적용됩니다. OMF가 아닌 환경에서는 **KEEP DATAFILES**가 기본값입니다. 따라서 OMF 환경에서 Unplug 후 DROP 시에는 반드시 **KEEP DATAFILES**를 명시적으로 지정해야 합니다.\n\n### SNAPSHOT COPY PDB 삭제 시 주의\n\nSnapshot Copy로 생성된 PDB(Copy-on-Write 기반)를 삭제할 때는, 원본 PDB의 데이터 파일에 대한 참조가 있으므로 특별한 주의가 필요합니다. Snapshot Copy PDB를 먼저 삭제한 후 원본 PDB를 삭제해야 합니다.",
+          "key_points": [
+            "DROP PLUGGABLE DATABASE로 PDB를 CDB에서 완전히 제거",
+            "PDB는 MOUNTED 또는 UNPLUGGED 상태에서만 DROP 가능",
+            "INCLUDING DATAFILES는 데이터 파일을 물리적으로 삭제하며, KEEP DATAFILES는 유지",
+            "OMF 환경에서는 INCLUDING DATAFILES가 기본값이므로, Unplug 후 DROP 시 KEEP DATAFILES를 명시해야 함",
+            "Unplug → DROP(KEEP DATAFILES) → Plug In은 PDB 이동의 표준 패턴",
+            "Snapshot Copy PDB 삭제 시 원본 PDB와의 참조 관계에 주의 필요"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s07",
+      "title": "관련 뷰 및 모니터링 (Related Views & Monitoring)",
+      "content": "PDB 상태 관리 및 분리 작업과 관련된 주요 딕셔너리 뷰 및 동적 성능 뷰를 정리합니다.",
+      "sqlExamplesIds": ["sql14", "sql15"],
+      "subsections": [
+        {
+          "title": "PDB 관련 핵심 뷰 (Core PDB Views)",
+          "content": "PDB의 상태, 구성, 히스토리 등을 모니터링하기 위해 다양한 뷰가 제공됩니다. 각 뷰의 역할과 주요 컬럼을 이해하면 PDB 관리를 효율적으로 수행할 수 있습니다.\n\n### V$PDBS (동적 성능 뷰)\n\n현재 인스턴스에서 PDB의 **실시간 상태**를 조회하는 뷰입니다.\n\n| 주요 컬럼 | 설명 |\n|---|---|\n| **CON_ID** | 컨테이너 ID |\n| **DBID** | PDB의 데이터베이스 ID |\n| **CON_UID** | 컨테이너 고유 ID |\n| **NAME** | PDB 이름 |\n| **OPEN_MODE** | 현재 오픈 모드 (READ WRITE, READ ONLY, MOUNTED) |\n| **RESTRICTED** | RESTRICTED 모드 여부 (YES/NO) |\n| **OPEN_TIME** | 마지막 오픈 시각 |\n| **TOTAL_SIZE** | PDB의 총 크기 (바이트) |\n| **CREATION_TIME** | PDB 생성 시각 |\n| **SNAPSHOT_PARENT_CON_ID** | Snapshot Copy의 원본 PDB CON_ID |\n\n### CDB_PDBS (딕셔너리 뷰)\n\nCDB에 등록된 모든 PDB의 **딕셔너리 정보**를 조회하는 뷰입니다.\n\n| 주요 컬럼 | 설명 |\n|---|---|\n| **PDB_NAME** | PDB 이름 |\n| **CON_ID** | 컨테이너 ID |\n| **DBID** | PDB의 데이터베이스 ID |\n| **STATUS** | PDB 상태 (NORMAL, UNPLUGGED, RELOCATING 등) |\n| **CON_UID** | 컨테이너 고유 ID |\n| **CREATION_SCN** | PDB 생성 SCN |\n| **IS_PROXY_PDB** | 프록시 PDB 여부 |\n\n### DBA_PDB_SAVED_STATES\n\nSAVE STATE로 저장된 PDB 상태 정보를 조회합니다.\n\n| 주요 컬럼 | 설명 |\n|---|---|\n| **CON_NAME** | PDB 이름 |\n| **CON_ID** | 컨테이너 ID |\n| **INSTANCE_NAME** | 인스턴스 이름 |\n| **STATE** | 저장된 오픈 모드 |\n| **RESTRICTED** | RESTRICTED 모드 여부 |\n\n### PDB_PLUG_IN_VIOLATIONS\n\nPlug In 시 감지된 호환성 위반 사항을 기록합니다.\n\n| 주요 컬럼 | 설명 |\n|---|---|\n| **TIME** | 위반 감지 시각 |\n| **NAME** | PDB 이름 |\n| **CAUSE** | 위반 원인 카테고리 |\n| **TYPE** | 위반 유형 (ERROR, WARNING) |\n| **MESSAGE** | 상세 메시지 |\n| **STATUS** | 상태 (PENDING, RESOLVED) |\n| **ACTION** | 권장 조치 |\n\n### 뷰 간 비교\n\n| 뷰 | 유형 | 범위 | 주요 용도 |\n|---|---|---|---|\n| **V$PDBS** | 동적 성능 뷰 | 현재 인스턴스 | 실시간 PDB 상태 모니터링 |\n| **CDB_PDBS** | 딕셔너리 뷰 | CDB 전체 | PDB 메타데이터 및 상태 조회 |\n| **DBA_PDB_SAVED_STATES** | 딕셔너리 뷰 | CDB 전체 | 저장된 PDB 오픈 모드 확인 |\n| **PDB_PLUG_IN_VIOLATIONS** | 딕셔너리 뷰 | CDB 전체 | Plug In 호환성 위반 관리 |\n| **DBA_PDBS** | 딕셔너리 뷰 | CDB 전체 | CDB_PDBS와 동일 (CDB_접두사 없는 형태) |\n| **V$CONTAINERS** | 동적 성능 뷰 | 현재 인스턴스 | 모든 컨테이너(CDB$ROOT + PDB) 정보 |",
+          "key_points": [
+            "V$PDBS는 실시간 PDB 상태(OPEN_MODE, RESTRICTED)를 조회하는 동적 성능 뷰",
+            "CDB_PDBS는 UNPLUGGED 등 PDB의 딕셔너리 수준 상태(STATUS)를 확인하는 뷰",
+            "DBA_PDB_SAVED_STATES로 SAVE STATE가 적용된 PDB와 저장된 오픈 모드를 확인",
+            "PDB_PLUG_IN_VIOLATIONS는 Plug In 호환성 검사 결과를 ERROR/WARNING으로 분류하여 기록",
+            "V$CONTAINERS는 CDB$ROOT, PDB$SEED, 모든 PDB를 포함한 전체 컨테이너 정보를 제공"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "PDB 오픈 모드 조회",
+      "sql": "SELECT con_id, name, open_mode, restricted, total_size\nFROM v$pdbs\nORDER BY con_id;",
+      "description": "V$PDBS 뷰를 사용하여 모든 PDB의 현재 오픈 모드(READ WRITE, READ ONLY, MOUNTED), RESTRICTED 모드 여부, 총 크기를 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "PDB 상태 및 딕셔너리 정보 조회",
+      "sql": "SELECT pdb_name, con_id, status, creation_scn, con_uid\nFROM cdb_pdbs\nORDER BY con_id;",
+      "description": "CDB_PDBS 뷰를 사용하여 PDB의 딕셔너리 레벨 상태(NORMAL, UNPLUGGED 등)를 확인합니다. STATUS가 UNPLUGGED인 PDB는 DROP만 가능합니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "PDB 오픈/닫기 (ALTER PLUGGABLE DATABASE)",
+      "sql": "-- PDB를 READ WRITE로 오픈\nALTER PLUGGABLE DATABASE pdb1 OPEN;\n\n-- PDB를 READ ONLY로 오픈\nALTER PLUGGABLE DATABASE pdb1 OPEN READ ONLY;\n\n-- PDB를 RESTRICTED 모드로 오픈\nALTER PLUGGABLE DATABASE pdb1 OPEN READ WRITE RESTRICTED;\n\n-- PDB를 FORCE로 모드 전환 (CLOSE 없이)\nALTER PLUGGABLE DATABASE pdb1 OPEN READ WRITE FORCE;\n\n-- PDB 닫기 (MOUNTED 상태로 전환)\nALTER PLUGGABLE DATABASE pdb1 CLOSE IMMEDIATE;\n\n-- 모든 PDB 오픈\nALTER PLUGGABLE DATABASE ALL OPEN;",
+      "description": "ALTER PLUGGABLE DATABASE 구문으로 PDB의 오픈 모드를 전환하는 다양한 예시입니다. OPEN, CLOSE, READ WRITE, READ ONLY, RESTRICTED, FORCE 옵션을 활용합니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "SAVE STATE / DISCARD STATE 설정",
+      "sql": "-- 현재 PDB의 오픈 상태 저장\nALTER PLUGGABLE DATABASE pdb1 SAVE STATE;\n\n-- 모든 PDB의 오픈 상태 저장\nALTER PLUGGABLE DATABASE ALL SAVE STATE;\n\n-- 특정 PDB를 제외하고 상태 저장\nALTER PLUGGABLE DATABASE ALL EXCEPT pdb_seed SAVE STATE;\n\n-- 저장된 상태 삭제 (DISCARD)\nALTER PLUGGABLE DATABASE pdb1 DISCARD STATE;\n\n-- 모든 PDB의 저장된 상태 삭제\nALTER PLUGGABLE DATABASE ALL DISCARD STATE;",
+      "description": "SAVE STATE로 PDB의 현재 오픈 모드를 저장하면, CDB 재시작 시 해당 모드로 자동 복원됩니다. DISCARD STATE로 저장된 상태를 삭제합니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "DBA_PDB_SAVED_STATES 조회",
+      "sql": "-- 저장된 PDB 상태 확인\nSELECT con_name, con_id, instance_name, state, restricted\nFROM dba_pdb_saved_states\nORDER BY con_name;",
+      "description": "DBA_PDB_SAVED_STATES 뷰를 조회하여 SAVE STATE로 저장된 PDB의 오픈 모드 정보를 확인합니다. 이 뷰에 행이 존재하는 PDB는 CDB 재시작 시 자동으로 오픈됩니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "PDB Unplug — XML 메타데이터 방식",
+      "sql": "-- 1. PDB 닫기\nALTER PLUGGABLE DATABASE pdb1 CLOSE IMMEDIATE;\n\n-- 2. PDB Unplug (XML 메타데이터)\nALTER PLUGGABLE DATABASE pdb1\n  UNPLUG INTO '/u01/app/oracle/pdb1.xml';",
+      "description": "PDB를 닫은 후 XML 메타데이터 파일로 Unplug합니다. XML 파일에는 메타데이터만 저장되고, 데이터 파일은 원래 위치에 유지됩니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "PDB Unplug — 단일 아카이브(.pdb) 방식",
+      "sql": "-- 1. PDB 닫기\nALTER PLUGGABLE DATABASE pdb1 CLOSE IMMEDIATE;\n\n-- 2. PDB Unplug (단일 아카이브)\nALTER PLUGGABLE DATABASE pdb1\n  UNPLUG INTO '/u01/app/oracle/pdb1.pdb';",
+      "description": "PDB를 닫은 후 단일 아카이브 파일(.pdb)로 Unplug합니다. .pdb 파일은 메타데이터와 데이터 파일을 하나의 ZIP 압축 파일로 통합합니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "UNPLUGGED PDB 상태 확인 및 DROP",
+      "sql": "-- UNPLUGGED 상태 확인\nSELECT pdb_name, status\nFROM cdb_pdbs\nWHERE status = 'UNPLUGGED';\n\n-- UNPLUGGED PDB 삭제 (데이터 파일 유지)\nDROP PLUGGABLE DATABASE pdb1 KEEP DATAFILES;",
+      "description": "Unplug 후 CDB_PDBS에서 UNPLUGGED 상태를 확인하고, DROP PLUGGABLE DATABASE로 딕셔너리에서 제거합니다. KEEP DATAFILES로 데이터 파일을 보존합니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "호환성 검사 (DBMS_PDB.CHECK_PLUG_COMPATIBILITY)",
+      "sql": "SET SERVEROUTPUT ON\nDECLARE\n  l_result BOOLEAN;\nBEGIN\n  l_result := DBMS_PDB.CHECK_PLUG_COMPATIBILITY(\n    pdb_descr_file => '/u01/app/oracle/pdb1.xml',\n    pdb_name       => 'PDB1_NEW'\n  );\n  IF l_result THEN\n    DBMS_OUTPUT.PUT_LINE('Compatible - Plug In possible');\n  ELSE\n    DBMS_OUTPUT.PUT_LINE('Not compatible - Check PDB_PLUG_IN_VIOLATIONS');\n  END IF;\nEND;\n/",
+      "description": "DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수로 PDB를 Plug In하기 전에 대상 CDB와의 호환성을 검사합니다. 결과가 FALSE이면 PDB_PLUG_IN_VIOLATIONS 뷰를 확인해야 합니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "PDB Plug In — XML 메타데이터 사용",
+      "sql": "CREATE PLUGGABLE DATABASE pdb1_new\n  USING '/u01/app/oracle/pdb1.xml'\n  FILE_NAME_CONVERT = ('/u01/oradata/cdb1/', '/u01/oradata/cdb2/')\n  NOCOPY;",
+      "description": "XML 메타데이터 파일을 사용하여 PDB를 Plug In합니다. FILE_NAME_CONVERT로 데이터 파일 경로를 변환하고, NOCOPY로 원래 위치의 파일을 직접 사용합니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "PDB Plug In — 단일 아카이브(.pdb) 사용",
+      "sql": "CREATE PLUGGABLE DATABASE pdb1_new\n  USING '/u01/app/oracle/pdb1.pdb'\n  FILE_NAME_CONVERT = NONE\n  CREATE_FILE_DEST = '/u01/oradata/cdb2/';",
+      "description": "단일 아카이브 파일(.pdb)을 사용하여 PDB를 Plug In합니다. CREATE_FILE_DEST로 Oracle Managed Files 경로를 지정하여 데이터 파일을 자동 배치합니다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "PDB 삭제 (DROP PLUGGABLE DATABASE)",
+      "sql": "-- 데이터 파일 포함 완전 삭제\nDROP PLUGGABLE DATABASE pdb1 INCLUDING DATAFILES;\n\n-- 데이터 파일 유지 삭제\nDROP PLUGGABLE DATABASE pdb1 KEEP DATAFILES;",
+      "description": "DROP PLUGGABLE DATABASE로 PDB를 삭제합니다. INCLUDING DATAFILES는 데이터 파일을 물리적으로 삭제하고, KEEP DATAFILES는 데이터 파일을 보존합니다."
+    },
+    {
+      "sqlExamplesId": "sql13",
+      "title": "PDB 이동 전체 워크플로우 (Unplug → DROP → Plug In)",
+      "sql": "-- [원본 CDB에서]\n-- 1. PDB 닫기\nALTER PLUGGABLE DATABASE pdb1 CLOSE IMMEDIATE;\n\n-- 2. Unplug\nALTER PLUGGABLE DATABASE pdb1\n  UNPLUG INTO '/u01/app/oracle/pdb1.pdb';\n\n-- 3. DROP (데이터 파일 유지 불필요 — .pdb에 포함됨)\nDROP PLUGGABLE DATABASE pdb1 INCLUDING DATAFILES;\n\n-- [대상 CDB에서]\n-- 4. 호환성 검사 후 Plug In\nCREATE PLUGGABLE DATABASE pdb1\n  USING '/u01/app/oracle/pdb1.pdb';\n\n-- 5. PDB 오픈\nALTER PLUGGABLE DATABASE pdb1 OPEN;\n\n-- 6. 상태 저장\nALTER PLUGGABLE DATABASE pdb1 SAVE STATE;",
+      "description": "PDB를 다른 CDB로 이동하는 전체 워크플로우입니다. .pdb 아카이브 방식을 사용할 경우, 데이터 파일이 아카이브에 포함되므로 DROP 시 INCLUDING DATAFILES를 사용해도 됩니다."
+    },
+    {
+      "sqlExamplesId": "sql14",
+      "title": "PDB_PLUG_IN_VIOLATIONS 조회",
+      "sql": "SELECT time, name, cause, type, message, status, action\nFROM pdb_plug_in_violations\nWHERE status = 'PENDING'\nORDER BY time DESC;",
+      "description": "PDB_PLUG_IN_VIOLATIONS 뷰에서 미해결(PENDING) 상태의 위반 사항을 조회합니다. ERROR 유형은 반드시 해결해야 하며, WARNING 유형은 PDB 오픈 시 자동 해결될 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql15",
+      "title": "AFTER STARTUP 트리거로 PDB 자동 오픈",
+      "sql": "CREATE OR REPLACE TRIGGER open_all_pdbs\n  AFTER STARTUP ON DATABASE\nBEGIN\n  EXECUTE IMMEDIATE 'ALTER PLUGGABLE DATABASE ALL OPEN';\nEXCEPTION\n  WHEN OTHERS THEN\n    NULL; -- 개별 PDB 오픈 실패 시에도 트리거 중단 방지\nEND;\n/",
+      "description": "AFTER STARTUP ON DATABASE 트리거를 생성하여 CDB 시작 시 모든 PDB를 자동으로 오픈합니다. 예외 처리를 포함하여 개별 PDB 오픈 실패가 전체 트리거를 중단시키지 않도록 합니다."
+    }
+  ],
+  "keywords": [
+    "PDB",
+    "Pluggable Database",
+    "CDB",
+    "Container Database",
+    "OPEN MODE",
+    "READ WRITE",
+    "READ ONLY",
+    "MOUNTED",
+    "SAVE STATE",
+    "DISCARD STATE",
+    "DBA_PDB_SAVED_STATES",
+    "UNPLUG",
+    "PLUG IN",
+    "UNPLUGGED",
+    "ALTER PLUGGABLE DATABASE",
+    "CREATE PLUGGABLE DATABASE",
+    "DROP PLUGGABLE DATABASE",
+    "INCLUDING DATAFILES",
+    "KEEP DATAFILES",
+    "DBMS_PDB.CHECK_PLUG_COMPATIBILITY",
+    "PDB_PLUG_IN_VIOLATIONS",
+    "V$PDBS",
+    "CDB_PDBS",
+    "XML Metadata",
+    ".pdb Archive",
+    "FILE_NAME_CONVERT",
+    "RESTRICTED",
+    "FORCE",
+    "CLOSE IMMEDIATE",
+    "AFTER STARTUP Trigger"
+  ]
+}

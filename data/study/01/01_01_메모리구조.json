@@ -1,0 +1,303 @@
+{
+  "id": "01_01",
+  "title": "메모리 구조 (Memory Structures)",
+  "chapter": "01. Oracle Database 아키텍처 및 인스턴스",
+  "description": "Oracle 인스턴스의 핵심 메모리 구성요소인 SGA(System Global Area)와 PGA(Program Global Area)의 전체 구조, 내부 동작 원리, 메모리 관리 메커니즘 및 각 구성요소 간의 관계를 상세히 다룹니다.",
+  "oracle26ai_changes": [
+    "Oracle 23ai부터 SGA 내 In-Memory Area가 기본 활성화 옵션으로 제공되며, INMEMORY_SIZE 파라미터의 기본값이 0이 아닌 환경이 지원됩니다.",
+    "Automatic Memory Management(AMM) 향상으로 SGA/PGA 간 메모리 자동 재분배 알고리즘이 개선되어 워크로드 변화에 더 빠르게 대응합니다.",
+    "PGA_AGGREGATE_TARGET 자동 조정 기능이 강화되어, 대량 정렬/해시 조인 워크로드 발생 시 PGA 할당이 보다 적극적으로 이루어집니다.",
+    "Result Cache의 자동 무효화(Auto-Invalidation) 메커니즘이 개선되어, 기반 테이블 변경 시 캐시 무효화 지연이 감소하였습니다.",
+    "Shared Pool 내 SQL Plan Management(SPM) 관련 메모리 사용이 최적화되어, 대규모 SQL Plan Baseline 환경에서의 Shared Pool 소비가 줄었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "Oracle 인스턴스와 메모리의 관계 (Instance and Memory Overview)",
+      "sqlExamplesIds": [],
+      "content": "Oracle Database는 **인스턴스(Instance)**와 **데이터베이스(Database)**의 조합으로 구성됩니다.\n\n- **인스턴스**: 메모리 구조(SGA + PGA) + 백그라운드 프로세스\n- **데이터베이스**: 디스크 상의 물리적 파일(데이터 파일, 컨트롤 파일, Redo Log 파일 등)\n\n인스턴스는 데이터베이스에 대한 **접근 경로**이며, 인스턴스가 시작(STARTUP)되면 SGA가 할당되고 백그라운드 프로세스가 기동됩니다. 인스턴스가 종료(SHUTDOWN)되면 SGA 메모리가 해제됩니다.\n\nOracle의 메모리 구조는 크게 두 가지로 나뉩니다:\n\n| 구분 | SGA | PGA |\n|---|---|---|\n| **공유 여부** | 모든 프로세스가 공유 | 각 프로세스 전용 |\n| **할당 시점** | 인스턴스 시작 시 | 서버 프로세스 생성 시 |\n| **해제 시점** | 인스턴스 종료 시 | 서버 프로세스 종료 시 |\n| **개수** | 인스턴스당 1개 | 서버 프로세스당 1개 |\n| **주요 역할** | 데이터/SQL 캐싱, Redo 버퍼링 | 정렬, 해시 조인, 세션 정보 |",
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "SGA (System Global Area / 시스템 글로벌 영역)",
+      "sqlExamplesIds": ["sql01", "sql02", "sql03", "sql06", "sql07", "sql08", "sql09", "sql13", "sql14", "sql15"],
+      "content": "SGA는 Oracle 인스턴스가 시작될 때 할당되는 **공유 메모리 영역**입니다. 모든 서버 프로세스와 백그라운드 프로세스가 공유하여 사용하며, 인스턴스당 정확히 하나만 존재합니다.\n\nSGA의 전체 구성요소:\n\n| 구성요소 | 필수 여부 | 설명 |\n|---|---|---|\n| **Database Buffer Cache** | 필수 | 데이터 블록 캐싱 |\n| **Shared Pool** | 필수 | SQL/PL/SQL 파싱 결과, 딕셔너리 캐싱 |\n| **Redo Log Buffer** | 필수 | 변경 사항(Redo Entry) 임시 저장 |\n| **Large Pool** | 선택 | RMAN 백업, Shared Server, 병렬 처리 전용 |\n| **Java Pool** | 선택 | Java 코드/데이터 저장 |\n| **Streams Pool** | 선택 | Oracle Streams, Advanced Queuing 지원 |\n| **Fixed SGA** | 필수(자동) | 내부 하우스키핑 정보, 래치/락 구조 |\n| **In-Memory Area** | 선택 | 컬럼 기반 In-Memory 저장소 |\n| **Result Cache** | 선택 | SQL/PL/SQL 실행 결과 캐싱 |\n\n### SGA Granule (SGA 그래뉼)\n\nSGA의 메모리는 **Granule(그래뉼)**이라는 연속적인 메모리 단위로 할당됩니다. 그래뉼 크기는 SGA 전체 크기에 따라 자동으로 결정됩니다.\n\n| SGA 크기 | Granule 크기 |\n|---|---|\n| 1GB 미만 | 4MB |\n| 1GB ~ 8GB | 16MB |\n| 8GB ~ 16GB | 32MB |\n| 16GB ~ 32GB | 64MB |\n| 32GB 이상 | 128MB 이상 |\n\n각 SGA 구성요소는 최소 1개의 Granule을 할당받으며, 동적 크기 조정(Dynamic SGA Resizing) 시에도 Granule 단위로 증감됩니다. `V$SGA_DYNAMIC_COMPONENTS` 뷰에서 Granule 크기를 확인할 수 있습니다.",
+      "subsections": [
+        {
+          "title": "데이터베이스 버퍼 캐시 (Database Buffer Cache)",
+          "content": "데이터 파일에서 읽어온 **데이터 블록의 복사본**을 저장하는 SGA 내 메모리 영역입니다. Oracle에서 가장 핵심적인 성능 관련 메모리 구성요소이며, 디스크 I/O를 최소화하는 것이 주된 목적입니다.\n\n### 동작 원리\n\n1. 사용자가 데이터를 요청하면, 서버 프로세스는 먼저 **버퍼 캐시**에서 해당 블록을 검색합니다.\n2. 캐시에 존재하면 **Cache Hit** — 디스크 I/O 없이 메모리에서 바로 처리합니다.\n3. 캐시에 없으면 **Cache Miss** — 데이터 파일에서 블록을 읽어와 캐시에 적재한 뒤 처리합니다.\n4. 데이터를 변경(DML)하면 해당 버퍼가 **Dirty Buffer**가 됩니다.\n5. DBWn(Database Writer) 프로세스가 Dirty Buffer를 디스크에 기록하여 동기화합니다.\n\n### 버퍼 상태 (Buffer States)\n\n| 상태 | 설명 |\n|---|---|\n| **Free (Unused)** | 아직 사용되지 않은 빈 버퍼. 인스턴스 시작 직후에 대부분 이 상태 |\n| **Clean** | 데이터가 있지만 변경되지 않았거나, 변경 후 디스크에 이미 기록된 버퍼 |\n| **Dirty** | 변경되었으나 아직 디스크에 기록되지 않은 버퍼. DBWn만이 디스크에 기록 가능 |\n| **Pinned** | 현재 다른 세션이 액세스 중인 버퍼. 교체 대상에서 제외 |\n\n### 버퍼 캐시 내부의 리스트 구조\n\n버퍼 캐시는 내부적으로 여러 리스트를 사용하여 버퍼를 관리합니다:\n\n**1. LRU List (Least Recently Used List)**\n- 모든 버퍼의 접근 순서를 관리하는 리스트입니다.\n- **Hot End (MRU 쪽)**: 최근에 접근된, 자주 사용되는 버퍼\n- **Cold End (LRU 쪽)**: 오래 전에 접근된, 교체 후보 버퍼\n- 새로운 블록을 캐시에 올릴 공간이 필요하면 Cold End에서 Free/Clean 버퍼를 찾아 교체합니다.\n\n**2. Touch Count 메커니즘**\n- 각 버퍼에는 **Touch Count(접근 횟수)**가 있어, 단순한 LRU가 아닌 **접근 빈도**를 반영합니다.\n- Touch Count가 높은 버퍼는 Hot End로 이동하여 캐시에 오래 유지됩니다.\n- 이를 통해 자주 사용되는 블록(인덱스 루트 블록 등)이 캐시에서 밀려나지 않습니다.\n\n**3. Checkpoint Queue (Write List)**\n- Dirty Buffer만을 추적하는 리스트입니다.\n- DBWn은 이 리스트를 참조하여 Dirty Buffer를 디스크에 기록합니다.\n- 변경된 순서(LRBA - Low Redo Block Address 순)로 관리되어, 복구 시 일관성을 보장합니다.\n\n### Buffer Pool 유형\n\nOracle은 버퍼 캐시를 용도에 따라 **3가지 풀(Pool)**로 분리하여 운영할 수 있습니다:\n\n| 풀 | 파라미터 | 용도 |\n|---|---|---|\n| **Default Pool** | `DB_CACHE_SIZE` | 일반적인 모든 블록의 기본 캐싱 영역 |\n| **Keep Pool** | `DB_KEEP_CACHE_SIZE` | 자주 접근하는 소규모 테이블/인덱스를 캐시에 **상주**시키기 위한 영역 |\n| **Recycle Pool** | `DB_RECYCLE_CACHE_SIZE` | 대규모 테이블 등 재사용 가능성이 낮은 블록을 위한 영역. 빠르게 교체됨 |\n\n테이블이나 인덱스 생성/변경 시 `STORAGE` 절에서 `BUFFER_POOL` 속성을 지정하여 특정 객체를 원하는 풀에 캐싱할 수 있습니다:\n```sql\nALTER TABLE employees STORAGE (BUFFER_POOL KEEP);\n```\n\n### 비표준 블록 크기 지원 (Multiple Block Sizes)\n\n기본 블록 크기(`DB_BLOCK_SIZE`, 보통 8KB) 외에도 2KB, 4KB, 16KB, 32KB 등 **비표준 블록 크기**의 테이블스페이스를 사용할 수 있습니다. 이 경우 각 블록 크기별로 별도의 버퍼 캐시를 할당해야 합니다:\n\n| 파라미터 | 블록 크기 |\n|---|---|\n| `DB_2K_CACHE_SIZE` | 2KB |\n| `DB_4K_CACHE_SIZE` | 4KB |\n| `DB_8K_CACHE_SIZE` | 8KB (기본과 별도) |\n| `DB_16K_CACHE_SIZE` | 16KB |\n| `DB_32K_CACHE_SIZE` | 32KB |\n\n### Full Table Scan 시 버퍼 캐시 동작\n\nFull Table Scan은 대량의 블록을 읽기 때문에, 기존 캐시의 유용한 블록을 밀어낼 위험이 있습니다. Oracle은 이를 방지하기 위해:\n\n- **소규모 테이블**(버퍼 캐시의 약 2% 이하): 일반적인 방식으로 캐싱 (MRU End)\n- **대규모 테이블**: 블록을 LRU End(Cold End)에 배치하여 빠르게 교체되도록 합니다. 이를 **Direct Path Read**로 처리하여 버퍼 캐시를 우회할 수도 있습니다.",
+          "key_points": [
+            "데이터 파일의 블록 복사본을 메모리에 캐싱하여 디스크 I/O를 줄이는 역할",
+            "LRU List + Touch Count 메커니즘으로 접근 빈도 기반의 버퍼 관리",
+            "Checkpoint Queue로 Dirty Buffer를 LRBA 순서로 관리하여 복구 일관성 보장",
+            "DB_CACHE_SIZE 파라미터로 Default Pool 크기 제어",
+            "DBWn(Database Writer) 프로세스가 Dirty 버퍼를 디스크에 기록",
+            "Default / Keep / Recycle 3가지 Buffer Pool로 용도별 분리 운영 가능",
+            "비표준 블록 크기 사용 시 DB_nK_CACHE_SIZE 파라미터로 별도 캐시 할당 필요",
+            "Full Table Scan 시 대규모 테이블은 LRU End 배치 또는 Direct Path Read로 캐시 오염 방지"
+          ]
+        },
+        {
+          "title": "공유 풀 (Shared Pool)",
+          "content": "SQL 및 PL/SQL 실행에 필요한 다양한 구조를 캐싱하는 SGA 내 핵심 메모리 영역입니다. `SHARED_POOL_SIZE` 파라미터로 크기를 제어합니다.\n\n### 공유 풀의 구성요소\n\n| 구성요소 | 역할 |\n|---|---|\n| **Library Cache** | SQL/PL/SQL 파싱 결과, 실행 계획 캐싱 |\n| **Data Dictionary Cache** | 테이블, 컬럼, 사용자 등 메타데이터 캐싱 |\n| **Result Cache** | SQL 쿼리 및 PL/SQL 함수의 실행 결과 캐싱 |\n| **Reserved Pool** | 대형 연속 메모리 할당을 위한 예약 영역 |\n| **Server Result Cache** | 서버 측 쿼리 결과 캐싱 |\n\n---\n\n### 라이브러리 캐시 (Library Cache)\n\n최근 사용된 SQL 및 PL/SQL 문장의 **파싱된 표현(Parse Tree)**과 **실행 계획(Execution Plan)**을 저장하는 영역입니다.\n\n#### SQL 처리 전체 흐름 (SQL Processing Flow)\n\nSQL 문장이 실행될 때 Oracle 내부에서는 다음 단계를 거칩니다:\n\n**1. 구문 분석 (Syntax Check)**\n- SQL 문법이 올바른지 확인합니다.\n- 오류 예: `SELCT * FROM emp;` → 구문 오류\n\n**2. 의미 분석 (Semantic Check)**\n- 참조된 객체(테이블, 컬럼 등)가 실제로 존재하는지 확인합니다.\n- 사용자에게 해당 객체에 대한 접근 권한이 있는지 확인합니다.\n- 이 단계에서 **Data Dictionary Cache**를 참조합니다.\n\n**3. 공유 풀 조회 (Shared Pool Check)**\n- 동일한 SQL이 이미 Library Cache에 존재하는지 확인합니다.\n- 존재하면 **Soft Parse** — 기존 실행 계획을 재사용합니다.\n- 존재하지 않으면 **Hard Parse** — 다음 단계로 진행합니다.\n\n**4. 최적화 (Optimization)**\n- Query Optimizer가 최적의 실행 계획을 생성합니다.\n- Cost-Based Optimizer(CBO)가 통계 정보를 기반으로 여러 실행 경로의 비용을 계산합니다.\n\n**5. 행 소스 생성 (Row Source Generation)**\n- 최적화된 실행 계획을 실제 실행 가능한 **행 소스 트리(Row Source Tree)**로 변환합니다.\n\n#### Hard Parse vs Soft Parse\n\n| 구분 | Hard Parse | Soft Parse |\n|---|---|---|\n| **발생 조건** | Library Cache에 동일 SQL 없음 | Library Cache에 동일 SQL 존재 |\n| **수행 단계** | Syntax → Semantic → Optimization → Row Source Generation 전체 | Syntax → Semantic → 캐시 재사용 |\n| **비용** | 매우 높음 (CPU, 메모리, 래치 경합) | 낮음 |\n| **성능 영향** | 과도한 Hard Parse는 심각한 성능 저하 유발 | 이상적인 상태 |\n\nHard Parse를 줄이기 위한 방법:\n- **바인드 변수(Bind Variable)** 사용: 리터럴 값 대신 바인드 변수를 사용하면 동일한 SQL로 인식\n- **CURSOR_SHARING 파라미터**: `FORCE`로 설정하면 리터럴 값을 자동으로 바인드 변수로 치환\n\n#### Shared Cursor 구조\n\nLibrary Cache에 저장되는 SQL은 **Parent Cursor**와 **Child Cursor**의 계층 구조를 가집니다:\n\n- **Parent Cursor**: SQL 텍스트 자체를 나타냄. SQL 텍스트가 완전히 동일하면 같은 Parent Cursor를 공유\n- **Child Cursor**: 실행 환경(스키마, 옵티마이저 설정 등)이 다르면 별도의 Child Cursor 생성\n\n예: 같은 `SELECT * FROM emp` 문장이라도 SCOTT 사용자와 HR 사용자는 서로 다른 emp 테이블을 참조하므로 별도의 Child Cursor가 생성됩니다.\n\n`V$SQL` — Child Cursor 단위 정보, `V$SQLAREA` — Parent Cursor 단위 정보를 조회합니다.\n\n---\n\n### 데이터 딕셔너리 캐시 (Data Dictionary Cache / Row Cache)\n\n테이블, 컬럼, 사용자, 권한, 제약조건 등 **데이터 딕셔너리 정보**를 행(Row) 단위로 캐싱하는 영역입니다. **Row Cache**라고도 불립니다.\n\nSQL 실행 시 의미 분석(Semantic Check) 단계에서 객체의 존재, 권한, 데이터 타입 등을 확인하기 위해 빈번하게 참조되므로 성능에 매우 중요합니다.\n\n- Library Cache가 블록 단위가 아닌 **행(Row) 단위**로 데이터를 캐싱하는 것이 특징입니다.\n- `V$ROWCACHE` 뷰로 사용 현황과 적중률을 확인할 수 있습니다.\n- 별도로 크기를 지정하는 파라미터는 없으며, Shared Pool 전체 크기 내에서 자동 관리됩니다.\n\n---\n\n### Reserved Pool (예약 풀)\n\nShared Pool 내에서 **대형 연속 메모리 블록(5KB 초과)**의 할당을 위해 별도로 예약된 영역입니다.\n\n- `SHARED_POOL_RESERVED_SIZE` 파라미터로 크기를 지정합니다 (기본: Shared Pool의 5%).\n- 대형 PL/SQL 패키지 컴파일, 대형 SQL 파싱 등에 사용됩니다.\n- 일반 할당이 실패한 경우에만 Reserved Pool에서 할당을 시도하므로, 일반 소형 할당에 의한 단편화(Fragmentation)로부터 보호합니다.\n\n---\n\n### Result Cache (결과 캐시)\n\nSQL 쿼리의 **실행 결과 데이터 자체**를 캐싱하여, 동일한 쿼리가 재실행될 때 실행 과정 없이 결과를 즉시 반환하는 메커니즘입니다.\n\n| 구분 | Library Cache | Result Cache |\n|---|---|---|\n| 캐싱 대상 | 파싱 결과 + 실행 계획 | 실행 결과 데이터 |\n| 재실행 시 | 실행 계획 재사용 (데이터는 다시 읽음) | 결과를 즉시 반환 |\n\n- `RESULT_CACHE_MAX_SIZE` 파라미터로 전체 크기 제어\n- `RESULT_CACHE_MAX_RESULT` 파라미터로 단일 결과의 최대 비율 제어 (기본 5%)\n- 쿼리에 `/*+ RESULT_CACHE */` 힌트를 사용하거나, 테이블에 `RESULT_CACHE (MODE FORCE)` 설정\n- 기반 테이블의 데이터가 변경(DML)되면 관련 캐시 결과가 **자동 무효화(Auto-Invalidation)**됩니다.",
+          "key_points": [
+            "SHARED_POOL_SIZE 파라미터로 크기 제어",
+            "라이브러리 캐시: SQL/PL/SQL 파싱 결과(Parse Tree)와 실행 계획(Execution Plan) 캐싱",
+            "SQL 처리 흐름: Syntax Check → Semantic Check → Shared Pool Check → Optimization → Row Source Generation",
+            "Hard Parse(전체 파싱)는 CPU/메모리 비용이 높으므로, 바인드 변수 사용으로 Soft Parse를 유도해야 함",
+            "Parent Cursor(SQL 텍스트 기준)와 Child Cursor(실행 환경 기준)의 계층 구조",
+            "데이터 딕셔너리 캐시(Row Cache): 메타데이터를 행 단위로 캐싱, 의미 분석 시 참조",
+            "Reserved Pool: 대형 연속 메모리 할당용 예약 영역 (기본 Shared Pool의 5%)",
+            "Result Cache: 쿼리 실행 결과 자체를 캐싱하여 재실행 시 즉시 반환, 기반 테이블 변경 시 자동 무효화"
+          ]
+        },
+        {
+          "title": "리두 로그 버퍼 (Redo Log Buffer)",
+          "content": "데이터베이스에 가해진 **모든 변경 사항(Redo Entry)**을 일시적으로 저장하는 SGA 내의 **순환 버퍼(Circular Buffer)**입니다. `LOG_BUFFER` 파라미터로 크기를 제어합니다.\n\n리두 로그 버퍼의 핵심 목적은 **장애 발생 시 데이터 복구를 보장**하는 것입니다. 모든 변경 사항은 디스크의 데이터 파일에 기록되기 전에 반드시 Redo Log에 먼저 기록되어야 합니다.\n\n### Write-Ahead Logging (선행 기록) 원칙\n\nOracle의 복구 메커니즘의 핵심 원칙으로, 다음 두 가지 규칙을 따릅니다:\n\n1. **변경 전 Redo 기록**: 데이터 블록의 변경 사항이 디스크의 데이터 파일에 기록되기 **전에**, 해당 변경에 대한 Redo Entry가 반드시 온라인 Redo Log 파일에 먼저 기록되어야 합니다.\n2. **COMMIT 시 Redo 강제 기록 (Log Force at Commit)**: 트랜잭션이 COMMIT되면, 해당 트랜잭션의 모든 Redo Entry가 디스크의 온라인 Redo Log 파일에 기록될 때까지 COMMIT은 완료되지 않습니다.\n\n이 원칙 덕분에 인스턴스 장애 발생 시에도 COMMIT된 트랜잭션의 데이터는 Redo Log로부터 복구할 수 있습니다.\n\n### Redo Entry의 내부 구조\n\nRedo Entry(Redo Record)는 하나 이상의 **Change Vector(변경 벡터)**로 구성됩니다:\n\n- **Change Vector**: 데이터베이스 내 단일 블록에 대한 하나의 변경을 기술하는 구조\n  - 변경된 블록의 주소 (DBA: Data Block Address)\n  - 변경 유형 (Operation Code)\n  - 변경 전/후 데이터\n\n예를 들어 하나의 UPDATE 문은 다음과 같은 Change Vector들을 생성할 수 있습니다:\n- UNDO 블록 변경 (변경 전 이미지 저장)\n- 데이터 블록 변경 (실제 행 변경)\n- UNDO 세그먼트 헤더 변경 (트랜잭션 테이블 갱신)\n\n### 순환 버퍼 (Circular Buffer) 구조\n\nRedo Log Buffer는 **원형으로 순환하는 구조**입니다:\n- 서버 프로세스가 Redo Entry를 버퍼에 기록하고\n- LGWR 프로세스가 버퍼의 내용을 디스크로 기록하면 해당 공간이 재사용 가능해집니다.\n- 버퍼가 가득 차서 서버 프로세스가 기록할 공간이 없으면, LGWR이 디스크 기록을 완료할 때까지 대기합니다 (`log buffer space` 대기 이벤트).\n\n### LGWR이 Redo Log Buffer를 디스크에 기록하는 조건\n\n| 조건 | 설명 |\n|---|---|\n| **COMMIT 발생** | 트랜잭션 커밋 시 해당 Redo를 반드시 디스크에 기록 (Log Force at Commit) |\n| **버퍼 1/3 이상 사용** | 버퍼 공간 부족을 예방하기 위한 임계값 기반 기록 |\n| **3초마다** | 주기적 타이머 기반 기록 |\n| **DBWn 기록 전** | DBWn이 Dirty Buffer를 데이터 파일에 기록하기 전, 관련 Redo가 먼저 기록되어야 함 (Write-Ahead Logging) |\n| **1MB 도달** | 버퍼에 1MB 이상의 Redo가 쌓이면 기록 |",
+          "key_points": [
+            "LOG_BUFFER 파라미터로 크기 제어",
+            "순환 버퍼(Circular Buffer) 구조로 공간을 재사용",
+            "Write-Ahead Logging 원칙: 데이터 변경 전에 반드시 Redo를 먼저 기록",
+            "Log Force at Commit: COMMIT 시 해당 트랜잭션의 Redo가 디스크에 기록될 때까지 완료 대기",
+            "Redo Entry는 Change Vector(변경 벡터)들로 구성되며, 각 벡터는 단일 블록의 변경을 기술",
+            "LGWR 프로세스가 5가지 조건(COMMIT, 1/3 사용, 3초, DBWn 기록 전, 1MB) 중 하나 충족 시 디스크에 기록",
+            "인스턴스 복구(Instance Recovery) 시 Redo 데이터를 사용하여 커밋된 변경 사항을 재적용(Roll Forward)"
+          ]
+        },
+        {
+          "title": "Large Pool (라지 풀)",
+          "content": "Shared Pool의 부담을 줄이기 위해 특정 **대형 메모리 할당**을 전담하는 선택적 SGA 구성요소입니다. `LARGE_POOL_SIZE` 파라미터로 크기를 지정합니다.\n\nShared Pool과 달리 **LRU 리스트로 관리되지 않습니다**. 할당된 메모리는 사용이 끝날 때까지 유지되며, 다른 용도로 교체되지 않습니다.\n\n### Large Pool의 주요 용도\n\n| 용도 | 설명 |\n|---|---|\n| **Shared Server 모드** | UGA(User Global Area)를 Large Pool에 할당 |\n| **RMAN 백업/복구** | I/O 버퍼로 사용. RMAN의 `BACKUP` 및 `RESTORE` 작업 시 디스크 I/O 버퍼링 |\n| **병렬 실행 (Parallel Execution)** | 병렬 쿼리의 프로세스 간 메시지 버퍼 |\n| **DBWR Async I/O** | 비동기 I/O 사용 시 I/O 버퍼 영역 |\n\nLarge Pool이 구성되지 않은 경우, 이러한 메모리 요청은 Shared Pool에서 처리되어 SQL 파싱 캐시와 경쟁하게 되므로 성능 저하가 발생할 수 있습니다.",
+          "key_points": [
+            "LARGE_POOL_SIZE 파라미터로 크기 제어",
+            "LRU로 관리되지 않음 — 할당 후 사용 완료까지 유지",
+            "Shared Server, RMAN, 병렬 실행 등 대형 메모리 할당 전담",
+            "미구성 시 Shared Pool에서 처리되어 SQL 캐시 성능에 영향 가능"
+          ]
+        },
+        {
+          "title": "Java Pool 및 Streams Pool",
+          "content": "### Java Pool (자바 풀)\n\nJVM(Java Virtual Machine) 내의 **Java 코드와 데이터**를 저장하는 선택적 SGA 구성요소입니다. `JAVA_POOL_SIZE` 파라미터로 크기를 지정합니다.\n\n- Java Stored Procedure, Java 클래스, Java 세션 상태 정보를 저장합니다.\n- Oracle JVM을 사용하는 애플리케이션이 없으면 크게 필요하지 않습니다.\n- 기본값은 약 24MB~50MB 수준입니다.\n\n### Streams Pool (스트림즈 풀)\n\n**Oracle Streams**, **Advanced Queuing(AQ)**, **Oracle GoldenGate의 Integrated Capture** 등에 사용되는 선택적 SGA 구성요소입니다. `STREAMS_POOL_SIZE` 파라미터로 크기를 지정합니다.\n\n- 데이터 복제, 변경 데이터 캡처(CDC) 등에 사용됩니다.\n- 명시적으로 크기를 지정하지 않으면, 첫 사용 시 Shared Pool에서 자동으로 할당받습니다(SGA 전체의 최대 10%).",
+          "key_points": [
+            "Java Pool: JVM 내 Java 코드/데이터 저장 (JAVA_POOL_SIZE)",
+            "Streams Pool: Oracle Streams, AQ, GoldenGate Integrated Capture용 (STREAMS_POOL_SIZE)",
+            "두 풀 모두 해당 기능을 사용하지 않으면 최소한의 메모리만 필요",
+            "Streams Pool 미지정 시 첫 사용 시 Shared Pool에서 SGA의 최대 10%까지 자동 할당"
+          ]
+        },
+        {
+          "title": "Fixed SGA",
+          "content": "Oracle 인스턴스의 **내부 하우스키핑 정보**를 저장하는 고정 크기의 SGA 구성요소입니다.\n\n### 특징\n- 인스턴스 시작 시 크기가 결정되며, **동적으로 변경할 수 없습니다**.\n- 사용자가 직접 크기를 지정하는 파라미터가 없습니다.\n- Oracle 버전과 플랫폼에 따라 크기가 결정됩니다.\n\n### 저장 내용\n- **래치(Latch)** 및 **락(Lock)** 구조의 메모리 주소 정보\n- 백그라운드 프로세스 간 통신에 사용되는 내부 구조\n- SGA 내 다른 구성요소들의 위치를 가리키는 포인터\n- `V$` 동적 성능 뷰가 참조하는 일부 내부 배열\n\n`V$SGA` 뷰에서 `Fixed Size`로 표시되며, 일반적으로 수 MB 수준의 작은 영역입니다.",
+          "key_points": [
+            "내부 하우스키핑용 고정 크기 영역으로, 사용자가 크기를 지정할 수 없음",
+            "래치, 락 구조, 내부 포인터 등 Oracle 내부 관리 정보를 저장",
+            "V$SGA에서 'Fixed Size'로 확인 가능",
+            "일반적으로 수 MB 수준의 소규모 영역"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "PGA (Program Global Area / 프로그램 글로벌 영역)",
+      "sqlExamplesIds": ["sql04", "sql05", "sql10", "sql12"],
+      "content": "PGA는 각 **서버 프로세스(또는 백그라운드 프로세스)에 독립적으로 할당**되는 **비공유(Private) 메모리 영역**입니다. SGA와 달리 다른 프로세스와 공유되지 않으며, 해당 프로세스만 읽고 쓸 수 있습니다.\n\n| 특성 | 설명 |\n|---|---|\n| **할당 시점** | 서버 프로세스 생성 시 |\n| **해제 시점** | 서버 프로세스 종료 시 |\n| **공유 여부** | 비공유 (해당 프로세스 전용) |\n| **개수** | 서버 프로세스당 1개 + 백그라운드 프로세스당 1개 |\n\n### PGA의 전체 구성\n\n```\nPGA\n├── Private SQL Area (개인 SQL 영역)\n│   ├── Persistent Area (지속 영역) — 바인드 변수 정보\n│   └── Runtime Area (런타임 영역) — 실행 상태 정보\n├── SQL Work Area (SQL 작업 영역)\n│   ├── Sort Area — 정렬 작업\n│   ├── Hash Area — 해시 조인 작업\n│   └── Bitmap Merge Area — 비트맵 인덱스 병합\n└── Session Memory (세션 메모리)\n    └── 세션 변수, 로그인 정보, PLSQL 변수 등\n```",
+      "subsections": [
+        {
+          "title": "Private SQL Area (개인 SQL 영역)",
+          "content": "각 세션이 실행하는 SQL 문에 대한 **개별적인 실행 정보**를 저장하는 영역입니다. Shared Pool의 공유 SQL 영역(Shared SQL Area)과 구분됩니다.\n\n### Persistent Area (지속 영역)\n- **바인드 변수의 값**을 저장합니다.\n- 커서가 닫힐 때까지 유지됩니다.\n- 예: `SELECT * FROM emp WHERE id = :emp_id` 에서 `:emp_id`에 바인딩된 실제 값\n\n### Runtime Area (런타임 영역)\n- SQL 실행 중 필요한 **상태 정보**를 저장합니다.\n- 실행이 시작될 때 생성되고, 실행이 완료되거나 커서가 닫힐 때 해제됩니다.\n- 포함 정보:\n  - 현재 처리 중인 행의 위치\n  - 정렬 또는 해시 조인의 진행 상태\n  - 쿼리 실행에 사용되는 임시 변수\n\n### 커서(Cursor)와의 관계\n\n**커서**는 Private SQL Area에 대한 **이름(핸들)**입니다:\n- 하나의 SQL 문이 실행되면 하나의 커서가 열리고, 그에 대응하는 Private SQL Area가 할당됩니다.\n- `OPEN_CURSORS` 파라미터로 세션당 열 수 있는 최대 커서 수를 제한합니다.\n- 커서가 닫히면 Private SQL Area의 대부분이 해제됩니다.",
+          "key_points": [
+            "Persistent Area: 바인드 변수 값 저장, 커서 닫힘 시까지 유지",
+            "Runtime Area: SQL 실행 상태 정보 저장, 실행 완료 시 해제",
+            "커서(Cursor)는 Private SQL Area에 대한 핸들(포인터)",
+            "OPEN_CURSORS 파라미터로 세션당 최대 커서 수 제한",
+            "Shared SQL Area(Library Cache)의 공유 실행 계획과 결합하여 SQL을 실행"
+          ]
+        },
+        {
+          "title": "SQL 작업 영역 (SQL Work Area)",
+          "content": "정렬(Sort), 해시 조인(Hash Join), 비트맵 인덱스 병합(Bitmap Merge) 등 **메모리 집약적인 SQL 작업**을 수행하기 위한 PGA 내 영역입니다.\n\n### 작업 영역의 종류\n\n| 작업 영역 | 용도 | 관련 작업 |\n|---|---|---|\n| **Sort Area** | 정렬 작업 | `ORDER BY`, `GROUP BY`, `DISTINCT`, 인덱스 생성 |\n| **Hash Area** | 해시 조인 | `HASH JOIN` 실행 시 해시 테이블 구축 |\n| **Bitmap Merge Area** | 비트맵 병합 | Bitmap Index의 AND/OR 병합 |\n| **Create Bitmap Area** | 비트맵 생성 | Star Transformation 시 비트맵 생성 |\n\n### 동작 모드 (Execution Modes)\n\n작업 영역의 크기에 따라 3가지 모드로 실행됩니다:\n\n| 모드 | 설명 | 성능 |\n|---|---|---|\n| **Optimal** | 전체 작업이 **메모리 내에서** 완료. 디스크 I/O 없음 | 최고 |\n| **One-pass** | 작업 데이터가 메모리를 초과하여 **임시 디스크 공간을 1회** 사용 | 중간 |\n| **Multi-pass** | 메모리가 매우 부족하여 **임시 디스크를 여러 번** 사용 | 최저 |\n\n이상적으로는 대부분의 작업이 Optimal 모드로 실행되어야 하며, Multi-pass는 가능한 피해야 합니다. `V$SQL_WORKAREA_HISTOGRAM` 뷰에서 각 모드별 실행 통계를 확인할 수 있습니다.\n\n### PGA 메모리 자동 관리 (Automatic PGA Memory Management)\n\n`WORKAREA_SIZE_POLICY` = `AUTO` (기본값)일 때 활성화됩니다:\n\n- `PGA_AGGREGATE_TARGET` 파라미터로 인스턴스 전체 PGA 목표 크기를 지정합니다.\n- Oracle이 **각 프로세스의 SQL Work Area 크기를 자동으로 조정**합니다.\n- 개별 작업 영역의 크기를 수동 지정하는 `SORT_AREA_SIZE`, `HASH_AREA_SIZE` 등의 파라미터는 무시됩니다.\n\n수동 관리(`WORKAREA_SIZE_POLICY` = `MANUAL`)도 가능하지만, Oracle은 자동 관리를 권장합니다.",
+          "key_points": [
+            "Sort Area, Hash Area, Bitmap Merge Area 등으로 구성",
+            "Optimal(메모리 내 완료) → One-pass(디스크 1회) → Multi-pass(디스크 다회) 3단계 동작 모드",
+            "PGA_AGGREGATE_TARGET으로 인스턴스 전체 PGA 목표 크기를 자동 관리",
+            "WORKAREA_SIZE_POLICY = AUTO가 기본값이며, Oracle 권장 설정",
+            "수동 관리 시 SORT_AREA_SIZE, HASH_AREA_SIZE 등 개별 파라미터 사용",
+            "V$SQL_WORKAREA_HISTOGRAM으로 Optimal/One-pass/Multi-pass 실행 비율 모니터링",
+            "메모리 부족 시 Temp Tablespace를 사용하여 성능 저하 발생"
+          ]
+        },
+        {
+          "title": "세션 메모리 (Session Memory) 및 UGA",
+          "content": "### Session Memory (세션 메모리)\n\n각 세션의 **세션 수준 정보**를 저장하는 영역입니다:\n- 로그인 정보 (사용자명, 권한 등)\n- 세션 레벨 변수 및 설정값\n- PL/SQL 패키지 변수, 커서 상태\n- NLS(National Language Support) 설정\n\n### UGA (User Global Area / 사용자 글로벌 영역)\n\nUGA는 사용자 세션과 관련된 정보를 저장하는 메모리 영역으로, **서버 연결 방식에 따라 위치가 달라지는** 것이 핵심 포인트입니다:\n\n| 연결 방식 | UGA 위치 | 이유 |\n|---|---|---|\n| **Dedicated Server** | **PGA** 내부 | 서버 프로세스와 세션이 1:1 대응이므로 PGA에 포함 |\n| **Shared Server** | **SGA (Large Pool 또는 Shared Pool)** 내부 | 여러 세션이 서버 프로세스를 공유하므로, 세션 정보가 공유 메모리에 있어야 다른 프로세스가 이어받을 수 있음 |\n\nDedicated Server 모드에서는 UGA가 PGA의 일부이므로 구분이 크게 의미 없지만, **Shared Server 모드에서는 UGA가 SGA로 이동**하므로 SGA 크기를 적절히 늘려야 합니다.\n\n`V$SESSTAT` 뷰에서 세션별 메모리 사용량(`session uga memory`, `session pga memory`)을 확인할 수 있습니다.",
+          "key_points": [
+            "Session Memory: 로그인 정보, 세션 변수, NLS 설정, PL/SQL 패키지 변수 등 저장",
+            "UGA(User Global Area)는 연결 방식에 따라 위치가 변동하는 것이 핵심",
+            "Dedicated Server: UGA가 PGA 내부에 위치",
+            "Shared Server: UGA가 SGA(Large Pool 또는 Shared Pool)로 이동",
+            "Shared Server 사용 시 SGA(특히 Large Pool) 크기를 충분히 확보해야 함",
+            "V$SESSTAT에서 session uga memory / session pga memory로 세션별 메모리 사용량 확인"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "메모리 관리 방식 (Memory Management Methods)",
+      "sqlExamplesIds": ["sql03", "sql11"],
+      "content": "Oracle은 SGA와 PGA의 크기를 관리하는 방식으로 여러 레벨의 자동화를 제공합니다. 관리자는 환경에 맞는 방식을 선택할 수 있습니다.",
+      "subsections": [
+        {
+          "title": "AMM - 자동 메모리 관리 (Automatic Memory Management)",
+          "content": "**SGA + PGA를 하나의 통합 메모리 풀로 관리**하는 가장 높은 수준의 자동화 방식입니다.\n\n### 설정 방법\n- `MEMORY_TARGET` 파라미터에 SGA + PGA의 총 목표 크기를 지정합니다.\n- `MEMORY_MAX_TARGET` 파라미터로 동적 조정의 상한선을 설정합니다.\n- `SGA_TARGET`과 `PGA_AGGREGATE_TARGET`을 **0**으로 설정하면 AMM이 완전 자동으로 동작합니다.\n\n### 동작 원리\n- Oracle이 워크로드를 분석하여 **SGA와 PGA 간의 메모리 비율을 자동으로 조정**합니다.\n- OLTP 워크로드가 많으면 SGA(Buffer Cache, Shared Pool)에 더 많이 할당하고, 분석/배치 워크로드가 많으면 PGA(Sort/Hash Area)에 더 많이 할당합니다.\n- `V$MEMORY_DYNAMIC_COMPONENTS` 뷰로 현재 할당 상태를 모니터링합니다.\n\n### 제한사항\n- Linux에서는 `/dev/shm`의 크기가 `MEMORY_MAX_TARGET` 이상이어야 합니다.\n- 일부 플랫폼(Windows 제외한 일부)에서만 지원됩니다.\n- `SGA_TARGET`과 `PGA_AGGREGATE_TARGET`에 0이 아닌 값을 설정하면 **최솟값(하한선)**으로 작동합니다.",
+          "key_points": [
+            "MEMORY_TARGET으로 SGA + PGA 총 메모리를 통합 관리하는 최상위 자동화 방식",
+            "MEMORY_MAX_TARGET으로 동적 확장의 상한선 설정",
+            "워크로드에 따라 SGA/PGA 간 메모리를 자동 재분배",
+            "SGA_TARGET, PGA_AGGREGATE_TARGET에 값을 지정하면 해당 값이 최솟값(하한선)으로 작동",
+            "Linux에서는 /dev/shm 크기가 MEMORY_MAX_TARGET 이상이어야 함"
+          ]
+        },
+        {
+          "title": "ASMM - 자동 공유 메모리 관리 (Automatic Shared Memory Management)",
+          "content": "**SGA 내부 구성요소의 크기를 자동으로 관리**하는 방식입니다. PGA는 별도로 관리합니다.\n\n### 설정 방법\n- `SGA_TARGET` 파라미터에 SGA 전체 목표 크기를 지정합니다.\n- `SGA_MAX_SIZE` 파라미터로 SGA 동적 확장의 상한선을 설정합니다.\n- `MEMORY_TARGET`을 0으로 설정(또는 미설정)합니다.\n- `PGA_AGGREGATE_TARGET`은 별도로 설정하여 PGA를 독립 관리합니다.\n\n### 자동 조정 대상 구성요소\n\n`SGA_TARGET`을 설정하면 Oracle이 다음 구성요소의 크기를 **자동으로 조정**합니다:\n\n| 자동 조정 대상 | 파라미터 |\n|---|---|\n| Database Buffer Cache | `DB_CACHE_SIZE` |\n| Shared Pool | `SHARED_POOL_SIZE` |\n| Large Pool | `LARGE_POOL_SIZE` |\n| Java Pool | `JAVA_POOL_SIZE` |\n| Streams Pool | `STREAMS_POOL_SIZE` |\n\n이때 개별 파라미터에 값을 지정하면 **최솟값(하한선)**으로 작동합니다.\n\n### 수동 지정이 필요한 구성요소\n\n다음 구성요소는 ASMM에서 자동 조정되지 않으므로 수동으로 지정해야 합니다:\n- `DB_KEEP_CACHE_SIZE` (Keep Buffer Pool)\n- `DB_RECYCLE_CACHE_SIZE` (Recycle Buffer Pool)\n- `DB_nK_CACHE_SIZE` (비표준 블록 크기 캐시)\n- `LOG_BUFFER` (Redo Log Buffer)\n\n`V$SGA_DYNAMIC_COMPONENTS` 뷰에서 각 구성요소의 현재 크기와 조정 이력을 확인합니다.",
+          "key_points": [
+            "SGA_TARGET으로 SGA 전체 크기를 지정하면 내부 구성요소 크기를 자동 조정",
+            "Buffer Cache, Shared Pool, Large Pool, Java Pool, Streams Pool이 자동 조정 대상",
+            "Keep/Recycle Pool, 비표준 블록 캐시, Redo Log Buffer는 수동 지정 필요",
+            "개별 구성요소 파라미터에 값을 지정하면 최솟값(하한선)으로 작동",
+            "PGA는 PGA_AGGREGATE_TARGET으로 별도 관리",
+            "V$SGA_DYNAMIC_COMPONENTS에서 동적 조정 이력 확인"
+          ]
+        },
+        {
+          "title": "수동 메모리 관리 (Manual Memory Management)",
+          "content": "SGA와 PGA 각 구성요소의 크기를 DBA가 **직접 개별적으로 지정**하는 방식입니다.\n\n### 설정 방법\n- `MEMORY_TARGET`과 `SGA_TARGET`을 모두 0으로 설정합니다.\n- 각 구성요소의 크기를 개별 파라미터로 직접 지정합니다.\n\n### SGA 관련 주요 파라미터\n\n| 파라미터 | 대상 |\n|---|---|\n| `DB_CACHE_SIZE` | Default Buffer Cache |\n| `DB_KEEP_CACHE_SIZE` | Keep Buffer Pool |\n| `DB_RECYCLE_CACHE_SIZE` | Recycle Buffer Pool |\n| `SHARED_POOL_SIZE` | Shared Pool |\n| `LARGE_POOL_SIZE` | Large Pool |\n| `JAVA_POOL_SIZE` | Java Pool |\n| `STREAMS_POOL_SIZE` | Streams Pool |\n| `LOG_BUFFER` | Redo Log Buffer |\n\n### PGA 관련 파라미터\n\n- `WORKAREA_SIZE_POLICY` = `MANUAL`로 설정\n- `SORT_AREA_SIZE`: 정렬 작업 영역 크기\n- `HASH_AREA_SIZE`: 해시 조인 작업 영역 크기\n- `BITMAP_MERGE_AREA_SIZE`: 비트맵 병합 영역 크기\n\n### 사용 시나리오\n\n수동 관리는 다음과 같은 특수한 경우에 사용됩니다:\n- 워크로드가 매우 예측 가능하고 고정적인 환경\n- 자동 관리가 최적이 아닌 결과를 낼 때 미세 조정이 필요한 경우\n- 레거시 시스템의 호환성 유지\n\n대부분의 환경에서는 **AMM 또는 ASMM을 사용하는 것이 Oracle의 권장 사항**입니다.",
+          "key_points": [
+            "MEMORY_TARGET = 0, SGA_TARGET = 0일 때 수동 관리 모드",
+            "SGA 구성요소: DB_CACHE_SIZE, SHARED_POOL_SIZE, LARGE_POOL_SIZE 등 개별 지정",
+            "PGA: WORKAREA_SIZE_POLICY = MANUAL 설정 후 SORT_AREA_SIZE, HASH_AREA_SIZE 등 개별 지정",
+            "워크로드가 예측 가능하거나 미세 조정이 필요한 특수 환경에서 사용",
+            "Oracle은 대부분의 환경에서 AMM 또는 ASMM을 권장"
+          ]
+        },
+        {
+          "title": "메모리 관리 방식 비교 요약 (Comparison Summary)",
+          "content": "세 가지 메모리 관리 방식의 핵심 차이를 비교합니다:\n\n| 구분 | AMM | ASMM | Manual |\n|---|---|---|---|\n| **핵심 파라미터** | `MEMORY_TARGET` | `SGA_TARGET` + `PGA_AGGREGATE_TARGET` | 개별 파라미터 |\n| **SGA 관리** | 자동 | 자동 | 수동 |\n| **PGA 관리** | 자동 | 자동 (별도) | 수동 |\n| **SGA↔PGA 재분배** | 가능 | 불가 | 불가 |\n| **자동화 수준** | 최고 | 중간 | 없음 |\n| **DBA 개입** | 최소 | 부분적 | 전면적 |\n| **적합 환경** | 일반적인 대부분 환경 | SGA/PGA 비율을 고정하고 싶을 때 | 매우 특수한 환경 |\n\n### 판단 플로우차트\n\n```\nMEMORY_TARGET > 0 ?\n  └── Yes → AMM (SGA + PGA 통합 자동 관리)\n  └── No → SGA_TARGET > 0 ?\n              └── Yes → ASMM (SGA 자동 + PGA 별도 자동)\n              └── No → Manual (모두 수동 관리)\n```",
+          "key_points": [
+            "AMM: MEMORY_TARGET으로 SGA+PGA 통합 관리, SGA↔PGA 간 자동 재분배 가능",
+            "ASMM: SGA_TARGET으로 SGA 내부만 자동 관리, PGA는 PGA_AGGREGATE_TARGET으로 별도 관리",
+            "Manual: 모든 구성요소를 개별 파라미터로 수동 관리",
+            "판단 기준: MEMORY_TARGET > 0 → AMM, 아니면 SGA_TARGET > 0 → ASMM, 둘 다 0 → Manual",
+            "Oracle 권장: AMM 또는 ASMM. 대부분의 환경에서 자동 관리가 수동 관리보다 효율적"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "SGA 크기 정보 조회",
+      "sql": "SELECT * FROM V$SGA;",
+      "description": "현재 인스턴스의 SGA 구성요소별 크기를 조회합니다. Fixed Size, Variable Size, Database Buffers, Redo Buffers로 구분됩니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "SGA 동적 구성요소 상세 조회",
+      "sql": "SELECT component, current_size/1024/1024 AS current_mb,\n       min_size/1024/1024 AS min_mb,\n       max_size/1024/1024 AS max_mb,\n       granule_size/1024/1024 AS granule_mb\nFROM V$SGA_DYNAMIC_COMPONENTS\nWHERE current_size > 0\nORDER BY current_size DESC;",
+      "description": "SGA의 각 동적 구성요소의 현재, 최소, 최대 크기와 Granule 크기를 MB 단위로 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "SGA 크기 조정 이력 조회",
+      "sql": "SELECT component, oper_type, oper_mode,\n       initial_size/1024/1024 AS initial_mb,\n       final_size/1024/1024 AS final_mb,\n       status, end_time\nFROM V$SGA_RESIZE_OPS\nORDER BY end_time DESC;",
+      "description": "SGA 구성요소의 동적 크기 조정 이력을 조회합니다. ASMM/AMM이 어떻게 메모리를 재분배했는지 확인할 수 있습니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "PGA 사용 현황 조회",
+      "sql": "SELECT name, value FROM V$PGASTAT;",
+      "description": "PGA 메모리 사용 통계를 조회합니다. 총 할당량, 사용량, 캐시 적중률, Optimal/One-pass/Multi-pass 실행 비율 등을 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "PGA 목표 대비 실제 사용량 Advisory 조회",
+      "sql": "SELECT pga_target_for_estimate/1024/1024 AS target_mb,\n       pga_target_factor,\n       estd_extra_bytes_rw/1024/1024 AS estd_extra_rw_mb,\n       estd_pga_cache_hit_percentage,\n       estd_overalloc_count\nFROM V$PGA_TARGET_ADVICE\nORDER BY pga_target_factor;",
+      "description": "PGA_AGGREGATE_TARGET의 다양한 크기 시나리오에서 예상되는 캐시 적중률과 디스크 I/O를 예측합니다. PGA 최적 크기를 결정하는 데 활용합니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "버퍼 캐시 적중률 조회",
+      "sql": "SELECT 1 - (physical.value / (db_block.value + consistent.value)) AS hit_ratio\nFROM V$SYSSTAT physical, V$SYSSTAT db_block, V$SYSSTAT consistent\nWHERE physical.name = 'physical reads'\nAND db_block.name = 'db block gets'\nAND consistent.name = 'consistent gets';",
+      "description": "데이터베이스 버퍼 캐시의 적중률(Hit Ratio)을 계산합니다. 1에 가까울수록 캐시 효율이 좋습니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "Buffer Cache Advisory 조회",
+      "sql": "SELECT size_for_estimate AS cache_mb,\n       size_factor,\n       physical_reads AS estd_phys_reads,\n       estd_physical_read_factor\nFROM V$DB_CACHE_ADVICE\nWHERE name = 'DEFAULT'\nORDER BY size_for_estimate;",
+      "description": "버퍼 캐시 크기를 변경했을 때의 예상 물리적 읽기 수를 시뮬레이션합니다. 최적의 버퍼 캐시 크기를 결정하는 데 활용합니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "Shared Pool Library Cache 적중률 조회",
+      "sql": "SELECT namespace,\n       gets AS total_requests,\n       gethits AS cache_hits,\n       gethitratio AS hit_ratio,\n       pins,\n       pinhits,\n       pinhitratio\nFROM V$LIBRARYCACHE;",
+      "description": "Library Cache의 네임스페이스별 적중률을 조회합니다. SQL AREA의 gethitratio가 95% 이상이 이상적입니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "Data Dictionary Cache 적중률 조회",
+      "sql": "SELECT parameter, gets, getmisses,\n       ROUND((1 - getmisses/NULLIF(gets, 0)) * 100, 2) AS hit_ratio_pct\nFROM V$ROWCACHE\nWHERE gets > 0\nORDER BY gets DESC;",
+      "description": "Data Dictionary Cache(Row Cache)의 항목별 적중률을 조회합니다. 적중률이 낮으면 Shared Pool 크기 증가를 검토합니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "SQL Work Area 실행 모드별 통계 조회",
+      "sql": "SELECT optimal_count AS optimal,\n       onepass_count AS onepass,\n       multipass_count AS multipass,\n       total_executions\nFROM V$SQL_WORKAREA_HISTOGRAM\nWHERE total_executions > 0\nORDER BY low_optimal_size;",
+      "description": "SQL Work Area의 Optimal/One-pass/Multi-pass 실행 횟수를 크기 구간별로 조회합니다. Multi-pass 비율이 높으면 PGA 증가를 검토합니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "현재 메모리 관리 방식 확인",
+      "sql": "SELECT name, value\nFROM V$PARAMETER\nWHERE name IN ('memory_target', 'memory_max_target',\n               'sga_target', 'sga_max_size',\n               'pga_aggregate_target',\n               'workarea_size_policy')\nORDER BY name;",
+      "description": "현재 인스턴스의 메모리 관리 방식(AMM/ASMM/Manual)을 판단할 수 있는 주요 파라미터를 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "세션별 PGA/UGA 메모리 사용량 조회",
+      "sql": "SELECT s.sid, s.serial#, s.username,\n       ROUND(st1.value/1024/1024, 2) AS pga_mb,\n       ROUND(st2.value/1024/1024, 2) AS uga_mb\nFROM V$SESSION s\nJOIN V$SESSTAT st1 ON s.sid = st1.sid\nJOIN V$SESSTAT st2 ON s.sid = st2.sid\nJOIN V$STATNAME sn1 ON st1.statistic# = sn1.statistic#\nJOIN V$STATNAME sn2 ON st2.statistic# = sn2.statistic#\nWHERE sn1.name = 'session pga memory'\nAND sn2.name = 'session uga memory'\nAND s.username IS NOT NULL\nORDER BY st1.value DESC;",
+      "description": "현재 활성 세션별 PGA 및 UGA 메모리 사용량을 조회합니다. 메모리를 과도하게 사용하는 세션을 식별하는 데 유용합니다."
+    },
+    {
+      "sqlExamplesId": "sql13",
+      "title": "Shared Pool 플러시 (캐시 초기화)",
+      "sql": "ALTER SYSTEM FLUSH SHARED_POOL;",
+      "description": "Shared Pool의 캐싱된 데이터를 모두 제거합니다. 테스트 환경에서 파싱 성능 측정 시 사용합니다. 운영 환경에서는 주의가 필요합니다."
+    },
+    {
+      "sqlExamplesId": "sql14",
+      "title": "Buffer Cache 플러시 (캐시 초기화)",
+      "sql": "ALTER SYSTEM FLUSH BUFFER_CACHE;",
+      "description": "Buffer Cache의 모든 Clean Buffer를 제거합니다. 테스트 환경에서 I/O 성능 측정 시 사용합니다. 운영 환경에서는 사용하지 않습니다."
+    },
+    {
+      "sqlExamplesId": "sql15",
+      "title": "Result Cache 상태 및 사용량 조회",
+      "sql": "SELECT name, value\nFROM V$RESULT_CACHE_STATISTICS;",
+      "description": "Result Cache의 현재 상태, 적중률, 무효화 횟수 등 전체 통계를 조회합니다."
+    }
+  ],
+  "keywords": [
+    "SGA", "PGA", "UGA",
+    "Database Buffer Cache", "LRU", "Touch Count", "Dirty Buffer", "Clean Buffer", "Checkpoint Queue",
+    "Default Pool", "Keep Pool", "Recycle Pool", "DB_CACHE_SIZE",
+    "Shared Pool", "Library Cache", "Data Dictionary Cache", "Row Cache", "Result Cache", "Reserved Pool",
+    "Hard Parse", "Soft Parse", "Bind Variable", "CURSOR_SHARING", "Parent Cursor", "Child Cursor",
+    "Redo Log Buffer", "Write-Ahead Logging", "Change Vector", "Redo Entry", "Log Force at Commit", "LGWR",
+    "Large Pool", "Java Pool", "Streams Pool", "Fixed SGA", "Granule",
+    "Private SQL Area", "SQL Work Area", "Sort Area", "Hash Area", "Session Memory",
+    "Optimal", "One-pass", "Multi-pass",
+    "AMM", "ASMM", "MEMORY_TARGET", "SGA_TARGET", "PGA_AGGREGATE_TARGET",
+    "DBWn", "V$SGA", "V$PGASTAT", "V$SQL_WORKAREA_HISTOGRAM"
+  ]
+}

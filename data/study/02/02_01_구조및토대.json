@@ -1,0 +1,304 @@
+{
+  "id": "02_01",
+  "title": "구조 및 토대 (CDB & PDB Architecture Foundation)",
+  "chapter": "02. 멀티테넌트 아키텍처 (CDB 및 PDB 구성)",
+  "description": "Oracle 멀티테넌트 아키텍처의 핵심 구조인 CDB(Container Database)와 PDB(Pluggable Database)의 구조적 토대, 컨테이너 간 관계, 공통/로컬 객체 분리 원리, 메모리·프로세스 공유 구조, 그리고 RAC 환경에서의 멀티테넌트 지원 방식을 상세히 다룹니다.",
+  "oracle26ai_changes": [
+    "Oracle 26ai에서 PDB 최대 개수 제한이 대폭 확대되어, 단일 CDB에서 4,098개 이상의 PDB를 지원합니다 (MAX_PDBS 파라미터 기본값 변경).",
+    "PDB Snapshot Carousel 기능이 강화되어 PDB 단위의 시점 복구(Point-in-Time Recovery)가 더욱 세밀해졌습니다.",
+    "CDB Fleet Management 기능이 향상되어, 여러 CDB를 하나의 논리적 Fleet으로 관리하고 PDB를 Fleet 내에서 자유롭게 재배치할 수 있습니다.",
+    "PDB Relocate 기능의 다운타임이 거의 제로에 가깝게 개선되어, RAC 환경에서의 PDB 라이브 마이그레이션이 더욱 원활해졌습니다.",
+    "Container Map 기능이 개선되어 PDB 간 데이터 라우팅 및 파티셔닝 전략이 더욱 유연해졌습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "멀티테넌트 아키텍처 개요 (Multitenant Architecture Overview)",
+      "content": "Oracle 멀티테넌트 아키텍처는 **Oracle 12c**에서 처음 도입된 데이터베이스 통합(Consolidation) 기술로, 하나의 물리적 데이터베이스 인스턴스 내에서 여러 개의 논리적 데이터베이스를 운영할 수 있는 구조입니다.\n\n### 도입 배경\n\n기존의 Non-CDB 환경에서는 데이터베이스 통합 시 다음과 같은 문제점이 있었습니다:\n\n1. **자원 낭비**: 각 데이터베이스마다 별도의 SGA, 백그라운드 프로세스가 필요하여 메모리·CPU 오버헤드 발생\n2. **관리 복잡성**: 패치 적용, 업그레이드, 백업 등을 개별 DB마다 수행해야 함\n3. **확장성 제한**: 수십~수백 개의 데이터베이스를 하나의 서버에서 운영 시 관리 한계\n\n### 멀티테넌트 아키텍처의 핵심 구성\n\n```\n┌─────────────────────────────────────────────┐\n│              CDB (Container Database)        │\n│  ┌─────────────────────────────────────────┐ │\n│  │           Oracle Instance               │ │\n│  │      (SGA + Background Processes)       │ │\n│  └─────────────────────────────────────────┘ │\n│                                              │\n│  ┌───────────┐ ┌───────────┐ ┌───────────┐  │\n│  │ CDB$ROOT  │ │ PDB$SEED  │ │   PDBs    │  │\n│  │ (Root     │ │ (Seed     │ │ (사용자   │  │\n│  │ Container)│ │ Container)│ │ PDB들)    │  │\n│  └───────────┘ └───────────┘ └───────────┘  │\n└─────────────────────────────────────────────┘\n```\n\n### CDB vs Non-CDB 비교\n\n| 구분 | Non-CDB | CDB (멀티테넌트) |\n|---|---|---|\n| **인스턴스 수** | DB당 1개 | 여러 PDB가 1개 인스턴스 공유 |\n| **SGA** | DB당 별도 할당 | 모든 PDB가 하나의 SGA 공유 |\n| **백그라운드 프로세스** | DB당 별도 기동 | 모든 PDB가 공유 |\n| **데이터 딕셔너리** | 단일 딕셔너리 | Root + 각 PDB 별도 딕셔너리 |\n| **패치/업그레이드** | 개별 적용 | CDB 단위로 일괄 적용 |\n| **백업** | 개별 수행 | CDB 또는 PDB 단위 선택 가능 |\n| **이식성(Portability)** | Export/Import 필요 | Plug/Unplug로 간편 이동 |\n| **자원 관리** | 개별 파라미터 | Resource Manager로 PDB 간 자원 제어 |\n| **지원 상태 (26ai)** | 지원 중단 (Desupported) | 유일한 지원 아키텍처 |\n\n> **중요**: Oracle 21c부터 Non-CDB 아키텍처는 **Desupported**되었으며, Oracle 26ai에서는 CDB 아키텍처만 지원됩니다. 모든 데이터베이스는 반드시 CDB로 생성해야 합니다.",
+      "sqlExamplesIds": ["sql01", "sql02"],
+      "subsections": [
+        {
+          "title": "멀티테넌트 도입 배경과 발전 과정 (Multitenant Evolution)",
+          "content": "멀티테넌트 아키텍처는 데이터베이스 통합(Database Consolidation)의 요구에서 탄생하였습니다. 기업 환경에서는 수십~수백 개의 데이터베이스를 운영하는 것이 일반적이며, 이를 효율적으로 관리하기 위한 방법이 필요했습니다.\n\n### 데이터베이스 통합 방식의 발전\n\n| 세대 | 통합 방식 | 특징 | 한계 |\n|---|---|---|---|\n| **1세대** | 서버 통합 (Server Consolidation) | 물리적 서버 수 감소 | OS/DB 별도 관리 |\n| **2세대** | 가상화 (Virtualization) | VM 단위 격리 | VM마다 별도 인스턴스 오버헤드 |\n| **3세대** | 스키마 통합 (Schema Consolidation) | 하나의 DB에 여러 스키마 | 네임스페이스 충돌, 보안 한계 |\n| **4세대** | **멀티테넌트 (Multitenant)** | CDB/PDB 구조 | Oracle 고유 기술 |\n\n### 버전별 멀티테넌트 주요 변화\n\n| 버전 | 주요 변화 |\n|---|---|\n| **12c R1 (12.1)** | 멀티테넌트 최초 도입, CDB당 최대 252개 PDB |\n| **12c R2 (12.2)** | PDB Hot Clone, PDB Relocate, Application Container 도입 |\n| **18c (12.2.0.2)** | CDB Fleet, Refreshable PDB Clone 개선 |\n| **19c (12.2.0.3)** | Automatic PDB Relocation, 최대 PDB 수 확대 |\n| **21c** | Non-CDB Desupported, ADB(Autonomous DB) 기반 멀티테넌트 강화 |\n| **23ai** | JSON Relational Duality, PDB 관리 자동화 향상 |\n| **26ai** | PDB 최대 수 대폭 확대, PDB Snapshot Carousel 강화, Fleet 관리 향상 |\n\n### ENABLE_PLUGGABLE_DATABASE 파라미터\n\n멀티테넌트 아키텍처의 활성화 여부를 결정하는 초기화 파라미터입니다.\n\n| 속성 | 값 |\n|---|---|\n| **파라미터명** | ENABLE_PLUGGABLE_DATABASE |\n| **기본값** | TRUE (Oracle 26ai) |\n| **수정 가능 여부** | 생성 시에만 설정, 이후 변경 불가 |\n| **설명** | TRUE이면 CDB로 생성, FALSE이면 Non-CDB (26ai에서 지원 중단) |\n\n```\nV$SYSTEM_PARAMETER에서 확인 가능:\nNAME: enable_pluggable_database\nVALUE: TRUE\n```",
+          "key_points": [
+            "멀티테넌트 아키텍처는 Oracle 12c에서 최초 도입된 데이터베이스 통합 기술",
+            "서버 통합 → 가상화 → 스키마 통합 → 멀티테넌트 순으로 통합 기술이 발전",
+            "Oracle 21c부터 Non-CDB는 Desupported, 26ai에서는 CDB만 지원",
+            "ENABLE_PLUGGABLE_DATABASE 파라미터는 생성 시에만 설정 가능하며 이후 변경 불가",
+            "Oracle 26ai에서 단일 CDB당 4,098개 이상의 PDB를 지원하도록 확장",
+            "PDB Relocate, Hot Clone 등 플러거블 기능이 지속적으로 강화"
+          ]
+        },
+        {
+          "title": "멀티테넌트의 핵심 이점 (Key Benefits of Multitenant)",
+          "content": "멀티테넌트 아키텍처는 데이터베이스 통합에 있어 다음과 같은 핵심적인 이점을 제공합니다.\n\n### 이점 분류표\n\n| 분류 | 이점 | 설명 |\n|---|---|---|\n| **자원 효율성** | 메모리 공유 | 여러 PDB가 하나의 SGA를 공유하여 메모리 사용량 대폭 절감 |\n| **자원 효율성** | 프로세스 공유 | 백그라운드 프로세스를 공유하여 CPU/메모리 오버헤드 감소 |\n| **관리 효율성** | 일괄 패치/업그레이드 | CDB 단위로 패치를 적용하면 모든 PDB에 자동 반영 |\n| **관리 효율성** | 통합 백업 | CDB 전체 또는 개별 PDB 단위로 유연한 백업 전략 수립 |\n| **이식성** | Plug/Unplug | PDB를 CDB에서 분리(Unplug)하여 다른 CDB에 연결(Plug) 가능 |\n| **이식성** | PDB Clone | 운영 PDB를 복제하여 개발/테스트 환경 신속 구축 |\n| **격리성** | 데이터 격리 | 각 PDB는 독립된 데이터 딕셔너리를 가져 완전한 논리적 격리 |\n| **격리성** | 자원 격리 | Resource Manager를 통한 PDB 간 CPU, I/O, 메모리 제한 |\n| **가용성** | 독립 관리 | PDB별 독립적인 시작/종료, Point-in-Time Recovery 가능 |\n| **가용성** | 라이브 마이그레이션 | PDB Relocate로 무중단 이동 (RAC 환경) |\n\n### 비용 측면 분석\n\n- **라이선스**: Oracle Multitenant 옵션은 Enterprise Edition의 유료 옵션입니다. 단, **단일 PDB 사용(Single-tenant)**은 추가 라이선스 없이 가능합니다.\n- **Standard Edition**: SE2에서도 최대 3개의 PDB를 사용할 수 있습니다.\n- **하드웨어 절감**: 여러 DB 인스턴스를 하나로 통합하여 서버 수, 메모리, 스토리지를 절감할 수 있습니다.\n\n### 자원 관리 메커니즘\n\nOracle Resource Manager를 통해 PDB 간 자원을 제어합니다:\n\n| 자원 유형 | 제어 방식 | 관련 파라미터/설정 |\n|---|---|---|\n| **CPU** | CPU 공유(shares) 및 사용률 제한(utilization limit) | CDB Resource Plan |\n| **병렬 처리** | PDB별 최대 병렬 서버 수 제한 | PARALLEL_SERVERS_TARGET |\n| **메모리** | PDB별 SGA/PGA 최소/최대값 설정 | SGA_MIN_SIZE, SGA_TARGET, PGA_AGGREGATE_TARGET |\n| **I/O** | PDB별 IOPS 및 MB/s 제한 | MAX_IOPS, MAX_MBPS |\n| **세션** | PDB별 최대 세션 수 제한 | SESSIONS 파라미터 |\n\n관련 뷰: `V$RSRC_PLAN`, `V$RSRC_CONSUMER_GROUP`, `DBA_CDB_RSRC_PLANS`, `DBA_CDB_RSRC_PLAN_DIRECTIVES`",
+          "key_points": [
+            "메모리와 프로세스를 PDB 간 공유하여 자원 효율성을 극대화",
+            "CDB 단위 패치/업그레이드로 관리 복잡성을 대폭 절감",
+            "Plug/Unplug 메커니즘으로 PDB를 손쉽게 이동 및 복제 가능",
+            "각 PDB는 독립된 데이터 딕셔너리를 가져 완전한 논리적 데이터 격리 보장",
+            "Oracle Resource Manager를 통해 CPU, I/O, 메모리, 세션 등 PDB 간 자원 제어",
+            "Standard Edition(SE2)에서도 최대 3개의 PDB를 추가 라이선스 없이 사용 가능",
+            "PDB Relocate를 통한 무중단 라이브 마이그레이션 지원"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s02",
+      "title": "CDB 내부 구조 (CDB Internal Structure)",
+      "content": "CDB(Container Database)는 **하나의 Oracle 인스턴스**와 **하나 이상의 컨테이너**로 구성됩니다. CDB 내의 각 컨테이너는 고유한 **컨테이너 ID(CON_ID)**를 가지며, 이를 통해 식별됩니다.\n\n### CDB 컨테이너 유형\n\n| 컨테이너 | CON_ID | 필수 여부 | 개수 | 역할 |\n|---|---|---|---|---|\n| **CDB$ROOT** | 1 | 필수 | 1개 | 시스템 메타데이터, 공통 객체 저장 |\n| **PDB$SEED** | 2 | 필수 | 1개 | 새 PDB 생성 시 템플릿 역할 |\n| **사용자 PDB** | 3 이상 | 선택 | 0~4096+ | 실제 애플리케이션 데이터 저장 |\n| **Application Container** | 가변 | 선택 | 0개 이상 | 애플리케이션 정의 공유 데이터 |\n\n### CDB의 물리적 파일 구조\n\n```\nCDB 물리적 파일 구조\n├── Control Files (제어 파일) ─── CDB 전체 공유\n├── Online Redo Log Files ─────── CDB 전체 공유\n├── Archived Redo Log Files ───── CDB 전체 공유\n├── SYSTEM Tablespace ─────────── CDB$ROOT용 + 각 PDB별 별도\n├── SYSAUX Tablespace ─────────── CDB$ROOT용 + 각 PDB별 별도\n├── UNDO Tablespace ───────────── CDB 전체 공유 (기본) 또는 PDB별 로컬\n├── TEMP Tablespace ───────────── CDB 전체 공유 또는 PDB별 로컬\n└── 사용자 Tablespace ─────────── 각 PDB별 별도\n```\n\n### CDB 전체 공유 vs PDB별 별도 자원\n\n| 자원 | 공유/별도 | 설명 |\n|---|---|---|\n| **SGA** | 공유 | 모든 PDB가 하나의 SGA 공유 |\n| **백그라운드 프로세스** | 공유 | LGWR, DBWn, PMON 등 공유 |\n| **Control File** | 공유 | CDB당 하나의 제어 파일 세트 |\n| **Redo Log** | 공유 | CDB당 하나의 Redo Log 세트 |\n| **UNDO Tablespace** | 공유(기본)/별도 | Local Undo Mode에서는 PDB별 별도 |\n| **SYSTEM Tablespace** | 별도 | 각 PDB마다 자체 SYSTEM 테이블스페이스 |\n| **SYSAUX Tablespace** | 별도 | 각 PDB마다 자체 SYSAUX 테이블스페이스 |\n| **TEMP Tablespace** | 공유/별도 | CDB 기본 TEMP 또는 PDB별 로컬 TEMP |\n| **데이터 딕셔너리** | 별도 | 각 PDB마다 자체 딕셔너리(메타데이터) |",
+      "sqlExamplesIds": ["sql03", "sql04", "sql05"],
+      "subsections": [
+        {
+          "title": "CDB$ROOT (루트 컨테이너, Root Container)",
+          "content": "CDB$ROOT는 CDB의 **최상위 컨테이너**로서, 전체 CDB의 메타데이터와 공통(Common) 객체를 저장하는 핵심적인 역할을 합니다. CON_ID가 항상 **1**입니다.\n\n### CDB$ROOT의 역할\n\n1. **Oracle 제공 메타데이터 저장**: 데이터 딕셔너리의 원본(마스터 카피)을 보유합니다. 각 PDB는 이 원본을 참조하거나 링크합니다.\n2. **공통 사용자(Common User) 관리**: C## 접두사를 가지는 공통 사용자 계정이 루트에서 생성됩니다.\n3. **공통 역할(Common Role) 관리**: CDB 전체에 걸쳐 유효한 역할을 관리합니다.\n4. **CDB 레벨 AWR 데이터 저장**: 성능 모니터링 데이터를 루트에서 관리합니다.\n5. **CDB 단위 관리 작업의 기준점**: 패치, 업그레이드, 백업 등 CDB 단위 작업의 진입점입니다.\n\n### CDB$ROOT의 데이터 딕셔너리 구조\n\nCDB$ROOT의 데이터 딕셔너리에는 두 가지 유형의 테이블이 존재합니다:\n\n| 유형 | 설명 | 예시 |\n|---|---|---|\n| **Oracle 제공 객체** | Oracle이 내부적으로 사용하는 시스템 테이블 | SYS.TAB$, SYS.OBJ$, SYS.COL$ 등 |\n| **공통 객체(Common Objects)** | 모든 PDB에서 참조 가능한 객체 | 공통 사용자, 공통 역할, 공통 프로파일 |\n\n### 루트에 접속하는 방법\n\n```\n-- SQL*Plus에서 CDB$ROOT로 직접 접속\nCONNECT sys/password@cdb_service AS SYSDBA\n\n-- 현재 컨테이너 확인\nSHOW CON_NAME\n-- 결과: CDB$ROOT\n\n-- PDB에서 루트로 전환\nALTER SESSION SET CONTAINER = CDB$ROOT;\n```\n\n### 관련 파라미터\n\n| 파라미터 | 설명 |\n|---|---|\n| **DB_NAME** | CDB 전체의 데이터베이스 이름 |\n| **DB_UNIQUE_NAME** | CDB의 고유 이름 (Data Guard 환경에서 구별) |\n| **DB_DOMAIN** | 데이터베이스 도메인명 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$DATABASE** | CDB 전체 데이터베이스 정보 (CDB 여부 확인: CDB 컬럼) |\n| **V$INSTANCE** | 인스턴스 정보 |\n| **V$CONTAINERS** | CDB 내 모든 컨테이너 목록 |\n| **V$PDBS** | 모든 PDB 정보 |\n| **CDB_USERS** | CDB 전체의 사용자 정보 |\n| **CDB_TABLESPACES** | CDB 전체의 테이블스페이스 정보 |",
+          "key_points": [
+            "CDB$ROOT는 CON_ID=1인 최상위 컨테이너로, CDB의 마스터 데이터 딕셔너리를 보유",
+            "공통 사용자(Common User)는 C## 접두사로 루트에서 생성되며, 모든 PDB에서 인식됨",
+            "Oracle 제공 메타데이터의 원본을 보유하며, PDB는 이를 참조(링크)하는 구조",
+            "CDB 단위 관리 작업(패치, 업그레이드, 백업)의 진입점 역할",
+            "V$DATABASE의 CDB 컬럼으로 현재 데이터베이스가 CDB인지 확인 가능",
+            "ALTER SESSION SET CONTAINER 명령으로 루트와 PDB 간 전환 가능"
+          ]
+        },
+        {
+          "title": "PDB$SEED (시드 컨테이너, Seed Container)",
+          "content": "PDB$SEED는 새로운 PDB를 생성할 때 **템플릿(Template)**으로 사용되는 읽기 전용(Read-Only) 컨테이너입니다. CON_ID가 항상 **2**입니다.\n\n### PDB$SEED의 역할과 특성\n\n| 항목 | 설명 |\n|---|---|\n| **목적** | 새 PDB 생성 시 데이터 파일을 복사하는 템플릿 |\n| **CON_ID** | 항상 2 |\n| **접근 모드** | READ ONLY (변경 불가) |\n| **수정 가능 여부** | 일반적으로 불가. 특별한 경우 READ WRITE로 변경 후 커스터마이징 가능 |\n| **삭제 가능 여부** | 삭제 불가 (CDB 필수 구성요소) |\n| **포함 파일** | SYSTEM, SYSAUX 테이블스페이스 데이터 파일 |\n\n### PDB 생성 시 PDB$SEED 사용 과정\n\n새로운 PDB를 생성하는 과정은 다음 단계를 거칩니다:\n\n1. **CREATE PLUGGABLE DATABASE** 명령 실행\n2. PDB$SEED의 데이터 파일(SYSTEM, SYSAUX)을 **복사**\n3. 복사된 파일 기반으로 새 PDB의 데이터 딕셔너리 초기화\n4. 새 PDB에 고유한 CON_ID 할당 (3 이상)\n5. 새 PDB에 고유한 GUID(Globally Unique Identifier) 생성\n6. 새 PDB는 MOUNTED 상태로 생성됨 → 수동으로 OPEN 필요\n\n```\n-- PDB$SEED로부터 새 PDB 생성\nCREATE PLUGGABLE DATABASE pdb_sales\n  ADMIN USER pdb_admin IDENTIFIED BY password\n  FILE_NAME_CONVERT = ('/pdbseed/', '/pdb_sales/');\n\n-- 생성된 PDB 열기\nALTER PLUGGABLE DATABASE pdb_sales OPEN;\n```\n\n### PDB$SEED 커스터마이징\n\n기본 PDB$SEED를 커스터마이징하여, 새로 생성되는 모든 PDB에 공통 설정을 적용할 수 있습니다:\n\n```\n-- PDB$SEED를 READ WRITE로 변경 (주의 필요)\nALTER PLUGGABLE DATABASE PDB$SEED CLOSE;\nALTER PLUGGABLE DATABASE PDB$SEED OPEN READ WRITE;\n\n-- 커스터마이징 작업 수행 (테이블스페이스 추가, 스키마 생성 등)\nALTER SESSION SET CONTAINER = PDB$SEED;\n-- ... 작업 수행 ...\n\n-- 다시 READ ONLY로 복원\nALTER PLUGGABLE DATABASE PDB$SEED CLOSE;\nALTER PLUGGABLE DATABASE PDB$SEED OPEN READ ONLY;\n```\n\n### Application Seed\n\nApplication Container에서는 별도의 **Application Seed**를 생성할 수 있으며, 이는 해당 Application Container 내에서 새 Application PDB를 생성할 때 템플릿으로 사용됩니다.",
+          "key_points": [
+            "PDB$SEED는 CON_ID=2인 읽기 전용 템플릿 컨테이너로, 새 PDB 생성의 기반",
+            "CREATE PLUGGABLE DATABASE 실행 시 PDB$SEED의 데이터 파일이 복사됨",
+            "기본적으로 READ ONLY 상태이며, 삭제 불가한 CDB 필수 구성요소",
+            "커스터마이징 시 일시적으로 READ WRITE로 변경 가능하나 작업 후 반드시 READ ONLY 복원 필요",
+            "새로 생성된 PDB는 MOUNTED 상태이므로 수동으로 OPEN해야 사용 가능",
+            "Application Container에서는 별도의 Application Seed 생성 가능"
+          ]
+        },
+        {
+          "title": "사용자 PDB (User Pluggable Databases)",
+          "content": "사용자 PDB는 실제 애플리케이션 데이터를 저장하고 비즈니스 로직을 수행하는 **핵심 작업 컨테이너**입니다. CON_ID는 3 이상의 값을 가지며, CDB 내에 여러 개를 생성할 수 있습니다.\n\n### PDB의 핵심 특성\n\n| 특성 | 설명 |\n|---|---|\n| **독립적 데이터 딕셔너리** | 각 PDB는 자체 메타데이터를 보유하여 다른 PDB와 완전히 격리 |\n| **독립적 테이블스페이스** | PDB별로 SYSTEM, SYSAUX, 사용자 테이블스페이스 보유 |\n| **독립적 서비스 이름** | 각 PDB는 고유한 서비스 이름으로 접속 |\n| **독립적 문자 집합** | PDB별로 다른 문자 집합(Character Set) 사용 가능 (12.2+) |\n| **독립적 시간대** | PDB별로 다른 DBTIMEZONE 설정 가능 |\n| **독립적 관리** | PDB별 시작/종료, 백업/복구, Point-in-Time Recovery 가능 |\n\n### PDB 상태(Open Mode)\n\nPDB는 다음과 같은 상태를 가질 수 있습니다:\n\n| 상태 | 설명 | 사용 시나리오 |\n|---|---|---|\n| **MOUNTED** | PDB 메타데이터만 로드, 접근 불가 | PDB 생성 직후, 유지보수 |\n| **READ ONLY** | 읽기만 가능, 변경 불가 | 리포팅, Active Data Guard Standby |\n| **READ WRITE** | 완전한 읽기/쓰기 가능 | 정상 운영 |\n| **MIGRATE** | 업그레이드/패치 적용을 위한 특수 모드 | 패치 적용, 업그레이드 |\n\n### PDB 생성 방법\n\nPDB를 생성하는 여러 가지 방법이 있습니다:\n\n| 방법 | 명령 | 설명 |\n|---|---|---|\n| **Seed에서 생성** | `CREATE PLUGGABLE DATABASE ... FROM PDB$SEED` | 기본 시드로부터 생성 (기본값) |\n| **기존 PDB 복제** | `CREATE PLUGGABLE DATABASE ... FROM pdb_source` | 기존 PDB를 복제 (Local Clone) |\n| **원격 PDB 복제** | `CREATE PLUGGABLE DATABASE ... FROM pdb@dblink` | DB Link를 통한 원격 복제 |\n| **Plug-in** | `CREATE PLUGGABLE DATABASE ... USING 'manifest.xml'` | Unplug된 PDB를 연결 |\n| **재배치** | `CREATE PLUGGABLE DATABASE ... RELOCATE ...` | PDB를 다른 CDB로 라이브 이동 |\n| **Refreshable Clone** | `CREATE PLUGGABLE DATABASE ... REFRESH MODE EVERY ...` | 주기적 동기화 복제본 |\n\n### PDB GUID (Globally Unique Identifier)\n\n각 PDB는 생성 시 **128비트 GUID**가 할당됩니다. 이 GUID는 PDB가 Unplug/Plug되어도 유지되며, 데이터 파일 경로에도 사용될 수 있습니다.\n\n```\nV$PDBS 뷰의 GUID 컬럼으로 확인:\nSELECT pdb_name, guid FROM v$pdbs;\n```\n\n### MAX_PDBS 파라미터\n\n| 속성 | 값 |\n|---|---|\n| **파라미터명** | MAX_PDBS |\n| **기본값** | 4098 (Oracle 26ai) |\n| **범위** | 0 ~ 4098 |\n| **동적 변경** | ALTER SYSTEM으로 변경 가능 |\n| **포함 범위** | PDB$SEED + Application Root 포함 |\n\n### PDB별 파라미터 설정\n\nPDB는 CDB 전체 파라미터와 별도로 **자체 파라미터를 설정**할 수 있습니다:\n\n```\n-- PDB 내에서 파라미터 설정\nALTER SESSION SET CONTAINER = pdb_sales;\nALTER SYSTEM SET open_cursors = 500 SCOPE=BOTH;\n\n-- PDB별 파라미터 확인\nSELECT name, value FROM v$system_parameter WHERE ispdb_modifiable = 'TRUE';\n```\n\nPDB에서 설정된 파라미터는 **PDB_SPFILE$** 내부 테이블에 저장되며, PDB가 Unplug/Plug되어도 유지됩니다.",
+          "key_points": [
+            "사용자 PDB는 CON_ID 3 이상으로, 실제 애플리케이션 데이터를 저장하는 작업 컨테이너",
+            "각 PDB는 독립된 데이터 딕셔너리, 테이블스페이스, 서비스 이름, 문자 집합을 보유",
+            "PDB 상태: MOUNTED, READ ONLY, READ WRITE, MIGRATE의 4가지 Open Mode",
+            "Seed 생성, Local Clone, Remote Clone, Plug-in, Relocate, Refreshable Clone 등 다양한 PDB 생성 방법 제공",
+            "MAX_PDBS 파라미터로 CDB당 최대 PDB 수를 제한 (Oracle 26ai 기본값 4098)",
+            "PDB별 초기화 파라미터를 독립적으로 설정 가능하며, PDB_SPFILE$에 저장됨",
+            "각 PDB는 고유한 GUID를 가지며, Unplug/Plug 시에도 유지됨"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s03",
+      "title": "데이터 딕셔너리 분리와 공통/로컬 객체 (Data Dictionary Separation & Common/Local Objects)",
+      "content": "멀티테넌트 아키텍처에서 데이터 딕셔너리의 분리 방식은 **CDB의 핵심 설계 원리**입니다. Oracle은 데이터 딕셔너리를 **Oracle 제공 메타데이터**와 **사용자 정의 메타데이터**로 분리하여 효율적으로 관리합니다.\n\n### 데이터 딕셔너리 분리 아키텍처\n\n```\n┌──────────────────────────────────────────┐\n│              CDB$ROOT (CON_ID=1)         │\n│  ┌──────────────────────────────────┐    │\n│  │  Oracle 제공 메타데이터 (원본)    │    │\n│  │  - SYS.TAB$, SYS.OBJ$ 등        │    │\n│  │  - 데이터 딕셔너리 기본 테이블    │    │\n│  └──────────────┬───────────────────┘    │\n│                 │ 메타데이터 링크         │\n│     ┌───────────┼───────────┐            │\n│     ▼           ▼           ▼            │\n│  ┌──────┐  ┌──────┐   ┌──────┐          │\n│  │ PDB1 │  │ PDB2 │   │ PDB3 │          │\n│  │로컬  │  │로컬  │   │로컬  │          │\n│  │딕셔너│  │딕셔너│   │딕셔너│          │\n│  │리    │  │리    │   │리    │          │\n│  └──────┘  └──────┘   └──────┘          │\n└──────────────────────────────────────────┘\n```\n\n### 딕셔너리 뷰 체계\n\n| 접두사 | 범위 | 사용 위치 | 설명 |\n|---|---|---|---|\n| **CDB_** | CDB 전체 | CDB$ROOT | 모든 컨테이너의 데이터를 통합 조회 (CON_ID 컬럼 포함) |\n| **DBA_** | 현재 컨테이너 | 어디서든 | 현재 접속한 컨테이너의 데이터만 조회 |\n| **ALL_** | 현재 컨테이너 | 어디서든 | 현재 사용자가 접근 가능한 객체만 조회 |\n| **USER_** | 현재 컨테이너 | 어디서든 | 현재 사용자 소유 객체만 조회 |\n\n### 공통 객체 vs 로컬 객체\n\n| 구분 | 공통 객체 (Common) | 로컬 객체 (Local) |\n|---|---|---|\n| **생성 위치** | CDB$ROOT에서 생성 | 개별 PDB에서 생성 |\n| **가시 범위** | 모든 PDB에서 참조 가능 | 해당 PDB 내에서만 참조 |\n| **사용자 예시** | C##DBA_USER (공통 사용자) | APP_USER (로컬 사용자) |\n| **역할 예시** | C##DBA_ROLE (공통 역할) | APP_ROLE (로컬 역할) |\n| **권한 부여** | CONTAINER=ALL / CONTAINER=CURRENT | 해당 PDB 내에서만 |\n| **이름 규칙** | C## 접두사 필수 (사용자/역할) | 접두사 제한 없음 |",
+      "sqlExamplesIds": ["sql06", "sql07"],
+      "subsections": [
+        {
+          "title": "메타데이터 링크와 객체 링크 (Metadata Links & Object Links)",
+          "content": "멀티테넌트 아키텍처에서는 데이터 딕셔너리의 중복 저장을 방지하기 위해 **메타데이터 링크(Metadata Link)**와 **객체 링크(Object Link)**라는 두 가지 메커니즘을 사용합니다. 이는 Oracle 멀티테넌트의 핵심적인 내부 동작 원리입니다.\n\n### 메타데이터 링크 (Metadata Link)\n\n메타데이터 링크는 PDB의 데이터 딕셔너리 객체(뷰, PL/SQL 패키지 등)가 **CDB$ROOT의 정의(메타데이터)**를 참조하되, **데이터는 각 PDB에 로컬로 저장**하는 방식입니다.\n\n| 항목 | 설명 |\n|---|---|\n| **정의(DDL)** | CDB$ROOT에 저장 (원본) → PDB에서 링크로 참조 |\n| **데이터(행)** | 각 PDB에 로컬로 저장 |\n| **예시** | DBA_TABLES 뷰의 정의는 Root에, 실제 테이블 목록 데이터는 각 PDB에 존재 |\n| **장점** | 딕셔너리 뷰/패키지 정의의 중복 저장 방지 → 디스크 공간 절약 |\n| **업그레이드 시** | Root의 정의만 업데이트하면 모든 PDB에 자동 반영 |\n\n### 객체 링크 (Object Link)\n\n객체 링크는 PDB에서 **데이터 자체를 CDB$ROOT에서 가져오는** 방식입니다. 즉, 정의와 데이터 모두 Root에 존재합니다.\n\n| 항목 | 설명 |\n|---|---|\n| **정의(DDL)** | CDB$ROOT에 저장 |\n| **데이터(행)** | CDB$ROOT에 저장 → PDB에서 링크로 접근 |\n| **예시** | SYS.REGISTRY$ (컴포넌트 등록 정보), AWR 관련 내부 테이블 |\n| **장점** | CDB 전체에서 단일 복사본으로 관리되는 데이터에 적합 |\n\n### 메타데이터 링크 vs 객체 링크 비교\n\n| 구분 | 메타데이터 링크 | 객체 링크 |\n|---|---|---|\n| **정의 위치** | CDB$ROOT | CDB$ROOT |\n| **데이터 위치** | 각 PDB (로컬) | CDB$ROOT |\n| **사용 대상** | 딕셔너리 뷰, PL/SQL 패키지 | 시스템 등록 정보, 내부 관리 테이블 |\n| **PDB 격리** | 높음 (데이터 분리) | 낮음 (데이터 공유) |\n| **업그레이드 영향** | 정의 변경만 Root에서 수행 | 데이터도 Root에서 관리 |\n\n### 딕셔너리 분리의 이점\n\n이 아키텍처 덕분에:\n- **Plug/Unplug**가 가능해집니다: PDB의 로컬 딕셔너리만 이동하면 되므로\n- **패치/업그레이드**가 효율적입니다: Root의 메타데이터만 업데이트하면 PDB에 자동 반영\n- **디스크 공간**이 절약됩니다: 수천 개의 딕셔너리 뷰/패키지 정의를 중복 저장하지 않음\n\n관련 뷰: `DBA_OBJECTS`의 `SHARING` 컬럼에서 METADATA LINK, OBJECT LINK 여부를 확인할 수 있습니다.",
+          "key_points": [
+            "메타데이터 링크: 객체 정의는 CDB$ROOT에, 데이터는 각 PDB에 로컬 저장",
+            "객체 링크: 객체 정의와 데이터 모두 CDB$ROOT에 저장되고 PDB에서 링크로 접근",
+            "딕셔너리 뷰(DBA_TABLES 등)는 메타데이터 링크 방식으로, 정의 변경 시 Root만 업데이트하면 자동 반영",
+            "DBA_OBJECTS의 SHARING 컬럼으로 객체의 링크 유형(METADATA LINK, OBJECT LINK, NONE) 확인 가능",
+            "딕셔너리 분리 덕분에 Plug/Unplug, 효율적 패치/업그레이드, 디스크 공간 절약이 가능"
+          ]
+        },
+        {
+          "title": "공통 사용자와 로컬 사용자 (Common Users & Local Users)",
+          "content": "멀티테넌트 환경에서 사용자(User)는 **공통 사용자(Common User)**와 **로컬 사용자(Local User)**로 구분됩니다. 이 구분은 사용자의 생성 위치와 가시 범위에 따라 결정됩니다.\n\n### 공통 사용자 (Common User)\n\n공통 사용자는 **CDB$ROOT에서 생성**되며, CDB 내 **모든 PDB에서 인식**되는 사용자입니다.\n\n| 항목 | 설명 |\n|---|---|\n| **생성 위치** | CDB$ROOT (루트에서만 생성 가능) |\n| **이름 규칙** | **C##** 접두사 필수 (예: C##DBA_ADMIN) |\n| **가시 범위** | CDB$ROOT + 모든 PDB |\n| **권한 부여** | CONTAINER=ALL (전체) 또는 CONTAINER=CURRENT (현재) |\n| **용도** | DBA 관리 계정, CDB 전체 모니터링 계정 등 |\n| **Oracle 제공 계정** | SYS, SYSTEM (C## 접두사 예외) |\n\n```\n-- 공통 사용자 생성\nCREATE USER C##admin IDENTIFIED BY password CONTAINER=ALL;\n\n-- 공통 사용자에게 모든 PDB에서의 DBA 권한 부여\nGRANT DBA TO C##admin CONTAINER=ALL;\n\n-- 특정 PDB에서만 권한 부여\nALTER SESSION SET CONTAINER = pdb_sales;\nGRANT SELECT ON hr.employees TO C##admin;\n```\n\n### 로컬 사용자 (Local User)\n\n로컬 사용자는 **특정 PDB 내에서 생성**되며, **해당 PDB에서만** 유효한 사용자입니다.\n\n| 항목 | 설명 |\n|---|---|\n| **생성 위치** | 개별 PDB 내부 |\n| **이름 규칙** | C##으로 시작하지 않는 일반 이름 |\n| **가시 범위** | 해당 PDB 내에서만 |\n| **권한 부여** | 해당 PDB 내에서만 유효 |\n| **용도** | 애플리케이션 계정, 개발자 계정 등 |\n\n```\n-- PDB 내에서 로컬 사용자 생성\nALTER SESSION SET CONTAINER = pdb_sales;\nCREATE USER app_user IDENTIFIED BY password;\nGRANT CONNECT, RESOURCE TO app_user;\n```\n\n### 공통 사용자 vs 로컬 사용자 비교\n\n| 구분 | 공통 사용자 | 로컬 사용자 |\n|---|---|---|\n| **생성 위치** | CDB$ROOT | 개별 PDB |\n| **이름 규칙** | C## 접두사 필수 | C## 접두사 사용 불가 |\n| **가시 범위** | 모든 컨테이너 | 해당 PDB만 |\n| **권한 범위** | 전체 또는 특정 컨테이너 | 해당 PDB만 |\n| **Plug/Unplug 시** | PDB 이동해도 유지 | PDB와 함께 이동 |\n| **용도** | 관리, 모니터링 | 애플리케이션, 개발 |\n\n### COMMON_USER_PREFIX 파라미터\n\n| 속성 | 값 |\n|---|---|\n| **기본값** | C## |\n| **설명** | 공통 사용자/역할 이름의 필수 접두사 |\n| **수정 가능 여부** | ALTER SYSTEM으로 변경 가능 (권장하지 않음) |\n| **빈 문자열 설정** | 접두사 제한을 해제 (보안 위험) |\n\n관련 뷰: `CDB_USERS`의 `COMMON` 컬럼 (YES/NO), `ORACLE_MAINTAINED` 컬럼",
+          "key_points": [
+            "공통 사용자는 CDB$ROOT에서 C## 접두사로 생성되며, 모든 PDB에서 인식됨",
+            "로컬 사용자는 개별 PDB 내에서 생성되며, 해당 PDB에서만 유효",
+            "SYS, SYSTEM 등 Oracle 제공 계정은 C## 접두사 없이도 공통 사용자로 존재",
+            "공통 사용자 권한 부여 시 CONTAINER=ALL(전체) 또는 CONTAINER=CURRENT(현재) 지정",
+            "COMMON_USER_PREFIX 파라미터로 접두사 변경 가능하나 기본값(C##) 사용 권장",
+            "CDB_USERS 뷰의 COMMON 컬럼으로 공통/로컬 사용자 구분 확인 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s04",
+      "title": "메모리 및 프로세스 공유 구조 (Shared Memory & Process Architecture)",
+      "content": "멀티테넌트 아키텍처의 핵심 이점 중 하나는 **단일 인스턴스(SGA + 백그라운드 프로세스)**를 여러 PDB가 공유하는 것입니다. 이를 통해 Non-CDB 환경 대비 대폭적인 자원 절감이 가능합니다.\n\n### 메모리 공유 구조\n\n```\n┌──────────────────────────────────────────┐\n│         Oracle Instance (SGA)             │\n│  ┌────────────────────────────────────┐   │\n│  │  Shared Pool                       │   │\n│  │  (SQL Cache, Dictionary Cache)    │   │\n│  │  ← PDB1, PDB2, PDB3 공유         │   │\n│  ├────────────────────────────────────┤   │\n│  │  Database Buffer Cache             │   │\n│  │  ← PDB1, PDB2, PDB3 공유         │   │\n│  ├────────────────────────────────────┤   │\n│  │  Redo Log Buffer                   │   │\n│  │  ← PDB1, PDB2, PDB3 공유         │   │\n│  ├────────────────────────────────────┤   │\n│  │  Large Pool / Java Pool / etc.    │   │\n│  │  ← PDB1, PDB2, PDB3 공유         │   │\n│  └────────────────────────────────────┘   │\n│                                           │\n│  ┌────────────────────────────────────┐   │\n│  │  Background Processes              │   │\n│  │  LGWR, DBWn, PMON, SMON, etc.     │   │\n│  │  ← PDB1, PDB2, PDB3 공유         │   │\n│  └────────────────────────────────────┘   │\n│                                           │\n│  ┌──────┐  ┌──────┐  ┌──────┐            │\n│  │ PGA  │  │ PGA  │  │ PGA  │ ← 서버    │\n│  │(PDB1)│  │(PDB2)│  │(PDB3)│   프로세스 │\n│  │세션  │  │세션  │  │세션  │   별 전용  │\n│  └──────┘  └──────┘  └──────┘            │\n└──────────────────────────────────────────┘\n```\n\n### 공유 자원 vs 전용 자원 상세\n\n| 자원 | 공유/전용 | PDB별 제어 가능 여부 |\n|---|---|---|\n| **SGA 전체** | 공유 | PDB별 SGA_MIN_SIZE, SGA_TARGET 설정 가능 |\n| **Buffer Cache** | 공유 | Resource Manager로 I/O 제한 가능 |\n| **Shared Pool** | 공유 | 직접 제어 불가, SQL/딕셔너리 캐시 자동 관리 |\n| **Redo Log Buffer** | 공유 | PDB별 제어 불가 |\n| **PGA** | 전용 (세션별) | PDB별 PGA_AGGREGATE_LIMIT, PGA_AGGREGATE_TARGET 설정 가능 |\n| **LGWR** | 공유 | PDB별 제어 불가 |\n| **DBWn** | 공유 | PDB별 제어 불가 |\n| **PMON** | 공유 | PDB별 제어 불가 |\n| **Listener** | 공유 | PDB별 서비스 이름으로 라우팅 |",
+      "sqlExamplesIds": ["sql08", "sql09"],
+      "subsections": [
+        {
+          "title": "PDB별 메모리 자원 관리 (Per-PDB Memory Resource Management)",
+          "content": "Oracle은 PDB별로 메모리 사용량을 제어하기 위해 여러 파라미터와 Resource Manager를 제공합니다. 이를 통해 특정 PDB가 과도하게 메모리를 사용하여 다른 PDB에 영향을 주는 것을 방지할 수 있습니다.\n\n### PDB별 메모리 관련 파라미터\n\n| 파라미터 | 설명 | PDB 레벨 설정 |\n|---|---|---|\n| **SGA_TARGET** | PDB가 사용할 수 있는 SGA 최대 크기 | 가능 |\n| **SGA_MIN_SIZE** | PDB에 보장되는 최소 SGA 크기 | 가능 |\n| **PGA_AGGREGATE_LIMIT** | PDB의 PGA 사용 절대 상한선 | 가능 |\n| **PGA_AGGREGATE_TARGET** | PDB의 PGA 목표 크기 | 가능 |\n| **DB_CACHE_SIZE** | Buffer Cache 크기 (PDB별 제한적 제어) | 제한적 |\n\n### SGA_TARGET과 SGA_MIN_SIZE의 관계\n\n```\nCDB 레벨: SGA_TARGET = 16GB\n\nPDB1: SGA_TARGET = 8GB   (최대 8GB까지 사용 가능)\n      SGA_MIN_SIZE = 2GB  (최소 2GB 보장)\n\nPDB2: SGA_TARGET = 6GB   (최대 6GB까지 사용 가능)\n      SGA_MIN_SIZE = 1GB  (최소 1GB 보장)\n\nPDB3: SGA_TARGET = 4GB   (최대 4GB까지 사용 가능)\n      SGA_MIN_SIZE = 1GB  (최소 1GB 보장)\n\n제약조건:\n- 각 PDB의 SGA_MIN_SIZE 합계 ≤ CDB SGA_TARGET의 50%\n- 각 PDB의 SGA_TARGET ≤ CDB SGA_TARGET\n```\n\n### PDB별 자원 제어 메커니즘\n\nOracle Resource Manager를 통한 CDB Resource Plan으로 PDB 간 자원을 제어합니다:\n\n1. **CPU 공유(Shares)**: PDB별 CPU 가중치 설정 (비율 기반)\n2. **CPU 사용률 제한(Utilization Limit)**: PDB별 최대 CPU 사용률 설정 (절대값)\n3. **병렬 서버 제한**: PDB별 최대 병렬 처리 서버 수 설정\n4. **I/O 제한**: MAX_IOPS (초당 최대 I/O 연산 수), MAX_MBPS (초당 최대 I/O 처리량)\n\n```\n-- CDB Resource Plan 생성 예시\nBEGIN\n  DBMS_RESOURCE_MANAGER.CREATE_CDB_PLAN(\n    plan => 'cdb_resource_plan',\n    comment => 'CDB resource plan for PDB management');\n\n  DBMS_RESOURCE_MANAGER.CREATE_CDB_PLAN_DIRECTIVE(\n    plan => 'cdb_resource_plan',\n    pluggable_database => 'pdb_sales',\n    shares => 3,\n    utilization_limit => 80,\n    parallel_server_limit => 50);\nEND;\n/\n```\n\n### 메모리 사용 모니터링\n\n관련 뷰:\n- **V$SGA**: SGA 전체 크기 정보\n- **V$PGASTAT**: PGA 통계 (CDB 전체)\n- **V$CON_SYSSTAT**: 컨테이너별 시스템 통계 (메모리 관련 포함)\n- **V$SYSTEM_PARAMETER**: PDB별 파라미터 설정 확인",
+          "key_points": [
+            "SGA_TARGET과 SGA_MIN_SIZE 파라미터로 PDB별 SGA 최대/최소 크기를 제어",
+            "PGA_AGGREGATE_LIMIT과 PGA_AGGREGATE_TARGET으로 PDB별 PGA 사용량 제한",
+            "각 PDB의 SGA_MIN_SIZE 합계는 CDB SGA_TARGET의 50%를 초과할 수 없음",
+            "CDB Resource Plan으로 PDB 간 CPU 공유, CPU 사용률 제한, I/O 제한 설정",
+            "MAX_IOPS, MAX_MBPS 파라미터로 PDB별 I/O 성능 제한 가능",
+            "V$CON_SYSSTAT 뷰로 컨테이너별 시스템 통계(메모리 포함) 모니터링"
+          ]
+        },
+        {
+          "title": "백그라운드 프로세스와 서버 프로세스 공유 (Background & Server Process Sharing)",
+          "content": "CDB 환경에서 모든 PDB는 하나의 인스턴스의 **백그라운드 프로세스를 공유**합니다. 서버 프로세스는 클라이언트 연결마다 생성되지만, 백그라운드 프로세스는 CDB 단위로 하나만 존재합니다.\n\n### CDB에서의 프로세스 구조\n\n| 프로세스 유형 | 공유 방식 | 설명 |\n|---|---|---|\n| **LGWR (Log Writer)** | CDB 공유 | 모든 PDB의 Redo를 하나의 Redo Log에 기록 |\n| **DBWn (Database Writer)** | CDB 공유 | 모든 PDB의 Dirty Buffer를 디스크에 기록 |\n| **PMON (Process Monitor)** | CDB 공유 | 모든 PDB의 비정상 종료 프로세스 정리 |\n| **SMON (System Monitor)** | CDB 공유 | CDB 전체의 인스턴스 복구, 공간 회수 |\n| **CKPT (Checkpoint)** | CDB 공유 | CDB 전체의 체크포인트 처리 |\n| **ARCn (Archiver)** | CDB 공유 | CDB 전체의 Archived Redo Log 생성 |\n| **MMON (Manageability Monitor)** | CDB 공유 | AWR 스냅샷 등 관리 기능 |\n| **CJQ0/Jnnn (Job Scheduler)** | CDB 공유 | 각 PDB의 스케줄러 작업을 처리 |\n| **서버 프로세스 (Server Process)** | 세션별 전용 | 각 클라이언트 연결에 대해 개별 생성 |\n\n### 서버 프로세스와 컨테이너 전환\n\n서버 프로세스는 현재 접속한 PDB의 컨텍스트에서 동작합니다. `ALTER SESSION SET CONTAINER` 명령으로 컨테이너를 전환하면, 동일한 서버 프로세스가 다른 PDB의 컨텍스트로 이동합니다.\n\n```\n-- 서버 프로세스의 현재 컨테이너 확인\nSELECT SYS_CONTEXT('USERENV', 'CON_NAME') AS current_container FROM DUAL;\n\n-- 컨테이너 전환 (동일 서버 프로세스 내)\nALTER SESSION SET CONTAINER = pdb_sales;\n```\n\n### PDB별 서비스 라우팅\n\n각 PDB는 고유한 **서비스(Service)**를 가지며, 클라이언트는 서비스 이름을 통해 특정 PDB에 직접 접속합니다:\n\n```\n-- PDB별 기본 서비스 확인\nSELECT name, pdb FROM v$services ORDER BY pdb;\n\n-- TNS 연결 문자열 예시\npdb_sales =\n  (DESCRIPTION =\n    (ADDRESS = (PROTOCOL = TCP)(HOST = dbhost)(PORT = 1521))\n    (CONNECT_DATA =\n      (SERVICE_NAME = pdb_sales)))\n```\n\n### UNDO Tablespace 모드: Shared vs Local\n\nCDB의 UNDO Tablespace는 두 가지 모드로 운영됩니다:\n\n| 모드 | 파라미터 | 설명 |\n|---|---|---|\n| **Shared Undo Mode** | LOCAL_UNDO_ENABLED=FALSE | CDB 전체가 하나의 UNDO 테이블스페이스 공유 |\n| **Local Undo Mode** | LOCAL_UNDO_ENABLED=TRUE | 각 PDB별 독립 UNDO 테이블스페이스 사용 |\n\nLocal Undo Mode의 이점:\n- PDB 단위 Flashback/Point-in-Time Recovery 가능\n- PDB Relocate 시 UNDO 데이터 독립 이동\n- 보안 강화 (PDB 간 UNDO 데이터 격리)\n\n**Oracle 26ai에서는 Local Undo Mode가 기본값**입니다.\n\n### UNDO 모드 변경 (CDB 생성 후)\n\nUNDO 모드(Shared/Local)는 CDB 생성 후에도 변경이 가능하지만, **CDB 재시작이 필수**입니다. 변경 절차는 다음과 같습니다:\n\n| 항목 | 설명 |\n|---|---|\n| **변경 명령** | ALTER DATABASE LOCAL UNDO ON (Local 모드) / ALTER DATABASE LOCAL UNDO OFF (Shared 모드) |\n| **필수 시작 모드** | STARTUP UPGRADE 모드에서 실행해야 함 |\n| **적용 범위** | CDB 단위 일괄 적용 (PDB별 개별 설정 불가) |\n| **재시작 필요** | 예 — 변경 후 반드시 CDB 재시작 필요 |\n\n```\n-- Local Undo Mode로 변경 절차\nSHUTDOWN IMMEDIATE;\nSTARTUP UPGRADE;\nALTER DATABASE LOCAL UNDO ON;\nSHUTDOWN IMMEDIATE;\nSTARTUP;\n\n-- Shared Undo Mode로 변경 절차\nSHUTDOWN IMMEDIATE;\nSTARTUP UPGRADE;\nALTER DATABASE LOCAL UNDO OFF;\nSHUTDOWN IMMEDIATE;\nSTARTUP;\n```\n\n> **주의**: UNDO 모드 변경은 CDB 단위로만 가능하며, 특정 PDB만 다른 UNDO 모드로 설정할 수 없습니다.\n\n### 일시 UNDO (Temporary UNDO)\n\n일시 UNDO는 **GTT(Global Temporary Table)**의 UNDO 데이터를 일반 UNDO 테이블스페이스 대신 **임시 테이블스페이스(Temporary Tablespace)**에 저장하는 기능입니다.\n\n| 항목 | 설명 |\n|---|---|\n| **파라미터** | TEMP_UNDO_ENABLED = TRUE |\n| **기본값** | FALSE |\n| **동적 변경** | 가능 (재시작 불필요) |\n| **적용 레벨** | 세션 또는 시스템 레벨 (ALTER SESSION / ALTER SYSTEM) |\n\n일시 UNDO의 이점:\n- **UNDO 테이블스페이스 사용량 감소**: GTT의 UNDO가 임시 테이블스페이스로 분리\n- **REDO 로그 사용량 감소**: 임시 테이블스페이스는 REDO를 생성하지 않으므로, GTT UNDO에 대한 REDO도 감소\n- **성능 향상**: GTT를 많이 사용하는 환경에서 UNDO/REDO 부하 경감\n\n```\n-- 세션 레벨에서 일시 UNDO 활성화\nALTER SESSION SET TEMP_UNDO_ENABLED = TRUE;\n\n-- 시스템 레벨에서 일시 UNDO 활성화\nALTER SYSTEM SET TEMP_UNDO_ENABLED = TRUE SCOPE=BOTH;\n```\n\n### ALTER SYSTEM FLUSH BUFFER_CACHE의 PDB 범위 동작\n\nALTER SYSTEM FLUSH BUFFER_CACHE 명령은 실행하는 컨테이너에 따라 플러시 범위가 달라집니다:\n\n| 실행 위치 | 플러시 범위 | 설명 |\n|---|---|---|\n| **PDB 내부에서 실행** | 해당 PDB의 버퍼 캐시만 플러시 | PDB에 속한 블록만 Buffer Cache에서 제거 |\n| **CDB$ROOT에서 실행** | CDB 전체 버퍼 캐시 플러시 | 모든 PDB의 블록을 포함하여 전체 Buffer Cache 제거 |\n\n```\n-- PDB에서 실행: 해당 PDB 버퍼만 플러시\nALTER SESSION SET CONTAINER = pdb_sales;\nALTER SYSTEM FLUSH BUFFER_CACHE;\n\n-- CDB$ROOT에서 실행: 전체 CDB 버퍼 플러시\nALTER SESSION SET CONTAINER = CDB$ROOT;\nALTER SYSTEM FLUSH BUFFER_CACHE;\n```\n\n> **시험 포인트**: PDB에서의 FLUSH BUFFER_CACHE는 해당 PDB 범위로 제한되므로, 다른 PDB의 성능에 영향을 주지 않습니다. 이는 멀티테넌트 환경에서의 격리(Isolation) 원칙이 적용된 결과입니다.",
+          "key_points": [
+            "LGWR, DBWn, PMON, SMON 등 백그라운드 프로세스는 CDB 단위로 공유",
+            "서버 프로세스는 클라이언트 연결별로 개별 생성되며, ALTER SESSION SET CONTAINER로 컨테이너 전환 가능",
+            "각 PDB는 고유한 서비스(Service) 이름을 가지며, 리스너를 통해 라우팅",
+            "Local Undo Mode(LOCAL_UNDO_ENABLED=TRUE)에서는 PDB별 독립 UNDO 테이블스페이스 사용",
+            "Oracle 26ai에서 Local Undo Mode가 기본값이며, PDB 단위 Flashback/PITR 지원",
+            "UNDO 모드(Shared/Local)는 CDB 생성 후 변경 가능하지만, STARTUP UPGRADE 모드에서 ALTER DATABASE LOCAL UNDO ON/OFF 실행 후 재시작 필요",
+            "UNDO 모드는 CDB 단위 일괄 적용이며, PDB별 개별 설정 불가",
+            "TEMP_UNDO_ENABLED=TRUE로 GTT의 UNDO 데이터를 임시 테이블스페이스에 저장 가능 (동적 변경, 재시작 불필요)",
+            "일시 UNDO는 UNDO 테이블스페이스와 REDO 로그 사용량을 감소시킴",
+            "ALTER SYSTEM FLUSH BUFFER_CACHE는 PDB에서 실행 시 해당 PDB 범위만, CDB$ROOT에서 실행 시 전체 CDB 범위를 플러시",
+            "V$SERVICES 뷰로 PDB별 서비스 목록 확인 가능"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionId": "s05",
+      "title": "RAC 환경에서의 멀티테넌트 지원 (Multitenant in RAC Environment)",
+      "content": "**RAC(Real Application Clusters)**는 여러 노드(인스턴스)가 하나의 공유 스토리지에 접근하여 고가용성(HA)과 확장성(Scalability)을 제공하는 Oracle의 클러스터링 기술입니다. 멀티테넌트 아키텍처는 RAC와 완벽하게 통합되어 동작합니다.\n\n### RAC + CDB 구조\n\n```\n┌──────────────────────────────────────────────────┐\n│                   Shared Storage                  │\n│    (CDB 데이터 파일, Redo Log, Control File 등)    │\n└────────────┬────────────────┬─────────────────────┘\n             │                │\n    ┌────────┴───────┐  ┌────┴────────────┐\n    │   Node 1        │  │   Node 2        │\n    │   Instance 1    │  │   Instance 2    │\n    │   (SGA + Proc)  │  │   (SGA + Proc)  │\n    │                 │  │                 │\n    │  PDB1 ✓ (OPEN)  │  │  PDB1 ✓ (OPEN)  │\n    │  PDB2 ✓ (OPEN)  │  │  PDB2 ✗ (CLOSE) │\n    │  PDB3 ✗ (CLOSE) │  │  PDB3 ✓ (OPEN)  │\n    └─────────────────┘  └─────────────────┘\n```\n\n### RAC에서 PDB의 동작 방식\n\n| 항목 | 설명 |\n|---|---|\n| **PDB 열기** | 각 RAC 노드(인스턴스)에서 독립적으로 PDB를 열거나 닫을 수 있음 |\n| **서비스 기반 접속** | PDB 서비스를 특정 노드에서만 실행하여 워크로드 분산 가능 |\n| **모든 노드에서 열기** | `ALTER PLUGGABLE DATABASE pdb1 OPEN INSTANCES=ALL;` |\n| **특정 노드에서 열기** | `ALTER PLUGGABLE DATABASE pdb1 OPEN INSTANCES=('inst1');` |\n| **캐시 퓨전** | PDB의 데이터 블록도 RAC의 Cache Fusion(GCS/GES)으로 노드 간 공유 |\n\n### PDB 서비스와 RAC 노드 매핑\n\n| 서비스 유형 | 설명 |\n|---|---|\n| **Uniform 서비스** | 모든 RAC 노드에서 동일한 PDB 서비스 실행 |\n| **Singleton 서비스** | 특정 노드에서만 PDB 서비스 실행 (Active/Passive) |\n| **Policy-Managed** | 서버 풀(Server Pool) 기반으로 자동 배치 |\n| **Admin-Managed** | 수동으로 노드 지정 |",
+      "sqlExamplesIds": ["sql10", "sql11", "sql12"],
+      "subsections": [
+        {
+          "title": "RAC에서의 PDB 관리 및 서비스 구성 (PDB Management in RAC)",
+          "content": "RAC 환경에서 PDB를 효과적으로 관리하려면 **서비스(Service) 구성**과 **인스턴스별 PDB 열기/닫기** 전략이 중요합니다. PDB 서비스를 적절히 구성하면 워크로드를 RAC 노드 간에 효과적으로 분산할 수 있습니다.\n\n### RAC에서 PDB 열기/닫기\n\n```\n-- 모든 RAC 인스턴스에서 PDB 열기\nALTER PLUGGABLE DATABASE pdb_sales OPEN INSTANCES=ALL;\n\n-- 특정 인스턴스에서만 PDB 열기\nALTER PLUGGABLE DATABASE pdb_sales OPEN INSTANCES=('rac_inst1','rac_inst2');\n\n-- 현재 인스턴스에서만 PDB 열기\nALTER PLUGGABLE DATABASE pdb_sales OPEN;\n\n-- 특정 인스턴스에서 PDB 닫기\nALTER PLUGGABLE DATABASE pdb_sales CLOSE INSTANCES=('rac_inst2');\n```\n\n### PDB 서비스 생성 (SRVCTL)\n\nRAC 환경에서 PDB 서비스는 **srvctl** 유틸리티를 사용하여 관리합니다:\n\n```\n-- PDB 서비스 생성 (특정 노드에서 실행)\nsrvctl add service -db cdb_name -service pdb_sales_svc \\\n  -pdb pdb_sales -preferred rac_inst1,rac_inst2 \\\n  -available rac_inst3\n\n-- PDB 서비스 시작\nsrvctl start service -db cdb_name -service pdb_sales_svc\n\n-- PDB 서비스 상태 확인\nsrvctl status service -db cdb_name -service pdb_sales_svc\n\n-- PDB 서비스 중지\nsrvctl stop service -db cdb_name -service pdb_sales_svc\n```\n\n### RAC에서의 PDB Relocate\n\nPDB Relocate는 RAC 환경에서 **PDB를 한 CDB에서 다른 CDB로 라이브 마이그레이션**하는 기능입니다:\n\n| 단계 | 설명 |\n|---|---|\n| 1. 준비 | 대상 CDB에서 DB Link 생성, 호환성 검증 |\n| 2. Relocate 시작 | `CREATE PLUGGABLE DATABASE ... RELOCATE` 실행 |\n| 3. 데이터 전송 | 소스 PDB의 데이터 파일을 대상으로 복사 (온라인) |\n| 4. 증분 전송 | 복사 중 변경된 데이터를 증분 전송 |\n| 5. 전환 (Switchover) | 최종 전환 시 짧은 중단 후 대상에서 PDB 활성화 |\n| 6. 정리 | 소스 CDB에서 PDB 제거 |\n\nOracle 26ai에서는 전환 단계의 다운타임이 거의 제로에 가까울 정도로 개선되었습니다.\n\n### RAC에서 PDB 자동 시작 구성\n\n```\n-- CDB 시작 시 PDB 자동 열기 (CDB 레벨 설정)\nALTER PLUGGABLE DATABASE ALL SAVE STATE INSTANCES=ALL;\n\n-- 특정 PDB만 자동 열기 저장\nALTER PLUGGABLE DATABASE pdb_sales SAVE STATE INSTANCES=ALL;\n\n-- 저장된 상태 확인\nSELECT con_name, instance_name, state \nFROM dba_pdb_saved_states;\n```\n\n### RAC 환경 모니터링 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **GV$CONTAINERS** | 모든 RAC 인스턴스의 컨테이너 정보 (Global View) |\n| **GV$PDBS** | 모든 RAC 인스턴스의 PDB 정보 |\n| **GV$SERVICES** | 모든 인스턴스의 서비스 정보 |\n| **V$ACTIVE_INSTANCES** | 활성 RAC 인스턴스 목록 |\n| **DBA_PDB_SAVED_STATES** | PDB 자동 시작 설정 정보 |",
+          "key_points": [
+            "RAC에서 PDB는 각 인스턴스에서 독립적으로 열기/닫기 가능 (INSTANCES 절 사용)",
+            "srvctl 유틸리티로 PDB 서비스를 생성하고 preferred/available 노드를 지정하여 워크로드 분산",
+            "PDB Relocate로 CDB 간 PDB 라이브 마이그레이션이 가능하며, Oracle 26ai에서 다운타임 최소화",
+            "ALTER PLUGGABLE DATABASE ... SAVE STATE로 CDB 재시작 시 PDB 자동 열기 구성",
+            "GV$ 뷰(GV$CONTAINERS, GV$PDBS)로 RAC 전체 인스턴스의 컨테이너 정보 모니터링",
+            "DBA_PDB_SAVED_STATES 뷰로 PDB 자동 시작 설정 상태 확인"
+          ]
+        },
+        {
+          "title": "RAC에서의 자원 관리와 캐시 퓨전 (Resource Management & Cache Fusion in RAC)",
+          "content": "RAC 멀티테넌트 환경에서는 **노드 간 데이터 공유(Cache Fusion)**와 **PDB별 자원 관리**가 동시에 동작합니다. Cache Fusion은 RAC의 핵심 기술로, 여러 노드의 Buffer Cache를 하나의 논리적 캐시처럼 운영합니다.\n\n### Cache Fusion과 PDB의 관계\n\nCache Fusion은 CDB 레벨에서 동작하므로, PDB의 데이터 블록도 다른 노드의 인스턴스와 공유됩니다:\n\n| 구성요소 | 역할 | PDB 관련 동작 |\n|---|---|---|\n| **GCS (Global Cache Service)** | 노드 간 데이터 블록 전송 관리 | PDB 데이터 블록도 GCS를 통해 전송 |\n| **GES (Global Enqueue Service)** | 노드 간 락/큐 관리 | PDB의 락도 GES로 관리 |\n| **LMS (Global Cache Service Process)** | 실제 블록 전송 수행 | PDB 블록 전송도 LMS가 처리 |\n| **LMON (Global Enqueue Service Monitor)** | 클러스터 멤버십 관리 | CDB 레벨에서 동작 |\n\n### RAC에서의 CDB Resource Plan\n\nRAC 환경에서 CDB Resource Plan은 **각 인스턴스에서 독립적으로 적용**됩니다:\n\n```\n-- CDB Resource Plan 활성화 (RAC 전체)\nALTER SYSTEM SET RESOURCE_MANAGER_PLAN = 'cdb_resource_plan' SCOPE=BOTH SID='*';\n\n-- 특정 인스턴스에서만 Resource Plan 설정\nALTER SYSTEM SET RESOURCE_MANAGER_PLAN = 'cdb_resource_plan' SCOPE=BOTH SID='rac_inst1';\n```\n\n### RAC에서의 UNDO 관리\n\nRAC 환경에서 UNDO Tablespace는 **인스턴스별로 할당**됩니다:\n\n| 모드 | RAC 동작 |\n|---|---|\n| **Shared Undo** | 각 인스턴스별 UNDO Tablespace, 모든 PDB 공유 |\n| **Local Undo** | 각 인스턴스별, 각 PDB별 UNDO Tablespace (인스턴스 x PDB 개수) |\n\nLocal Undo Mode에서 RAC 환경이면 UNDO Tablespace 수 = **인스턴스 수 x PDB 수**가 됩니다. 이는 스토리지 사용량 증가를 의미하지만, PDB별 독립적인 복구와 관리가 가능해집니다.\n\n### RAC에서의 PDB 가용성 시나리오\n\n| 시나리오 | 동작 |\n|---|---|\n| **노드 장애** | 다른 노드에서 PDB 서비스 자동 페일오버 (preferred/available 설정에 따라) |\n| **PDB 장애** | 해당 PDB만 영향, 다른 PDB는 정상 운영 |\n| **Rolling 업그레이드** | 한 노드씩 순차적으로 패치 적용, 다른 노드에서 PDB 서비스 유지 |\n| **PDB Relocate** | 서비스 중단 최소화하며 PDB를 다른 CDB/노드로 이동 |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **GV$INSTANCE** | RAC 전체 인스턴스 정보 |\n| **GV$LOCK** | RAC 전체 락 정보 |\n| **GV$DLM_MISC** | GCS/GES 통계 |\n| **GV$CR_BLOCK_SERVER** | CR 블록 전송 통계 |\n| **GV$CURRENT_BLOCK_SERVER** | Current 블록 전송 통계 |\n| **V$CLUSTER_INTERCONNECTS** | 인터커넥트 정보 |",
+          "key_points": [
+            "Cache Fusion(GCS/GES)은 CDB 레벨에서 동작하며, PDB 데이터 블록도 노드 간 공유",
+            "CDB Resource Plan은 RAC의 각 인스턴스에서 독립적으로 적용",
+            "Local Undo Mode에서 RAC 환경의 UNDO Tablespace 수 = 인스턴스 수 x PDB 수",
+            "노드 장애 시 PDB 서비스가 다른 노드로 자동 페일오버 (서비스 설정에 따라)",
+            "Rolling 업그레이드로 한 노드씩 패치 적용하면서 다른 노드에서 서비스 유지 가능",
+            "GV$ 뷰(Global View)로 RAC 전체 인스턴스의 상태를 통합 모니터링"
+          ]
+        }
+      ]
+    }
+  ],
+  "sql_examples": [
+    {
+      "sqlExamplesId": "sql01",
+      "title": "CDB 여부 확인 (Check if CDB)",
+      "sql": "SELECT name, cdb, con_id FROM v$database;",
+      "description": "현재 데이터베이스가 CDB인지 확인합니다. CDB 컬럼이 YES이면 CDB, NO이면 Non-CDB입니다."
+    },
+    {
+      "sqlExamplesId": "sql02",
+      "title": "현재 컨테이너 확인 (Check Current Container)",
+      "sql": "SELECT SYS_CONTEXT('USERENV', 'CON_NAME') AS con_name, SYS_CONTEXT('USERENV', 'CON_ID') AS con_id FROM DUAL;",
+      "description": "현재 세션이 접속해 있는 컨테이너의 이름과 ID를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql03",
+      "title": "모든 컨테이너 목록 조회 (List All Containers)",
+      "sql": "SELECT con_id, name, open_mode, restricted, total_size FROM v$containers ORDER BY con_id;",
+      "description": "CDB 내 모든 컨테이너(CDB$ROOT, PDB$SEED, 사용자 PDB)의 목록과 상태를 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql04",
+      "title": "PDB 상세 정보 조회 (PDB Detail Information)",
+      "sql": "SELECT pdb_id, pdb_name, status, con_id, guid, creation_time, open_mode, restricted, total_size, block_size FROM v$pdbs ORDER BY pdb_id;",
+      "description": "모든 PDB의 상세 정보(이름, 상태, GUID, 생성 시간, 크기 등)를 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql05",
+      "title": "컨테이너별 테이블스페이스 조회 (Tablespaces per Container)",
+      "sql": "SELECT con_id, tablespace_name, status, contents, block_size, bigfile FROM cdb_tablespaces ORDER BY con_id, tablespace_name;",
+      "description": "CDB 내 모든 컨테이너의 테이블스페이스 정보를 CON_ID별로 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql06",
+      "title": "공통 사용자 및 로컬 사용자 조회 (Common vs Local Users)",
+      "sql": "SELECT con_id, username, common, oracle_maintained, created FROM cdb_users WHERE oracle_maintained = 'N' ORDER BY con_id, username;",
+      "description": "CDB 전체에서 사용자 정의 계정의 공통/로컬 여부를 조회합니다. COMMON 컬럼이 YES이면 공통 사용자, NO이면 로컬 사용자입니다."
+    },
+    {
+      "sqlExamplesId": "sql07",
+      "title": "딕셔너리 객체의 공유 유형 확인 (Object Sharing Type)",
+      "sql": "SELECT object_name, object_type, sharing, oracle_maintained FROM dba_objects WHERE sharing IN ('METADATA LINK', 'OBJECT LINK') AND ROWNUM <= 20 ORDER BY sharing, object_type;",
+      "description": "데이터 딕셔너리 객체의 공유 유형(METADATA LINK, OBJECT LINK)을 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql08",
+      "title": "PDB별 SGA/PGA 파라미터 확인 (Per-PDB Memory Parameters)",
+      "sql": "SELECT con_id, name, value, ispdb_modifiable FROM v$system_parameter WHERE name IN ('sga_target', 'sga_min_size', 'pga_aggregate_target', 'pga_aggregate_limit') ORDER BY con_id, name;",
+      "description": "PDB별 메모리 관련 파라미터(SGA/PGA) 설정값을 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql09",
+      "title": "컨테이너별 시스템 통계 (Per-Container System Statistics)",
+      "sql": "SELECT con_id, stat_name, value FROM v$con_sysstat WHERE stat_name IN ('physical reads', 'physical writes', 'db block gets', 'consistent gets', 'session logical reads') ORDER BY con_id, stat_name;",
+      "description": "컨테이너(PDB)별 I/O 및 메모리 관련 주요 시스템 통계를 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql10",
+      "title": "RAC 환경에서 PDB 인스턴스별 상태 확인 (PDB State per RAC Instance)",
+      "sql": "SELECT inst_id, con_id, name, open_mode, restricted FROM gv$containers WHERE con_id > 2 ORDER BY inst_id, con_id;",
+      "description": "RAC 환경에서 각 인스턴스별로 PDB가 열려 있는 상태를 확인합니다."
+    },
+    {
+      "sqlExamplesId": "sql11",
+      "title": "PDB 서비스 목록 조회 (PDB Service List)",
+      "sql": "SELECT inst_id, name, network_name, pdb, creation_date FROM gv$services WHERE pdb IS NOT NULL ORDER BY inst_id, pdb;",
+      "description": "RAC 환경에서 각 인스턴스에 등록된 PDB 서비스 목록을 조회합니다."
+    },
+    {
+      "sqlExamplesId": "sql12",
+      "title": "PDB 자동 시작 상태 확인 (PDB Saved State)",
+      "sql": "SELECT con_name, instance_name, state FROM dba_pdb_saved_states ORDER BY con_name;",
+      "description": "CDB 재시작 시 자동으로 열리도록 설정된 PDB의 상태를 확인합니다."
+    }
+  ],
+  "keywords": [
+    "CDB (Container Database)",
+    "PDB (Pluggable Database)",
+    "CDB$ROOT",
+    "PDB$SEED",
+    "멀티테넌트 (Multitenant)",
+    "CON_ID",
+    "ENABLE_PLUGGABLE_DATABASE",
+    "MAX_PDBS",
+    "Common User (공통 사용자)",
+    "Local User (로컬 사용자)",
+    "Metadata Link (메타데이터 링크)",
+    "Object Link (객체 링크)",
+    "Plug/Unplug",
+    "PDB Clone",
+    "PDB Relocate",
+    "RAC (Real Application Clusters)",
+    "Cache Fusion",
+    "GCS (Global Cache Service)",
+    "GES (Global Enqueue Service)",
+    "CDB Resource Plan",
+    "Local Undo Mode",
+    "ALTER DATABASE LOCAL UNDO ON/OFF",
+    "TEMP_UNDO_ENABLED",
+    "Temporary UNDO (일시 UNDO)",
+    "ALTER SYSTEM FLUSH BUFFER_CACHE",
+    "STARTUP UPGRADE",
+    "V$CONTAINERS",
+    "V$PDBS",
+    "CDB_뷰",
+    "Application Container",
+    "SGA_MIN_SIZE",
+    "PDB GUID",
+    "SAVE STATE",
+    "srvctl",
+    "C## (Common User Prefix)"
+  ]
+}

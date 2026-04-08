@@ -1,5 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
+import manifest from '@/data/manifest.json';
+
+// ── Types ──
 
 export interface StudySection {
   sectionId: string;
@@ -44,76 +47,89 @@ export interface QuizSet {
   questionCount: number;
 }
 
-// Update this to wherever your study folder is. It's next to the project folder.
-const STUDY_DIR = path.join(process.cwd(), '..', 'study');
-const QUESTIONS_DIR = path.join(process.cwd(), '..', 'customquestions_json');
-const EXAM_DIR = path.join(process.cwd(), '..', 'questions_json');
+export interface ExamChapter {
+  chapterId: string;
+  chapterName: string;
+  fileName: string;
+  questionCount: number;
+}
 
-export async function getChapters() {
+// ── Paths (project-internal) ──
+
+const DATA_DIR = path.join(process.cwd(), 'data');
+const STUDY_DIR = path.join(DATA_DIR, 'study');
+const CUSTOM_DIR = path.join(DATA_DIR, 'custom');
+const EXAM_DIR = path.join(DATA_DIR, 'questions');
+
+// ── Helper ──
+
+async function readJson<T>(filePath: string): Promise<T | null> {
   try {
-    const chapters = await fs.readdir(STUDY_DIR);
-    return chapters.filter(c => !c.startsWith('.'));
-  } catch(e) {
-    console.error(e);
-    return [];
+    const content = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(content) as T;
+  } catch {
+    return null;
   }
+}
+
+// ── Study ──
+
+export async function getChapters(): Promise<string[]> {
+  return Object.keys(manifest.study).sort();
 }
 
 export async function getChapterSubcategories(chapterId: string) {
-  const chapterPath = path.join(STUDY_DIR, chapterId);
-  try {
-    const files = await fs.readdir(chapterPath);
-    const subcats = [];
-    
+  const files = (manifest.study as Record<string, string[]>)[chapterId];
+  if (!files) return [];
+
+  const subcats = [];
+  for (const file of files) {
+    const data = await readJson<StudyData>(path.join(STUDY_DIR, chapterId, `${file}.json`));
+    if (data) {
+      subcats.push({
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        keywords: data.keywords || [],
+      });
+    }
+  }
+  return subcats;
+}
+
+export async function getStudyData(chapterId: string, subCategoryId: string): Promise<StudyData | null> {
+  const files = (manifest.study as Record<string, string[]>)[chapterId];
+  if (!files) return null;
+
+  const targetFile = files.find(f => f.startsWith(subCategoryId));
+  if (!targetFile) return null;
+
+  return readJson<StudyData>(path.join(STUDY_DIR, chapterId, `${targetFile}.json`));
+}
+
+// ── Quiz (custom questions) ──
+
+export async function getQuizChapters(): Promise<QuizSet[]> {
+  const sets: QuizSet[] = [];
+
+  for (const [chapterId, files] of Object.entries(manifest.custom as Record<string, string[]>)) {
     for (const file of files) {
-      if (file.endsWith('.json')) {
-        const content = await fs.readFile(path.join(chapterPath, file), 'utf-8');
-        const data = JSON.parse(content) as StudyData;
-        subcats.push({
-          id: data.id,
-          title: data.title,
-          description: data.description,
-          keywords: data.keywords || []
+      const match = file.match(/^custom_(\d+)_(\d+)$/);
+      if (!match) continue;
+      const [, , setId] = match;
+      const questions = await readJson<QuizQuestion[]>(path.join(CUSTOM_DIR, chapterId, `${file}.json`));
+      if (questions && questions.length > 0) {
+        sets.push({
+          chapterId,
+          setId,
+          chapterName: questions[0].chapter,
+          questionCount: questions.length,
         });
       }
     }
-    return subcats;
-  } catch (e) {
-    console.error(e);
-    return [];
   }
-}
 
-export async function getQuizChapters(): Promise<QuizSet[]> {
-  try {
-    const chapterDirs = await fs.readdir(QUESTIONS_DIR);
-    const sets: QuizSet[] = [];
-    for (const dir of chapterDirs) {
-      const dirPath = path.join(QUESTIONS_DIR, dir);
-      const stat = await fs.stat(dirPath);
-      if (!stat.isDirectory()) continue;
-      const files = await fs.readdir(dirPath);
-      for (const file of files) {
-        const match = file.match(/^custom_(\d+)_(\d+)\.json$/);
-        if (!match) continue;
-        const [, chapterId, setId] = match;
-        const content = await fs.readFile(path.join(dirPath, file), 'utf-8');
-        const questions = JSON.parse(content) as QuizQuestion[];
-        if (questions.length > 0) {
-          sets.push({
-            chapterId,
-            setId,
-            chapterName: questions[0].chapter,
-            questionCount: questions.length,
-          });
-        }
-      }
-    }
-    return sets.sort((a, b) => `${a.chapterId}_${a.setId}`.localeCompare(`${b.chapterId}_${b.setId}`));
-  } catch (e) {
-    console.error(e);
-    return [];
-  }
+  return sets.sort((a, b) => `${a.chapterId}_${a.setId}`.localeCompare(`${b.chapterId}_${b.setId}`));
 }
 
 export async function getQuizSetsForChapter(chapterId: string): Promise<QuizSet[]> {
@@ -122,74 +138,38 @@ export async function getQuizSetsForChapter(chapterId: string): Promise<QuizSet[
 }
 
 export async function getQuizQuestions(chapterId: string, setId: string): Promise<QuizQuestion[]> {
-  try {
-    const filePath = path.join(QUESTIONS_DIR, chapterId, `custom_${chapterId}_${setId}.json`);
-    const content = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(content) as QuizQuestion[];
-  } catch (e) {
-    console.error(e);
-    return [];
-  }
+  return (
+    (await readJson<QuizQuestion[]>(
+      path.join(CUSTOM_DIR, chapterId, `custom_${chapterId}_${setId}.json`),
+    )) ?? []
+  );
 }
 
-export interface ExamChapter {
-  chapterId: string;
-  chapterName: string;
-  fileName: string;
-  questionCount: number;
-}
+// ── Exam (original questions) ──
 
 export async function getExamChapters(): Promise<ExamChapter[]> {
-  try {
-    const files = await fs.readdir(EXAM_DIR);
-    const chapters: ExamChapter[] = [];
-    for (const file of files) {
-      if (!file.endsWith('.json')) continue;
-      const match = file.match(/^(\d+)_(.+)\.json$/);
-      if (!match) continue;
-      const [, chapterId, name] = match;
-      const content = await fs.readFile(path.join(EXAM_DIR, file), 'utf-8');
-      const questions = JSON.parse(content) as QuizQuestion[];
+  const chapters: ExamChapter[] = [];
+
+  for (const fileName of manifest.questions) {
+    const match = fileName.match(/^(\d+)_(.+)$/);
+    if (!match) continue;
+    const [, chapterId] = match;
+    const questions = await readJson<QuizQuestion[]>(path.join(EXAM_DIR, `${fileName}.json`));
+    if (questions) {
       chapters.push({
         chapterId,
-        chapterName: questions.length > 0 ? questions[0].chapter : name,
-        fileName: file,
+        chapterName: questions.length > 0 ? questions[0].chapter : fileName,
+        fileName: `${fileName}.json`,
         questionCount: questions.length,
       });
     }
-    return chapters.sort((a, b) => a.chapterId.localeCompare(b.chapterId));
-  } catch (e) {
-    console.error(e);
-    return [];
   }
+
+  return chapters.sort((a, b) => a.chapterId.localeCompare(b.chapterId));
 }
 
 export async function getExamQuestions(chapterId: string): Promise<QuizQuestion[]> {
-  try {
-    const files = await fs.readdir(EXAM_DIR);
-    const target = files.find(f => f.startsWith(`${chapterId}_`) && f.endsWith('.json'));
-    if (!target) return [];
-    const content = await fs.readFile(path.join(EXAM_DIR, target), 'utf-8');
-    return JSON.parse(content) as QuizQuestion[];
-  } catch (e) {
-    console.error(e);
-    return [];
-  }
-}
-
-export async function getStudyData(chapterId: string, subCategoryId: string): Promise<StudyData | null> {
-  const chapterPath = path.join(STUDY_DIR, chapterId);
-  try {
-    const files = await fs.readdir(chapterPath);
-    const targetFile = files.find(f => f.startsWith(subCategoryId) && f.endsWith('.json'));
-    
-    if (targetFile) {
-      const content = await fs.readFile(path.join(chapterPath, targetFile), 'utf-8');
-      return JSON.parse(content) as StudyData;
-    }
-    return null;
-  } catch(e) {
-    console.error(e);
-    return null;
-  }
+  const target = manifest.questions.find((f: string) => f.startsWith(`${chapterId}_`));
+  if (!target) return [];
+  return (await readJson<QuizQuestion[]>(path.join(EXAM_DIR, `${target}.json`))) ?? [];
 }
