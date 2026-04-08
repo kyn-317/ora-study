@@ -129,3 +129,47 @@ a {
   font-size: 0.9em;
   color: var(--color-5);
 }
+
+/* Quiz Option Cards */
+.option-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.option-card:hover:not(.option-correct):not(.option-incorrect) {
+  border-color: var(--color-4);
+  background: rgba(67, 171, 240, 0.08);
+}
+.option-selected {
+  border-color: var(--color-4) !important;
+  background: rgba(67, 171, 240, 0.12) !important;
+  box-shadow: 0 0 12px rgba(67, 171, 240, 0.15);
+}
+.option-correct {
+  border-color: #34d399 !important;
+  background: rgba(52, 211, 153, 0.12) !important;
+  cursor: default;
+}
+.option-incorrect {
+  border-color: #f87171 !important;
+  background: rgba(248, 113, 113, 0.12) !important;
+  cursor: default;
+}
+
+/* Quiz Progress Bar */
+.quiz-progress-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.quiz-progress-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--color-4), var(--color-2));
+  transition: width 0.3s ease;
+}
