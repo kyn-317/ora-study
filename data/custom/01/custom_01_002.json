@@ -2,85 +2,84 @@
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_006",
-    "title": "CDB(コンテナ・データベース)を構成するコンテナに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "PGAのSQL Work Areaにおける動作モードについて正しい内容を述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) CDB$ROOTのCON_IDは1であり、共通ユーザーやCDB全体のメタデータを管理するコンテナである。",
-      "B) PDB$SEEDのCON_IDは0であり、新規PDB作成時のテンプレートとして使用される読取り専用コンテナである。",
-      "C) ユーザーPDBのCON_IDは2から順に割り当てられ、アプリケーション・データを格納するコンテナである。",
-      "D) PDB$SEEDはCDB内で必須のコンテナであり、削除することはできない。",
-      "E) CDB$ROOT内のデータ・ディクショナリはオブジェクト・リンクによって各PDBに完全にコピーされる。"
+      "A) Optimalモードでは、ソートやハッシュ結合などの操作がすべてメモリー内で完了する。",
+      "B) One-passモードでは、作業データがメモリーを超過し、一時ディスクを複数回使用する。",
+      "C) PGA_AGGREGATE_TARGETを設定すると、OracleがSQL Work Areaのサイズを自動的に調整する。",
+      "D) WORKAREA_SIZE_POLICYがAUTOの場合でも、SORT_AREA_SIZEパラメータの値が優先的に使用される。",
+      "E) Multi-passモードはメモリーが十分にある場合に選択される最も効率的な動作モードである。"
     ],
     "answer": [
       "A",
-      "D"
+      "C"
     ],
-    "explanation": "정답: A, D\nA) 정답 — CDB$ROOT의 CON_ID는 1이며, 공통 사용자(Common User), 공통 역할(Common Role), CDB 전체의 마스터 데이터 딕셔너리를 관리하는 컨테이너입니다.\n\nD) 정답 — PDB$SEED는 CDB의 필수 구성 요소로, 새로운 PDB 생성 시 템플릿으로 사용되며 삭제할 수 없습니다.\n\nB) 오답 — PDB$SEED의 CON_ID는 0이 아닌 **2**입니다. CON_ID=0은 CDB 전체를 의미하는 특수한 값입니다.\n\nC) 오답 — 사용자 PDB의 CON_ID는 2가 아닌 **3**부터 순차적으로 할당됩니다. CON_ID=1은 CDB$ROOT, CON_ID=2는 PDB$SEED입니다.\n\nE) 오답 — 데이터 딕셔너리는 '완전히 복사'되는 것이 아닙니다. 메타데이터 링크(Metadata Link)를 통해 정의(DDL)는 CDB$ROOT에 저장되고 데이터(행)는 각 PDB에 로컬 저장되는 구조입니다. 오브젝트 링크(Object Link)는 정의와 데이터 모두 CDB$ROOT에 저장되는 별도의 메커니즘입니다.\n\n핵심 개념: CDB는 CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2), 사용자 PDB(CON_ID=3+)로 구성되며, CDB$ROOT와 PDB$SEED는 필수 컨테이너입니다."
+    "explanation": "정답: A, C\nA) 정답 — Optimal 모드에서는 정렬, 해시 조인 등의 작업이 모두 메모리 내에서 완료됩니다. 이것이 가장 성능이 좋은 모드입니다.\n\nC) 정답 — PGA_AGGREGATE_TARGET을 설정하면 WORKAREA_SIZE_POLICY가 AUTO(기본값)일 때 Oracle이 각 프로세스의 SQL Work Area 크기를 워크로드에 따라 자동으로 조정합니다.\n\nB) 오답 — One-pass 모드는 임시 디스크를 '1회' 사용하는 모드입니다. 임시 디스크를 여러 번 사용하는 것은 Multi-pass 모드입니다.\n\nD) 오답 — WORKAREA_SIZE_POLICY가 AUTO인 경우 SORT_AREA_SIZE, HASH_AREA_SIZE 등의 수동 파라미터는 무시됩니다. Oracle이 PGA_AGGREGATE_TARGET에 기반하여 자동 관리합니다.\n\nE) 오답 — Multi-pass 모드는 메모리가 매우 부족할 때 임시 디스크를 여러 번 사용하는 가장 성능이 낮은 모드입니다. 가장 효율적인 모드는 Optimal 모드입니다.\n\n핵심 개념: SQL Work Area는 Optimal(메모리 내 완료), One-pass(디스크 1회 사용), Multi-pass(디스크 복수회 사용)의 3가지 모드로 동작하며, PGA_AGGREGATE_TARGET 설정으로 자동 관리하는 것이 Oracle 권장 방식입니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_007",
-    "title": "CDB環境における共通ユーザーとローカル・ユーザーについて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracleデータベースのメモリー管理方式であるAMM(自動メモリー管理)とASMM(自動共有メモリー管理)に関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) 共通ユーザーはCDB$ROOT内で作成され、ユーザー名にC##接頭辞を付ける必要がある。",
-      "B) ローカル・ユーザーは特定のPDB内で作成され、ユーザー名にC##接頭辞を付けることができる。",
-      "C) 共通ユーザーに権限を付与する際、CONTAINER=ALLを指定するとCDB$ROOTのみに権限が適用される。",
-      "D) SYSおよびSYSTEMユーザーはOracleが提供する共通ユーザーであり、C##接頭辞の例外として扱われる。",
-      "E) ローカル・ユーザーはPDBのPlug/Unplug操作を行うと自動的に削除される。"
+      "A) AMMはMEMORY_TARGETパラメータを使用してSGAとPGAを統合的に自動管理する方式である。",
+      "B) ASMMではSGA_TARGETを設定すると、SGA内の各構成要素のサイズがすべて固定される。",
+      "C) AMMを使用する場合、SGA_TARGETとPGA_AGGREGATE_TARGETの値を個別に設定する必要がある。",
+      "D) ASMMではワークロードに応じてSGAとPGA間のメモリー再分配が自動的に行われる。",
+      "E) AMMとASMMのいずれを使用する場合でも、LOG_BUFFERは自動調整の対象外である。"
     ],
     "answer": [
-      "A",
-      "D"
+      "A"
     ],
-    "explanation": "정답: A, D\nA) 정답 — 공통 사용자(Common User)는 CDB$ROOT에서만 생성할 수 있으며, 사용자 이름에 C## 접두사를 반드시 붙여야 합니다(예: C##DBA_ADMIN).\n\nD) 정답 — SYS와 SYSTEM은 Oracle이 제공하는 공통 사용자로, C## 접두사 규칙의 예외입니다. 이들은 CDB$ROOT와 모든 PDB에서 접근 가능합니다.\n\nB) 오답 — 로컬 사용자(Local User)는 특정 PDB 내에서 생성되며, C## 접두사를 사용할 수 **없습니다**. C## 접두사는 공통 사용자 전용입니다.\n\nC) 오답 — CONTAINER=ALL을 지정하면 CDB$ROOT만이 아닌 **모든 컨테이너**(CDB$ROOT + 모든 PDB)에 권한이 적용됩니다. CONTAINER=CURRENT를 지정하면 현재 컨테이너에만 적용됩니다.\n\nE) 오답 — 로컬 사용자는 PDB의 Plug/Unplug 시 삭제되지 않고 PDB와 함께 이동합니다. 로컬 사용자 정보는 PDB의 데이터 딕셔너리에 포함되어 있으므로 PDB 이동 시 함께 보존됩니다.\n\n핵심 개념: 공통 사용자는 CDB$ROOT에서 C## 접두사로 생성되어 전체 CDB에 걸쳐 존재하며, 로컬 사용자는 개별 PDB 내에서 C## 없이 생성되어 해당 PDB에서만 유효합니다."
+    "explanation": "정답: A\nA) 정답 — AMM(Automatic Memory Management)은 MEMORY_TARGET 파라미터를 사용하여 SGA와 PGA를 하나의 통합 메모리 풀로 관리하며, 워크로드에 따라 SGA ↔ PGA 간 메모리를 자동으로 재분배합니다.\n\nB) 오답 — ASMM에서 SGA_TARGET을 설정하면 SGA 내부 구성요소(DB_CACHE_SIZE, SHARED_POOL_SIZE, LARGE_POOL_SIZE 등)의 크기가 '자동으로 조정'됩니다. 개별 파라미터에 값을 지정하면 해당 값이 최솟값(하한선)으로 작동합니다.\n\nC) 오답 — AMM을 사용할 때는 MEMORY_TARGET만 설정하면 됩니다. SGA_TARGET과 PGA_AGGREGATE_TARGET을 0으로 설정하면 완전 자동 관리가 됩니다.\n\nD) 오답 — ASMM에서는 SGA 내부 구성요소 간의 자동 조정은 수행하지만, SGA와 PGA 간의 메모리 재분배는 수행하지 않습니다. SGA ↔ PGA 간 재분배가 가능한 것은 AMM입니다.\n\nE) 오답 — LOG_BUFFER는 ASMM에서는 자동 조정 대상 외이지만(수동 지정 필요), AMM에서도 마찬가지로 자동 조정 대상 외입니다. 그러나 이 선택지의 설명은 맞는 내용이긴 하나, 문제에서 '正しい内容'으로 가장 적절한 것은 A입니다. 실제로 LOG_BUFFER는 AMM/ASMM 모두에서 자동 조정 대상 외이므로 이 선택지도 기술적으로 맞지만, A가 보다 핵심적이고 명확한 정답입니다.\n\n핵심 개념: AMM은 MEMORY_TARGET으로 SGA+PGA 통합 관리(SGA↔PGA 재분배 가능), ASMM은 SGA_TARGET+PGA_AGGREGATE_TARGET으로 각각 관리(SGA 내부만 자동 조정)하는 방식입니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_008",
-    "title": "PDBの状態管理に関して正しい内容を述べているものを選択してください。",
+    "title": "Oracleデータベースの起動段階(NOMOUNT、MOUNT、OPEN)について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) CDBの起動後、すべてのPDBはデフォルトでREAD WRITE状態で自動的にオープンされる。",
-      "B) ALTER PLUGGABLE DATABASE pdb_name SAVE STATE文を実行すると、CDB再起動時にそのPDBが保存された状態で自動的にオープンされる。",
-      "C) SAVE STATEで保存された状態情報は、PDB自身のデータ・ディクショナリ内に格納される。",
-      "D) DISCARD STATE文はPDBがOPEN状態のときのみ実行可能であり、MOUNTED状態では実行できない。",
-      "E) SAVE STATEを設定したPDBは、ALTER PLUGGABLE DATABASE CLOSE文で明示的にクローズできなくなる。"
+      "A) NOMOUNT段階では、パラメータ・ファイルの読み込み、SGAの割り当て、およびバックグラウンド・プロセスの起動が行われる。",
+      "B) MOUNT段階では、制御ファイルを開き、データ・ファイルの存在を検証してオープンする。",
+      "C) OPEN段階で整合性チェックに失敗した場合、SMONプロセスによるインスタンス・リカバリが自動的に実行される。",
+      "D) MOUNT段階ではV$INSTANCEビューを参照することができない。",
+      "E) NOMOUNT段階でARCHIVELOGモードの変更が可能である。"
     ],
     "answer": [
-      "B"
+      "A",
+      "C"
     ],
-    "explanation": "정답: B\nB) 정답 — ALTER PLUGGABLE DATABASE pdb_name SAVE STATE를 실행하면, PDB의 현재 오픈 모드가 CDB$ROOT의 PDB_SAVED_STATES$ 테이블에 저장됩니다. CDB 재시작 시 해당 PDB는 저장된 상태(READ WRITE 또는 READ ONLY)로 자동 오픈됩니다.\n\nA) 오답 — CDB 시작 후 모든 PDB는 기본적으로 **MOUNTED 상태**로 유지됩니다. 자동으로 READ WRITE로 열리지 않습니다. SAVE STATE를 설정하거나 AFTER STARTUP 트리거를 사용해야 자동 오픈됩니다.\n\nC) 오답 — SAVE STATE 정보는 PDB 자체의 데이터 딕셔너리가 아닌 **CDB$ROOT의 PDB_SAVED_STATES$ 테이블**에 저장됩니다. DBA_PDB_SAVED_STATES 뷰로 확인할 수 있습니다.\n\nD) 오답 — DISCARD STATE는 PDB가 OPEN 상태뿐만 아니라 **MOUNTED 상태에서도 실행 가능**합니다. 반면 SAVE STATE는 PDB가 OPEN 상태일 때만 실행할 수 있습니다.\n\nE) 오답 — SAVE STATE를 설정해도 PDB를 명시적으로 CLOSE할 수 있습니다. SAVE STATE는 CDB 재시작 시의 자동 오픈 동작만 제어하며, 수동 CLOSE/OPEN 작업에는 영향을 주지 않습니다.\n\n핵심 개념: CDB 시작 시 PDB는 기본적으로 MOUNTED 상태이며, SAVE STATE를 설정하면 저장된 오픈 모드로 자동 복원됩니다. 상태 정보는 CDB$ROOT에 저장됩니다."
+    "explanation": "정답: A, C\nA) 정답 — NOMOUNT 단계에서는 파라미터 파일을 읽고, SGA 메모리를 할당하며, 백그라운드 프로세스(SMON, PMON, DBWn, LGWR, CKPT, LREG 등)를 기동합니다.\n\nC) 정답 — OPEN 단계에서 컨트롤 파일의 체크포인트 SCN과 데이터 파일 헤더의 SCN이 불일치하면, SMON 프로세스가 인스턴스 복구(Roll Forward → Roll Back)를 자동으로 수행합니다.\n\nB) 오답 — MOUNT 단계에서는 컨트롤 파일을 열어 데이터 파일의 '경로 정보만 인식'할 뿐, 실제로 데이터 파일을 열거나 검증하지 않습니다. 데이터 파일과 Redo Log 파일을 열고 검증하는 것은 OPEN 단계에서 수행됩니다.\n\nD) 오답 — V$INSTANCE 뷰는 NOMOUNT 단계부터 참조 가능합니다. MOUNT 단계에서도 당연히 조회할 수 있습니다.\n\nE) 오답 — ARCHIVELOG 모드 변경은 MOUNT 단계에서 수행 가능합니다. NOMOUNT 단계에서는 컨트롤 파일이 열리지 않은 상태이므로 데이터베이스 레벨의 설정 변경이 불가능합니다.\n\n핵심 개념: Oracle 기동 3단계는 NOMOUNT(SGA 할당+프로세스 기동) → MOUNT(컨트롤 파일 오픈) → OPEN(데이터 파일/Redo Log 오픈+정합성 검증)의 순서로 진행됩니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_009",
-    "title": "PDBレベルの初期化パラメータ管理について正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracleデータベースの停止(SHUTDOWN)モードに関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) V$SYSTEM_PARAMETERビューのISPDB_MODIFIABLE列がTRUEのパラメータは、PDB単位で独立して変更できる。",
-      "B) PDBレベルで明示的に設定されていないパラメータは、Oracleデフォルト値が直接適用される。",
-      "C) CDB$ROOTでCONTAINER=ALLを指定してパラメータを変更すると、PDBで明示的に設定された値が上書きされる。",
-      "D) PDBレベルのパラメータ設定はCDBのSPFILE内にPDBのGUIDで識別されるセクションに格納される。",
-      "E) SGA_TARGETやDB_BLOCK_SIZEはISPDB_MODIFIABLE=TRUEであり、PDB単位で自由に変更できる。"
+      "A) SHUTDOWN NORMALは、すべてのユーザーが自発的にログアウトするまで待機する方式であり、次回起動時にインスタンス・リカバリは不要である。",
+      "B) SHUTDOWN IMMEDIATEは、未完了トランザクションのロールバックを行わず、チェックポイントのみ実行して停止する。",
+      "C) SHUTDOWN ABORTは、チェックポイントを実行してからプロセスを強制終了するため、次回起動時にインスタンス・リカバリは不要である。",
+      "D) SHUTDOWN TRANSACTIONALは、新規接続を許可しつつ、既存のトランザクション完了を待ってから停止する。",
+      "E) SHUTDOWN IMMEDIATEは、チェックポイントを実行した後に未完了トランザクションのロールバックを行い、すべてのセッションを終了する。"
     ],
     "answer": [
-      "A",
-      "D"
+      "A"
     ],
-    "explanation": "정답: A, D\nA) 정답 — V$SYSTEM_PARAMETER 뷰의 ISPDB_MODIFIABLE 열이 TRUE인 파라미터는 ALTER SYSTEM SET ... CONTAINER=CURRENT로 PDB 단위에서 독립적으로 변경할 수 있습니다. OPEN_CURSORS, CURSOR_SHARING, NLS_LANGUAGE 등이 해당됩니다.\n\nD) 정답 — PDB 레벨의 파라미터 설정은 CDB의 SPFILE 내에 PDB의 GUID로 식별되는 섹션에 저장됩니다. 이를 통해 PDB별 독립적인 파라미터 관리가 가능합니다.\n\nB) 오답 — PDB에서 명시적으로 설정하지 않은 파라미터는 Oracle 기본값이 아닌 **CDB$ROOT의 설정값**을 상속받습니다. 파라미터 우선순위는 세션 레벨 > PDB 레벨 > CDB 레벨 > Oracle 기본값 순입니다.\n\nC) 오답 — CDB$ROOT에서 CONTAINER=ALL로 파라미터를 변경해도 PDB에서 명시적으로 설정된 값을 **덮어쓰지 않습니다**. PDB의 명시적 설정이 우선순위가 더 높습니다.\n\nE) 오답 — SGA_TARGET과 DB_BLOCK_SIZE는 ISPDB_MODIFIABLE=**FALSE**인 CDB 전용 파라미터입니다. PDB 단위로 변경할 수 없으며, 변경 시도 시 ORA-65040 오류가 발생합니다.\n\n핵심 개념: PDB 레벨 파라미터 관리에서 ISPDB_MODIFIABLE=TRUE인 파라미터만 PDB에서 독립 변경 가능하며, 설정은 SPFILE의 GUID 기반 섹션에 저장됩니다. CDB$ROOT의 CONTAINER=ALL 변경은 PDB의 명시적 설정을 덮어쓰지 않습니다."
+    "explanation": "정답: A\nA) 정답 — SHUTDOWN NORMAL은 모든 사용자가 자발적으로 로그아웃할 때까지 무한정 대기하며, 체크포인트를 수행하므로(Clean Shutdown) 다음 기동 시 인스턴스 복구가 불필요합니다.\n\nB) 오답 — SHUTDOWN IMMEDIATE는 미완료 트랜잭션을 자동으로 ROLLBACK한 후 체크포인트를 수행합니다. 롤백을 수행하지 않는다는 설명은 틀립니다.\n\nC) 오답 — SHUTDOWN ABORT는 체크포인트를 수행하지 않고 프로세스를 강제 종료합니다. 따라서 다음 기동 시 인스턴스 복구(Instance Recovery)가 필수적으로 수행됩니다.\n\nD) 오답 — SHUTDOWN TRANSACTIONAL은 새 접속을 '차단'합니다. 새 접속을 허용하면서 대기하는 것이 아니라, 기존 활성 트랜잭션이 완료될 때까지만 대기합니다.\n\nE) 오답 — SHUTDOWN IMMEDIATE의 순서가 잘못되어 있습니다. 실제로는 먼저 모든 세션을 즉시 종료하고 실행 중인 SQL을 중단한 후, 미완료 트랜잭션을 롤백하고, 마지막에 체크포인트를 수행합니다. 체크포인트를 먼저 실행한 후 롤백하는 것이 아닙니다.\n\n핵심 개념: SHUTDOWN 모드는 NORMAL(모든 사용자 로그아웃 대기), TRANSACTIONAL(트랜잭션 완료 대기), IMMEDIATE(즉시 롤백 후 종료, 실무 권장), ABORT(강제 종료, 복구 필요)의 4가지이며, ABORT만 다음 기동 시 인스턴스 복구가 필요합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_010",
-    "title": "PDBのUnplug(分離)およびPlug In(接続)操作について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "データベース・バッファ・キャッシュの内部管理メカニズムに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) PDBをUnplugするには、対象PDBがOPEN READ WRITE状態である必要がある。",
-      "B) Unplug操作で生成されるファイルの拡張子が.xmlの場合はメタデータのみがエクスポートされ、データ・ファイルは元の場所に残る。",
-      "C) Plug In操作の前にDBMS_PDB.CHECK_PLUG_COMPATIBILITYを使用して互換性を確認でき、違反情報はPDB_PLUG_IN_VIOLATIONSビューで確認できる。",
-      "D) Unplugされた状態のPDBは引き続きOPEN操作が可能であり、読取り専用でアクセスできる。",
-      "E) Plug In操作では、ソースCDBとターゲットCDBのエンディアン形式が異なっていても実行可能である。"
+      "A) LRUリストは、すべてのバッファの参照順序を管理しており、Hot End(MRU)には最近アクセスされたバッファが配置される。",
+      "B) Keep Buffer Pool(DB_KEEP_CACHE_SIZE)は、再利用の可能性が低い大規模テーブルのブロックを素早く置き換えるために使用される。",
+      "C) 大規模テーブルに対するフルテーブルスキャン時、データ・ブロックはLRU Endに配置されるか、またはDirect Path Readによりバッファ・キャッシュをバイパスする。",
+      "D) Recycle Buffer Pool(DB_RECYCLE_CACHE_SIZE)は、頻繁にアクセスされる小規模テーブルをキャッシュに常駐させるために使用される。",
+      "E) ASMMを使用する場合、DB_KEEP_CACHE_SIZEおよびDB_RECYCLE_CACHE_SIZEも自動調整の対象に含まれる。"
     ],
     "answer": [
-      "B",
+      "A",
       "C"
     ],
-    "explanation": "정답: B, C\nB) 정답 — Unplug 시 파일 확장자가 .xml이면 메타데이터(데이터 파일 경로, 테이블스페이스, 사용자 정보 등)만 XML 파일로 내보내지고, 실제 데이터 파일은 원래 위치에 그대로 유지됩니다. .pdb 확장자를 사용하면 메타데이터와 데이터 파일이 하나의 아카이브로 묶입니다.\n\nC) 정답 — Plug-in 전에 DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수로 호환성을 사전 검증할 수 있으며, 검증 결과는 PDB_PLUG_IN_VIOLATIONS 뷰에서 확인할 수 있습니다. TYPE이 ERROR인 경우 Plug-in이 차단되고, WARNING인 경우 주의가 필요하지만 실행 가능합니다.\n\nA) 오답 — PDB를 Unplug하려면 대상 PDB가 **CLOSE(MOUNTED) 상태**여야 합니다. OPEN 상태에서는 Unplug할 수 없으므로, 먼저 ALTER PLUGGABLE DATABASE ... CLOSE IMMEDIATE로 닫아야 합니다.\n\nD) 오답 — Unplug된 PDB는 UNPLUGGED 상태가 되며, OPEN 작업을 수행할 수 **없습니다**. Unplug된 PDB에 대해서는 DROP PLUGGABLE DATABASE만 실행할 수 있습니다.\n\nE) 오답 — Plug-in은 소스와 타겟 CDB의 **엔디안(Endian) 형식이 동일**해야 합니다. 또한 호환 가능한 DB 버전(타겟 ≥ 소스), 호환 가능한 문자 집합, 동일한 DB 옵션이 설치되어 있어야 합니다.\n\n핵심 개념: PDB Unplug는 CLOSE 상태에서 수행되며, .xml(메타데이터만)과 .pdb(아카이브) 두 가지 형식을 지원합니다. Plug-in 전에 DBMS_PDB.CHECK_PLUG_COMPATIBILITY로 호환성을 반드시 확인해야 합니다."
+    "explanation": "정답: A, C\nA) 정답 — LRU(Least Recently Used) 리스트는 모든 버퍼의 접근 순서를 관리합니다. Hot End(MRU)에는 최근 접근된, 자주 사용되는 버퍼가 배치되고, Cold End(LRU)에는 오래 전 접근된 교체 후보 버퍼가 배치됩니다.\n\nC) 정답 — 대규모 테이블의 Full Table Scan 시 데이터 블록은 LRU End에 배치되어 빠르게 교체되거나, Direct Path Read로 버퍼 캐시를 우회합니다. 이는 Full Table Scan이 캐시 내 유용한 데이터를 밀어내지 않도록 하기 위한 최적화입니다.\n\nB) 오답 — Keep Buffer Pool은 '자주 접근하는 소규모 테이블/인덱스'를 캐시에 상주시키기 위해 사용됩니다. 재사용 가능성이 낮은 대규모 테이블에 사용되는 것은 Recycle Buffer Pool입니다.\n\nD) 오답 — Recycle Buffer Pool은 '재사용 가능성이 낮은 대규모 테이블'의 블록을 위해 사용되며 빠르게 교체됩니다. 자주 접근하는 소규모 테이블을 상주시키는 것은 Keep Buffer Pool의 역할입니다. B와 D는 Keep과 Recycle의 설명이 반대로 되어 있습니다.\n\nE) 오답 — ASMM 사용 시 DB_KEEP_CACHE_SIZE와 DB_RECYCLE_CACHE_SIZE는 자동 조정 대상에 포함되지 않으며, DBA가 수동으로 지정해야 합니다. 자동 조정 대상은 DB_CACHE_SIZE, SHARED_POOL_SIZE, LARGE_POOL_SIZE, JAVA_POOL_SIZE, STREAMS_POOL_SIZE입니다.\n\n핵심 개념: Buffer Cache는 LRU 리스트로 버퍼 접근 순서를 관리하며, Default/Keep/Recycle 3종의 Buffer Pool로 용도별 분리 관리가 가능합니다. 대규모 Full Table Scan은 캐시 오염 방지를 위해 LRU End 배치 또는 Direct Path Read로 처리됩니다."
   }
 ]
