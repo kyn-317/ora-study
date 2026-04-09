@@ -1,6 +1,9 @@
 {
-  "generatedAt": "2026-04-09T04:44:53.298Z",
+  "generatedAt": "2026-04-09T05:01:46.351Z",
   "study": {
+    "00": [
+      "00_00_전체흐름총정리"
+    ],
     "01": [
       "01_00_챕터흐름요약",
       "01_01_메모리구조",
@@ -154,7 +157,50 @@
     ]
   },
   "keywordIndex": {
+    "1Z0-182": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "Oracle 26ai": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "Oracle DBA": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "시험 총정리": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
     "SGA": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
       {
         "studyId": "01_00",
         "chapterId": "01",
@@ -179,6 +225,13 @@
     ],
     "PGA": [
       {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
         "studyId": "01_00",
         "chapterId": "01",
         "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
@@ -202,11 +255,1253 @@
     ],
     "인스턴스": [
       {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
         "studyId": "01_00",
         "chapterId": "01",
         "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
         "fileName": "01_00_챕터흐름요약",
         "hasKeywordStudy": false
+      }
+    ],
+    "데이터베이스": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "메모리 구조": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "프로세스 구조": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "저장 구조": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "CDB": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "01_04",
+        "chapterId": "01",
+        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
+        "fileName": "01_04_아키텍처기동",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "01_05",
+        "chapterId": "01",
+        "title": "초기화 파라미터 파일 (Initialization Parameter Files)",
+        "fileName": "01_05_초기화파라미터파일",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "02_03",
+        "chapterId": "02",
+        "title": "PDB 상태 관리 및 분리 (PDB State Management & Unplugging)",
+        "fileName": "02_03_PDB상태관리및분리",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "06_00",
+        "chapterId": "06",
+        "title": "챕터 흐름 요약 — UNDO 데이터베이스 제어 (Chapter Flow Overview)",
+        "fileName": "06_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "06_03",
+        "chapterId": "06",
+        "title": "특수 환경 제어 (Special Environment Control)",
+        "fileName": "06_03_특수환경제어",
+        "hasKeywordStudy": true
+      }
+    ],
+    "PDB": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "01_04",
+        "chapterId": "01",
+        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
+        "fileName": "01_04_아키텍처기동",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "01_05",
+        "chapterId": "01",
+        "title": "초기화 파라미터 파일 (Initialization Parameter Files)",
+        "fileName": "01_05_초기화파라미터파일",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "02_03",
+        "chapterId": "02",
+        "title": "PDB 상태 관리 및 분리 (PDB State Management & Unplugging)",
+        "fileName": "02_03_PDB상태관리및분리",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "06_00",
+        "chapterId": "06",
+        "title": "챕터 흐름 요약 — UNDO 데이터베이스 제어 (Chapter Flow Overview)",
+        "fileName": "06_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "06_03",
+        "chapterId": "06",
+        "title": "특수 환경 제어 (Special Environment Control)",
+        "fileName": "06_03_특수환경제어",
+        "hasKeywordStudy": true
+      }
+    ],
+    "멀티테넌트": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_04",
+        "chapterId": "01",
+        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
+        "fileName": "01_04_아키텍처기동",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "04_00",
+        "chapterId": "04",
+        "title": "챕터 흐름 요약 — 보안, 권한 및 감사 (Chapter Flow Overview)",
+        "fileName": "04_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      }
+    ],
+    "CDB$ROOT": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_04",
+        "chapterId": "01",
+        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
+        "fileName": "01_04_아키텍처기동",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "02_00",
+        "chapterId": "02",
+        "title": "챕터 흐름 요약 — 멀티테넌트 아키텍처 (CDB 및 PDB 구성) (Chapter Flow Overview)",
+        "fileName": "02_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "02_01",
+        "chapterId": "02",
+        "title": "구조 및 토대 (CDB & PDB Architecture Foundation)",
+        "fileName": "02_01_구조및토대",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "06_03",
+        "chapterId": "06",
+        "title": "특수 환경 제어 (Special Environment Control)",
+        "fileName": "06_03_특수환경제어",
+        "hasKeywordStudy": true
+      }
+    ],
+    "PDB$SEED": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_04",
+        "chapterId": "01",
+        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
+        "fileName": "01_04_아키텍처기동",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "02_00",
+        "chapterId": "02",
+        "title": "챕터 흐름 요약 — 멀티테넌트 아키텍처 (CDB 및 PDB 구성) (Chapter Flow Overview)",
+        "fileName": "02_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "02_01",
+        "chapterId": "02",
+        "title": "구조 및 토대 (CDB & PDB Architecture Foundation)",
+        "fileName": "02_01_구조및토대",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "02_02",
+        "chapterId": "02",
+        "title": "PDB 생성 및 템플릿 (PDB Creation & Templates)",
+        "fileName": "02_02_PDB생성및템플릿",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "06_03",
+        "chapterId": "06",
+        "title": "특수 환경 제어 (Special Environment Control)",
+        "fileName": "06_03_특수환경제어",
+        "hasKeywordStudy": true
+      }
+    ],
+    "DBCA": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "02_00",
+        "chapterId": "02",
+        "title": "챕터 흐름 요약 — 멀티테넌트 아키텍처 (CDB 및 PDB 구성) (Chapter Flow Overview)",
+        "fileName": "02_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "02_04",
+        "chapterId": "02",
+        "title": "파라미터 및 복제 관리 (PDB Parameters & Cloning)",
+        "fileName": "02_04_파라미터및복제관리",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "03_00",
+        "chapterId": "03",
+        "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
+        "fileName": "03_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "03_01",
+        "chapterId": "03",
+        "title": "주요 운영 환경 툴 (Database Administration Tools)",
+        "fileName": "03_01_주요운영환경툴",
+        "hasKeywordStudy": true
+      }
+    ],
+    "SQL*Plus": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "03_00",
+        "chapterId": "03",
+        "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
+        "fileName": "03_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "03_01",
+        "chapterId": "03",
+        "title": "주요 운영 환경 툴 (Database Administration Tools)",
+        "fileName": "03_01_주요운영환경툴",
+        "hasKeywordStudy": true
+      }
+    ],
+    "EM Cloud Control": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "RMAN": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_06",
+        "chapterId": "01",
+        "title": "복구 기초 (Recovery Fundamentals)",
+        "fileName": "01_06_복구기초",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "03_00",
+        "chapterId": "03",
+        "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
+        "fileName": "03_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "03_01",
+        "chapterId": "03",
+        "title": "주요 운영 환경 툴 (Database Administration Tools)",
+        "fileName": "03_01_주요운영환경툴",
+        "hasKeywordStudy": true
+      }
+    ],
+    "리스너": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "tnsnames.ora": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "03_00",
+        "chapterId": "03",
+        "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
+        "fileName": "03_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "03_02",
+        "chapterId": "03",
+        "title": "네트워크 진단 및 제어 툴 (Network Diagnostic & Control Tools)",
+        "fileName": "03_02_네트워크진단제어툴",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "03_03",
+        "chapterId": "03",
+        "title": "네이밍 및 접속 규약 (Naming Methods & Connection)",
+        "fileName": "03_03_네이밍및접속규약",
+        "hasKeywordStudy": true
+      }
+    ],
+    "Easy Connect": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "03_00",
+        "chapterId": "03",
+        "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
+        "fileName": "03_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "03_02",
+        "chapterId": "03",
+        "title": "네트워크 진단 및 제어 툴 (Network Diagnostic & Control Tools)",
+        "fileName": "03_02_네트워크진단제어툴",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "03_03",
+        "chapterId": "03",
+        "title": "네이밍 및 접속 규약 (Naming Methods & Connection)",
+        "fileName": "03_03_네이밍및접속규약",
+        "hasKeywordStudy": true
+      }
+    ],
+    "DB Link": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "02_04",
+        "chapterId": "02",
+        "title": "파라미터 및 복제 관리 (PDB Parameters & Cloning)",
+        "fileName": "02_04_파라미터및복제관리",
+        "hasKeywordStudy": true
+      }
+    ],
+    "사용자": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "인증": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "권한": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "롤": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "감사": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "프로파일": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "테이블스페이스": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "05_00",
+        "chapterId": "05",
+        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
+        "fileName": "05_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      }
+    ],
+    "세그먼트": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "05_00",
+        "chapterId": "05",
+        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
+        "fileName": "05_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      }
+    ],
+    "익스텐트": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "05_00",
+        "chapterId": "05",
+        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
+        "fileName": "05_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      }
+    ],
+    "데이터 블록": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "05_00",
+        "chapterId": "05",
+        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
+        "fileName": "05_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      }
+    ],
+    "UNDO": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      }
+    ],
+    "읽기 일관성": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      }
+    ],
+    "Flashback": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      }
+    ],
+    "ORA-01555": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "06_00",
+        "chapterId": "06",
+        "title": "챕터 흐름 요약 — UNDO 데이터베이스 제어 (Chapter Flow Overview)",
+        "fileName": "06_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "06_02",
+        "chapterId": "06",
+        "title": "데이터 상태 (UNDO Data States)",
+        "fileName": "06_02_데이터상태",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "06_03",
+        "chapterId": "06",
+        "title": "특수 환경 제어 (Special Environment Control)",
+        "fileName": "06_03_특수환경제어",
+        "hasKeywordStudy": true
+      }
+    ],
+    "External Table": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "07_02",
+        "chapterId": "07",
+        "title": "대량 로드 처리 (SQL*Loader)",
+        "fileName": "07_02_대량로드처리",
+        "hasKeywordStudy": true
+      }
+    ],
+    "SQL*Loader": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "07_00",
+        "chapterId": "07",
+        "title": "챕터 흐름 요약 — 데이터 이동 (데이터 로드/추출) (Chapter Flow Overview)",
+        "fileName": "07_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "07_01",
+        "chapterId": "07",
+        "title": "외부 파일 조작 (External Tables)",
+        "fileName": "07_01_외부파일조작",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "07_02",
+        "chapterId": "07",
+        "title": "대량 로드 처리 (SQL*Loader)",
+        "fileName": "07_02_대량로드처리",
+        "hasKeywordStudy": true
+      }
+    ],
+    "Data Pump": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "07_00",
+        "chapterId": "07",
+        "title": "챕터 흐름 요약 — 데이터 이동 (데이터 로드/추출) (Chapter Flow Overview)",
+        "fileName": "07_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "07_03",
+        "chapterId": "07",
+        "title": "Data Pump (expdp / impdp)",
+        "fileName": "07_03_DataPump",
+        "hasKeywordStudy": true
+      }
+    ],
+    "expdp": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "07_00",
+        "chapterId": "07",
+        "title": "챕터 흐름 요약 — 데이터 이동 (데이터 로드/추출) (Chapter Flow Overview)",
+        "fileName": "07_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "07_03",
+        "chapterId": "07",
+        "title": "Data Pump (expdp / impdp)",
+        "fileName": "07_03_DataPump",
+        "hasKeywordStudy": true
+      }
+    ],
+    "impdp": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "07_00",
+        "chapterId": "07",
+        "title": "챕터 흐름 요약 — 데이터 이동 (데이터 로드/추출) (Chapter Flow Overview)",
+        "fileName": "07_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "07_03",
+        "chapterId": "07",
+        "title": "Data Pump (expdp / impdp)",
+        "fileName": "07_03_DataPump",
+        "hasKeywordStudy": true
+      }
+    ],
+    "AWR": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_02",
+        "chapterId": "01",
+        "title": "프로세스 구조 (Process Structures)",
+        "fileName": "01_02_프로세스구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "08_04",
+        "chapterId": "08",
+        "title": "진단 모니터 (Diagnostic Monitor - ADDM)",
+        "fileName": "08_04_진단모니터",
+        "hasKeywordStudy": true
+      }
+    ],
+    "ADDM": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "08_04",
+        "chapterId": "08",
+        "title": "진단 모니터 (Diagnostic Monitor - ADDM)",
+        "fileName": "08_04_진단모니터",
+        "hasKeywordStudy": true
+      }
+    ],
+    "Resource Manager": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "08_00",
+        "chapterId": "08",
+        "title": "챕터 흐름 요약 — 성능 모니터링, 어드바이저 및 자동 관리 태스크 (Chapter Flow Overview)",
+        "fileName": "08_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "08_02",
+        "chapterId": "08",
+        "title": "자동화 기반 태스크 (Automated Maintenance Tasks)",
+        "fileName": "08_02_자동화기반태스크",
+        "hasKeywordStudy": true
+      }
+    ],
+    "Maintenance Window": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "08_00",
+        "chapterId": "08",
+        "title": "챕터 흐름 요약 — 성능 모니터링, 어드바이저 및 자동 관리 태스크 (Chapter Flow Overview)",
+        "fileName": "08_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "08_02",
+        "chapterId": "08",
+        "title": "자동화 기반 태스크 (Automated Maintenance Tasks)",
+        "fileName": "08_02_자동화기반태스크",
+        "hasKeywordStudy": true
+      }
+    ],
+    "STARTUP": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_04",
+        "chapterId": "01",
+        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
+        "fileName": "01_04_아키텍처기동",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "03_01",
+        "chapterId": "03",
+        "title": "주요 운영 환경 툴 (Database Administration Tools)",
+        "fileName": "03_01_주요운영환경툴",
+        "hasKeywordStudy": true
+      }
+    ],
+    "SHUTDOWN": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_04",
+        "chapterId": "01",
+        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
+        "fileName": "01_04_아키텍처기동",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "03_01",
+        "chapterId": "03",
+        "title": "주요 운영 환경 툴 (Database Administration Tools)",
+        "fileName": "03_01_주요운영환경툴",
+        "hasKeywordStudy": true
+      }
+    ],
+    "SPFILE": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_04",
+        "chapterId": "01",
+        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
+        "fileName": "01_04_아키텍처기동",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "01_05",
+        "chapterId": "01",
+        "title": "초기화 파라미터 파일 (Initialization Parameter Files)",
+        "fileName": "01_05_초기화파라미터파일",
+        "hasKeywordStudy": true
+      }
+    ],
+    "ALTER SYSTEM": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      }
+    ],
+    "STATISTICS_LEVEL": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "08_00",
+        "chapterId": "08",
+        "title": "챕터 흐름 요약 — 성능 모니터링, 어드바이저 및 자동 관리 태스크 (Chapter Flow Overview)",
+        "fileName": "08_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "08_01",
+        "chapterId": "08",
+        "title": "기본 모니터링 및 로깅 (Basic Monitoring and Logging)",
+        "fileName": "08_01_기본모니터링및로깅",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "08_03",
+        "chapterId": "08",
+        "title": "문제 해결 어드바이저 (Problem Resolution Advisors)",
+        "fileName": "08_03_문제해결어드바이저",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "08_04",
+        "chapterId": "08",
+        "title": "진단 모니터 (Diagnostic Monitor - ADDM)",
+        "fileName": "08_04_진단모니터",
+        "hasKeywordStudy": true
+      }
+    ],
+    "MEMORY_TARGET": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_00",
+        "chapterId": "01",
+        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
+        "fileName": "01_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_01",
+        "chapterId": "01",
+        "title": "메모리 구조 (Memory Structures)",
+        "fileName": "01_01_메모리구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "01_05",
+        "chapterId": "01",
+        "title": "초기화 파라미터 파일 (Initialization Parameter Files)",
+        "fileName": "01_05_초기화파라미터파일",
+        "hasKeywordStudy": true
+      }
+    ],
+    "UNDO_RETENTION": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "06_00",
+        "chapterId": "06",
+        "title": "챕터 흐름 요약 — UNDO 데이터베이스 제어 (Chapter Flow Overview)",
+        "fileName": "06_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "06_01",
+        "chapterId": "06",
+        "title": "기능 및 목적 (UNDO Functions and Purpose)",
+        "fileName": "06_01_기능및목적",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "06_02",
+        "chapterId": "06",
+        "title": "데이터 상태 (UNDO Data States)",
+        "fileName": "06_02_데이터상태",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "06_03",
+        "chapterId": "06",
+        "title": "특수 환경 제어 (Special Environment Control)",
+        "fileName": "06_03_특수환경제어",
+        "hasKeywordStudy": true
+      }
+    ],
+    "Direct Path": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "HWM": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_03",
+        "chapterId": "01",
+        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
+        "fileName": "01_03_물리적논리적저장구조",
+        "hasKeywordStudy": true
+      },
+      {
+        "studyId": "05_00",
+        "chapterId": "05",
+        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
+        "fileName": "05_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      }
+    ],
+    "SHRINK SPACE": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "05_00",
+        "chapterId": "05",
+        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
+        "fileName": "05_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "05_04",
+        "chapterId": "05",
+        "title": "저장 공간 축소 및 최적화 (Space Reclamation and Storage Optimization)",
+        "fileName": "05_04_저장공간축소및최적화",
+        "hasKeywordStudy": true
+      }
+    ],
+    "통합 감사": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "V$ Views": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "08_00",
+        "chapterId": "08",
+        "title": "챕터 흐름 요약 — 성능 모니터링, 어드바이저 및 자동 관리 태스크 (Chapter Flow Overview)",
+        "fileName": "08_00_챕터흐름요약",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "08_01",
+        "chapterId": "08",
+        "title": "기본 모니터링 및 로깅 (Basic Monitoring and Logging)",
+        "fileName": "08_01_기본모니터링및로깅",
+        "hasKeywordStudy": true
+      }
+    ],
+    "데이터 딕셔너리": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      }
+    ],
+    "ADR": [
+      {
+        "studyId": "00_00",
+        "chapterId": "00",
+        "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+        "fileName": "00_00_전체흐름총정리",
+        "hasKeywordStudy": false
+      },
+      {
+        "studyId": "01_04",
+        "chapterId": "01",
+        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
+        "fileName": "01_04_아키텍처기동",
+        "hasKeywordStudy": true
       }
     ],
     "Instance": [
@@ -559,144 +1854,6 @@
         "hasKeywordStudy": false
       }
     ],
-    "테이블스페이스": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "05_00",
-        "chapterId": "05",
-        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
-        "fileName": "05_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      }
-    ],
-    "세그먼트": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "05_00",
-        "chapterId": "05",
-        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
-        "fileName": "05_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      }
-    ],
-    "익스텐트": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "05_00",
-        "chapterId": "05",
-        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
-        "fileName": "05_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      }
-    ],
-    "데이터 블록": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "05_00",
-        "chapterId": "05",
-        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
-        "fileName": "05_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      }
-    ],
-    "STARTUP": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_04",
-        "chapterId": "01",
-        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
-        "fileName": "01_04_아키텍처기동",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "03_01",
-        "chapterId": "03",
-        "title": "주요 운영 환경 툴 (Database Administration Tools)",
-        "fileName": "03_01_주요운영환경툴",
-        "hasKeywordStudy": true
-      }
-    ],
-    "SHUTDOWN": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_04",
-        "chapterId": "01",
-        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
-        "fileName": "01_04_아키텍처기동",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "03_01",
-        "chapterId": "03",
-        "title": "주요 운영 환경 툴 (Database Administration Tools)",
-        "fileName": "03_01_주요운영환경툴",
-        "hasKeywordStudy": true
-      }
-    ],
     "NOMOUNT": [
       {
         "studyId": "01_00",
@@ -766,38 +1923,6 @@
         "title": "초기화 파라미터 파일 (Initialization Parameter Files)",
         "fileName": "01_05_초기화파라미터파일",
         "hasKeywordStudy": true
-      }
-    ],
-    "SPFILE": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_04",
-        "chapterId": "01",
-        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
-        "fileName": "01_04_아키텍처기동",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "01_05",
-        "chapterId": "01",
-        "title": "초기화 파라미터 파일 (Initialization Parameter Files)",
-        "fileName": "01_05_초기화파라미터파일",
-        "hasKeywordStudy": true
-      }
-    ],
-    "ALTER SYSTEM": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
       }
     ],
     "SCOPE": [
@@ -984,15 +2109,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "UNDO": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      }
-    ],
     "SCN": [
       {
         "studyId": "01_00",
@@ -1061,29 +2177,6 @@
       }
     ],
     "ASMM": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_01",
-        "chapterId": "01",
-        "title": "메모리 구조 (Memory Structures)",
-        "fileName": "01_01_메모리구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "01_05",
-        "chapterId": "01",
-        "title": "초기화 파라미터 파일 (Initialization Parameter Files)",
-        "fileName": "01_05_초기화파라미터파일",
-        "hasKeywordStudy": true
-      }
-    ],
-    "MEMORY_TARGET": [
       {
         "studyId": "01_00",
         "chapterId": "01",
@@ -1209,131 +2302,6 @@
         "chapterId": "03",
         "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
         "fileName": "03_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      }
-    ],
-    "CDB": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "01_04",
-        "chapterId": "01",
-        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
-        "fileName": "01_04_아키텍처기동",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "01_05",
-        "chapterId": "01",
-        "title": "초기화 파라미터 파일 (Initialization Parameter Files)",
-        "fileName": "01_05_초기화파라미터파일",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "02_03",
-        "chapterId": "02",
-        "title": "PDB 상태 관리 및 분리 (PDB State Management & Unplugging)",
-        "fileName": "02_03_PDB상태관리및분리",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "06_00",
-        "chapterId": "06",
-        "title": "챕터 흐름 요약 — UNDO 데이터베이스 제어 (Chapter Flow Overview)",
-        "fileName": "06_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "06_03",
-        "chapterId": "06",
-        "title": "특수 환경 제어 (Special Environment Control)",
-        "fileName": "06_03_특수환경제어",
-        "hasKeywordStudy": true
-      }
-    ],
-    "PDB": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "01_04",
-        "chapterId": "01",
-        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
-        "fileName": "01_04_아키텍처기동",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "01_05",
-        "chapterId": "01",
-        "title": "초기화 파라미터 파일 (Initialization Parameter Files)",
-        "fileName": "01_05_초기화파라미터파일",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "02_03",
-        "chapterId": "02",
-        "title": "PDB 상태 관리 및 분리 (PDB State Management & Unplugging)",
-        "fileName": "02_03_PDB상태관리및분리",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "06_00",
-        "chapterId": "06",
-        "title": "챕터 흐름 요약 — UNDO 데이터베이스 제어 (Chapter Flow Overview)",
-        "fileName": "06_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "06_03",
-        "chapterId": "06",
-        "title": "특수 환경 제어 (Special Environment Control)",
-        "fileName": "06_03_특수환경제어",
-        "hasKeywordStudy": true
-      }
-    ],
-    "멀티테넌트": [
-      {
-        "studyId": "01_00",
-        "chapterId": "01",
-        "title": "챕터 흐름 요약 — Oracle Database 아키텍처 및 인스턴스 (Chapter Flow Overview)",
-        "fileName": "01_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "01_04",
-        "chapterId": "01",
-        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
-        "fileName": "01_04_아키텍처기동",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "04_00",
-        "chapterId": "04",
-        "title": "챕터 흐름 요약 — 보안, 권한 및 감사 (Chapter Flow Overview)",
-        "fileName": "04_00_챕터흐름요약",
         "hasKeywordStudy": false
       }
     ],
@@ -2372,22 +3340,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "AWR": [
-      {
-        "studyId": "01_02",
-        "chapterId": "01",
-        "title": "프로세스 구조 (Process Structures)",
-        "fileName": "01_02_프로세스구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "08_04",
-        "chapterId": "08",
-        "title": "진단 모니터 (Diagnostic Monitor - ADDM)",
-        "fileName": "08_04_진단모니터",
-        "hasKeywordStudy": true
-      }
-    ],
     "ASH": [
       {
         "studyId": "01_02",
@@ -3268,43 +4220,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "UNDO_RETENTION": [
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "06_00",
-        "chapterId": "06",
-        "title": "챕터 흐름 요약 — UNDO 데이터베이스 제어 (Chapter Flow Overview)",
-        "fileName": "06_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "06_01",
-        "chapterId": "06",
-        "title": "기능 및 목적 (UNDO Functions and Purpose)",
-        "fileName": "06_01_기능및목적",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "06_02",
-        "chapterId": "06",
-        "title": "데이터 상태 (UNDO Data States)",
-        "fileName": "06_02_데이터상태",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "06_03",
-        "chapterId": "06",
-        "title": "특수 환경 제어 (Special Environment Control)",
-        "fileName": "06_03_특수환경제어",
-        "hasKeywordStudy": true
-      }
-    ],
     "RETENTION GUARANTEE": [
       {
         "studyId": "01_03",
@@ -3420,36 +4335,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "ORA-01555": [
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "06_00",
-        "chapterId": "06",
-        "title": "챕터 흐름 요약 — UNDO 데이터베이스 제어 (Chapter Flow Overview)",
-        "fileName": "06_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "06_02",
-        "chapterId": "06",
-        "title": "데이터 상태 (UNDO Data States)",
-        "fileName": "06_02_데이터상태",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "06_03",
-        "chapterId": "06",
-        "title": "특수 환경 제어 (Special Environment Control)",
-        "fileName": "06_03_특수환경제어",
-        "hasKeywordStudy": true
-      }
-    ],
     "Snapshot Too Old": [
       {
         "studyId": "01_03",
@@ -3503,15 +4388,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "읽기 일관성": [
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      }
-    ],
     "CR Copy": [
       {
         "studyId": "01_03",
@@ -3531,15 +4407,6 @@
       }
     ],
     "트랜잭션 롤백": [
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      }
-    ],
-    "Flashback": [
       {
         "studyId": "01_03",
         "chapterId": "01",
@@ -3832,22 +4699,6 @@
         "hasKeywordStudy": false
       }
     ],
-    "HWM": [
-      {
-        "studyId": "01_03",
-        "chapterId": "01",
-        "title": "물리적/논리적 저장 구조 (Physical and Logical Storage Structures)",
-        "fileName": "01_03_물리적논리적저장구조",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "05_00",
-        "chapterId": "05",
-        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
-        "fileName": "05_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      }
-    ],
     "Shared UNDO": [
       {
         "studyId": "01_03",
@@ -4010,15 +4861,6 @@
         "chapterId": "08",
         "title": "기본 모니터링 및 로깅 (Basic Monitoring and Logging)",
         "fileName": "08_01_기본모니터링및로깅",
-        "hasKeywordStudy": true
-      }
-    ],
-    "ADR": [
-      {
-        "studyId": "01_04",
-        "chapterId": "01",
-        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
-        "fileName": "01_04_아키텍처기동",
         "hasKeywordStudy": true
       }
     ],
@@ -4532,73 +5374,6 @@
         "chapterId": "02",
         "title": "파라미터 및 복제 관리 (PDB Parameters & Cloning)",
         "fileName": "02_04_파라미터및복제관리",
-        "hasKeywordStudy": true
-      }
-    ],
-    "CDB$ROOT": [
-      {
-        "studyId": "01_04",
-        "chapterId": "01",
-        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
-        "fileName": "01_04_아키텍처기동",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "02_00",
-        "chapterId": "02",
-        "title": "챕터 흐름 요약 — 멀티테넌트 아키텍처 (CDB 및 PDB 구성) (Chapter Flow Overview)",
-        "fileName": "02_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "02_01",
-        "chapterId": "02",
-        "title": "구조 및 토대 (CDB & PDB Architecture Foundation)",
-        "fileName": "02_01_구조및토대",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "06_03",
-        "chapterId": "06",
-        "title": "특수 환경 제어 (Special Environment Control)",
-        "fileName": "06_03_특수환경제어",
-        "hasKeywordStudy": true
-      }
-    ],
-    "PDB$SEED": [
-      {
-        "studyId": "01_04",
-        "chapterId": "01",
-        "title": "아키텍처 기동 (Instance Startup and Shutdown)",
-        "fileName": "01_04_아키텍처기동",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "02_00",
-        "chapterId": "02",
-        "title": "챕터 흐름 요약 — 멀티테넌트 아키텍처 (CDB 및 PDB 구성) (Chapter Flow Overview)",
-        "fileName": "02_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "02_01",
-        "chapterId": "02",
-        "title": "구조 및 토대 (CDB & PDB Architecture Foundation)",
-        "fileName": "02_01_구조및토대",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "02_02",
-        "chapterId": "02",
-        "title": "PDB 생성 및 템플릿 (PDB Creation & Templates)",
-        "fileName": "02_02_PDB생성및템플릿",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "06_03",
-        "chapterId": "06",
-        "title": "특수 환경 제어 (Special Environment Control)",
-        "fileName": "06_03_특수환경제어",
         "hasKeywordStudy": true
       }
     ],
@@ -5763,29 +6538,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "RMAN": [
-      {
-        "studyId": "01_06",
-        "chapterId": "01",
-        "title": "복구 기초 (Recovery Fundamentals)",
-        "fileName": "01_06_복구기초",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "03_00",
-        "chapterId": "03",
-        "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
-        "fileName": "03_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "03_01",
-        "chapterId": "03",
-        "title": "주요 운영 환경 툴 (Database Administration Tools)",
-        "fileName": "03_01_주요운영환경툴",
-        "hasKeywordStudy": true
-      }
-    ],
     "BLOCKRECOVER": [
       {
         "studyId": "01_06",
@@ -6488,36 +7240,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "DBCA": [
-      {
-        "studyId": "02_00",
-        "chapterId": "02",
-        "title": "챕터 흐름 요약 — 멀티테넌트 아키텍처 (CDB 및 PDB 구성) (Chapter Flow Overview)",
-        "fileName": "02_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "02_04",
-        "chapterId": "02",
-        "title": "파라미터 및 복제 관리 (PDB Parameters & Cloning)",
-        "fileName": "02_04_파라미터및복제관리",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "03_00",
-        "chapterId": "03",
-        "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
-        "fileName": "03_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "03_01",
-        "chapterId": "03",
-        "title": "주요 운영 환경 툴 (Database Administration Tools)",
-        "fileName": "03_01_주요운영환경툴",
-        "hasKeywordStudy": true
-      }
-    ],
     "CDB Fleet Management": [
       {
         "studyId": "02_00",
@@ -6995,15 +7717,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "DB Link": [
-      {
-        "studyId": "02_04",
-        "chapterId": "02",
-        "title": "파라미터 및 복제 관리 (PDB Parameters & Cloning)",
-        "fileName": "02_04_파라미터및복제관리",
-        "hasKeywordStudy": true
-      }
-    ],
     "REFRESH MODE": [
       {
         "studyId": "02_04",
@@ -7037,22 +7750,6 @@
         "chapterId": "02",
         "title": "파라미터 및 복제 관리 (PDB Parameters & Cloning)",
         "fileName": "02_04_파라미터및복제관리",
-        "hasKeywordStudy": true
-      }
-    ],
-    "SQL*Plus": [
-      {
-        "studyId": "03_00",
-        "chapterId": "03",
-        "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
-        "fileName": "03_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "03_01",
-        "chapterId": "03",
-        "title": "주요 운영 환경 툴 (Database Administration Tools)",
-        "fileName": "03_01_주요운영환경툴",
         "hasKeywordStudy": true
       }
     ],
@@ -7246,29 +7943,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "tnsnames.ora": [
-      {
-        "studyId": "03_00",
-        "chapterId": "03",
-        "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
-        "fileName": "03_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "03_02",
-        "chapterId": "03",
-        "title": "네트워크 진단 및 제어 툴 (Network Diagnostic & Control Tools)",
-        "fileName": "03_02_네트워크진단제어툴",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "03_03",
-        "chapterId": "03",
-        "title": "네이밍 및 접속 규약 (Naming Methods & Connection)",
-        "fileName": "03_03_네이밍및접속규약",
-        "hasKeywordStudy": true
-      }
-    ],
     "sqlnet.ora": [
       {
         "studyId": "03_00",
@@ -7380,29 +8054,6 @@
       }
     ],
     "NAMES.DIRECTORY_PATH": [
-      {
-        "studyId": "03_00",
-        "chapterId": "03",
-        "title": "챕터 흐름 요약 — 데이터베이스 관리 툴 및 네트워크 (Chapter Flow Overview)",
-        "fileName": "03_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "03_02",
-        "chapterId": "03",
-        "title": "네트워크 진단 및 제어 툴 (Network Diagnostic & Control Tools)",
-        "fileName": "03_02_네트워크진단제어툴",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "03_03",
-        "chapterId": "03",
-        "title": "네이밍 및 접속 규약 (Naming Methods & Connection)",
-        "fileName": "03_03_네이밍및접속규약",
-        "hasKeywordStudy": true
-      }
-    ],
-    "Easy Connect": [
       {
         "studyId": "03_00",
         "chapterId": "03",
@@ -9970,22 +10621,6 @@
         "hasKeywordStudy": false
       }
     ],
-    "SHRINK SPACE": [
-      {
-        "studyId": "05_00",
-        "chapterId": "05",
-        "title": "챕터 흐름 요약 — 스토리지 최적화 및 테이블스페이스 (Chapter Flow Overview)",
-        "fileName": "05_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "05_04",
-        "chapterId": "05",
-        "title": "저장 공간 축소 및 최적화 (Space Reclamation and Storage Optimization)",
-        "fileName": "05_04_저장공간축소및최적화",
-        "hasKeywordStudy": true
-      }
-    ],
     "ROW MOVEMENT": [
       {
         "studyId": "05_00",
@@ -11996,29 +12631,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "SQL*Loader": [
-      {
-        "studyId": "07_00",
-        "chapterId": "07",
-        "title": "챕터 흐름 요약 — 데이터 이동 (데이터 로드/추출) (Chapter Flow Overview)",
-        "fileName": "07_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "07_01",
-        "chapterId": "07",
-        "title": "외부 파일 조작 (External Tables)",
-        "fileName": "07_01_외부파일조작",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "07_02",
-        "chapterId": "07",
-        "title": "대량 로드 처리 (SQL*Loader)",
-        "fileName": "07_02_대량로드처리",
-        "hasKeywordStudy": true
-      }
-    ],
     "sqlldr": [
       {
         "studyId": "07_00",
@@ -12210,54 +12822,6 @@
         "chapterId": "07",
         "title": "대량 로드 처리 (SQL*Loader)",
         "fileName": "07_02_대량로드처리",
-        "hasKeywordStudy": true
-      }
-    ],
-    "Data Pump": [
-      {
-        "studyId": "07_00",
-        "chapterId": "07",
-        "title": "챕터 흐름 요약 — 데이터 이동 (데이터 로드/추출) (Chapter Flow Overview)",
-        "fileName": "07_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "07_03",
-        "chapterId": "07",
-        "title": "Data Pump (expdp / impdp)",
-        "fileName": "07_03_DataPump",
-        "hasKeywordStudy": true
-      }
-    ],
-    "expdp": [
-      {
-        "studyId": "07_00",
-        "chapterId": "07",
-        "title": "챕터 흐름 요약 — 데이터 이동 (데이터 로드/추출) (Chapter Flow Overview)",
-        "fileName": "07_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "07_03",
-        "chapterId": "07",
-        "title": "Data Pump (expdp / impdp)",
-        "fileName": "07_03_DataPump",
-        "hasKeywordStudy": true
-      }
-    ],
-    "impdp": [
-      {
-        "studyId": "07_00",
-        "chapterId": "07",
-        "title": "챕터 흐름 요약 — 데이터 이동 (데이터 로드/추출) (Chapter Flow Overview)",
-        "fileName": "07_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "07_03",
-        "chapterId": "07",
-        "title": "Data Pump (expdp / impdp)",
-        "fileName": "07_03_DataPump",
         "hasKeywordStudy": true
       }
     ],
@@ -12830,15 +13394,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "External Table": [
-      {
-        "studyId": "07_02",
-        "chapterId": "07",
-        "title": "대량 로드 처리 (SQL*Loader)",
-        "fileName": "07_02_대량로드처리",
-        "hasKeywordStudy": true
-      }
-    ],
     "EXTERNAL_TABLE": [
       {
         "studyId": "07_02",
@@ -13019,22 +13574,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "V$ Views": [
-      {
-        "studyId": "08_00",
-        "chapterId": "08",
-        "title": "챕터 흐름 요약 — 성능 모니터링, 어드바이저 및 자동 관리 태스크 (Chapter Flow Overview)",
-        "fileName": "08_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "08_01",
-        "chapterId": "08",
-        "title": "기본 모니터링 및 로깅 (Basic Monitoring and Logging)",
-        "fileName": "08_01_기본모니터링및로깅",
-        "hasKeywordStudy": true
-      }
-    ],
     "V$SQL": [
       {
         "studyId": "08_00",
@@ -13179,36 +13718,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "STATISTICS_LEVEL": [
-      {
-        "studyId": "08_00",
-        "chapterId": "08",
-        "title": "챕터 흐름 요약 — 성능 모니터링, 어드바이저 및 자동 관리 태스크 (Chapter Flow Overview)",
-        "fileName": "08_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "08_01",
-        "chapterId": "08",
-        "title": "기본 모니터링 및 로깅 (Basic Monitoring and Logging)",
-        "fileName": "08_01_기본모니터링및로깅",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "08_03",
-        "chapterId": "08",
-        "title": "문제 해결 어드바이저 (Problem Resolution Advisors)",
-        "fileName": "08_03_문제해결어드바이저",
-        "hasKeywordStudy": true
-      },
-      {
-        "studyId": "08_04",
-        "chapterId": "08",
-        "title": "진단 모니터 (Diagnostic Monitor - ADDM)",
-        "fileName": "08_04_진단모니터",
-        "hasKeywordStudy": true
-      }
-    ],
     "CONTROL_MANAGEMENT_PACK_ACCESS": [
       {
         "studyId": "08_00",
@@ -13278,39 +13787,7 @@
         "hasKeywordStudy": true
       }
     ],
-    "Maintenance Window": [
-      {
-        "studyId": "08_00",
-        "chapterId": "08",
-        "title": "챕터 흐름 요약 — 성능 모니터링, 어드바이저 및 자동 관리 태스크 (Chapter Flow Overview)",
-        "fileName": "08_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "08_02",
-        "chapterId": "08",
-        "title": "자동화 기반 태스크 (Automated Maintenance Tasks)",
-        "fileName": "08_02_자동화기반태스크",
-        "hasKeywordStudy": true
-      }
-    ],
     "DBMS_AUTO_TASK_ADMIN": [
-      {
-        "studyId": "08_00",
-        "chapterId": "08",
-        "title": "챕터 흐름 요약 — 성능 모니터링, 어드바이저 및 자동 관리 태스크 (Chapter Flow Overview)",
-        "fileName": "08_00_챕터흐름요약",
-        "hasKeywordStudy": false
-      },
-      {
-        "studyId": "08_02",
-        "chapterId": "08",
-        "title": "자동화 기반 태스크 (Automated Maintenance Tasks)",
-        "fileName": "08_02_자동화기반태스크",
-        "hasKeywordStudy": true
-      }
-    ],
-    "Resource Manager": [
       {
         "studyId": "08_00",
         "chapterId": "08",
@@ -14656,15 +15133,6 @@
         "chapterId": "08",
         "title": "문제 해결 어드바이저 (Problem Resolution Advisors)",
         "fileName": "08_03_문제해결어드바이저",
-        "hasKeywordStudy": true
-      }
-    ],
-    "ADDM": [
-      {
-        "studyId": "08_04",
-        "chapterId": "08",
-        "title": "진단 모니터 (Diagnostic Monitor - ADDM)",
-        "fileName": "08_04_진단모니터",
         "hasKeywordStudy": true
       }
     ],
