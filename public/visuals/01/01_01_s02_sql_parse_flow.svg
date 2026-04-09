@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 660">
   <style>
     text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
     .title { font-size: 18px; font-weight: 700; }
@@ -50,64 +50,73 @@
 
   <line x1="400" y1="250" x2="400" y2="270" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#ah)" />
 
-  <!-- Step 4: Shared Pool Check (Decision) -->
+  <!-- Step 4: Shared Pool Check (Decision Diamond) -->
   <polygon points="400,275 510,315 400,355 290,315" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1.5" />
   <text x="400" y="312" text-anchor="middle" class="sublabel">3. Library Cache</text>
   <text x="400" y="328" text-anchor="middle" class="small">동일 SQL 존재?</text>
 
   <!-- Soft Parse path (YES - left) -->
-  <line x1="290" y1="315" x2="180" y2="315" stroke="#10B981" stroke-width="2" marker-end="url(#ah-green)" />
+  <line x1="290" y1="315" x2="180" y2="315" stroke="#10B981" stroke-width="1.5" marker-end="url(#ah-green)" />
   <text x="235" y="305" text-anchor="middle" class="sublabel" fill="#10B981">YES</text>
 
-  <rect x="50" y="290" width="125" height="50" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="2" />
+  <rect x="50" y="290" width="125" height="50" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1.5" />
   <text x="112" y="312" text-anchor="middle" class="label" fill="#10B981">Soft Parse</text>
   <text x="112" y="330" text-anchor="middle" class="small">실행 계획 재사용</text>
 
-  <!-- Soft Parse arrow down to execution -->
-  <line x1="112" y1="340" x2="112" y2="520" stroke="#10B981" stroke-width="1.5" marker-end="url(#ah-green)" />
+  <!-- Soft Parse arrow down to execution (drawn BEFORE tips box so box covers it) -->
+  <line x1="112" y1="340" x2="112" y2="528" stroke="#10B981" stroke-width="1.5" marker-end="url(#ah-green)" />
 
-  <!-- Hard Parse path (NO - right/down) -->
-  <line x1="400" y1="355" x2="400" y2="380" stroke="#F43F5E" stroke-width="2" marker-end="url(#ah-red)" />
-  <text x="418" y="370" class="sublabel" fill="#F43F5E">NO</text>
+  <!-- Optimization tips box (opaque bg, covers the arrow behind it) -->
+  <rect x="35" y="357" width="245" height="124" class="box" fill="#0F172A" stroke="#10B981" stroke-width="1" />
+  <text x="58" y="376" class="sublabel" fill="#10B981">Hard Parse 줄이는 방법</text>
+  <text x="58" y="396" class="small">1. 바인드 변수(Bind Variable) 사용</text>
+  <text x="58" y="413" class="code">WHERE id = :emp_id</text>
+  <text x="58" y="433" class="small">2. CURSOR_SHARING = FORCE</text>
+  <text x="73" y="448" class="small">리터럴 → 바인드 변수 자동 치환</text>
+  <text x="58" y="463" class="small">3. 표준 SQL 코딩 규칙 적용</text>
+
+  <!-- Hard Parse path (NO - down) -->
+  <line x1="400" y1="355" x2="400" y2="388" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#ah-red)" />
+  <text x="418" y="375" class="sublabel" fill="#F43F5E">NO</text>
 
   <!-- Hard Parse label -->
-  <rect x="560" y="365" width="125" height="35" class="box" fill="rgba(244,63,94,0.15)" stroke="#F43F5E" stroke-width="2" />
-  <text x="622" y="387" text-anchor="middle" class="label" fill="#F43F5E">Hard Parse</text>
-  <line x1="555" y1="382" x2="510" y2="382" stroke="#F43F5E" stroke-width="1" stroke-dasharray="4,3" />
+  <rect x="545" y="365" width="125" height="35" class="box" fill="rgba(244,63,94,0.15)" stroke="#F43F5E" stroke-width="1.5" />
+  <text x="607" y="387" text-anchor="middle" class="label" fill="#F43F5E">Hard Parse</text>
+  <line x1="540" y1="382" x2="495" y2="382" stroke="#F43F5E" stroke-width="1" stroke-dasharray="4,3" />
 
   <!-- Step 5: Optimization -->
-  <rect x="310" y="385" width="180" height="45" class="box" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1.5" />
-  <text x="400" y="405" text-anchor="middle" class="sublabel">4. Optimization</text>
-  <text x="400" y="422" text-anchor="middle" class="small">CBO 최적 실행 계획 생성</text>
+  <rect x="310" y="393" width="180" height="42" class="box" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1.5" />
+  <text x="400" y="412" text-anchor="middle" class="sublabel">4. Optimization</text>
+  <text x="400" y="428" text-anchor="middle" class="small">CBO 최적 실행 계획 생성</text>
 
-  <line x1="400" y1="430" x2="400" y2="450" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#ah-red)" />
+  <line x1="400" y1="435" x2="400" y2="458" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#ah-red)" />
 
   <!-- Step 6: Row Source Generation -->
-  <rect x="310" y="455" width="180" height="45" class="box" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1.5" />
-  <text x="400" y="475" text-anchor="middle" class="sublabel">5. Row Source Generation</text>
-  <text x="400" y="492" text-anchor="middle" class="small">행 소스 트리 변환</text>
+  <rect x="310" y="463" width="180" height="42" class="box" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1.5" />
+  <text x="400" y="482" text-anchor="middle" class="sublabel">5. Row Source Generation</text>
+  <text x="400" y="498" text-anchor="middle" class="small">행 소스 트리 변환</text>
 
-  <line x1="400" y1="500" x2="400" y2="520" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#ah)" />
+  <line x1="400" y1="505" x2="400" y2="528" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#ah)" />
 
   <!-- Execution -->
-  <rect x="200" y="525" width="400" height="40" class="box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="2" />
-  <text x="400" y="550" text-anchor="middle" class="label" fill="#6F6BEA">SQL Execution (SQL 실행)</text>
+  <rect x="100" y="533" width="500" height="40" class="box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.5" />
+  <text x="350" y="558" text-anchor="middle" class="label" fill="#6F6BEA">SQL Execution (SQL 실행)</text>
 
-  <!-- Optimization tips box -->
-  <rect x="50" y="375" width="230" height="120" class="box" fill="rgba(16,185,129,0.05)" stroke="#10B981" stroke-width="1" stroke-dasharray="4,3" />
-  <text x="70" y="395" class="sublabel" fill="#10B981">Hard Parse 줄이는 방법</text>
-  <text x="70" y="415" class="small">1. 바인드 변수(Bind Variable) 사용</text>
-  <text x="70" y="433" class="code">WHERE id = :emp_id</text>
-  <text x="70" y="453" class="small">2. CURSOR_SHARING = FORCE</text>
-  <text x="70" y="470" class="small">   리터럴 → 바인드 변수 자동 치환</text>
-  <text x="70" y="488" class="small">3. 표준 SQL 코딩 규칙 적용</text>
+  <!-- === Bottom info area (below main flow, no overlap) === -->
 
   <!-- Cost comparison box -->
-  <rect x="570" y="420" width="200" height="100" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1" />
-  <text x="590" y="440" class="sublabel">비용 비교 (Cost)</text>
-  <rect x="590" y="450" width="100" height="12" rx="2" fill="rgba(244,63,94,0.4)" />
-  <text x="700" y="461" class="small" fill="#F43F5E">Hard Parse</text>
-  <rect x="590" y="470" width="25" height="12" rx="2" fill="rgba(16,185,129,0.5)" />
-  <text x="700" y="481" class="small" fill="#10B981">Soft Parse</text>
-  <text x="590" y="505" class="small">CPU, 메모리, 래치 경합</text>
+  <rect x="100" y="595" width="220" height="55" rx="6" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="120" y="614" class="sublabel">비용 비교 (Cost)</text>
+  <rect x="120" y="624" width="100" height="10" rx="2" fill="rgba(244,63,94,0.4)" />
+  <text x="230" y="633" class="small" fill="#F43F5E">Hard Parse</text>
+  <rect x="120" y="639" width="25" height="10" rx="2" fill="rgba(16,185,129,0.5)" />
+  <text x="230" y="648" class="small" fill="#10B981">Soft Parse</text>
+
+  <!-- Color Legend -->
+  <rect x="380" y="595" width="220" height="55" rx="6" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="400" y="614" class="sublabel">화살표 색상 범례</text>
+  <line x1="400" y1="628" x2="425" y2="628" stroke="#10B981" stroke-width="1.5" />
+  <text x="432" y="632" class="small" fill="#10B981">Soft Parse 경로</text>
+  <line x1="400" y1="644" x2="425" y2="644" stroke="#F43F5E" stroke-width="1.5" />
+  <text x="432" y="648" class="small" fill="#F43F5E">Hard Parse 경로</text>
 </svg>

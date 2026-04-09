@@ -80,9 +80,9 @@
   <text x="445" y="330" text-anchor="middle" class="small">파일 헤더 갱신</text>
   <text x="445" y="345" text-anchor="middle" class="small">DBWn에 기록 요청</text>
 
-  <!-- Arrow CKPT -> DBWn -->
-  <line x1="370" y1="310" x2="180" y2="310" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#aY)"/>
-  <text x="275" y="302" text-anchor="middle" class="small" fill="#F59E0B">기록 요청</text>
+  <!-- Arrow CKPT -> DBWn (routed above boxes) -->
+  <polyline points="445,270 445,258 105,258 105,270" fill="none" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#aY)"/>
+  <text x="200" y="253" text-anchor="middle" class="small" fill="#F59E0B">기록 요청</text>
 
   <!-- SMON -->
   <rect x="540" y="270" width="150" height="95" class="box" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1.5"/>
@@ -161,20 +161,24 @@
   <text x="715" y="622" text-anchor="middle" class="sublabel">Alert Log</text>
   <text x="715" y="640" text-anchor="middle" class="small">진단 로그</text>
 
-  <!-- Arrows from processes to files -->
-  <line x1="105" y1="365" x2="115" y2="605" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#aR)"/>
-  <text x="80" y="555" class="small" fill="#F43F5E">Write</text>
+  <!-- Arrows from processes to files (routed around boxes) -->
+  <!-- DBWn → Data Files (left edge route, outside PMON) -->
+  <polyline points="30,320 18,320 18,552 115,552 115,605" fill="none" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#aR)"/>
+  <text x="60" y="565" class="small" fill="#F43F5E">Write</text>
 
-  <line x1="275" y1="365" x2="275" y2="605" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#aR)"/>
-  <text x="250" y="555" class="small" fill="#F43F5E">Write</text>
+  <!-- LGWR → Redo Log (PMON-LREG gap at x=188) -->
+  <polyline points="200,320 188,320 188,552 275,552 275,605" fill="none" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#aR)"/>
+  <text x="225" y="565" class="small" fill="#F43F5E">Write</text>
 
-  <line x1="445" y1="365" x2="435" y2="605" stroke="#F43F5E" stroke-width="1.2" marker-end="url(#aR)"/>
-  <text x="455" y="555" class="small" fill="#F43F5E">Update</text>
+  <!-- CKPT → Control Files (CKPT-SMON gap at x=532) -->
+  <polyline points="520,320 532,320 532,548 435,548 435,605" fill="none" stroke="#F43F5E" stroke-width="1.2" marker-end="url(#aR)"/>
+  <text x="470" y="561" class="small" fill="#F43F5E">Update</text>
 
-  <line x1="592" y1="482" x2="585" y2="605" stroke="#10B981" stroke-width="1.2" marker-end="url(#aG)"/>
-  <text x="605" y="555" class="small" fill="#10B981">Copy</text>
+  <!-- ARCn → Archive Log (MMON-Optional gap at x=528) -->
+  <polyline points="540,465 528,465 528,556 585,556 585,605" fill="none" stroke="#10B981" stroke-width="1.2" marker-end="url(#aG)"/>
+  <text x="550" y="569" class="small" fill="#10B981">Copy</text>
 
-  <!-- Write-Ahead Logging note -->
-  <rect x="160" y="365" width="200" height="20" class="box" fill="rgba(244,63,94,0.12)" stroke="#F43F5E" stroke-width="1"/>
-  <text x="260" y="379" text-anchor="middle" class="small" fill="#F43F5E">Write-Ahead Logging: LGWR 선행!</text>
+  <!-- Write-Ahead Logging note (below SMON) -->
+  <rect x="540" y="370" width="200" height="20" class="box" fill="rgba(244,63,94,0.12)" stroke="#F43F5E" stroke-width="1"/>
+  <text x="640" y="384" text-anchor="middle" class="small" fill="#F43F5E">Write-Ahead Logging: LGWR 선행!</text>
 </svg>

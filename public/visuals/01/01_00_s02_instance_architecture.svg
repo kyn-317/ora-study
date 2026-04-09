@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 740">
   <style>
     text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
     .title { font-size: 18px; font-weight: 700; }
@@ -9,8 +9,10 @@
     .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
     .box { rx: 8; ry: 8; }
     .arrow-line { stroke-width: 2; fill: none; }
-    .dashed { stroke-dasharray: 6,4; }
-    .formula { font-size: 15px; font-weight: 700; fill: #A5B4FC; }
+    .proc-name { font-size: 12px; font-weight: 600; fill: #F43F5E; }
+    .proc-desc { font-size: 11px; fill: #94A3B8; }
+    .arrow-label { font-size: 13px; font-weight: 700; fill: #4A90D9; }
+    .arrow-label-bg { fill: #1E293B; stroke: #4A90D9; stroke-width: 1; rx: 4; ry: 4; }
   </style>
   <defs>
     <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
@@ -25,141 +27,153 @@
   </defs>
 
   <!-- Title -->
-  <text x="400" y="28" text-anchor="middle" class="title">Oracle Database = Instance + Database</text>
-  <text x="400" y="46" text-anchor="middle" class="subtitle">오라클 데이터베이스 = 인스턴스(메모리+프로세스) + 데이터베이스(디스크 파일)</text>
+  <text x="430" y="28" text-anchor="middle" class="title">Oracle Database = Instance + Database</text>
+  <text x="430" y="46" text-anchor="middle" class="subtitle">오라클 데이터베이스 = 인스턴스(메모리+프로세스) + 데이터베이스(디스크 파일)</text>
 
   <!-- ========== INSTANCE (left) ========== -->
-  <rect x="20" y="60" width="480" height="505" class="box" fill="none" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="8,4" />
-  <text x="260" y="82" text-anchor="middle" class="label" fill="#6F6BEA">Instance (인스턴스)</text>
+  <rect x="20" y="60" width="530" height="660" class="box" fill="none" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="8,4" />
+  <text x="285" y="82" text-anchor="middle" class="label" fill="#6F6BEA">Instance (인스턴스)</text>
 
-  <!-- SGA -->
-  <rect x="35" y="92" width="450" height="200" class="box" fill="rgba(111,107,234,0.07)" stroke="#6F6BEA" stroke-width="1.5" />
-  <text x="260" y="112" text-anchor="middle" class="label" fill="#6F6BEA">SGA (System Global Area)</text>
+  <!-- ===== SGA ===== -->
+  <rect x="35" y="92" width="500" height="210" class="box" fill="rgba(111,107,234,0.07)" stroke="#6F6BEA" stroke-width="1.5" />
+  <text x="285" y="112" text-anchor="middle" class="label" fill="#6F6BEA">SGA (System Global Area)</text>
+  <rect x="160" y="268" width="220" height="22" rx="11" fill="rgba(111,107,234,0.2)" stroke="none" />
+  <text x="270" y="283" text-anchor="middle" style="font-size:11px; fill:#A5B4FC;">모든 프로세스가 공유하는 메모리 영역</text>
 
   <!-- Buffer Cache -->
-  <rect x="50" y="122" width="130" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
-  <text x="115" y="143" text-anchor="middle" class="sublabel">Buffer Cache</text>
-  <text x="115" y="163" text-anchor="middle" class="code">DB_CACHE_SIZE</text>
+  <rect x="50" y="122" width="145" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
+  <text x="122" y="143" text-anchor="middle" class="sublabel">Buffer Cache</text>
+  <text x="122" y="163" text-anchor="middle" class="code">DB_CACHE_SIZE</text>
 
   <!-- Shared Pool -->
-  <rect x="195" y="122" width="130" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
-  <text x="260" y="143" text-anchor="middle" class="sublabel">Shared Pool</text>
-  <text x="260" y="163" text-anchor="middle" class="code">SHARED_POOL_SIZE</text>
+  <rect x="210" y="122" width="145" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
+  <text x="282" y="143" text-anchor="middle" class="sublabel">Shared Pool</text>
+  <text x="282" y="163" text-anchor="middle" class="code">SHARED_POOL_SIZE</text>
 
   <!-- Redo Log Buffer -->
-  <rect x="340" y="122" width="130" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
-  <text x="405" y="143" text-anchor="middle" class="sublabel">Redo Log Buffer</text>
-  <text x="405" y="163" text-anchor="middle" class="code">LOG_BUFFER</text>
+  <rect x="370" y="122" width="150" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
+  <text x="445" y="143" text-anchor="middle" class="sublabel">Redo Log Buffer</text>
+  <text x="445" y="163" text-anchor="middle" class="code">LOG_BUFFER</text>
 
   <!-- Large Pool -->
-  <rect x="50" y="192" width="130" height="45" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
-  <text x="115" y="213" text-anchor="middle" class="sublabel">Large Pool</text>
-  <text x="115" y="228" text-anchor="middle" class="small">RMAN, 병렬 처리</text>
+  <rect x="50" y="192" width="145" height="48" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="122" y="213" text-anchor="middle" class="sublabel">Large Pool</text>
+  <text x="122" y="230" text-anchor="middle" class="small">RMAN, 병렬 처리</text>
 
   <!-- AMM note -->
-  <rect x="195" y="192" width="275" height="45" class="box" fill="rgba(255,255,255,0.03)" stroke="#475569" stroke-width="1" />
-  <text x="332" y="210" text-anchor="middle" class="small">메모리 관리: AMM(자동) → ASMM(분리자동) → Manual(수동)</text>
-  <text x="332" y="228" text-anchor="middle" class="code">MEMORY_TARGET / SGA_TARGET</text>
+  <rect x="210" y="192" width="310" height="48" class="box" fill="rgba(255,255,255,0.03)" stroke="#475569" stroke-width="1" />
+  <text x="365" y="211" text-anchor="middle" class="small">메모리 관리: AMM(자동) → ASMM(분리자동) → Manual(수동)</text>
+  <text x="365" y="229" text-anchor="middle" class="code">MEMORY_TARGET / SGA_TARGET</text>
 
-  <!-- Memory management label -->
-  <rect x="150" y="250" width="220" height="22" rx="11" fill="rgba(111,107,234,0.2)" stroke="none" />
-  <text x="260" y="265" text-anchor="middle" style="font-size:11px; fill:#A5B4FC;">모든 프로세스가 공유하는 메모리 영역</text>
+  <!-- ===== PGA ===== -->
+  <rect x="35" y="320" width="240" height="115" class="box" fill="rgba(16,185,129,0.07)" stroke="#10B981" stroke-width="1.5" />
+  <text x="155" y="342" text-anchor="middle" class="label" fill="#10B981">PGA (프로세스 전용)</text>
+  <rect x="50" y="352" width="210" height="28" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1" />
+  <text x="155" y="371" text-anchor="middle" class="sublabel">Sort / Hash Join Work Area</text>
+  <rect x="50" y="388" width="210" height="28" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1" />
+  <text x="155" y="407" text-anchor="middle" class="sublabel">Session Memory</text>
 
-  <!-- PGA -->
-  <rect x="35" y="280" width="210" height="100" class="box" fill="rgba(16,185,129,0.07)" stroke="#10B981" stroke-width="1.5" />
-  <text x="140" y="300" text-anchor="middle" class="label" fill="#10B981">PGA (프로세스 전용)</text>
-  <rect x="50" y="310" width="180" height="28" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1" />
-  <text x="140" y="330" text-anchor="middle" class="sublabel">Sort / Hash Join Work Area</text>
-  <rect x="50" y="345" width="180" height="25" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1" />
-  <text x="140" y="362" text-anchor="middle" class="sublabel">Session Memory</text>
+  <!-- ===== Background Processes ===== -->
+  <rect x="290" y="320" width="245" height="210" class="box" fill="rgba(244,63,94,0.07)" stroke="#F43F5E" stroke-width="1.5" />
+  <text x="412" y="342" text-anchor="middle" class="label" fill="#F43F5E">백그라운드 프로세스</text>
 
-  <!-- Background Processes -->
-  <rect x="260" y="280" width="225" height="165" class="box" fill="rgba(244,63,94,0.07)" stroke="#F43F5E" stroke-width="1.5" />
-  <text x="372" y="300" text-anchor="middle" class="label" fill="#F43F5E">백그라운드 프로세스</text>
+  <text x="305" y="370" class="proc-name">DBWn</text>
+  <text x="355" y="370" class="proc-desc">Dirty Buffer → 데이터 파일</text>
+  <text x="305" y="394" class="proc-name">LGWR</text>
+  <text x="355" y="394" class="proc-desc">Redo Buffer → Redo Log</text>
+  <text x="305" y="418" class="proc-name">CKPT</text>
+  <text x="355" y="418" class="proc-desc">체크포인트 조율</text>
+  <text x="305" y="442" class="proc-name">SMON</text>
+  <text x="355" y="442" class="proc-desc">인스턴스 복구</text>
+  <text x="305" y="466" class="proc-name">PMON</text>
+  <text x="355" y="466" class="proc-desc">프로세스 정리</text>
+  <text x="305" y="490" class="proc-name">ARCn</text>
+  <text x="355" y="490" class="proc-desc">Redo → 아카이브 로그</text>
 
-  <text x="280" y="322" class="sublabel">DBWn</text>
-  <text x="380" y="322" class="small">Dirty Buffer → 데이터 파일</text>
-  <text x="280" y="344" class="sublabel">LGWR</text>
-  <text x="380" y="344" class="small">Redo Buffer → Redo Log</text>
-  <text x="280" y="366" class="sublabel">CKPT</text>
-  <text x="380" y="366" class="small">체크포인트 조율</text>
-  <text x="280" y="388" class="sublabel">SMON</text>
-  <text x="380" y="388" class="small">인스턴스 복구</text>
-  <text x="280" y="410" class="sublabel">PMON</text>
-  <text x="380" y="410" class="small">프로세스 정리</text>
-  <text x="280" y="432" class="sublabel">ARCn</text>
-  <text x="380" y="432" class="small">Redo → 아카이브 로그</text>
-
-  <!-- Server Process + User -->
-  <rect x="35" y="400" width="210" height="50" class="box" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1" stroke-dasharray="5,3" />
-  <text x="140" y="420" text-anchor="middle" class="sublabel">서버 프로세스 (Server Process)</text>
-  <text x="140" y="438" text-anchor="middle" class="small">사용자 SQL 실행, Dedicated/Shared/DRCP</text>
+  <!-- Server Process -->
+  <rect x="35" y="450" width="240" height="50" class="box" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1" stroke-dasharray="5,3" />
+  <text x="155" y="470" text-anchor="middle" class="sublabel">서버 프로세스 (Server Process)</text>
+  <text x="155" y="488" text-anchor="middle" class="small">사용자 SQL 실행</text>
 
   <!-- Connection modes -->
-  <rect x="35" y="460" width="210" height="40" class="box" fill="rgba(255,255,255,0.03)" stroke="#475569" stroke-width="1" />
-  <text x="140" y="478" text-anchor="middle" class="small">Dedicated (1:1) | Shared | DRCP (Pool)</text>
-  <text x="140" y="493" text-anchor="middle" class="small">연결 구성 방식</text>
+  <rect x="35" y="515" width="240" height="40" class="box" fill="rgba(255,255,255,0.03)" stroke="#475569" stroke-width="1" />
+  <text x="155" y="533" text-anchor="middle" class="small">Dedicated (1:1) | Shared | DRCP (Pool)</text>
+  <text x="155" y="548" text-anchor="middle" class="small">연결 구성 방식</text>
 
   <!-- ========== DATABASE (right) ========== -->
-  <rect x="520" y="60" width="260" height="505" class="box" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="8,4" />
-  <text x="650" y="82" text-anchor="middle" class="label" fill="#F59E0B">Database (데이터베이스)</text>
-  <text x="650" y="97" text-anchor="middle" class="small">디스크 상의 물리적 파일들</text>
+  <rect x="570" y="60" width="270" height="660" class="box" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="8,4" />
+  <text x="705" y="82" text-anchor="middle" class="label" fill="#F59E0B">Database (데이터베이스)</text>
+  <text x="705" y="97" text-anchor="middle" class="small">디스크 상의 물리적 파일들</text>
 
   <!-- Control File -->
-  <rect x="540" y="110" width="220" height="65" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5" />
-  <text x="650" y="133" text-anchor="middle" class="label" fill="#F59E0B">컨트롤 파일</text>
-  <text x="650" y="148" text-anchor="middle" class="sublabel">Control File</text>
-  <text x="650" y="166" text-anchor="middle" class="small">DB 구조 메타데이터, 다중화 필수</text>
+  <rect x="590" y="110" width="230" height="65" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5" />
+  <text x="705" y="133" text-anchor="middle" class="label" fill="#F59E0B">컨트롤 파일</text>
+  <text x="705" y="148" text-anchor="middle" class="sublabel">Control File</text>
+  <text x="705" y="166" text-anchor="middle" class="small">DB 구조 메타데이터, 다중화 필수</text>
 
   <!-- Online Redo Log -->
-  <rect x="540" y="190" width="220" height="65" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5" />
-  <text x="650" y="213" text-anchor="middle" class="label" fill="#F59E0B">온라인 Redo Log</text>
-  <text x="650" y="228" text-anchor="middle" class="sublabel">Online Redo Log Files</text>
-  <text x="650" y="246" text-anchor="middle" class="small">모든 변경 사항 순차 기록</text>
+  <rect x="590" y="195" width="230" height="65" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5" />
+  <text x="705" y="218" text-anchor="middle" class="label" fill="#F59E0B">온라인 Redo Log</text>
+  <text x="705" y="233" text-anchor="middle" class="sublabel">Online Redo Log Files</text>
+  <text x="705" y="251" text-anchor="middle" class="small">모든 변경 사항 순차 기록</text>
 
   <!-- Data Files -->
-  <rect x="540" y="270" width="220" height="65" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5" />
-  <text x="650" y="293" text-anchor="middle" class="label" fill="#F59E0B">데이터 파일</text>
-  <text x="650" y="308" text-anchor="middle" class="sublabel">Data Files (.dbf)</text>
-  <text x="650" y="326" text-anchor="middle" class="small">실제 사용자 데이터 저장</text>
+  <rect x="590" y="280" width="230" height="65" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5" />
+  <text x="705" y="303" text-anchor="middle" class="label" fill="#F59E0B">데이터 파일</text>
+  <text x="705" y="318" text-anchor="middle" class="sublabel">Data Files (.dbf)</text>
+  <text x="705" y="336" text-anchor="middle" class="small">실제 사용자 데이터 저장</text>
 
   <!-- Logical storage -->
-  <rect x="540" y="355" width="220" height="120" class="box" fill="rgba(255,255,255,0.04)" stroke="#475569" stroke-width="1" />
-  <text x="650" y="375" text-anchor="middle" class="sublabel" fill="#CBD5E1">논리적 저장 계층</text>
-  <text x="560" y="398" class="small">Tablespace (테이블스페이스)</text>
-  <text x="570" y="416" class="small">└ Segment (세그먼트)</text>
-  <text x="580" y="434" class="small">└ Extent (익스텐트)</text>
-  <text x="590" y="452" class="small">└ Block (8KB 블록)</text>
-  <text x="650" y="470" text-anchor="middle" class="small">SYSTEM | SYSAUX | UNDO | TEMP | USERS</text>
+  <rect x="590" y="365" width="230" height="125" class="box" fill="rgba(255,255,255,0.04)" stroke="#475569" stroke-width="1" />
+  <text x="705" y="385" text-anchor="middle" class="sublabel" fill="#CBD5E1">논리적 저장 계층</text>
+  <text x="610" y="408" class="small">Tablespace (테이블스페이스)</text>
+  <text x="620" y="426" class="small">└ Segment (세그먼트)</text>
+  <text x="630" y="444" class="small">└ Extent (익스텐트)</text>
+  <text x="640" y="462" class="small">└ Block (8KB 블록)</text>
+  <text x="705" y="483" text-anchor="middle" class="small">SYSTEM | SYSAUX | UNDO | TEMP | USERS</text>
 
   <!-- Archive Log -->
-  <rect x="540" y="490" width="220" height="55" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1" stroke-dasharray="5,3" />
-  <text x="650" y="513" text-anchor="middle" class="sublabel">아카이브 로그 (Archive Log)</text>
-  <text x="650" y="530" text-anchor="middle" class="small">ARCHIVELOG 모드 시 생성</text>
+  <rect x="590" y="510" width="230" height="55" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1" stroke-dasharray="5,3" />
+  <text x="705" y="533" text-anchor="middle" class="sublabel">아카이브 로그 (Archive Log)</text>
+  <text x="705" y="550" text-anchor="middle" class="small">ARCHIVELOG 모드 시 생성</text>
 
-  <!-- === Connection Arrows: Instance → Database === -->
-  <!-- DBWn → Data Files -->
-  <path d="M 485 322 L 537 302" class="arrow-line" stroke="#F43F5E" stroke-width="2" marker-end="url(#ah-amber)" />
-  <text x="508" y="305" text-anchor="middle" style="font-size:9px; fill:#F43F5E;">DBWn</text>
+  <!-- === Arrows: Background Processes → Database Files === -->
+  <!-- Solid = 상시 기록 (continuous write), Dashed = 이벤트 기반 (event-driven) -->
 
-  <!-- LGWR → Redo Log -->
-  <path d="M 485 344 L 537 222" class="arrow-line" stroke="#F43F5E" stroke-width="2" marker-end="url(#ah-amber)" />
-  <text x="500" y="275" text-anchor="middle" style="font-size:9px; fill:#F43F5E;">LGWR</text>
+  <!-- Arrow lines (drawn first, behind labels) -->
+  <path d="M 535 370 L 554 370 L 554 312 L 587 312" class="arrow-line" stroke="#F43F5E" stroke-width="2" marker-end="url(#ah-amber)" />
+  <path d="M 535 394 L 546 394 L 546 227 L 587 227" class="arrow-line" stroke="#F43F5E" stroke-width="2" marker-end="url(#ah-amber)" />
+  <path d="M 535 418 L 562 418 L 562 142 L 587 142" class="arrow-line" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-amber)" />
+  <path d="M 535 490 L 554 490 L 554 537 L 587 537" class="arrow-line" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-amber)" />
 
-  <!-- ARCn → Archive Log -->
-  <path d="M 485 432 L 537 515" class="arrow-line" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-amber)" />
-  <text x="505" y="480" text-anchor="middle" style="font-size:9px; fill:#F43F5E;">ARCn</text>
+  <!-- Arrow labels (drawn last, always on top) -->
+  <rect x="538" y="330" width="42" height="20" class="arrow-label-bg" />
+  <text x="559" y="345" text-anchor="middle" class="arrow-label">DBWn</text>
+  <rect x="530" y="286" width="42" height="20" class="arrow-label-bg" />
+  <text x="551" y="301" text-anchor="middle" class="arrow-label">LGWR</text>
+  <rect x="546" y="234" width="42" height="20" class="arrow-label-bg" />
+  <text x="567" y="249" text-anchor="middle" class="arrow-label">CKPT</text>
+  <rect x="538" y="506" width="42" height="20" class="arrow-label-bg" />
+  <text x="559" y="521" text-anchor="middle" class="arrow-label">ARCn</text>
 
-  <!-- CKPT → Control File -->
-  <path d="M 485 366 L 537 142" class="arrow-line" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-amber)" />
+  <!-- === Arrow Legend === -->
+  <rect x="35" y="575" width="500" height="50" class="box" fill="rgba(255,255,255,0.02)" stroke="#475569" stroke-width="1" />
+  <text x="55" y="595" class="small" fill="#CBD5E1">화살표 범례:</text>
+  <line x1="130" y1="591" x2="175" y2="591" stroke="#F43F5E" stroke-width="2" />
+  <polygon points="175,588 182,591 175,594" fill="#F59E0B" />
+  <text x="190" y="595" class="small">상시 기록 (DBWn, LGWR)</text>
+  <line x1="350" y1="591" x2="395" y2="591" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="5,3" />
+  <polygon points="395,588 402,591 395,594" fill="#F59E0B" />
+  <text x="410" y="595" class="small">이벤트 기반 (CKPT, ARCn)</text>
+  <text x="285" y="616" text-anchor="middle" class="small">프로세스 → 파일 방향의 쓰기 흐름</text>
 
-  <!-- Legend -->
-  <rect x="35" y="520" width="12" height="12" rx="2" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
-  <text x="53" y="531" class="small">SGA 구성요소</text>
-  <rect x="155" y="520" width="12" height="12" rx="2" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1" />
-  <text x="173" y="531" class="small">PGA 영역</text>
-  <rect x="255" y="520" width="12" height="12" rx="2" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1" />
-  <text x="273" y="531" class="small">백그라운드 프로세스</text>
-  <rect x="395" y="520" width="12" height="12" rx="2" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1" />
-  <text x="413" y="531" class="small">물리적 파일</text>
+  <!-- === Color Legend === -->
+  <rect x="50" y="645" width="12" height="12" rx="2" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
+  <text x="68" y="656" class="small">SGA 구성요소</text>
+  <rect x="175" y="645" width="12" height="12" rx="2" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1" />
+  <text x="193" y="656" class="small">PGA 영역</text>
+  <rect x="270" y="645" width="12" height="12" rx="2" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1" />
+  <text x="288" y="656" class="small">백그라운드 프로세스</text>
+  <rect x="415" y="645" width="12" height="12" rx="2" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1" />
+  <text x="433" y="656" class="small">물리적 파일</text>
 </svg>

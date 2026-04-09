@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 555">
   <style>
     text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
     .title { font-size: 18px; font-weight: 700; }
@@ -10,6 +10,8 @@
     .box { rx: 8; ry: 8; }
     .arrow-line { stroke: #6F6BEA; stroke-width: 2; fill: none; }
     .dashed { stroke-dasharray: 6,4; }
+    .arrow-label { font-size: 13px; font-weight: 700; fill: #4A90D9; }
+    .arrow-label-bg { fill: #1E293B; stroke: #4A90D9; stroke-width: 1; rx: 4; ry: 4; }
   </style>
   <defs>
     <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
@@ -25,22 +27,22 @@
   <text x="400" y="48" text-anchor="middle" class="subtitle">오라클 인스턴스 = 메모리 구조(SGA + PGA) + 백그라운드 프로세스</text>
 
   <!-- Instance boundary -->
-  <rect x="30" y="60" width="740" height="440" class="box" fill="none" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="8,4" />
+  <rect x="30" y="60" width="740" height="475" class="box" fill="none" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="8,4" />
   <text x="50" y="82" class="label" fill="#6F6BEA">Instance (인스턴스)</text>
 
   <!-- ===== SGA Block ===== -->
   <rect x="50" y="95" width="460" height="380" class="box" fill="rgba(111,107,234,0.08)" stroke="#6F6BEA" stroke-width="1.5" />
   <text x="280" y="118" text-anchor="middle" class="label" fill="#6F6BEA">SGA (System Global Area) — 공유 메모리</text>
 
-  <!-- Database Buffer Cache -->
+  <!-- Shared Pool (좌측) -->
   <rect x="70" y="130" width="200" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
-  <text x="170" y="153" text-anchor="middle" class="sublabel">Database Buffer Cache</text>
-  <text x="170" y="173" text-anchor="middle" class="code">DB_CACHE_SIZE</text>
+  <text x="170" y="153" text-anchor="middle" class="sublabel">Shared Pool (공유 풀)</text>
+  <text x="170" y="173" text-anchor="middle" class="code">SHARED_POOL_SIZE</text>
 
-  <!-- Shared Pool -->
+  <!-- Database Buffer Cache (우측 — DBWn 화살표 출발) -->
   <rect x="290" y="130" width="200" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
-  <text x="390" y="153" text-anchor="middle" class="sublabel">Shared Pool (공유 풀)</text>
-  <text x="390" y="173" text-anchor="middle" class="code">SHARED_POOL_SIZE</text>
+  <text x="390" y="153" text-anchor="middle" class="sublabel">Database Buffer Cache</text>
+  <text x="390" y="173" text-anchor="middle" class="code">DB_CACHE_SIZE</text>
 
   <!-- Redo Log Buffer -->
   <rect x="70" y="200" width="200" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
@@ -100,12 +102,12 @@
 
   <text x="640" y="290" text-anchor="middle" class="code">PGA_AGGREGATE_TARGET</text>
 
-  <!-- PGA label -->
-  <rect x="580" y="298" width="120" height="24" rx="12" fill="rgba(16,185,129,0.2)" stroke="none" />
-  <text x="640" y="314" text-anchor="middle" style="font-size:11px; fill:#6EE7B7;">프로세스당 1개</text>
+  <!-- PGA label (between PGA and Background Processes) -->
+  <rect x="580" y="311" width="120" height="24" rx="12" fill="rgba(16,185,129,0.2)" stroke="none" />
+  <text x="640" y="327" text-anchor="middle" style="font-size:11px; fill:#6EE7B7;">프로세스당 1개</text>
 
   <!-- ===== Background Processes ===== -->
-  <rect x="530" y="340" width="220" height="130" class="box" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1.5" />
+  <rect x="530" y="340" width="220" height="135" class="box" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1.5" />
   <text x="640" y="363" text-anchor="middle" class="label" fill="#F43F5E">Background Processes</text>
 
   <text x="555" y="388" class="sublabel">DBWn  — Buffer → Disk</text>
@@ -114,13 +116,22 @@
   <text x="555" y="448" class="sublabel">SMON — Recovery</text>
   <text x="555" y="468" class="sublabel">PMON — Cleanup</text>
 
-  <!-- Arrows: SGA ↔ Background -->
-  <line x1="510" y1="250" x2="530" y2="400" class="arrow-line dashed" marker-end="url(#ah)" />
-  <line x1="510" y1="170" x2="530" y2="380" class="arrow-line dashed" marker-end="url(#ah)" />
+  <!-- Arrow lines: SGA → Background Processes (ㄱ자 꺾임) -->
+  <path d="M490,157 H515 V385 H550" fill="none" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-blue)" />
+  <path d="M510,227 H525 V405 H550" fill="none" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-blue)" />
 
   <!-- Legend -->
-  <rect x="50" y="485" width="12" height="12" rx="2" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
-  <text x="68" y="496" class="small">필수 구성요소</text>
-  <rect x="170" y="485" width="12" height="12" rx="2" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
-  <text x="188" y="496" class="small">선택 구성요소</text>
+  <rect x="50" y="488" width="12" height="12" rx="2" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
+  <text x="68" y="499" class="small">필수 구성요소</text>
+  <rect x="170" y="488" width="12" height="12" rx="2" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="188" y="499" class="small">선택 구성요소</text>
+
+  <!-- Arrow labels (최상단 레이어 — 점선 위에 렌더링) -->
+  <rect x="460" y="255" width="110" height="32" class="arrow-label-bg" />
+  <text x="515" y="270" text-anchor="middle" class="arrow-label" style="font-size:11px;">dirty buffer</text>
+  <text x="515" y="283" text-anchor="middle" class="arrow-label" style="font-size:11px;">→ 디스크 기록</text>
+
+  <rect x="470" y="320" width="110" height="32" class="arrow-label-bg" />
+  <text x="525" y="335" text-anchor="middle" class="arrow-label" style="font-size:11px;">redo 엔트리</text>
+  <text x="525" y="348" text-anchor="middle" class="arrow-label" style="font-size:11px;">→ 로그 기록</text>
 </svg>

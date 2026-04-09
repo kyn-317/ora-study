@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 650">
   <style>
     text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
     .title { font-size: 18px; font-weight: 700; }
@@ -10,14 +10,14 @@
     .box { rx: 8; ry: 8; }
   </style>
   <defs>
-    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    <marker id="ah" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#6F6BEA" />
     </marker>
-    <marker id="ah-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+    <marker id="ah-green" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#10B981" />
     </marker>
-    <marker id="ah-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#F43F5E" />
+    <marker id="ah-red" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#F43F5E" />
     </marker>
   </defs>
 
@@ -28,7 +28,7 @@
   <!-- === Three columns comparison === -->
 
   <!-- AMM -->
-  <rect x="30" y="65" width="240" height="270" class="box" fill="rgba(16,185,129,0.06)" stroke="#10B981" stroke-width="2" />
+  <rect x="30" y="65" width="240" height="285" class="box" fill="rgba(16,185,129,0.06)" stroke="#10B981" stroke-width="2" />
   <text x="150" y="90" text-anchor="middle" class="label" fill="#10B981">AMM</text>
   <text x="150" y="108" text-anchor="middle" class="small">Automatic Memory Management</text>
   <text x="150" y="123" text-anchor="middle" class="small">자동 메모리 관리</text>
@@ -59,7 +59,7 @@
   <text x="50" y="325" class="small" fill="#10B981">Oracle 권장</text>
 
   <!-- ASMM -->
-  <rect x="280" y="65" width="240" height="270" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="2" />
+  <rect x="280" y="65" width="240" height="285" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="2" />
   <text x="400" y="90" text-anchor="middle" class="label" fill="#3B82F6">ASMM</text>
   <text x="400" y="108" text-anchor="middle" class="small">Automatic Shared Memory Mgmt</text>
   <text x="400" y="123" text-anchor="middle" class="small">자동 공유 메모리 관리</text>
@@ -91,7 +91,7 @@
   <text x="300" y="335" class="small" fill="#3B82F6">SGA/PGA 비율 고정 시</text>
 
   <!-- Manual -->
-  <rect x="530" y="65" width="240" height="270" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="2" />
+  <rect x="530" y="65" width="240" height="285" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="2" />
   <text x="650" y="90" text-anchor="middle" class="label" fill="#F59E0B">Manual</text>
   <text x="650" y="108" text-anchor="middle" class="small">Manual Memory Management</text>
   <text x="650" y="123" text-anchor="middle" class="small">수동 메모리 관리</text>
@@ -121,52 +121,54 @@
   <text x="550" y="335" class="small" fill="#F59E0B">특수 환경/레거시</text>
 
   <!-- === Decision Flowchart === -->
-  <rect x="30" y="350" width="740" height="215" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1" />
-  <text x="50" y="375" class="label">Decision Flowchart (판단 플로차트)</text>
+  <rect x="30" y="380" width="740" height="255" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="50" y="407" class="label">Decision Flowchart (판단 플로차트)</text>
 
-  <!-- Decision 1 -->
-  <polygon points="200,400 310,430 200,460 90,430" fill="rgba(111,107,234,0.1)" stroke="#6F6BEA" stroke-width="1.5" />
-  <text x="200" y="427" text-anchor="middle" class="code">MEMORY_TARGET</text>
-  <text x="200" y="442" text-anchor="middle" class="small">&gt; 0 ?</text>
+  <!-- AMM result box -->
+  <rect x="115" y="431" width="110" height="32" rx="6" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1.5" />
+  <text x="170" y="452" text-anchor="middle" class="sublabel" fill="#10B981">AMM</text>
 
-  <!-- YES to AMM -->
-  <line x1="200" y1="400" x2="200" y2="385" stroke="#10B981" stroke-width="2" marker-end="url(#ah-green)" />
-  <text x="215" y="394" class="small" fill="#10B981">YES</text>
-  <rect x="150" y="378" width="100" height="0" rx="0" fill="none" />
+  <!-- YES arrow: diamond up to AMM box -->
+  <line x1="170" y1="473" x2="170" y2="468" stroke="#10B981" stroke-width="1.5" marker-end="url(#ah-green)" />
+  <text x="182" y="475" class="small" fill="#10B981">YES</text>
 
-  <rect x="140" y="358" width="120" height="25" rx="6" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1.5" />
-  <text x="200" y="375" text-anchor="middle" class="sublabel" fill="#10B981">AMM</text>
+  <!-- Decision 1: diamond -->
+  <polygon points="170,473 260,498 170,523 80,498" fill="rgba(111,107,234,0.1)" stroke="#6F6BEA" stroke-width="1.5" />
+  <text x="170" y="496" text-anchor="middle" class="code">MEMORY_TARGET</text>
+  <text x="170" y="510" text-anchor="middle" class="small">&gt; 0 ?</text>
 
-  <!-- NO to Decision 2 -->
-  <line x1="310" y1="430" x2="400" y2="430" stroke="#F43F5E" stroke-width="2" />
-  <text x="340" y="423" class="small" fill="#F43F5E">NO</text>
+  <!-- NO arrow: diamond right to next diamond -->
+  <line x1="260" y1="498" x2="370" y2="498" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#ah-red)" />
+  <text x="310" y="491" text-anchor="middle" class="small" fill="#F43F5E">NO</text>
 
-  <!-- Decision 2 -->
-  <polygon points="500,400 600,430 500,460 400,430" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="500" y="427" text-anchor="middle" class="code">SGA_TARGET</text>
-  <text x="500" y="442" text-anchor="middle" class="small">&gt; 0 ?</text>
+  <!-- ASMM result box -->
+  <rect x="420" y="431" width="110" height="32" rx="6" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1.5" />
+  <text x="475" y="452" text-anchor="middle" class="sublabel" fill="#3B82F6">ASMM</text>
 
-  <!-- YES to ASMM -->
-  <line x1="500" y1="400" x2="500" y2="385" stroke="#10B981" stroke-width="2" marker-end="url(#ah-green)" />
-  <text x="515" y="394" class="small" fill="#10B981">YES</text>
+  <!-- YES arrow: diamond up to ASMM box -->
+  <line x1="475" y1="473" x2="475" y2="468" stroke="#10B981" stroke-width="1.5" marker-end="url(#ah-green)" />
+  <text x="487" y="475" class="small" fill="#10B981">YES</text>
 
-  <rect x="440" y="358" width="120" height="25" rx="6" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="500" y="375" text-anchor="middle" class="sublabel" fill="#3B82F6">ASMM</text>
+  <!-- Decision 2: diamond -->
+  <polygon points="475,473 565,498 475,523 385,498" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5" />
+  <text x="475" y="496" text-anchor="middle" class="code">SGA_TARGET</text>
+  <text x="475" y="510" text-anchor="middle" class="small">&gt; 0 ?</text>
 
-  <!-- NO to Manual -->
-  <line x1="600" y1="430" x2="660" y2="430" stroke="#F43F5E" stroke-width="2" marker-end="url(#ah-red)" />
-  <text x="625" y="423" class="small" fill="#F43F5E">NO</text>
+  <!-- NO arrow: diamond right to Manual box -->
+  <line x1="565" y1="498" x2="635" y2="498" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#ah-red)" />
+  <text x="595" y="491" text-anchor="middle" class="small" fill="#F43F5E">NO</text>
 
-  <rect x="665" y="418" width="85" height="25" rx="6" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="1.5" />
-  <text x="707" y="435" text-anchor="middle" class="sublabel" fill="#F59E0B">Manual</text>
+  <!-- Manual result box -->
+  <rect x="640" y="483" width="100" height="32" rx="6" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="1.5" />
+  <text x="690" y="504" text-anchor="middle" class="sublabel" fill="#F59E0B">Manual</text>
 
-  <!-- Bottom note -->
-  <text x="50" y="490" class="sublabel">ASMM에서 개별 파라미터 지정 시 → 해당 값이 최솟값(하한선)으로 작동</text>
-  <text x="50" y="510" class="sublabel">AMM에서 SGA_TARGET / PGA_AGGREGATE_TARGET 지정 시 → 역시 최솟값(하한선)</text>
+  <!-- Bottom notes -->
+  <text x="50" y="549" class="sublabel">ASMM에서 개별 파라미터 지정 시 → 해당 값이 최솟값(하한선)으로 작동</text>
+  <text x="50" y="567" class="sublabel">AMM에서 SGA_TARGET / PGA_AGGREGATE_TARGET 지정 시 → 역시 최솟값(하한선)</text>
 
   <!-- Monitoring views -->
-  <text x="50" y="540" class="code">V$MEMORY_DYNAMIC_COMPONENTS</text>
-  <text x="340" y="540" class="small">AMM 모니터링</text>
-  <text x="50" y="555" class="code">V$SGA_DYNAMIC_COMPONENTS</text>
-  <text x="340" y="555" class="small">ASMM 모니터링</text>
+  <text x="50" y="593" class="code">V$MEMORY_DYNAMIC_COMPONENTS</text>
+  <text x="340" y="593" class="small">AMM 모니터링</text>
+  <text x="50" y="611" class="code">V$SGA_DYNAMIC_COMPONENTS</text>
+  <text x="340" y="611" class="small">ASMM 모니터링</text>
 </svg>
