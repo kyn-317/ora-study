@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .arrow-line { stroke: #6F6BEA; stroke-width: 2; fill: none; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">SQL*Loader: Standard Mode vs Express Mode</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">컨트롤 파일 기반 vs 테이블 DDL 자동 유추 (Oracle 26ai 강화)</text>
+
+  <!-- Standard Mode -->
+  <rect x="30" y="75" width="355" height="310" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1.5" />
+  <text x="207" y="100" text-anchor="middle" class="label" fill="#3B82F6">Standard Mode (기본 모드)</text>
+  <text x="207" y="118" text-anchor="middle" class="small">컨트롤 파일(.ctl) 필수</text>
+
+  <!-- Standard Mode Flow -->
+  <rect x="55" y="135" width="300" height="35" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1" />
+  <text x="205" y="157" text-anchor="middle" class="code">sqlldr userid=hr/hr control=load.ctl</text>
+
+  <line x1="205" y1="170" x2="205" y2="190" class="arrow-line" marker-end="url(#ah)" />
+
+  <rect x="55" y="192" width="300" height="55" class="box" fill="rgba(42,43,61,0.5)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="75" y="212" class="code">LOAD DATA</text>
+  <text x="75" y="227" class="code">INFILE 'data.csv'</text>
+  <text x="75" y="242" class="code">INTO TABLE emp FIELDS TERMINATED BY ','</text>
+
+  <line x1="205" y1="247" x2="205" y2="265" class="arrow-line" marker-end="url(#ah)" />
+
+  <rect x="55" y="267" width="300" height="35" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1" />
+  <text x="205" y="289" text-anchor="middle" class="sublabel">컨트롤 파일의 규칙에 따라 데이터 로드</text>
+
+  <text x="55" y="330" class="small">장점: 세밀한 제어 (WHEN, 다중 테이블, 변환)</text>
+  <text x="55" y="348" class="small">단점: .ctl 파일 작성 필요, 초기 설정 복잡</text>
+  <text x="55" y="366" class="small">사용: 복잡한 데이터 매핑, 조건부 로드</text>
+
+  <!-- Express Mode -->
+  <rect x="415" y="75" width="355" height="310" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.5" />
+  <text x="592" y="100" text-anchor="middle" class="label" fill="#F59E0B">Express Mode</text>
+  <text x="592" y="118" text-anchor="middle" class="small">컨트롤 파일 불필요 (Oracle 26ai 강화)</text>
+
+  <!-- Express Mode Flow -->
+  <rect x="440" y="135" width="305" height="35" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="592" y="157" text-anchor="middle" class="code">sqlldr userid=hr/hr table=emp data=emp.csv</text>
+
+  <line x1="592" y1="170" x2="592" y2="190" class="arrow-line" marker-end="url(#ah)" />
+
+  <rect x="440" y="192" width="305" height="55" class="box" fill="rgba(42,43,61,0.5)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="460" y="212" class="sublabel">테이블 DDL에서 자동으로</text>
+  <text x="460" y="230" class="sublabel">컬럼명, 데이터 타입, 순서를 유추</text>
+  <text x="460" y="242" class="code">CSV 헤더와 컬럼명 자동 매칭</text>
+
+  <line x1="592" y1="247" x2="592" y2="265" class="arrow-line" marker-end="url(#ah)" />
+
+  <rect x="440" y="267" width="305" height="35" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1" />
+  <text x="592" y="289" text-anchor="middle" class="sublabel">테이블 정의에 맞춰 자동 데이터 로드</text>
+
+  <text x="440" y="330" class="small">장점: 간편함, .ctl 불필요, 빠른 시작</text>
+  <text x="440" y="348" class="small">단점: 복잡한 변환/조건부 로드 제한적</text>
+  <text x="440" y="366" class="small">사용: 단순 CSV 로드, 빠른 테스트</text>
+
+  <!-- Key differences at bottom -->
+  <text x="400" y="405" text-anchor="middle" class="sublabel">Express Mode 추가 옵션: DATE_FORMAT, CHARACTERSET, DIRECT=TRUE, MULTITHREADING</text>
+</svg>

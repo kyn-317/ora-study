@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" fill="none">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; fill: #6F6BEA; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 13px; font-weight: 600; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .mono { font-family: 'Consolas', monospace; font-size: 11px; }
+  </style>
+
+  <text x="400" y="30" text-anchor="middle" class="title">읽기 일관성과 CR 블록 생성 과정</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Read Consistency: Query SCN vs Block SCN → CR Block Generation</text>
+
+  <!-- Session A: SELECT -->
+  <rect x="30" y="70" width="180" height="55" rx="8" fill="#1E1F2E" stroke="#3B82F6" stroke-width="2"/>
+  <text x="120" y="92" text-anchor="middle" class="label" fill="#3B82F6">세션 A (SELECT)</text>
+  <text x="120" y="110" text-anchor="middle" class="mono" fill="#3B82F6">Query SCN = 1000</text>
+
+  <!-- Session B: UPDATE -->
+  <rect x="590" y="70" width="180" height="55" rx="8" fill="#1E1F2E" stroke="#F43F5E" stroke-width="2"/>
+  <text x="680" y="92" text-anchor="middle" class="label" fill="#F43F5E">세션 B (UPDATE)</text>
+  <text x="680" y="110" text-anchor="middle" class="mono" fill="#F43F5E">변경 + COMMIT</text>
+
+  <!-- Data Block in Buffer Cache -->
+  <rect x="290" y="140" width="220" height="70" rx="8" fill="#1E1F2E" stroke="#F59E0B" stroke-width="2"/>
+  <text x="400" y="162" text-anchor="middle" class="label" fill="#F59E0B">데이터 블록 (Current)</text>
+  <text x="400" y="180" text-anchor="middle" class="mono">Block SCN = 1500</text>
+  <text x="400" y="194" text-anchor="middle" class="small">세션 B가 변경 후 커밋한 상태</text>
+
+  <!-- Arrow from Session A to Data Block -->
+  <path d="M210 97 L290 170" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#aB)"/>
+  <text x="240" y="125" class="small" fill="#3B82F6">1) 블록 읽기</text>
+
+  <!-- Arrow from Session B to Data Block -->
+  <path d="M590 97 L510 170" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#aR)"/>
+  <text x="560" y="125" class="small" fill="#F43F5E">변경 적용</text>
+
+  <!-- Decision diamond -->
+  <polygon points="400,235 460,265 400,295 340,265" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="400" y="262" text-anchor="middle" class="small" fill="#6F6BEA">Block SCN</text>
+  <text x="400" y="275" text-anchor="middle" class="small" fill="#6F6BEA">> Query SCN?</text>
+
+  <!-- Yes path -->
+  <path d="M400 295 L400 320" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#aR)"/>
+  <text x="415" y="312" class="small" fill="#F43F5E">YES</text>
+
+  <!-- No path (to the left) -->
+  <path d="M340 265 L240 265" stroke="#10B981" stroke-width="1.5" marker-end="url(#aG)"/>
+  <text x="290" y="258" class="small" fill="#10B981">NO → 그대로 읽기</text>
+
+  <!-- CR Block Generation Process -->
+  <rect x="150" y="325" width="500" height="170" rx="10" fill="#0F1019" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="400" y="348" text-anchor="middle" class="label" fill="#6F6BEA">CR 블록 (Consistent Read Block) 생성 과정</text>
+
+  <!-- Step boxes inside -->
+  <rect x="170" y="360" width="145" height="50" rx="5" fill="#1E1F2E" stroke="#3B82F6" stroke-width="1"/>
+  <text x="242" y="380" text-anchor="middle" class="small" fill="#3B82F6">2) Current Block</text>
+  <text x="242" y="396" text-anchor="middle" class="small">복사본(Clone) 생성</text>
+
+  <path d="M315 385 L335 385" stroke="#E2E8F0" stroke-width="1" marker-end="url(#aW)"/>
+
+  <rect x="340" y="360" width="145" height="50" rx="5" fill="#1E1F2E" stroke="#F59E0B" stroke-width="1"/>
+  <text x="412" y="380" text-anchor="middle" class="small" fill="#F59E0B">3) ITL의 UBA로</text>
+  <text x="412" y="396" text-anchor="middle" class="small">UNDO 레코드 추적</text>
+
+  <path d="M485 385 L505 385" stroke="#E2E8F0" stroke-width="1" marker-end="url(#aW)"/>
+
+  <rect x="510" y="360" width="120" height="50" rx="5" fill="#1E1F2E" stroke="#10B981" stroke-width="1"/>
+  <text x="570" y="380" text-anchor="middle" class="small" fill="#10B981">4) UNDO 역적용</text>
+  <text x="570" y="396" text-anchor="middle" class="small">과거 이미지 생성</text>
+
+  <!-- Result -->
+  <rect x="250" y="420" width="300" height="60" rx="6" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="1.5"/>
+  <text x="400" y="442" text-anchor="middle" class="label" fill="#10B981">5) CR 블록 완성</text>
+  <text x="400" y="458" text-anchor="middle" class="small">SCN ≤ Query SCN인 과거 시점 블록</text>
+  <text x="400" y="472" text-anchor="middle" class="small">→ 일관된 데이터 읽기 반환</text>
+
+  <!-- ITL Structure on the right -->
+  <rect x="570" y="140" width="200" height="90" rx="6" fill="#1E1F2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="670" y="160" text-anchor="middle" class="small" fill="#F59E0B">ITL (Interested Transaction List)</text>
+  <text x="585" y="178" class="mono" fill="#94A3B8">XID   |Flag |SCN  |UBA</text>
+  <text x="585" y="193" class="mono">007.01| U   |     |UBA→UNDO</text>
+  <text x="585" y="208" class="mono" fill="#94A3B8">005.02| C   |1200 |UBA→UNDO</text>
+  <text x="585" y="223" class="mono" fill="#94A3B8">003.01| C   |0900 |...</text>
+
+  <!-- Bottom: Statement vs Transaction level -->
+  <rect x="30" y="505" width="350" height="12" rx="3" fill="#3B82F6" fill-opacity="0.2"/>
+  <text x="205" y="515" text-anchor="middle" class="small" fill="#3B82F6">문장 수준 (READ COMMITTED) - 기본</text>
+  <rect x="420" y="505" width="350" height="12" rx="3" fill="#F59E0B" fill-opacity="0.2"/>
+  <text x="595" y="515" text-anchor="middle" class="small" fill="#F59E0B">트랜잭션 수준 (SERIALIZABLE) - 명시 설정</text>
+
+  <defs>
+    <marker id="aB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3B82F6"/></marker>
+    <marker id="aR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#F43F5E"/></marker>
+    <marker id="aG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#10B981"/></marker>
+    <marker id="aW" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#E2E8F0"/></marker>
+  </defs>
+</svg>

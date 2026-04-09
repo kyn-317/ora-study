@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .step { font-size: 13px; font-weight: 700; fill: #6F6BEA; }
+  </style>
+
+  <defs>
+    <marker id="aPr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA"/>
+    </marker>
+    <marker id="aBl" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3B82F6"/>
+    </marker>
+    <marker id="aGr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#10B981"/>
+    </marker>
+    <marker id="aYe" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#F59E0B"/>
+    </marker>
+    <marker id="aRe" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#F43F5E"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">SELECT 문 실행 흐름</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Query Processing Flow — 백그라운드 프로세스 관여 없음</text>
+
+  <!-- User Process -->
+  <rect x="30" y="80" width="130" height="55" class="box" fill="rgba(107,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="95" y="103" text-anchor="middle" class="label" fill="#6F6BEA">User Process</text>
+  <text x="95" y="123" text-anchor="middle" class="small">사용자 프로세스</text>
+
+  <!-- Step 1 arrow -->
+  <line x1="160" y1="107" x2="220" y2="107" stroke="#6F6BEA" stroke-width="2" marker-end="url(#aPr)"/>
+  <text x="190" y="98" text-anchor="middle" class="step">1</text>
+  <text x="190" y="125" text-anchor="middle" class="small">SQL 전달</text>
+
+  <!-- Server Process -->
+  <rect x="220" y="75" width="160" height="65" class="box" fill="rgba(107,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="300" y="100" text-anchor="middle" class="label" fill="#6F6BEA">Server Process</text>
+  <text x="300" y="118" text-anchor="middle" class="small">서버 프로세스</text>
+  <text x="300" y="133" text-anchor="middle" class="code">SELECT * FROM emp</text>
+
+  <!-- Step 2 arrow to Shared Pool -->
+  <line x1="300" y1="140" x2="300" y2="190" stroke="#3B82F6" stroke-width="2" marker-end="url(#aBl)"/>
+  <text x="312" y="168" class="step">2</text>
+
+  <!-- SGA Region -->
+  <rect x="180" y="190" width="590" height="160" class="box" fill="rgba(59,130,246,0.05)" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="475" y="210" text-anchor="middle" class="label" fill="#3B82F6">SGA</text>
+
+  <!-- Shared Pool -->
+  <rect x="200" y="220" width="170" height="110" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="285" y="240" text-anchor="middle" class="sublabel">Shared Pool</text>
+  <text x="285" y="260" text-anchor="middle" class="small">Library Cache</text>
+
+  <!-- Soft/Hard Parse -->
+  <rect x="215" y="270" width="140" height="22" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="285" y="285" text-anchor="middle" class="small" fill="#10B981">Soft Parse: 캐시 Hit</text>
+  <rect x="215" y="298" width="140" height="22" class="box" fill="rgba(244,63,94,0.12)" stroke="#F43F5E" stroke-width="1"/>
+  <text x="285" y="313" text-anchor="middle" class="small" fill="#F43F5E">Hard Parse: 새로 파싱</text>
+
+  <!-- Step 3 arrow to Buffer Cache -->
+  <line x1="370" y1="280" x2="420" y2="280" stroke="#3B82F6" stroke-width="2" marker-end="url(#aBl)"/>
+  <text x="395" y="272" class="step">3</text>
+
+  <!-- Buffer Cache -->
+  <rect x="420" y="220" width="170" height="110" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="505" y="240" text-anchor="middle" class="sublabel">Buffer Cache</text>
+  <text x="505" y="260" text-anchor="middle" class="small">데이터 블록 검색</text>
+
+  <rect x="435" y="270" width="140" height="22" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="505" y="285" text-anchor="middle" class="small" fill="#10B981">Cache Hit: 메모리에서</text>
+  <rect x="435" y="298" width="140" height="22" class="box" fill="rgba(244,63,94,0.12)" stroke="#F43F5E" stroke-width="1"/>
+  <text x="505" y="313" text-anchor="middle" class="small" fill="#F43F5E">Cache Miss: 디스크 I/O</text>
+
+  <!-- Data Files -->
+  <rect x="630" y="230" width="120" height="90" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="690" y="258" text-anchor="middle" class="label" fill="#F59E0B">데이터 파일</text>
+  <text x="690" y="278" text-anchor="middle" class="small">Data Files</text>
+  <text x="690" y="298" text-anchor="middle" class="small">(디스크)</text>
+
+  <!-- Step 4 arrow Cache Miss to Data File -->
+  <line x1="590" y1="309" x2="630" y2="295" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#aRe)"/>
+  <text x="615" y="315" class="step" fill="#F43F5E">4</text>
+
+  <!-- Arrow back from Data File to Buffer Cache -->
+  <line x1="630" y1="255" x2="590" y2="265" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#aYe)"/>
+  <text x="600" y="248" class="small" fill="#F59E0B">블록 적재</text>
+
+  <!-- Step 5 processing -->
+  <rect x="420" y="350" width="170" height="30" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1"/>
+  <text x="505" y="370" text-anchor="middle" class="sublabel" fill="#10B981">5 데이터 추출 및 처리</text>
+  <line x1="505" y1="330" x2="505" y2="350" stroke="#10B981" stroke-width="1.5" marker-end="url(#aGr)"/>
+
+  <!-- Step 6 Result Return -->
+  <line x1="420" y1="370" x2="95" y2="370" stroke="#6F6BEA" stroke-width="2" marker-end="url(#aPr)"/>
+  <text x="260" y="362" text-anchor="middle" class="step">6</text>
+  <text x="260" y="388" text-anchor="middle" class="small">결과 반환 (Result Return)</text>
+
+  <!-- Result box at user -->
+  <rect x="30" y="355" width="130" height="35" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1"/>
+  <text x="95" y="377" text-anchor="middle" class="sublabel" fill="#10B981">결과 수신</text>
+
+  <!-- Note box -->
+  <rect x="30" y="420" width="740" height="65" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="400" y="445" text-anchor="middle" class="label">핵심 포인트 (Key Points)</text>
+  <text x="50" y="468" class="sublabel">- SELECT 실행은 서버 프로세스가 전담하며, 백그라운드 프로세스(DBWn, LGWR 등)는 관여하지 않음</text>
+  <text x="50" y="483" class="sublabel">- Soft Parse 비율이 높을수록 성능이 좋음 | Cache Hit 비율이 높을수록 I/O 감소</text>
+</svg>

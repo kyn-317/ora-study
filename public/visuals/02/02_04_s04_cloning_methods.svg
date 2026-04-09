@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">PDB 클론 방법 비교</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">PDB Cloning Methods — Local, Remote, Refreshable, Snapshot Copy</text>
+
+  <!-- Local Clone -->
+  <rect x="40" y="70" width="350" height="130" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="40" y="70" width="350" height="28" rx="8" ry="8" fill="#10B981" opacity="0.15"/>
+  <text x="215" y="90" text-anchor="middle" class="label" fill="#10B981">로컬 클론 (Local Clone)</text>
+
+  <text x="55" y="115" class="small">소스: 동일 CDB 내 기존 PDB</text>
+  <text x="55" y="132" class="small">동기화: 1회성 (복사 후 독립)</text>
+  <text x="55" y="149" class="code">CREATE PDB pdb_clone FROM source_pdb;</text>
+  <text x="55" y="168" class="small" fill="#10B981">핫 클론 (12.2+): READ WRITE 상태에서 클론</text>
+  <text x="55" y="185" class="small" fill="#F59E0B">전제: 로컬 UNDO + ARCHIVELOG (핫 클론 시)</text>
+
+  <!-- Remote Clone -->
+  <rect x="410" y="70" width="350" height="130" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="410" y="70" width="350" height="28" rx="8" ry="8" fill="#3B82F6" opacity="0.15"/>
+  <text x="585" y="90" text-anchor="middle" class="label" fill="#3B82F6">원격 클론 (Remote Clone)</text>
+
+  <text x="425" y="115" class="small">소스: 다른 CDB (DB Link 통해)</text>
+  <text x="425" y="132" class="small">동기화: 1회성 (복사 후 독립)</text>
+  <text x="425" y="149" class="code">CREATE PDB clone FROM pdb@dblink;</text>
+  <text x="425" y="168" class="small" fill="#3B82F6">Oracle Net으로 블록 단위 데이터 전송</text>
+  <text x="425" y="185" class="small" fill="#F59E0B">전제: DB Link + 공통 사용자 + CREATE PDB 권한</text>
+
+  <!-- Refreshable Clone -->
+  <rect x="40" y="220" width="350" height="150" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <rect x="40" y="220" width="350" height="28" rx="8" ry="8" fill="#F59E0B" opacity="0.15"/>
+  <text x="215" y="240" text-anchor="middle" class="label" fill="#F59E0B">Refreshable Clone</text>
+
+  <text x="55" y="265" class="small">소스: 동일/다른 CDB (주기적 동기화)</text>
+  <text x="55" y="282" class="small" fill="#F59E0B">클론 PDB: READ ONLY만 가능</text>
+  <text x="55" y="299" class="code">REFRESH MODE EVERY 60 MINUTES</text>
+  <text x="55" y="316" class="code">REFRESH MODE MANUAL</text>
+  <text x="55" y="335" class="small" fill="#10B981">SWITCHOVER: 소스/클론 역할 교환</text>
+  <text x="55" y="352" class="small">용도: 준 실시간 DR, 보고용, 롤링 업그레이드</text>
+  <text x="55" y="365" class="small" fill="#F43F5E">전제: 소스 ARCHIVELOG 모드 필수</text>
+
+  <!-- Snapshot Copy -->
+  <rect x="410" y="220" width="350" height="150" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="410" y="220" width="350" height="28" rx="8" ry="8" fill="#6F6BEA" opacity="0.15"/>
+  <text x="585" y="240" text-anchor="middle" class="label" fill="#6F6BEA">Snapshot Copy</text>
+
+  <text x="425" y="265" class="small">소스: 동일 CDB (스토리지 스냅샷)</text>
+  <text x="425" y="282" class="small" fill="#6F6BEA">Copy-on-Write: 물리적 복사 없이 즉시 생성</text>
+  <text x="425" y="299" class="code">CREATE PDB ... SNAPSHOT COPY;</text>
+  <text x="425" y="318" class="small" fill="#10B981">생성 속도: 거의 즉시 (데이터 크기 무관)</text>
+  <text x="425" y="335" class="small">변경된 블록만 추가 스토리지 사용</text>
+  <text x="425" y="352" class="small" fill="#F43F5E">전제: ACFS 또는 스냅샷 지원 스토리지</text>
+  <text x="425" y="365" class="small" fill="#F43F5E">소스 PDB 삭제 시 클론 영향받음</text>
+
+  <!-- Comparison Table -->
+  <rect x="40" y="390" width="720" height="115" class="box" fill="#2A2B3D" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="400" y="412" text-anchor="middle" class="label">핵심 비교 요약</text>
+
+  <!-- Header -->
+  <text x="100" y="432" text-anchor="middle" class="sublabel">방법</text>
+  <text x="230" y="432" text-anchor="middle" class="sublabel">소스 상태</text>
+  <text x="370" y="432" text-anchor="middle" class="sublabel">동기화</text>
+  <text x="510" y="432" text-anchor="middle" class="sublabel">클론 모드</text>
+  <text x="670" y="432" text-anchor="middle" class="sublabel">주요 전제조건</text>
+
+  <line x1="50" y1="438" x2="750" y2="438" stroke="#94A3B8" stroke-width="0.5"/>
+
+  <text x="100" y="455" text-anchor="middle" class="small" fill="#10B981">로컬 클론</text>
+  <text x="230" y="455" text-anchor="middle" class="small">RO 또는 RW(핫)</text>
+  <text x="370" y="455" text-anchor="middle" class="small">1회성</text>
+  <text x="510" y="455" text-anchor="middle" class="small">READ WRITE</text>
+  <text x="670" y="455" text-anchor="middle" class="small">핫 클론: Local UNDO+ARCH</text>
+
+  <text x="100" y="472" text-anchor="middle" class="small" fill="#3B82F6">원격 클론</text>
+  <text x="230" y="472" text-anchor="middle" class="small">RO 또는 RW(핫)</text>
+  <text x="370" y="472" text-anchor="middle" class="small">1회성</text>
+  <text x="510" y="472" text-anchor="middle" class="small">READ WRITE</text>
+  <text x="670" y="472" text-anchor="middle" class="small">DB Link + 공통 사용자</text>
+
+  <text x="100" y="489" text-anchor="middle" class="small" fill="#F59E0B">Refreshable</text>
+  <text x="230" y="489" text-anchor="middle" class="small">READ WRITE</text>
+  <text x="370" y="489" text-anchor="middle" class="small">주기적</text>
+  <text x="510" y="489" text-anchor="middle" class="small" fill="#F43F5E">READ ONLY만</text>
+  <text x="670" y="489" text-anchor="middle" class="small">ARCHIVELOG 모드</text>
+
+  <text x="100" y="506" text-anchor="middle" class="small" fill="#6F6BEA">Snapshot</text>
+  <text x="230" y="506" text-anchor="middle" class="small">READ ONLY</text>
+  <text x="370" y="506" text-anchor="middle" class="small">1회(CoW)</text>
+  <text x="510" y="506" text-anchor="middle" class="small">READ WRITE</text>
+  <text x="670" y="506" text-anchor="middle" class="small">ACFS/스냅샷 스토리지</text>
+</svg>

@@ -14,7 +14,10 @@
     {
       "sectionId": "s01",
       "title": "자동화 유지관리 태스크 개요 (Automated Maintenance Tasks Overview)",
-      "sqlExamplesIds": ["sql01", "sql02"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02"
+      ],
       "content": "Oracle Database는 데이터베이스의 최적 성능과 안정성을 유지하기 위해 **자동화 유지관리 태스크(Automated Maintenance Tasks)** 프레임워크를 제공합니다. 이 프레임워크는 사전 정의된 유지관리 작업들을 **유지관리 윈도우(Maintenance Window)** 내에서 자동으로 실행하며, **Resource Manager**와 연계하여 시스템 리소스를 적절히 배분합니다.\n\n## 자동화 유지관리 태스크 아키텍처 전체 구조\n\n```\n자동화 유지관리 태스크 프레임워크\n├── AutoTask 클라이언트 (Predefined Tasks)\n│   ├── Automatic Optimizer Statistics Collection (자동 통계 수집)\n│   ├── Automatic SQL Tuning Advisor (자동 SQL 튜닝)\n│   └── Automatic Segment Advisor (자동 세그먼트 어드바이저)\n├── Maintenance Window (유지관리 윈도우)\n│   ├── MAINTENANCE_WINDOW_GROUP (윈도우 그룹)\n│   ├── Predefined Windows (사전 정의 윈도우)\n│   └── DBMS_SCHEDULER 기반 스케줄링\n├── Resource Manager (리소스 매니저)\n│   ├── Resource Plan (리소스 플랜)\n│   ├── Consumer Group (소비자 그룹)\n│   ├── Plan Directive (플랜 지시문)\n│   └── DBRM 프로세스\n└── 연계 메커니즘\n    ├── Window → Resource Plan 자동 전환\n    └── AutoTask Client → 우선순위 기반 리소스 배분\n```\n\n## 핵심 구성요소 비교\n\n| 구성요소 | 역할 | 관리 단위 |\n|---|---|---|\n| **AutoTask Client** | 사전 정의된 자동 유지관리 작업 | DBMS_AUTO_TASK_ADMIN |\n| **Maintenance Window** | 유지관리 작업 실행 시간대 정의 | DBMS_SCHEDULER |\n| **Resource Manager** | CPU/IO/병렬처리 리소스 제어 | DBMS_RESOURCE_MANAGER |\n| **DBRM 프로세스** | Resource Manager의 백그라운드 실행 엔진 | 자동 (백그라운드 프로세스) |\n\n## AutoTask 프레임워크 동작 흐름\n\n1. **Scheduler**가 Maintenance Window의 시작 시간을 감지\n2. Maintenance Window가 **열리면(Open)** 해당 윈도우에 연결된 **Resource Plan**이 자동 활성화\n3. **AutoTask Framework**가 등록된 클라이언트 태스크들을 우선순위에 따라 실행\n4. 각 태스크는 Resource Manager의 소비자 그룹 정책에 따라 리소스를 할당받음\n5. Maintenance Window가 **닫히면(Close)** Resource Plan이 이전 플랜으로 복원\n6. 실행 중이던 유지관리 태스크는 중단(또는 완료 후 종료)",
       "subsections": [
         {
@@ -31,12 +34,26 @@
             "윈도우 시간이 부족하면 미완료 태스크는 다음 윈도우에서 우선순위에 따라 재스케줄"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/08/08_02_s01_automated_maintenance_overview.svg",
+          "caption": "자동 유지 관리 태스크 아키텍처 (Scheduler → Auto Task → 3대 태스크 + Maintenance Window)",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s02",
       "title": "유지관리 윈도우 (Maintenance Window)",
-      "sqlExamplesIds": ["sql03", "sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04",
+        "sql05"
+      ],
       "content": "**유지관리 윈도우(Maintenance Window)**는 Oracle Scheduler의 윈도우(Window) 기능을 활용하여, 자동 유지관리 태스크가 실행될 시간대를 정의하는 구성요소입니다. 윈도우가 열려 있는 동안에만 AutoTask 프레임워크가 유지관리 작업을 실행하며, 윈도우에 연결된 Resource Plan이 자동으로 활성화됩니다.\n\n## 사전 정의된 Maintenance Window 목록\n\n| 윈도우 이름 | 요일 | 시작 시간 | 기본 지속 시간 | Resource Plan |\n|---|---|---|---|---|\n| **MONDAY_WINDOW** | 월요일 | 22:00 | 4시간 | DEFAULT_MAINTENANCE_PLAN |\n| **TUESDAY_WINDOW** | 화요일 | 22:00 | 4시간 | DEFAULT_MAINTENANCE_PLAN |\n| **WEDNESDAY_WINDOW** | 수요일 | 22:00 | 4시간 | DEFAULT_MAINTENANCE_PLAN |\n| **THURSDAY_WINDOW** | 목요일 | 22:00 | 4시간 | DEFAULT_MAINTENANCE_PLAN |\n| **FRIDAY_WINDOW** | 금요일 | 22:00 | 4시간 | DEFAULT_MAINTENANCE_PLAN |\n| **SATURDAY_WINDOW** | 토요일 | 06:00 | 20시간 | DEFAULT_MAINTENANCE_PLAN |\n| **SUNDAY_WINDOW** | 일요일 | 06:00 | 20시간 | DEFAULT_MAINTENANCE_PLAN |\n\n## Maintenance Window 계층 구조\n\n```\nMAINTENANCE_WINDOW_GROUP (윈도우 그룹)\n├── MONDAY_WINDOW\n├── TUESDAY_WINDOW\n├── WEDNESDAY_WINDOW\n├── THURSDAY_WINDOW\n├── FRIDAY_WINDOW\n├── SATURDAY_WINDOW\n└── SUNDAY_WINDOW\n```",
       "subsections": [
         {
@@ -69,7 +86,10 @@
     {
       "sectionId": "s03",
       "title": "자동 유지관리 태스크 제어 (Controlling Automated Maintenance Tasks)",
-      "sqlExamplesIds": ["sql06", "sql07"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07"
+      ],
       "content": "**DBMS_AUTO_TASK_ADMIN** 패키지는 AutoTask 프레임워크의 중앙 관리 인터페이스로, 개별 클라이언트 태스크의 활성화/비활성화, 실행 이력 조회, 태스크 우선순위 관리를 담당합니다.",
       "subsections": [
         {
@@ -85,12 +105,25 @@
             "SQL Tuning Advisor의 SQL Profile 자동 적용은 DBMS_AUTO_SQLTUNE.SET_AUTO_TUNING_TASK_PARAMETER로 별도 제어"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/08/08_02_s03_auto_task_control_flow.svg",
+          "caption": "자동 유지 관리 태스크 활성화/비활성화 제어 (DBMS_AUTO_TASK_ADMIN)",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "Resource Manager 개요 및 구성요소 (Resource Manager Overview and Components)",
-      "sqlExamplesIds": ["sql08", "sql09"],
+      "sqlExamplesIds": [
+        "sql08",
+        "sql09"
+      ],
       "content": "**Resource Manager(리소스 매니저)**는 Oracle Database의 시스템 리소스(CPU, I/O, 병렬 처리, 세션 수 등)를 소비자 그룹(Consumer Group) 단위로 배분하고 제어하는 기능입니다. Maintenance Window와 연계하여 유지관리 시간대에 적절한 리소스 배분 정책을 자동으로 적용합니다.\n\n## Resource Manager 핵심 구성요소\n\n| 구성요소 | 설명 |\n|---|---|\n| **Resource Plan** | 리소스 배분 정책의 최상위 컨테이너. 소비자 그룹별 리소스 할당 비율 정의 |\n| **Consumer Group** | 동일한 리소스 정책을 적용받는 세션들의 논리적 그룹 |\n| **Plan Directive** | Resource Plan과 Consumer Group을 연결하며, 구체적인 리소스 할당 규칙 정의 |\n| **DBRM Process** | Resource Manager의 백그라운드 프로세스. 리소스 배분을 실제로 집행 |\n\n## Resource Manager 아키텍처\n\n```\nResource Manager 아키텍처\n├── Resource Plan (활성 플랜 - 1개만 활성화 가능)\n│   ├── Plan Directive 1\n│   │   └── Consumer Group A → CPU: 60%, 병렬: 제한 없음\n│   ├── Plan Directive 2\n│   │   └── Consumer Group B → CPU: 30%, 병렬: 최대 4\n│   ├── Plan Directive 3\n│   │   └── Consumer Group C → CPU: 10%, 병렬: 최대 2\n│   └── (OTHER_GROUPS Directive - 필수)\n│       └── OTHER_GROUPS → 미분류 세션의 기본 리소스\n├── DBRM 백그라운드 프로세스\n│   └── CPU 스케줄링, I/O 제한, 세션 관리 실행\n└── Consumer Group 매핑 규칙\n    ├── 로그인 속성 기반 (사용자, 서비스, 모듈 등)\n    └── 런타임 전환 규칙 (실행 시간, I/O 양 기반)\n```\n\n## Resource Manager 제어 가능 리소스\n\n| 리소스 유형 | 제어 방법 | 설명 |\n|---|---|---|\n| **CPU** | MGMT_P1~P8 (다중 레벨) | 소비자 그룹별 CPU 사용 비율(%) 할당 |\n| **병렬 처리** | PARALLEL_DEGREE_LIMIT_P1 | 병렬 실행 최대 병렬도 제한 |\n| **병렬 서버** | PARALLEL_SERVER_LIMIT | 사용 가능한 병렬 서버 비율(%) 제한 |\n| **활성 세션** | ACTIVE_SESS_POOL_P1 | 동시 활성 세션 수 제한 |\n| **실행 시간** | SWITCH_TIME | 지정 시간 초과 시 소비자 그룹 자동 전환 |\n| **I/O** | MAX_IOPS, MAX_MBPS | 초당 I/O 요청 수, 초당 I/O 처리량 제한 |\n| **Idle 시간** | MAX_IDLE_TIME | 유휴 세션 자동 종료 시간 |\n| **Idle 블로킹** | MAX_IDLE_BLOCKER_TIME | 다른 세션을 블로킹하는 유휴 세션 종료 시간 |\n| **PGA** | SESSION_PGA_LIMIT | 세션당 최대 PGA 사용량 |\n| **UNDO** | UNDO_POOL | 소비자 그룹의 총 UNDO 사용량 제한 |",
       "subsections": [
         {
@@ -120,12 +153,25 @@
             "V$SESSION의 RESOURCE_CONSUMER_GROUP 컬럼으로 세션별 현재 그룹 확인 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/08/08_02_s04_resource_manager_architecture.svg",
+          "caption": "Resource Manager 구성요소 관계도 (Plan → Directive → Consumer Group)",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s05",
       "title": "CDB/PDB 환경의 Resource Manager (Resource Manager in CDB/PDB Environment)",
-      "sqlExamplesIds": ["sql10", "sql11"],
+      "sqlExamplesIds": [
+        "sql10",
+        "sql11"
+      ],
       "content": "멀티테넌트(Multitenant) 환경에서 Resource Manager는 **CDB 레벨**과 **PDB 레벨** 두 계층으로 동작합니다. CDB Resource Plan은 PDB 간의 리소스 배분을, PDB Resource Plan은 PDB 내부의 Consumer Group 간 리소스 배분을 담당합니다.\n\n## CDB vs PDB Resource Manager 비교\n\n| 구분 | CDB Resource Plan | PDB Resource Plan |\n|---|---|---|\n| **제어 범위** | PDB 간 리소스 배분 | PDB 내 Consumer Group 간 배분 |\n| **설정 위치** | CDB Root (CDB$ROOT) | 각 PDB 내부 |\n| **Plan Directive 대상** | PDB (Pluggable Database) | Consumer Group |\n| **CPU 제어** | PDB별 CPU 비율(shares) 및 상한(utilization_limit) | 그룹별 MGMT_P1~P8 |\n| **I/O 제어** | PDB별 MAX_IOPS, MAX_MBPS | 그룹별 MAX_IOPS, MAX_MBPS |\n| **병렬 제어** | PDB별 PARALLEL_SERVER_LIMIT | 그룹별 PARALLEL_DEGREE_LIMIT_P1 |\n| **메모리 제어** | PDB별 MEMORY_MIN, MEMORY_LIMIT | N/A (PDB 레벨 파라미터로 제어) |",
       "subsections": [
         {
@@ -146,7 +192,10 @@
     {
       "sectionId": "s06",
       "title": "Resource Manager와 Maintenance Window의 연계 (Integration of Resource Manager and Maintenance Window)",
-      "sqlExamplesIds": ["sql12", "sql13"],
+      "sqlExamplesIds": [
+        "sql12",
+        "sql13"
+      ],
       "content": "**Maintenance Window**와 **Resource Manager**는 Oracle의 자동화 유지관리 프레임워크에서 핵심적인 결합 관계를 형성합니다. 윈도우가 열리면 연결된 Resource Plan이 자동 활성화되고, 윈도우가 닫히면 이전 플랜으로 복원됩니다. 이 메커니즘을 통해 유지관리 시간대에 적절한 리소스 배분이 자동으로 이루어집니다.\n\n## 연계 동작 시퀀스\n\n```\n[윈도우 열기 전]\n현재 활성 플랜: DEFAULT_PLAN (또는 사용자 정의 플랜)\n    │\n    ▼\n[Maintenance Window 열림 (22:00)]\n    ├── 1) Scheduler가 Window Open 이벤트 발생\n    ├── 2) 현재 Resource Plan을 저장 (복원용)\n    ├── 3) 윈도우의 resource_plan 속성의 플랜으로 전환\n    │      (예: DEFAULT_MAINTENANCE_PLAN)\n    ├── 4) DBRM 프로세스가 새 플랜의 Directive 적용\n    ├── 5) AutoTask가 유지관리 태스크 실행 시작\n    │      → MAINTENANCE_CONSUMER_GROUP 사용\n    └── 6) 유지관리 태스크에 높은 리소스 할당\n    │\n    ▼\n[Maintenance Window 닫힘 (02:00)]\n    ├── 1) Scheduler가 Window Close 이벤트 발생\n    ├── 2) AutoTask에 태스크 중단 신호 전송\n    ├── 3) 저장된 이전 Resource Plan으로 복원\n    │      (예: DEFAULT_PLAN으로 복귀)\n    └── 4) DBRM 프로세스가 원래 플랜의 Directive 적용\n```\n\n## Resource Plan 전환 우선순위\n\n| 전환 트리거 | 우선순위 | 설명 |\n|---|---|---|\n| **ALTER SYSTEM (FORCE)** | 최고 | FORCE 옵션으로 설정 시 윈도우 자동 전환도 무시 |\n| **ALTER SYSTEM** | 높음 | 수동 설정, 다음 윈도우 전환까지 유지 |\n| **Maintenance Window** | 중간 | 윈도우 열림/닫힘에 의한 자동 전환 |\n| **기본 설정** | 낮음 | 초기화 파라미터 파일의 설정값 |",
       "subsections": [
         {
@@ -162,6 +211,16 @@
             "윈도우 중첩 시 높은 우선순위 윈도우의 Resource Plan이 우선 적용",
             "RAC 환경에서는 각 인스턴스에서 독립적으로 Resource Plan 전환이 이루어짐"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/08/08_02_s06_resource_manager_maintenance_integration.svg",
+          "caption": "Resource Manager와 Maintenance Window 자동 플랜 전환 메커니즘",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

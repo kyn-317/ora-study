@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Oracle 기본 테이블스페이스 (Default Tablespaces)</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Database 생성 시 자동으로 구성되는 5개 필수/선택 테이블스페이스</text>
+
+  <!-- Database container -->
+  <rect x="30" y="65" width="740" height="340" class="box" fill="rgba(255,255,255,0.02)" stroke="#2A2B3D" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="50" y="85" class="label" fill="#6F6BEA">Oracle Database</text>
+
+  <!-- SYSTEM -->
+  <rect x="50" y="100" width="200" height="130" class="box" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="2"/>
+  <text x="150" y="122" text-anchor="middle" class="label" fill="#F43F5E">SYSTEM</text>
+  <text x="150" y="140" text-anchor="middle" class="sublabel">데이터 딕셔너리</text>
+  <text x="150" y="155" text-anchor="middle" class="sublabel">Data Dictionary</text>
+  <text x="60" y="175" class="code">system01.dbf</text>
+  <text x="60" y="192" class="small">SYS 소유 / 항상 ONLINE</text>
+  <text x="60" y="207" class="small">삭제 불가 (필수)</text>
+  <rect x="55" y="213" width="40" height="14" fill="#F43F5E" rx="3" opacity="0.8"/>
+  <text x="75" y="224" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">필수</text>
+
+  <!-- SYSAUX -->
+  <rect x="270" y="100" width="200" height="130" class="box" fill="rgba(111,107,234,0.1)" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="370" y="122" text-anchor="middle" class="label" fill="#6F6BEA">SYSAUX</text>
+  <text x="370" y="140" text-anchor="middle" class="sublabel">보조 구성 요소</text>
+  <text x="370" y="155" text-anchor="middle" class="sublabel">Auxiliary Components</text>
+  <text x="280" y="175" class="code">sysaux01.dbf</text>
+  <text x="280" y="192" class="small">AWR, ADDM, EM 데이터</text>
+  <text x="280" y="207" class="small">삭제 불가 (필수)</text>
+  <rect x="275" y="213" width="40" height="14" fill="#6F6BEA" rx="3" opacity="0.8"/>
+  <text x="295" y="224" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">필수</text>
+
+  <!-- TEMP -->
+  <rect x="490" y="100" width="270" height="130" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="2"/>
+  <text x="625" y="122" text-anchor="middle" class="label" fill="#F59E0B">TEMP</text>
+  <text x="625" y="140" text-anchor="middle" class="sublabel">임시 세그먼트 (Temporary)</text>
+  <text x="625" y="155" text-anchor="middle" class="sublabel">정렬, 해시 조인, GTT</text>
+  <text x="500" y="175" class="code">temp01.dbf (TEMPFILE)</text>
+  <text x="500" y="192" class="small">세션 종료 시 자동 해제</text>
+  <text x="500" y="207" class="small">대체 후 삭제 가능</text>
+  <rect x="495" y="213" width="40" height="14" fill="#F59E0B" rx="3" opacity="0.8"/>
+  <text x="515" y="224" text-anchor="middle" font-size="10" fill="#1a1a2e" font-weight="600">필수</text>
+
+  <!-- UNDO -->
+  <rect x="50" y="250" width="280" height="130" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="2"/>
+  <text x="190" y="272" text-anchor="middle" class="label" fill="#10B981">UNDOTBS1</text>
+  <text x="190" y="290" text-anchor="middle" class="sublabel">언두 데이터 (Undo Data)</text>
+  <text x="190" y="305" text-anchor="middle" class="sublabel">트랜잭션 롤백, 읽기 일관성 (CR)</text>
+  <text x="60" y="325" class="code">undotbs01.dbf</text>
+  <text x="60" y="342" class="small">자동 관리 (AUM) / UNDO_TABLESPACE 파라미터</text>
+  <text x="60" y="358" class="small">대체 후 삭제 가능</text>
+  <rect x="55" y="363" width="40" height="14" fill="#10B981" rx="3" opacity="0.8"/>
+  <text x="75" y="374" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">필수</text>
+
+  <!-- USERS -->
+  <rect x="350" y="250" width="410" height="130" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="2"/>
+  <text x="555" y="272" text-anchor="middle" class="label" fill="#3B82F6">USERS</text>
+  <text x="555" y="290" text-anchor="middle" class="sublabel">사용자 데이터 기본 저장소</text>
+  <text x="555" y="305" text-anchor="middle" class="sublabel">User Default Permanent Tablespace</text>
+  <text x="360" y="325" class="code">users01.dbf</text>
+  <text x="360" y="342" class="small">DEFAULT_PERMANENT_TABLESPACE로 지정 가능</text>
+  <text x="360" y="358" class="small">기본 TS 변경 후 삭제 가능</text>
+  <rect x="355" y="363" width="40" height="14" fill="#3B82F6" rx="3" opacity="0.8"/>
+  <text x="375" y="374" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">선택</text>
+</svg>

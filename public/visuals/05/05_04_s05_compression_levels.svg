@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="28" text-anchor="middle" class="title">Oracle 데이터 압축 유형 비교</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">Data Compression: Basic → Advanced → HCC (압축률 증가 순서)</text>
+
+  <!-- Compression bar visual -->
+  <rect x="50" y="65" width="700" height="30" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1" rx="5"/>
+  <rect x="50" y="65" width="200" height="30" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" rx="5"/>
+  <rect x="250" y="65" width="200" height="30" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="450" y="65" width="150" height="30" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <rect x="600" y="65" width="150" height="30" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="1" rx="5"/>
+  <text x="150" y="85" text-anchor="middle" class="small" fill="#3B82F6">비압축</text>
+  <text x="350" y="85" text-anchor="middle" class="small" fill="#6F6BEA">Basic 2~3x</text>
+  <text x="525" y="85" text-anchor="middle" class="small" fill="#10B981">Advanced 3~4x</text>
+  <text x="675" y="85" text-anchor="middle" class="small" fill="#F59E0B">HCC 10~50x</text>
+
+  <!-- Basic Compression -->
+  <rect x="30" y="110" width="240" height="170" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="2"/>
+  <text x="150" y="133" text-anchor="middle" class="label" fill="#3B82F6">Basic Compression</text>
+  <text x="40" y="155" class="code">ROW STORE COMPRESS BASIC</text>
+  <text x="40" y="175" class="sublabel">압축 대상:</text>
+  <text x="40" y="192" class="small">Direct-Path INSERT만</text>
+  <text x="40" y="208" class="small">(INSERT /*+ APPEND */, CTAS,</text>
+  <text x="40" y="222" class="small"> SQL*Loader Direct)</text>
+  <text x="40" y="245" class="sublabel">라이선스: 무료</text>
+  <text x="40" y="262" class="sublabel">압축률: 2~3x</text>
+  <text x="40" y="278" class="small" fill="#F43F5E">일반 DML 시 압축 해제됨</text>
+
+  <!-- Advanced Compression -->
+  <rect x="280" y="110" width="240" height="170" class="box" fill="rgba(111,107,234,0.06)" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="400" y="133" text-anchor="middle" class="label" fill="#6F6BEA">Advanced Compression</text>
+  <text x="290" y="155" class="code">ROW STORE COMPRESS ADVANCED</text>
+  <text x="290" y="175" class="sublabel">압축 대상:</text>
+  <text x="290" y="192" class="small">모든 DML (INSERT, UPDATE,</text>
+  <text x="290" y="208" class="small"> DELETE, Direct-Path 모두)</text>
+  <text x="290" y="230" class="sublabel">라이선스: Advanced Compression</text>
+  <text x="290" y="245" class="sublabel">압축률: 3~4x</text>
+  <text x="290" y="262" class="small">OLTP 부하에서도 압축 상태 유지</text>
+  <text x="290" y="278" class="small" fill="#10B981">OLTP 환경 권장</text>
+
+  <!-- HCC -->
+  <rect x="530" y="110" width="240" height="170" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="2"/>
+  <text x="650" y="133" text-anchor="middle" class="label" fill="#F59E0B">HCC (Hybrid Columnar)</text>
+  <text x="540" y="155" class="code">COLUMN STORE COMPRESS</text>
+  <text x="540" y="172" class="code">  FOR QUERY / ARCHIVE</text>
+  <text x="540" y="195" class="sublabel">압축 방식: 열 기반 (Columnar)</text>
+  <text x="540" y="212" class="small">CU (Compression Unit) 단위</text>
+  <text x="540" y="232" class="sublabel">라이선스: 특수 하드웨어 필요</text>
+  <text x="540" y="247" class="small">Exadata, ZFS Storage, Pillar</text>
+  <text x="540" y="265" class="sublabel">압축률: 10~50x</text>
+  <text x="540" y="278" class="small" fill="#F59E0B">DW/아카이브 환경 권장</text>
+
+  <!-- DML impact comparison -->
+  <rect x="30" y="295" width="740" height="130" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1.5"/>
+  <text x="50" y="318" class="label">DML 영향 비교</text>
+
+  <!-- Header -->
+  <text x="50" y="340" class="sublabel" fill="#94A3B8">압축 유형</text>
+  <text x="220" y="340" class="sublabel" fill="#94A3B8">INSERT</text>
+  <text x="350" y="340" class="sublabel" fill="#94A3B8">UPDATE</text>
+  <text x="490" y="340" class="sublabel" fill="#94A3B8">SELECT 성능</text>
+  <text x="640" y="340" class="sublabel" fill="#94A3B8">저장 절약</text>
+  <line x1="50" y1="346" x2="750" y2="346" stroke="#2A2B3D" stroke-width="1"/>
+
+  <text x="50" y="365" class="code" fill="#3B82F6">Basic</text>
+  <text x="220" y="365" class="small">Direct만 압축</text>
+  <text x="350" y="365" class="small" fill="#F43F5E">압축 해제</text>
+  <text x="490" y="365" class="small" fill="#10B981">향상 (I/O 감소)</text>
+  <text x="640" y="365" class="small">2~3x</text>
+
+  <text x="50" y="385" class="code" fill="#6F6BEA">Advanced</text>
+  <text x="220" y="385" class="small">모두 압축</text>
+  <text x="350" y="385" class="small" fill="#10B981">압축 유지</text>
+  <text x="490" y="385" class="small" fill="#10B981">향상</text>
+  <text x="640" y="385" class="small">3~4x</text>
+
+  <text x="50" y="405" class="code" fill="#F59E0B">HCC Query</text>
+  <text x="220" y="405" class="small">Direct만</text>
+  <text x="350" y="405" class="small" fill="#F43F5E">CU 잠금 + 재압축</text>
+  <text x="490" y="405" class="small" fill="#10B981">대폭 향상</text>
+  <text x="640" y="405" class="small">10~15x</text>
+
+  <text x="50" y="425" class="code" fill="#F59E0B">HCC Archive</text>
+  <text x="220" y="425" class="small">Direct만</text>
+  <text x="350" y="425" class="small" fill="#F43F5E">CU 잠금 + 재압축</text>
+  <text x="490" y="425" class="small" fill="#10B981">대폭 향상</text>
+  <text x="640" y="425" class="small">15~50x</text>
+</svg>

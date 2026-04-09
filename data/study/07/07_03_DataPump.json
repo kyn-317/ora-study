@@ -15,7 +15,9 @@
     {
       "sectionId": "s01",
       "title": "Data Pump 개요 및 아키텍처 (Data Pump Overview and Architecture)",
-      "sqlExamplesIds": ["sql01"],
+      "sqlExamplesIds": [
+        "sql01"
+      ],
       "content": "**Oracle Data Pump**는 Oracle Database 10g부터 도입된 **서버 측(Server-Side)** 고속 데이터 및 메타데이터 이동 유틸리티입니다. 기존 exp/imp 유틸리티를 대체하며, 직접 경로(Direct Path) API를 활용하여 대폭 향상된 성능과 유연한 데이터 필터링, 병렬 처리, 네트워크 기반 Import 등을 지원합니다.",
       "subsections": [
         {
@@ -32,12 +34,24 @@
             "DBA_DATAPUMP_JOBS, V$SESSION_LONGOPS 등으로 작업 모니터링"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/07/07_03_s01_datapump_architecture.svg",
+          "caption": "Data Pump 아키텍처 - MCP, Worker Process, Master Table, Direct Path API의 서버 측 구조 및 기존 exp/imp와 핵심 차이",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s02",
       "title": "Directory Object 설정 (Directory Object Configuration)",
-      "sqlExamplesIds": ["sql02"],
+      "sqlExamplesIds": [
+        "sql02"
+      ],
       "content": "Data Pump는 **서버 측에서 동작**하므로, 덤프 파일과 로그 파일의 읽기/쓰기 경로를 **Directory Object**로 지정해야 합니다. 이는 Data Pump 사용의 전제 조건입니다.",
       "subsections": [
         {
@@ -57,7 +71,11 @@
     {
       "sectionId": "s03",
       "title": "Data Pump Export - expdp (Data Pump Export - expdp)",
-      "sqlExamplesIds": ["sql03", "sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04",
+        "sql05"
+      ],
       "content": "**expdp**는 Data Pump Export 커맨드 라인 클라이언트로, 데이터베이스의 데이터와 메타데이터를 덤프 파일(.dmp)로 추출합니다. 다양한 Export 모드와 풍부한 필터링/변환 파라미터를 제공합니다.",
       "subsections": [
         {
@@ -74,12 +92,26 @@
             "ESTIMATE_ONLY=Y로 실제 Export 없이 예상 크기만 확인 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/07/07_03_s03_export_modes.svg",
+          "caption": "expdp Export 5가지 모드(FULL/SCHEMAS/TABLES/TABLESPACES/TRANSPORTABLE) 및 핵심 파라미터 분류",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "Data Pump Import - impdp (Data Pump Import - impdp)",
-      "sqlExamplesIds": ["sql06", "sql07", "sql08"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07",
+        "sql08"
+      ],
       "content": "**impdp**는 Data Pump Import 커맨드 라인 클라이언트로, 덤프 파일의 데이터와 메타데이터를 데이터베이스에 적재합니다. REMAP, TRANSFORM, TABLE_EXISTS_ACTION 등 강력한 변환/제어 기능을 제공하여 유연한 데이터 이관을 가능하게 합니다.",
       "subsections": [
         {
@@ -101,7 +133,10 @@
     {
       "sectionId": "s05",
       "title": "대화형 모드와 작업 제어 (Interactive Mode and Job Control)",
-      "sqlExamplesIds": ["sql09", "sql10"],
+      "sqlExamplesIds": [
+        "sql09",
+        "sql10"
+      ],
       "content": "Data Pump의 **대화형 모드(Interactive Command Mode)**는 실행 중인 Export/Import 작업을 동적으로 제어할 수 있는 강력한 기능입니다. **Ctrl+C**를 누르면 대화형 모드로 진입하며, 작업 상태 확인, 일시 중지, 종료, 병렬도 변경 등을 수행할 수 있습니다.",
       "subsections": [
         {
@@ -118,12 +153,25 @@
             "STATUS[=interval] 명령으로 작업 진행률을 주기적으로 확인 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/07/07_03_s05_interactive_mode.svg",
+          "caption": "Data Pump 대화형 모드(Ctrl+C) 명령어 - STATUS, PARALLEL 변경, STOP_JOB, KILL_JOB, ATTACH 등",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s06",
       "title": "작업 상태 관리 및 모니터링 (Job State Management and Monitoring)",
-      "sqlExamplesIds": ["sql11", "sql12"],
+      "sqlExamplesIds": [
+        "sql11",
+        "sql12"
+      ],
       "content": "Data Pump 작업은 명확한 **상태 전이(State Transition)** 모델을 가지며, DBA_DATAPUMP_JOBS 뷰와 V$SESSION_LONGOPS를 통해 작업 진행 상황을 모니터링할 수 있습니다.",
       "subsections": [
         {
@@ -140,12 +188,24 @@
             "METRICS=Y 파라미터로 각 객체별 처리 시간 통계를 상세하게 출력"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/07/07_03_s06_job_state_transitions.svg",
+          "caption": "Data Pump 작업 상태 전이 다이어그램 - DEFINING->EXECUTING->COMPLETING->COMPLETED 및 STOP/RESTART 경로",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s07",
       "title": "REMAP 기능 상세 (REMAP Features in Detail)",
-      "sqlExamplesIds": ["sql13"],
+      "sqlExamplesIds": [
+        "sql13"
+      ],
       "content": "Data Pump Import의 **REMAP** 파라미터군은 Export 시의 소스 환경과 Import 시의 대상 환경 간의 차이를 처리하기 위한 핵심 기능입니다. 스키마, 테이블스페이스, 테이블명, 데이터파일 경로 등을 Import 시 동적으로 변환할 수 있습니다.",
       "subsections": [
         {
@@ -161,12 +221,24 @@
             "DDL 내의 스키마 참조(뷰, 프로시저 등)도 REMAP_SCHEMA에 의해 자동 변환"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/07/07_03_s07_remap_features.svg",
+          "caption": "REMAP 파라미터 상세 - REMAP_SCHEMA, REMAP_TABLESPACE, REMAP_TABLE, REMAP_DATA의 변환 흐름",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s08",
       "title": "EXCLUDE / INCLUDE 필터 (EXCLUDE / INCLUDE Filters)",
-      "sqlExamplesIds": ["sql14"],
+      "sqlExamplesIds": [
+        "sql14"
+      ],
       "content": "Data Pump의 **EXCLUDE**와 **INCLUDE** 파라미터는 Export/Import 대상 객체를 유형(Type)과 이름(Name) 기준으로 세밀하게 필터링하는 기능입니다.",
       "subsections": [
         {
@@ -182,12 +254,25 @@
             "Import 시에도 EXCLUDE/INCLUDE를 사용하여 덤프 파일에서 선별적으로 Import 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "svg",
+          "src": "/visuals/07/07_03_s08_exclude_include_filters.svg",
+          "caption": "EXCLUDE/INCLUDE 필터 구문 및 예시 - 객체 유형별 정밀한 Export/Import 대상 제어",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s09",
       "title": "고급 기능 (Advanced Features)",
-      "sqlExamplesIds": ["sql15", "sql16"],
+      "sqlExamplesIds": [
+        "sql15",
+        "sql16"
+      ],
       "content": "Data Pump는 Transportable Tablespace, 네트워크 기반 Import, Multitenant 환경 지원, 성능 튜닝 등 다양한 고급 기능을 제공합니다.",
       "subsections": [
         {
@@ -203,6 +288,16 @@
             "CLUSTER=N으로 RAC 환경에서 로컬 노드만 사용하여 노드 간 통신 오버헤드 제거",
             "METRICS=Y로 각 객체별 처리 시간을 출력하여 병목 구간 파악 가능"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v07",
+          "type": "svg",
+          "src": "/visuals/07/07_03_s09_transportable_network.svg",
+          "caption": "Transportable Tablespace(데이터파일 복사 + 메타데이터 Import)와 Network Import(DB Link 경유 직접 이관) 비교",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

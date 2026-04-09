@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <defs>
+    <marker id="arrB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3B82F6"/>
+    </marker>
+    <marker id="arrG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#10B981"/>
+    </marker>
+    <marker id="arrR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#F43F5E"/>
+    </marker>
+    <marker id="arrY" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrP" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">UNDO 데이터 동작 흐름</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">UNDO Data Flow — Rollback, Read Consistency, Recovery</text>
+
+  <!-- Step 1: User DML -->
+  <rect x="30" y="75" width="170" height="55" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="115" y="98" text-anchor="middle" class="label" fill="#3B82F6">1. DML 실행</text>
+  <text x="115" y="118" text-anchor="middle" class="code">UPDATE emp SET sal=5000</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="200" y1="102" x2="250" y2="102" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrB)"/>
+
+  <!-- Step 2: Before Image to UNDO -->
+  <rect x="260" y="75" width="200" height="55" class="box" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="360" y="98" text-anchor="middle" class="label" fill="#6F6BEA">2. Before Image 저장</text>
+  <text x="360" y="118" text-anchor="middle" class="sublabel">이전 값(sal=3000) → UNDO 세그먼트</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="460" y1="102" x2="510" y2="102" stroke="#6F6BEA" stroke-width="2" marker-end="url(#arrP)"/>
+
+  <!-- Step 3: Redo for UNDO -->
+  <rect x="520" y="75" width="240" height="55" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="640" y="98" text-anchor="middle" class="label" fill="#F59E0B">3. UNDO의 Redo 기록</text>
+  <text x="640" y="118" text-anchor="middle" class="sublabel">UNDO 변경도 Redo Log에 기록</text>
+
+  <!-- Step 4: Data Block Change -->
+  <rect x="30" y="165" width="200" height="55" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="130" y="188" text-anchor="middle" class="label" fill="#10B981">4. 데이터 블록 변경</text>
+  <text x="130" y="208" text-anchor="middle" class="sublabel">Buffer Cache에서 sal=5000으로 변경</text>
+
+  <!-- Branching: COMMIT or ROLLBACK -->
+  <rect x="300" y="165" width="200" height="55" class="box" fill="rgba(255,255,255,0.05)" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="400" y="192" text-anchor="middle" class="label">5. COMMIT 또는 ROLLBACK?</text>
+
+  <!-- Arrow 4→5 -->
+  <line x1="230" y1="192" x2="298" y2="192" stroke="#10B981" stroke-width="2" marker-end="url(#arrG)"/>
+
+  <!-- COMMIT path -->
+  <line x1="400" y1="220" x2="200" y2="280" stroke="#10B981" stroke-width="2" marker-end="url(#arrG)"/>
+  <text x="270" y="258" class="sublabel" fill="#10B981">COMMIT</text>
+
+  <rect x="50" y="275" width="300" height="80" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1.2"/>
+  <text x="200" y="298" text-anchor="middle" class="label" fill="#10B981">COMMIT 경로</text>
+  <text x="200" y="318" text-anchor="middle" class="sublabel">변경 확정 — UNDO는 즉시 삭제되지 않음</text>
+  <text x="200" y="338" text-anchor="middle" class="code">UNDO_RETENTION(기본 900초) 동안 보존</text>
+
+  <!-- ROLLBACK path -->
+  <line x1="400" y1="220" x2="600" y2="280" stroke="#F43F5E" stroke-width="2" marker-end="url(#arrR)"/>
+  <text x="530" y="258" class="sublabel" fill="#F43F5E">ROLLBACK</text>
+
+  <rect x="450" y="275" width="310" height="80" class="box" fill="rgba(243,63,94,0.08)" stroke="#F43F5E" stroke-width="1.2"/>
+  <text x="605" y="298" text-anchor="middle" class="label" fill="#F43F5E">ROLLBACK 경로</text>
+  <text x="605" y="318" text-anchor="middle" class="sublabel">UNDO 데이터로 원래 상태 복원</text>
+  <text x="605" y="338" text-anchor="middle" class="code">sal=3000으로 되돌림</text>
+
+  <!-- Read Consistency Section -->
+  <rect x="30" y="385" width="740" height="100" class="box" fill="rgba(59,130,246,0.05)" stroke="#3B82F6" stroke-width="1.2"/>
+  <text x="400" y="410" text-anchor="middle" class="label" fill="#3B82F6">읽기 일관성 (Read Consistency) — Statement-Level</text>
+
+  <!-- Session A -->
+  <rect x="55" y="420" width="220" height="50" rx="6" ry="6" fill="rgba(243,63,94,0.10)" stroke="#F43F5E" stroke-width="0.8"/>
+  <text x="165" y="440" text-anchor="middle" class="sublabel" fill="#F43F5E">Session A: UPDATE sal=5000</text>
+  <text x="165" y="458" text-anchor="middle" class="small" fill="#F43F5E">(COMMIT 전)</text>
+
+  <!-- Arrow -->
+  <line x1="275" y1="445" x2="335" y2="445" stroke="#6F6BEA" stroke-width="2" marker-end="url(#arrP)"/>
+  <text x="305" y="438" text-anchor="middle" class="small" fill="#6F6BEA">UNDO</text>
+
+  <!-- UNDO provides CR copy -->
+  <rect x="340" y="420" width="160" height="50" rx="6" ry="6" fill="rgba(111,107,234,0.10)" stroke="#6F6BEA" stroke-width="0.8"/>
+  <text x="420" y="440" text-anchor="middle" class="sublabel" fill="#6F6BEA">UNDO 세그먼트</text>
+  <text x="420" y="458" text-anchor="middle" class="code">Before Image: sal=3000</text>
+
+  <!-- Arrow -->
+  <line x1="500" y1="445" x2="540" y2="445" stroke="#10B981" stroke-width="2" marker-end="url(#arrG)"/>
+  <text x="520" y="438" text-anchor="middle" class="small" fill="#10B981">CR Copy</text>
+
+  <!-- Session B -->
+  <rect x="545" y="420" width="210" height="50" rx="6" ry="6" fill="rgba(16,185,129,0.10)" stroke="#10B981" stroke-width="0.8"/>
+  <text x="650" y="440" text-anchor="middle" class="sublabel" fill="#10B981">Session B: SELECT sal → 3000</text>
+  <text x="650" y="458" text-anchor="middle" class="small" fill="#10B981">일관된 읽기 보장</text>
+
+  <!-- UNDO Data States -->
+  <rect x="30" y="510" width="740" height="100" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="400" y="535" text-anchor="middle" class="label">UNDO 데이터 상태 전이 (UNDO Data State Transition)</text>
+
+  <!-- ACTIVE -->
+  <rect x="70" y="550" width="160" height="40" rx="6" ry="6" fill="rgba(243,63,94,0.12)" stroke="#F43F5E" stroke-width="1.2"/>
+  <text x="150" y="568" text-anchor="middle" class="sublabel" fill="#F43F5E">ACTIVE</text>
+  <text x="150" y="583" text-anchor="middle" class="small" fill="#F43F5E">활성 트랜잭션 — 삭제 불가</text>
+
+  <!-- Arrow -->
+  <line x1="230" y1="570" x2="280" y2="570" stroke="#E2E8F0" stroke-width="1.5" marker-end="url(#arrB)"/>
+  <text x="255" y="562" text-anchor="middle" class="small">COMMIT</text>
+
+  <!-- UNEXPIRED -->
+  <rect x="285" y="550" width="190" height="40" rx="6" ry="6" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.2"/>
+  <text x="380" y="568" text-anchor="middle" class="sublabel" fill="#F59E0B">UNEXPIRED</text>
+  <text x="380" y="583" text-anchor="middle" class="small" fill="#F59E0B">보존 기간 중 — 가능하면 보존</text>
+
+  <!-- Arrow -->
+  <line x1="475" y1="570" x2="525" y2="570" stroke="#E2E8F0" stroke-width="1.5" marker-end="url(#arrG)"/>
+  <text x="500" y="562" text-anchor="middle" class="small">시간 경과</text>
+
+  <!-- EXPIRED -->
+  <rect x="530" y="550" width="190" height="40" rx="6" ry="6" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.2"/>
+  <text x="625" y="568" text-anchor="middle" class="sublabel" fill="#10B981">EXPIRED</text>
+  <text x="625" y="583" text-anchor="middle" class="small" fill="#10B981">보존 기간 만료 — 덮어쓰기 가능</text>
+</svg>

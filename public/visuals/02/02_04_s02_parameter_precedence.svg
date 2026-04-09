@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">PDB 파라미터 우선순위 계층</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Parameter Precedence Hierarchy — CDB vs PDB Level</text>
+
+  <!-- Priority Pyramid -->
+  <!-- Level 1: Session -->
+  <rect x="200" y="70" width="400" height="55" class="box" fill="#F43F5E" opacity="0.15" stroke="#F43F5E" stroke-width="2"/>
+  <text x="240" y="92" class="label" fill="#F43F5E">1순위 (최우선)</text>
+  <text x="240" y="112" class="sublabel">ALTER SESSION SET — 현재 세션에서만 유효</text>
+
+  <!-- Level 2: PDB -->
+  <rect x="200" y="135" width="400" height="55" class="box" fill="#F59E0B" opacity="0.12" stroke="#F59E0B" stroke-width="2"/>
+  <text x="240" y="157" class="label" fill="#F59E0B">2순위</text>
+  <text x="240" y="177" class="sublabel">PDB 레벨 ALTER SYSTEM SET — CONTAINER=CURRENT</text>
+
+  <!-- Level 3: CDB Root -->
+  <rect x="200" y="200" width="400" height="55" class="box" fill="#3B82F6" opacity="0.12" stroke="#3B82F6" stroke-width="2"/>
+  <text x="240" y="222" class="label" fill="#3B82F6">3순위</text>
+  <text x="240" y="242" class="sublabel">CDB 루트 ALTER SYSTEM SET — PDB 설정 없으면 적용</text>
+
+  <!-- Level 4: Oracle Default -->
+  <rect x="200" y="265" width="400" height="55" class="box" fill="#94A3B8" opacity="0.1" stroke="#94A3B8" stroke-width="1.5"/>
+  <text x="240" y="287" class="label" fill="#94A3B8">4순위 (기본값)</text>
+  <text x="240" y="307" class="sublabel" fill="#94A3B8">Oracle 기본값 (Default) — 어디에도 설정 없을 때</text>
+
+  <!-- Arrow -->
+  <text x="170" y="100" class="small" fill="#F43F5E">높음</text>
+  <line x1="175" y1="110" x2="175" y2="310" stroke="#94A3B8" stroke-width="1" stroke-dasharray="3,3"/>
+  <polygon points="170,308 175,318 180,308" fill="#94A3B8"/>
+  <text x="170" y="330" class="small">낮음</text>
+
+  <!-- Key Behaviors -->
+  <rect x="40" y="340" width="350" height="105" class="box" fill="#2A2B3D" stroke="#F59E0B" stroke-width="1"/>
+  <text x="215" y="362" text-anchor="middle" class="label" fill="#F59E0B">핵심 동작 규칙</text>
+  <text x="55" y="382" class="small" fill="#F59E0B">CONTAINER=ALL 변경 시:</text>
+  <text x="55" y="399" class="small">PDB에 명시적 설정 있음 → PDB 값 유지 (덮어쓰기 안됨)</text>
+  <text x="55" y="416" class="small">PDB에 명시적 설정 없음 → 새 CDB 값 상속</text>
+  <text x="55" y="436" class="code">ALTER SYSTEM RESET 파라미터 → CDB 기본값 복원</text>
+
+  <!-- Parameter Types -->
+  <rect x="410" y="340" width="350" height="105" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1"/>
+  <text x="585" y="362" text-anchor="middle" class="label" fill="#3B82F6">파라미터 식별</text>
+  <text x="425" y="382" class="code">ISPDB_MODIFIABLE = TRUE</text>
+  <text x="425" y="399" class="small" fill="#10B981">  PDB 레벨 변경 가능 (예: OPEN_CURSORS)</text>
+  <text x="425" y="416" class="code">ISPDB_MODIFIABLE = FALSE</text>
+  <text x="425" y="433" class="small" fill="#F43F5E">  CDB 루트에서만 변경 (예: SGA_TARGET)</text>
+  <text x="425" y="451" class="small">확인: V$SYSTEM_PARAMETER.ISDEFAULT (상속 여부)</text>
+</svg>

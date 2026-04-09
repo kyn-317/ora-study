@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .yes { font-size: 12px; font-weight: 600; fill: #10B981; }
+    .no { font-size: 12px; font-weight: 600; fill: #F43F5E; }
+    .header-text { font-size: 12px; font-weight: 600; fill: #E2E8F0; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">종료 모드 비교 (Shutdown Modes Comparison)</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">안전도: NORMAL > TRANSACTIONAL > IMMEDIATE > ABORT</text>
+
+  <!-- Column headers -->
+  <rect x="20" y="70" width="160" height="36" class="box" fill="#2A2B3D"/>
+  <text x="100" y="93" text-anchor="middle" class="header-text">항목</text>
+
+  <rect x="190" y="70" width="140" height="36" class="box" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1"/>
+  <text x="260" y="88" text-anchor="middle" class="label" fill="#10B981">NORMAL</text>
+  <text x="260" y="101" text-anchor="middle" class="small">기본 모드</text>
+
+  <rect x="340" y="70" width="140" height="36" class="box" fill="#3B82F6" opacity="0.2" stroke="#3B82F6" stroke-width="1"/>
+  <text x="410" y="88" text-anchor="middle" class="label" fill="#3B82F6">TRANSACTIONAL</text>
+  <text x="410" y="101" text-anchor="middle" class="small">트랜잭션 보호</text>
+
+  <rect x="490" y="70" width="140" height="36" class="box" fill="#6F6BEA" opacity="0.2" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="560" y="88" text-anchor="middle" class="label" fill="#6F6BEA">IMMEDIATE</text>
+  <text x="560" y="101" text-anchor="middle" class="small">가장 많이 사용</text>
+
+  <rect x="640" y="70" width="140" height="36" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1"/>
+  <text x="710" y="88" text-anchor="middle" class="label" fill="#F43F5E">ABORT</text>
+  <text x="710" y="101" text-anchor="middle" class="small">비상시만</text>
+
+  <!-- Row 1: 새 접속 허용 -->
+  <rect x="20" y="116" width="160" height="32" class="box" fill="#2A2B3D" opacity="0.5"/>
+  <text x="100" y="137" text-anchor="middle" class="sublabel">새 접속 허용</text>
+  <text x="260" y="137" text-anchor="middle" class="no">X</text>
+  <text x="410" y="137" text-anchor="middle" class="no">X</text>
+  <text x="560" y="137" text-anchor="middle" class="no">X</text>
+  <text x="710" y="137" text-anchor="middle" class="no">X</text>
+
+  <!-- Row 2: 세션 종료 대기 -->
+  <rect x="20" y="156" width="160" height="32" class="box" fill="none"/>
+  <text x="100" y="177" text-anchor="middle" class="sublabel">세션 종료 대기</text>
+  <text x="260" y="177" text-anchor="middle" class="yes">O (무한 대기)</text>
+  <text x="410" y="177" text-anchor="middle" class="no">X</text>
+  <text x="560" y="177" text-anchor="middle" class="no">X</text>
+  <text x="710" y="177" text-anchor="middle" class="no">X</text>
+
+  <!-- Row 3: 트랜잭션 완료 대기 -->
+  <rect x="20" y="196" width="160" height="32" class="box" fill="#2A2B3D" opacity="0.5"/>
+  <text x="100" y="217" text-anchor="middle" class="sublabel">트랜잭션 완료 대기</text>
+  <text x="260" y="217" text-anchor="middle" class="yes">O</text>
+  <text x="410" y="217" text-anchor="middle" class="yes">O</text>
+  <text x="560" y="217" text-anchor="middle" class="no">X (롤백)</text>
+  <text x="710" y="217" text-anchor="middle" class="no">X (무시)</text>
+
+  <!-- Row 4: 체크포인트 수행 -->
+  <rect x="20" y="236" width="160" height="32" class="box" fill="none"/>
+  <text x="100" y="257" text-anchor="middle" class="sublabel">체크포인트 수행</text>
+  <text x="260" y="257" text-anchor="middle" class="yes">O</text>
+  <text x="410" y="257" text-anchor="middle" class="yes">O</text>
+  <text x="560" y="257" text-anchor="middle" class="yes">O</text>
+  <text x="710" y="257" text-anchor="middle" class="no">X</text>
+
+  <!-- Row 5: Redo 기록 -->
+  <rect x="20" y="276" width="160" height="32" class="box" fill="#2A2B3D" opacity="0.5"/>
+  <text x="100" y="297" text-anchor="middle" class="sublabel">Redo Log 기록</text>
+  <text x="260" y="297" text-anchor="middle" class="yes">O</text>
+  <text x="410" y="297" text-anchor="middle" class="yes">O</text>
+  <text x="560" y="297" text-anchor="middle" class="yes">O</text>
+  <text x="710" y="297" text-anchor="middle" class="no">X</text>
+
+  <!-- Row 6: 인스턴스 복구 필요 -->
+  <rect x="20" y="316" width="160" height="32" class="box" fill="none"/>
+  <text x="100" y="337" text-anchor="middle" class="sublabel">인스턴스 복구 필요</text>
+  <text x="260" y="337" text-anchor="middle" class="no">불필요</text>
+  <text x="410" y="337" text-anchor="middle" class="no">불필요</text>
+  <text x="560" y="337" text-anchor="middle" class="no">불필요</text>
+  <text x="710" y="337" text-anchor="middle" class="yes" style="fill:#F43F5E">필수</text>
+
+  <!-- Row 7: 종료 속도 -->
+  <rect x="20" y="356" width="160" height="32" class="box" fill="#2A2B3D" opacity="0.5"/>
+  <text x="100" y="377" text-anchor="middle" class="sublabel">종료 속도</text>
+  <text x="260" y="377" text-anchor="middle" class="small">매우 느림</text>
+  <text x="410" y="377" text-anchor="middle" class="small">느림~보통</text>
+  <text x="560" y="377" text-anchor="middle" class="sublabel">빠름</text>
+  <text x="710" y="377" text-anchor="middle" class="sublabel">즉시</text>
+
+  <!-- Speed bar -->
+  <rect x="190" y="396" width="590" height="6" rx="3" ry="3" fill="#2A2B3D"/>
+  <rect x="190" y="396" width="590" height="6" rx="3" ry="3" fill="url(#speedGrad)"/>
+
+  <!-- Clean / Dirty shutdown divider -->
+  <line x1="635" y1="116" x2="635" y2="390" stroke="#F59E0B" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="415" y="430" text-anchor="middle" class="small">Clean Shutdown (정상 종료)</text>
+  <text x="710" y="430" text-anchor="middle" class="small" style="fill:#F43F5E">Dirty Shutdown</text>
+
+  <!-- Bottom recommendations -->
+  <rect x="60" y="455" width="300" height="50" class="box" fill="none" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="210" y="475" text-anchor="middle" class="label" fill="#6F6BEA">실무 권장: SHUTDOWN IMMEDIATE</text>
+  <text x="210" y="493" text-anchor="middle" class="small">안전 + 빠른 종료 = 최적 균형</text>
+
+  <rect x="440" y="455" width="300" height="50" class="box" fill="none" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="590" y="475" text-anchor="middle" class="label" fill="#F43F5E">STARTUP FORCE = ABORT + STARTUP</text>
+  <text x="590" y="493" text-anchor="middle" class="small">비정상 종료 후 재기동 시 사용</text>
+
+  <defs>
+    <linearGradient id="speedGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#3B82F6" stop-opacity="0.5"/>
+      <stop offset="75%" stop-color="#6F6BEA" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#F43F5E" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+</svg>

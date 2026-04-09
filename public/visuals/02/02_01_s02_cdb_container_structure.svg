@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">CDB 내부 컨테이너 구조</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">CDB Internal Container Structure — CON_ID 체계</text>
+
+  <!-- CDB$ROOT -->
+  <rect x="250" y="70" width="300" height="90" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <rect x="250" y="70" width="300" height="28" rx="8" ry="8" fill="#F59E0B" opacity="0.15"/>
+  <text x="400" y="90" text-anchor="middle" class="label" fill="#F59E0B">CDB$ROOT (CON_ID = 1)</text>
+  <text x="265" y="115" class="small">마스터 데이터 딕셔너리 (원본)</text>
+  <text x="265" y="132" class="small">공통 사용자/역할 (C##), AWR 데이터, 패치 관리</text>
+  <text x="265" y="149" class="small">CDB 레벨 관리 작업의 진입점</text>
+
+  <!-- Connecting lines -->
+  <line x1="310" y1="160" x2="140" y2="200" stroke="#94A3B8" stroke-width="1.5"/>
+  <line x1="400" y1="160" x2="400" y2="200" stroke="#94A3B8" stroke-width="1.5"/>
+  <line x1="490" y1="160" x2="660" y2="200" stroke="#94A3B8" stroke-width="1.5"/>
+
+  <!-- PDB$SEED -->
+  <rect x="40" y="200" width="200" height="130" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="40" y="200" width="200" height="28" rx="8" ry="8" fill="#10B981" opacity="0.15"/>
+  <text x="140" y="220" text-anchor="middle" class="label" fill="#10B981">PDB$SEED (CON_ID = 2)</text>
+  <text x="55" y="248" class="small">READ ONLY (항상)</text>
+  <text x="55" y="265" class="small">새 PDB 생성 시 템플릿</text>
+  <text x="55" y="282" class="small">SYSTEM + SYSAUX + TEMP</text>
+  <text x="55" y="299" class="small">삭제 불가</text>
+  <text x="55" y="316" class="small">패치 적용 시 자동 반영</text>
+
+  <!-- User PDB 1 -->
+  <rect x="260" y="200" width="200" height="130" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="260" y="200" width="200" height="28" rx="8" ry="8" fill="#6F6BEA" opacity="0.15"/>
+  <text x="360" y="220" text-anchor="middle" class="label" fill="#6F6BEA">PDB1 (CON_ID = 3)</text>
+  <text x="275" y="248" class="small">READ WRITE (운영)</text>
+  <text x="275" y="265" class="small">독립 데이터 딕셔너리</text>
+  <text x="275" y="282" class="small">독립 테이블스페이스</text>
+  <text x="275" y="299" class="small">로컬 사용자/역할</text>
+  <text x="275" y="316" class="small">고유 GUID / 서비스</text>
+
+  <!-- User PDB 2 -->
+  <rect x="560" y="200" width="200" height="130" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="560" y="200" width="200" height="28" rx="8" ry="8" fill="#3B82F6" opacity="0.15"/>
+  <text x="660" y="220" text-anchor="middle" class="label" fill="#3B82F6">PDB_N (CON_ID = N)</text>
+  <text x="575" y="248" class="small">READ WRITE / READ ONLY</text>
+  <text x="575" y="265" class="small">독립 데이터 딕셔너리</text>
+  <text x="575" y="282" class="small">독립 테이블스페이스</text>
+  <text x="575" y="299" class="small">PDB별 파라미터 설정</text>
+  <text x="575" y="316" class="small">Plug/Unplug 이동 가능</text>
+
+  <!-- Physical File Structure -->
+  <text x="400" y="365" text-anchor="middle" class="label">물리적 파일 구조 (Physical File Layout)</text>
+
+  <!-- Shared files -->
+  <rect x="40" y="380" width="350" height="160" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1"/>
+  <text x="215" y="400" text-anchor="middle" class="sublabel" fill="#3B82F6">CDB 전체 공유 파일</text>
+  <rect x="55" y="410" width="140" height="26" rx="4" ry="4" fill="#3B82F6" opacity="0.15" stroke="#3B82F6" stroke-width="0.5"/>
+  <text x="125" y="428" text-anchor="middle" class="small" fill="#3B82F6">Control Files</text>
+  <rect x="205" y="410" width="170" height="26" rx="4" ry="4" fill="#3B82F6" opacity="0.15" stroke="#3B82F6" stroke-width="0.5"/>
+  <text x="290" y="428" text-anchor="middle" class="small" fill="#3B82F6">Online Redo Logs</text>
+  <rect x="55" y="445" width="170" height="26" rx="4" ry="4" fill="#3B82F6" opacity="0.15" stroke="#3B82F6" stroke-width="0.5"/>
+  <text x="140" y="463" text-anchor="middle" class="small" fill="#3B82F6">Archived Redo Logs</text>
+  <rect x="235" y="445" width="140" height="26" rx="4" ry="4" fill="#F59E0B" opacity="0.15" stroke="#F59E0B" stroke-width="0.5"/>
+  <text x="305" y="463" text-anchor="middle" class="small" fill="#F59E0B">UNDO (Shared)</text>
+  <text x="215" y="497" text-anchor="middle" class="small">* Local Undo Mode 시 PDB별 별도 UNDO</text>
+  <text x="215" y="515" text-anchor="middle" class="code">LOCAL_UNDO_ENABLED = TRUE (26ai 기본값)</text>
+
+  <!-- Per-PDB files -->
+  <rect x="410" y="380" width="350" height="160" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="585" y="400" text-anchor="middle" class="sublabel" fill="#6F6BEA">PDB별 개별 파일</text>
+  <rect x="425" y="410" width="100" height="26" rx="4" ry="4" fill="#6F6BEA" opacity="0.15" stroke="#6F6BEA" stroke-width="0.5"/>
+  <text x="475" y="428" text-anchor="middle" class="small" fill="#6F6BEA">SYSTEM TS</text>
+  <rect x="535" y="410" width="100" height="26" rx="4" ry="4" fill="#6F6BEA" opacity="0.15" stroke="#6F6BEA" stroke-width="0.5"/>
+  <text x="585" y="428" text-anchor="middle" class="small" fill="#6F6BEA">SYSAUX TS</text>
+  <rect x="645" y="410" width="100" height="26" rx="4" ry="4" fill="#6F6BEA" opacity="0.15" stroke="#6F6BEA" stroke-width="0.5"/>
+  <text x="695" y="428" text-anchor="middle" class="small" fill="#6F6BEA">TEMP TS</text>
+  <rect x="425" y="445" width="150" height="26" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="0.5"/>
+  <text x="500" y="463" text-anchor="middle" class="small" fill="#10B981">사용자 Tablespace</text>
+  <rect x="585" y="445" width="150" height="26" rx="4" ry="4" fill="#F43F5E" opacity="0.15" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="660" y="463" text-anchor="middle" class="small" fill="#F43F5E">UNDO (Local)</text>
+  <text x="585" y="497" text-anchor="middle" class="small">각 PDB마다 자체 데이터 딕셔너리 보유</text>
+  <text x="585" y="515" text-anchor="middle" class="small">PDB 간 완전한 논리적 격리</text>
+
+  <!-- Bottom note -->
+  <text x="400" y="555" text-anchor="middle" class="code">MAX_PDBS = 4098 (Oracle 26ai 기본값, PDB$SEED + App Root 포함)</text>
+</svg>

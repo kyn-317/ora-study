@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">SMALLFILE vs BIGFILE 테이블스페이스 비교</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">SMALLFILE Tablespace vs BIGFILE Tablespace — 구조적 차이</text>
+
+  <!-- SMALLFILE Side -->
+  <rect x="30" y="70" width="355" height="470" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="2"/>
+  <text x="207" y="95" text-anchor="middle" class="label" fill="#3B82F6">SMALLFILE 테이블스페이스</text>
+  <text x="207" y="112" text-anchor="middle" class="small">전통적 유형 — 다중 데이터 파일</text>
+
+  <!-- SMALLFILE: Multiple datafiles -->
+  <rect x="55" y="130" width="300" height="180" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="65" y="150" class="sublabel">Tablespace: USERS</text>
+
+  <rect x="70" y="162" width="120" height="38" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="130" y="177" text-anchor="middle" class="code">users01.dbf</text>
+  <text x="130" y="193" text-anchor="middle" class="small">10GB</text>
+
+  <rect x="200" y="162" width="120" height="38" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="260" y="177" text-anchor="middle" class="code">users02.dbf</text>
+  <text x="260" y="193" text-anchor="middle" class="small">10GB</text>
+
+  <rect x="70" y="210" width="120" height="38" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="130" y="225" text-anchor="middle" class="code">users03.dbf</text>
+  <text x="130" y="241" text-anchor="middle" class="small">10GB</text>
+
+  <rect x="200" y="210" width="120" height="38" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="260" y="225" text-anchor="middle" class="code">users04.dbf</text>
+  <text x="260" y="241" text-anchor="middle" class="small">5GB</text>
+
+  <text x="70" y="278" class="small">최대 1,022 데이터 파일 / 테이블스페이스</text>
+  <text x="70" y="296" class="small">파일당 최대 32GB (8KB 블록 기준)</text>
+
+  <!-- SMALLFILE ROWID -->
+  <rect x="55" y="320" width="300" height="90" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="65" y="340" class="sublabel">ROWID 구조 (80비트)</text>
+  <rect x="70" y="350" width="80" height="28" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1" rx="4"/>
+  <text x="110" y="368" text-anchor="middle" class="code">OBJ 32b</text>
+  <rect x="155" y="350" width="55" height="28" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" rx="4"/>
+  <text x="182" y="368" text-anchor="middle" class="code">FILE 10b</text>
+  <rect x="215" y="350" width="70" height="28" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1" rx="4"/>
+  <text x="250" y="368" text-anchor="middle" class="code">BLOCK 22b</text>
+  <rect x="290" y="350" width="50" height="28" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="1" rx="4"/>
+  <text x="315" y="368" text-anchor="middle" class="code">ROW 16b</text>
+  <text x="70" y="400" class="small">File 10bit → 최대 1,022 파일 식별</text>
+
+  <!-- SMALLFILE specs -->
+  <rect x="55" y="420" width="300" height="105" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="65" y="440" class="sublabel">특성</text>
+  <text x="65" y="458" class="small">기본 타입: Oracle 기본 설정</text>
+  <text x="65" y="474" class="small">TS 최대 크기: ~32TB (8KB 블록)</text>
+  <text x="65" y="490" class="small">DDL 대상: ALTER DATABASE DATAFILE</text>
+  <text x="65" y="506" class="small">적합 환경: Non-ASM, 전통적 FS</text>
+
+  <!-- BIGFILE Side -->
+  <rect x="415" y="70" width="355" height="470" class="box" fill="rgba(111,107,234,0.06)" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="592" y="95" text-anchor="middle" class="label" fill="#6F6BEA">BIGFILE 테이블스페이스</text>
+  <text x="592" y="112" text-anchor="middle" class="small">Oracle 10g+ — 단일 데이터 파일</text>
+
+  <!-- BIGFILE: Single large datafile -->
+  <rect x="440" y="130" width="300" height="180" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="450" y="150" class="sublabel">Tablespace: BIG_DATA</text>
+
+  <rect x="460" y="162" width="260" height="88" class="box" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="590" y="200" text-anchor="middle" class="code">bigdata01.dbf</text>
+  <text x="590" y="220" text-anchor="middle" class="label" fill="#6F6BEA">32TB</text>
+  <text x="590" y="240" text-anchor="middle" class="small">단일 파일 (Single Datafile)</text>
+
+  <text x="460" y="278" class="small">정확히 1개 데이터 파일 / 테이블스페이스</text>
+  <text x="460" y="296" class="small">파일 최대 32TB (8KB 블록 기준)</text>
+
+  <!-- BIGFILE ROWID -->
+  <rect x="440" y="320" width="300" height="90" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="450" y="340" class="sublabel">ROWID 구조 (80비트)</text>
+  <rect x="460" y="350" width="80" height="28" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1" rx="4"/>
+  <text x="500" y="368" text-anchor="middle" class="code">OBJ 32b</text>
+  <rect x="545" y="350" width="170" height="28" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1" rx="4"/>
+  <text x="630" y="368" text-anchor="middle" class="code">BLOCK 32b (File 없음)</text>
+  <text x="460" y="400" class="small">Block 32bit → 최대 4,294,967,296 블록</text>
+
+  <!-- BIGFILE specs -->
+  <rect x="440" y="420" width="300" height="105" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="450" y="440" class="sublabel">특성</text>
+  <text x="450" y="458" class="small">기본 타입: 명시적 지정 또는 SET DEFAULT BIGFILE</text>
+  <text x="450" y="474" class="small">TS 최대 크기: ~32TB (8KB 블록)</text>
+  <text x="450" y="490" class="small">DDL 대상: ALTER TABLESPACE (직접)</text>
+  <text x="450" y="506" class="small">적합 환경: ASM/OMF, 대용량 DB</text>
+
+  <!-- VS divider -->
+  <circle cx="400" cy="305" r="18" fill="rgba(244,63,94,0.2)" stroke="#F43F5E" stroke-width="2"/>
+  <text x="400" y="310" text-anchor="middle" class="label" fill="#F43F5E">VS</text>
+</svg>

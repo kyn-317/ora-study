@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .header { font-size: 12px; font-weight: 600; fill: #E2E8F0; }
+    .cell { font-size: 11px; fill: #CBD5E1; }
+    .yes { font-size: 11px; fill: #10B981; font-weight: 600; }
+    .no { font-size: 11px; fill: #F43F5E; font-weight: 600; }
+    .partial { font-size: 11px; fill: #F59E0B; font-weight: 600; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">External Table vs SQL*Loader vs Data Pump</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">외부 테이블 제한사항 및 로드 도구 비교</text>
+
+  <!-- Table header -->
+  <rect x="30" y="70" width="740" height="35" class="box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1" />
+  <text x="145" y="92" text-anchor="middle" class="header">비교 항목</text>
+  <text x="330" y="92" text-anchor="middle" class="header" fill="#3B82F6">External Table</text>
+  <text x="510" y="92" text-anchor="middle" class="header" fill="#F59E0B">SQL*Loader</text>
+  <text x="685" y="92" text-anchor="middle" class="header" fill="#10B981">Data Pump</text>
+
+  <!-- Column separator lines -->
+  <line x1="235" y1="70" x2="235" y2="395" stroke="#2A2B3D" stroke-width="1" />
+  <line x1="420" y1="70" x2="420" y2="395" stroke="#2A2B3D" stroke-width="1" />
+  <line x1="600" y1="70" x2="600" y2="395" stroke="#2A2B3D" stroke-width="1" />
+
+  <!-- Rows -->
+  <!-- Row 1 -->
+  <rect x="30" y="105" width="740" height="30" class="box" fill="rgba(42,43,61,0.3)" />
+  <text x="50" y="124" class="cell">실행 위치</text>
+  <text x="330" y="124" text-anchor="middle" class="cell">서버 측 (Server-Side)</text>
+  <text x="510" y="124" text-anchor="middle" class="cell">클라이언트 측 (Client)</text>
+  <text x="685" y="124" text-anchor="middle" class="cell">서버 측 (Server-Side)</text>
+
+  <!-- Row 2 -->
+  <rect x="30" y="135" width="740" height="30" class="box" fill="none" />
+  <text x="50" y="154" class="cell">DML 지원</text>
+  <text x="330" y="154" text-anchor="middle" class="no">SELECT Only</text>
+  <text x="510" y="154" text-anchor="middle" class="yes">INSERT (로드 전용)</text>
+  <text x="685" y="154" text-anchor="middle" class="yes">Export + Import</text>
+
+  <!-- Row 3 -->
+  <rect x="30" y="165" width="740" height="30" class="box" fill="rgba(42,43,61,0.3)" />
+  <text x="50" y="184" class="cell">인덱스 생성</text>
+  <text x="330" y="184" text-anchor="middle" class="no">불가</text>
+  <text x="510" y="184" text-anchor="middle" class="yes">대상 테이블에 가능</text>
+  <text x="685" y="184" text-anchor="middle" class="yes">가능</text>
+
+  <!-- Row 4 -->
+  <rect x="30" y="195" width="740" height="30" class="box" fill="none" />
+  <text x="50" y="214" class="cell">제약조건</text>
+  <text x="330" y="214" text-anchor="middle" class="no">NOT NULL만 (미적용)</text>
+  <text x="510" y="214" text-anchor="middle" class="yes">적용됨</text>
+  <text x="685" y="214" text-anchor="middle" class="yes">적용됨</text>
+
+  <!-- Row 5 -->
+  <rect x="30" y="225" width="740" height="30" class="box" fill="rgba(42,43,61,0.3)" />
+  <text x="50" y="244" class="cell">트리거 실행</text>
+  <text x="330" y="244" text-anchor="middle" class="no">불가</text>
+  <text x="510" y="244" text-anchor="middle" class="partial">Conventional만</text>
+  <text x="685" y="244" text-anchor="middle" class="no">불가</text>
+
+  <!-- Row 6 -->
+  <rect x="30" y="255" width="740" height="30" class="box" fill="none" />
+  <text x="50" y="274" class="cell">병렬 처리</text>
+  <text x="330" y="274" text-anchor="middle" class="yes">Parallel Query</text>
+  <text x="510" y="274" text-anchor="middle" class="yes">Direct Path Parallel</text>
+  <text x="685" y="274" text-anchor="middle" class="yes">PARALLEL Workers</text>
+
+  <!-- Row 7 -->
+  <rect x="30" y="285" width="740" height="30" class="box" fill="rgba(42,43,61,0.3)" />
+  <text x="50" y="304" class="cell">데이터 물리적 로드</text>
+  <text x="330" y="304" text-anchor="middle" class="no">불필요 (실시간 읽기)</text>
+  <text x="510" y="304" text-anchor="middle" class="yes">테이블에 적재</text>
+  <text x="685" y="304" text-anchor="middle" class="yes">테이블에 적재</text>
+
+  <!-- Row 8 -->
+  <rect x="30" y="315" width="740" height="30" class="box" fill="none" />
+  <text x="50" y="334" class="cell">조인 가능</text>
+  <text x="330" y="334" text-anchor="middle" class="yes">내부 테이블과 조인</text>
+  <text x="510" y="334" text-anchor="middle" class="no">로드 후 가능</text>
+  <text x="685" y="334" text-anchor="middle" class="no">Import 후 가능</text>
+
+  <!-- Row 9 -->
+  <rect x="30" y="345" width="740" height="30" class="box" fill="rgba(42,43,61,0.3)" />
+  <text x="50" y="364" class="cell">파일 형식</text>
+  <text x="330" y="364" text-anchor="middle" class="cell">CSV, 고정폭, Parquet</text>
+  <text x="510" y="364" text-anchor="middle" class="cell">CSV, 고정폭, 가변</text>
+  <text x="685" y="364" text-anchor="middle" class="cell">Oracle .dmp 형식</text>
+
+  <!-- Row 10 -->
+  <rect x="30" y="375" width="740" height="30" class="box" fill="none" />
+  <text x="50" y="394" class="cell">최적 사용 사례</text>
+  <text x="330" y="394" text-anchor="middle" class="cell">ETL, 임시 조회, 검증</text>
+  <text x="510" y="394" text-anchor="middle" class="cell">대량 초기 로드</text>
+  <text x="685" y="394" text-anchor="middle" class="cell">DB 간 이관, 백업</text>
+
+  <!-- External Table Limitations summary -->
+  <rect x="30" y="420" width="740" height="70" class="box" fill="rgba(244,63,94,0.06)" stroke="#F43F5E" stroke-width="1" />
+  <text x="50" y="442" class="label" fill="#F43F5E">External Table 주요 제한사항 요약</text>
+  <text x="50" y="462" class="small">INSERT/UPDATE/DELETE 불가 (ORACLE_DATAPUMP 언로드 제외) | 인덱스/제약조건 미지원 | 읽기 일관성(Read Consistency) 미보장</text>
+  <text x="50" y="480" class="small">파티셔닝 불가 | 통계정보 자동 수집 없음 (DBMS_STATS 수동 수집) | 파일 미존재 시 ORA-29913 에러</text>
+</svg>

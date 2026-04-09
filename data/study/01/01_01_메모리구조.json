@@ -16,6 +16,16 @@
       "title": "Oracle 인스턴스와 메모리의 관계 (Instance and Memory Overview)",
       "sqlExamplesIds": [],
       "content": "Oracle Database는 **인스턴스(Instance)**와 **데이터베이스(Database)**의 조합으로 구성됩니다.\n\n- **인스턴스**: 메모리 구조(SGA + PGA) + 백그라운드 프로세스\n- **데이터베이스**: 디스크 상의 물리적 파일(데이터 파일, 컨트롤 파일, Redo Log 파일 등)\n\n인스턴스는 데이터베이스에 대한 **접근 경로**이며, 인스턴스가 시작(STARTUP)되면 SGA가 할당되고 백그라운드 프로세스가 기동됩니다. 인스턴스가 종료(SHUTDOWN)되면 SGA 메모리가 해제됩니다.\n\nOracle의 메모리 구조는 크게 두 가지로 나뉩니다:\n\n| 구분 | SGA | PGA |\n|---|---|---|\n| **공유 여부** | 모든 프로세스가 공유 | 각 프로세스 전용 |\n| **할당 시점** | 인스턴스 시작 시 | 서버 프로세스 생성 시 |\n| **해제 시점** | 인스턴스 종료 시 | 서버 프로세스 종료 시 |\n| **개수** | 인스턴스당 1개 | 서버 프로세스당 1개 |\n| **주요 역할** | 데이터/SQL 캐싱, Redo 버퍼링 | 정렬, 해시 조인, 세션 정보 |",
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/01/01_01_s01_instance_memory_overview.svg",
+          "caption": "Oracle 인스턴스 전체 구조: SGA(공유 메모리) + PGA(프로세스 전용) + 백그라운드 프로세스",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -23,6 +33,16 @@
       "title": "SGA (System Global Area / 시스템 글로벌 영역)",
       "sqlExamplesIds": ["sql01", "sql02", "sql03", "sql06", "sql07", "sql08", "sql09", "sql13", "sql14", "sql15"],
       "content": "SGA는 Oracle 인스턴스가 시작될 때 할당되는 **공유 메모리 영역**입니다. 모든 서버 프로세스와 백그라운드 프로세스가 공유하여 사용하며, 인스턴스당 정확히 하나만 존재합니다.\n\nSGA의 전체 구성요소:\n\n| 구성요소 | 필수 여부 | 설명 |\n|---|---|---|\n| **Database Buffer Cache** | 필수 | 데이터 블록 캐싱 |\n| **Shared Pool** | 필수 | SQL/PL/SQL 파싱 결과, 딕셔너리 캐싱 |\n| **Redo Log Buffer** | 필수 | 변경 사항(Redo Entry) 임시 저장 |\n| **Large Pool** | 선택 | RMAN 백업, Shared Server, 병렬 처리 전용 |\n| **Java Pool** | 선택 | Java 코드/데이터 저장 |\n| **Streams Pool** | 선택 | Oracle Streams, Advanced Queuing 지원 |\n| **Fixed SGA** | 필수(자동) | 내부 하우스키핑 정보, 래치/락 구조 |\n| **In-Memory Area** | 선택 | 컬럼 기반 In-Memory 저장소 |\n| **Result Cache** | 선택 | SQL/PL/SQL 실행 결과 캐싱 |\n\n### SGA Granule (SGA 그래뉼)\n\nSGA의 메모리는 **Granule(그래뉼)**이라는 연속적인 메모리 단위로 할당됩니다. 그래뉼 크기는 SGA 전체 크기에 따라 자동으로 결정됩니다.\n\n| SGA 크기 | Granule 크기 |\n|---|---|\n| 1GB 미만 | 4MB |\n| 1GB ~ 8GB | 16MB |\n| 8GB ~ 16GB | 32MB |\n| 16GB ~ 32GB | 64MB |\n| 32GB 이상 | 128MB 이상 |\n\n각 SGA 구성요소는 최소 1개의 Granule을 할당받으며, 동적 크기 조정(Dynamic SGA Resizing) 시에도 Granule 단위로 증감됩니다. `V$SGA_DYNAMIC_COMPONENTS` 뷰에서 Granule 크기를 확인할 수 있습니다.",
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/01/01_01_s02_sga_internal.svg",
+          "caption": "SGA 내부 구성요소 상세 구조: 필수/선택 구성요소와 Granule 기반 메모리 할당",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
       "subsections": [
         {
           "title": "데이터베이스 버퍼 캐시 (Database Buffer Cache)",
@@ -36,6 +56,16 @@
             "Default / Keep / Recycle 3가지 Buffer Pool로 용도별 분리 운영 가능",
             "비표준 블록 크기 사용 시 DB_nK_CACHE_SIZE 파라미터로 별도 캐시 할당 필요",
             "Full Table Scan 시 대규모 테이블은 LRU End 배치 또는 Direct Path Read로 캐시 오염 방지"
+          ],
+          "visuals": [
+            {
+              "id": "v03",
+              "type": "svg",
+              "src": "/visuals/01/01_01_s02_buffer_cache_lru.svg",
+              "caption": "Buffer Cache 내부 리스트 구조: LRU List + Touch Count 메커니즘과 버퍼 상태 관리",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
         },
         {
@@ -50,6 +80,16 @@
             "데이터 딕셔너리 캐시(Row Cache): 메타데이터를 행 단위로 캐싱, 의미 분석 시 참조",
             "Reserved Pool: 대형 연속 메모리 할당용 예약 영역 (기본 Shared Pool의 5%)",
             "Result Cache: 쿼리 실행 결과 자체를 캐싱하여 재실행 시 즉시 반환, 기반 테이블 변경 시 자동 무효화"
+          ],
+          "visuals": [
+            {
+              "id": "v04",
+              "type": "svg",
+              "src": "/visuals/01/01_01_s02_sql_parse_flow.svg",
+              "caption": "SQL 처리 흐름: Hard Parse vs Soft Parse 경로와 Library Cache 동작",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
         },
         {
@@ -63,6 +103,16 @@
             "Redo Entry는 Change Vector(변경 벡터)들로 구성되며, 각 벡터는 단일 블록의 변경을 기술",
             "LGWR 프로세스가 5가지 조건(COMMIT, 1/3 사용, 3초, DBWn 기록 전, 1MB) 중 하나 충족 시 디스크에 기록",
             "인스턴스 복구(Instance Recovery) 시 Redo 데이터를 사용하여 커밋된 변경 사항을 재적용(Roll Forward)"
+          ],
+          "visuals": [
+            {
+              "id": "v05",
+              "type": "svg",
+              "src": "/visuals/01/01_01_s02_redo_log_buffer.svg",
+              "caption": "Redo Log Buffer 순환 구조와 LGWR의 5가지 디스크 기록 조건, Write-Ahead Logging 원칙",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
         },
         {
@@ -102,6 +152,16 @@
       "title": "PGA (Program Global Area / 프로그램 글로벌 영역)",
       "sqlExamplesIds": ["sql04", "sql05", "sql10", "sql12"],
       "content": "PGA는 각 **서버 프로세스(또는 백그라운드 프로세스)에 독립적으로 할당**되는 **비공유(Private) 메모리 영역**입니다. SGA와 달리 다른 프로세스와 공유되지 않으며, 해당 프로세스만 읽고 쓸 수 있습니다.\n\n| 특성 | 설명 |\n|---|---|\n| **할당 시점** | 서버 프로세스 생성 시 |\n| **해제 시점** | 서버 프로세스 종료 시 |\n| **공유 여부** | 비공유 (해당 프로세스 전용) |\n| **개수** | 서버 프로세스당 1개 + 백그라운드 프로세스당 1개 |\n\n### PGA의 전체 구성\n\n```\nPGA\n├── Private SQL Area (개인 SQL 영역)\n│   ├── Persistent Area (지속 영역) — 바인드 변수 정보\n│   └── Runtime Area (런타임 영역) — 실행 상태 정보\n├── SQL Work Area (SQL 작업 영역)\n│   ├── Sort Area — 정렬 작업\n│   ├── Hash Area — 해시 조인 작업\n│   └── Bitmap Merge Area — 비트맵 인덱스 병합\n└── Session Memory (세션 메모리)\n    └── 세션 변수, 로그인 정보, PLSQL 변수 등\n```",
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "svg",
+          "src": "/visuals/01/01_01_s03_pga_internal.svg",
+          "caption": "PGA 내부 구성 트리와 SQL Work Area의 3단계 실행 모드(Optimal/One-pass/Multi-pass)",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
       "subsections": [
         {
           "title": "Private SQL Area (개인 SQL 영역)",
@@ -137,6 +197,16 @@
             "Shared Server: UGA가 SGA(Large Pool 또는 Shared Pool)로 이동",
             "Shared Server 사용 시 SGA(특히 Large Pool) 크기를 충분히 확보해야 함",
             "V$SESSTAT에서 session uga memory / session pga memory로 세션별 메모리 사용량 확인"
+          ],
+          "visuals": [
+            {
+              "id": "v07",
+              "type": "svg",
+              "src": "/visuals/01/01_01_s03_uga_location.svg",
+              "caption": "UGA 위치 변동: Dedicated Server(PGA 내부) vs Shared Server(SGA로 이동) 비교",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
         }
       ]
@@ -190,6 +260,16 @@
             "Manual: 모든 구성요소를 개별 파라미터로 수동 관리",
             "판단 기준: MEMORY_TARGET > 0 → AMM, 아니면 SGA_TARGET > 0 → ASMM, 둘 다 0 → Manual",
             "Oracle 권장: AMM 또는 ASMM. 대부분의 환경에서 자동 관리가 수동 관리보다 효율적"
+          ],
+          "visuals": [
+            {
+              "id": "v08",
+              "type": "svg",
+              "src": "/visuals/01/01_01_s04_memory_mgmt_comparison.svg",
+              "caption": "메모리 관리 방식 비교(AMM vs ASMM vs Manual)와 판단 플로차트",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
         }
       ]

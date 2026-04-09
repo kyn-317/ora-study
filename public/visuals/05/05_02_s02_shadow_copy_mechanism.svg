@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2; fill: none; marker-end: url(#ah); }
+    .arrow-green { stroke: #10B981; stroke-width: 2; fill: none; marker-end: url(#ah-g); }
+    .arrow-orange { stroke: #F59E0B; stroke-width: 2; fill: none; marker-end: url(#ah-o); }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="ah-g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+    </marker>
+    <marker id="ah-o" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="28" text-anchor="middle" class="title">온라인 데이터 파일 이동 — 섀도 복사 메커니즘</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">ALTER DATABASE MOVE DATAFILE — Shadow Copy with Dual Write</text>
+
+  <!-- Phase 1 -->
+  <rect x="30" y="65" width="740" height="105" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="50" y="85" class="label" fill="#3B82F6">Phase 1: 섀도 파일 생성 + 블록 복사 시작</text>
+
+  <!-- Original file -->
+  <rect x="50" y="95" width="200" height="55" class="box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="150" y="115" text-anchor="middle" class="label">원본 파일 (Source)</text>
+  <text x="150" y="133" text-anchor="middle" class="code">/old/users01.dbf</text>
+
+  <!-- Arrow copy -->
+  <line x1="250" y1="122" x2="380" y2="122" class="arrow" stroke-dasharray="6,3"/>
+  <text x="315" y="115" text-anchor="middle" class="small">블록 순차 복사</text>
+
+  <!-- Shadow file -->
+  <rect x="380" y="95" width="200" height="55" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="480" y="115" text-anchor="middle" class="label" fill="#10B981">섀도 파일 (Shadow)</text>
+  <text x="480" y="133" text-anchor="middle" class="code">/new/users01.dbf</text>
+
+  <!-- DML indicator -->
+  <rect x="620" y="95" width="130" height="55" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="685" y="115" text-anchor="middle" class="sublabel" fill="#F59E0B">DML 계속 가능</text>
+  <text x="685" y="133" text-anchor="middle" class="small">SELECT / INSERT</text>
+  <text x="685" y="147" text-anchor="middle" class="small">UPDATE / DELETE</text>
+
+  <!-- Phase 2 -->
+  <rect x="30" y="185" width="740" height="130" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="50" y="205" class="label" fill="#F59E0B">Phase 2: 이중 쓰기 (Dual Write) — 복사 진행 중</text>
+
+  <!-- Original with writes -->
+  <rect x="50" y="218" width="200" height="80" class="box" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="150" y="240" text-anchor="middle" class="label">원본 파일</text>
+  <text x="150" y="258" text-anchor="middle" class="small">READ: 여기서 읽기</text>
+  <text x="150" y="275" text-anchor="middle" class="small">WRITE: 원본에도 기록</text>
+
+  <!-- Shadow with writes -->
+  <rect x="380" y="218" width="200" height="80" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="480" y="240" text-anchor="middle" class="label" fill="#10B981">섀도 파일</text>
+  <text x="480" y="258" text-anchor="middle" class="small">블록 복사 계속 진행</text>
+  <text x="480" y="275" text-anchor="middle" class="small">WRITE: 섀도에도 기록</text>
+
+  <!-- Dual write arrows -->
+  <path d="M 310 235 L 310 215 L 620 215 L 620 235" stroke="#F59E0B" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+  <text x="465" y="213" text-anchor="middle" class="code">DML 변경 → 양쪽 동시 기록</text>
+
+  <!-- I/O overhead note -->
+  <rect x="620" y="230" width="130" height="55" class="box" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1"/>
+  <text x="685" y="250" text-anchor="middle" class="sublabel" fill="#F43F5E">I/O 오버헤드</text>
+  <text x="685" y="268" text-anchor="middle" class="small">~10-20% 추가</text>
+
+  <!-- Phase 3 -->
+  <rect x="30" y="330" width="740" height="100" class="box" fill="rgba(16,185,129,0.06)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="50" y="350" class="label" fill="#10B981">Phase 3: 경로 전환 (Path Switch)</text>
+
+  <!-- Control file update -->
+  <rect x="50" y="360" width="200" height="55" class="box" fill="rgba(111,107,234,0.08)" stroke="#6F6BEA" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="150" y="382" text-anchor="middle" class="sublabel" fill="#94A3B8">원본 (비활성화)</text>
+  <text x="150" y="400" text-anchor="middle" class="code" fill="#94A3B8">/old/users01.dbf</text>
+
+  <rect x="300" y="358" width="230" height="60" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="415" y="380" text-anchor="middle" class="label" fill="#F59E0B">컨트롤 파일 갱신</text>
+  <text x="415" y="398" text-anchor="middle" class="small">경로: /old → /new (짧은 잠금)</text>
+  <text x="415" y="412" text-anchor="middle" class="small">Lock 시간: 매우 짧음</text>
+
+  <rect x="570" y="360" width="180" height="55" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="2"/>
+  <text x="660" y="382" text-anchor="middle" class="label" fill="#10B981">새 파일 (활성)</text>
+  <text x="660" y="400" text-anchor="middle" class="code">/new/users01.dbf</text>
+
+  <line x1="250" y1="388" x2="298" y2="388" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="530" y1="388" x2="568" y2="388" class="arrow-green"/>
+
+  <!-- Phase 4 -->
+  <rect x="30" y="445" width="740" height="70" class="box" fill="rgba(111,107,234,0.06)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="50" y="465" class="label" fill="#6F6BEA">Phase 4: 원본 삭제 (KEEP 옵션 없는 경우)</text>
+
+  <rect x="50" y="478" width="200" height="30" class="box" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1"/>
+  <text x="150" y="498" text-anchor="middle" class="small" fill="#F43F5E">원본 자동 삭제 (KEEP 미사용 시)</text>
+
+  <rect x="380" y="478" width="200" height="30" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="2"/>
+  <text x="480" y="498" text-anchor="middle" class="label" fill="#10B981">이동 완료!</text>
+
+  <!-- Options box -->
+  <rect x="30" y="530" width="740" height="55" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="50" y="550" class="sublabel">옵션:</text>
+  <text x="110" y="550" class="code">REUSE</text>
+  <text x="170" y="550" class="small">— 대상 경로에 파일 있으면 덮어쓰기</text>
+  <text x="430" y="550" class="code">KEEP</text>
+  <text x="475" y="550" class="small">— 원본 파일 삭제하지 않고 유지</text>
+  <text x="50" y="572" class="code">V$SESSION_LONGOPS</text>
+  <text x="220" y="572" class="small">— 이동 진행 상태 모니터링</text>
+</svg>

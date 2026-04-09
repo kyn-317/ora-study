@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <text x="400" y="30" class="title" text-anchor="middle">데이터베이스 링크 개요 및 유형 비교</text>
+  <text x="400" y="50" class="subtitle" text-anchor="middle">Private / Public / Global 링크의 범위와 이름 해석 우선순위</text>
+
+  <!-- DB Link concept -->
+  <rect x="50" y="70" width="200" height="70" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <text x="150" y="95" class="label" text-anchor="middle" fill="#3B82F6">Local Database</text>
+  <text x="150" y="115" class="sublabel" text-anchor="middle">링크 소유</text>
+  <text x="150" y="130" class="code" text-anchor="middle">SELECT * FROM</text>
+
+  <!-- Arrow with DB Link -->
+  <line x1="250" y1="105" x2="530" y2="105" stroke="#F59E0B" stroke-width="2.5"/>
+  <polygon points="528,101 537,105 528,109" fill="#F59E0B"/>
+  <rect x="330" y="88" width="130" height="22" rx="4" ry="4" fill="#F59E0B" opacity="0.3" stroke="#F59E0B"/>
+  <text x="395" y="103" class="code" text-anchor="middle">@dblink_name</text>
+  <text x="395" y="125" class="small" text-anchor="middle">단방향 연결 경로</text>
+
+  <rect x="540" y="70" width="200" height="70" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <text x="640" y="95" class="label" text-anchor="middle" fill="#10B981">Remote Database</text>
+  <text x="640" y="115" class="sublabel" text-anchor="middle">원격 객체 제공</text>
+  <text x="640" y="130" class="code" text-anchor="middle">emp@remote_db</text>
+
+  <!-- Three types -->
+  <text x="400" y="170" class="label" text-anchor="middle">데이터베이스 링크 유형 (DB Link Types)</text>
+
+  <!-- Private -->
+  <rect x="30" y="185" width="235" height="150" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="30" y="185" width="235" height="30" rx="8" ry="8" fill="#6F6BEA"/>
+  <text x="147" y="205" class="label" text-anchor="middle" fill="#FFF">Private Link</text>
+  <text x="50" y="232" class="sublabel">소유자만 사용 가능</text>
+  <text x="50" y="252" class="small">CREATE DATABASE LINK</text>
+  <text x="50" y="270" class="small">소유자 스키마에 저장</text>
+  <text x="50" y="288" class="small" fill="#10B981">보안 수준: 높음</text>
+  <text x="50" y="306" class="code" font-size="10">USER_DB_LINKS 뷰</text>
+  <text x="50" y="324" class="small" fill="#F59E0B">이름 해석 우선순위: 1순위</text>
+
+  <!-- Public -->
+  <rect x="282" y="185" width="235" height="150" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="282" y="185" width="235" height="30" rx="8" ry="8" fill="#3B82F6"/>
+  <text x="399" y="205" class="label" text-anchor="middle" fill="#FFF">Public Link</text>
+  <text x="302" y="232" class="sublabel">DB 내 모든 사용자</text>
+  <text x="302" y="252" class="small">CREATE PUBLIC DATABASE LINK</text>
+  <text x="302" y="270" class="small">PUBLIC 스키마에 저장</text>
+  <text x="302" y="288" class="small" fill="#F59E0B">보안 수준: 중간</text>
+  <text x="302" y="306" class="code" font-size="10">DBA_DB_LINKS (OWNER='PUBLIC')</text>
+  <text x="302" y="324" class="small" fill="#F59E0B">이름 해석 우선순위: 2순위</text>
+
+  <!-- Global -->
+  <rect x="534" y="185" width="235" height="150" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="534" y="185" width="235" height="30" rx="8" ry="8" fill="#10B981"/>
+  <text x="651" y="205" class="label" text-anchor="middle" fill="#FFF">Global Link</text>
+  <text x="554" y="232" class="sublabel">네트워크 전체</text>
+  <text x="554" y="252" class="small">Oracle Net / LDAP 기반</text>
+  <text x="554" y="270" class="small">디렉토리 서비스에 저장</text>
+  <text x="554" y="288" class="small" fill="#F43F5E">보안 수준: 낮음</text>
+  <text x="554" y="306" class="code" font-size="10">네트워크 디렉토리 조회</text>
+  <text x="554" y="324" class="small" fill="#F59E0B">이름 해석 우선순위: 3순위</text>
+
+  <!-- Priority flow -->
+  <text x="400" y="360" class="label" text-anchor="middle" fill="#F59E0B">이름 해석 우선순위 (Name Resolution Priority)</text>
+
+  <rect x="100" y="375" width="150" height="30" rx="4" ry="4" fill="#6F6BEA" opacity="0.3" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="175" y="395" class="label" text-anchor="middle" fill="#6F6BEA" font-size="12">1. Private</text>
+
+  <line x1="250" y1="390" x2="305" y2="390" stroke="#E2E8F0" stroke-width="2"/>
+  <polygon points="303,387 310,390 303,393" fill="#E2E8F0"/>
+  <text x="278" y="383" class="small" text-anchor="middle">없으면</text>
+
+  <rect x="310" y="375" width="150" height="30" rx="4" ry="4" fill="#3B82F6" opacity="0.3" stroke="#3B82F6" stroke-width="2"/>
+  <text x="385" y="395" class="label" text-anchor="middle" fill="#3B82F6" font-size="12">2. Public</text>
+
+  <line x1="460" y1="390" x2="515" y2="390" stroke="#E2E8F0" stroke-width="2"/>
+  <polygon points="513,387 520,390 513,393" fill="#E2E8F0"/>
+  <text x="488" y="383" class="small" text-anchor="middle">없으면</text>
+
+  <rect x="520" y="375" width="150" height="30" rx="4" ry="4" fill="#10B981" opacity="0.3" stroke="#10B981" stroke-width="2"/>
+  <text x="595" y="395" class="label" text-anchor="middle" fill="#10B981" font-size="12">3. Global</text>
+
+  <!-- Distributed processing types -->
+  <text x="400" y="435" class="label" text-anchor="middle">분산 처리 유형</text>
+
+  <rect x="50" y="450" width="220" height="50" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1"/>
+  <text x="160" y="470" class="sublabel" text-anchor="middle" fill="#3B82F6">분산 쿼리</text>
+  <text x="160" y="488" class="small" text-anchor="middle">SELECT만 (읽기 전용)</text>
+
+  <rect x="290" y="450" width="220" height="50" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1"/>
+  <text x="400" y="470" class="sublabel" text-anchor="middle" fill="#F59E0B">원격 트랜잭션</text>
+  <text x="400" y="488" class="small" text-anchor="middle">단일 원격 노드 DML</text>
+
+  <rect x="530" y="450" width="220" height="50" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1"/>
+  <text x="640" y="470" class="sublabel" text-anchor="middle" fill="#F43F5E">분산 트랜잭션</text>
+  <text x="640" y="488" class="small" text-anchor="middle">다중 노드 DML + 2PC</text>
+</svg>

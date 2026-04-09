@@ -1,0 +1,20 @@
+{
+  "chapter": "08",
+  "chapter_name": "UNDOの管理",
+  "original_topic_ratio": {
+    "UNDOデータと状態管理": 2,
+    "UNDO保持とRetention管理": 0,
+    "一時UNDOとTemp UNDO": 1,
+    "マルチテナントUNDO管理": 1,
+    "UNDO監視とサイズ算定": 0
+  },
+  "custom_topic_counts": {
+    "UNDOデータと状態管理": 3,
+    "UNDO保持とRetention管理": 3,
+    "一時UNDOとTemp UNDO": 1,
+    "マルチテナントUNDO管理": 1,
+    "UNDO監視とサイズ算定": 2
+  },
+  "total_custom": 10,
+  "last_number": "C_08_010"
+}

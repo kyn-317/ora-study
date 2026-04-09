@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" fill="none">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .label { font-size: 13px; font-weight: 600; }
+    .desc { font-size: 11px; fill: #94A3B8; }
+    .mono { font-family: 'Consolas', monospace; font-size: 10px; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <text x="400" y="32" text-anchor="middle" class="title">자동 유지 관리 태스크 제어 흐름</text>
+  <text x="400" y="52" text-anchor="middle" class="subtitle">Auto Maintenance Task Control Flow (DBMS_AUTO_TASK_ADMIN)</text>
+
+  <!-- Enable/Disable flow -->
+  <rect x="30" y="75" width="740" height="150" fill="#1E1F2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
+  <text x="400" y="98" text-anchor="middle" class="label">태스크 활성화/비활성화 제어</text>
+
+  <!-- ENABLE -->
+  <rect x="50" y="112" width="340" height="100" rx="6" fill="#10B981" opacity="0.08" stroke="#10B981" stroke-width="1.5"/>
+  <text x="220" y="132" text-anchor="middle" class="label" fill="#10B981">활성화 (ENABLE)</text>
+  <text x="65" y="152" class="mono" fill="#10B981">DBMS_AUTO_TASK_ADMIN.ENABLE(</text>
+  <text x="65" y="166" class="mono" fill="#10B981">  client_name =&gt; 'auto optimizer stats collection',</text>
+  <text x="65" y="180" class="mono" fill="#10B981">  operation    =&gt; NULL,</text>
+  <text x="65" y="194" class="mono" fill="#10B981">  window_name  =&gt; NULL);</text>
+
+  <!-- DISABLE -->
+  <rect x="410" y="112" width="340" height="100" rx="6" fill="#F43F5E" opacity="0.08" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="580" y="132" text-anchor="middle" class="label" fill="#F43F5E">비활성화 (DISABLE)</text>
+  <text x="425" y="152" class="mono" fill="#F43F5E">DBMS_AUTO_TASK_ADMIN.DISABLE(</text>
+  <text x="425" y="166" class="mono" fill="#F43F5E">  client_name =&gt; 'sql tuning advisor',</text>
+  <text x="425" y="180" class="mono" fill="#F43F5E">  operation    =&gt; NULL,</text>
+  <text x="425" y="194" class="mono" fill="#F43F5E">  window_name  =&gt; 'MONDAY_WINDOW');</text>
+
+  <!-- Client Names -->
+  <rect x="30" y="245" width="350" height="175" fill="#1E1F2E" stroke="#3B82F6" stroke-width="1.5" class="box"/>
+  <text x="205" y="270" text-anchor="middle" class="label" fill="#3B82F6">CLIENT_NAME (태스크 식별자)</text>
+  
+  <rect x="50" y="285" width="310" height="26" rx="4" fill="#10B981" opacity="0.1"/>
+  <text x="65" y="302" class="mono" fill="#10B981">auto optimizer stats collection</text>
+  <text x="285" y="302" class="desc">통계 수집</text>
+
+  <rect x="50" y="316" width="310" height="26" rx="4" fill="#F59E0B" opacity="0.1"/>
+  <text x="65" y="333" class="mono" fill="#F59E0B">sql tuning advisor</text>
+  <text x="285" y="333" class="desc">SQL 튜닝</text>
+
+  <rect x="50" y="347" width="310" height="26" rx="4" fill="#F43F5E" opacity="0.1"/>
+  <text x="65" y="364" class="mono" fill="#F43F5E">auto space advisor</text>
+  <text x="285" y="364" class="desc">공간 관리</text>
+
+  <rect x="50" y="378" width="310" height="26" rx="4" fill="#6F6BEA" opacity="0.1"/>
+  <text x="65" y="395" class="mono" fill="#6F6BEA">auto index advisor (26ai)</text>
+  <text x="285" y="395" class="desc">자동 인덱싱</text>
+
+  <!-- Monitoring Views -->
+  <rect x="420" y="245" width="350" height="175" fill="#1E1F2E" stroke="#F59E0B" stroke-width="1.5" class="box"/>
+  <text x="595" y="270" text-anchor="middle" class="label" fill="#F59E0B">모니터링 뷰 (Monitoring Views)</text>
+  
+  <text x="440" y="295" class="mono" fill="#F59E0B">DBA_AUTOTASK_CLIENT</text>
+  <text x="440" y="310" class="desc">  각 태스크 클라이언트의 상태 및 설정</text>
+
+  <text x="440" y="332" class="mono" fill="#F59E0B">DBA_AUTOTASK_CLIENT_HISTORY</text>
+  <text x="440" y="347" class="desc">  태스크 실행 이력 (성공/실패/건너뜀)</text>
+
+  <text x="440" y="369" class="mono" fill="#F59E0B">DBA_AUTOTASK_WINDOW_CLIENTS</text>
+  <text x="440" y="384" class="desc">  윈도우별 태스크 활성화 상태</text>
+
+  <text x="440" y="406" class="mono" fill="#F59E0B">DBA_AUTOTASK_OPERATION</text>
+  <text x="440" y="421" class="desc">  태스크 세부 작업 및 마지막 실행 시간</text>
+</svg>

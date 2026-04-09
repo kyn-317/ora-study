@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <text x="400" y="32" class="title" text-anchor="middle">통합 감사 정책 관리 (Unified Audit Policy Management)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">정책 생성 → 활성화 → 조회 → 관리 전체 프로세스</text>
+
+  <!-- Create Policy -->
+  <rect x="30" y="75" width="360" height="170" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="30" y="75" width="360" height="28" rx="8" ry="8" fill="#6F6BEA"/>
+  <text x="210" y="94" class="label" text-anchor="middle" fill="#FFF">1. 정책 생성 (CREATE AUDIT POLICY)</text>
+
+  <text x="50" y="120" class="sublabel">감사 대상 유형:</text>
+
+  <rect x="50" y="130" width="150" height="28" class="box" fill="#3B82F6" opacity="0.15" stroke="#3B82F6" stroke-width="1"/>
+  <text x="125" y="148" class="code" text-anchor="middle">PRIVILEGES</text>
+
+  <rect x="210" y="130" width="160" height="28" class="box" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="1"/>
+  <text x="290" y="148" class="code" text-anchor="middle">ACTIONS ON obj</text>
+
+  <rect x="50" y="165" width="100" height="28" class="box" fill="#F59E0B" opacity="0.15" stroke="#F59E0B" stroke-width="1"/>
+  <text x="100" y="183" class="code" text-anchor="middle">ROLES</text>
+
+  <rect x="160" y="165" width="210" height="28" class="box" fill="#F43F5E" opacity="0.15" stroke="#F43F5E" stroke-width="1"/>
+  <text x="265" y="183" class="code" text-anchor="middle">ACTIONS COMPONENT=xxx</text>
+
+  <text x="50" y="215" class="sublabel">조건부 감사:</text>
+  <text x="50" y="233" class="code">WHEN 'SYS_CONTEXT(...)' EVALUATE PER</text>
+  <text x="50" y="240" class="small">STATEMENT | SESSION | INSTANCE</text>
+
+  <!-- Enable Policy -->
+  <rect x="410" y="75" width="360" height="170" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="410" y="75" width="360" height="28" rx="8" ry="8" fill="#3B82F6"/>
+  <text x="590" y="94" class="label" text-anchor="middle" fill="#FFF">2. 정책 활성화 (AUDIT POLICY)</text>
+
+  <text x="430" y="120" class="code">AUDIT POLICY pol_name;</text>
+  <text x="630" y="120" class="small">모든 사용자</text>
+
+  <text x="430" y="142" class="code">AUDIT POLICY pol_name BY user1;</text>
+  <text x="430" y="157" class="small">특정 사용자에게만 적용</text>
+
+  <text x="430" y="180" class="code">AUDIT POLICY pol_name EXCEPT sys;</text>
+  <text x="430" y="195" class="small">특정 사용자 제외하고 적용</text>
+
+  <text x="430" y="218" class="code">NOAUDIT POLICY pol_name;</text>
+  <text x="630" y="218" class="small">비활성화</text>
+
+  <text x="430" y="238" class="sublabel" fill="#F43F5E">생성만으로는 감사 안 됨! 활성화 필수</text>
+
+  <!-- Predefined Policies -->
+  <rect x="30" y="265" width="740" height="110" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1.5"/>
+  <rect x="30" y="265" width="740" height="28" rx="8" ry="8" fill="#F59E0B"/>
+  <text x="400" y="284" class="label" text-anchor="middle" fill="#1E1E2E">사전 정의 감사 정책 (Predefined Audit Policies)</text>
+
+  <rect x="50" y="300" width="170" height="30" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1"/>
+  <text x="135" y="315" class="code" text-anchor="middle">ORA_SECURECONFIG</text>
+  <text x="135" y="340" class="small" text-anchor="middle">자동 활성화!</text>
+  <text x="135" y="355" class="small" text-anchor="middle">보안 관련 SQL 감사</text>
+  <text x="135" y="367" class="small" text-anchor="middle">비활성화 비권장</text>
+
+  <rect x="240" y="300" width="170" height="30" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1"/>
+  <text x="325" y="315" class="code" text-anchor="middle">ORA_LOGON_FAILURES</text>
+  <text x="325" y="340" class="small" text-anchor="middle">자동 활성화!</text>
+  <text x="325" y="355" class="small" text-anchor="middle">로그인 실패 감사</text>
+
+  <rect x="430" y="300" width="150" height="30" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1"/>
+  <text x="505" y="315" class="code" text-anchor="middle">ORA_ACCOUNT_MGMT</text>
+  <text x="505" y="340" class="small" text-anchor="middle">수동 활성화</text>
+  <text x="505" y="355" class="small" text-anchor="middle">계정 관리 작업</text>
+
+  <rect x="600" y="300" width="155" height="30" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1"/>
+  <text x="677" y="315" class="code" text-anchor="middle">ORA_CIS_RECOMMEND</text>
+  <text x="677" y="340" class="small" text-anchor="middle">수동 활성화</text>
+  <text x="677" y="355" class="small" text-anchor="middle">CIS 벤치마크</text>
+
+  <!-- Audit Trail Management -->
+  <rect x="30" y="395" width="360" height="110" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <rect x="30" y="395" width="360" height="28" rx="8" ry="8" fill="#10B981"/>
+  <text x="210" y="414" class="label" text-anchor="middle" fill="#FFF">감사 트레일 관리 (DBMS_AUDIT_MGMT)</text>
+
+  <text x="50" y="442" class="code">SET_LAST_ARCHIVE_TIMESTAMP</text>
+  <text x="50" y="458" class="small">아카이브 완료 시점 설정</text>
+  <text x="50" y="478" class="code">CLEAN_AUDIT_TRAIL</text>
+  <text x="210" y="478" class="small">시점 이전 레코드 삭제</text>
+  <text x="50" y="495" class="code">CREATE_PURGE_JOB</text>
+  <text x="210" y="495" class="small">자동 정리 스케줄</text>
+
+  <!-- Roles -->
+  <rect x="410" y="395" width="360" height="110" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5"/>
+  <rect x="410" y="395" width="360" height="28" rx="8" ry="8" fill="#F43F5E"/>
+  <text x="590" y="414" class="label" text-anchor="middle" fill="#FFF">감사 관리 롤 (직무 분리)</text>
+
+  <rect x="430" y="432" width="150" height="30" class="box" fill="#6F6BEA" opacity="0.2" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="505" y="451" class="code" text-anchor="middle">AUDIT_ADMIN</text>
+
+  <rect x="600" y="432" width="150" height="30" class="box" fill="#3B82F6" opacity="0.2" stroke="#3B82F6" stroke-width="1"/>
+  <text x="675" y="451" class="code" text-anchor="middle">AUDIT_VIEWER</text>
+
+  <text x="430" y="480" class="small">ADMIN: 정책 생성/삭제, 트레일 관리</text>
+  <text x="430" y="495" class="small">VIEWER: 감사 트레일 조회만 가능</text>
+  <text x="430" y="500" class="small">DBA 롤만으로는 감사 관리 불가!</text>
+</svg>

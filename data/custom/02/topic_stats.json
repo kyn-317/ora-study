@@ -1,0 +1,20 @@
+{
+  "chapter": "02",
+  "chapter_name": "Oracle提供のデータベース・ツールの採用",
+  "original_topic_ratio": {
+    "DBCA": 1,
+    "SQL*PlusとSQL Developer": 2,
+    "Enterprise Manager": 1,
+    "RMAN": 0,
+    "Oracle Netツール": 0
+  },
+  "custom_topic_counts": {
+    "DBCA": 2,
+    "SQL*PlusとSQL Developer": 3,
+    "Enterprise Manager": 2,
+    "RMAN": 2,
+    "Oracle Netツール": 1
+  },
+  "total_custom": 10,
+  "last_number": "C_02_010"
+}

@@ -26,13 +26,29 @@
             "AUDIT_SYS_OPERATIONS 파라미터가 TRUE이면 SYS 사용자의 모든 작업이 OS 감사 트레일에 기록됨"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/04/04_04_s01_audit_architecture.svg",
+          "caption": "Oracle 감사 아키텍처 전체 흐름 - 통합/강제/FGA 감사 유형 비교",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s02",
       "title": "통합 감사 (Unified Auditing)",
       "content": "통합 감사(Unified Auditing)는 Oracle 12c부터 도입된 단일화된 감사 프레임워크로, 기존의 여러 감사 방식(DB 감사, OS 감사, XML 감사, FGA 등)을 **하나의 감사 트레일**로 통합합니다. Oracle 26ai에서는 통합 감사가 **기본(Default)** 감사 방식이며, 정책 기반(Policy-Based) 접근으로 감사 대상을 유연하게 정의할 수 있습니다.\n\n## 통합 감사 vs 전통적 감사 비교\n\n| 항목 | 통합 감사 (Unified) | 전통적 감사 (Traditional) |\n|---|---|---|\n| **도입 버전** | Oracle 12c~ | Oracle 10g 이전~ |\n| **감사 트레일** | 단일 (UNIFIED_AUDIT_TRAIL) | 분산 (DB, OS, XML 별도) |\n| **정책 기반** | CREATE AUDIT POLICY로 정책 정의 | AUDIT 문으로 개별 지정 |\n| **성능** | SGA 큐 기반 비동기 기록 (우수) | 동기 기록 (상대적 부하) |\n| **관리** | AUDIT_ADMIN / AUDIT_VIEWER 롤 | DBA 롤 또는 AUDIT SYSTEM |\n| **SYS 감사** | 통합 트레일에 포함 가능 | 별도 OS 파일에만 기록 |\n| **조건부 감사** | WHEN 절로 조건 지정 가능 | 제한적 |\n\n## AUDSYS 스키마\n\nAUDSYS는 통합 감사 트레일 데이터를 저장하는 전용 내부 스키마입니다.\n\n| 항목 | 설명 |\n|---|---|\n| **소유 객체** | AUD$UNIFIED 테이블 (감사 레코드 저장) |\n| **테이블스페이스** | AUDSYS 데이터는 SYSAUX 테이블스페이스에 저장 (변경 가능) |\n| **접근 제한** | 직접 로그인 불가, UNIFIED_AUDIT_TRAIL 뷰를 통해서만 조회 |\n| **보호** | DROP, ALTER 불가 (Oracle 내부 보호) |\n\n## 혼합 모드 vs 순수 통합 감사 모드\n\n| 모드 | 설명 | 확인 방법 |\n|---|---|---|\n| **혼합 모드 (Mixed Mode)** | 전통적 감사와 통합 감사가 공존. 기본 설치 시 이 모드 | V$OPTION에서 'Unified Auditing' = FALSE |\n| **순수 통합 감사 모드 (Pure)** | 오직 통합 감사만 동작. 전통적 감사 비활성화 | V$OPTION에서 'Unified Auditing' = TRUE |\n\n순수 통합 감사 모드로 전환하려면 Oracle 바이너리를 재링크(relink)해야 합니다:\n\n```bash\n# 순수 통합 감사 모드 전환 (Linux)\ncd $ORACLE_HOME/rdbms/lib\nmake -f ins_rdbms.mk uniaud_on ioracle ORACLE_HOME=$ORACLE_HOME\n```",
-      "sqlExamplesIds": ["sql01", "sql02", "sql03", "sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02",
+        "sql03",
+        "sql04",
+        "sql05"
+      ],
       "subsections": [
         {
           "title": "감사 정책 생성 및 관리 (Creating and Managing Audit Policies)",
@@ -81,13 +97,25 @@
             "DBA_AUDIT_MGMT_CLEANUP_JOBS 뷰로 자동 정리 작업의 상태와 스케줄을 확인 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/04/04_04_s02_unified_audit_policy.svg",
+          "caption": "통합 감사 정책 관리 - 생성/활성화 프로세스, 사전 정의 정책, 관리 롤",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s03",
       "title": "강제 감사 (Mandatory Auditing)",
       "content": "강제 감사(Mandatory Auditing)는 감사 설정 여부와 관계없이 **항상 기록되는** 감사 항목입니다. 이 항목들은 NOAUDIT 문이나 감사 정책 비활성화로도 비활성화할 수 없으며, 데이터베이스 보안의 최소 감사 기준선(Baseline)을 제공합니다.\n\n## 강제 감사 대상 항목\n\n| 강제 감사 항목 | 설명 |\n|---|---|\n| **SYSDBA/SYSOPER 접속** | AS SYSDBA 또는 AS SYSOPER로의 모든 접속(성공/실패) |\n| **데이터베이스 기동 (STARTUP)** | 데이터베이스 인스턴스 기동 이벤트 |\n| **데이터베이스 종료 (SHUTDOWN)** | 데이터베이스 인스턴스 종료 이벤트 |\n| **DBMS_AUDIT_MGMT 패키지 사용** | 감사 트레일 관리 패키지의 모든 프로시저 호출 |\n\n## 강제 감사 레코드 저장 위치\n\n| 모드 | 저장 위치 |\n|---|---|\n| **순수 통합 감사 모드** | UNIFIED_AUDIT_TRAIL (AUDSYS 스키마) |\n| **혼합 모드** | OS 감사 파일 ($ORACLE_BASE/audit/ 또는 Windows 이벤트 로그) |\n| **데이터베이스 미기동 시** | OS 감사 파일 (DB 기동 전이므로 DB 내 기록 불가) |\n\n## 강제 감사의 존재 이유\n\n강제 감사는 다음과 같은 상황을 방지하기 위해 설계되었습니다:\n\n1. **감사 우회 방지**: 관리자 권한 접속 기록을 삭제하거나 감사를 비활성화하여 추적을 피하는 행위 방지\n2. **감사 트레일 무결성 보호**: DBMS_AUDIT_MGMT 사용 기록을 남겨, 감사 트레일 자체의 조작 시도 추적\n3. **기동/종료 추적**: 비인가 기동/종료로 인한 서비스 중단 탐지",
-      "sqlExamplesIds": ["sql06"],
+      "sqlExamplesIds": [
+        "sql06"
+      ],
       "subsections": [
         {
           "title": "강제 감사 항목 상세 및 저장 메커니즘 (Mandatory Audit Items and Storage Mechanism)",
@@ -101,13 +129,28 @@
             "순수 통합 감사 모드에서는 모든 강제 감사 레코드가 UNIFIED_AUDIT_TRAIL에서 조회 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/04/04_04_s03_mandatory_audit.svg",
+          "caption": "강제 감사 항목 - 비활성화 불가능한 4가지 필수 감사 대상 및 저장 위치",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "파인 그레인 감사 (Fine-Grained Auditing, FGA)",
       "content": "파인 그레인 감사(Fine-Grained Auditing, FGA)는 **특정 열(Column)** 및 **특정 행(Row)**에 대한 접근을 세밀하게 감사하는 기능입니다. 통합 감사 정책이 SQL 문 단위의 감사라면, FGA는 SQL 문이 **어떤 데이터에** 접근했는지까지 추적할 수 있어 민감한 데이터 보호에 핵심적입니다.\n\n## FGA vs 통합 감사 정책 비교\n\n| 항목 | 통합 감사 정책 | FGA |\n|---|---|---|\n| **감사 단위** | SQL 문, 권한, 롤 수준 | 열(Column), 행(Row) 수준 |\n| **SELECT 감사** | 제한적 (테이블 단위) | 가능 (특정 열/행 조건) |\n| **조건 지정** | WHEN 절 (세션/인스턴스 속성) | audit_condition (SQL WHERE 조건) |\n| **핸들러** | 미지원 | 핸들러 프로시저 호출 가능 |\n| **설정 방법** | CREATE AUDIT POLICY | DBMS_FGA.ADD_POLICY |\n| **트레일** | UNIFIED_AUDIT_TRAIL | UNIFIED_AUDIT_TRAIL + DBA_FGA_AUDIT_TRAIL |\n| **MERGE 감사** | 지원 | 지원 (내부적으로 INSERT/UPDATE/DELETE로 분리) |\n\n## FGA 동작 원리\n\n```\nSQL 문 실행\n    ↓\nFGA 정책의 audit_condition 평가\n    ↓ (조건 충족 시)\n감사 열(audit_column) 접근 여부 확인\n    ↓ (접근 시)\nALL_COLUMNS / ANY_COLUMNS 조건 평가\n    ↓ (조건 충족 시)\n감사 레코드 생성 + (선택) 핸들러 프로시저 실행\n    ↓\n감사 트레일에 기록 (SQL_TEXT, SQL_BIND 포함)\n```",
-      "sqlExamplesIds": ["sql07", "sql08", "sql09", "sql10"],
+      "sqlExamplesIds": [
+        "sql07",
+        "sql08",
+        "sql09",
+        "sql10"
+      ],
       "subsections": [
         {
           "title": "FGA 정책 생성 및 관리 (DBMS_FGA Package)",
@@ -143,6 +186,16 @@
             "핸들러 프로시저 내에서 COMMIT을 사용하면 자율 트랜잭션(Autonomous Transaction)으로 처리됨",
             "DBA_COMMON_AUDIT_TRAIL 뷰는 통합 감사와 FGA 감사 트레일을 하나의 뷰로 통합 조회 가능"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/04/04_04_s04_fga_structure.svg",
+          "caption": "파인 그레인 감사(FGA) 구조 - DBMS_FGA 패키지, 열/행 수준 감사 흐름",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

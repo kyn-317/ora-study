@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" fill="none">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; fill: #6F6BEA; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 13px; font-weight: 600; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .mono { font-family: 'Consolas', monospace; font-size: 11px; }
+  </style>
+
+  <text x="400" y="30" text-anchor="middle" class="title">Temporary UNDO 동작 흐름 비교</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">기존 UNDO vs Temporary UNDO: GTT DML 처리 시 I/O 경로 비교</text>
+
+  <!-- Left: Traditional Flow -->
+  <rect x="20" y="65" width="365" height="355" rx="10" fill="#0F1019" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="202" y="88" text-anchor="middle" class="label" fill="#F43F5E">기존 방식 (TEMP_UNDO_ENABLED = FALSE)</text>
+
+  <rect x="45" y="100" width="315" height="35" rx="5" fill="#1E1F2E" stroke="#3B82F6" stroke-width="1"/>
+  <text x="202" y="122" text-anchor="middle" class="small">1) GTT에 DML 실행</text>
+  <path d="M202 135 L202 145" stroke="#94A3B8" stroke-width="1" marker-end="url(#as3)"/>
+
+  <rect x="45" y="148" width="315" height="35" rx="5" fill="#1E1F2E" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="202" y="170" text-anchor="middle" class="small" fill="#F43F5E">2) UNDO 레코드를 UNDO TBS에 기록</text>
+  <path d="M202 183 L202 193" stroke="#94A3B8" stroke-width="1" marker-end="url(#as3)"/>
+
+  <rect x="45" y="196" width="315" height="35" rx="5" fill="#1E1F2E" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="202" y="218" text-anchor="middle" class="small" fill="#F43F5E">3) UNDO 레코드에 대한 REDO 생성</text>
+  <path d="M202 231 L202 241" stroke="#94A3B8" stroke-width="1" marker-end="url(#as3)"/>
+
+  <rect x="45" y="244" width="315" height="35" rx="5" fill="#1E1F2E" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="202" y="266" text-anchor="middle" class="small" fill="#F43F5E">4) REDO 로그 버퍼에 기록</text>
+  <path d="M202 279 L202 289" stroke="#94A3B8" stroke-width="1" marker-end="url(#as3)"/>
+
+  <rect x="45" y="292" width="315" height="35" rx="5" fill="#1E1F2E" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="202" y="314" text-anchor="middle" class="small" fill="#F43F5E">5) LGWR이 REDO를 디스크에 기록</text>
+  <path d="M202 327 L202 337" stroke="#94A3B8" stroke-width="1" marker-end="url(#as3)"/>
+
+  <rect x="45" y="340" width="315" height="35" rx="5" fill="#1E1F2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="202" y="362" text-anchor="middle" class="small">6) COMMIT 시 UNDO 보존</text>
+
+  <!-- I/O count -->
+  <rect x="45" y="385" width="315" height="25" rx="4" fill="#F43F5E" fill-opacity="0.1"/>
+  <text x="202" y="403" text-anchor="middle" class="small" fill="#F43F5E">총 6단계 | UNDO I/O + REDO I/O 모두 발생</text>
+
+  <!-- Right: Temporary UNDO Flow -->
+  <rect x="415" y="65" width="365" height="355" rx="10" fill="#0F1019" stroke="#10B981" stroke-width="1.5"/>
+  <text x="597" y="88" text-anchor="middle" class="label" fill="#10B981">Temporary UNDO (TEMP_UNDO_ENABLED = TRUE)</text>
+
+  <rect x="440" y="100" width="315" height="35" rx="5" fill="#1E1F2E" stroke="#3B82F6" stroke-width="1"/>
+  <text x="597" y="122" text-anchor="middle" class="small">1) GTT에 DML 실행</text>
+  <path d="M597 135 L597 145" stroke="#94A3B8" stroke-width="1" marker-end="url(#as3)"/>
+
+  <rect x="440" y="148" width="315" height="35" rx="5" fill="#1E1F2E" stroke="#10B981" stroke-width="2"/>
+  <text x="597" y="170" text-anchor="middle" class="small" fill="#10B981">2) UNDO 레코드를 Temp TBS에 기록</text>
+  <path d="M597 183 L597 193" stroke="#94A3B8" stroke-width="1" marker-end="url(#as3)"/>
+
+  <!-- Skipped steps -->
+  <rect x="440" y="196" width="315" height="35" rx="5" fill="#2A2B3D" fill-opacity="0.3" stroke="#2A2B3D" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="597" y="218" text-anchor="middle" class="small" fill="#94A3B8">3) REDO 생성 — 생략!</text>
+
+  <rect x="440" y="244" width="315" height="35" rx="5" fill="#2A2B3D" fill-opacity="0.3" stroke="#2A2B3D" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="597" y="266" text-anchor="middle" class="small" fill="#94A3B8">4) REDO 버퍼 기록 — 생략!</text>
+
+  <rect x="440" y="292" width="315" height="35" rx="5" fill="#2A2B3D" fill-opacity="0.3" stroke="#2A2B3D" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="597" y="314" text-anchor="middle" class="small" fill="#94A3B8">5) LGWR 디스크 기록 — 생략!</text>
+
+  <path d="M597 183 L597 337" stroke="#10B981" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <rect x="440" y="340" width="315" height="35" rx="5" fill="#1E1F2E" stroke="#10B981" stroke-width="1"/>
+  <text x="597" y="362" text-anchor="middle" class="small" fill="#10B981">6) COMMIT 시 Temp UNDO 즉시 해제</text>
+
+  <!-- I/O count -->
+  <rect x="440" y="385" width="315" height="25" rx="4" fill="#10B981" fill-opacity="0.1"/>
+  <text x="597" y="403" text-anchor="middle" class="small" fill="#10B981">총 2단계 | REDO I/O 완전 생략 → 대폭 성능 향상</text>
+
+  <!-- Bottom note -->
+  <text x="400" y="440" text-anchor="middle" class="mono" fill="#6F6BEA">모니터링: V$TEMPUNDOSTAT (10분 간격 스냅샷) | V$TEMP_SPACE_HEADER (공간 현황)</text>
+
+  <defs>
+    <marker id="as3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#94A3B8"/></marker>
+  </defs>
+</svg>

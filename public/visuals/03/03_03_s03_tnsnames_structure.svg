@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <text x="400" y="30" class="title" text-anchor="middle">tnsnames.ora 구조 해부 (Structure Anatomy)</text>
+  <text x="400" y="50" class="subtitle" text-anchor="middle">접속 디스크립터의 계층 구조 및 주요 키워드</text>
+
+  <!-- Tree structure -->
+  <rect x="30" y="70" width="430" height="320" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+
+  <!-- Net Service Name -->
+  <rect x="50" y="85" width="180" height="30" rx="4" ry="4" fill="#6F6BEA" opacity="0.3" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="140" y="105" class="label" text-anchor="middle" fill="#6F6BEA">ORCL =</text>
+  <text x="250" y="105" class="small">네트 서비스 이름 (별칭)</text>
+
+  <!-- DESCRIPTION -->
+  <line x1="140" y1="115" x2="140" y2="130" stroke="#6F6BEA" stroke-width="1.5"/>
+  <line x1="140" y1="130" x2="170" y2="130" stroke="#6F6BEA" stroke-width="1.5"/>
+  <rect x="70" y="125" width="220" height="28" rx="4" ry="4" fill="#3B82F6" opacity="0.2" stroke="#3B82F6"/>
+  <text x="180" y="143" class="sublabel" text-anchor="middle">(DESCRIPTION =</text>
+
+  <!-- ADDRESS -->
+  <line x1="180" y1="153" x2="180" y2="168" stroke="#3B82F6" stroke-width="1"/>
+  <line x1="180" y1="168" x2="200" y2="168" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="90" y="163" width="340" height="28" rx="4" ry="4" fill="#10B981" opacity="0.2" stroke="#10B981"/>
+  <text x="130" y="181" class="code" font-size="10">(ADDRESS =</text>
+
+  <!-- ADDRESS details -->
+  <line x1="230" y1="191" x2="230" y2="204" stroke="#10B981" stroke-width="1"/>
+  <rect x="110" y="198" width="300" height="55" rx="3" ry="3" fill="#1A1A2E" stroke="#2A2B3D"/>
+  <text x="130" y="215" class="code" font-size="10">(PROTOCOL = TCP)</text>
+  <text x="275" y="215" class="small">프로토콜</text>
+  <text x="130" y="232" class="code" font-size="10">(HOST = dbserver01)</text>
+  <text x="292" y="232" class="small">호스트</text>
+  <text x="130" y="248" class="code" font-size="10">(PORT = 1521)</text>
+  <text x="260" y="248" class="small">포트</text>
+
+  <!-- CONNECT_DATA -->
+  <line x1="180" y1="260" x2="180" y2="275" stroke="#3B82F6" stroke-width="1"/>
+  <line x1="180" y1="275" x2="200" y2="275" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="90" y="270" width="340" height="28" rx="4" ry="4" fill="#F59E0B" opacity="0.2" stroke="#F59E0B"/>
+  <text x="130" y="288" class="code" font-size="10">(CONNECT_DATA =</text>
+
+  <!-- CONNECT_DATA details -->
+  <rect x="110" y="305" width="300" height="68" rx="3" ry="3" fill="#1A1A2E" stroke="#2A2B3D"/>
+  <text x="130" y="322" class="code" font-size="10">(SERVER = DEDICATED)</text>
+  <text x="312" y="322" class="small">접속 모드</text>
+  <text x="130" y="340" class="code" font-size="10">(SERVICE_NAME = orcl.example.com)</text>
+  <text x="130" y="358" class="small" fill="#F59E0B">SERVICE_NAME 권장 (SID는 레거시)</text>
+
+  <!-- Right side - Key details -->
+  <rect x="480" y="70" width="295" height="155" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="500" y="92" class="label" fill="#6F6BEA" font-size="12">CONNECT_DATA 키워드</text>
+
+  <text x="500" y="114" class="code">SERVICE_NAME</text>
+  <text x="620" y="114" class="small">서비스 이름 (권장)</text>
+  <text x="500" y="132" class="code">SID</text>
+  <text x="620" y="132" class="small">Oracle SID (레거시)</text>
+  <text x="500" y="150" class="code">SERVER</text>
+  <text x="620" y="150" class="small">DEDICATED/SHARED</text>
+  <text x="500" y="168" class="code">INSTANCE_NAME</text>
+  <text x="620" y="168" class="small">RAC 인스턴스 지정</text>
+  <text x="500" y="186" class="code">FAILOVER_MODE</text>
+  <text x="620" y="186" class="small">TAF 설정</text>
+
+  <!-- Failover/LB config -->
+  <rect x="480" y="240" width="295" height="100" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1"/>
+  <text x="500" y="262" class="label" fill="#10B981" font-size="12">Failover / Load Balancing</text>
+  <text x="500" y="282" class="code">ADDRESS_LIST =</text>
+  <text x="500" y="300" class="small">여러 ADDRESS 그룹화</text>
+  <text x="500" y="318" class="code">FAILOVER = ON</text>
+  <text x="620" y="318" class="small">장애 전환</text>
+  <text x="500" y="336" class="code">LOAD_BALANCE = ON</text>
+  <text x="640" y="336" class="small">부하 분산</text>
+
+  <!-- Syntax rules -->
+  <rect x="30" y="400" width="745" height="50" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="50" y="420" class="label" font-size="12">문법 규칙</text>
+  <text x="50" y="438" class="small">대소문자 무관 | # 주석 | 괄호 매칭 필수 | 여러 별칭 쉼표 구분 가능 (ORCL, ORCL_PROD = ...)</text>
+</svg>

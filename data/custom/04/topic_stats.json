@@ -1,0 +1,16 @@
+{
+  "chapter": "04",
+  "chapter_name": "Oracle Net Servicesの構成",
+  "original_topic_ratio": {
+    "リスナーの構成と管理": 1,
+    "ネーミング・メソッドと接続構成": 3,
+    "データベース・リンク": 1
+  },
+  "custom_topic_counts": {
+    "リスナーの構成と管理": 3,
+    "ネーミング・メソッドと接続構成": 5,
+    "データベース・リンク": 2
+  },
+  "total_custom": 10,
+  "last_number": "C_04_010"
+}

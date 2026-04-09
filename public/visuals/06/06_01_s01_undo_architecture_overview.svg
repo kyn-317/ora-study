@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" fill="none">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; fill: #6F6BEA; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 13px; font-weight: 600; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .mono { font-family: 'Consolas', monospace; font-size: 11px; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" class="title">UNDO 전체 아키텍처 개요 (UNDO Architecture Overview)</text>
+  <text x="400" y="52" text-anchor="middle" class="subtitle">DML → UNDO 세그먼트 → 읽기 일관성 / 롤백 / Flashback</text>
+
+  <!-- DML Operation Box -->
+  <rect x="290" y="70" width="220" height="45" class="box" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="400" y="90" text-anchor="middle" class="label" fill="#6F6BEA">사용자 DML 실행</text>
+  <text x="400" y="105" text-anchor="middle" class="small">INSERT / UPDATE / DELETE / MERGE</text>
+
+  <!-- Arrow down -->
+  <path d="M400 115 L400 140" stroke="#6F6BEA" stroke-width="2" marker-end="url(#arrowPurple)"/>
+
+  <!-- Server Process -->
+  <rect x="250" y="140" width="300" height="45" class="box" fill="#1E1F2E" stroke="#3B82F6" stroke-width="2"/>
+  <text x="400" y="160" text-anchor="middle" class="label" fill="#3B82F6">서버 프로세스 (Server Process)</text>
+  <text x="400" y="175" text-anchor="middle" class="small">변경 전 이미지(Before Image) 생성</text>
+
+  <!-- Three branches from Server Process -->
+  <!-- Left: Redo Log Buffer -->
+  <path d="M310 185 L160 215" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arrowYellow)"/>
+  <rect x="40" y="215" width="240" height="60" class="box" fill="#1E1F2E" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="160" y="237" text-anchor="middle" class="label" fill="#F59E0B">Redo Log Buffer</text>
+  <text x="160" y="253" text-anchor="middle" class="small">1) UNDO 변경 포함 Redo 기록</text>
+  <text x="160" y="267" text-anchor="middle" class="mono" fill="#F59E0B">→ LGWR → Redo Log Files</text>
+
+  <!-- Center: UNDO Segment -->
+  <path d="M400 185 L400 215" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+  <rect x="290" y="215" width="220" height="60" class="box" fill="#1E1F2E" stroke="#10B981" stroke-width="2"/>
+  <text x="400" y="237" text-anchor="middle" class="label" fill="#10B981">UNDO 세그먼트</text>
+  <text x="400" y="253" text-anchor="middle" class="small">2) Before Image 기록</text>
+  <text x="400" y="267" text-anchor="middle" class="mono" fill="#10B981">UNDO Tablespace</text>
+
+  <!-- Right: Data Block -->
+  <path d="M490 185 L640 215" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <rect x="520" y="215" width="240" height="60" class="box" fill="#1E1F2E" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="640" y="237" text-anchor="middle" class="label" fill="#3B82F6">데이터 블록</text>
+  <text x="640" y="253" text-anchor="middle" class="small">3) 실제 변경 적용</text>
+  <text x="640" y="267" text-anchor="middle" class="mono" fill="#3B82F6">Buffer Cache → DBWn</text>
+
+  <!-- UNDO Segment to 3 functions -->
+  <path d="M400 275 L400 310" stroke="#10B981" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <!-- Three function boxes -->
+  <!-- Read Consistency -->
+  <rect x="30" y="320" width="230" height="80" class="box" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="145" y="342" text-anchor="middle" class="label" fill="#6F6BEA">읽기 일관성</text>
+  <text x="145" y="358" text-anchor="middle" class="small">Read Consistency</text>
+  <text x="145" y="378" text-anchor="middle" class="small">CR 블록 생성으로 변경 전</text>
+  <text x="145" y="392" text-anchor="middle" class="small">일관된 데이터 이미지 제공</text>
+  <path d="M340 340 L265 340" stroke="#6F6BEA" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowPurple)"/>
+
+  <!-- Rollback -->
+  <rect x="285" y="320" width="230" height="80" class="box" fill="#1E1F2E" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="400" y="342" text-anchor="middle" class="label" fill="#F43F5E">트랜잭션 롤백</text>
+  <text x="400" y="358" text-anchor="middle" class="small">Transaction Rollback</text>
+  <text x="400" y="378" text-anchor="middle" class="small">ROLLBACK 시 Before Image로</text>
+  <text x="400" y="392" text-anchor="middle" class="small">원래 상태 복원</text>
+
+  <!-- Flashback -->
+  <rect x="540" y="320" width="230" height="80" class="box" fill="#1E1F2E" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="655" y="342" text-anchor="middle" class="label" fill="#F59E0B">Flashback 기능</text>
+  <text x="655" y="358" text-anchor="middle" class="small">Flashback Features</text>
+  <text x="655" y="378" text-anchor="middle" class="small">과거 시점 데이터 조회/복원</text>
+  <text x="655" y="392" text-anchor="middle" class="small">AS OF TIMESTAMP / SCN</text>
+  <path d="M460 340 L535 340" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowYellow)"/>
+
+  <!-- UNDO vs Redo comparison -->
+  <rect x="50" y="425" width="700" height="80" class="box" fill="#1E1F2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="400" y="448" text-anchor="middle" class="label">UNDO vs Redo 핵심 비교</text>
+  <text x="200" y="470" text-anchor="middle" class="small" fill="#10B981">UNDO: 변경 전 이미지(Before Image)</text>
+  <text x="200" y="486" text-anchor="middle" class="small" fill="#10B981">→ 롤백, 읽기 일관성, Flashback</text>
+  <text x="400" y="478" text-anchor="middle" class="small" fill="#2A2B3D">│</text>
+  <text x="600" y="470" text-anchor="middle" class="small" fill="#F59E0B">Redo: 변경 내역(Change Vector)</text>
+  <text x="600" y="486" text-anchor="middle" class="small" fill="#F59E0B">→ 장애 복구(Instance/Media Recovery)</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6"/>
+    </marker>
+    <marker id="arrowYellow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F43F5E"/>
+    </marker>
+  </defs>
+</svg>

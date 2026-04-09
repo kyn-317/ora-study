@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .imp { font-size: 12px; fill: #F43F5E; font-weight: 600; }
+  </style>
+
+  <text x="400" y="32" class="title" text-anchor="middle">강제 감사 항목 (Mandatory Auditing)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">NOAUDIT로도 비활성화 불가 - Oracle 커널 하드코딩, 최소 감사 기준선</text>
+
+  <!-- Central concept -->
+  <rect x="200" y="70" width="400" height="40" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="2"/>
+  <text x="400" y="95" class="imp" text-anchor="middle">비활성화 불가능! 항상 기록되는 감사 항목</text>
+
+  <!-- Four mandatory items -->
+  <rect x="30" y="130" width="180" height="100" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="30" y="130" width="180" height="26" rx="8" ry="8" fill="#6F6BEA"/>
+  <text x="120" y="148" class="label" text-anchor="middle" fill="#FFF">SYSDBA/SYSOPER</text>
+  <text x="120" y="172" class="sublabel" text-anchor="middle">AS SYSDBA/SYSOPER</text>
+  <text x="120" y="190" class="small" text-anchor="middle">모든 접속(성공/실패)</text>
+  <text x="120" y="206" class="small" text-anchor="middle">SYSBACKUP/SYSDG 등 포함</text>
+  <text x="120" y="222" class="small" text-anchor="middle">OS User, IP, 시각 기록</text>
+
+  <rect x="225" y="130" width="170" height="100" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="225" y="130" width="170" height="26" rx="8" ry="8" fill="#3B82F6"/>
+  <text x="310" y="148" class="label" text-anchor="middle" fill="#FFF">DB 기동</text>
+  <text x="310" y="172" class="sublabel" text-anchor="middle">STARTUP</text>
+  <text x="310" y="190" class="small" text-anchor="middle">인스턴스 기동 이벤트</text>
+  <text x="310" y="206" class="small" text-anchor="middle">DB 미기동 시</text>
+  <text x="310" y="222" class="small" text-anchor="middle">OS 파일에 먼저 기록</text>
+
+  <rect x="410" y="130" width="170" height="100" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="410" y="130" width="170" height="26" rx="8" ry="8" fill="#10B981"/>
+  <text x="495" y="148" class="label" text-anchor="middle" fill="#FFF">DB 종료</text>
+  <text x="495" y="172" class="sublabel" text-anchor="middle">SHUTDOWN</text>
+  <text x="495" y="190" class="small" text-anchor="middle">인스턴스 종료 이벤트</text>
+  <text x="495" y="206" class="small" text-anchor="middle">비인가 종료 탐지</text>
+  <text x="495" y="222" class="small" text-anchor="middle">서비스 중단 추적</text>
+
+  <rect x="595" y="130" width="175" height="100" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <rect x="595" y="130" width="175" height="26" rx="8" ry="8" fill="#F59E0B"/>
+  <text x="682" y="148" class="label" text-anchor="middle" fill="#1E1E2E">AUDIT_MGMT</text>
+  <text x="682" y="172" class="sublabel" text-anchor="middle">DBMS_AUDIT_MGMT</text>
+  <text x="682" y="190" class="small" text-anchor="middle">모든 프로시저 호출</text>
+  <text x="682" y="206" class="small" text-anchor="middle">감사 트레일 조작</text>
+  <text x="682" y="222" class="small" text-anchor="middle">시도 추적 보장</text>
+
+  <!-- Storage locations -->
+  <rect x="30" y="250" width="740" height="90" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1.5"/>
+  <text x="50" y="272" class="label">감사 레코드 저장 위치 (모드별)</text>
+
+  <rect x="50" y="285" width="210" height="45" class="box" fill="#6F6BEA" opacity="0.1" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="155" y="302" class="sublabel" text-anchor="middle">순수 통합 감사 모드</text>
+  <text x="155" y="320" class="code" text-anchor="middle">UNIFIED_AUDIT_TRAIL</text>
+
+  <rect x="280" y="285" width="220" height="45" class="box" fill="#F59E0B" opacity="0.1" stroke="#F59E0B" stroke-width="1"/>
+  <text x="390" y="302" class="sublabel" text-anchor="middle">혼합 모드</text>
+  <text x="390" y="320" class="code" text-anchor="middle">$ORACLE_BASE/audit/ (OS 파일)</text>
+
+  <rect x="520" y="285" width="230" height="45" class="box" fill="#F43F5E" opacity="0.1" stroke="#F43F5E" stroke-width="1"/>
+  <text x="635" y="302" class="sublabel" text-anchor="middle">DB 미기동 시</text>
+  <text x="635" y="320" class="code" text-anchor="middle">OS 감사 파일 (DB 기록 불가)</text>
+
+  <!-- Key point -->
+  <text x="400" y="355" class="small" text-anchor="middle">감사 우회 방지 | 감사 트레일 무결성 보호 | V$OPTION: 'Unified Auditing' = TRUE/FALSE로 모드 확인</text>
+</svg>

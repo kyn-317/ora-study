@@ -14,7 +14,10 @@
       "sectionId": "s01",
       "title": "테이블스페이스 개요 (Tablespace Overview)",
       "content": "**테이블스페이스(Tablespace)**는 Oracle Database의 **논리적 저장 구조(Logical Storage Structure)**에서 가장 큰 단위로, 데이터베이스 객체(테이블, 인덱스, LOB 등)가 저장되는 논리적 컨테이너입니다. 테이블스페이스는 하나 이상의 **데이터 파일(Datafile)**로 구성되어 물리적 저장 장치와 연결됩니다.\n\n## 논리적/물리적 저장 구조 계층\n\n```\nDatabase (데이터베이스)\n └── Tablespace (테이블스페이스) ─── 논리적 최상위\n      ├── Segment (세그먼트) ─── 테이블, 인덱스 등 객체 단위\n      │    ├── Extent (익스텐트) ─── 연속된 블록의 집합\n      │    │    ├── Data Block (데이터 블록) ─── I/O 최소 단위\n      │    │    ├── Data Block\n      │    │    └── ...\n      │    ├── Extent\n      │    └── ...\n      └── Datafile (데이터 파일) ─── 물리적 파일 대응\n           └── OS Block ─── 운영체제 블록\n```\n\n## 논리적 구조와 물리적 구조의 관계\n\n| 논리적 구조 | 물리적 구조 | 관계 |\n|---|---|---|\n| **Database** | 데이터 파일, 제어 파일, 리두 로그 파일 | 1:N (하나의 DB에 여러 물리 파일) |\n| **Tablespace** | 데이터 파일(Datafile) | 1:N (SMALLFILE) 또는 1:1 (BIGFILE) |\n| **Segment** | 데이터 파일 내 공간 | 하나의 세그먼트는 여러 데이터 파일에 걸칠 수 있음 |\n| **Extent** | 데이터 파일 내 연속 블록 | 하나의 익스텐트는 단일 데이터 파일 내에 존재 |\n| **Data Block** | OS 블록 | 1:N (하나의 DB 블록 = 여러 OS 블록) |\n\n## 기본 테이블스페이스 종류\n\n| 테이블스페이스 | 용도 | 필수 여부 | 특징 |\n|---|---|---|---|\n| **SYSTEM** | 데이터 딕셔너리 저장 | 필수 | SYS 소유, 항상 ONLINE, SMALLFILE |\n| **SYSAUX** | SYSTEM의 보조 구성요소 저장 | 필수 | AWR, Enterprise Manager 등의 데이터 |\n| **TEMP** | 임시 세그먼트(정렬, 해시 조인 등) | 필수 | TEMPORARY 테이블스페이스, 재사용 가능 |\n| **UNDO** | 언두 데이터(트랜잭션 롤백용) | 필수 | 자동 관리(AUM), UNDO_TABLESPACE 파라미터 |\n| **USERS** | 사용자 데이터 기본 저장소 | 선택 | 기본 영구 테이블스페이스로 지정 가능 |",
-      "sqlExamplesIds": ["sql01", "sql02"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02"
+      ],
       "subsections": [
         {
           "title": "논리적 저장 구조 계층 (Logical Storage Hierarchy)",
@@ -38,7 +41,27 @@
             "UNDO 테이블스페이스는 트랜잭션 롤백 및 읽기 일관성(Consistent Read)을 위한 언두 데이터 저장",
             "USERS 테이블스페이스는 사용자 데이터의 기본 저장소이며, DATABASE_PROPERTIES에서 기본 영구 TS 확인 가능",
             "SYSTEM 테이블스페이스에 사용자 객체를 생성하는 것은 공간 경합 및 관리 복잡성으로 인해 비권장"
+          ],
+          "visuals": [
+            {
+              "id": "v02",
+              "type": "svg",
+              "src": "/visuals/05/05_01_s01_default_tablespaces.svg",
+              "caption": "Oracle 기본 테이블스페이스 5종 — SYSTEM, SYSAUX, TEMP, UNDO, USERS",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/05/05_01_s01_logical_storage_hierarchy.svg",
+          "caption": "Oracle 논리적 저장 구조 계층 — Tablespace > Segment > Extent > Data Block",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     },
@@ -46,7 +69,10 @@
       "sectionId": "s02",
       "title": "SMALLFILE 테이블스페이스 (SMALLFILE Tablespace / SMALLFILE 表領域)",
       "content": "**SMALLFILE 테이블스페이스**는 Oracle Database의 **전통적인(기본) 테이블스페이스 유형**으로, 하나의 테이블스페이스에 **여러 개의 데이터 파일(Datafile)**을 포함할 수 있습니다. Oracle Database 생성 시 별도의 설정이 없으면 SMALLFILE이 기본 테이블스페이스 타입입니다.\n\n## SMALLFILE 테이블스페이스 핵심 특성\n\n| 특성 | 값 |\n|---|---|\n| **데이터 파일 수** | 테이블스페이스당 최대 1,022개 |\n| **데이터 파일 최대 크기** | 블록 크기에 따라 다름 (아래 표 참조) |\n| **ROWID 내 파일 번호** | 10비트 (최대 1,022개 파일 식별) |\n| **ROWID 내 블록 번호** | 22비트 (파일당 최대 약 4백만 블록) |\n| **기본 설정 여부** | Oracle 기본 테이블스페이스 타입 |\n\n## 블록 크기별 SMALLFILE 데이터 파일 최대 크기\n\n| DB_BLOCK_SIZE | 데이터 파일 최대 크기 | 테이블스페이스 최대 크기 (1,022 파일 기준) |\n|---|---|---|\n| **2KB** | 8GB | 약 8TB |\n| **4KB** | 16GB | 약 16TB |\n| **8KB (기본)** | 32GB | 약 32TB |\n| **16KB** | 64GB | 약 64TB |\n| **32KB** | 128GB | 약 128TB |",
-      "sqlExamplesIds": ["sql03", "sql04"],
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04"
+      ],
       "subsections": [
         {
           "title": "SMALLFILE 테이블스페이스의 정의 및 구조 (Definition and Structure)",
@@ -58,6 +84,16 @@
             "DB_BLOCK_SIZE가 8KB일 때 데이터 파일 최대 크기는 약 32GB, 테이블스페이스 최대 크기는 약 32TB",
             "데이터 파일은 ADD DATAFILE로 추가, ALTER DATABASE DATAFILE ... RESIZE로 크기 변경 가능",
             "DB_FILES 파라미터로 인스턴스에서 열 수 있는 최대 데이터 파일 수를 제한"
+          ],
+          "visuals": [
+            {
+              "id": "v03",
+              "type": "svg",
+              "src": "/visuals/05/05_01_s02_smallfile_rowid_structure.svg",
+              "caption": "SMALLFILE ROWID 구조 — OOOOOO FFF BBBBBB RRR (18자리 Base64)",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
         },
         {
@@ -77,7 +113,10 @@
       "sectionId": "s03",
       "title": "BIGFILE 테이블스페이스 (BIGFILE Tablespace / BIGFILE 表領域)",
       "content": "**BIGFILE 테이블스페이스**는 Oracle 10g에서 도입된 테이블스페이스 유형으로, **단일 데이터 파일(Single Datafile)**로만 구성됩니다. 하나의 매우 큰 데이터 파일을 사용하여 테라바이트~엑사바이트 규모의 대용량 데이터를 관리할 수 있으며, **ASM(Automatic Storage Management)** 또는 **OMF(Oracle Managed Files)** 환경에서 특히 유용합니다.\n\n## BIGFILE 테이블스페이스 핵심 특성\n\n| 특성 | 값 |\n|---|---|\n| **데이터 파일 수** | 테이블스페이스당 정확히 **1개** |\n| **ROWID 내 파일 번호** | 사용하지 않음 (0비트 또는 고정) |\n| **ROWID 내 블록 번호** | 32비트 (최대 약 42억 블록) |\n| **최대 블록 수** | 4,294,967,296 (2^32) 블록 |\n| **기본 설정 여부** | 비기본 (명시적 지정 또는 SET DEFAULT BIGFILE 필요) |\n\n## 블록 크기별 BIGFILE 데이터 파일 최대 크기\n\n| DB_BLOCK_SIZE | BIGFILE 최대 크기 | SMALLFILE 최대 크기 (비교) |\n|---|---|---|\n| **2KB** | 8TB | 8GB |\n| **4KB** | 16TB | 16GB |\n| **8KB (기본)** | 32TB | 32GB |\n| **16KB** | 64TB | 64GB |\n| **32KB** | 128TB | 128GB |",
-      "sqlExamplesIds": ["sql05", "sql06"],
+      "sqlExamplesIds": [
+        "sql05",
+        "sql06"
+      ],
       "subsections": [
         {
           "title": "BIGFILE 테이블스페이스의 정의 및 구조 (Definition and Structure)",
@@ -120,7 +159,9 @@
       "sectionId": "s04",
       "title": "SMALLFILE vs BIGFILE 비교 (SMALLFILE vs BIGFILE Comparison)",
       "content": "SMALLFILE 테이블스페이스와 BIGFILE 테이블스페이스의 주요 차이를 종합적으로 비교합니다. 시험에서는 두 유형의 구조적 차이, 관리 방식의 차이, 적합한 사용 환경을 정확히 구분하는 것이 중요합니다.\n\n## 종합 비교표\n\n| 비교 항목 | SMALLFILE | BIGFILE |\n|---|---|---|\n| **도입 버전** | Oracle 초기부터 | Oracle 10g (10.1) |\n| **데이터 파일 수** | 최대 1,022개 | 정확히 1개 |\n| **ROWID 파일 번호 비트** | 10비트 | 0비트 (사용 안 함) |\n| **ROWID 블록 번호 비트** | 22비트 | 32비트 |\n| **파일당 최대 블록 수** | 약 4백만 (2^22) | 약 42억 (2^32) |\n| **8KB 블록 시 파일 최대 크기** | 약 32GB | 약 32TB |\n| **8KB 블록 시 TS 최대 크기** | 약 32TB (1,022 파일) | 약 32TB (1 파일) |\n| **크기 변경 단위** | 데이터 파일 레벨 | 테이블스페이스 레벨 가능 |\n| **자동 확장 설정 단위** | 데이터 파일 레벨 | 테이블스페이스 레벨 가능 |\n| **ADD/DROP DATAFILE** | 가능 | 불가 |\n| **I/O 분산** | 여러 파일로 자연 분산 | ASM에 의존 |\n| **기본 타입** | 기본값 | 명시적 설정 필요 |\n| **권장 환경** | 일반 파일 시스템 | ASM + OMF |\n| **RMAN 병렬 백업** | 파일별 자연 병렬화 | 멀티섹션 백업 필요 |",
-      "sqlExamplesIds": ["sql07"],
+      "sqlExamplesIds": [
+        "sql07"
+      ],
       "subsections": [
         {
           "title": "구조적 차이 상세 분석 (Structural Difference Analysis)",
@@ -133,13 +174,26 @@
             "RAC + ASM 환경에서도 BIGFILE이 권장되며 ASM 클러스터 파일 시스템 기능 활용 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/05/05_01_s04_smallfile_vs_bigfile.svg",
+          "caption": "SMALLFILE vs BIGFILE 테이블스페이스 구조적 차이 비교",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s05",
       "title": "데이터 파일 자동 확장 (AUTOEXTEND / データ・ファイルの自動拡張機能)",
       "content": "**AUTOEXTEND(자동 확장)**는 데이터 파일의 공간이 부족할 때 Oracle이 자동으로 데이터 파일 크기를 확장하는 기능입니다. 테이블스페이스의 공간 부족으로 인한 ORA-01653, ORA-01654 등의 오류를 방지하며, 스토리지 관리의 자동화를 제공합니다.\n\n## AUTOEXTEND 핵심 요소\n\n| 요소 | 설명 | 구문 |\n|---|---|---|\n| **AUTOEXTEND ON** | 자동 확장 활성화 | AUTOEXTEND ON |\n| **AUTOEXTEND OFF** | 자동 확장 비활성화 | AUTOEXTEND OFF |\n| **NEXT** | 확장 시 증가 크기 | NEXT 100M |\n| **MAXSIZE** | 최대 확장 한계 | MAXSIZE 30G |\n| **MAXSIZE UNLIMITED** | 파일 시스템/블록 크기 한계까지 확장 | MAXSIZE UNLIMITED |",
-      "sqlExamplesIds": ["sql08", "sql09"],
+      "sqlExamplesIds": [
+        "sql08",
+        "sql09"
+      ],
       "subsections": [
         {
           "title": "AUTOEXTEND 메커니즘 상세 (AUTOEXTEND Mechanism Details)",
@@ -164,13 +218,28 @@
             "DBA_FREE_SPACE와 DBA_DATA_FILES를 활용한 정기적 공간 모니터링이 필수"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/05/05_01_s05_autoextend_mechanism.svg",
+          "caption": "AUTOEXTEND 자동 확장 메커니즘 흐름 — 공간 부족 시 자동 확장 과정",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s06",
       "title": "테이블스페이스 생성 구문 및 옵션 (Tablespace Creation Syntax and Options)",
       "content": "테이블스페이스 생성은 **CREATE TABLESPACE** 문을 사용하며, SMALLFILE/BIGFILE 지정, 데이터 파일 경로/크기, 자동 확장, 익스텐트 관리 방식 등 다양한 옵션을 포함합니다.\n\n## CREATE TABLESPACE 기본 구문\n\n```sql\nCREATE [SMALLFILE | BIGFILE] TABLESPACE tablespace_name\n  DATAFILE 'file_path' SIZE size\n  [AUTOEXTEND ON NEXT increment MAXSIZE max_size | AUTOEXTEND OFF]\n  [EXTENT MANAGEMENT LOCAL [AUTOALLOCATE | UNIFORM SIZE size]]\n  [SEGMENT SPACE MANAGEMENT AUTO | MANUAL]\n  [BLOCKSIZE n]\n  [LOGGING | NOLOGGING]\n  [ONLINE | OFFLINE]\n  [ENCRYPTION ... ENCRYPT];\n```",
-      "sqlExamplesIds": ["sql03", "sql05", "sql06", "sql10"],
+      "sqlExamplesIds": [
+        "sql03",
+        "sql05",
+        "sql06",
+        "sql10"
+      ],
       "subsections": [
         {
           "title": "생성 구문 상세 옵션 (Creation Syntax Detail Options)",
@@ -190,7 +259,10 @@
       "sectionId": "s07",
       "title": "기본 테이블스페이스 설정 (Default Tablespace Configuration)",
       "content": "Oracle Database에서는 **사용자의 기본 테이블스페이스(DEFAULT TABLESPACE)**와 **데이터베이스 레벨의 기본 테이블스페이스 타입(BIGFILE/SMALLFILE)**을 설정할 수 있습니다. 이 설정은 새 사용자 생성 시 및 테이블스페이스 생성 시 기본 동작에 영향을 줍니다.\n\n## 기본 설정 유형\n\n| 설정 유형 | 설명 | 변경 구문 |\n|---|---|---|\n| **DB 기본 영구 TS** | 사용자의 기본 영구 테이블스페이스 | ALTER DATABASE DEFAULT TABLESPACE |\n| **DB 기본 임시 TS** | 사용자의 기본 임시 테이블스페이스 | ALTER DATABASE DEFAULT TEMPORARY TABLESPACE |\n| **DB 기본 TS 타입** | SMALLFILE 또는 BIGFILE | ALTER DATABASE SET DEFAULT [BIGFILE|SMALLFILE] TABLESPACE |\n| **사용자별 기본 TS** | 개별 사용자의 기본 테이블스페이스 | ALTER USER ... DEFAULT TABLESPACE |",
-      "sqlExamplesIds": ["sql10", "sql11"],
+      "sqlExamplesIds": [
+        "sql10",
+        "sql11"
+      ],
       "subsections": [
         {
           "title": "데이터베이스 레벨 기본 설정 (Database-Level Default Settings)",

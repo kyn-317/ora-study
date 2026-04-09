@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" fill="none">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .label { font-size: 13px; font-weight: 600; }
+    .desc { font-size: 11px; fill: #94A3B8; }
+    .mono { font-family: 'Consolas', monospace; font-size: 11px; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <text x="400" y="32" text-anchor="middle" class="title">데이터 딕셔너리 뷰 계층 비교</text>
+  <text x="400" y="52" text-anchor="middle" class="subtitle">Data Dictionary View Prefix Comparison (DBA_ / ALL_ / USER_ / CDB_)</text>
+
+  <!-- DBA_ -->
+  <rect x="30" y="75" width="170" height="200" fill="#1E1F2E" stroke="#F43F5E" stroke-width="2" class="box"/>
+  <rect x="30" y="75" width="170" height="36" fill="#F43F5E" fill-opacity="0.15" rx="8" ry="8"/>
+  <text x="115" y="98" text-anchor="middle" class="label" fill="#F43F5E">DBA_ 뷰</text>
+  <text x="45" y="128" class="desc">범위: DB 전체 객체</text>
+  <text x="45" y="148" class="desc">권한: SELECT_CATALOG_ROLE</text>
+  <text x="45" y="168" class="desc">     또는 SELECT ANY</text>
+  <text x="45" y="188" class="desc">     DICTIONARY</text>
+  <text x="45" y="215" class="mono" fill="#F43F5E">DBA_TABLES</text>
+  <text x="45" y="232" class="mono" fill="#F43F5E">DBA_USERS</text>
+  <text x="45" y="249" class="mono" fill="#F43F5E">DBA_TABLESPACES</text>
+  <text x="45" y="266" class="desc">OWNER 컬럼: 있음</text>
+
+  <!-- ALL_ -->
+  <rect x="220" y="75" width="170" height="200" fill="#1E1F2E" stroke="#3B82F6" stroke-width="2" class="box"/>
+  <rect x="220" y="75" width="170" height="36" fill="#3B82F6" fill-opacity="0.15" rx="8" ry="8"/>
+  <text x="305" y="98" text-anchor="middle" class="label" fill="#3B82F6">ALL_ 뷰</text>
+  <text x="235" y="128" class="desc">범위: 접근 가능 객체</text>
+  <text x="235" y="148" class="desc">권한: 별도 권한 불요</text>
+  <text x="235" y="168" class="desc">     (GRANT 받은 객체</text>
+  <text x="235" y="188" class="desc">      + 본인 소유)</text>
+  <text x="235" y="215" class="mono" fill="#3B82F6">ALL_TABLES</text>
+  <text x="235" y="232" class="mono" fill="#3B82F6">ALL_OBJECTS</text>
+  <text x="235" y="249" class="mono" fill="#3B82F6">ALL_TAB_COLUMNS</text>
+  <text x="235" y="266" class="desc">OWNER 컬럼: 있음</text>
+
+  <!-- USER_ -->
+  <rect x="410" y="75" width="170" height="200" fill="#1E1F2E" stroke="#10B981" stroke-width="2" class="box"/>
+  <rect x="410" y="75" width="170" height="36" fill="#10B981" fill-opacity="0.15" rx="8" ry="8"/>
+  <text x="495" y="98" text-anchor="middle" class="label" fill="#10B981">USER_ 뷰</text>
+  <text x="425" y="128" class="desc">범위: 본인 소유 객체만</text>
+  <text x="425" y="148" class="desc">권한: 별도 권한 불요</text>
+  <text x="425" y="168" class="desc">     (자신의 스키마</text>
+  <text x="425" y="188" class="desc">      객체만 표시)</text>
+  <text x="425" y="215" class="mono" fill="#10B981">USER_TABLES</text>
+  <text x="425" y="232" class="mono" fill="#10B981">USER_INDEXES</text>
+  <text x="425" y="249" class="mono" fill="#10B981">USER_CONSTRAINTS</text>
+  <text x="425" y="266" class="desc">OWNER 컬럼: 없음</text>
+
+  <!-- CDB_ -->
+  <rect x="600" y="75" width="170" height="200" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="2" class="box"/>
+  <rect x="600" y="75" width="170" height="36" fill="#6F6BEA" fill-opacity="0.15" rx="8" ry="8"/>
+  <text x="685" y="98" text-anchor="middle" class="label" fill="#6F6BEA">CDB_ 뷰</text>
+  <text x="615" y="128" class="desc">범위: CDB 전체</text>
+  <text x="615" y="148" class="desc">     (모든 PDB 포함)</text>
+  <text x="615" y="168" class="desc">권한: SYSDBA 또는</text>
+  <text x="615" y="188" class="desc">     공통 권한</text>
+  <text x="615" y="215" class="mono" fill="#6F6BEA">CDB_TABLES</text>
+  <text x="615" y="232" class="mono" fill="#6F6BEA">CDB_USERS</text>
+  <text x="615" y="249" class="mono" fill="#6F6BEA">CDB_TABLESPACES</text>
+  <text x="615" y="266" class="desc">CON_ID 컬럼: 있음</text>
+
+  <!-- Bottom: Base Tables -->
+  <rect x="150" y="310" width="500" height="60" fill="#1E1F2E" stroke="#F59E0B" stroke-width="2" class="box"/>
+  <text x="400" y="335" text-anchor="middle" class="label" fill="#F59E0B">기본 테이블 (Base Tables) — SYS 소유</text>
+  <text x="400" y="355" text-anchor="middle" class="mono" fill="#F59E0B">TAB$  OBJ$  COL$  USER$  TS$  SEG$  FILE$</text>
+  <text x="400" y="365" text-anchor="middle" class="desc">SYSTEM 테이블스페이스에 저장 / 직접 조회 비권장</text>
+
+  <!-- Arrows from views to base -->
+  <line x1="115" y1="275" x2="250" y2="310" stroke="#F43F5E" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="305" y1="275" x2="340" y2="310" stroke="#3B82F6" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="495" y1="275" x2="460" y2="310" stroke="#10B981" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="685" y1="275" x2="550" y2="310" stroke="#6F6BEA" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Comparison with V$ -->
+  <rect x="30" y="395" width="740" height="75" fill="#1E1F2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
+  <text x="400" y="418" text-anchor="middle" class="label">딕셔너리 뷰 vs V$ 뷰 핵심 차이</text>
+  <text x="50" y="440" class="desc">딕셔너리 뷰: 디스크 저장 → 읽기 일관성 보장 → DDL 시 갱신 → OPEN 상태에서만 접근</text>
+  <text x="50" y="458" class="desc">V$ 뷰:       SGA 메모리 → 읽기 일관성 미보장 → 실시간 갱신 → NOMOUNT부터 부분 접근</text>
+</svg>

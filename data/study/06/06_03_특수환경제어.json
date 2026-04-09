@@ -307,6 +307,44 @@
       "description": "UNDO 관련 종합 모니터링 쿼리입니다. UNDO 익스텐트 상태별 사용량, ORA-01555/공간 부족 에러 이력, 활성 트랜잭션의 UNDO 사용량을 종합적으로 확인합니다."
     }
   ],
+  "visuals": [
+    {
+      "id": "v01",
+      "type": "svg",
+      "src": "/visuals/06/06_03_s01_special_env_overview.svg",
+      "caption": "UNDO 특수 환경 제어 전체 구조: Temporary UNDO + 멀티테넌트 UNDO 모드 (Shared/Local)",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s01"
+    },
+    {
+      "id": "v02",
+      "type": "svg",
+      "src": "/visuals/06/06_03_s02_temp_undo_flow.svg",
+      "caption": "Temporary UNDO 동작 흐름 비교: 기존(6단계) vs Temp UNDO(2단계) — REDO I/O 완전 생략",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s02"
+    },
+    {
+      "id": "v03",
+      "type": "svg",
+      "src": "/visuals/06/06_03_s03_shared_vs_local_undo.svg",
+      "caption": "멀티테넌트 UNDO: Shared vs Local 아키텍처 비교 — 기능, 격리성, 모드 전환",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s03"
+    },
+    {
+      "id": "v04",
+      "type": "svg",
+      "src": "/visuals/06/06_03_s06_undo_mode_switch_procedure.svg",
+      "caption": "UNDO 모드 전환 절차: Shared→Local(권장) vs Local→Shared(비권장) 단계별 비교",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s06"
+    }
+  ],
   "keywords": [
     "Temporary UNDO",
     "一時UNDO",

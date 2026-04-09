@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .arrow-line { stroke: #6F6BEA; stroke-width: 2; fill: none; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="ah-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+    </marker>
+    <marker id="ah-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F43F5E" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">SQL*Loader Architecture &amp; Process Flow</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">SQL*Loader 아키텍처 - 클라이언트 측 유틸리티의 5단계 실행 과정</text>
+
+  <!-- Input Files (Left) -->
+  <rect x="30" y="80" width="180" height="200" class="box" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1.5" />
+  <text x="120" y="102" text-anchor="middle" class="label" fill="#3B82F6">Input Files</text>
+
+  <rect x="45" y="115" width="150" height="35" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1" />
+  <text x="120" y="137" text-anchor="middle" class="code">control.ctl</text>
+
+  <rect x="45" y="160" width="150" height="35" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1" />
+  <text x="120" y="182" text-anchor="middle" class="code">data.csv / .dat</text>
+
+  <text x="120" y="225" text-anchor="middle" class="small">컨트롤 파일: 로드 규칙</text>
+  <text x="120" y="242" text-anchor="middle" class="small">데이터 파일: 원본 데이터</text>
+  <text x="120" y="260" text-anchor="middle" class="small">Express Mode: .ctl 불필요</text>
+
+  <!-- sqlldr Process (Center) -->
+  <rect x="260" y="70" width="280" height="290" class="box" fill="rgba(111,107,234,0.08)" stroke="#6F6BEA" stroke-width="2" />
+  <text x="400" y="95" text-anchor="middle" class="label" fill="#6F6BEA">sqlldr Process (클라이언트)</text>
+  <text x="400" y="112" text-anchor="middle" class="code">$ORACLE_HOME/bin/sqlldr</text>
+
+  <!-- 5 Steps -->
+  <rect x="280" y="125" width="240" height="30" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1" />
+  <text x="400" y="145" text-anchor="middle" class="sublabel">1. 초기화 (Initialization)</text>
+
+  <rect x="280" y="162" width="240" height="30" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1" />
+  <text x="400" y="182" text-anchor="middle" class="sublabel">2. 데이터 읽기 (READSIZE 버퍼)</text>
+
+  <rect x="280" y="199" width="240" height="30" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="400" y="219" text-anchor="middle" class="sublabel">3. 변환/검증 (Conversion)</text>
+
+  <rect x="280" y="236" width="240" height="30" class="box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1" />
+  <text x="400" y="256" text-anchor="middle" class="sublabel">4. 데이터 적재 (Loading)</text>
+
+  <rect x="280" y="273" width="240" height="30" class="box" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1" />
+  <text x="400" y="293" text-anchor="middle" class="sublabel">5. 후처리 (COMMIT/인덱스)</text>
+
+  <!-- Arrows: Input -> sqlldr -->
+  <line x1="210" y1="132" x2="278" y2="140" stroke="#3B82F6" stroke-width="1.5" fill="none" marker-end="url(#ah-blue)" />
+  <line x1="210" y1="177" x2="278" y2="177" stroke="#F59E0B" stroke-width="1.5" fill="none" marker-end="url(#ah)" />
+
+  <!-- Output Files (Right) -->
+  <rect x="590" y="80" width="180" height="200" class="box" fill="rgba(244,63,94,0.06)" stroke="#F43F5E" stroke-width="1.5" />
+  <text x="680" y="102" text-anchor="middle" class="label" fill="#F43F5E">Output Files</text>
+
+  <rect x="605" y="115" width="150" height="30" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1" />
+  <text x="680" y="135" text-anchor="middle" class="code">load.log</text>
+
+  <rect x="605" y="155" width="150" height="30" class="box" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1" />
+  <text x="680" y="175" text-anchor="middle" class="code">load.bad</text>
+
+  <rect x="605" y="195" width="150" height="30" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="680" y="215" text-anchor="middle" class="code">load.dsc</text>
+
+  <text x="680" y="250" text-anchor="middle" class="small">.log: 실행 통계 기록</text>
+  <text x="680" y="265" text-anchor="middle" class="small">.bad: 파싱 실패 레코드</text>
+  <text x="680" y="280" text-anchor="middle" class="small">.dsc: WHEN 불만족 레코드</text>
+
+  <!-- Arrows: sqlldr -> Output -->
+  <line x1="540" y1="290" x2="603" y2="130" stroke="#10B981" stroke-width="1.5" fill="none" marker-end="url(#ah)" />
+  <line x1="540" y1="215" x2="603" y2="170" stroke="#F43F5E" stroke-width="1.5" fill="none" marker-end="url(#ah-red)" />
+
+  <!-- Oracle Database (Bottom) -->
+  <rect x="160" y="390" width="480" height="210" class="box" fill="rgba(111,107,234,0.05)" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="8,4" />
+  <text x="400" y="415" text-anchor="middle" class="label" fill="#6F6BEA">Oracle Database</text>
+
+  <!-- Conventional Path -->
+  <rect x="185" y="430" width="200" height="80" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5" />
+  <text x="285" y="453" text-anchor="middle" class="label" fill="#3B82F6">Conventional Path</text>
+  <text x="285" y="473" text-anchor="middle" class="small">SQL INSERT 사용</text>
+  <text x="285" y="490" text-anchor="middle" class="small">SGA Buffer Cache 경유</text>
+  <text x="285" y="505" text-anchor="middle" class="small">전체 Redo 생성</text>
+
+  <!-- Direct Path -->
+  <rect x="415" y="430" width="200" height="80" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5" />
+  <text x="515" y="453" text-anchor="middle" class="label" fill="#F59E0B">Direct Path</text>
+  <text x="515" y="473" text-anchor="middle" class="small">SQL 우회, 블록 직접 생성</text>
+  <text x="515" y="490" text-anchor="middle" class="small">HWM 위에 기록</text>
+  <text x="515" y="505" text-anchor="middle" class="small">최소 Redo, 고속</text>
+
+  <!-- Arrows: sqlldr -> Database -->
+  <line x1="350" y1="310" x2="285" y2="428" stroke="#3B82F6" stroke-width="2" fill="none" marker-end="url(#ah-blue)" />
+  <line x1="450" y1="310" x2="515" y2="428" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#ah)" />
+
+  <!-- Target Table -->
+  <rect x="280" y="530" width="240" height="50" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1.5" />
+  <text x="400" y="555" text-anchor="middle" class="label" fill="#10B981">Target Table (대상 테이블)</text>
+  <text x="400" y="572" text-anchor="middle" class="small">데이터 적재 완료</text>
+
+  <line x1="285" y1="510" x2="350" y2="528" stroke="#3B82F6" stroke-width="1.5" fill="none" marker-end="url(#ah-blue)" />
+  <line x1="515" y1="510" x2="450" y2="528" stroke="#F59E0B" stroke-width="1.5" fill="none" marker-end="url(#ah)" />
+</svg>

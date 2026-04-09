@@ -16,7 +16,17 @@
       "title": "Oracle 저장 구조 개요 (Storage Structures Overview)",
       "sqlExamplesIds": [],
       "content": "Oracle Database의 저장 구조는 **물리적 저장 구조(Physical Storage Structures)**와 **논리적 저장 구조(Logical Storage Structures)**로 나뉩니다. 물리적 구조는 운영체제 수준에서 실제 존재하는 파일들이며, 논리적 구조는 Oracle이 데이터를 관리하기 위해 내부적으로 정의한 추상적 계층입니다.\n\n### 물리적 저장 구조와 논리적 저장 구조의 관계\n\n| 구분 | 물리적 저장 구조 | 논리적 저장 구조 |\n|---|---|---|\n| **관리 주체** | 운영체제(OS) | Oracle Database |\n| **가시성** | OS 파일 시스템에서 확인 가능 | Oracle 딕셔너리/뷰에서 확인 |\n| **구성요소** | 데이터 파일, 컨트롤 파일, Redo Log 파일, 아카이브 로그, 파라미터 파일 등 | 테이블스페이스, 세그먼트, 익스텐트, 데이터 블록 |\n| **매핑 관계** | 데이터 파일 ↔ 테이블스페이스 | 테이블스페이스 → 세그먼트 → 익스텐트 → 블록 |\n\n### Oracle Database 파일 구성 전체도\n\n```\nOracle Database\n├── 필수 파일 (Required Files)\n│   ├── Data Files (.dbf)          ← 실제 데이터 저장\n│   ├── Control Files (.ctl)       ← 데이터베이스 구조 메타데이터\n│   └── Online Redo Log Files (.log) ← 변경 이력 기록\n│\n├── 선택/자동 생성 파일\n│   ├── Archive Log Files           ← Redo Log의 아카이브 복사본\n│   ├── Parameter Files (PFILE/SPFILE) ← 인스턴스 구성 파라미터\n│   ├── Password File                ← 원격 SYSDBA 인증\n│   ├── Alert Log / Trace Files      ← 진단 로그\n│   └── Backup Files (RMAN)          ← 백업 파일\n│\n└── 논리적 구조 (Logical Structures)\n    ├── Tablespace (테이블스페이스)\n    │   ├── Segment (세그먼트)\n    │   │   ├── Extent (익스텐트)\n    │   │   │   └── Data Block (데이터 블록)\n```\n\n**핵심 매핑 원칙**:\n- 하나의 **데이터 파일**은 정확히 하나의 **테이블스페이스**에 속합니다.\n- 하나의 **테이블스페이스**는 하나 이상의 **데이터 파일**로 구성될 수 있습니다.\n- 하나의 **세그먼트**는 하나의 테이블스페이스 내에 존재하지만, 여러 데이터 파일에 걸쳐 **익스텐트**를 가질 수 있습니다.",
-      "subsections": []
+      "subsections": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/01/01_03_s01_storage_overview.svg",
+          "caption": "Oracle 물리적 저장 구조(데이터 파일, 컨트롤 파일, Redo Log)와 논리적 저장 구조(테이블스페이스→세그먼트→익스텐트→블록)의 전체 매핑 관계도",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ]
     },
     {
       "sectionId": "s02",
@@ -46,6 +56,16 @@
             "ALTER DATABASE BACKUP CONTROLFILE TO TRACE로 재생성 SQL 스크립트를 추출할 수 있음",
             "컨트롤 파일 전체 손실 시 RMAN 백업 또는 트레이스 파일에서 복구 필요"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/01/01_03_s02_controlfile_multiplex.svg",
+          "caption": "컨트롤 파일 다중화(Multiplexing) 구조 — 서로 다른 디스크에 동기적 동시 갱신으로 동일한 복사본 유지",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     },
@@ -91,6 +111,16 @@
             "ARCHIVELOG 모드: 미디어 복구, 온라인 백업, Point-in-Time Recovery 지원 — 운영 환경 필수",
             "ARCHIVELOG 모드 전환은 MOUNT 상태에서 ALTER DATABASE ARCHIVELOG 명령으로 수행"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/01/01_03_s03_redo_log_circular.svg",
+          "caption": "온라인 Redo Log 그룹의 순환 기록 구조(Circular Writing) — LGWR이 그룹 간 로그 스위치를 수행하며 CURRENT→ACTIVE→INACTIVE 상태 전이",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     },
@@ -180,6 +210,24 @@
             "MSSM(Manual SSM)의 PCTUSED는 ASSM에서 사용되지 않음 — 비트맵이 대체"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/01/01_03_s05_logical_hierarchy.svg",
+          "caption": "논리적 저장 구조 4단계 계층도 — 테이블스페이스→세그먼트→익스텐트→데이터 블록과 AUTOALLOCATE 익스텐트 크기 자동 증가",
+          "placement": "after-content",
+          "width": "100%"
+        },
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/01/01_03_s05_block_structure.svg",
+          "caption": "Oracle 데이터 블록 내부 구조(Header, Row Directory, Free Space, Row Data)와 PCTFREE 공간 관리 메커니즘",
+          "placement": "after-keypoints",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -225,6 +273,16 @@
             "PDB Relocate, PDB Snapshot Carousel 등 PDB 이동성/고급 기능에도 Local UNDO 필수",
             "로컬 UNDO 모드에서는 PDB 간 UNDO 간섭이 없어 격리성이 향상됨"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "svg",
+          "src": "/visuals/01/01_03_s06_undo_flow.svg",
+          "caption": "UNDO 데이터 동작 흐름 — DML 실행 시 Before Image 저장, COMMIT/ROLLBACK 경로, 읽기 일관성(CR Copy) 메커니즘, UNDO 상태 전이(ACTIVE→UNEXPIRED→EXPIRED)",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

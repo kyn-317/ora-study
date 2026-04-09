@@ -14,7 +14,9 @@
     {
       "sectionId": "s01",
       "title": "ADDM 개요 및 아키텍처 (ADDM Overview and Architecture)",
-      "sqlExamplesIds": ["sql01"],
+      "sqlExamplesIds": [
+        "sql01"
+      ],
       "content": "**ADDM(Automatic Database Diagnostic Monitor)**은 Oracle Database에 내장된 자동 성능 진단 엔진으로, AWR(Automatic Workload Repository) 스냅샷 데이터를 분석하여 성능 문제의 근본 원인을 식별하고 해결 권장 사항을 제시합니다. ADDM은 **MMON(Manageability Monitor)** 백그라운드 프로세스에 의해 매 AWR 스냅샷 후 자동으로 실행됩니다.\n\n## ADDM의 핵심 목적\n\n| 목적 | 설명 |\n|---|---|\n| **자동 성능 진단** | AWR 스냅샷 간 성능 데이터를 자동 분석하여 문제 식별 |\n| **근본 원인 분석 (Root Cause Analysis)** | 증상이 아닌 근본 원인까지 추적하여 진단 |\n| **영향도 정량화 (Impact Quantification)** | DB Time 기준으로 각 문제의 영향도를 수치화 |\n| **실행 가능한 권장 사항** | 구체적인 해결 방안을 예상 효과와 함께 제시 |\n| **사전 예방적 모니터링** | 정기적 분석으로 문제가 심각해지기 전에 감지 |\n\n## ADDM 아키텍처 구성요소\n\n| 구성요소 | 역할 |\n|---|---|\n| **AWR (Automatic Workload Repository)** | 성능 통계 데이터의 저장소. ADDM의 입력 데이터 소스 |\n| **MMON (Manageability Monitor)** | AWR 스냅샷 수집 및 ADDM 분석을 트리거하는 백그라운드 프로세스 |\n| **MMNL (Manageability Monitor Light)** | MMON 보조 프로세스. ASH 버퍼 플러시 등 경량 태스크 담당 |\n| **Advisor Framework** | ADDM을 포함한 어드바이저 인프라. DBMS_ADVISOR 패키지로 접근 |\n| **ADDM 분석 엔진** | DB Time 분해(Decomposition) 기반 성능 분석 로직 |\n| **DBA_ADVISOR_* 뷰** | ADDM 분석 결과(Finding, Recommendation)를 조회하는 딕셔너리 뷰 |\n\n## ADDM 자동 실행 흐름\n\n```\nMMON 프로세스: AWR 스냅샷 수집 (기본 1시간 간격)\n    │\n    ▼\nAWR 스냅샷 완료\n    │\n    ▼\nMMON이 자동으로 ADDM 분석 태스크 생성\n    │\n    ▼\nADDM 엔진: 직전 2개 스냅샷 간 데이터 분석\n    ├── DB Time 분해 (CPU Time, Wait Time)\n    ├── 상위 성능 소비 요소 식별\n    ├── 근본 원인 추적 (Root Cause Drill-Down)\n    └── 권장 사항 생성 (Recommendations)\n    │\n    ▼\n분석 결과를 AWR 리포지토리에 저장\n    │\n    ▼\nEnterprise Manager 또는 DBA_ADVISOR_* 뷰를 통해 조회 가능\n```\n\n## ADDM vs 기타 진단 도구 비교\n\n| 도구 | 분석 시점 | 분석 대상 | 자동/수동 | 데이터 소스 |\n|---|---|---|---|---|\n| **ADDM** | 사후 분석 (AWR 기반) | 전체 데이터베이스 성능 | 자동 + 수동 | AWR 스냅샷 |\n| **ASH (Active Session History)** | 실시간/과거 | 활성 세션 활동 | 수동 조회 | V$ACTIVE_SESSION_HISTORY |\n| **AWR 리포트** | 사후 분석 | 통계 요약 | 수동 | AWR 스냅샷 |\n| **Real-Time ADDM** | 실시간 | 현재 성능 문제 | 수동 | SGA 내 통계 |\n| **SQL Tuning Advisor** | 수동 분석 | 개별 SQL 문 | 수동 | SQL 실행 통계 |",
       "subsections": [
         {
@@ -29,12 +31,25 @@
             "ADDM은 증상(Symptom)이 아닌 근본 원인(Root Cause)까지 하향식(Top-Down)으로 추적하는 것이 핵심 설계 철학"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/08/08_04_s01_addm_architecture.svg",
+          "caption": "ADDM 자동 실행 흐름 및 DB Time 분해 분석 아키텍처",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s02",
       "title": "ADDM 분석 메커니즘 (ADDM Analysis Mechanism)",
-      "sqlExamplesIds": ["sql02", "sql03"],
+      "sqlExamplesIds": [
+        "sql02",
+        "sql03"
+      ],
       "content": "ADDM의 분석 메커니즘은 **DB Time 분해(DB Time Decomposition)** 방법론에 기반합니다. ADDM은 성능 문제를 **Finding**(발견)으로 분류하고, 각 Finding에 대해 **Recommendation**(권장 사항)을 생성합니다.",
       "subsections": [
         {
@@ -61,12 +76,25 @@
             "SQL 관련 Finding은 SQL Tuning Advisor 실행을, 인덱스 관련은 Automatic Indexing을 Action으로 연계"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/08/08_04_s02_addm_finding_recommendation_hierarchy.svg",
+          "caption": "ADDM Finding → Recommendation → Action 계층 구조 및 유형 분류",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s03",
       "title": "ADDM 구성 및 제어 (ADDM Configuration and Control)",
-      "sqlExamplesIds": ["sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql04",
+        "sql05"
+      ],
       "content": "ADDM의 동작은 초기화 파라미터, DBMS_ADVISOR 패키지의 태스크 파라미터, AWR 스냅샷 설정 등으로 제어됩니다. 적절한 구성을 통해 ADDM의 분석 범위, 빈도, 상세도를 조정할 수 있습니다.",
       "subsections": [
         {
@@ -87,7 +115,10 @@
     {
       "sectionId": "s04",
       "title": "PDB 레벨 ADDM (PDB-Level ADDM)",
-      "sqlExamplesIds": ["sql06", "sql07"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07"
+      ],
       "content": "Oracle 멀티테넌트(Multitenant) 환경에서 PDB(Pluggable Database)별 독립적인 ADDM 분석을 수행하려면 PDB 레벨의 AWR이 활성화되어야 합니다. Oracle 26ai에서는 PDB 레벨 AWR이 기본 활성화되어 별도 설정 없이 PDB 독립 ADDM이 가능합니다.",
       "subsections": [
         {
@@ -102,12 +133,26 @@
             "PDB ADDM 권장 사항은 해당 PDB에서 변경 가능한 항목(PDB 수정 가능 파라미터 등)으로 한정"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/08/08_04_s04_pdb_level_addm.svg",
+          "caption": "CDB vs PDB 레벨 ADDM 비교 (Oracle 26ai PDB AWR 자동 활성화)",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s05",
       "title": "ADDM 보고서 생성 및 해석 (ADDM Report Generation and Interpretation)",
-      "sqlExamplesIds": ["sql08", "sql09", "sql10"],
+      "sqlExamplesIds": [
+        "sql08",
+        "sql09",
+        "sql10"
+      ],
       "content": "ADDM 분석 결과는 **텍스트 보고서**, **Enterprise Manager 그래픽 인터페이스**, **딕셔너리 뷰 조회** 등 다양한 방법으로 확인할 수 있습니다. 가장 일반적인 방법은 `addmrpt.sql` 스크립트 또는 `DBMS_ADDM` 패키지를 사용하는 것입니다.",
       "subsections": [
         {
@@ -123,12 +168,26 @@
             "Finding이 없는 보고서는 분석 기간 동안 유의미한 성능 문제가 없었음을 의미"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/08/08_04_s05_addm_report_structure.svg",
+          "caption": "ADDM 보고서 생성 방법 및 구조 (addmrpt.sql, DBMS_ADDM, EM)",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s06",
       "title": "수동 ADDM 분석 (Manual ADDM Analysis)",
-      "sqlExamplesIds": ["sql11", "sql12", "sql13"],
+      "sqlExamplesIds": [
+        "sql11",
+        "sql12",
+        "sql13"
+      ],
       "content": "ADDM은 기본적으로 매 AWR 스냅샷 후 자동 실행되지만, DBA가 특정 시간 범위를 지정하여 수동으로 ADDM 분석을 수행할 수도 있습니다. 수동 분석은 과거의 특정 성능 문제를 조사하거나, 자동 분석 기간과 다른 범위를 분석할 때 유용합니다.",
       "subsections": [
         {
@@ -164,6 +223,16 @@
             "성능 모니터링은 병목 지점 식별, 문제 수정, 기준선 설정, 용량 계획을 위해 DBA의 필수 활동",
             "하드웨어 추가는 마지막 수단이며, 근본적인 SQL/설계 문제를 해결하지 않으면 하드웨어 증설의 효과가 제한적"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/08/08_04_s07_performance_tuning_methodology.svg",
+          "caption": "Oracle 권장 성능 튜닝 방법론 5단계 (ADDM → OS → 메모리 → I/O → SQL)",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

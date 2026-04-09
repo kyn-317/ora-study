@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2; fill: none; marker-end: url(#ah); }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="28" text-anchor="middle" class="title">오프라인 데이터 파일 이동 — 2가지 방법 비교</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">ALTER DATABASE RENAME FILE (MOUNT) vs ALTER TABLESPACE RENAME DATAFILE (OPEN)</text>
+
+  <!-- Method 1: RENAME FILE (MOUNT) -->
+  <rect x="30" y="65" width="355" height="380" class="box" fill="rgba(111,107,234,0.06)" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="207" y="88" text-anchor="middle" class="label" fill="#6F6BEA">ALTER DATABASE RENAME FILE</text>
+  <text x="207" y="105" text-anchor="middle" class="small">DB 상태: MOUNT (서비스 중단 필수)</text>
+
+  <!-- Step 1 -->
+  <rect x="50" y="118" width="315" height="36" class="box" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="60" y="133" class="code" fill="#F43F5E">1</text>
+  <text x="80" y="140" class="sublabel">SHUTDOWN (DB 종료)</text>
+  <line x1="207" y1="154" x2="207" y2="168" class="arrow"/>
+
+  <!-- Step 2 -->
+  <rect x="50" y="168" width="315" height="36" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="60" y="183" class="code" fill="#F59E0B">2</text>
+  <text x="80" y="190" class="sublabel">OS 레벨에서 파일 복사 (cp / copy)</text>
+  <line x1="207" y1="204" x2="207" y2="218" class="arrow"/>
+
+  <!-- Step 3 -->
+  <rect x="50" y="218" width="315" height="36" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="60" y="233" class="code" fill="#3B82F6">3</text>
+  <text x="80" y="240" class="sublabel">STARTUP MOUNT (마운트 상태로 기동)</text>
+  <line x1="207" y1="254" x2="207" y2="268" class="arrow"/>
+
+  <!-- Step 4 -->
+  <rect x="50" y="268" width="315" height="48" class="box" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="60" y="283" class="code" fill="#6F6BEA">4</text>
+  <text x="80" y="290" class="sublabel">ALTER DATABASE RENAME FILE</text>
+  <text x="80" y="306" class="code">'old_path' TO 'new_path';</text>
+  <line x1="207" y1="316" x2="207" y2="330" class="arrow"/>
+
+  <!-- Step 5 -->
+  <rect x="50" y="330" width="315" height="36" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="60" y="345" class="code" fill="#10B981">5</text>
+  <text x="80" y="352" class="sublabel">ALTER DATABASE OPEN (DB 오픈)</text>
+  <line x1="207" y1="366" x2="207" y2="380" class="arrow"/>
+
+  <!-- Step 6 -->
+  <rect x="50" y="380" width="315" height="36" class="box" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1"/>
+  <text x="60" y="395" class="code" fill="#F43F5E">6</text>
+  <text x="80" y="402" class="sublabel">원본 파일 수동 삭제</text>
+
+  <!-- Scope note -->
+  <text x="50" y="432" class="small">적용: SYSTEM, UNDO 포함 모든 데이터 파일</text>
+
+  <!-- Method 2: RENAME DATAFILE (OPEN) -->
+  <rect x="415" y="65" width="355" height="380" class="box" fill="rgba(16,185,129,0.06)" stroke="#10B981" stroke-width="2"/>
+  <text x="592" y="88" text-anchor="middle" class="label" fill="#10B981">ALTER TABLESPACE RENAME DATAFILE</text>
+  <text x="592" y="105" text-anchor="middle" class="small">DB 상태: OPEN (TS만 OFFLINE)</text>
+
+  <!-- Step 1 -->
+  <rect x="435" y="118" width="315" height="48" class="box" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="445" y="133" class="code" fill="#F43F5E">1</text>
+  <text x="465" y="140" class="sublabel">ALTER TABLESPACE ... OFFLINE;</text>
+  <text x="465" y="156" class="small">(해당 TS만 OFFLINE, DB는 OPEN 유지)</text>
+  <line x1="592" y1="166" x2="592" y2="180" class="arrow"/>
+
+  <!-- Step 2 -->
+  <rect x="435" y="180" width="315" height="36" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="445" y="195" class="code" fill="#F59E0B">2</text>
+  <text x="465" y="202" class="sublabel">OS 레벨에서 파일 복사 (cp / copy)</text>
+  <line x1="592" y1="216" x2="592" y2="230" class="arrow"/>
+
+  <!-- Step 3 -->
+  <rect x="435" y="230" width="315" height="48" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="445" y="245" class="code" fill="#10B981">3</text>
+  <text x="465" y="252" class="sublabel">ALTER TABLESPACE ... RENAME</text>
+  <text x="465" y="268" class="code">DATAFILE 'old' TO 'new';</text>
+  <line x1="592" y1="278" x2="592" y2="292" class="arrow"/>
+
+  <!-- Step 4 -->
+  <rect x="435" y="292" width="315" height="36" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="445" y="307" class="code" fill="#3B82F6">4</text>
+  <text x="465" y="314" class="sublabel">ALTER TABLESPACE ... ONLINE;</text>
+  <line x1="592" y1="328" x2="592" y2="342" class="arrow"/>
+
+  <!-- Step 5 -->
+  <rect x="435" y="342" width="315" height="36" class="box" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1"/>
+  <text x="445" y="357" class="code" fill="#F43F5E">5</text>
+  <text x="465" y="364" class="sublabel">원본 파일 수동 삭제</text>
+
+  <!-- Scope note -->
+  <text x="435" y="400" class="small">제한: SYSTEM, UNDO TS에는 사용 불가</text>
+  <text x="435" y="416" class="small">(OFFLINE 불가한 TS는 RENAME FILE 사용)</text>
+  <text x="435" y="432" class="small" fill="#10B981">장점: DB 전체 중단 없이 개별 TS만 중지</text>
+</svg>

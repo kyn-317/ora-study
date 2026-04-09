@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <text x="400" y="30" class="title" text-anchor="middle">tnsping 동작 흐름 및 오류 코드 (tnsping Diagnostic Flow)</text>
+  <text x="400" y="50" class="subtitle" text-anchor="middle">이름 해석 - TNS 연결 시도 - 응답 확인 4단계 진단 프로세스</text>
+
+  <!-- Step 1 -->
+  <rect x="30" y="75" width="170" height="65" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <circle cx="48" cy="90" r="12" fill="#6F6BEA"/>
+  <text x="48" y="94" class="label" text-anchor="middle" fill="#FFF" font-size="11">1</text>
+  <text x="125" y="95" class="sublabel" text-anchor="middle">이름 해석</text>
+  <text x="115" y="112" class="small" text-anchor="middle">tnsnames.ora / LDAP</text>
+  <text x="115" y="127" class="small" text-anchor="middle">/ EZCONNECT 검색</text>
+
+  <line x1="200" y1="107" x2="230" y2="107" stroke="#6F6BEA" stroke-width="2"/>
+  <polygon points="228,104 235,107 228,110" fill="#6F6BEA"/>
+
+  <!-- Step 2 -->
+  <rect x="235" y="75" width="160" height="65" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <circle cx="253" cy="90" r="12" fill="#3B82F6"/>
+  <text x="253" y="94" class="label" text-anchor="middle" fill="#FFF" font-size="11">2</text>
+  <text x="325" y="95" class="sublabel" text-anchor="middle">TNS 연결 시도</text>
+  <text x="315" y="112" class="small" text-anchor="middle">호스트:포트로</text>
+  <text x="315" y="127" class="small" text-anchor="middle">CONNECT 패킷 전송</text>
+
+  <line x1="395" y1="107" x2="425" y2="107" stroke="#3B82F6" stroke-width="2"/>
+  <polygon points="423,104 430,107 423,110" fill="#3B82F6"/>
+
+  <!-- Step 3 -->
+  <rect x="430" y="75" width="160" height="65" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <circle cx="448" cy="90" r="12" fill="#10B981"/>
+  <text x="448" y="94" class="label" text-anchor="middle" fill="#FFF" font-size="11">3</text>
+  <text x="520" y="95" class="sublabel" text-anchor="middle">응답 확인</text>
+  <text x="510" y="112" class="small" text-anchor="middle">REFUSE 또는</text>
+  <text x="510" y="127" class="small" text-anchor="middle">ACCEPT 패킷 수신</text>
+
+  <line x1="590" y1="107" x2="620" y2="107" stroke="#10B981" stroke-width="2"/>
+  <polygon points="618,104 625,107 618,110" fill="#10B981"/>
+
+  <!-- Step 4 -->
+  <rect x="625" y="75" width="150" height="65" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <circle cx="643" cy="90" r="12" fill="#F59E0B"/>
+  <text x="643" y="94" class="label" text-anchor="middle" fill="#1E1E2E" font-size="11">4</text>
+  <text x="710" y="95" class="sublabel" text-anchor="middle">결과 출력</text>
+  <text x="700" y="112" class="code" text-anchor="middle">OK (10 msec)</text>
+  <text x="700" y="127" class="small" text-anchor="middle">또는 오류 코드</text>
+
+  <!-- Success output example -->
+  <rect x="30" y="165" width="370" height="90" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <text x="45" y="185" class="label" fill="#10B981" font-size="12">성공 출력 예시</text>
+  <text x="45" y="205" class="code" font-size="10">Used TNSNAMES adapter to resolve the alias</text>
+  <text x="45" y="220" class="code" font-size="10">Attempting to contact (DESCRIPTION=</text>
+  <text x="55" y="235" class="code" font-size="10">(ADDRESS=(PROTOCOL=TCP)(HOST=db01)(PORT=1521))</text>
+  <text x="45" y="248" class="code" fill="#10B981" font-size="10">OK (10 msec)</text>
+
+  <!-- Error codes -->
+  <rect x="420" y="165" width="355" height="130" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="435" y="185" class="label" fill="#F43F5E" font-size="12">주요 오류 코드</text>
+
+  <text x="435" y="207" class="code" fill="#F43F5E">TNS-12541</text>
+  <text x="530" y="207" class="small">no listener (리스너 미실행)</text>
+
+  <text x="435" y="225" class="code" fill="#F43F5E">TNS-12535</text>
+  <text x="530" y="225" class="small">operation timed out (방화벽 차단)</text>
+
+  <text x="435" y="243" class="code" fill="#F43F5E">TNS-03505</text>
+  <text x="530" y="243" class="small">Failed to resolve name (이름 미정의)</text>
+
+  <text x="435" y="261" class="code" fill="#F43F5E">TNS-12543</text>
+  <text x="530" y="261" class="small">host unreachable (DNS/네트워크 오류)</text>
+
+  <text x="435" y="279" class="code" fill="#F43F5E">TNS-12560</text>
+  <text x="530" y="279" class="small">protocol adapter error</text>
+
+  <!-- Key limitation box -->
+  <rect x="30" y="310" width="745" height="80" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <text x="400" y="335" class="label" text-anchor="middle" fill="#F59E0B">tnsping 핵심 한계 (시험 출제 포인트)</text>
+
+  <rect x="60" y="348" width="160" height="30" rx="4" ry="4" fill="#F43F5E" opacity="0.15" stroke="#F43F5E"/>
+  <text x="140" y="367" class="small" text-anchor="middle" fill="#F43F5E">DB 기동 여부 확인 X</text>
+
+  <rect x="240" y="348" width="160" height="30" rx="4" ry="4" fill="#F43F5E" opacity="0.15" stroke="#F43F5E"/>
+  <text x="320" y="367" class="small" text-anchor="middle" fill="#F43F5E">서비스 등록 확인 X</text>
+
+  <rect x="420" y="348" width="160" height="30" rx="4" ry="4" fill="#F43F5E" opacity="0.15" stroke="#F43F5E"/>
+  <text x="500" y="367" class="small" text-anchor="middle" fill="#F43F5E">사용자 인증 검증 X</text>
+
+  <rect x="600" y="348" width="160" height="30" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981"/>
+  <text x="680" y="367" class="small" text-anchor="middle" fill="#10B981">리스너 도달만 O</text>
+
+  <!-- Bottom note -->
+  <text x="400" y="418" class="sublabel" text-anchor="middle">tnsping 성공 =/= DB 접속 성공 : 실제 연결은 SQL*Plus 등으로 별도 확인 필요</text>
+  <text x="400" y="440" class="code" text-anchor="middle">tnsping ORCL  |  tnsping dbserver01:1521/ORCLPDB1  |  tnsping ORCL 5</text>
+</svg>

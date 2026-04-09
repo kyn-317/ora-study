@@ -14,7 +14,10 @@
       "sectionId": "s01",
       "title": "권한 및 롤 개요 (Privileges and Roles Overview)",
       "content": "**Oracle 권한(Privilege)**은 특정 SQL 문을 실행하거나 특정 데이터베이스 객체에 접근할 수 있는 능력을 의미합니다. 권한은 크게 **시스템 권한(System Privilege)**과 **객체 권한(Object Privilege)**으로 분류되며, **롤(Role)**은 관련 권한들을 묶어서 관리할 수 있는 명명된 권한 그룹입니다.\n\n### 권한 관리 체계\n\n```\n                         ┌─────────────────────┐\n                         │   Oracle 권한 체계    │\n                         └──────────┬──────────┘\n                    ┌───────────────┼───────────────┐\n              ┌─────┴─────┐  ┌─────┴─────┐  ┌──────┴──────┐\n              │ 시스템 권한 │  │ 객체 권한  │  │    롤       │\n              │ (System)  │  │ (Object)  │  │  (Role)     │\n              └─────┬─────┘  └─────┬─────┘  └──────┬──────┘\n                    │              │               │\n            GRANT/REVOKE    GRANT/REVOKE    GRANT/REVOKE\n                    │              │               │\n              ┌─────┴─────────────┴───────────────┴─────┐\n              │     사용자(User) 또는 롤(Role)            │\n              └─────────────────────────────────────────┘\n```\n\n### 권한 유형 비교\n\n| 구분 | 시스템 권한 (System Privilege) | 객체 권한 (Object Privilege) |\n|---|---|---|\n| **정의** | DDL/DML 등 특정 SQL 문 실행 권한 | 특정 객체에 대한 접근/조작 권한 |\n| **범위** | 데이터베이스 전체 또는 스키마 레벨 | 특정 객체(테이블, 뷰 등) 단위 |\n| **예시** | CREATE TABLE, ALTER USER, SELECT ANY TABLE | SELECT ON hr.employees, EXECUTE ON pkg |\n| **부여 옵션** | WITH ADMIN OPTION | WITH GRANT OPTION |\n| **취소 연쇄** | 연쇄 취소 없음 (No Cascade) | 연쇄 취소 발생 (Cascade Revoke) |\n| **부여자 추적** | 부여자 미추적 | 부여자 추적 |\n| **관리 뷰** | DBA_SYS_PRIVS, SESSION_PRIVS | DBA_TAB_PRIVS, DBA_COL_PRIVS |",
-      "sqlExamplesIds": ["sql01", "sql02"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02"
+      ],
       "subsections": [
         {
           "title": "시스템 권한 상세 (System Privileges Detail)",
@@ -40,13 +43,27 @@
             "DBA_TAB_PRIVS로 객체 권한 부여 내역을, DBA_COL_PRIVS로 컬럼 레벨 권한을 확인"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/04/04_02_s01_privilege_hierarchy.svg",
+          "caption": "Oracle 권한 체계 전체 구조 - 시스템 권한, 객체 권한, 롤의 관계",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s02",
       "title": "ADMIN OPTION과 GRANT OPTION 비교 (ADMIN OPTION vs GRANT OPTION)",
       "content": "Oracle에서 권한 부여 시 사용하는 **WITH ADMIN OPTION**과 **WITH GRANT OPTION**은 피부여자가 해당 권한을 다른 사용자에게 재부여할 수 있게 해주는 옵션입니다. 그러나 두 옵션은 적용 대상, 취소 동작, 부여자 추적 등에서 근본적인 차이가 있습니다.\n\n### ADMIN OPTION vs GRANT OPTION 핵심 비교표\n\n| 비교 항목 | WITH ADMIN OPTION | WITH GRANT OPTION |\n|---|---|---|\n| **적용 대상** | 시스템 권한 및 롤 | 객체 권한만 |\n| **재부여 가능** | 예 | 예 |\n| **취소 시 연쇄 효과** | **없음** (No Cascade) | **있음** (Cascade Revoke) |\n| **부여자 추적** | 추적하지 않음 | 부여자를 추적함 |\n| **REVOKE 시 영향** | 피부여자만 권한 상실 | 피부여자 + 피부여자가 부여한 모든 사용자 권한 상실 |\n| **부여자 정보 저장** | DBA_SYS_PRIVS에 ADMIN_OPTION 컬럼 | DBA_TAB_PRIVS에 GRANTABLE, GRANTOR 컬럼 |\n\n```\nWITH ADMIN OPTION (시스템 권한):\nDBA ──GRANT──> A (WITH ADMIN OPTION) ──GRANT──> B ──GRANT──> C\nDBA ──REVOKE──> A  →  A만 권한 상실, B와 C는 권한 유지\n\nWITH GRANT OPTION (객체 권한):\nOwner ──GRANT──> A (WITH GRANT OPTION) ──GRANT──> B ──GRANT──> C\nOwner ──REVOKE──> A  →  A, B, C 모두 권한 상실 (연쇄 취소)\n```",
-      "sqlExamplesIds": ["sql03", "sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04",
+        "sql05"
+      ],
       "subsections": [
         {
           "title": "WITH ADMIN OPTION 동작 원리 (WITH ADMIN OPTION Behavior)",
@@ -72,13 +89,26 @@
             "DBA_TAB_PRIVS의 GRANTABLE 및 GRANTOR 컬럼으로 GRANT OPTION 여부와 부여자를 확인"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/04/04_02_s02_admin_vs_grant_option.svg",
+          "caption": "ADMIN OPTION vs GRANT OPTION 취소 동작 비교 - 연쇄/비연쇄 취소 핵심 차이",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s03",
       "title": "롤 개요 및 유형 (Roles Overview and Types)",
       "content": "**롤(Role)**은 관련된 권한들을 하나의 명명된 그룹으로 묶어서 관리하는 Oracle의 권한 관리 메커니즘입니다. 롤을 사용하면 개별 사용자에게 일일이 권한을 부여하는 대신, 업무 역할에 맞는 롤을 부여하여 권한 관리를 단순화할 수 있습니다.\n\n### 롤의 장점\n\n| 장점 | 설명 |\n|---|---|\n| **권한 관리 간소화** | 수십 개의 권한을 하나의 롤로 묶어 한 번에 부여/취소 |\n| **동적 권한 변경** | 롤에 권한을 추가/제거하면 해당 롤을 가진 모든 사용자에게 즉시 반영 |\n| **계층적 구조** | 롤에 다른 롤을 부여하여 계층적 권한 구조 구성 가능 |\n| **선택적 활성화** | SET ROLE로 세션별 활성/비활성화 가능 |\n| **보안 강화** | 롤 인증(비밀번호, 외부 등)을 통한 추가 보안 |\n\n### 롤 유형 분류\n\n```\n                     ┌───────────────┐\n                     │   Oracle 롤    │\n                     └──────┬────────┘\n              ┌─────────────┼─────────────┐\n        ┌─────┴─────┐ ┌────┴────┐ ┌──────┴──────┐\n        │ 사전정의 롤 │ │사용자정의│ │ 멀티테넌트 롤│\n        │(Predefined)│ │(Custom) │ │ (CDB/PDB)  │\n        └─────┬─────┘ └────┬────┘ └──────┬──────┘\n              │            │             │\n        DBA, CONNECT,  업무별 롤     공통 롤,\n        RESOURCE,      생성         로컬 롤\n        SELECT_CATALOG_ROLE...\n```\n\n### 주요 사전 정의 롤\n\n| 롤 이름 | 포함 권한 | 설명 |\n|---|---|---|\n| **DBA** | 대부분의 시스템 권한 (WITH ADMIN OPTION) | 데이터베이스 관리자 롤 |\n| **CONNECT** | CREATE SESSION | 데이터베이스 접속 권한 (과거보다 축소됨) |\n| **RESOURCE** | CREATE TABLE, CREATE SEQUENCE 등 | 객체 생성 권한 |\n| **SELECT_CATALOG_ROLE** | 데이터 딕셔너리 뷰 SELECT | 딕셔너리 조회 롤 |\n| **EXECUTE_CATALOG_ROLE** | 딕셔너리 패키지 EXECUTE | 딕셔너리 패키지 실행 롤 |\n| **EXP_FULL_DATABASE** | Export 관련 권한 | 전체 데이터베이스 Export 롤 |\n| **IMP_FULL_DATABASE** | Import 관련 권한 | 전체 데이터베이스 Import 롤 |\n| **DATAPUMP_EXP_FULL_DATABASE** | Data Pump Export 권한 | Data Pump Export 롤 |\n| **DATAPUMP_IMP_FULL_DATABASE** | Data Pump Import 권한 | Data Pump Import 롤 |",
-      "sqlExamplesIds": ["sql06", "sql07"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07"
+      ],
       "subsections": [
         {
           "title": "롤 생성 및 인증 방식 (Role Creation and Authentication)",
@@ -104,13 +134,27 @@
             "SESSION_ROLES 뷰로 현재 세션에서 활성화된 롤을, SESSION_PRIVS로 활성 권한을 확인"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/04/04_02_s03_role_types.svg",
+          "caption": "롤 유형 및 구조 - 사전 정의 롤, 사용자 정의 롤, 롤 중첩 및 활성화",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "GRANT 및 REVOKE 구문 (GRANT and REVOKE Syntax)",
       "content": "**GRANT** 및 **REVOKE** 문은 Oracle에서 권한과 롤을 부여하고 취소하는 핵심 SQL 명령입니다. 시스템 권한, 객체 권한, 롤에 대해 각각 다른 구문과 동작 특성을 가집니다.\n\n### GRANT 구문 요약\n\n| 대상 | 구문 | 옵션 |\n|---|---|---|\n| **시스템 권한** | `GRANT sys_priv TO user/role/PUBLIC` | WITH ADMIN OPTION |\n| **객체 권한** | `GRANT obj_priv ON object TO user/role/PUBLIC` | WITH GRANT OPTION |\n| **롤** | `GRANT role TO user/role/PUBLIC` | WITH ADMIN OPTION |\n\n### REVOKE 구문 요약\n\n| 대상 | 구문 | 연쇄 효과 |\n|---|---|---|\n| **시스템 권한** | `REVOKE sys_priv FROM user/role/PUBLIC` | 연쇄 없음 |\n| **객체 권한** | `REVOKE obj_priv ON object FROM user/role/PUBLIC` | 연쇄 취소 발생 |\n| **롤** | `REVOKE role FROM user/role/PUBLIC` | 연쇄 없음 |",
-      "sqlExamplesIds": ["sql03", "sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04",
+        "sql05"
+      ],
       "subsections": [
         {
           "title": "시스템 권한 및 롤 부여/취소 (Granting/Revoking System Privileges and Roles)",
@@ -141,7 +185,10 @@
       "sectionId": "s05",
       "title": "멀티테넌트 환경의 공통/로컬 롤 (Common and Local Roles in Multitenant)",
       "content": "멀티테넌트 아키텍처(CDB/PDB)에서는 롤이 **공통 롤(Common Role)**과 **로컬 롤(Local Role)**로 구분됩니다. 공통 롤은 CDB 전체에서 인식되며, 로컬 롤은 특정 PDB 내에서만 유효합니다. **CONTAINER** 절을 사용하여 권한 부여 범위를 제어합니다.\n\n### 공통 롤 vs 로컬 롤 비교표\n\n| 비교 항목 | 공통 롤 (Common Role) | 로컬 롤 (Local Role) |\n|---|---|---|\n| **생성 위치** | CDB 루트(CDB$ROOT)에서만 생성 | 개별 PDB에서 생성 |\n| **이름 규칙** | C## 또는 c## 접두사 필수 | 접두사 없음 |\n| **인식 범위** | CDB 전체 (모든 PDB에서 인식) | 해당 PDB 내에서만 인식 |\n| **권한 부여 범위** | CONTAINER=ALL 또는 CONTAINER=CURRENT | 해당 PDB 내에서만 |\n| **생성 권한** | CREATE ROLE (공통 권한) | CREATE ROLE (로컬 권한) |\n| **관리 대상** | CDB 관리자 | PDB 관리자 |\n| **사용 사례** | CDB 전체 정책 적용 | PDB별 독립 정책 |\n\n### CONTAINER 절 동작\n\n```sql\n-- CDB 루트에서 공통 롤 생성\nCREATE ROLE c##app_role CONTAINER=ALL;\n\n-- 공통 롤에 권한 부여 (CDB 전체에 적용)\nGRANT CREATE SESSION TO c##app_role CONTAINER=ALL;\n\n-- 공통 롤에 권한 부여 (CDB 루트에서만 적용)\nGRANT CREATE TABLE TO c##app_role CONTAINER=CURRENT;\n\n-- PDB에서 로컬 롤 생성\nALTER SESSION SET CONTAINER = sales_pdb;\nCREATE ROLE local_app_role;  -- 로컬 롤은 접두사 불필요\n```\n\n### CONTAINER 절의 권한 부여 범위\n\n| CONTAINER 값 | 실행 위치 | 영향 범위 |\n|---|---|---|\n| **CONTAINER=ALL** | CDB 루트에서만 가능 | CDB 전체 (루트 + 모든 PDB) |\n| **CONTAINER=CURRENT** | CDB 루트 또는 PDB | 현재 컨테이너만 |\n| **생략** | CDB 루트: CURRENT 기본값, PDB: CURRENT만 가능 | 현재 컨테이너 |",
-      "sqlExamplesIds": ["sql08", "sql09"],
+      "sqlExamplesIds": [
+        "sql08",
+        "sql09"
+      ],
       "subsections": [
         {
           "title": "공통 롤 관리 (Common Role Management)",
@@ -165,13 +212,26 @@
             "서로 다른 PDB에 동일 이름의 로컬 롤이 존재해도 충돌이 발생하지 않음"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/04/04_02_s05_common_local_roles.svg",
+          "caption": "멀티테넌트 환경의 공통 롤(C##) vs 로컬 롤 - CONTAINER 절 범위 제어",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s06",
       "title": "권한 계층 및 상속 (Privilege Hierarchy and Inheritance)",
       "content": "Oracle의 권한 체계는 **사용자에게 직접 부여된 권한**, **롤을 통해 간접 부여된 권한**, **PUBLIC을 통해 부여된 권한**이 결합되어 최종 유효 권한을 형성합니다. 이 권한 계층을 정확히 이해하는 것이 데이터베이스 보안 관리의 핵심입니다.\n\n### 권한 적용 우선순위\n\n```\n┌──────────────────────────────────────────────────┐\n│           세션의 최종 유효 권한                     │\n│  ┌────────────────────────────────────────────┐  │\n│  │ 1. 직접 부여된 시스템 권한                    │  │\n│  │ 2. 직접 부여된 객체 권한                      │  │\n│  │ 3. 활성 롤에 포함된 시스템/객체 권한            │  │\n│  │ 4. PUBLIC에 부여된 시스템/객체 권한            │  │\n│  └────────────────────────────────────────────┘  │\n└──────────────────────────────────────────────────┘\n```\n\n### 직접 권한 vs 롤 기반 권한 차이점\n\n| 항목 | 직접 부여 권한 | 롤 기반 권한 |\n|---|---|---|\n| **PL/SQL Definer's Rights** | 적용됨 | 적용 안 됨 |\n| **뷰/프로시저 생성** | 사용 가능 | 사용 불가 (직접 권한 필요) |\n| **SET ROLE NONE 후** | 유지됨 | 비활성화됨 |\n| **관리 뷰** | DBA_SYS_PRIVS, DBA_TAB_PRIVS | DBA_ROLE_PRIVS, ROLE_SYS_PRIVS |",
-      "sqlExamplesIds": ["sql10", "sql11"],
+      "sqlExamplesIds": [
+        "sql10",
+        "sql11"
+      ],
       "subsections": [
         {
           "title": "권한 조회 및 분석 (Privilege Inquiry and Analysis)",

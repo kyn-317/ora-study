@@ -16,12 +16,26 @@
       "title": "PDB 생성 방법 개요 (PDB Creation Methods Overview)",
       "sqlExamplesIds": [],
       "content": "Oracle 멀티테넌트 환경에서 PDB를 생성하는 방법은 크게 4가지로 분류됩니다. 각 방법은 소스와 용도에 따라 적합한 시나리오가 다릅니다.\n\n### PDB 생성 방법 비교\n\n| 생성 방법 | 소스 | 주요 용도 | 시간 | 특징 |\n|---|---|---|---|---|\n| **PDB$SEED에서 생성** | PDB$SEED | 새로운 빈 PDB 생성 | 빠름 | 가장 기본적인 방법, 빈 PDB 생성 |\n| **기존 PDB 클론** | 기존 PDB | 동일 데이터를 가진 PDB 복제 | 데이터 크기에 비례 | 테스트/개발 환경 구성에 적합 |\n| **PDB Plugging** | XML 메타데이터 + 데이터 파일 | 다른 CDB에서 PDB 이전 | 빠름 (파일 복사 제외) | CDB 간 PDB 이동에 사용 |\n| **Non-CDB를 PDB로 변환** | Non-CDB 데이터베이스 | 기존 Non-CDB의 멀티테넌트 전환 | 데이터 크기에 비례 | Oracle 12c 이후 마이그레이션 |\n\n### PDB 생성 프로세스의 공통 단계\n\n1. CDB의 CDB$ROOT에 **공통 사용자(Common User)**로 접속\n2. 적절한 권한 확인 (`CREATE PLUGGABLE DATABASE` 시스템 권한)\n3. `CREATE PLUGGABLE DATABASE` 문 실행\n4. 새 PDB는 **MOUNTED** 상태로 생성됨\n5. PDB를 **OPEN** 상태로 전환\n6. 필요 시 PDB 저장 상태(Save State) 설정\n\n### PDB 생성 시 필수 조건\n\n| 조건 | 설명 |\n|---|---|---|\n| CDB가 OPEN 상태 | CDB가 READ WRITE 모드로 열려 있어야 함 |\n| 적절한 권한 | `CREATE PLUGGABLE DATABASE` 시스템 권한 필요 |\n| CDB$ROOT 접속 | 공통 사용자로 CDB$ROOT에 접속 |\n| PDB 이름 고유성 | CDB 내에서 PDB 이름이 고유해야 함 |\n| 파일 경로 지정 | OMF 미사용 시 `FILE_NAME_CONVERT` 또는 `CREATE_FILE_DEST` 필요 |",
-      "subsections": []
+      "subsections": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/02/02_02_s01_pdb_creation_methods.svg",
+          "caption": "PDB 생성 방법 비교 - 4가지 핵심 생성 방법과 공통 프로세스 플로우",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ]
     },
     {
       "sectionId": "s02",
       "title": "PDB$SEED의 역할과 구조 (PDB$SEED Role & Structure)",
-      "sqlExamplesIds": ["sql01", "sql02", "sql03"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02",
+        "sql03"
+      ],
       "content": "PDB$SEED는 CDB 내에서 새로운 PDB를 생성하기 위한 **템플릿(Template)** 역할을 하는 특수한 컨테이너입니다. CDB 생성 시 자동으로 생성되며, 항상 **READ ONLY** 상태로 유지됩니다.",
       "subsections": [
         {
@@ -47,12 +61,26 @@
             "V$CONTAINERS는 CDB$ROOT, PDB$SEED, 모든 PDB를 포함하는 전체 컨테이너 정보를 제공"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/02/02_02_s02_pdbseed_structure.svg",
+          "caption": "PDB SEED 역할과 구조 - 골든 이미지 템플릿, 데이터 파일 구성, DBA_PDBS STATUS",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s03",
       "title": "PDB$SEED에서 PDB 생성 (Creating PDB from PDB$SEED)",
-      "sqlExamplesIds": ["sql04", "sql05", "sql06"],
+      "sqlExamplesIds": [
+        "sql04",
+        "sql05",
+        "sql06"
+      ],
       "content": "PDB$SEED를 템플릿으로 사용하여 새로운 PDB를 생성하는 것이 가장 기본적이고 일반적인 PDB 생성 방법입니다. `CREATE PLUGGABLE DATABASE` 구문을 사용합니다.",
       "subsections": [
         {
@@ -90,12 +118,33 @@
             "ADMIN USER 패스워드는 생성 후 즉시 변경 권장하며 패스워드 복잡도 정책을 별도 설정 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/02/02_02_s03_create_pdb_process.svg",
+          "caption": "PDB 생성 내부 프로세스 6단계 및 파일 경로 결정 우선순위",
+          "placement": "after-content",
+          "width": "100%"
+        },
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/02/02_02_s03_admin_user_types.svg",
+          "caption": "공통 사용자 vs 로컬 사용자 - ADMIN USER 계정 구조 및 PDB_DBA 역할 권한",
+          "placement": "after-keypoints",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "PDB 생성 시 스토리지 제한 (Storage Limitations for PDB)",
-      "sqlExamplesIds": ["sql07", "sql08"],
+      "sqlExamplesIds": [
+        "sql07",
+        "sql08"
+      ],
       "content": "PDB별 스토리지 사용량을 제한하여 CDB 내의 자원을 효율적으로 관리할 수 있습니다. STORAGE 절과 관련 파라미터를 통해 PDB의 디스크 사용을 제어합니다.",
       "subsections": [
         {
@@ -115,7 +164,10 @@
     {
       "sectionId": "s05",
       "title": "Application Seed와 Application Container (Application Seed & Container)",
-      "sqlExamplesIds": ["sql09", "sql10"],
+      "sqlExamplesIds": [
+        "sql09",
+        "sql10"
+      ],
       "content": "Application Container는 공통 애플리케이션 정의를 공유하는 PDB들의 논리적 그룹이며, Application Seed는 이 컨테이너 내에서 새 Application PDB를 생성하기 위한 전용 시드입니다.",
       "subsections": [
         {
@@ -135,7 +187,9 @@
     {
       "sectionId": "s06",
       "title": "DBCA를 이용한 PDB 생성 (PDB Creation Using DBCA)",
-      "sqlExamplesIds": ["sql11"],
+      "sqlExamplesIds": [
+        "sql11"
+      ],
       "content": "Database Configuration Assistant(DBCA)는 GUI 및 Silent 모드를 통해 PDB를 생성할 수 있는 Oracle 제공 도구입니다.",
       "subsections": [
         {
@@ -155,7 +209,11 @@
     {
       "sectionId": "s07",
       "title": "PDB 생성 후 초기 설정 작업 (Post-Creation Configuration)",
-      "sqlExamplesIds": ["sql12", "sql13", "sql14"],
+      "sqlExamplesIds": [
+        "sql12",
+        "sql13",
+        "sql14"
+      ],
       "content": "PDB가 MOUNTED 상태로 생성된 후, 운영 가능한 상태로 만들기 위해 수행해야 하는 일련의 초기 설정 작업을 설명합니다.",
       "subsections": [
         {
@@ -176,7 +234,10 @@
     {
       "sectionId": "s08",
       "title": "PDB 생성 방법 비교: Seed vs Clone vs Plugging (Creation Methods Comparison)",
-      "sqlExamplesIds": ["sql15", "sql16"],
+      "sqlExamplesIds": [
+        "sql15",
+        "sql16"
+      ],
       "content": "PDB 생성의 세 가지 주요 방법을 상세히 비교하고 각각의 내부 동작, 적합한 시나리오, 장단점을 분석합니다.",
       "subsections": [
         {

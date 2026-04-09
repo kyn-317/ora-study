@@ -1,0 +1,17 @@
+{
+  "chapter": "01",
+  "chapter_name": "Oracle Databaseアーキテクチャの説明",
+  "original_topic_ratio": {
+    "メモリー構造（SGA・PGA）": 2,
+    "バックグラウンド・プロセス": 1,
+    "マルチテナント・アーキテクチャ": 2
+  },
+  "custom_topic_counts": {
+    "メモリー構造（SGA・PGA）": 6,
+    "バックグラウンド・プロセス": 2,
+    "マルチテナント・アーキテクチャ": 0,
+    "インスタンスの起動と停止": 2
+  },
+  "total_custom": 10,
+  "last_number": "C_01_010"
+}

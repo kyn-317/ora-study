@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">PDB$SEED 역할과 구조</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">PDB$SEED Role &amp; Structure — Golden Image Template</text>
+
+  <!-- PDB$SEED Central -->
+  <rect x="220" y="70" width="360" height="160" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="220" y="70" width="360" height="30" rx="8" ry="8" fill="#10B981" opacity="0.15"/>
+  <text x="400" y="92" text-anchor="middle" class="label" fill="#10B981">PDB$SEED (CON_ID = 2)</text>
+
+  <!-- Properties -->
+  <text x="240" y="120" class="sublabel">골든 이미지 (Golden Image) 역할</text>
+
+  <!-- Data files -->
+  <rect x="240" y="132" width="130" height="28" rx="4" ry="4" fill="#3B82F6" opacity="0.15" stroke="#3B82F6" stroke-width="0.5"/>
+  <text x="305" y="150" text-anchor="middle" class="small" fill="#3B82F6">SYSTEM TS</text>
+  <rect x="380" y="132" width="130" height="28" rx="4" ry="4" fill="#3B82F6" opacity="0.15" stroke="#3B82F6" stroke-width="0.5"/>
+  <text x="445" y="150" text-anchor="middle" class="small" fill="#3B82F6">SYSAUX TS</text>
+  <rect x="240" y="166" width="130" height="28" rx="4" ry="4" fill="#F59E0B" opacity="0.15" stroke="#F59E0B" stroke-width="0.5"/>
+  <text x="305" y="184" text-anchor="middle" class="small" fill="#F59E0B">TEMP TS</text>
+  <rect x="380" y="166" width="130" height="28" rx="4" ry="4" fill="#F43F5E" opacity="0.12" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="445" y="184" text-anchor="middle" class="small" fill="#F43F5E">UNDO TS (Local)</text>
+
+  <text x="240" y="215" class="small" fill="#F43F5E">READ ONLY (항상) | 삭제 불가 | 수정 시 특수 절차 필요</text>
+
+  <!-- Properties on left -->
+  <rect x="40" y="85" width="160" height="130" class="box" fill="#2A2B3D" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="120" y="105" text-anchor="middle" class="sublabel" fill="#F59E0B">핵심 특성</text>
+  <text x="55" y="125" class="small">CON_ID = 2 (항상)</text>
+  <text x="55" y="143" class="small">READ ONLY (항상)</text>
+  <text x="55" y="161" class="small">삭제 불가</text>
+  <text x="55" y="179" class="small">CDB 생성 시 자동 생성</text>
+  <text x="55" y="197" class="small">패치 자동 반영</text>
+
+  <!-- Monitoring views on right -->
+  <rect x="600" y="85" width="160" height="130" class="box" fill="#2A2B3D" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="680" y="105" text-anchor="middle" class="sublabel" fill="#3B82F6">모니터링 뷰</text>
+  <text x="615" y="125" class="code">V$PDBS</text>
+  <text x="615" y="143" class="code">V$CONTAINERS</text>
+  <text x="615" y="161" class="code">DBA_PDBS</text>
+  <text x="615" y="179" class="code">CDB_DATA_FILES</text>
+  <text x="615" y="197" class="code">CDB_TEMP_FILES</text>
+
+  <!-- Arrow down from SEED to PDBs -->
+  <line x1="340" y1="230" x2="200" y2="280" stroke="#10B981" stroke-width="1.5"/>
+  <polygon points="196,274 196,286 206,280" fill="#10B981"/>
+  <line x1="400" y1="230" x2="400" y2="280" stroke="#10B981" stroke-width="1.5"/>
+  <polygon points="395,278 400,288 405,278" fill="#10B981"/>
+  <line x1="460" y1="230" x2="600" y2="280" stroke="#10B981" stroke-width="1.5"/>
+  <polygon points="594,274 604,280 594,286" fill="#10B981"/>
+
+  <text x="270" y="260" class="small" fill="#10B981">파일 복사</text>
+  <text x="410" y="260" class="small" fill="#10B981">파일 복사</text>
+  <text x="520" y="260" class="small" fill="#10B981">파일 복사</text>
+
+  <!-- New PDBs -->
+  <rect x="100" y="285" width="180" height="60" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="190" y="308" text-anchor="middle" class="sublabel" fill="#6F6BEA">PDB1 (CON_ID=3)</text>
+  <text x="190" y="328" text-anchor="middle" class="small">MOUNTED → OPEN</text>
+
+  <rect x="310" y="285" width="180" height="60" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="400" y="308" text-anchor="middle" class="sublabel" fill="#6F6BEA">PDB2 (CON_ID=4)</text>
+  <text x="400" y="328" text-anchor="middle" class="small">MOUNTED → OPEN</text>
+
+  <rect x="520" y="285" width="180" height="60" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="610" y="308" text-anchor="middle" class="sublabel" fill="#6F6BEA">PDB_N (CON_ID=N)</text>
+  <text x="610" y="328" text-anchor="middle" class="small">MOUNTED → OPEN</text>
+
+  <!-- DBA_PDBS STATUS -->
+  <rect x="40" y="365" width="720" height="45" class="box" fill="#2A2B3D" stroke="#F59E0B" stroke-width="1"/>
+  <text x="400" y="383" text-anchor="middle" class="sublabel" fill="#F59E0B">DBA_PDBS STATUS 값: 생성 직후 NEW → 최초 OPEN 시 딕셔너리 완성 → NORMAL</text>
+  <text x="400" y="400" text-anchor="middle" class="code">NEW (미오픈) | NORMAL (정상) | UNUSABLE (오류) | UNPLUGGED (분리됨) | RELOCATING (이동중)</text>
+</svg>

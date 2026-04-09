@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <text x="400" y="30" class="title" text-anchor="middle">Enterprise Manager Cloud Control 아키텍처</text>
+  <text x="400" y="50" class="subtitle" text-anchor="middle">OMS + Management Agent + Repository DB 3계층 구조</text>
+
+  <!-- Browser layer -->
+  <rect x="280" y="70" width="240" height="45" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="400" y="92" class="label" text-anchor="middle" fill="#6F6BEA">웹 브라우저 (Web Browser)</text>
+  <text x="400" y="107" class="code" text-anchor="middle">https://oms_host:7803/em</text>
+
+  <!-- Arrow -->
+  <line x1="400" y1="115" x2="400" y2="140" stroke="#6F6BEA" stroke-width="2"/>
+  <polygon points="397,138 400,145 403,138" fill="#6F6BEA"/>
+  <text x="420" y="132" class="small">HTTPS</text>
+
+  <!-- OMS Layer -->
+  <rect x="150" y="145" width="500" height="100" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <text x="400" y="168" class="label" text-anchor="middle" fill="#10B981">OMS (Oracle Management Service)</text>
+  <text x="400" y="185" class="sublabel" text-anchor="middle">중앙 관리 서버 - 모든 관리 작업의 허브</text>
+
+  <rect x="170" y="198" width="120" height="30" rx="4" ry="4" fill="#10B981" opacity="0.2" stroke="#10B981"/>
+  <text x="230" y="218" class="small" text-anchor="middle">웹 서비스(WebLogic)</text>
+
+  <rect x="310" y="198" width="120" height="30" rx="4" ry="4" fill="#10B981" opacity="0.2" stroke="#10B981"/>
+  <text x="370" y="218" class="small" text-anchor="middle">Job 스케줄러</text>
+
+  <rect x="450" y="198" width="120" height="30" rx="4" ry="4" fill="#10B981" opacity="0.2" stroke="#10B981"/>
+  <text x="510" y="218" class="small" text-anchor="middle">알림/이벤트 처리</text>
+
+  <!-- Arrows down to agents -->
+  <line x1="200" y1="245" x2="200" y2="290" stroke="#3B82F6" stroke-width="1.5"/>
+  <polygon points="197,288 200,295 203,288" fill="#3B82F6"/>
+  <line x1="400" y1="245" x2="400" y2="290" stroke="#3B82F6" stroke-width="1.5"/>
+  <polygon points="397,288 400,295 403,288" fill="#3B82F6"/>
+  <line x1="600" y1="245" x2="600" y2="290" stroke="#3B82F6" stroke-width="1.5"/>
+  <polygon points="597,288 600,295 603,288" fill="#3B82F6"/>
+
+  <text x="300" y="270" class="small" text-anchor="middle">HTTPS (Upload/Download)</text>
+
+  <!-- Agent Layer -->
+  <rect x="80" y="295" width="200" height="80" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <text x="180" y="318" class="label" text-anchor="middle" fill="#3B82F6">Management Agent</text>
+  <text x="180" y="336" class="small" text-anchor="middle">호스트 1 (DB 서버)</text>
+  <rect x="100" y="345" width="70" height="22" rx="3" ry="3" fill="#F59E0B" opacity="0.2" stroke="#F59E0B"/>
+  <text x="135" y="360" class="code" text-anchor="middle" font-size="9">Oracle DB</text>
+  <rect x="185" y="345" width="70" height="22" rx="3" ry="3" fill="#F59E0B" opacity="0.2" stroke="#F59E0B"/>
+  <text x="220" y="360" class="code" text-anchor="middle" font-size="9">Listener</text>
+
+  <rect x="300" y="295" width="200" height="80" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <text x="400" y="318" class="label" text-anchor="middle" fill="#3B82F6">Management Agent</text>
+  <text x="400" y="336" class="small" text-anchor="middle">호스트 2 (DB 서버)</text>
+  <rect x="320" y="345" width="70" height="22" rx="3" ry="3" fill="#F59E0B" opacity="0.2" stroke="#F59E0B"/>
+  <text x="355" y="360" class="code" text-anchor="middle" font-size="9">Oracle DB</text>
+  <rect x="405" y="345" width="70" height="22" rx="3" ry="3" fill="#F59E0B" opacity="0.2" stroke="#F59E0B"/>
+  <text x="440" y="360" class="code" text-anchor="middle" font-size="9">ASM</text>
+
+  <rect x="520" y="295" width="200" height="80" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <text x="620" y="318" class="label" text-anchor="middle" fill="#3B82F6">Management Agent</text>
+  <text x="620" y="336" class="small" text-anchor="middle">호스트 N ...</text>
+  <rect x="540" y="345" width="70" height="22" rx="3" ry="3" fill="#F59E0B" opacity="0.2" stroke="#F59E0B"/>
+  <text x="575" y="360" class="code" text-anchor="middle" font-size="9">Oracle DB</text>
+  <rect x="625" y="345" width="70" height="22" rx="3" ry="3" fill="#F59E0B" opacity="0.2" stroke="#F59E0B"/>
+  <text x="660" y="360" class="code" text-anchor="middle" font-size="9">PDB x N</text>
+
+  <!-- Repository arrow -->
+  <line x1="400" y1="245" x2="710" y2="245" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="710" y1="245" x2="710" y2="395" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <!-- Repository DB -->
+  <rect x="620" y="395" width="165" height="65" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <text x="702" y="418" class="label" text-anchor="middle" fill="#F59E0B">Management</text>
+  <text x="702" y="435" class="label" text-anchor="middle" fill="#F59E0B">Repository DB</text>
+  <text x="702" y="452" class="small" text-anchor="middle">수집 데이터 저장소</text>
+
+  <!-- Key features -->
+  <rect x="80" y="395" width="520" height="65" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="100" y="415" class="label" font-size="12">EM CC 주요 관리 기능</text>
+  <text x="100" y="435" class="small">성능 모니터링 | DB 기동/종료 | Job 자동화 | 패치 관리 | 백업 구성</text>
+  <text x="100" y="452" class="code">Oracle 26ai: AI Vector Search 모니터링 메트릭 추가</text>
+
+  <text x="400" y="475" class="small" text-anchor="middle">Agent는 각 호스트에 설치되어 메트릭을 수집하고 OMS에 전송</text>
+</svg>

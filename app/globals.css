@@ -98,10 +98,16 @@ a {
 }
 
 /* Markdown Content Styles */
+.markdown-content .table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+}
+
 .markdown-content table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.5rem 0;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   overflow: hidden;
@@ -214,6 +220,27 @@ a {
     position: static;
     max-height: none;
     width: 100%;
+  }
+}
+
+/* Responsive: 좁은 화면에서 좌우 여백 축소 */
+@media (max-width: 600px) {
+  .study-header-banner {
+    padding: 2rem 1rem !important;
+  }
+
+  .study-content-area {
+    padding: 1.5rem 0.75rem !important;
+  }
+
+  .study-section-card {
+    padding: 1.25rem !important;
+    border-radius: 12px !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .study-section-card .study-section-card {
+    padding: 1rem !important;
   }
 }
 

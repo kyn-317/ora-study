@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2; fill: none; marker-end: url(#ah); }
+    .arrow-red { stroke: #F43F5E; stroke-width: 2; fill: none; marker-end: url(#ah-r); }
+    .arrow-green { stroke: #10B981; stroke-width: 2; fill: none; marker-end: url(#ah-g); }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="ah-r" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F43F5E" />
+    </marker>
+    <marker id="ah-g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="28" text-anchor="middle" class="title">재개 가능 영역 할당 흐름 (Resumable Space Allocation)</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">공간 부족 시 작업 일시 중지 → DBA 개입 → 자동 재개</text>
+
+  <!-- Step 1: Large operation -->
+  <rect x="260" y="65" width="280" height="48" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="2"/>
+  <text x="400" y="86" text-anchor="middle" class="label" fill="#3B82F6">대형 작업 실행</text>
+  <text x="400" y="103" text-anchor="middle" class="small">INSERT, CTAS, Data Pump Import 등</text>
+  <line x1="400" y1="113" x2="400" y2="138" class="arrow"/>
+
+  <!-- Step 2: Space shortage -->
+  <rect x="260" y="140" width="280" height="40" class="box" fill="rgba(244,63,94,0.15)" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="400" y="164" text-anchor="middle" class="label" fill="#F43F5E">공간 부족 발생 (ORA-01653/01654/01536)</text>
+  <line x1="400" y1="180" x2="400" y2="205" class="arrow"/>
+
+  <!-- Decision: Resumable? -->
+  <polygon points="400,205 510,240 400,275 290,240" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="2"/>
+  <text x="400" y="238" text-anchor="middle" class="label" fill="#F59E0B">Resumable</text>
+  <text x="400" y="254" text-anchor="middle" class="small">활성화?</text>
+
+  <!-- NO branch -->
+  <line x1="510" y1="240" x2="620" y2="240" class="arrow-red"/>
+  <text x="555" y="233" class="small" fill="#F43F5E">NO</text>
+  <rect x="620" y="220" width="150" height="45" class="box" fill="rgba(244,63,94,0.15)" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="695" y="240" text-anchor="middle" class="label" fill="#F43F5E">ORA 오류 발생</text>
+  <text x="695" y="256" text-anchor="middle" class="small">작업 실패 + 롤백</text>
+
+  <!-- YES branch -->
+  <line x1="400" y1="275" x2="400" y2="300" class="arrow-green"/>
+  <text x="410" y="292" class="small" fill="#10B981">YES</text>
+
+  <!-- Suspended -->
+  <rect x="240" y="302" width="320" height="55" class="box" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="2"/>
+  <text x="400" y="323" text-anchor="middle" class="label" fill="#F59E0B">작업 일시 중지 (SUSPENDED)</text>
+  <text x="400" y="340" text-anchor="middle" class="code">V$SESSION.EVENT = 'statement suspended...'</text>
+  <text x="400" y="352" text-anchor="middle" class="small">DBA_RESUMABLE.STATUS = 'SUSPENDED'</text>
+
+  <!-- AFTER SUSPEND trigger -->
+  <line x1="560" y1="330" x2="620" y2="330" stroke="#F59E0B" stroke-width="1.5" fill="none" marker-end="url(#ah)"/>
+  <rect x="620" y="310" width="150" height="45" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="695" y="330" text-anchor="middle" class="sublabel" fill="#F59E0B">AFTER SUSPEND</text>
+  <text x="695" y="346" text-anchor="middle" class="small">트리거 자동 실행</text>
+
+  <line x1="400" y1="357" x2="400" y2="382" class="arrow"/>
+
+  <!-- DBA Intervention -->
+  <rect x="200" y="384" width="400" height="60" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="400" y="405" text-anchor="middle" class="label" fill="#10B981">DBA 개입: 공간 확보</text>
+  <text x="400" y="425" text-anchor="middle" class="small">데이터 파일 추가/확장 | 쿼터 증가 | 객체 삭제</text>
+  <text x="400" y="440" text-anchor="middle" class="small">Oracle 내부 폴링으로 공간 확보 여부 주기적 확인</text>
+
+  <line x1="400" y1="444" x2="400" y2="470" class="arrow"/>
+
+  <!-- Decision: Space available? -->
+  <polygon points="400,470 500,500 400,530 300,500" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="400" y="498" text-anchor="middle" class="sublabel">공간 확보?</text>
+  <text x="400" y="514" text-anchor="middle" class="small">TIMEOUT 이내?</text>
+
+  <!-- YES: Resume -->
+  <line x1="400" y1="530" x2="400" y2="555" class="arrow-green"/>
+  <text x="410" y="545" class="small" fill="#10B981">YES</text>
+  <rect x="280" y="557" width="240" height="45" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="2"/>
+  <text x="400" y="578" text-anchor="middle" class="label" fill="#10B981">작업 자동 재개 (RESUME)</text>
+  <text x="400" y="595" text-anchor="middle" class="small">중단 지점에서 계속 실행</text>
+
+  <!-- TIMEOUT: Fail -->
+  <line x1="500" y1="500" x2="620" y2="500" class="arrow-red"/>
+  <text x="548" y="493" class="small" fill="#F43F5E">TIMEOUT</text>
+  <rect x="620" y="480" width="150" height="45" class="box" fill="rgba(244,63,94,0.15)" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="695" y="500" text-anchor="middle" class="label" fill="#F43F5E">ORA-30032</text>
+  <text x="695" y="516" text-anchor="middle" class="small">타임아웃, 작업 롤백</text>
+
+  <!-- Settings box -->
+  <rect x="30" y="302" width="195" height="95" class="box" fill="rgba(255,255,255,0.04)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="40" y="320" class="sublabel">설정 방법:</text>
+  <text x="40" y="338" class="code">ALTER SESSION ENABLE</text>
+  <text x="40" y="353" class="code">  RESUMABLE TIMEOUT 3600;</text>
+  <text x="40" y="373" class="code">RESUMABLE_TIMEOUT = 3600</text>
+  <text x="40" y="390" class="small">(시스템 레벨 파라미터)</text>
+</svg>

@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .arrow-line { stroke: #6F6BEA; stroke-width: 2; fill: none; }
+    .dashed { stroke-dasharray: 6,4; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="ah-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Oracle Instance = SGA + Background Processes</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">오라클 인스턴스 = 메모리 구조(SGA + PGA) + 백그라운드 프로세스</text>
+
+  <!-- Instance boundary -->
+  <rect x="30" y="60" width="740" height="440" class="box" fill="none" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="8,4" />
+  <text x="50" y="82" class="label" fill="#6F6BEA">Instance (인스턴스)</text>
+
+  <!-- ===== SGA Block ===== -->
+  <rect x="50" y="95" width="460" height="380" class="box" fill="rgba(111,107,234,0.08)" stroke="#6F6BEA" stroke-width="1.5" />
+  <text x="280" y="118" text-anchor="middle" class="label" fill="#6F6BEA">SGA (System Global Area) — 공유 메모리</text>
+
+  <!-- Database Buffer Cache -->
+  <rect x="70" y="130" width="200" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
+  <text x="170" y="153" text-anchor="middle" class="sublabel">Database Buffer Cache</text>
+  <text x="170" y="173" text-anchor="middle" class="code">DB_CACHE_SIZE</text>
+
+  <!-- Shared Pool -->
+  <rect x="290" y="130" width="200" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
+  <text x="390" y="153" text-anchor="middle" class="sublabel">Shared Pool (공유 풀)</text>
+  <text x="390" y="173" text-anchor="middle" class="code">SHARED_POOL_SIZE</text>
+
+  <!-- Redo Log Buffer -->
+  <rect x="70" y="200" width="200" height="55" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
+  <text x="170" y="223" text-anchor="middle" class="sublabel">Redo Log Buffer</text>
+  <text x="170" y="243" text-anchor="middle" class="code">LOG_BUFFER</text>
+
+  <!-- Large Pool -->
+  <rect x="290" y="200" width="95" height="55" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="337" y="223" text-anchor="middle" class="sublabel">Large Pool</text>
+  <text x="337" y="240" text-anchor="middle" class="small">선택</text>
+
+  <!-- Java Pool -->
+  <rect x="395" y="200" width="95" height="55" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="442" y="223" text-anchor="middle" class="sublabel">Java Pool</text>
+  <text x="442" y="240" text-anchor="middle" class="small">선택</text>
+
+  <!-- Streams Pool -->
+  <rect x="70" y="270" width="130" height="50" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="135" y="293" text-anchor="middle" class="sublabel">Streams Pool</text>
+  <text x="135" y="308" text-anchor="middle" class="small">선택</text>
+
+  <!-- In-Memory Area -->
+  <rect x="210" y="270" width="130" height="50" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="275" y="293" text-anchor="middle" class="sublabel">In-Memory Area</text>
+  <text x="275" y="308" text-anchor="middle" class="small">선택</text>
+
+  <!-- Result Cache -->
+  <rect x="350" y="270" width="130" height="50" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="415" y="293" text-anchor="middle" class="sublabel">Result Cache</text>
+  <text x="415" y="308" text-anchor="middle" class="small">선택</text>
+
+  <!-- Fixed SGA -->
+  <rect x="70" y="335" width="420" height="35" class="box" fill="rgba(255,255,255,0.03)" stroke="#475569" stroke-width="1" />
+  <text x="280" y="358" text-anchor="middle" class="small">Fixed SGA (고정, 내부 관리용)</text>
+
+  <!-- SGA size control -->
+  <text x="280" y="400" text-anchor="middle" class="code">SGA_TARGET / SGA_MAX_SIZE / MEMORY_TARGET</text>
+  <text x="280" y="418" text-anchor="middle" class="small">Granule 단위로 할당 (4MB ~ 128MB+)</text>
+
+  <!-- Shared label -->
+  <rect x="135" y="440" width="120" height="24" rx="12" fill="rgba(111,107,234,0.2)" stroke="none" />
+  <text x="195" y="456" text-anchor="middle" style="font-size:11px; fill:#A5B4FC;">모든 프로세스 공유</text>
+
+  <!-- ===== PGA Block ===== -->
+  <rect x="530" y="95" width="220" height="210" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1.5" />
+  <text x="640" y="118" text-anchor="middle" class="label" fill="#10B981">PGA — 프로세스 전용</text>
+
+  <!-- PGA components -->
+  <rect x="545" y="130" width="190" height="40" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1" />
+  <text x="640" y="155" text-anchor="middle" class="sublabel">Private SQL Area</text>
+
+  <rect x="545" y="180" width="190" height="40" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1" />
+  <text x="640" y="205" text-anchor="middle" class="sublabel">SQL Work Area (Sort/Hash)</text>
+
+  <rect x="545" y="230" width="190" height="40" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1" />
+  <text x="640" y="255" text-anchor="middle" class="sublabel">Session Memory</text>
+
+  <text x="640" y="290" text-anchor="middle" class="code">PGA_AGGREGATE_TARGET</text>
+
+  <!-- PGA label -->
+  <rect x="580" y="298" width="120" height="24" rx="12" fill="rgba(16,185,129,0.2)" stroke="none" />
+  <text x="640" y="314" text-anchor="middle" style="font-size:11px; fill:#6EE7B7;">프로세스당 1개</text>
+
+  <!-- ===== Background Processes ===== -->
+  <rect x="530" y="340" width="220" height="130" class="box" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1.5" />
+  <text x="640" y="363" text-anchor="middle" class="label" fill="#F43F5E">Background Processes</text>
+
+  <text x="555" y="388" class="sublabel">DBWn  — Buffer → Disk</text>
+  <text x="555" y="408" class="sublabel">LGWR — Redo → Log File</text>
+  <text x="555" y="428" class="sublabel">CKPT — Checkpoint</text>
+  <text x="555" y="448" class="sublabel">SMON — Recovery</text>
+  <text x="555" y="468" class="sublabel">PMON — Cleanup</text>
+
+  <!-- Arrows: SGA ↔ Background -->
+  <line x1="510" y1="250" x2="530" y2="400" class="arrow-line dashed" marker-end="url(#ah)" />
+  <line x1="510" y1="170" x2="530" y2="380" class="arrow-line dashed" marker-end="url(#ah)" />
+
+  <!-- Legend -->
+  <rect x="50" y="485" width="12" height="12" rx="2" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" />
+  <text x="68" y="496" class="small">필수 구성요소</text>
+  <rect x="170" y="485" width="12" height="12" rx="2" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="188" y="496" class="small">선택 구성요소</text>
+</svg>

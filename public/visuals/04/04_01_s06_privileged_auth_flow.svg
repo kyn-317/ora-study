@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .yes { font-size: 11px; fill: #10B981; font-weight: 600; }
+    .no { font-size: 11px; fill: #F43F5E; font-weight: 600; }
+    .decision { fill: #2A2B3D; stroke: #6F6BEA; stroke-width: 1.5; }
+  </style>
+
+  <text x="400" y="32" class="title" text-anchor="middle">특권 사용자 인증 흐름 (Privileged Authentication Flow)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">SYSDBA/SYSOPER 접속 시 인증 경로 결정 프로세스</text>
+
+  <!-- Start -->
+  <rect x="300" y="70" width="200" height="40" class="box" fill="#6F6BEA" stroke="none"/>
+  <text x="400" y="95" class="label" text-anchor="middle" fill="#FFF">CONNECT / AS SYSDBA</text>
+
+  <line x1="400" y1="110" x2="400" y2="140" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Decision: Local? -->
+  <polygon points="400,140 500,180 400,220 300,180" class="decision"/>
+  <text x="400" y="176" class="sublabel" text-anchor="middle">로컬 접속?</text>
+  <text x="400" y="190" class="small" text-anchor="middle">Local Connection?</text>
+
+  <!-- YES: Local -->
+  <text x="270" y="175" class="yes">Yes</text>
+  <line x1="300" y1="180" x2="180" y2="180" stroke="#10B981" stroke-width="1.5"/>
+  <line x1="180" y1="180" x2="180" y2="220" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- OS Group Check -->
+  <rect x="80" y="220" width="200" height="50" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <text x="180" y="242" class="label" text-anchor="middle">OS 그룹 멤버십 확인</text>
+  <text x="180" y="258" class="small" text-anchor="middle">dba 그룹 / oper 그룹?</text>
+
+  <!-- OS Auth Success -->
+  <text x="60" y="290" class="yes">멤버</text>
+  <line x1="120" y1="270" x2="120" y2="310" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="50" y="310" width="140" height="45" class="box" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1.5"/>
+  <text x="120" y="330" class="label" text-anchor="middle" fill="#10B981">인증 성공</text>
+  <text x="120" y="345" class="small" text-anchor="middle">SYS 스키마로 접속</text>
+
+  <!-- OS Auth Fail -->
+  <text x="250" y="290" class="no">비멤버</text>
+  <line x1="240" y1="270" x2="240" y2="310" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="195" y="310" width="90" height="35" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="240" y="332" class="small" text-anchor="middle" fill="#F43F5E">인증 실패</text>
+
+  <!-- NO: Remote -->
+  <text x="520" y="175" class="no">No (원격)</text>
+  <line x1="500" y1="180" x2="600" y2="180" stroke="#F43F5E" stroke-width="1.5"/>
+  <line x1="600" y1="180" x2="600" y2="220" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Password File Check -->
+  <polygon points="600,220 700,260 600,300 500,260" class="decision"/>
+  <text x="600" y="256" class="sublabel" text-anchor="middle">패스워드 파일</text>
+  <text x="600" y="270" class="small" text-anchor="middle">존재?</text>
+
+  <!-- PW File Yes -->
+  <text x="475" y="255" class="yes">Yes</text>
+  <line x1="500" y1="260" x2="420" y2="260" stroke="#10B981" stroke-width="1.5"/>
+  <line x1="420" y1="260" x2="420" y2="310" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="340" y="310" width="160" height="50" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="420" y="330" class="label" text-anchor="middle">패스워드 파일 인증</text>
+  <text x="420" y="350" class="code" text-anchor="middle">V$PWFILE_USERS 확인</text>
+
+  <!-- PW Auth result -->
+  <line x1="380" y1="360" x2="380" y2="390" stroke="#10B981" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="365" y="385" class="yes">성공</text>
+  <rect x="330" y="390" width="100" height="35" class="box" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1.5"/>
+  <text x="380" y="412" class="label" text-anchor="middle" fill="#10B981">인증 성공</text>
+
+  <line x1="460" y1="360" x2="460" y2="390" stroke="#F43F5E" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="470" y="385" class="no">실패</text>
+  <rect x="435" y="390" width="70" height="35" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="470" y="412" class="small" text-anchor="middle" fill="#F43F5E">실패</text>
+
+  <!-- PW File No -->
+  <text x="720" y="255" class="no">No</text>
+  <line x1="700" y1="260" x2="730" y2="260" stroke="#F43F5E" stroke-width="1.5"/>
+  <line x1="730" y1="260" x2="730" y2="310" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="660" y="310" width="140" height="45" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="730" y="330" class="label" text-anchor="middle" fill="#F43F5E">인증 실패</text>
+  <text x="730" y="348" class="code" text-anchor="middle">ORA-01031</text>
+
+  <!-- Summary Box -->
+  <rect x="30" y="440" width="740" height="30" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="400" y="460" class="small" text-anchor="middle">SYSDBA/SYSOPER 접속은 필수 감사(Mandatory Auditing) 대상 | AUDIT_SYS_OPERATIONS=TRUE (기본) | DB 미기동 시에도 인증 가능</text>
+
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#94A3B8"/>
+    </marker>
+  </defs>
+</svg>

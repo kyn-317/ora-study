@@ -292,6 +292,53 @@
       "description": "ORA-30036 에러 발생 시 즉시 대응으로 UNDO 테이블스페이스의 데이터 파일을 확장하거나 추가하는 방법입니다. AUTOEXTEND ON 설정과 적절한 MAXSIZE 지정이 중요합니다."
     }
   ],
+  "visuals": [
+    {
+      "id": "v01",
+      "type": "svg",
+      "src": "/visuals/06/06_02_s01_undo_state_transition.svg",
+      "caption": "UNDO Extent 상태 전이 다이어그램: ACTIVE → UNEXPIRED → EXPIRED 및 GUARANTEE/NOGUARANTEE 비교",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s01"
+    },
+    {
+      "id": "v02",
+      "type": "svg",
+      "src": "/visuals/06/06_02_s04_undo_space_reuse_priority.svg",
+      "caption": "UNDO 공간 재사용 우선순위: NOGUARANTEE(5단계) vs GUARANTEE(4단계) 공간 확보 전략",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s04"
+    },
+    {
+      "id": "v03",
+      "type": "svg",
+      "src": "/visuals/06/06_02_s05_undo_retention_autotuning.svg",
+      "caption": "UNDO_RETENTION 및 Auto-Tuning 메커니즘: AUTOEXTEND ON(자동 조정) vs OFF(수동 고정)",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s05"
+    },
+    {
+      "id": "v04",
+      "type": "svg",
+      "src": "/visuals/06/06_02_s06_undo_space_sizing.svg",
+      "caption": "UNDO 테이블스페이스 크기 산정 공식: UR × UPS × DB_BLOCK_SIZE 및 모니터링 임계값",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s06"
+    },
+    {
+      "id": "v05",
+      "type": "svg",
+      "src": "/visuals/06/06_02_s09_ora01555_vs_ora30036_tradeoff.svg",
+      "caption": "ORA-01555 vs ORA-30036 트레이드오프: 읽기 보호와 쓰기 보호의 균형 전략",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s09"
+    }
+  ],
   "keywords": [
     "UNDO Extent",
     "ACTIVE",

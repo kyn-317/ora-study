@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Oracle 데이터 블록 내부 구조</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Data Block Internal Structure &amp; PCTFREE Space Management</text>
+
+  <!-- Block outer border -->
+  <rect x="60" y="70" width="320" height="420" class="box" fill="rgba(255,255,255,0.03)" stroke="#6F6BEA" stroke-width="2.5"/>
+  <text x="220" y="64" text-anchor="middle" class="label" fill="#6F6BEA">Oracle Data Block (8KB)</text>
+
+  <!-- Block Header -->
+  <rect x="75" y="85" width="290" height="100" rx="6" ry="6" fill="rgba(243,63,94,0.10)" stroke="#F43F5E" stroke-width="1.2"/>
+  <text x="220" y="108" text-anchor="middle" class="label" fill="#F43F5E">Block Header (블록 헤더)</text>
+
+  <!-- Sub-sections of header -->
+  <rect x="90" y="115" width="260" height="22" rx="4" ry="4" fill="rgba(243,63,94,0.08)" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="100" y="130" class="sublabel" fill="#F43F5E">Common Header</text>
+  <text x="250" y="130" class="small" fill="#94A3B8">블록 주소, 타입, SCN</text>
+
+  <rect x="90" y="140" width="260" height="22" rx="4" ry="4" fill="rgba(243,63,94,0.08)" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="100" y="155" class="sublabel" fill="#F43F5E">Transaction Layer (ITL)</text>
+  <text x="270" y="155" class="small" fill="#94A3B8">동시 트랜잭션 관리</text>
+
+  <rect x="90" y="165" width="260" height="16" rx="4" ry="4" fill="rgba(243,63,94,0.08)" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="100" y="177" class="small" fill="#F43F5E">Table Directory — 행이 속한 테이블 정보</text>
+
+  <!-- Row Directory -->
+  <rect x="75" y="195" width="290" height="40" rx="6" ry="6" fill="rgba(59,130,246,0.10)" stroke="#3B82F6" stroke-width="1.2"/>
+  <text x="220" y="220" text-anchor="middle" class="label" fill="#3B82F6">Row Directory (행 디렉토리)</text>
+
+  <!-- Free Space -->
+  <rect x="75" y="245" width="290" height="80" rx="6" ry="6" fill="rgba(16,185,129,0.10)" stroke="#10B981" stroke-width="1.2" stroke-dasharray="5,3"/>
+  <text x="220" y="278" text-anchor="middle" class="label" fill="#10B981">Free Space (빈 공간)</text>
+  <text x="220" y="298" text-anchor="middle" class="sublabel" fill="#10B981">INSERT / UPDATE 확장에 사용</text>
+
+  <!-- Row Data -->
+  <rect x="75" y="335" width="290" height="140" rx="6" ry="6" fill="rgba(245,158,11,0.10)" stroke="#F59E0B" stroke-width="1.2"/>
+  <text x="220" y="358" text-anchor="middle" class="label" fill="#F59E0B">Row Data (행 데이터)</text>
+
+  <!-- Row entries -->
+  <rect x="90" y="370" width="260" height="20" rx="3" ry="3" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="0.5"/>
+  <text x="100" y="384" class="code">Row 1: EMPNO=100, SAL=3000, ...</text>
+  <rect x="90" y="394" width="260" height="20" rx="3" ry="3" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="0.5"/>
+  <text x="100" y="408" class="code">Row 2: EMPNO=101, SAL=4500, ...</text>
+  <rect x="90" y="418" width="260" height="20" rx="3" ry="3" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="0.5"/>
+  <text x="100" y="432" class="code">Row 3: EMPNO=102, SAL=5000, ...</text>
+  <rect x="90" y="442" width="260" height="20" rx="3" ry="3" fill="rgba(245,158,11,0.05)" stroke="#F59E0B" stroke-width="0.3" stroke-dasharray="3,3"/>
+  <text x="220" y="456" text-anchor="middle" class="small" fill="#F59E0B">...</text>
+
+  <!-- PCTFREE Diagram (right side) -->
+  <rect x="430" y="70" width="340" height="290" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="600" y="95" text-anchor="middle" class="label">PCTFREE / PCTUSED 공간 관리</text>
+  <text x="600" y="113" text-anchor="middle" class="subtitle">Block Space Management</text>
+
+  <!-- Visual block fill diagram -->
+  <rect x="460" y="130" width="140" height="200" rx="4" ry="4" fill="rgba(255,255,255,0.02)" stroke="#6F6BEA" stroke-width="1.5"/>
+
+  <!-- Row data (filled from bottom) -->
+  <rect x="462" y="195" width="136" height="133" rx="2" ry="2" fill="rgba(245,158,11,0.15)"/>
+  <text x="530" y="270" text-anchor="middle" class="sublabel" fill="#F59E0B">사용 공간</text>
+  <text x="530" y="288" text-anchor="middle" class="small" fill="#F59E0B">90% (100-PCTFREE)</text>
+
+  <!-- PCTFREE area (top) -->
+  <rect x="462" y="132" width="136" height="63" rx="2" ry="2" fill="rgba(16,185,129,0.15)"/>
+  <text x="530" y="160" text-anchor="middle" class="sublabel" fill="#10B981">PCTFREE</text>
+  <text x="530" y="178" text-anchor="middle" class="small" fill="#10B981">10% (기본값)</text>
+
+  <!-- Divider line -->
+  <line x1="460" y1="195" x2="600" y2="195" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4,2"/>
+
+  <!-- Labels -->
+  <text x="612" y="165" class="small" fill="#10B981">UPDATE 확장용</text>
+  <text x="612" y="180" class="small" fill="#10B981">예약 공간</text>
+  <text x="612" y="240" class="small" fill="#F59E0B">INSERT로</text>
+  <text x="612" y="255" class="small" fill="#F59E0B">채워진 공간</text>
+  <text x="612" y="310" class="small" fill="#94A3B8">90%까지 INSERT</text>
+  <text x="612" y="325" class="small" fill="#94A3B8">이후 INSERT 중단</text>
+
+  <!-- Row Migration Warning -->
+  <rect x="430" y="370" width="340" height="85" class="box" fill="rgba(243,63,94,0.08)" stroke="#F43F5E" stroke-width="1.2"/>
+  <text x="600" y="395" text-anchor="middle" class="label" fill="#F43F5E">행 마이그레이션 (Row Migration)</text>
+  <text x="600" y="415" text-anchor="middle" class="sublabel">PCTFREE 부족 시 UPDATE로 행 크기 증가 →</text>
+  <text x="600" y="433" text-anchor="middle" class="sublabel">다른 블록으로 행 이동 → 성능 저하</text>
+  <text x="600" y="448" text-anchor="middle" class="small" fill="#F43F5E">원래 블록에 포인터만 남기고 실제 행은 새 블록으로</text>
+
+  <!-- ASSM vs MSSM -->
+  <rect x="60" y="497" width="710" height="20" rx="4" ry="4" fill="rgba(111,107,234,0.08)"/>
+  <text x="400" y="511" text-anchor="middle" class="small" fill="#6F6BEA">ASSM(Automatic Segment Space Management): 비트맵 기반 자동 공간 관리 — PCTUSED 불필요, Free List 경합 없음 (기본값, 권장)</text>
+</svg>

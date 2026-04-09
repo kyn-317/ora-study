@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <text x="400" y="30" class="title" text-anchor="middle">리스너 아키텍처 및 서비스 등록 방식</text>
+  <text x="400" y="50" class="subtitle" text-anchor="middle">Dynamic vs Static Registration, listener.ora 구조</text>
+
+  <!-- Client -->
+  <rect x="30" y="75" width="130" height="50" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="95" y="98" class="label" text-anchor="middle" fill="#6F6BEA">클라이언트</text>
+  <text x="95" y="115" class="small" text-anchor="middle">TNS 접속 요청</text>
+
+  <!-- Arrow to Listener -->
+  <line x1="160" y1="100" x2="250" y2="100" stroke="#E2E8F0" stroke-width="2"/>
+  <polygon points="248,97 255,100 248,103" fill="#E2E8F0"/>
+  <text x="205" y="92" class="code" text-anchor="middle" font-size="9">TCP 1521</text>
+
+  <!-- Listener -->
+  <rect x="255" y="65" width="200" height="75" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2.5"/>
+  <text x="355" y="88" class="label" text-anchor="middle" fill="#3B82F6">리스너 (Listener)</text>
+  <text x="355" y="106" class="sublabel" text-anchor="middle">LISTENER (기본 이름)</text>
+  <text x="355" y="122" class="code" text-anchor="middle">TCP:1521 | TCPS:2484 | IPC</text>
+
+  <!-- Arrow to Server Process -->
+  <line x1="455" y1="100" x2="545" y2="100" stroke="#E2E8F0" stroke-width="2"/>
+  <polygon points="543,97 550,100 543,103" fill="#E2E8F0"/>
+  <text x="500" y="90" class="small" text-anchor="middle">Hand-off</text>
+
+  <!-- Server Process -->
+  <rect x="550" y="75" width="130" height="50" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <text x="615" y="98" class="label" text-anchor="middle" fill="#10B981">서버 프로세스</text>
+  <text x="615" y="115" class="small" text-anchor="middle">세션 처리</text>
+
+  <!-- Arrow to DB -->
+  <line x1="680" y1="100" x2="720" y2="100" stroke="#10B981" stroke-width="1.5"/>
+  <polygon points="718,97 725,100 718,103" fill="#10B981"/>
+  <rect x="725" y="82" width="55" height="36" rx="4" ry="4" fill="#F59E0B" opacity="0.3" stroke="#F59E0B"/>
+  <text x="752" y="105" class="code" text-anchor="middle" font-size="9">DB</text>
+
+  <!-- Dynamic Registration -->
+  <rect x="30" y="165" width="365" height="180" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <text x="212" y="188" class="label" text-anchor="middle" fill="#10B981">동적 서비스 등록 (Dynamic Registration)</text>
+
+  <text x="50" y="210" class="sublabel">LREG 프로세스가 ~60초마다 자동 등록</text>
+
+  <rect x="50" y="220" width="100" height="40" rx="4" ry="4" fill="#10B981" opacity="0.2" stroke="#10B981"/>
+  <text x="100" y="237" class="code" text-anchor="middle" font-size="10">LREG</text>
+  <text x="100" y="253" class="small" text-anchor="middle">프로세스</text>
+
+  <line x1="150" y1="240" x2="195" y2="240" stroke="#10B981" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <polygon points="193,237 200,240 193,243" fill="#10B981"/>
+  <text x="172" y="232" class="small" text-anchor="middle">~60s</text>
+
+  <rect x="200" y="220" width="100" height="40" rx="4" ry="4" fill="#3B82F6" opacity="0.2" stroke="#3B82F6"/>
+  <text x="250" y="237" class="code" text-anchor="middle" font-size="10">Listener</text>
+  <text x="250" y="253" class="small" text-anchor="middle">등록 수신</text>
+
+  <text x="50" y="278" class="small">상태: READY / BLOCKED (실시간 반영)</text>
+  <text x="50" y="296" class="small">부하 정보 포함 (Load Balancing 가능)</text>
+  <text x="50" y="314" class="code">ALTER SYSTEM REGISTER; -- 즉시 등록</text>
+  <text x="50" y="332" class="small">LOCAL_LISTENER / REMOTE_LISTENER 파라미터</text>
+
+  <!-- Static Registration -->
+  <rect x="415" y="165" width="365" height="180" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <text x="597" y="188" class="label" text-anchor="middle" fill="#F59E0B">정적 서비스 등록 (Static Registration)</text>
+
+  <text x="435" y="210" class="sublabel">listener.ora SID_LIST에 수동 기술</text>
+
+  <rect x="435" y="220" width="120" height="40" rx="4" ry="4" fill="#F59E0B" opacity="0.2" stroke="#F59E0B"/>
+  <text x="495" y="237" class="code" text-anchor="middle" font-size="10">listener.ora</text>
+  <text x="495" y="253" class="small" text-anchor="middle">SID_LIST</text>
+
+  <line x1="555" y1="240" x2="600" y2="240" stroke="#F59E0B" stroke-width="1.5"/>
+  <polygon points="598,237 605,240 598,243" fill="#F59E0B"/>
+
+  <rect x="605" y="220" width="100" height="40" rx="4" ry="4" fill="#3B82F6" opacity="0.2" stroke="#3B82F6"/>
+  <text x="655" y="237" class="code" text-anchor="middle" font-size="10">Listener</text>
+  <text x="655" y="253" class="small" text-anchor="middle">정적 등록</text>
+
+  <text x="435" y="278" class="small" fill="#F59E0B">상태: 항상 UNKNOWN</text>
+  <text x="435" y="296" class="small">부하 정보 미포함</text>
+  <text x="435" y="314" class="small" fill="#10B981">인스턴스 미기동 시에도 등록 유지!</text>
+  <text x="435" y="332" class="code">lsnrctl reload -- 구성 변경 반영</text>
+
+  <!-- When static is needed -->
+  <rect x="30" y="360" width="745" height="75" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="50" y="382" class="label" fill="#F59E0B" font-size="12">정적 등록이 필수인 경우</text>
+
+  <rect x="50" y="392" width="125" height="28" rx="4" ry="4" fill="#F59E0B" opacity="0.15"/>
+  <text x="112" y="411" class="small" text-anchor="middle">원격 STARTUP</text>
+
+  <rect x="185" y="392" width="125" height="28" rx="4" ry="4" fill="#F59E0B" opacity="0.15"/>
+  <text x="247" y="411" class="small" text-anchor="middle">OEM 원격 관리</text>
+
+  <rect x="320" y="392" width="125" height="28" rx="4" ry="4" fill="#F59E0B" opacity="0.15"/>
+  <text x="382" y="411" class="small" text-anchor="middle">Data Guard</text>
+
+  <rect x="455" y="392" width="140" height="28" rx="4" ry="4" fill="#F59E0B" opacity="0.15"/>
+  <text x="525" y="411" class="small" text-anchor="middle">RMAN DUPLICATE</text>
+
+  <rect x="605" y="392" width="150" height="28" rx="4" ry="4" fill="#F59E0B" opacity="0.15"/>
+  <text x="680" y="411" class="small" text-anchor="middle">Grid Infrastructure</text>
+
+  <!-- listener.ora key structure -->
+  <rect x="30" y="450" width="745" height="55" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="50" y="470" class="label" font-size="12">listener.ora 핵심 구조</text>
+  <text x="50" y="490" class="code">LISTENER = (DESCRIPTION_LIST = (DESCRIPTION = (ADDRESS = (PROTOCOL=TCP)(HOST=...)(PORT=1521))))</text>
+  <text x="400" y="498" class="small" text-anchor="middle">위치: $ORACLE_HOME/network/admin/listener.ora</text>
+</svg>

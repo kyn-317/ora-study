@@ -255,6 +255,71 @@
       "description": "HR.EMPLOYEES 테이블에 대한 최근 트랜잭션의 변경 내역과 자동 생성된 UNDO SQL을 조회합니다. UNDO SQL을 실행하면 해당 변경을 되돌릴 수 있습니다."
     }
   ],
+  "visuals": [
+    {
+      "id": "v01",
+      "type": "svg",
+      "src": "/visuals/06/06_01_s01_undo_architecture_overview.svg",
+      "caption": "UNDO 전체 아키텍처 개요: DML → UNDO 세그먼트 → 3대 핵심 기능 (읽기 일관성, 롤백, Flashback)",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s01"
+    },
+    {
+      "id": "v02",
+      "type": "svg",
+      "src": "/visuals/06/06_01_s02_undo_data_lifecycle.svg",
+      "caption": "UNDO 데이터 생명주기: DML 유형별 UNDO 생성 → Active → Unexpired → Expired 상태 전이",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s02"
+    },
+    {
+      "id": "v03",
+      "type": "svg",
+      "src": "/visuals/06/06_01_s03_undo_segment_structure.svg",
+      "caption": "UNDO 세그먼트 구조: 헤더 블록, 트랜잭션 테이블, 순환적 Extent 할당 메커니즘",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s03"
+    },
+    {
+      "id": "v04",
+      "type": "svg",
+      "src": "/visuals/06/06_01_s05_read_consistency_cr_block.svg",
+      "caption": "읽기 일관성과 CR 블록 생성 과정: Query SCN vs Block SCN 비교 → UNDO 역적용",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s05"
+    },
+    {
+      "id": "v05",
+      "type": "svg",
+      "src": "/visuals/06/06_01_s06_rollback_types_process.svg",
+      "caption": "트랜잭션 롤백 유형 및 인스턴스 복구 2단계 프로세스 (Roll Forward → Roll Back)",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s06"
+    },
+    {
+      "id": "v06",
+      "type": "svg",
+      "src": "/visuals/06/06_01_s07_ora01555_mechanism.svg",
+      "caption": "ORA-01555 Snapshot Too Old 발생 메커니즘: 타임라인, 원인, 대응 방안",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s07"
+    },
+    {
+      "id": "v07",
+      "type": "svg",
+      "src": "/visuals/06/06_01_s08_flashback_features_undo.svg",
+      "caption": "Flashback 기능 분류: UNDO 기반(Query, Version, Transaction, Table) vs 비-UNDO 기반(Drop, Database)",
+      "placement": "after-content",
+      "width": "100%",
+      "sectionId": "s08"
+    }
+  ],
   "keywords": [
     "UNDO データ (UNDO Data)",
     "UNDO セグメント (UNDO Segment)",

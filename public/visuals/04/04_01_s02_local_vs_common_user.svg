@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .highlight { font-size: 12px; fill: #6F6BEA; font-weight: 600; }
+  </style>
+
+  <text x="400" y="32" class="title" text-anchor="middle">로컬 사용자 vs 공통 사용자 (Local User vs Common User)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">멀티테넌트(CDB/PDB) 아키텍처에서의 사용자 유형 비교</text>
+
+  <!-- CDB Container -->
+  <rect x="30" y="70" width="740" height="350" rx="12" ry="12" fill="none" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="6"/>
+  <text x="50" y="92" class="label" fill="#6F6BEA">CDB (Container Database)</text>
+
+  <!-- CDB$ROOT -->
+  <rect x="50" y="105" width="700" height="100" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="70" y="125" class="label" fill="#F59E0B">CDB$ROOT</text>
+
+  <!-- Common Users in ROOT -->
+  <rect x="220" y="115" width="120" height="40" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="280" y="133" class="code" text-anchor="middle">C##DBA_ADMIN</text>
+  <text x="280" y="148" class="small" text-anchor="middle">공통 사용자</text>
+
+  <rect x="360" y="115" width="80" height="40" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="400" y="133" class="code" text-anchor="middle">SYS</text>
+  <text x="400" y="148" class="small" text-anchor="middle">공통(사전정의)</text>
+
+  <rect x="460" y="115" width="80" height="40" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="500" y="133" class="code" text-anchor="middle">SYSTEM</text>
+  <text x="500" y="148" class="small" text-anchor="middle">공통(사전정의)</text>
+
+  <text x="70" y="185" class="small">공통 사용자 생성: CREATE USER C##... CONTAINER=ALL</text>
+  <text x="450" y="185" class="small">CDB_USERS 뷰: COMMON='YES'</text>
+
+  <!-- Arrows down to PDBs -->
+  <line x1="280" y1="155" x2="175" y2="225" stroke="#3B82F6" stroke-width="1" stroke-dasharray="3"/>
+  <line x1="280" y1="155" x2="400" y2="225" stroke="#3B82F6" stroke-width="1" stroke-dasharray="3"/>
+  <line x1="280" y1="155" x2="625" y2="225" stroke="#3B82F6" stroke-width="1" stroke-dasharray="3"/>
+  <text x="180" y="218" class="highlight">메타데이터 전파</text>
+
+  <!-- PDB1 -->
+  <rect x="50" y="225" width="220" height="180" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <rect x="50" y="225" width="220" height="28" rx="8" ry="8" fill="#10B981" opacity="0.8"/>
+  <text x="160" y="244" class="label" text-anchor="middle" fill="#FFF">PDB1</text>
+
+  <!-- Common user in PDB1 -->
+  <rect x="65" y="265" width="90" height="32" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1"/>
+  <text x="110" y="280" class="code" text-anchor="middle" font-size="10">C##DBA_ADMIN</text>
+  <text x="110" y="292" class="small" text-anchor="middle">공통</text>
+
+  <!-- Local users in PDB1 -->
+  <rect x="165" y="265" width="90" height="32" class="box" fill="#2A2B3D" stroke="#F43F5E" stroke-width="1"/>
+  <text x="210" y="280" class="code" text-anchor="middle" font-size="10">app_user</text>
+  <text x="210" y="292" class="small" text-anchor="middle">로컬</text>
+
+  <rect x="65" y="305" width="90" height="32" class="box" fill="#2A2B3D" stroke="#F43F5E" stroke-width="1"/>
+  <text x="110" y="320" class="code" text-anchor="middle" font-size="10">hr_user</text>
+  <text x="110" y="332" class="small" text-anchor="middle">로컬</text>
+
+  <text x="65" y="360" class="small">로컬: C## 접두사 불가</text>
+  <text x="65" y="375" class="small">PDB 내에서만 고유</text>
+  <text x="65" y="390" class="small">PDB 관리자가 생성</text>
+
+  <!-- PDB2 -->
+  <rect x="290" y="225" width="220" height="180" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <rect x="290" y="225" width="220" height="28" rx="8" ry="8" fill="#10B981" opacity="0.8"/>
+  <text x="400" y="244" class="label" text-anchor="middle" fill="#FFF">PDB2</text>
+
+  <rect x="305" y="265" width="90" height="32" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1"/>
+  <text x="350" y="280" class="code" text-anchor="middle" font-size="10">C##DBA_ADMIN</text>
+  <text x="350" y="292" class="small" text-anchor="middle">공통</text>
+
+  <rect x="405" y="265" width="90" height="32" class="box" fill="#2A2B3D" stroke="#F43F5E" stroke-width="1"/>
+  <text x="450" y="280" class="code" text-anchor="middle" font-size="10">app_user</text>
+  <text x="450" y="292" class="small" text-anchor="middle">로컬(독립)</text>
+
+  <text x="305" y="330" class="small">동일 이름 app_user가</text>
+  <text x="305" y="345" class="small">PDB1과 독립적으로 존재</text>
+  <text x="305" y="375" class="highlight">CONTAINER=ALL: 전체 적용</text>
+  <text x="305" y="390" class="highlight">CONTAINER=CURRENT: 현재만</text>
+
+  <!-- PDB3 -->
+  <rect x="530" y="225" width="200" height="180" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <rect x="530" y="225" width="200" height="28" rx="8" ry="8" fill="#10B981" opacity="0.8"/>
+  <text x="630" y="244" class="label" text-anchor="middle" fill="#FFF">PDB3</text>
+
+  <rect x="545" y="265" width="90" height="32" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1"/>
+  <text x="590" y="280" class="code" text-anchor="middle" font-size="10">C##DBA_ADMIN</text>
+  <text x="590" y="292" class="small" text-anchor="middle">공통</text>
+
+  <rect x="645" y="265" width="70" height="32" class="box" fill="#2A2B3D" stroke="#F43F5E" stroke-width="1"/>
+  <text x="680" y="280" class="code" text-anchor="middle" font-size="10">sales_user</text>
+  <text x="680" y="292" class="small" text-anchor="middle">로컬</text>
+
+  <text x="545" y="330" class="small">PDB_DBA 역할로</text>
+  <text x="545" y="345" class="small">PDB 관리자 지정</text>
+
+  <!-- Legend -->
+  <rect x="30" y="440" width="740" height="45" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="50" y="453" width="14" height="14" rx="2" fill="#3B82F6"/>
+  <text x="72" y="464" class="small">공통 사용자 (C## 접두사, CDB$ROOT에서 생성)</text>
+  <rect x="320" y="453" width="14" height="14" rx="2" fill="#F43F5E"/>
+  <text x="342" y="464" class="small">로컬 사용자 (접두사 없음, PDB에서 생성)</text>
+  <text x="580" y="464" class="code">_ORACLE_SCRIPT=TRUE</text>
+  <text x="720" y="464" class="small">C## 우회(비권장)</text>
+</svg>

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .arrow-line { stroke: #6F6BEA; stroke-width: 2; fill: none; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="ah-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Directory Object &amp; External Table Creation</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">디렉토리 객체 생성부터 외부 테이블 SELECT까지의 전체 흐름</text>
+
+  <!-- Step 1: CREATE DIRECTORY -->
+  <rect x="30" y="75" width="230" height="120" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1.5" />
+  <text x="40" y="95" class="small">Step 1</text>
+  <text x="145" y="115" text-anchor="middle" class="label" fill="#F59E0B">CREATE DIRECTORY</text>
+  <text x="145" y="138" text-anchor="middle" class="code">CREATE DIRECTORY ext_dir</text>
+  <text x="145" y="155" text-anchor="middle" class="code">AS '/u01/ext_data';</text>
+  <text x="145" y="180" text-anchor="middle" class="small">CREATE ANY DIRECTORY 권한 필요</text>
+
+  <!-- Step 2: GRANT -->
+  <rect x="285" y="75" width="230" height="120" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1.5" />
+  <text x="295" y="95" class="small">Step 2</text>
+  <text x="400" y="115" text-anchor="middle" class="label" fill="#10B981">GRANT Permissions</text>
+  <text x="400" y="138" text-anchor="middle" class="code">GRANT READ, WRITE</text>
+  <text x="400" y="155" text-anchor="middle" class="code">ON DIRECTORY ext_dir TO hr;</text>
+  <text x="400" y="180" text-anchor="middle" class="small">READ / WRITE / EXECUTE 개별 부여</text>
+
+  <!-- Step 3: CREATE TABLE -->
+  <rect x="540" y="75" width="230" height="120" class="box" fill="rgba(111,107,234,0.1)" stroke="#6F6BEA" stroke-width="1.5" />
+  <text x="550" y="95" class="small">Step 3</text>
+  <text x="655" y="115" text-anchor="middle" class="label" fill="#6F6BEA">CREATE TABLE</text>
+  <text x="655" y="138" text-anchor="middle" class="code">ORGANIZATION EXTERNAL</text>
+  <text x="655" y="155" text-anchor="middle" class="code">(TYPE ORACLE_LOADER ...)</text>
+  <text x="655" y="180" text-anchor="middle" class="small">메타데이터만 딕셔너리에 저장</text>
+
+  <!-- Arrows between steps -->
+  <line x1="260" y1="135" x2="283" y2="135" class="arrow-line" marker-end="url(#ah)" />
+  <line x1="515" y1="135" x2="538" y2="135" class="arrow-line" marker-end="url(#ah)" />
+
+  <!-- CREATE TABLE Syntax Detail -->
+  <rect x="40" y="220" width="720" height="170" class="box" fill="rgba(42,43,61,0.6)" stroke="#2A2B3D" stroke-width="1.5" />
+  <text x="60" y="245" class="label" fill="#6F6BEA">External Table DDL Structure (외부 테이블 DDL 구조)</text>
+  <text x="60" y="270" class="code">CREATE TABLE ext_emp (</text>
+  <text x="80" y="287" class="code">emp_id NUMBER, emp_name VARCHAR2(100), hire_date DATE</text>
+  <text x="60" y="304" class="code">) ORGANIZATION EXTERNAL (</text>
+  <text x="80" y="321" class="code">TYPE ORACLE_LOADER                        -- 액세스 드라이버 (필수)</text>
+  <text x="80" y="338" class="code">DEFAULT DIRECTORY ext_dir                  -- 기본 디렉토리 (필수)</text>
+  <text x="80" y="355" class="code">ACCESS PARAMETERS ( ... )                  -- 파싱 규칙 (선택)</text>
+  <text x="80" y="372" class="code">LOCATION ('emp.csv', 'emp2.csv')           -- 파일 목록 (필수)</text>
+  <text x="60" y="383" class="code">) REJECT LIMIT UNLIMITED;</text>
+
+  <!-- Permission table -->
+  <rect x="40" y="410" width="350" height="100" class="box" fill="rgba(16,185,129,0.06)" stroke="#10B981" stroke-width="1" />
+  <text x="215" y="432" text-anchor="middle" class="label" fill="#10B981">Directory 권한 체계</text>
+  <text x="60" y="452" class="code">READ ON DIRECTORY   </text><text x="230" y="452" class="sublabel">- 파일 읽기 (SELECT)</text>
+  <text x="60" y="470" class="code">WRITE ON DIRECTORY  </text><text x="230" y="470" class="sublabel">- 파일 쓰기 (로그/언로드)</text>
+  <text x="60" y="488" class="code">EXECUTE ON DIRECTORY</text><text x="230" y="488" class="sublabel">- 전처리기 실행</text>
+
+  <!-- ALTER TABLE info -->
+  <rect x="410" y="410" width="350" height="100" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1" />
+  <text x="585" y="432" text-anchor="middle" class="label" fill="#3B82F6">ALTER TABLE 변경 가능 항목</text>
+  <text x="430" y="452" class="code">LOCATION</text><text x="560" y="452" class="sublabel">- 파일 위치 변경</text>
+  <text x="430" y="470" class="code">DEFAULT DIRECTORY</text><text x="560" y="470" class="sublabel">- 디렉토리 변경</text>
+  <text x="430" y="488" class="code">ACCESS PARAMETERS</text><text x="560" y="488" class="sublabel">- 파싱 규칙 변경</text>
+  <text x="430" y="505" class="code">REJECT LIMIT / PARALLEL</text>
+</svg>

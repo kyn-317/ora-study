@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Oracle 프로세스 아키텍처 개요</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Process Architecture Overview</text>
+
+  <!-- Client Machine -->
+  <rect x="30" y="75" width="220" height="180" rx="12" ry="12" fill="none" stroke="#2A2B3D" stroke-width="2" stroke-dasharray="6,3"/>
+  <text x="140" y="95" text-anchor="middle" class="small">클라이언트 머신 (Client Machine)</text>
+
+  <!-- User Processes -->
+  <rect x="55" y="110" width="170" height="50" class="box" fill="rgba(107,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="140" y="133" text-anchor="middle" class="label" fill="#6F6BEA">사용자 프로세스</text>
+  <text x="140" y="150" text-anchor="middle" class="sublabel">User Process</text>
+
+  <rect x="55" y="175" width="170" height="40" class="box" fill="rgba(107,107,234,0.08)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="140" y="195" text-anchor="middle" class="code">SQL*Plus, JDBC, OCI</text>
+  <text x="140" y="210" text-anchor="middle" class="small">클라이언트 애플리케이션</text>
+
+  <!-- Arrow: Client to Server -->
+  <line x1="250" y1="135" x2="330" y2="135" stroke="#6F6BEA" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <text x="290" y="125" text-anchor="middle" class="small">Oracle Net</text>
+  <text x="290" y="155" text-anchor="middle" class="small">(네트워크)</text>
+
+  <!-- Database Server -->
+  <rect x="320" y="75" width="460" height="520" rx="12" ry="12" fill="none" stroke="#3B82F6" stroke-width="2"/>
+  <text x="550" y="95" text-anchor="middle" class="label" fill="#3B82F6">데이터베이스 서버 (Database Server)</text>
+
+  <!-- Server Processes -->
+  <rect x="345" y="110" width="180" height="65" class="box" fill="rgba(107,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="435" y="133" text-anchor="middle" class="label" fill="#6F6BEA">서버 프로세스</text>
+  <text x="435" y="150" text-anchor="middle" class="sublabel">Server Process</text>
+  <text x="435" y="166" text-anchor="middle" class="small">SQL 파싱/실행, 데이터 읽기</text>
+
+  <!-- PGA -->
+  <rect x="345" y="190" width="180" height="45" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="435" y="212" text-anchor="middle" class="label" fill="#F59E0B">PGA</text>
+  <text x="435" y="228" text-anchor="middle" class="small">전용 메모리 (Private)</text>
+
+  <!-- SGA -->
+  <rect x="345" y="260" width="415" height="170" class="box" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="552" y="282" text-anchor="middle" class="label" fill="#3B82F6">SGA (System Global Area) — 공유 메모리</text>
+
+  <!-- SGA Components -->
+  <rect x="360" y="295" width="120" height="40" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="420" y="315" text-anchor="middle" class="sublabel">Shared Pool</text>
+  <text x="420" y="328" text-anchor="middle" class="small">SQL 캐시</text>
+
+  <rect x="495" y="295" width="120" height="40" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="555" y="315" text-anchor="middle" class="sublabel">Buffer Cache</text>
+  <text x="555" y="328" text-anchor="middle" class="small">데이터 블록</text>
+
+  <rect x="630" y="295" width="120" height="40" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="690" y="315" text-anchor="middle" class="sublabel">Redo Log Buffer</text>
+  <text x="690" y="328" text-anchor="middle" class="small">변경 로그</text>
+
+  <rect x="360" y="350" width="120" height="40" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="420" y="370" text-anchor="middle" class="sublabel">Large Pool</text>
+
+  <rect x="495" y="350" width="120" height="40" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="555" y="370" text-anchor="middle" class="sublabel">Java Pool</text>
+
+  <rect x="630" y="350" width="120" height="40" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="690" y="370" text-anchor="middle" class="sublabel">Streams Pool</text>
+
+  <!-- Background Processes -->
+  <rect x="345" y="455" width="415" height="120" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="552" y="478" text-anchor="middle" class="label" fill="#10B981">백그라운드 프로세스 (Background Processes)</text>
+
+  <rect x="360" y="490" width="70" height="35" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="395" y="512" text-anchor="middle" class="code">DBWn</text>
+
+  <rect x="440" y="490" width="70" height="35" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="475" y="512" text-anchor="middle" class="code">LGWR</text>
+
+  <rect x="520" y="490" width="70" height="35" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="555" y="512" text-anchor="middle" class="code">CKPT</text>
+
+  <rect x="600" y="490" width="70" height="35" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="635" y="512" text-anchor="middle" class="code">SMON</text>
+
+  <rect x="360" y="535" width="70" height="35" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="395" y="557" text-anchor="middle" class="code">PMON</text>
+
+  <rect x="440" y="535" width="70" height="35" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="475" y="557" text-anchor="middle" class="code">LREG</text>
+
+  <rect x="520" y="535" width="70" height="35" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="555" y="557" text-anchor="middle" class="code">ARCn</text>
+
+  <rect x="600" y="535" width="70" height="35" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="635" y="557" text-anchor="middle" class="code">MMON</text>
+
+  <!-- Arrows: Server Process to SGA -->
+  <line x1="435" y1="235" x2="435" y2="260" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+  <!-- Arrows: SGA to Background -->
+  <line x1="552" y1="430" x2="552" y2="455" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- Physical Files (outside server box, at bottom) -->
+  <rect x="30" y="510" width="260" height="90" rx="10" ry="10" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="160" y="535" text-anchor="middle" class="label" fill="#F43F5E">물리적 파일 (Physical Files)</text>
+  <text x="160" y="558" text-anchor="middle" class="sublabel">데이터 파일 | Redo Log | Control File</text>
+  <text x="160" y="578" text-anchor="middle" class="small">Data Files | Redo Log Files | Control Files</text>
+
+  <!-- Arrow: Background to Files -->
+  <line x1="345" y1="555" x2="290" y2="555" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <text x="318" y="545" text-anchor="middle" class="small">I/O</text>
+
+  <!-- Connection labels -->
+  <rect x="55" y="272" width="170" height="55" class="box" fill="rgba(255,255,255,0.05)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="140" y="292" text-anchor="middle" class="sublabel">연결 방식 (Connection Mode)</text>
+  <text x="140" y="310" text-anchor="middle" class="code">1:1 Dedicated | N:M Shared</text>
+
+  <!-- Arrow defs -->
+  <defs>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F43F5E"/>
+    </marker>
+  </defs>
+</svg>

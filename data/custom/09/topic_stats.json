@@ -1,0 +1,16 @@
+{
+  "chapter": "09",
+  "chapter_name": "データの移動",
+  "original_topic_ratio": {
+    "外部表": 1,
+    "Data Pump": 2,
+    "SQL*Loader": 1
+  },
+  "custom_topic_counts": {
+    "外部表": 1,
+    "Data Pump": 6,
+    "SQL*Loader": 3
+  },
+  "total_custom": 10,
+  "last_number": "C_09_010"
+}

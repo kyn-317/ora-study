@@ -16,13 +16,26 @@
       "title": "Oracle DBA 툴 전체 개요 (Overview of Database Administration Tools)",
       "content": "Oracle Database를 관리하기 위해 다양한 툴이 제공됩니다. 각 툴은 고유한 용도와 인터페이스를 가지며, DBA는 상황에 따라 적절한 툴을 선택하여 사용합니다.\n\n## 주요 DBA 관리 툴 비교\n\n| 툴 | 인터페이스 | 주요 용도 | 데이터베이스 기동/종료 | 원격 관리 | 스크립트/자동화 |\n|---|---|---|---|---|---|\n| **DBCA** | GUI / CLI | DB 생성·삭제·구성 | 생성 시 자동 기동 | 지원 안 함 | 응답 파일(Response File)로 자동화 |\n| **SQL*Plus** | CLI (텍스트) | SQL 실행, DB 기동/종료, 관리 | STARTUP / SHUTDOWN | SQL*Net 통해 가능 | SQL 스크립트(@) |\n| **EM Cloud Control** | 웹 GUI | 종합 모니터링, 관리, 운영 | 웹에서 기동/종료 가능 | 완전 지원 (웹 기반) | Job 시스템으로 자동화 |\n| **RMAN** | CLI (전용) | 백업/복구 전문 | STARTUP / SHUTDOWN | 지원 | RMAN 스크립트 |\n| **SQL Developer** | GUI (데스크톱) | SQL 실행, 객체 관리, 개발 | 지원 안 함 | JDBC 접속 | 제한적 |\n\n## 툴 선택 기준\n\n```\n데이터베이스 생성/삭제     → DBCA\n일상 관리/SQL 실행        → SQL*Plus\n대규모 환경 모니터링       → Enterprise Manager Cloud Control\n백업 및 복구             → RMAN\nSQL 개발/디버깅          → SQL Developer\n```\n\n각 툴은 상호 보완적이며, 실무에서는 복수의 툴을 조합하여 사용합니다. 예를 들어, DBCA로 데이터베이스를 생성한 후 SQL*Plus로 세부 설정을 수행하고, RMAN으로 백업 정책을 구성하며, EM Cloud Control로 전체 환경을 모니터링하는 것이 일반적인 패턴입니다.",
       "sqlExamplesIds": [],
-      "subsections": []
+      "subsections": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/03/03_01_s01_dba_tools_overview.svg",
+          "caption": "Oracle DBA 관리 툴 전체 개요 - 5대 핵심 도구의 용도, 인터페이스, 기능 비교 및 선택 가이드",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ]
     },
     {
       "sectionId": "s02",
       "title": "DBCA - 데이터베이스 구성 도우미 (Database Configuration Assistant)",
       "content": "DBCA(Database Configuration Assistant)는 Oracle Database를 **생성, 구성, 삭제**하기 위한 전용 유틸리티입니다. GUI 기반의 **대화형 모드(Interactive Mode)**와 명령줄 기반의 **비대화형(사일런트) 모드(Silent Mode)**를 모두 지원합니다.\n\n## DBCA 주요 기능\n\n| 기능 | 설명 |\n|---|---|\n| **데이터베이스 생성** | CDB/Non-CDB 데이터베이스 신규 생성 |\n| **PDB 생성** | CDB 내에 Pluggable Database 추가 생성 |\n| **데이터베이스 삭제** | 기존 데이터베이스 완전 제거 |\n| **데이터베이스 구성 변경** | 기존 DB의 옵션, 초기화 파라미터 변경 |\n| **템플릿 관리** | DB 생성 템플릿 생성/관리 |\n| **PDB 삭제** | CDB에서 PDB 제거 |\n\n## DBCA의 역할 범위 (중요)\n\nDBCA는 **데이터베이스 생성/관리 전용 도구**이며, 리스너 구성이나 네이밍 방법(tnsnames.ora, sqlnet.ora) 설정은 수행하지 않습니다. 리스너 생성 및 네트워크 구성은 **NETCA** 또는 **Net Manager(NETMGR)**의 역할입니다.\n\n| 작업 | DBCA | NETCA/NETMGR |\n|---|---|---|\n| 데이터베이스 생성/삭제 | O | X |\n| PDB 생성/삭제 | O | X |\n| 리스너 생성/구성 | X | O |\n| tnsnames.ora 구성 | X | O |\n| sqlnet.ora 구성 | X | O |\n\nDBCA 대화형 모드의 **\"네트워크 구성\" 단계**(7단계)는 기존에 생성되어 있는 리스너를 **선택**하는 것이지, 새로운 리스너를 생성하는 것이 아닙니다. 따라서 DBCA로 데이터베이스를 생성하기 전에 NETCA를 사용하여 리스너를 먼저 구성해야 합니다.\n\n## DBCA 실행 방법\n\n```bash\n# GUI 모드 (대화형)\n$ORACLE_HOME/bin/dbca\n\n# 사일런트 모드 (비대화형)\ndbca -silent -createDatabase -responseFile /path/to/response.rsp\n```",
-      "sqlExamplesIds": ["sql01", "sql02"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02"
+      ],
       "subsections": [
         {
           "title": "대화형 모드 (Interactive Mode / GUI Mode)",
@@ -51,13 +64,29 @@
             "-createPluggableDatabase, -deletePluggableDatabase로 PDB 관리도 사일런트로 수행 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/03/03_01_s02_dbca_workflow.svg",
+          "caption": "DBCA 대화형 모드 12단계 워크플로우 - 역할 범위 구분 및 템플릿 유형 비교",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s03",
       "title": "SQL*Plus (SQL*Plus Command-Line Interface)",
       "content": "SQL*Plus는 Oracle Database와 상호 작용하기 위한 **명령줄 인터페이스(CLI)** 도구로, Oracle DBA가 가장 빈번하게 사용하는 핵심 관리 도구입니다. SQL, PL/SQL 실행은 물론 데이터베이스 **기동(STARTUP)** 및 **종료(SHUTDOWN)** 등 인스턴스 관리 기능을 제공합니다.\n\n## SQL*Plus의 주요 기능 분류\n\n| 기능 분류 | 설명 |\n|---|---|\n| **SQL 실행** | DML, DDL, DCL 등 모든 SQL 문 실행 |\n| **PL/SQL 실행** | 익명 블록, 프로시저, 함수 호출 |\n| **인스턴스 관리** | STARTUP, SHUTDOWN 명령 |\n| **포맷팅 및 리포팅** | COLUMN, SET LINESIZE/PAGESIZE 등 출력 형식 제어 |\n| **스크립트 실행** | @, @@, START 명령으로 SQL 스크립트 파일 실행 |\n| **세션 관리** | ALTER SESSION, SET/SHOW 명령 |\n| **CDB/PDB 관리** | ALTER SESSION SET CONTAINER로 PDB 전환 |",
-      "sqlExamplesIds": ["sql03", "sql04", "sql05", "sql06", "sql07"],
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04",
+        "sql05",
+        "sql06",
+        "sql07"
+      ],
       "subsections": [
         {
           "title": "SQL*Plus 접속 방법 (Connection Methods)",
@@ -96,13 +125,25 @@
             "CDB$ROOT 접속 시 V$ 뷰는 CDB 전체 범위, PDB 접속 시 해당 PDB만 조회"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/03/03_01_s03_sqlplus_startup_shutdown.svg",
+          "caption": "SQL*Plus STARTUP 3단계 상태 전이도 및 SHUTDOWN 4모드 비교표",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "Enterprise Manager Cloud Control (EM Cloud Control)",
       "content": "Oracle Enterprise Manager Cloud Control(EM CC)은 Oracle 환경 전체를 **웹 기반 GUI**로 모니터링하고 관리하는 **통합 관리 플랫폼**입니다. 단일 데이터베이스부터 수백 개의 데이터베이스, 미들웨어, 호스트 등을 중앙 집중식으로 관리할 수 있습니다.\n\n## EM Cloud Control 주요 기능\n\n| 기능 | 설명 |\n|---|---|\n| **모니터링** | 성능 메트릭, 가용성, 알림 관리 |\n| **데이터베이스 관리** | 기동/종료, 초기화 파라미터, 스토리지, 사용자 관리 |\n| **성능 분석** | AWR, ADDM, ASH 기반 성능 진단 |\n| **백업/복구** | RMAN 기반 백업 스케줄링 및 관리 |\n| **패치 관리** | Oracle 패치 자동화 |\n| **프로비저닝** | 데이터베이스 자동 배포 |\n| **컴플라이언스** | 보안 정책 준수 여부 모니터링 |",
-      "sqlExamplesIds": ["sql08"],
+      "sqlExamplesIds": [
+        "sql08"
+      ],
       "subsections": [
         {
           "title": "EM Cloud Control 아키텍처 (Architecture)",
@@ -139,13 +180,27 @@
             "리스너 관리 시에도 Host Credentials(OS 인증 정보)가 필요"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/03/03_01_s04_em_cloud_control_architecture.svg",
+          "caption": "Enterprise Manager Cloud Control 3계층 아키텍처 - OMS, Agent, Repository DB",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s05",
       "title": "RMAN - Recovery Manager (복구 관리자)",
       "content": "RMAN(Recovery Manager)은 Oracle Database의 **백업 및 복구** 작업을 전문적으로 수행하는 **명령줄 유틸리티**입니다. Oracle이 공식적으로 권장하는 백업/복구 도구이며, SQL*Plus와 유사한 명령줄 인터페이스를 제공합니다.\n\n## RMAN의 주요 기능\n\n| 기능 | 설명 |\n|---|---|\n| **데이터베이스 백업** | 전체/증분/아카이브 로그 백업 |\n| **데이터베이스 복구** | 완전 복구(Complete Recovery) 및 불완전 복구(Point-in-Time Recovery) |\n| **데이터베이스 기동/종료** | SQL*Plus와 동일한 STARTUP/SHUTDOWN 기능 |\n| **블록 미디어 복구** | 손상된 개별 블록 복구 (Block-Level Media Recovery) |\n| **백업 검증** | VALIDATE로 백업 파일 무결성 확인 |\n| **카탈로그 관리** | 백업 메타데이터 관리 (Recovery Catalog 또는 Control File) |\n| **중복 데이터베이스 생성** | DUPLICATE 명령으로 데이터베이스 복제 |",
-      "sqlExamplesIds": ["sql09", "sql10", "sql11"],
+      "sqlExamplesIds": [
+        "sql09",
+        "sql10",
+        "sql11"
+      ],
       "subsections": [
         {
           "title": "RMAN 접속 및 기동/종료 (Connection and Startup/Shutdown)",
@@ -171,13 +226,25 @@
             "Oracle 네이티브 압축 및 투명 암호화로 백업 크기 절감 및 보안 강화"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/03/03_01_s05_rman_backup_recovery.svg",
+          "caption": "RMAN 접속 구조 및 백업/복구 주요 명령 흐름",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s06",
       "title": "SQL Developer (Oracle SQL Developer)",
       "content": "Oracle SQL Developer는 Oracle Database를 관리하고 개발하기 위한 **무료 GUI(그래픽 사용자 인터페이스) 도구**입니다. Java 기반의 데스크톱 애플리케이션으로, SQL 및 PL/SQL 개발, 데이터베이스 객체 관리, 데이터 모델링 등 폭넓은 기능을 제공합니다.\n\n## SQL Developer 주요 특징\n\n| 특징 | 설명 |\n|---|---|\n| **무료** | Oracle Technology Network에서 무료 다운로드 |\n| **크로스 플랫폼** | Windows, Linux, macOS 지원 (Java 기반) |\n| **JDBC 접속** | JDBC Thin Driver 사용 (Oracle Client 설치 불필요) |\n| **다중 DB 지원** | Oracle 외 MySQL, PostgreSQL, SQL Server 등 접속 가능 |\n| **확장 가능** | 플러그인(Extension)으로 기능 확장 |",
-      "sqlExamplesIds": ["sql12"],
+      "sqlExamplesIds": [
+        "sql12"
+      ],
       "subsections": [
         {
           "title": "SQL Developer 데이터베이스 접속 (Database Connection)",

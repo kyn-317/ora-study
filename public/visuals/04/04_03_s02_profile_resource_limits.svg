@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .imp { font-size: 12px; fill: #F43F5E; font-weight: 600; }
+  </style>
+
+  <text x="400" y="32" class="title" text-anchor="middle">프로파일을 통한 자원 제한 (Resource Limits via PROFILE)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">자원 제한 + 비밀번호 관리를 하나의 프로파일로 통합 관리</text>
+
+  <!-- Profile Structure -->
+  <rect x="250" y="70" width="300" height="45" class="box" fill="#6F6BEA" stroke="none"/>
+  <text x="400" y="88" class="label" text-anchor="middle" fill="#FFF">PROFILE (프로파일)</text>
+  <text x="400" y="105" class="small" text-anchor="middle" fill="#E2E8F0">각 사용자는 반드시 하나의 프로파일 할당</text>
+
+  <!-- Two branches -->
+  <line x1="330" y1="115" x2="200" y2="145" stroke="#3B82F6" stroke-width="1.5"/>
+  <line x1="470" y1="115" x2="600" y2="145" stroke="#10B981" stroke-width="1.5"/>
+
+  <!-- Resource Limits -->
+  <rect x="30" y="145" width="360" height="280" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="30" y="145" width="360" height="28" rx="8" ry="8" fill="#3B82F6"/>
+  <text x="210" y="164" class="label" text-anchor="middle" fill="#FFF">자원 제한 (Resource Limits)</text>
+
+  <rect x="50" y="185" width="320" height="25" class="box" fill="#F43F5E" opacity="0.15" stroke="#F43F5E" stroke-width="1"/>
+  <text x="210" y="202" class="imp" text-anchor="middle">RESOURCE_LIMIT = TRUE 필수!</text>
+
+  <text x="50" y="230" class="sublabel">세션 레벨 (초과 시 세션 종료):</text>
+  <text x="50" y="248" class="code">SESSIONS_PER_USER</text>
+  <text x="220" y="248" class="small">동시 세션 수</text>
+  <text x="50" y="266" class="code">CPU_PER_SESSION</text>
+  <text x="220" y="266" class="small">세션 CPU (1/100초)</text>
+  <text x="50" y="284" class="code">CONNECT_TIME</text>
+  <text x="220" y="284" class="small">최대 연결 시간 (분)</text>
+  <text x="50" y="302" class="code">IDLE_TIME</text>
+  <text x="220" y="302" class="small">최대 유휴 시간 (분)</text>
+  <text x="50" y="320" class="code">LOGICAL_READS_PER_SESSION</text>
+  <text x="270" y="320" class="small">논리적 읽기</text>
+
+  <text x="50" y="348" class="sublabel">호출 레벨 (초과 시 명령문만 롤백):</text>
+  <text x="50" y="366" class="code">CPU_PER_CALL</text>
+  <text x="220" y="366" class="small">호출당 CPU (1/100초)</text>
+  <text x="50" y="384" class="code">LOGICAL_READS_PER_CALL</text>
+  <text x="270" y="384" class="small">호출당 읽기</text>
+
+  <text x="50" y="412" class="code">PRIVATE_SGA</text>
+  <text x="170" y="412" class="small">Shared Server에서만 적용</text>
+
+  <!-- Password Management -->
+  <rect x="410" y="145" width="360" height="280" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="410" y="145" width="360" height="28" rx="8" ry="8" fill="#10B981"/>
+  <text x="590" y="164" class="label" text-anchor="middle" fill="#FFF">비밀번호 관리 (Password Mgmt)</text>
+
+  <rect x="430" y="185" width="320" height="25" class="box" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="1"/>
+  <text x="590" y="202" class="sublabel" text-anchor="middle" fill="#10B981">RESOURCE_LIMIT 무관, 항상 적용!</text>
+
+  <text x="430" y="230" class="code">PASSWORD_LIFE_TIME</text>
+  <text x="610" y="230" class="small">유효 기간 180일</text>
+  <text x="430" y="248" class="code">PASSWORD_GRACE_TIME</text>
+  <text x="620" y="248" class="small">유예 기간 7일</text>
+  <text x="430" y="266" class="code">FAILED_LOGIN_ATTEMPTS</text>
+  <text x="625" y="266" class="small">실패 허용 10회</text>
+  <text x="430" y="284" class="code">PASSWORD_LOCK_TIME</text>
+  <text x="610" y="284" class="small">잠금 기간 1일</text>
+  <text x="430" y="302" class="code">PASSWORD_REUSE_TIME</text>
+  <text x="620" y="302" class="small">재사용 금지 기간</text>
+  <text x="430" y="320" class="code">PASSWORD_REUSE_MAX</text>
+  <text x="620" y="320" class="small">재사용 전 변경 횟수</text>
+  <text x="430" y="338" class="code">INACTIVE_ACCOUNT_TIME</text>
+  <text x="630" y="338" class="small">비활성 잠금</text>
+  <text x="430" y="356" class="code">PASSWORD_VERIFY_FUNCTION</text>
+  <text x="640" y="356" class="small">검증 함수</text>
+
+  <text x="430" y="385" class="sublabel">REUSE_TIME + REUSE_MAX 동시 설정:</text>
+  <text x="430" y="402" class="small">양쪽 조건 모두 충족 필요</text>
+
+  <!-- Bottom notes -->
+  <rect x="30" y="440" width="740" height="50" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="50" y="458" class="sublabel">DEFAULT 프로파일: 모든 파라미터 UNLIMITED | DROP PROFILE CASCADE: 사용자를 DEFAULT로 전환 후 삭제</text>
+  <text x="50" y="478" class="code">DBA_PROFILES</text>
+  <text x="155" y="478" class="small">프로파일 조회</text>
+  <text x="255" y="478" class="code">ALTER PROFILE</text>
+  <text x="370" y="478" class="small">변경 시 다음 세션부터 적용</text>
+  <text x="520" y="478" class="code">V$RESOURCE_LIMIT</text>
+  <text x="650" y="478" class="small">자원 사용 현황</text>
+</svg>

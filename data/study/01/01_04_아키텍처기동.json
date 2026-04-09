@@ -15,7 +15,17 @@
       "title": "인스턴스와 데이터베이스의 관계 (Instance vs Database Overview)",
       "sqlExamplesIds": ["sql01"],
       "content": "Oracle Database 시스템은 **인스턴스(Instance)**와 **데이터베이스(Database)**라는 두 가지 핵심 구성요소로 이루어져 있으며, 기동(Startup)과 종료(Shutdown)를 이해하려면 이 둘의 관계를 명확히 구분해야 합니다.\n\n- **인스턴스(Instance)**: SGA(System Global Area) 메모리 구조 + 백그라운드 프로세스의 조합\n- **데이터베이스(Database)**: 디스크에 저장된 물리적 파일의 집합 (데이터 파일, 컨트롤 파일, Redo Log 파일 등)\n\n인스턴스는 데이터베이스에 대한 **접근 경로(Access Path)**이며, 사용자가 데이터에 접근하기 위해서는 반드시 인스턴스가 기동되어 데이터베이스와 연결되어야 합니다.\n\n| 구분 | 인스턴스 (Instance) | 데이터베이스 (Database) |\n|---|---|---|\n| **구성** | 메모리(SGA) + 프로세스 | 물리적 파일 (디스크) |\n| **생명주기** | STARTUP 시 생성, SHUTDOWN 시 소멸 | 영구적으로 존재 |\n| **관계** | 보통 1:1 (RAC에서는 N:1) | 하나 이상의 인스턴스에 의해 접근 가능 |\n| **식별** | `ORACLE_SID` 환경 변수 | 컨트롤 파일에 기록된 DB 이름 |\n\n### RAC(Real Application Clusters) 환경에서의 관계\n\n단일 인스턴스 환경에서는 인스턴스와 데이터베이스가 **1:1** 관계이지만, **RAC** 환경에서는 하나의 데이터베이스에 **여러 인스턴스**가 동시에 접근합니다(N:1 관계). 각 인스턴스는 고유한 SGA와 백그라운드 프로세스를 가지며, 공유 스토리지(ASM 등)를 통해 동일한 데이터 파일에 접근합니다.",
-      "subsections": []
+      "subsections": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/01/01_04_s01_instance_vs_database.svg",
+          "caption": "인스턴스(메모리+프로세스)와 데이터베이스(물리적 파일)의 관계 — 단일 인스턴스(1:1) vs RAC(N:1)",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ]
     },
     {
       "sectionId": "s02",
@@ -83,6 +93,16 @@
             "데이터 파일 누락 시 ORA-01157, 복구 필요 시 ORA-01113 발생"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/01/01_04_s03_startup_stages.svg",
+          "caption": "Oracle 인스턴스 기동 3단계: NOMOUNT(SGA+프로세스) → MOUNT(컨트롤파일) → OPEN(데이터파일+Redo)",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -136,6 +156,16 @@
             "SHUTDOWN IMMEDIATE가 너무 오래 걸리거나 인스턴스 Hang 상태 시 사용"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/01/01_04_s04_shutdown_modes.svg",
+          "caption": "4가지 Shutdown 모드 비교 — NORMAL/TRANSACTIONAL/IMMEDIATE/ABORT의 동작 차이와 안전도",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -167,6 +197,16 @@
             "DBA_PDB_SAVED_STATES 뷰로 저장된 상태 확인 가능",
             "ALTER PLUGGABLE DATABASE ALL SAVE STATE로 모든 PDB를 한 번에 설정 가능"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/01/01_04_s05_cdb_pdb_startup.svg",
+          "caption": "CDB/PDB 기동 관계 — CDB STARTUP 후 PDB는 MOUNTED 상태이며 별도 OPEN과 SAVE STATE 설정 필요",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     },
@@ -220,6 +260,16 @@
             "모든 PDB의 Redo 데이터가 동일한 온라인 Redo 로그에 기록됨"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/01/01_04_s07_cdb_shared_local.svg",
+          "caption": "CDB 공유 자원(SGA, 프로세스, 제어파일, Redo Log)과 PDB 로컬 자원(데이터 파일, 임시 파일) 구분",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -239,6 +289,16 @@
             "Oracle Clusterware가 클러스터 멤버십, 장애 감지, 자동 페일오버를 관리",
             "RAC 노드 수에 제한 없음 — 4노드 제한은 잘못된 정보"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "svg",
+          "src": "/visuals/01/01_04_s08_rac_architecture.svg",
+          "caption": "RAC 아키텍처 — N개 인스턴스가 인터커넥트(Cache Fusion)를 통해 1개 공유 스토리지의 데이터베이스에 접근",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     },

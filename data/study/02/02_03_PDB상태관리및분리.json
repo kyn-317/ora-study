@@ -15,14 +15,31 @@
       "sectionId": "s01",
       "title": "PDB 상태 관리 개요 (PDB State Management Overview)",
       "content": "PDB(Pluggable Database)는 CDB(Container Database) 내에서 독립적으로 **오픈 모드(Open Mode)**를 가지며, CDB의 시작/종료와는 별도로 각 PDB의 상태를 개별적으로 관리할 수 있습니다.\n\nPDB의 라이프사이클에서 상태 관리와 분리(Unplug)는 핵심적인 운영 작업입니다.\n\n### PDB 상태 관리 핵심 구성요소\n\n| 구성요소 | 설명 |\n|---|---|\n| **PDB 오픈 모드** | READ WRITE, READ ONLY, MOUNTED 세 가지 기본 모드 |\n| **SAVE STATE** | CDB 재시작 시 PDB를 이전 오픈 모드로 자동 복원 |\n| **DISCARD STATE** | 저장된 PDB 상태 정보를 삭제하여 수동 오픈으로 전환 |\n| **Unplug** | PDB를 CDB에서 분리하여 이동 가능한 형태로 변환 |\n| **Plug In** | 분리된 PDB를 다른 CDB에 연결 |\n| **DROP** | PDB를 완전히 삭제 |\n\n### PDB 상태 전환 흐름\n\n```\n                    ┌─────────────┐\n         ┌─────────│  MOUNTED     │─────────┐\n         │         └──────┬──────┘         │\n         │                │                │\n    CLOSE │          OPEN  │          OPEN  │ READ ONLY\n         │                │                │\n         │         ┌──────▼──────┐         │\n         │         │ READ WRITE  │◄────────┘\n         │         └──────┬──────┘\n         │                │\n         │         ┌──────▼──────┐\n         └────────►│ READ ONLY   │\n                   └─────────────┘\n```\n\n### CDB 시작 시 PDB 기본 동작\n\nCDB가 시작(STARTUP)되면, **CDB$ROOT**는 OPEN 상태가 되지만 모든 PDB는 기본적으로 **MOUNTED** 상태로 유지됩니다. PDB를 사용하려면 수동으로 오픈하거나, **SAVE STATE** 기능 또는 **트리거(Trigger)**를 사용하여 자동 오픈을 구성해야 합니다.\n\n| 자동 오픈 방법 | 설명 | 권장 여부 |\n|---|---|---|\n| **SAVE STATE** | Oracle 제공 공식 메커니즘, PDB별 상태 저장 | 권장 |\n| **AFTER STARTUP 트리거** | CDB 레벨 트리거로 모든 PDB 일괄 오픈 | 대안 |\n| **수동 오픈** | DBA가 직접 ALTER PLUGGABLE DATABASE 실행 | 비권장 (운영) |",
-      "sqlExamplesIds": ["sql01", "sql02"],
-      "subsections": []
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02"
+      ],
+      "subsections": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/02/02_03_s01_pdb_state_transition.svg",
+          "caption": "PDB 오픈 모드 상태 전이도 - MOUNTED, READ WRITE, READ ONLY 간 전환 및 옵션",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ]
     },
     {
       "sectionId": "s02",
       "title": "PDB 오픈 모드 (PDB Open Modes)",
       "content": "PDB는 세 가지 기본 오픈 모드를 가지며, 각 모드에서 허용되는 작업이 다릅니다. 오픈 모드는 `V$PDBS` 뷰의 `OPEN_MODE` 컬럼으로 확인할 수 있습니다.",
-      "sqlExamplesIds": ["sql01", "sql02", "sql03"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02",
+        "sql03"
+      ],
       "subsections": [
         {
           "title": "READ WRITE 모드 (읽기/쓰기 모드)",
@@ -65,7 +82,10 @@
       "sectionId": "s03",
       "title": "SAVE STATE / DISCARD STATE 메커니즘 (PDB State Preservation)",
       "content": "CDB를 재시작(SHUTDOWN → STARTUP)하면, 모든 PDB는 기본적으로 **MOUNTED** 상태로 돌아갑니다. **SAVE STATE**는 PDB의 현재 오픈 모드를 저장하여, CDB 재시작 후 자동으로 해당 모드로 복원하는 메커니즘입니다.",
-      "sqlExamplesIds": ["sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql04",
+        "sql05"
+      ],
       "subsections": [
         {
           "title": "SAVE STATE의 동작 원리 (How SAVE STATE Works)",
@@ -100,13 +120,27 @@
             "Oracle은 SAVE STATE를 공식 권장 방법으로 제시하며, 트리거는 대안으로 간주"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/02/02_03_s03_save_discard_state.svg",
+          "caption": "SAVE STATE / DISCARD STATE 메커니즘 - CDB 재시작 시 자동 오픈 설정 비교",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "PDB Unplug (PDB 분리)",
       "content": "PDB Unplug는 PDB를 CDB에서 **분리(Detach)**하여 이동 가능한 형태로 만드는 작업입니다. Unplug된 PDB는 다른 CDB에 Plug In할 수 있어, PDB 이동(Migration) 및 배포의 핵심 메커니즘입니다.",
-      "sqlExamplesIds": ["sql06", "sql07", "sql08"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07",
+        "sql08"
+      ],
       "subsections": [
         {
           "title": "Unplug 프로세스 상세 (Unplug Process Detail)",
@@ -132,13 +166,27 @@
             "동일 서버 내 작업은 XML, 원격 서버 이동/배포는 .pdb 아카이브가 적합"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/02/02_03_s04_unplug_process.svg",
+          "caption": "PDB Unplug/Plug In 프로세스 - XML vs PDB 아카이브 형식 비교 및 전체 프로세스",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s05",
       "title": "PDB Plug In (PDB 연결)",
       "content": "PDB Plug In은 Unplug된 PDB 또는 Non-CDB를 CDB에 **연결(Attach)**하는 작업입니다. CREATE PLUGGABLE DATABASE ... USING 구문을 사용하며, Plug In 전에 호환성 검사를 수행해야 합니다.",
-      "sqlExamplesIds": ["sql09", "sql10", "sql11"],
+      "sqlExamplesIds": [
+        "sql09",
+        "sql10",
+        "sql11"
+      ],
       "subsections": [
         {
           "title": "호환성 검사 (Compatibility Check with DBMS_PDB)",
@@ -170,7 +218,10 @@
       "sectionId": "s06",
       "title": "PDB 삭제 (DROP PLUGGABLE DATABASE)",
       "content": "PDB 삭제는 CDB에서 PDB를 **완전히 제거**하는 작업입니다. DROP PLUGGABLE DATABASE 구문을 사용하며, 데이터 파일의 처리 방식을 선택할 수 있습니다.",
-      "sqlExamplesIds": ["sql12", "sql13"],
+      "sqlExamplesIds": [
+        "sql12",
+        "sql13"
+      ],
       "subsections": [
         {
           "title": "DROP PLUGGABLE DATABASE 상세 (DROP PDB Detail)",
@@ -184,13 +235,26 @@
             "Snapshot Copy PDB 삭제 시 원본 PDB와의 참조 관계에 주의 필요"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/02/02_03_s06_drop_pdb.svg",
+          "caption": "PDB 삭제 - INCLUDING DATAFILES vs KEEP DATAFILES 비교 및 Unplug-DROP-Plug In 패턴",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s07",
       "title": "관련 뷰 및 모니터링 (Related Views & Monitoring)",
       "content": "PDB 상태 관리 및 분리 작업과 관련된 주요 딕셔너리 뷰 및 동적 성능 뷰를 정리합니다.",
-      "sqlExamplesIds": ["sql14", "sql15"],
+      "sqlExamplesIds": [
+        "sql14",
+        "sql15"
+      ],
       "subsections": [
         {
           "title": "PDB 관련 핵심 뷰 (Core PDB Views)",

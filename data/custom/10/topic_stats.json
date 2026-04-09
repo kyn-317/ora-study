@@ -1,0 +1,18 @@
+{
+  "chapter": "10",
+  "chapter_name": "PDBの作成および管理の表示",
+  "original_topic_ratio": {
+    "PDB作成と削除": 1,
+    "PDBの切断とプラグイン": 2,
+    "PDBクローニング": 1,
+    "PDBの状態管理とパラメータ": 1
+  },
+  "custom_topic_counts": {
+    "PDB作成と削除": 2,
+    "PDBの切断とプラグイン": 1,
+    "PDBクローニング": 3,
+    "PDBの状態管理とパラメータ": 4
+  },
+  "total_custom": 10,
+  "last_number": "C_10_010"
+}

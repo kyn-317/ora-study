@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" class="title" text-anchor="middle">초기화 파라미터 분류 체계</text>
+  <text x="400" y="50" class="subtitle" text-anchor="middle">Initialization Parameter Classification</text>
+
+  <!-- Classification 1: Dynamic vs Static -->
+  <rect x="30" y="70" width="360" height="470" class="box" fill="none" stroke="#6F6BEA" stroke-width="1.5"/>
+  <rect x="30" y="70" width="360" height="32" rx="8" ry="0" fill="#6F6BEA" fill-opacity="0.2"/>
+  <text x="210" y="91" class="label" text-anchor="middle" fill="#6F6BEA">변경 가능성 기준 (Modifiability)</text>
+
+  <!-- Dynamic -->
+  <rect x="50" y="118" width="320" height="230" class="box" fill="#10B981" fill-opacity="0.05" stroke="#10B981" stroke-width="1"/>
+  <text x="70" y="140" class="label" fill="#10B981">동적 파라미터 (Dynamic)</text>
+  <text x="70" y="158" class="small">실행 중 ALTER SYSTEM / ALTER SESSION으로 변경 가능</text>
+
+  <!-- IMMEDIATE -->
+  <rect x="70" y="170" width="135" height="80" class="box" fill="none" stroke="#3B82F6" stroke-width="1"/>
+  <text x="137" y="190" class="sublabel" text-anchor="middle" fill="#3B82F6">IMMEDIATE</text>
+  <text x="137" y="208" class="small" text-anchor="middle">즉시 적용</text>
+  <text x="137" y="224" class="small" text-anchor="middle">모든 세션에</text>
+  <text x="137" y="240" class="small" text-anchor="middle">바로 반영</text>
+
+  <!-- DEFERRED -->
+  <rect x="215" y="170" width="135" height="80" class="box" fill="none" stroke="#F59E0B" stroke-width="1"/>
+  <text x="282" y="190" class="sublabel" text-anchor="middle" fill="#F59E0B">DEFERRED</text>
+  <text x="282" y="208" class="small" text-anchor="middle">지연 적용</text>
+  <text x="282" y="224" class="small" text-anchor="middle">새 세션부터</text>
+  <text x="282" y="240" class="small" text-anchor="middle">적용됨</text>
+
+  <!-- Session level -->
+  <rect x="70" y="262" width="280" height="70" class="box" fill="none" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4"/>
+  <text x="210" y="282" class="sublabel" text-anchor="middle">세션 레벨 변경 가능 여부</text>
+  <text x="210" y="302" class="small" text-anchor="middle">ISSES_MODIFIABLE = TRUE 인 파라미터만</text>
+  <text x="210" y="318" class="small" text-anchor="middle">ALTER SESSION SET ... 으로 변경 가능</text>
+
+  <!-- V$PARAMETER reference -->
+  <text x="210" y="352" class="code" text-anchor="middle">V$PARAMETER.ISSYS_MODIFIABLE</text>
+
+  <!-- Static -->
+  <rect x="50" y="370" width="320" height="150" class="box" fill="#F43F5E" fill-opacity="0.05" stroke="#F43F5E" stroke-width="1"/>
+  <text x="70" y="392" class="label" fill="#F43F5E">정적 파라미터 (Static)</text>
+  <text x="70" y="410" class="small">인스턴스 기동 시에만 설정. ISSYS_MODIFIABLE = FALSE</text>
+
+  <text x="70" y="435" class="sublabel">대표 파라미터:</text>
+  <text x="70" y="455" class="code">DB_BLOCK_SIZE  DB_NAME  COMPATIBLE</text>
+  <text x="70" y="475" class="code">CONTROL_FILES  PROCESSES  DB_FILES</text>
+
+  <text x="70" y="500" class="small">변경: SCOPE=SPFILE + 인스턴스 재기동 필요</text>
+
+  <!-- Classification 2: Basic vs Advanced vs Hidden -->
+  <rect x="410" y="70" width="360" height="470" class="box" fill="none" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="410" y="70" width="360" height="32" rx="8" ry="0" fill="#3B82F6" fill-opacity="0.2"/>
+  <text x="590" y="91" class="label" text-anchor="middle" fill="#3B82F6">관리 수준 기준 (Management Level)</text>
+
+  <!-- Basic -->
+  <rect x="430" y="118" width="320" height="150" class="box" fill="#10B981" fill-opacity="0.05" stroke="#10B981" stroke-width="1"/>
+  <text x="450" y="140" class="label" fill="#10B981">기본 파라미터 (Basic) ~30개</text>
+  <text x="450" y="158" class="small">DBA가 반드시 검토해야 하는 핵심 파라미터</text>
+  <text x="450" y="180" class="code">DB_NAME  DB_BLOCK_SIZE  MEMORY_TARGET</text>
+  <text x="450" y="198" class="code">SGA_TARGET  PGA_AGGREGATE_TARGET</text>
+  <text x="450" y="216" class="code">PROCESSES  OPEN_CURSORS  COMPATIBLE</text>
+  <text x="450" y="240" class="small">ISBASIC = TRUE</text>
+  <text x="450" y="256" class="small">이것만 설정하면 정상 운영 가능</text>
+
+  <!-- Advanced -->
+  <rect x="430" y="282" width="320" height="120" class="box" fill="#3B82F6" fill-opacity="0.05" stroke="#3B82F6" stroke-width="1"/>
+  <text x="450" y="304" class="label" fill="#3B82F6">고급 파라미터 (Advanced) 수백 개</text>
+  <text x="450" y="322" class="small">대부분 기본값이 최적, 특수 상황에서만 변경</text>
+  <text x="450" y="344" class="code">DB_CACHE_SIZE  SHARED_POOL_SIZE</text>
+  <text x="450" y="362" class="code">OPTIMIZER_MODE  CURSOR_SHARING</text>
+  <text x="450" y="384" class="small">ISBASIC = FALSE</text>
+
+  <!-- Hidden -->
+  <rect x="430" y="416" width="320" height="120" class="box" fill="#F43F5E" fill-opacity="0.05" stroke="#F43F5E" stroke-width="1"/>
+  <text x="450" y="438" class="label" fill="#F43F5E">숨겨진 파라미터 (Hidden/Underscore)</text>
+  <text x="450" y="456" class="small">_ (언더스코어)로 시작, 공식 문서 미기재</text>
+  <text x="450" y="478" class="code">_optimizer_use_feedback</text>
+  <text x="450" y="496" class="small">X$KSPPI / X$KSPPCV 로 조회</text>
+  <text x="450" y="516" class="small" fill="#F43F5E">Oracle Support 지시 없이 변경 금지!</text>
+
+  <!-- Bottom note -->
+  <text x="400" y="565" class="small" text-anchor="middle">V$PARAMETER 뷰의 ISSYS_MODIFIABLE, ISSES_MODIFIABLE, ISBASIC, ISPDB_MODIFIABLE 컬럼으로 분류 가능</text>
+</svg>

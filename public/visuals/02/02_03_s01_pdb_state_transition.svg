@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">PDB 오픈 모드 상태 전이도</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">PDB Open Mode State Transition Diagram</text>
+
+  <!-- MOUNTED State -->
+  <rect x="270" y="70" width="260" height="80" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="2"/>
+  <text x="400" y="98" text-anchor="middle" class="label" fill="#F43F5E">MOUNTED (CLOSE)</text>
+  <text x="400" y="118" text-anchor="middle" class="small">사용자 접속/쿼리 불가</text>
+  <text x="400" y="135" text-anchor="middle" class="small">CDB 시작 후 기본 상태 | Unplug/DROP 가능</text>
+
+  <!-- READ WRITE State -->
+  <rect x="60" y="230" width="280" height="100" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <text x="200" y="258" text-anchor="middle" class="label" fill="#10B981">READ WRITE</text>
+  <text x="200" y="278" text-anchor="middle" class="small">운영 모드 — 모든 DML/DDL 허용</text>
+  <text x="200" y="295" text-anchor="middle" class="small">Redo Log 생성 | 복구 가능</text>
+  <text x="200" y="315" text-anchor="middle" class="code">ALTER PDB pdb OPEN [READ WRITE];</text>
+
+  <!-- READ ONLY State -->
+  <rect x="460" y="230" width="280" height="100" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <text x="600" y="258" text-anchor="middle" class="label" fill="#3B82F6">READ ONLY</text>
+  <text x="600" y="278" text-anchor="middle" class="small">읽기 전용 — DML 차단</text>
+  <text x="600" y="295" text-anchor="middle" class="small">보고서 전용, Standby, 데이터 보호</text>
+  <text x="600" y="315" text-anchor="middle" class="code">ALTER PDB pdb OPEN READ ONLY;</text>
+
+  <!-- MOUNTED → READ WRITE -->
+  <path d="M 310 150 C 260 180, 220 200, 200 230" fill="none" stroke="#10B981" stroke-width="2"/>
+  <polygon points="195,226 200,236 207,225" fill="#10B981"/>
+  <text x="220" y="185" class="sublabel" fill="#10B981">OPEN</text>
+
+  <!-- MOUNTED → READ ONLY -->
+  <path d="M 490 150 C 540 180, 580 200, 600 230" fill="none" stroke="#3B82F6" stroke-width="2"/>
+  <polygon points="595,225 600,236 607,226" fill="#3B82F6"/>
+  <text x="560" y="185" class="sublabel" fill="#3B82F6">OPEN READ ONLY</text>
+
+  <!-- READ WRITE → MOUNTED (CLOSE) -->
+  <path d="M 160 230 C 160 190, 280 160, 300 150" fill="none" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <polygon points="296,155 307,148 300,157" fill="#F43F5E"/>
+  <text x="170" y="195" class="sublabel" fill="#F43F5E">CLOSE</text>
+
+  <!-- READ ONLY → MOUNTED (CLOSE) -->
+  <path d="M 640 230 C 640 190, 520 160, 500 150" fill="none" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <polygon points="503,157 493,148 497,158" fill="#F43F5E"/>
+  <text x="600" y="195" class="sublabel" fill="#F43F5E">CLOSE</text>
+
+  <!-- READ WRITE ↔ READ ONLY (FORCE) -->
+  <line x1="340" y1="275" x2="460" y2="275" stroke="#F59E0B" stroke-width="1.5"/>
+  <polygon points="458,270 468,275 458,280" fill="#F59E0B"/>
+  <polygon points="342,270 332,275 342,280" fill="#F59E0B"/>
+  <text x="400" y="268" text-anchor="middle" class="sublabel" fill="#F59E0B">FORCE 옵션</text>
+
+  <!-- Options -->
+  <rect x="40" y="360" width="340" height="120" class="box" fill="#2A2B3D" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="210" y="382" text-anchor="middle" class="label" fill="#F59E0B">주요 옵션</text>
+  <text x="55" y="402" class="small" fill="#F43F5E">RESTRICTED</text>
+  <text x="160" y="402" class="small">RESTRICTED SESSION 권한 사용자만 접속</text>
+  <text x="55" y="420" class="small" fill="#F59E0B">FORCE</text>
+  <text x="160" y="420" class="small">CLOSE 없이 직접 모드 전환</text>
+  <text x="55" y="438" class="small" fill="#3B82F6">IMMEDIATE</text>
+  <text x="160" y="438" class="small">CLOSE 시 활성 세션 강제 종료</text>
+  <text x="55" y="456" class="small" fill="#10B981">ALL</text>
+  <text x="160" y="456" class="small">모든 PDB 일괄 OPEN/CLOSE</text>
+  <text x="55" y="474" class="small" fill="#6F6BEA">INSTANCES=ALL</text>
+  <text x="200" y="474" class="small">RAC 전체 인스턴스에서 OPEN/CLOSE</text>
+
+  <!-- Auto Open Methods -->
+  <rect x="400" y="360" width="360" height="120" class="box" fill="#2A2B3D" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="580" y="382" text-anchor="middle" class="label" fill="#10B981">CDB 재시작 시 자동 오픈 방법</text>
+
+  <rect x="415" y="395" width="160" height="30" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="1"/>
+  <text x="495" y="415" text-anchor="middle" class="sublabel" fill="#10B981">SAVE STATE (권장)</text>
+
+  <rect x="585" y="395" width="160" height="30" rx="4" ry="4" fill="#F59E0B" opacity="0.12" stroke="#F59E0B" stroke-width="1"/>
+  <text x="665" y="415" text-anchor="middle" class="sublabel" fill="#F59E0B">STARTUP 트리거 (대안)</text>
+
+  <text x="415" y="445" class="small">PDB별 개별 모드 저장</text>
+  <text x="585" y="445" class="small">전체 PDB 일괄 (개별 제어 어려움)</text>
+
+  <text x="580" y="472" text-anchor="middle" class="code">ALTER PDB ALL SAVE STATE;  -- 권장 방식</text>
+</svg>

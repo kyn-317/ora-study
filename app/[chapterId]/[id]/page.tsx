@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getStudyData, StudySection, SqlExample } from '../../../lib/data';
+import { getStudyData, StudySection, SqlExample, Visual } from '../../../lib/data';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -50,13 +50,75 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
     );
   };
 
+  const renderVisuals = (visuals: Visual[] | undefined, placement: Visual['placement']) => {
+    const filtered = visuals?.filter(v => v.placement === placement);
+    if (!filtered || filtered.length === 0) return null;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', margin: '1.5rem 0' }}>
+        {filtered.map(v => (
+          <figure key={v.id} style={{ margin: 0, textAlign: 'center' }}>
+            {v.type === 'svg' && (
+              <img
+                src={v.src}
+                alt={v.caption}
+                style={{
+                  width: v.width || '100%',
+                  maxWidth: '100%',
+                  borderRadius: '12px',
+                  border: '1px solid var(--glass-border)',
+                  background: 'rgba(0,0,0,0.3)',
+                  padding: '1rem',
+                }}
+              />
+            )}
+            {v.type === 'html' && (
+              <iframe
+                src={v.src}
+                title={v.caption}
+                style={{
+                  width: v.width || '100%',
+                  minHeight: '300px',
+                  border: '1px solid var(--glass-border)',
+                  borderRadius: '12px',
+                  background: 'transparent',
+                }}
+              />
+            )}
+            {v.type === 'mermaid' && v.mermaidCode && (
+              <pre style={{
+                textAlign: 'left',
+                background: 'rgba(0,0,0,0.3)',
+                padding: '1rem',
+                borderRadius: '12px',
+                border: '1px solid var(--glass-border)',
+                overflow: 'auto',
+                color: 'var(--foreground)',
+                fontSize: '0.9rem',
+              }}>
+                <code className="language-mermaid">{v.mermaidCode}</code>
+              </pre>
+            )}
+            <figcaption style={{
+              color: 'var(--text-muted)',
+              fontSize: '0.85rem',
+              marginTop: '0.5rem',
+              fontStyle: 'italic',
+            }}>
+              {v.caption}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    );
+  };
+
   const renderSection = (sec: StudySection, level: number = 1) => {
     const isTopLevel = level === 1;
     return (
       <section 
         key={sec.sectionId || sec.title} 
-        className={isTopLevel ? "glass" : ""}
-        style={{ 
+        className={`study-section-card ${isTopLevel ? "glass" : ""}`}
+        style={{
           marginBottom: isTopLevel ? '3rem' : '1.5rem',
           padding: isTopLevel ? '2.5rem' : '1.5rem',
           border: isTopLevel ? '1px solid var(--color-4)' : '1px solid var(--glass-border)',
@@ -86,11 +148,15 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
           {sec.title}
         </h2>
         
+        {renderVisuals(sec.visuals, 'before-content')}
+
         <div className="markdown-content" style={{ color: 'var(--foreground)', lineHeight: 1.7 }}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ table: ({ children, ...props }) => (<div className="table-wrapper"><table {...props}>{children}</table></div>) }}>
             {sec.content}
           </ReactMarkdown>
         </div>
+
+        {renderVisuals(sec.visuals, 'after-content')}
 
         {sec.key_points && sec.key_points.length > 0 && (
           <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(111, 107, 234, 0.1)', borderRadius: '12px', borderLeft: '4px solid var(--color-3)' }}>
@@ -100,6 +166,8 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
             </ul>
           </div>
         )}
+
+        {renderVisuals(sec.visuals, 'after-keypoints')}
 
         {/* Subsections first, then SQL */}
         {sec.subsections && sec.subsections.length > 0 && (
@@ -122,7 +190,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
   return (
     <main style={{ padding: '0', maxWidth: '100%', margin: '0' }}>
       {/* Header Banner */}
-      <div className="bg-gradient-primary" style={{ padding: '4rem 2rem', borderRadius: '0 0 30px 30px' }}>
+      <div className="bg-gradient-primary study-header-banner" style={{ padding: '4rem 2rem', borderRadius: '0 0 30px 30px' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <Link href={`/${chapterId}`} style={{ color: 'white', opacity: 0.8, textDecoration: 'none', marginBottom: '1rem', display: 'inline-block', fontSize: '0.9rem' }}>
             &larr; Back to {chapterId}
@@ -139,7 +207,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
         </div>
       </div>
 
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '3rem 2rem' }}>
+      <div className="study-content-area" style={{ maxWidth: '1000px', margin: '0 auto', padding: '3rem 2rem' }}>
         {data.oracle26ai_changes && (
           <div className="glass" style={{ padding: '2rem', borderRadius: '20px', marginBottom: '4rem', borderColor: 'var(--color-4)' }}>
             <h3 style={{ color: 'var(--color-4)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

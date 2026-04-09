@@ -1,0 +1,16 @@
+{
+  "chapter": "12",
+  "chapter_name": "自動メンテナンス",
+  "original_topic_ratio": {
+    "自動メンテナンスタスク": 2,
+    "メンテナンス・ウィンドウ": 1,
+    "Resource Manager連携": 1
+  },
+  "custom_topic_counts": {
+    "自動メンテナンスタスク": 4,
+    "メンテナンス・ウィンドウ": 4,
+    "Resource Manager連携": 2
+  },
+  "total_custom": 10,
+  "last_number": "C_12_010"
+}

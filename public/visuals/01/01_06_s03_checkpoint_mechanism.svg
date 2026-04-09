@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">체크포인트 유형 비교 Checkpoint Types</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Full Checkpoint vs Incremental Checkpoint 동작 방식과 I/O 패턴</text>
+
+  <!-- Checkpoint Flow: top section -->
+  <rect x="30" y="68" width="740" height="100" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
+  <text x="400" y="88" text-anchor="middle" class="label" fill="#6F6BEA">체크포인트 동작 흐름 Checkpoint Flow</text>
+
+  <!-- Flow: CKPT -> DBWn -> Data File -->
+  <rect x="60" y="102" width="130" height="45" fill="#2A2B3D" stroke="#6F6BEA" stroke-width="1" class="box"/>
+  <text x="125" y="122" text-anchor="middle" class="sublabel" fill="#6F6BEA">CKPT 프로세스</text>
+  <text x="125" y="138" text-anchor="middle" class="small">조율 Coordinate</text>
+
+  <!-- Arrow 1 -->
+  <line x1="190" y1="124" x2="240" y2="124" stroke="#E2E8F0" stroke-width="1.5"/>
+  <polygon points="238,120 238,128 246,124" fill="#E2E8F0"/>
+  <text x="215" y="118" text-anchor="middle" class="small">신호</text>
+
+  <rect x="248" y="102" width="130" height="45" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1" class="box"/>
+  <text x="313" y="122" text-anchor="middle" class="sublabel" fill="#3B82F6">DBWn 프로세스</text>
+  <text x="313" y="138" text-anchor="middle" class="small">Dirty Buffer 기록</text>
+
+  <!-- Arrow 2 -->
+  <line x1="378" y1="124" x2="428" y2="124" stroke="#E2E8F0" stroke-width="1.5"/>
+  <polygon points="426,120 426,128 434,124" fill="#E2E8F0"/>
+
+  <rect x="436" y="102" width="130" height="45" fill="#2A2B3D" stroke="#10B981" stroke-width="1" class="box"/>
+  <text x="501" y="122" text-anchor="middle" class="sublabel" fill="#10B981">Data Files</text>
+  <text x="501" y="138" text-anchor="middle" class="small">디스크 기록 완료</text>
+
+  <!-- Arrow 3 from CKPT to Control/Header -->
+  <rect x="618" y="97" width="140" height="55" fill="#2A2B3D" stroke="#F59E0B" stroke-width="1" class="box"/>
+  <text x="688" y="117" text-anchor="middle" class="sublabel" fill="#F59E0B">SCN 업데이트</text>
+  <text x="688" y="133" text-anchor="middle" class="small">Control File +</text>
+  <text x="688" y="146" text-anchor="middle" class="small">Data File Header</text>
+
+  <line x1="125" y1="147" x2="125" y2="155" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="125" y1="155" x2="618" y2="155" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="618" y1="152" x2="618" y2="155" stroke="#F59E0B" stroke-width="1"/>
+
+  <!-- Two columns: Full vs Incremental -->
+  <!-- Full Checkpoint -->
+  <rect x="30" y="185" width="365" height="340" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5" class="box"/>
+  <rect x="30" y="185" width="365" height="30" fill="#F43F5E" fill-opacity="0.15" rx="8" ry="8"/>
+  <text x="212" y="205" text-anchor="middle" class="label" fill="#F43F5E">Full Checkpoint 전체 체크포인트</text>
+
+  <text x="50" y="235" class="sublabel">동작: 모든 Dirty Buffer를 한꺼번에 디스크에 기록</text>
+
+  <!-- I/O Pattern: spike -->
+  <text x="50" y="260" class="small">I/O 패턴:</text>
+  <rect x="50" y="268" width="320" height="60" fill="#2A2B3D" class="box"/>
+  <!-- Spike pattern bars -->
+  <rect x="70" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <rect x="90" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <rect x="110" y="280" width="12" height="35" fill="#F43F5E"/>
+  <rect x="130" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <rect x="150" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <rect x="170" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <rect x="190" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <rect x="210" y="280" width="12" height="35" fill="#F43F5E"/>
+  <rect x="230" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <rect x="250" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <rect x="270" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <rect x="290" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <rect x="310" y="280" width="12" height="35" fill="#F43F5E"/>
+  <rect x="330" y="310" width="12" height="5" fill="#F43F5E" opacity="0.3"/>
+  <text x="340" y="285" class="small" fill="#F43F5E">순간 I/O 스파이크</text>
+
+  <!-- Trigger conditions -->
+  <text x="50" y="348" class="sublabel">발생 시점:</text>
+  <text x="55" y="368" class="code">SHUTDOWN NORMAL / IMMEDIATE / TRANSACTIONAL</text>
+  <text x="55" y="385" class="code">ALTER SYSTEM CHECKPOINT</text>
+  <text x="55" y="402" class="code">로그 스위치 시 (Thread Checkpoint)</text>
+
+  <!-- Control File update -->
+  <text x="50" y="425" class="sublabel">기록 대상:</text>
+  <text x="55" y="443" class="small">Control File에 Checkpoint SCN 기록</text>
+  <text x="55" y="458" class="small">완료 후 이전 Redo Log 재사용 가능</text>
+
+  <rect x="50" y="470" width="320" height="24" fill="#F43F5E" fill-opacity="0.1" class="box"/>
+  <text x="210" y="486" text-anchor="middle" class="small" fill="#F43F5E">일시적 I/O 부하 높음 / 발생 빈도 낮음</text>
+
+  <!-- Incremental Checkpoint -->
+  <rect x="405" y="185" width="365" height="340" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5" class="box"/>
+  <rect x="405" y="185" width="365" height="30" fill="#10B981" fill-opacity="0.15" rx="8" ry="8"/>
+  <text x="587" y="205" text-anchor="middle" class="label" fill="#10B981">Incremental Checkpoint 증분 체크포인트</text>
+
+  <text x="425" y="235" class="sublabel">동작: Checkpoint Queue에서 오래된 것부터 순차 기록</text>
+
+  <!-- I/O Pattern: even -->
+  <text x="425" y="260" class="small">I/O 패턴:</text>
+  <rect x="425" y="268" width="320" height="60" fill="#2A2B3D" class="box"/>
+  <!-- Even pattern bars -->
+  <rect x="445" y="305" width="12" height="15" fill="#10B981"/>
+  <rect x="465" y="303" width="12" height="17" fill="#10B981"/>
+  <rect x="485" y="306" width="12" height="14" fill="#10B981"/>
+  <rect x="505" y="304" width="12" height="16" fill="#10B981"/>
+  <rect x="525" y="307" width="12" height="13" fill="#10B981"/>
+  <rect x="545" y="305" width="12" height="15" fill="#10B981"/>
+  <rect x="565" y="303" width="12" height="17" fill="#10B981"/>
+  <rect x="585" y="306" width="12" height="14" fill="#10B981"/>
+  <rect x="605" y="304" width="12" height="16" fill="#10B981"/>
+  <rect x="625" y="307" width="12" height="13" fill="#10B981"/>
+  <rect x="645" y="305" width="12" height="15" fill="#10B981"/>
+  <rect x="665" y="303" width="12" height="17" fill="#10B981"/>
+  <rect x="685" y="306" width="12" height="14" fill="#10B981"/>
+  <rect x="705" y="304" width="12" height="16" fill="#10B981"/>
+  <text x="710" y="285" class="small" fill="#10B981">균일 분산 I/O</text>
+
+  <!-- Behavior -->
+  <text x="425" y="348" class="sublabel">특성:</text>
+  <text x="430" y="368" class="code">FAST_START_MTTR_TARGET에 의해 빈도 자동 조정</text>
+  <text x="430" y="385" class="code">Checkpoint Queue 기반 순차 기록</text>
+  <text x="430" y="402" class="code">현대 Oracle의 기본 체크포인트 방식</text>
+
+  <!-- Control File update -->
+  <text x="425" y="425" class="sublabel">기록 대상:</text>
+  <text x="430" y="443" class="small">Control File에 Low RBA (Redo Block Address) 기록</text>
+  <text x="430" y="458" class="small">복구 시 필요한 Redo 양을 점진적으로 축소</text>
+
+  <rect x="425" y="470" width="320" height="24" fill="#10B981" fill-opacity="0.1" class="box"/>
+  <text x="585" y="486" text-anchor="middle" class="small" fill="#10B981">일상 I/O 부하 균일 / 지속적 수행</text>
+
+  <!-- Bottom summary -->
+  <text x="400" y="545" text-anchor="middle" class="code">FAST_START_MTTR_TARGET = 낮은 값 → Incremental Checkpoint 빈도 증가 → 복구 시간 단축, I/O 부하 증가</text>
+</svg>

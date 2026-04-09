@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <text x="400" y="30" class="title" text-anchor="middle">DB 링크 접속 방식 비교 (Authentication Methods)</text>
+  <text x="400" y="50" class="subtitle" text-anchor="middle">Fixed User / Connected User / Current User 세 가지 인증 방식</text>
+
+  <!-- Fixed User -->
+  <rect x="30" y="75" width="240" height="200" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="30" y="75" width="240" height="32" rx="8" ry="8" fill="#6F6BEA"/>
+  <text x="150" y="96" class="label" text-anchor="middle" fill="#FFF">고정 사용자 (Fixed User)</text>
+
+  <text x="50" y="125" class="sublabel">링크에 고정된 원격 계정 사용</text>
+  <text x="50" y="148" class="code" font-size="10">CREATE DATABASE LINK lnk</text>
+  <text x="50" y="164" class="code" font-size="10">  CONNECT TO user</text>
+  <text x="50" y="180" class="code" font-size="10">  IDENTIFIED BY pwd</text>
+  <text x="50" y="196" class="code" font-size="10">  USING 'remote_db';</text>
+
+  <text x="50" y="222" class="small" fill="#10B981">가장 일반적인 방식</text>
+  <text x="50" y="240" class="small">항상 지정된 계정으로 접속</text>
+  <text x="50" y="258" class="small" fill="#F59E0B">비밀번호가 딕셔너리에 저장됨</text>
+
+  <!-- Connected User -->
+  <rect x="285" y="75" width="230" height="200" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="285" y="75" width="230" height="32" rx="8" ry="8" fill="#3B82F6"/>
+  <text x="400" y="96" class="label" text-anchor="middle" fill="#FFF">연결 사용자 (Connected)</text>
+
+  <text x="305" y="125" class="sublabel">현재 로컬 세션 사용자 사용</text>
+  <text x="305" y="148" class="code" font-size="10">CREATE DATABASE LINK lnk</text>
+  <text x="305" y="164" class="code" font-size="10">  USING 'remote_db';</text>
+  <text x="305" y="180" class="small" fill="#94A3B8">-- 인증 절 생략</text>
+
+  <text x="305" y="208" class="small">현재 세션의 user/pwd로</text>
+  <text x="305" y="226" class="small">원격 DB에 동일 계정 접속</text>
+  <text x="305" y="248" class="small" fill="#F43F5E">양쪽 DB에 동일 계정 필요</text>
+  <text x="305" y="266" class="small" fill="#F59E0B">비밀번호 저장하지 않음</text>
+
+  <!-- Current User -->
+  <rect x="530" y="75" width="240" height="200" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="530" y="75" width="240" height="32" rx="8" ry="8" fill="#10B981"/>
+  <text x="650" y="96" class="label" text-anchor="middle" fill="#FFF">현재 사용자 (Current)</text>
+
+  <text x="550" y="125" class="sublabel">글로벌 사용자(Enterprise User)</text>
+  <text x="550" y="148" class="code" font-size="10">CREATE DATABASE LINK lnk</text>
+  <text x="550" y="164" class="code" font-size="10">  CONNECT TO CURRENT_USER</text>
+  <text x="550" y="180" class="code" font-size="10">  USING 'remote_db';</text>
+
+  <text x="550" y="208" class="small">Enterprise User Security</text>
+  <text x="550" y="226" class="small">환경에서 사용</text>
+  <text x="550" y="248" class="small">글로벌 인증(LDAP) 기반</text>
+  <text x="550" y="266" class="small" fill="#F59E0B">가장 높은 보안 수준</text>
+
+  <!-- Comparison summary -->
+  <rect x="30" y="295" width="740" height="110" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="50" y="318" class="label" font-size="12">접속 방식 비교 요약</text>
+
+  <!-- Header -->
+  <text x="200" y="340" class="sublabel" text-anchor="middle">항목</text>
+  <text x="370" y="340" class="sublabel" text-anchor="middle" fill="#6F6BEA">Fixed User</text>
+  <text x="530" y="340" class="sublabel" text-anchor="middle" fill="#3B82F6">Connected User</text>
+  <text x="690" y="340" class="sublabel" text-anchor="middle" fill="#10B981">Current User</text>
+
+  <text x="200" y="358" class="small" text-anchor="middle">비밀번호 저장</text>
+  <text x="370" y="358" class="small" text-anchor="middle" fill="#F43F5E">딕셔너리에 저장</text>
+  <text x="530" y="358" class="small" text-anchor="middle" fill="#10B981">저장하지 않음</text>
+  <text x="690" y="358" class="small" text-anchor="middle" fill="#10B981">저장하지 않음</text>
+
+  <text x="200" y="376" class="small" text-anchor="middle">원격 계정</text>
+  <text x="370" y="376" class="small" text-anchor="middle">고정 계정</text>
+  <text x="530" y="376" class="small" text-anchor="middle">로컬과 동일</text>
+  <text x="690" y="376" class="small" text-anchor="middle">글로벌 사용자</text>
+
+  <text x="200" y="394" class="small" text-anchor="middle">보안 수준</text>
+  <text x="370" y="394" class="small" text-anchor="middle" fill="#F59E0B">중</text>
+  <text x="530" y="394" class="small" text-anchor="middle" fill="#F59E0B">중</text>
+  <text x="690" y="394" class="small" text-anchor="middle" fill="#10B981">높음</text>
+</svg>

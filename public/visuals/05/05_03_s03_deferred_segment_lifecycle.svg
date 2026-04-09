@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2; fill: none; marker-end: url(#ah); }
+    .arrow-green { stroke: #10B981; stroke-width: 2; fill: none; marker-end: url(#ah-g); }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="ah-g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="28" text-anchor="middle" class="title">지연 세그먼트 생성 라이프사이클</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">Deferred Segment Creation — DEFERRED_SEGMENT_CREATION = TRUE (기본)</text>
+
+  <!-- Phase 1: CREATE TABLE -->
+  <rect x="30" y="70" width="220" height="120" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="2"/>
+  <text x="140" y="93" text-anchor="middle" class="label" fill="#3B82F6">CREATE TABLE</text>
+  <text x="140" y="112" text-anchor="middle" class="code">CREATE TABLE emp (...)</text>
+  <rect x="50" y="125" width="180" height="50" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="140" y="143" text-anchor="middle" class="sublabel">메타데이터만 생성</text>
+  <text x="140" y="160" text-anchor="middle" class="small">세그먼트 미할당 / 디스크 0 사용</text>
+  <text x="140" y="175" text-anchor="middle" class="small">DBA_TABLES.SEGMENT_CREATED = 'NO'</text>
+
+  <!-- Arrow -->
+  <line x1="250" y1="130" x2="295" y2="130" class="arrow"/>
+  <text x="273" y="122" class="small">시간 경과</text>
+
+  <!-- Phase 2: First INSERT -->
+  <rect x="300" y="70" width="220" height="120" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="2"/>
+  <text x="410" y="93" text-anchor="middle" class="label" fill="#F59E0B">첫 번째 INSERT</text>
+  <text x="410" y="112" text-anchor="middle" class="code">INSERT INTO emp VALUES(..)</text>
+  <rect x="320" y="125" width="180" height="50" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="410" y="143" text-anchor="middle" class="sublabel">세그먼트 즉시 생성 (Materialize)</text>
+  <text x="410" y="160" text-anchor="middle" class="small">초기 익스텐트 할당</text>
+  <text x="410" y="175" text-anchor="middle" class="small">DBA_TABLES.SEGMENT_CREATED = 'YES'</text>
+
+  <!-- Arrow -->
+  <line x1="520" y1="130" x2="565" y2="130" class="arrow-green"/>
+
+  <!-- Phase 3: Normal operation -->
+  <rect x="570" y="70" width="200" height="120" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="2"/>
+  <text x="670" y="93" text-anchor="middle" class="label" fill="#10B981">정상 운영</text>
+  <text x="670" y="112" text-anchor="middle" class="small">DML 정상 처리</text>
+  <rect x="590" y="125" width="160" height="50" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1"/>
+  <text x="670" y="143" text-anchor="middle" class="sublabel">세그먼트 할당됨</text>
+  <text x="670" y="160" text-anchor="middle" class="small">익스텐트 자동 확장</text>
+  <text x="670" y="175" text-anchor="middle" class="small">AUTOALLOCATE / UNIFORM</text>
+
+  <!-- Benefits section -->
+  <rect x="30" y="210" width="360" height="150" class="box" fill="rgba(16,185,129,0.06)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="50" y="233" class="label" fill="#10B981">지연 세그먼트의 장점</text>
+  <text x="50" y="255" class="sublabel">디스크 공간 절약</text>
+  <text x="50" y="273" class="small">빈 테이블이 수백 개여도 실제 공간 소비 0</text>
+  <text x="50" y="295" class="sublabel">PDB 프로비저닝 가속</text>
+  <text x="50" y="313" class="small">스키마만 복제 시 빠른 생성 (세그먼트 미할당)</text>
+  <text x="50" y="335" class="sublabel">Data Pump Import 최적화</text>
+  <text x="50" y="353" class="small">빈 테이블 Import 시 세그먼트 생성 생략</text>
+
+  <!-- Force materialize -->
+  <rect x="415" y="210" width="355" height="150" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="435" y="233" class="label" fill="#F59E0B">강제 세그먼트 생성 (Materialize)</text>
+  <text x="435" y="258" class="code">ALTER TABLE emp ALLOCATE EXTENT;</text>
+  <text x="435" y="278" class="small">즉시 세그먼트 할당 (INSERT 없이)</text>
+  <text x="435" y="303" class="code">DBMS_SPACE_ADMIN.MATERIALIZE_</text>
+  <text x="435" y="318" class="code">  DEFERRED_SEGMENTS('HR');</text>
+  <text x="435" y="338" class="small">스키마의 모든 지연 세그먼트 일괄 생성</text>
+
+  <!-- Parameter -->
+  <text x="435" y="358" class="sublabel">파라미터: DEFERRED_SEGMENT_CREATION = TRUE (기본)</text>
+</svg>

@@ -15,6 +15,16 @@
       "title": "Oracle 프로세스 아키텍처 개요 (Process Architecture Overview)",
       "sqlExamplesIds": ["sql11"],
       "content": "Oracle Database는 **인스턴스(Instance)**를 통해 데이터베이스에 접근하며, 인스턴스는 **메모리 구조(SGA + PGA)**와 **프로세스(Processes)**로 구성됩니다. 프로세스는 Oracle Database의 모든 작업을 수행하는 실행 단위입니다.\n\nOracle의 프로세스는 크게 **3가지 유형**으로 분류됩니다:\n\n| 유형 | 설명 | 실행 위치 |\n|---|---|---|\n| **사용자 프로세스 (User Process)** | 클라이언트 애플리케이션(SQL*Plus, JDBC 등)이 실행하는 프로세스 | 클라이언트 머신 |\n| **서버 프로세스 (Server Process)** | 사용자 요청을 처리하는 Oracle 프로세스 | 데이터베이스 서버 |\n| **백그라운드 프로세스 (Background Process)** | 인스턴스 유지관리를 수행하는 Oracle 프로세스 | 데이터베이스 서버 |\n\n### 프로세스 간 관계 흐름\n\n```\n[클라이언트]\n   User Process\n       │\n       │ Oracle Net (네트워크)\n       ▼\n[데이터베이스 서버]\n   Server Process ──── SGA (공유 메모리) ──── Background Processes\n       │                    │                       │\n       PGA (전용)           │                  물리적 파일\n                     데이터 파일, Redo Log, Control File\n```\n\n사용자 프로세스는 서버 프로세스와 **1:1(Dedicated)** 또는 **N:M(Shared)** 관계로 연결되며, 서버 프로세스는 SGA를 통해 백그라운드 프로세스와 협력합니다.",
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/01/01_02_s01_process_architecture.svg",
+          "caption": "Oracle 프로세스 아키텍처 전체 구조도: 사용자 프로세스, 서버 프로세스, SGA, 백그라운드 프로세스, 물리적 파일 간의 관계를 보여줍니다.",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -53,6 +63,16 @@
             "세션은 SID + Serial# 조합으로 고유하게 식별됨",
             "DRCP 환경에서는 세션은 유지되면서 연결만 풀로 반환되는 '연결 없는 세션' 상태 가능",
             "V$SESSION 뷰에서 현재 세션 상태, 대기 이벤트, 사용자 정보를 조회할 수 있음"
+          ],
+          "visuals": [
+            {
+              "id": "v02",
+              "type": "svg",
+              "src": "/visuals/01/01_02_s02_connection_session_lifecycle.svg",
+              "caption": "연결(Connection)과 세션(Session)의 생명주기: 물리적 통신 경로와 논리적 사용자 상태의 차이를 단계별로 보여줍니다.",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
         }
       ]
@@ -94,6 +114,16 @@
             "접속 문자열에 (SERVER=POOLED)를 지정하여 사용",
             "DBMS_CONNECTION_POOL 패키지로 풀 구성 및 관리"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/01/01_02_s03_dedicated_shared_drcp.svg",
+          "caption": "Dedicated Server, Shared Server, DRCP 세 가지 연결 모드의 구조와 메모리 차이, 비교 요약표를 제공합니다.",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     },
@@ -173,6 +203,24 @@
             "RAC 환경에서 REMOTE_LISTENER로 다른 노드 리스너에도 등록하여 로드 밸런싱 지원"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/01/01_02_s04_background_processes.svg",
+          "caption": "백그라운드 프로세스 관계도: 필수/선택적 프로세스, SGA 컴포넌트, 물리적 파일 간의 I/O 관계를 보여줍니다.",
+          "placement": "after-content",
+          "width": "100%"
+        },
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/01/01_02_s04_instance_recovery_flow.svg",
+          "caption": "SMON 인스턴스 복구 흐름: Roll Forward → DB 오픈 → Roll Back 3단계 복구 과정을 시간축과 함께 보여줍니다.",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -249,6 +297,24 @@
             "인스턴스 장애 시 SMON이 Redo Log를 사용하여 COMMIT된 트랜잭션을 복구 (Roll Forward)",
             "Undo 변경 사항도 Redo로 기록됨 (Undo의 Redo) — 인스턴스 복구 시 Undo도 복원 필요"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "svg",
+          "src": "/visuals/01/01_02_s06_select_query_flow.svg",
+          "caption": "SELECT 문 실행 흐름: 사용자 프로세스 → 서버 프로세스 → Shared Pool → Buffer Cache → 결과 반환까지의 6단계를 보여줍니다.",
+          "placement": "after-content",
+          "width": "100%"
+        },
+        {
+          "id": "v07",
+          "type": "svg",
+          "src": "/visuals/01/01_02_s06_dml_commit_flow.svg",
+          "caption": "DML 및 COMMIT 처리 흐름: DML 5단계(파싱→블록확인→Undo→변경→Redo)와 COMMIT 단계(LGWR 기록→성공반환→DBWn 비동기)를 보여줍니다.",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

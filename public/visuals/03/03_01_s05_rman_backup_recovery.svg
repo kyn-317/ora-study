@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <text x="400" y="30" class="title" text-anchor="middle">RMAN 접속 및 백업/복구 프로세스 (Recovery Manager)</text>
+  <text x="400" y="50" class="subtitle" text-anchor="middle">Target DB + Catalog DB 접속 구조와 백업 흐름</text>
+
+  <!-- RMAN Client -->
+  <rect x="300" y="70" width="200" height="50" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <text x="400" y="93" class="label" text-anchor="middle" fill="#F59E0B">RMAN Client</text>
+  <text x="400" y="110" class="code" text-anchor="middle">rman target / catalog rcat/pwd@catdb</text>
+
+  <!-- Arrows to Target and Catalog -->
+  <line x1="340" y1="120" x2="180" y2="160" stroke="#3B82F6" stroke-width="2"/>
+  <polygon points="182,157 175,164 186,163" fill="#3B82F6"/>
+  <text x="240" y="140" class="small" fill="#3B82F6">TARGET</text>
+
+  <line x1="460" y1="120" x2="620" y2="160" stroke="#10B981" stroke-width="2"/>
+  <polygon points="618,157 625,164 614,163" fill="#10B981"/>
+  <text x="560" y="140" class="small" fill="#10B981">CATALOG (선택)</text>
+
+  <!-- Target DB -->
+  <rect x="60" y="165" width="240" height="90" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <text x="180" y="188" class="label" text-anchor="middle" fill="#3B82F6">Target Database</text>
+  <text x="180" y="208" class="sublabel" text-anchor="middle">백업/복구 대상 DB</text>
+  <text x="180" y="228" class="small" text-anchor="middle">제어 파일에 백업 메타데이터 저장</text>
+  <text x="180" y="244" class="code" text-anchor="middle">rman target /</text>
+
+  <!-- Catalog DB -->
+  <rect x="500" y="165" width="240" height="90" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <text x="620" y="188" class="label" text-anchor="middle" fill="#10B981">Recovery Catalog DB</text>
+  <text x="620" y="208" class="sublabel" text-anchor="middle">백업 메타데이터 중앙 저장소</text>
+  <text x="620" y="228" class="small" text-anchor="middle">여러 Target DB의 백업 이력 관리</text>
+  <text x="620" y="244" class="code" text-anchor="middle">catalog rcat/pwd@catdb</text>
+
+  <!-- Backup flow -->
+  <text x="400" y="285" class="label" text-anchor="middle">RMAN 주요 백업/복구 명령</text>
+
+  <rect x="30" y="300" width="170" height="50" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="115" y="320" class="code" text-anchor="middle">BACKUP DATABASE</text>
+  <text x="115" y="340" class="small" text-anchor="middle">전체 DB 백업</text>
+
+  <rect x="215" y="300" width="170" height="50" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="300" y="320" class="code" text-anchor="middle">BACKUP ARCHIVELOG</text>
+  <text x="300" y="340" class="small" text-anchor="middle">아카이브 로그 백업</text>
+
+  <rect x="400" y="300" width="170" height="50" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <text x="485" y="320" class="code" text-anchor="middle">RESTORE DATABASE</text>
+  <text x="485" y="340" class="small" text-anchor="middle">백업에서 복원</text>
+
+  <rect x="585" y="300" width="185" height="50" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <text x="677" y="320" class="code" text-anchor="middle">RECOVER DATABASE</text>
+  <text x="677" y="340" class="small" text-anchor="middle">리두 로그 적용 (복구)</text>
+
+  <!-- RMAN key features -->
+  <rect x="30" y="365" width="740" height="40" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="50" y="385" class="small">특장점: 증분 백업(Incremental) | 블록 변경 추적(BCT) | 압축 백업 | 병렬 처리 | 자동 채널 할당</text>
+  <text x="50" y="399" class="code">Oracle 26ai: AI 기반 자동 복구 권장 - RECOMMEND 명령 개선, Autonomous Recovery 강화</text>
+</svg>

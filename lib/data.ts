@@ -4,6 +4,16 @@ import manifest from '@/data/manifest.json';
 
 // ── Types ──
 
+export interface Visual {
+  id: string;
+  type: 'svg' | 'html' | 'mermaid';
+  src?: string;
+  mermaidCode?: string;
+  caption: string;
+  placement: 'before-content' | 'after-content' | 'after-keypoints';
+  width?: string;
+}
+
 export interface StudySection {
   sectionId: string;
   title: string;
@@ -11,6 +21,7 @@ export interface StudySection {
   sqlExamplesIds?: string[];
   subsections?: StudySection[];
   key_points?: string[];
+  visuals?: Visual[];
 }
 
 export interface SqlExample {

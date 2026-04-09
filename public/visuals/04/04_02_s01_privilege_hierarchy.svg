@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <text x="400" y="32" class="title" text-anchor="middle">Oracle 권한 체계 전체 구조 (Privilege System Overview)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">시스템 권한, 객체 권한, 롤의 관계와 GRANT/REVOKE 흐름</text>
+
+  <!-- Oracle Privilege System -->
+  <rect x="280" y="70" width="240" height="40" class="box" fill="#6F6BEA" stroke="none"/>
+  <text x="400" y="95" class="label" text-anchor="middle" fill="#FFF">Oracle 권한 체계 (Privilege System)</text>
+
+  <!-- Three branches -->
+  <line x1="340" y1="110" x2="140" y2="145" stroke="#3B82F6" stroke-width="1.5"/>
+  <line x1="400" y1="110" x2="400" y2="145" stroke="#10B981" stroke-width="1.5"/>
+  <line x1="460" y1="110" x2="660" y2="145" stroke="#F59E0B" stroke-width="1.5"/>
+
+  <!-- System Privileges -->
+  <rect x="30" y="145" width="220" height="180" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="30" y="145" width="220" height="28" rx="8" ry="8" fill="#3B82F6"/>
+  <text x="140" y="164" class="label" text-anchor="middle" fill="#FFF">시스템 권한 (System)</text>
+
+  <text x="50" y="195" class="sublabel">DDL/DML 실행 권한</text>
+  <text x="50" y="215" class="code">CREATE TABLE</text>
+  <text x="50" y="232" class="code">ALTER USER</text>
+  <text x="50" y="249" class="code">SELECT ANY TABLE</text>
+  <text x="50" y="270" class="sublabel">부여 옵션:</text>
+  <text x="50" y="287" class="code">WITH ADMIN OPTION</text>
+  <text x="50" y="304" class="small">취소 시 연쇄 없음 (No Cascade)</text>
+  <text x="50" y="318" class="small">부여자 미추적</text>
+
+  <!-- Object Privileges -->
+  <rect x="270" y="145" width="260" height="180" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="270" y="145" width="260" height="28" rx="8" ry="8" fill="#10B981"/>
+  <text x="400" y="164" class="label" text-anchor="middle" fill="#FFF">객체 권한 (Object)</text>
+
+  <text x="290" y="195" class="sublabel">특정 객체 접근/조작 권한</text>
+  <text x="290" y="215" class="code">SELECT ON hr.employees</text>
+  <text x="290" y="232" class="code">EXECUTE ON dbms_stats</text>
+  <text x="290" y="249" class="code">UPDATE (salary) ON hr.emp</text>
+  <text x="290" y="270" class="sublabel">부여 옵션:</text>
+  <text x="290" y="287" class="code">WITH GRANT OPTION</text>
+  <text x="290" y="304" class="small">취소 시 연쇄 발생 (Cascade Revoke!)</text>
+  <text x="290" y="318" class="small">부여자 추적 (GRANTOR)</text>
+
+  <!-- Roles -->
+  <rect x="550" y="145" width="220" height="180" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <rect x="550" y="145" width="220" height="28" rx="8" ry="8" fill="#F59E0B"/>
+  <text x="660" y="164" class="label" text-anchor="middle" fill="#1E1E2E">롤 (Role)</text>
+
+  <text x="570" y="195" class="sublabel">명명된 권한 그룹</text>
+  <text x="570" y="215" class="code">DBA</text>
+  <text x="620" y="215" class="code">CONNECT</text>
+  <text x="700" y="215" class="code">RESOURCE</text>
+  <text x="570" y="235" class="small">시스템+객체 권한 포함 가능</text>
+  <text x="570" y="255" class="small">롤 안에 롤 포함 가능 (중첩)</text>
+  <text x="570" y="275" class="code">SET ROLE role_name</text>
+  <text x="570" y="295" class="small">세션에서 활성화/비활성화</text>
+  <text x="570" y="315" class="small">GRANT OPTION 부여 불가</text>
+
+  <!-- GRANT/REVOKE flow -->
+  <line x1="140" y1="325" x2="140" y2="360" stroke="#3B82F6" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="400" y1="325" x2="400" y2="360" stroke="#10B981" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="660" y1="325" x2="660" y2="360" stroke="#F59E0B" stroke-width="1" marker-end="url(#arr)"/>
+
+  <text x="400" y="350" class="label" text-anchor="middle">GRANT / REVOKE</text>
+
+  <!-- User/Role target -->
+  <rect x="150" y="365" width="500" height="50" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="400" y="387" class="label" text-anchor="middle">사용자 (User) 또는 롤 (Role) 또는 PUBLIC</text>
+  <text x="400" y="405" class="small" text-anchor="middle">PUBLIC에 부여 시 모든 현재/미래 사용자에게 적용 (보안 주의)</text>
+
+  <!-- Session effective privileges -->
+  <rect x="30" y="435" width="740" height="70" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1.5"/>
+  <text x="50" y="455" class="sublabel">세션의 최종 유효 권한 = 직접 부여 권한 + 활성 롤 권한 + PUBLIC 권한</text>
+
+  <text x="50" y="478" class="code">DBA_SYS_PRIVS</text>
+  <text x="180" y="478" class="small">시스템 권한</text>
+  <text x="265" y="478" class="code">DBA_TAB_PRIVS</text>
+  <text x="395" y="478" class="small">객체 권한</text>
+  <text x="465" y="478" class="code">DBA_ROLE_PRIVS</text>
+  <text x="600" y="478" class="small">롤 부여</text>
+  <text x="50" y="495" class="code">SESSION_PRIVS</text>
+  <text x="180" y="495" class="small">활성 권한</text>
+  <text x="265" y="495" class="code">SESSION_ROLES</text>
+  <text x="395" y="495" class="small">활성 롤</text>
+  <text x="465" y="495" class="small">PL/SQL Definer's Rights: 직접 부여 권한만 유효, 롤 기반 무시</text>
+</svg>

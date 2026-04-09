@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="32" class="title" text-anchor="middle">Oracle DBA 관리 툴 전체 개요 (Administration Tools Overview)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">각 툴의 용도, 인터페이스, 핵심 기능 비교</text>
+
+  <!-- DBCA -->
+  <rect x="30" y="75" width="145" height="160" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="30" y="75" width="145" height="30" rx="8" ry="8" fill="#6F6BEA"/>
+  <text x="102" y="95" class="label" text-anchor="middle" fill="#FFFFFF">DBCA</text>
+  <text x="102" y="120" class="sublabel" text-anchor="middle">GUI / CLI</text>
+  <text x="102" y="140" class="small" text-anchor="middle">DB 생성/삭제/구성</text>
+  <text x="102" y="158" class="small" text-anchor="middle">PDB 생성/삭제</text>
+  <text x="102" y="176" class="small" text-anchor="middle">템플릿 관리</text>
+  <text x="102" y="196" class="code" text-anchor="middle">dbca -silent</text>
+  <text x="102" y="216" class="small" text-anchor="middle">응답파일(.rsp)</text>
+
+  <!-- SQL*Plus -->
+  <rect x="190" y="75" width="145" height="160" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="190" y="75" width="145" height="30" rx="8" ry="8" fill="#3B82F6"/>
+  <text x="262" y="95" class="label" text-anchor="middle" fill="#FFFFFF">SQL*Plus</text>
+  <text x="262" y="120" class="sublabel" text-anchor="middle">CLI (텍스트)</text>
+  <text x="262" y="140" class="small" text-anchor="middle">SQL/PL/SQL 실행</text>
+  <text x="262" y="158" class="small" text-anchor="middle">STARTUP/SHUTDOWN</text>
+  <text x="262" y="176" class="small" text-anchor="middle">세션/파라미터 관리</text>
+  <text x="262" y="196" class="code" text-anchor="middle">sqlplus / as sysdba</text>
+  <text x="262" y="216" class="small" text-anchor="middle">DBA 필수 도구</text>
+
+  <!-- EM Cloud Control -->
+  <rect x="350" y="75" width="145" height="160" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="350" y="75" width="145" height="30" rx="8" ry="8" fill="#10B981"/>
+  <text x="422" y="95" class="label" text-anchor="middle" fill="#FFFFFF">EM Cloud Ctrl</text>
+  <text x="422" y="120" class="sublabel" text-anchor="middle">웹 GUI</text>
+  <text x="422" y="140" class="small" text-anchor="middle">종합 모니터링</text>
+  <text x="422" y="158" class="small" text-anchor="middle">기동/종료 (웹)</text>
+  <text x="422" y="176" class="small" text-anchor="middle">Job 자동화</text>
+  <text x="422" y="196" class="code" text-anchor="middle">https://host:7803/em</text>
+  <text x="422" y="216" class="small" text-anchor="middle">대규모 환경 필수</text>
+
+  <!-- RMAN -->
+  <rect x="510" y="75" width="145" height="160" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <rect x="510" y="75" width="145" height="30" rx="8" ry="8" fill="#F59E0B"/>
+  <text x="582" y="95" class="label" text-anchor="middle" fill="#1E1E2E">RMAN</text>
+  <text x="582" y="120" class="sublabel" text-anchor="middle">CLI (전용)</text>
+  <text x="582" y="140" class="small" text-anchor="middle">백업/복구 전문</text>
+  <text x="582" y="158" class="small" text-anchor="middle">STARTUP/SHUTDOWN</text>
+  <text x="582" y="176" class="small" text-anchor="middle">카탈로그 관리</text>
+  <text x="582" y="196" class="code" text-anchor="middle">rman target /</text>
+  <text x="582" y="216" class="small" text-anchor="middle">백업 정책 자동화</text>
+
+  <!-- SQL Developer -->
+  <rect x="670" y="75" width="105" height="160" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="2"/>
+  <rect x="670" y="75" width="105" height="30" rx="8" ry="8" fill="#F43F5E"/>
+  <text x="722" y="95" class="label" text-anchor="middle" fill="#FFFFFF">SQL Dev</text>
+  <text x="722" y="120" class="sublabel" text-anchor="middle">GUI (데스크톱)</text>
+  <text x="722" y="140" class="small" text-anchor="middle">SQL 개발</text>
+  <text x="722" y="158" class="small" text-anchor="middle">객체 관리</text>
+  <text x="722" y="176" class="small" text-anchor="middle">데이터 모델링</text>
+  <text x="722" y="196" class="code" text-anchor="middle">JDBC 접속</text>
+  <text x="722" y="216" class="small" text-anchor="middle">개발자 도구</text>
+
+  <!-- Tool Selection Guide -->
+  <text x="400" y="270" class="label" text-anchor="middle">툴 선택 가이드 (Tool Selection Guide)</text>
+
+  <!-- Flow arrows -->
+  <rect x="50" y="290" width="700" height="210" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+
+  <!-- Row 1 -->
+  <text x="70" y="318" class="sublabel">데이터베이스 생성/삭제</text>
+  <line x1="250" y1="313" x2="380" y2="313" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="6,3"/>
+  <polygon points="380,310 390,313 380,316" fill="#6F6BEA"/>
+  <rect x="395" y="300" width="100" height="26" rx="4" ry="4" fill="#6F6BEA" opacity="0.3" stroke="#6F6BEA"/>
+  <text x="445" y="318" class="label" text-anchor="middle" fill="#6F6BEA" font-size="12">DBCA</text>
+
+  <!-- Row 2 -->
+  <text x="70" y="348" class="sublabel">일상 관리 / SQL 실행</text>
+  <line x1="250" y1="343" x2="380" y2="343" stroke="#3B82F6" stroke-width="2" stroke-dasharray="6,3"/>
+  <polygon points="380,340 390,343 380,346" fill="#3B82F6"/>
+  <rect x="395" y="330" width="100" height="26" rx="4" ry="4" fill="#3B82F6" opacity="0.3" stroke="#3B82F6"/>
+  <text x="445" y="348" class="label" text-anchor="middle" fill="#3B82F6" font-size="12">SQL*Plus</text>
+
+  <!-- Row 3 -->
+  <text x="70" y="378" class="sublabel">대규모 환경 모니터링</text>
+  <line x1="250" y1="373" x2="380" y2="373" stroke="#10B981" stroke-width="2" stroke-dasharray="6,3"/>
+  <polygon points="380,370 390,373 380,376" fill="#10B981"/>
+  <rect x="395" y="360" width="100" height="26" rx="4" ry="4" fill="#10B981" opacity="0.3" stroke="#10B981"/>
+  <text x="445" y="378" class="label" text-anchor="middle" fill="#10B981" font-size="12">EM CC</text>
+
+  <!-- Row 4 -->
+  <text x="70" y="408" class="sublabel">백업 및 복구</text>
+  <line x1="250" y1="403" x2="380" y2="403" stroke="#F59E0B" stroke-width="2" stroke-dasharray="6,3"/>
+  <polygon points="380,400 390,403 380,406" fill="#F59E0B"/>
+  <rect x="395" y="390" width="100" height="26" rx="4" ry="4" fill="#F59E0B" opacity="0.3" stroke="#F59E0B"/>
+  <text x="445" y="408" class="label" text-anchor="middle" fill="#F59E0B" font-size="12">RMAN</text>
+
+  <!-- Row 5 -->
+  <text x="70" y="438" class="sublabel">SQL 개발 / 디버깅</text>
+  <line x1="250" y1="433" x2="380" y2="433" stroke="#F43F5E" stroke-width="2" stroke-dasharray="6,3"/>
+  <polygon points="380,430 390,433 380,436" fill="#F43F5E"/>
+  <rect x="395" y="420" width="100" height="26" rx="4" ry="4" fill="#F43F5E" opacity="0.3" stroke="#F43F5E"/>
+  <text x="445" y="438" class="label" text-anchor="middle" fill="#F43F5E" font-size="12">SQL Dev</text>
+
+  <!-- Typical workflow -->
+  <text x="560" y="318" class="small">일반적인 운영 패턴:</text>
+  <text x="560" y="340" class="code">DBCA → SQL*Plus → RMAN → EM CC</text>
+  <text x="560" y="358" class="small">생성 → 설정 → 백업 → 모니터링</text>
+
+  <!-- 26ai badge -->
+  <rect x="545" y="375" width="180" height="50" rx="6" ry="6" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="555" y="393" class="code">Oracle 26ai 변경사항</text>
+  <text x="555" y="410" class="small">AI 워크로드 프로파일</text>
+  <text x="555" y="422" class="small">Vector Search 지원 강화</text>
+
+  <!-- Footer -->
+  <text x="400" y="510" class="small" text-anchor="middle">Oracle 26ai DBA Tools - 각 툴은 상호 보완적이며 복수 툴을 조합하여 사용</text>
+</svg>

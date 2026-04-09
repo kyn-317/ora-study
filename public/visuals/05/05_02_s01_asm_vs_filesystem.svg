@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="28" text-anchor="middle" class="title">ASM vs 파일 시스템 저장 비교</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">Automatic Storage Management vs File System Storage</text>
+
+  <!-- ASM Side -->
+  <rect x="30" y="65" width="355" height="370" class="box" fill="rgba(111,107,234,0.06)" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="207" y="88" text-anchor="middle" class="label" fill="#6F6BEA">ASM (Automatic Storage Management)</text>
+
+  <!-- ASM Instance -->
+  <rect x="50" y="100" width="315" height="50" class="box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="207" y="122" text-anchor="middle" class="label">ASM Instance</text>
+  <text x="207" y="140" text-anchor="middle" class="small">Oracle이 자동 관리하는 전용 볼륨 매니저</text>
+
+  <!-- Disk Group -->
+  <rect x="50" y="160" width="150" height="90" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="125" y="180" text-anchor="middle" class="sublabel" fill="#3B82F6">Disk Group +DATA</text>
+  <text x="125" y="195" text-anchor="middle" class="small">Normal Redundancy</text>
+  <rect x="65" y="205" width="55" height="20" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1" rx="3"/>
+  <text x="92" y="219" text-anchor="middle" class="code">sdb1</text>
+  <rect x="130" y="205" width="55" height="20" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1" rx="3"/>
+  <text x="157" y="219" text-anchor="middle" class="code">sdc1</text>
+
+  <rect x="215" y="160" width="150" height="90" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="290" y="180" text-anchor="middle" class="sublabel" fill="#10B981">Disk Group +FRA</text>
+  <text x="290" y="195" text-anchor="middle" class="small">High Redundancy</text>
+  <rect x="230" y="205" width="55" height="20" fill="rgba(16,185,129,0.2)" stroke="#10B981" stroke-width="1" rx="3"/>
+  <text x="257" y="219" text-anchor="middle" class="code">sde1</text>
+  <rect x="295" y="205" width="55" height="20" fill="rgba(16,185,129,0.2)" stroke="#10B981" stroke-width="1" rx="3"/>
+  <text x="322" y="219" text-anchor="middle" class="code">sdf1</text>
+
+  <!-- ASM path format -->
+  <rect x="50" y="262" width="315" height="40" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="60" y="280" class="sublabel">경로 형식:</text>
+  <text x="60" y="296" class="code">+DATA/orcl26ai/datafile/users.301.xxx</text>
+
+  <!-- ASM features -->
+  <text x="60" y="320" class="small">자동 미러링 (2-way / 3-way)</text>
+  <text x="60" y="336" class="small">자동 리밸런싱 (디스크 추가/제거 시)</text>
+  <text x="60" y="352" class="small">RAC 공유 기본 지원</text>
+  <text x="60" y="368" class="small">OMF 자동 파일 이름 관리</text>
+  <text x="60" y="384" class="small">Oracle 전용 — OS에서 직접 접근 불가</text>
+
+  <!-- Mirroring levels -->
+  <rect x="50" y="396" width="315" height="30" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="60" y="416" class="code">External(0) Normal(2) High(3) Flex(가변)</text>
+
+  <!-- FS Side -->
+  <rect x="415" y="65" width="355" height="370" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="2"/>
+  <text x="592" y="88" text-anchor="middle" class="label" fill="#3B82F6">파일 시스템 (File System)</text>
+
+  <!-- OS / DBA -->
+  <rect x="435" y="100" width="315" height="50" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="592" y="122" text-anchor="middle" class="label">OS / DBA 수동 관리</text>
+  <text x="592" y="140" text-anchor="middle" class="small">운영체제 파일 시스템 직접 사용</text>
+
+  <!-- Directories -->
+  <rect x="435" y="160" width="315" height="90" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="445" y="180" class="sublabel">디렉토리 구조:</text>
+  <text x="445" y="200" class="code">/u01/oradata/orcl/system01.dbf</text>
+  <text x="445" y="218" class="code">/u01/oradata/orcl/users01.dbf</text>
+  <text x="445" y="236" class="code">/u02/oradata/orcl/users02.dbf</text>
+
+  <!-- FS path format -->
+  <rect x="435" y="262" width="315" height="40" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="445" y="280" class="sublabel">경로 형식:</text>
+  <text x="445" y="296" class="code">/u01/app/oracle/oradata/orcl/users01.dbf</text>
+
+  <!-- FS features -->
+  <text x="445" y="320" class="small">미러링: OS RAID에 의존</text>
+  <text x="445" y="336" class="small">로드 밸런싱: 수동 배치 필요</text>
+  <text x="445" y="352" class="small">RAC: 공유 FS 필요 (OCFS2, NFS 등)</text>
+  <text x="445" y="368" class="small">OS에서 직접 파일 관리 가능</text>
+  <text x="445" y="384" class="small">전통적 환경에서 널리 사용</text>
+
+  <!-- Online Move note -->
+  <rect x="435" y="396" width="315" height="30" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1"/>
+  <text x="445" y="416" class="code">ALTER DATABASE MOVE DATAFILE (ASM↔FS)</text>
+</svg>

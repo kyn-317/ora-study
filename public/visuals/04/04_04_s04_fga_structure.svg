@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <text x="400" y="32" class="title" text-anchor="middle">파인 그레인 감사 구조 (Fine-Grained Auditing, FGA)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">열/행 수준 세밀한 감사 - SELECT 감사의 핵심 도구</text>
+
+  <!-- FGA Flow -->
+  <rect x="30" y="75" width="740" height="180" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="50" y="95" class="label">FGA 동작 흐름 (Processing Flow)</text>
+
+  <!-- Step boxes -->
+  <rect x="50" y="108" width="130" height="40" class="box" fill="#6F6BEA" opacity="0.2" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="115" y="125" class="sublabel" text-anchor="middle">SQL 문 실행</text>
+  <text x="115" y="141" class="small" text-anchor="middle">SELECT/DML</text>
+
+  <line x1="180" y1="128" x2="210" y2="128" stroke="#94A3B8" stroke-width="1" marker-end="url(#arr)"/>
+
+  <rect x="210" y="108" width="140" height="40" class="box" fill="#3B82F6" opacity="0.2" stroke="#3B82F6" stroke-width="1"/>
+  <text x="280" y="125" class="code" text-anchor="middle">audit_condition</text>
+  <text x="280" y="141" class="small" text-anchor="middle">행 조건 평가</text>
+
+  <line x1="350" y1="128" x2="380" y2="128" stroke="#94A3B8" stroke-width="1" marker-end="url(#arr)"/>
+
+  <rect x="380" y="108" width="130" height="40" class="box" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1"/>
+  <text x="445" y="125" class="code" text-anchor="middle">audit_column</text>
+  <text x="445" y="141" class="small" text-anchor="middle">열 접근 확인</text>
+
+  <line x1="510" y1="128" x2="540" y2="128" stroke="#94A3B8" stroke-width="1" marker-end="url(#arr)"/>
+
+  <rect x="540" y="108" width="110" height="40" class="box" fill="#F59E0B" opacity="0.2" stroke="#F59E0B" stroke-width="1"/>
+  <text x="595" y="125" class="sublabel" text-anchor="middle">감사 레코드</text>
+  <text x="595" y="141" class="small" text-anchor="middle">생성</text>
+
+  <line x1="650" y1="128" x2="680" y2="128" stroke="#94A3B8" stroke-width="1" marker-end="url(#arr)"/>
+
+  <rect x="680" y="108" width="80" height="40" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1"/>
+  <text x="720" y="125" class="sublabel" text-anchor="middle">핸들러</text>
+  <text x="720" y="141" class="small" text-anchor="middle">(선택)</text>
+
+  <!-- audit_column_opts -->
+  <text x="50" y="172" class="sublabel">audit_column_opts:</text>
+  <rect x="200" y="160" width="170" height="28" class="box" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="1"/>
+  <text x="285" y="178" class="code" text-anchor="middle">ANY_COLUMNS (기본)</text>
+
+  <rect x="385" y="160" width="170" height="28" class="box" fill="#F59E0B" opacity="0.15" stroke="#F59E0B" stroke-width="1"/>
+  <text x="470" y="178" class="code" text-anchor="middle">ALL_COLUMNS</text>
+
+  <text x="200" y="200" class="small">하나라도 접근 시 감사</text>
+  <text x="385" y="200" class="small">모든 열 접근 시에만 감사</text>
+
+  <text x="50" y="226" class="code">statement_types: SELECT, INSERT, UPDATE, DELETE, MERGE</text>
+  <text x="530" y="226" class="small">MERGE: 내부적으로 분리 처리</text>
+  <text x="50" y="245" class="small">enable: 기본 TRUE → ADD_POLICY 호출 시 즉시 활성화 | 하나의 테이블에 여러 FGA 정책 동시 적용 가능</text>
+
+  <!-- DBMS_FGA Package -->
+  <rect x="30" y="270" width="360" height="110" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="30" y="270" width="360" height="26" rx="8" ry="8" fill="#3B82F6"/>
+  <text x="210" y="288" class="label" text-anchor="middle" fill="#FFF">DBMS_FGA 패키지</text>
+
+  <text x="50" y="315" class="code">ADD_POLICY</text>
+  <text x="160" y="315" class="small">정책 생성 (즉시 활성화)</text>
+  <text x="50" y="335" class="code">DROP_POLICY</text>
+  <text x="160" y="335" class="small">정책 삭제</text>
+  <text x="50" y="355" class="code">ENABLE_POLICY</text>
+  <text x="170" y="355" class="small">정책 활성화</text>
+  <text x="50" y="375" class="code">DISABLE_POLICY</text>
+  <text x="175" y="375" class="small">정책 비활성화</text>
+
+  <!-- Handler & Trail -->
+  <rect x="410" y="270" width="360" height="110" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1.5"/>
+  <rect x="410" y="270" width="360" height="26" rx="8" ry="8" fill="#F59E0B"/>
+  <text x="590" y="288" class="label" text-anchor="middle" fill="#1E1E2E">핸들러 및 트레일 조회</text>
+
+  <text x="430" y="315" class="sublabel">핸들러 프로시저 시그니처:</text>
+  <text x="430" y="333" class="code">PROCEDURE(object_schema,</text>
+  <text x="430" y="348" class="code">  object_name, policy_name)</text>
+  <text x="430" y="368" class="sublabel">조회 뷰:</text>
+  <text x="430" y="378" class="code">DBA_FGA_AUDIT_TRAIL</text>
+  <text x="600" y="378" class="small">SQL_TEXT, SQL_BIND</text>
+  <text x="430" y="375" class="code">DBA_AUDIT_POLICIES</text>
+  <text x="600" y="375" class="small">FGA 정책 목록</text>
+
+  <!-- FGA vs Unified comparison -->
+  <rect x="30" y="400" width="740" height="85" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1.5"/>
+  <text x="50" y="420" class="label">FGA vs 통합 감사 핵심 차이</text>
+
+  <text x="50" y="442" class="sublabel">FGA 고유 기능:</text>
+  <text x="180" y="442" class="small">열/행 수준 세밀한 조건 | SELECT 감사 핵심 | 핸들러 프로시저 지원</text>
+  <text x="50" y="462" class="sublabel">감사 트레일:</text>
+  <text x="130" y="462" class="code">DBA_FGA_AUDIT_TRAIL</text>
+  <text x="300" y="462" class="small">SQL_TEXT + SQL_BIND 포함</text>
+  <text x="500" y="462" class="code">UNIFIED_AUDIT_TRAIL</text>
+  <text x="665" y="462" class="small">FGA_POLICY_NAME 열</text>
+  <text x="50" y="480" class="sublabel">활용 사례:</text>
+  <text x="130" y="480" class="small">개인정보 조회 추적, 급여 접근 감사, 의료 데이터(HIPAA), 금융 고액 거래 조회 감사</text>
+</svg>

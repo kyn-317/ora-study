@@ -14,7 +14,11 @@
       "sectionId": "s01",
       "title": "권한 분석 (Privilege Analysis with DBMS_PRIVILEGE_CAPTURE)",
       "content": "**권한 분석(Privilege Analysis)**은 Oracle Database에서 사용자 및 역할에 부여된 권한 중 실제로 사용되는 권한과 사용되지 않는 권한을 식별하여 **최소 권한 원칙(Principle of Least Privilege)**을 구현하기 위한 보안 기능입니다.\n\n### 권한 분석의 목적\n\n| 목적 | 설명 |\n|---|---|\n| **최소 권한 원칙 구현** | 불필요한 권한을 식별하고 제거하여 보안 강화 |\n| **권한 감사(Audit)** | 실제 사용되는 권한과 미사용 권한의 현황 파악 |\n| **규정 준수(Compliance)** | SOX, GDPR 등 보안 규정에 필요한 권한 분석 보고서 생성 |\n| **마이그레이션 지원** | 업그레이드/마이그레이션 시 필요한 최소 권한 세트 파악 |\n\n### 권한 분석 워크플로우\n\n```\n┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐\n│  CREATE_CAPTURE  │───>│  ENABLE_CAPTURE  │───>│   워크로드 실행   │\n│  (정책 생성)      │    │  (캡처 시작)      │    │  (일반 업무 수행) │\n└─────────────────┘    └──────────────────┘    └────────┬────────┘\n                                                        │\n┌─────────────────┐    ┌──────────────────┐             │\n│ GENERATE_RESULT  │<───│ DISABLE_CAPTURE  │<────────────┘\n│ (결과 생성)       │    │ (캡처 중지)       │\n└────────┬────────┘    └──────────────────┘\n         │\n         v\n  DBA_USED_PRIVS / DBA_UNUSED_PRIVS 조회\n```\n\n### 캡처 유형 (Capture Types)\n\n| 캡처 유형 | 설명 | 사용 시나리오 |\n|---|---|---|\n| **DATABASE** | 전체 데이터베이스에서 사용된 권한 캡처 (단, Oracle 유지 관리 계정 제외) | 전사적 권한 감사 |\n| **ROLE** | 특정 역할에 부여된 권한의 사용 여부 캡처 | 역할별 권한 최적화 |\n| **CONTEXT** | 특정 조건(모듈, 액션 등)에서 사용된 권한 캡처 | 애플리케이션별 분석 |\n| **ROLE_AND_CONTEXT** | 역할과 조건을 결합한 캡처 | 세밀한 권한 분석 |\n\n### 권한 분석 결과 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_USED_PRIVS** | 캡처 기간 동안 실제 사용된 권한 목록 |\n| **DBA_UNUSED_PRIVS** | 캡처 기간 동안 사용되지 않은 권한 목록 |\n| **DBA_USED_SYSPRIVS** | 사용된 시스템 권한 목록 |\n| **DBA_USED_OBJPRIVS** | 사용된 객체 권한 목록 |\n| **DBA_USED_OBJPRIVS_PATH** | 사용된 객체 권한의 부여 경로 |\n| **DBA_USED_SYSPRIVS_PATH** | 사용된 시스템 권한의 부여 경로 |\n| **DBA_PRIV_CAPTURES** | 생성된 권한 분석 정책 목록 |",
-      "sqlExamplesIds": ["sql01", "sql02", "sql03"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02",
+        "sql03"
+      ],
       "subsections": [
         {
           "title": "권한 분석 정책 생성 및 실행 (Creating and Running Privilege Analysis Policies)",
@@ -51,13 +55,27 @@
             "'SYS 및 SYSTEM을 포함한 전체 권한 분석 가능'이라는 설명은 오답 — 시험 출제 포인트"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/04/04_03_s01_privilege_analysis_workflow.svg",
+          "caption": "DBMS_PRIVILEGE_CAPTURE 권한 분석 워크플로우 5단계 및 캡처 유형",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s02",
       "title": "프로파일을 통한 자원 제한 (Resource Limits via PROFILE)",
       "content": "**프로파일(PROFILE)**은 사용자에게 할당할 수 있는 데이터베이스 자원 사용량 및 비밀번호 정책의 집합입니다. 각 사용자는 반드시 하나의 프로파일에 연결되며, 명시적으로 지정하지 않으면 **DEFAULT** 프로파일이 자동 적용됩니다.\n\n### 프로파일의 두 가지 역할\n\n| 역할 | 설명 | 적용 조건 |\n|---|---|---|\n| **자원 제한 (Resource Limits)** | CPU, 세션, 연결 시간 등 시스템 자원 사용량 제한 | RESOURCE_LIMIT = TRUE 필요 |\n| **비밀번호 관리 (Password Management)** | 비밀번호 수명, 재사용 제한, 계정 잠금 등 | 항상 적용 (RESOURCE_LIMIT 무관) |\n\n### 자원 제한 파라미터 (Resource Limit Parameters)\n\n| 파라미터 | 설명 | 단위 |\n|---|---|---|\n| **SESSIONS_PER_USER** | 사용자당 동시 세션 수 제한 | 세션 수 |\n| **CPU_PER_SESSION** | 세션당 CPU 사용 시간 제한 | 1/100초 (centiseconds) |\n| **CPU_PER_CALL** | 단일 호출(파싱/실행/페치)당 CPU 시간 제한 | 1/100초 (centiseconds) |\n| **CONNECT_TIME** | 세션 최대 연결 시간 | 분 (minutes) |\n| **IDLE_TIME** | 세션 최대 유휴 시간 | 분 (minutes) |\n| **LOGICAL_READS_PER_SESSION** | 세션당 최대 논리적 읽기(블록 수) | 블록 수 |\n| **LOGICAL_READS_PER_CALL** | 호출당 최대 논리적 읽기 | 블록 수 |\n| **PRIVATE_SGA** | Shared Server 모드에서 세션당 SGA 사용량 제한 | 바이트(K/M 접미사 가능) |\n| **COMPOSITE_LIMIT** | 가중치 기반 복합 자원 제한 | 서비스 단위(SU) |\n\n### RESOURCE_LIMIT 초기화 파라미터\n\n자원 제한 파라미터가 실제로 적용되려면 **RESOURCE_LIMIT** 초기화 파라미터가 **TRUE**로 설정되어야 합니다. 이 파라미터는 동적으로 변경 가능합니다.\n\n```sql\nALTER SYSTEM SET RESOURCE_LIMIT = TRUE;\n```\n\n> **중요**: 비밀번호 관리 파라미터는 RESOURCE_LIMIT 설정과 무관하게 **항상 적용**됩니다.\n\n### DEFAULT 프로파일\n\nOracle 데이터베이스 생성 시 자동으로 생성되는 DEFAULT 프로파일은 모든 파라미터가 **UNLIMITED**로 설정됩니다. 사용자에게 별도 프로파일을 지정하지 않으면 DEFAULT 프로파일이 자동 할당됩니다.\n\n### 프로파일 적용 우선순위\n\n```\n사용자 프로파일의 파라미터 값\n├── 명시적 값 설정 → 해당 값 적용\n├── DEFAULT 지정 → DEFAULT 프로파일의 해당 파라미터 값 적용\n└── UNLIMITED 지정 → 제한 없음\n```",
-      "sqlExamplesIds": ["sql04", "sql05", "sql06"],
+      "sqlExamplesIds": [
+        "sql04",
+        "sql05",
+        "sql06"
+      ],
       "subsections": [
         {
           "title": "자원 제한 파라미터 상세 (Resource Limit Parameters in Detail)",
@@ -84,13 +102,27 @@
             "각 사용자는 반드시 하나의 프로파일만 할당 가능하며, 미지정 시 DEFAULT 프로파일 자동 적용"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/04/04_03_s02_profile_resource_limits.svg",
+          "caption": "프로파일의 자원 제한과 비밀번호 관리 파라미터 구조 비교",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s03",
       "title": "비밀번호 관리 (Password Management via PROFILE)",
       "content": "프로파일의 **비밀번호 관리 파라미터**는 사용자 계정의 비밀번호 정책을 제어합니다. 자원 제한과 달리 비밀번호 관리 파라미터는 RESOURCE_LIMIT 설정과 무관하게 **항상 적용**됩니다.\n\n### 비밀번호 관리 파라미터\n\n| 파라미터 | 설명 | 기본값(DEFAULT) |\n|---|---|---|\n| **PASSWORD_LIFE_TIME** | 비밀번호 유효 기간 (일) | 180 |\n| **PASSWORD_GRACE_TIME** | 비밀번호 만료 후 유예 기간 (일) | 7 |\n| **PASSWORD_REUSE_TIME** | 비밀번호 재사용 금지 기간 (일) | UNLIMITED |\n| **PASSWORD_REUSE_MAX** | 비밀번호 재사용까지 필요한 변경 횟수 | UNLIMITED |\n| **FAILED_LOGIN_ATTEMPTS** | 계정 잠금까지 허용되는 연속 로그인 실패 횟수 | 10 |\n| **PASSWORD_LOCK_TIME** | 로그인 실패로 인한 계정 잠금 기간 (일) | 1 |\n| **INACTIVE_ACCOUNT_TIME** | 마지막 로그인 이후 계정 비활성 잠금까지의 기간 (일) | UNLIMITED |\n| **PASSWORD_VERIFY_FUNCTION** | 비밀번호 복잡성 검증 함수 | NULL |\n\n### 비밀번호 수명 주기\n\n```\n비밀번호 생성/변경\n     │\n     ├── PASSWORD_LIFE_TIME (유효 기간)\n     │        │\n     │        v\n     ├── 만료 경고 → PASSWORD_GRACE_TIME (유예 기간)\n     │        │\n     │        v\n     └── 계정 만료 (EXPIRED 상태) → 로그인 시 비밀번호 변경 강제\n```\n\n### 계정 잠금 메커니즘\n\n```\n로그인 시도\n     │\n     ├── 성공 → 실패 카운터 초기화\n     │\n     └── 실패 → 실패 카운터 증가\n              │\n              ├── FAILED_LOGIN_ATTEMPTS 미만 → 다시 시도 가능\n              │\n              └── FAILED_LOGIN_ATTEMPTS 도달 → 계정 잠금 (LOCKED(TIMED))\n                       │\n                       ├── PASSWORD_LOCK_TIME 경과 → 자동 잠금 해제\n                       │\n                       └── DBA 수동 잠금 해제: ALTER USER ... ACCOUNT UNLOCK\n```\n\n### PASSWORD_REUSE_TIME과 PASSWORD_REUSE_MAX 상호작용\n\n| PASSWORD_REUSE_TIME | PASSWORD_REUSE_MAX | 결과 |\n|---|---|---|\n| UNLIMITED | UNLIMITED | 비밀번호 무제한 재사용 가능 |\n| N일 | UNLIMITED | N일 경과 후 재사용 가능 |\n| UNLIMITED | M회 | M회 변경 후 재사용 가능 |\n| N일 | M회 | N일 경과 **그리고** M회 변경 후 재사용 가능 (양쪽 모두 충족 필요) |",
-      "sqlExamplesIds": ["sql07", "sql08", "sql09"],
+      "sqlExamplesIds": [
+        "sql07",
+        "sql08",
+        "sql09"
+      ],
       "subsections": [
         {
           "title": "비밀번호 검증 함수 (Password Verify Function)",
@@ -117,13 +149,27 @@
             "PASSWORD_LOCK_TIME에 분수값(예: 1/1440 = 1분)을 지정하여 세밀한 잠금 기간 설정 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/04/04_03_s03_password_management.svg",
+          "caption": "비밀번호 수명주기, 계정 상태 유형, 검증 함수 상세 구조",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "테이블스페이스 사용 한도 (Tablespace Quota)",
       "content": "**테이블스페이스 쿼터(Tablespace Quota)**는 사용자가 특정 테이블스페이스에 생성할 수 있는 객체의 최대 저장 공간을 제한하는 메커니즘입니다. 쿼터를 통해 개별 사용자의 디스크 사용량을 제어하고, 특정 사용자가 테이블스페이스를 독점하는 것을 방지합니다.\n\n### 쿼터의 기본 개념\n\n| 항목 | 설명 |\n|---|---|\n| **정의** | 사용자가 특정 테이블스페이스에서 사용할 수 있는 최대 공간 |\n| **적용 대상** | 영구(Permanent) 테이블스페이스의 세그먼트(테이블, 인덱스, LOB 등) |\n| **제외 대상** | 임시(Temporary) 테이블스페이스, UNDO 테이블스페이스 |\n| **단위** | 바이트, K(킬로바이트), M(메가바이트), G(기가바이트) 또는 UNLIMITED |\n\n### 쿼터 설정 방법\n\n| 방법 | 구문 | 설명 |\n|---|---|---|\n| **CREATE USER** | `QUOTA size ON tablespace` | 사용자 생성 시 쿼터 설정 |\n| **ALTER USER** | `QUOTA size ON tablespace` | 기존 사용자의 쿼터 변경 |\n| **UNLIMITED 쿼터** | `QUOTA UNLIMITED ON tablespace` | 특정 테이블스페이스에 무제한 쿼터 |\n| **쿼터 제거** | `QUOTA 0 ON tablespace` | 쿼터를 0으로 설정 (새 객체 생성 불가, 기존 객체는 유지) |\n\n### UNLIMITED TABLESPACE 시스템 권한\n\n**UNLIMITED TABLESPACE** 시스템 권한이 부여되면, 모든 영구 테이블스페이스에 대해 무제한 쿼터가 자동으로 부여됩니다. 이 권한은 개별 쿼터 설정을 무시합니다.\n\n> **주의**: RESOURCE 역할에는 UNLIMITED TABLESPACE 시스템 권한이 포함되어 있었으나, Oracle 12c 이후로는 제거되었습니다.\n\n### 쿼터와 UNLIMITED TABLESPACE 상호작용\n\n| 상황 | 쿼터 적용 |\n|---|---|\n| 개별 쿼터만 설정 | 설정된 쿼터 적용 |\n| UNLIMITED TABLESPACE 권한 부여 | 모든 테이블스페이스에 무제한 (개별 쿼터 무시) |\n| UNLIMITED TABLESPACE 권한 REVOKE | 이전에 설정된 개별 쿼터가 다시 적용됨 |\n| 쿼터 0 설정 + UNLIMITED TABLESPACE 없음 | 새 객체 생성 불가 (기존 객체는 유지) |\n\n### 임시 테이블스페이스와 쿼터\n\n임시(Temporary) 테이블스페이스와 UNDO 테이블스페이스에는 쿼터가 필요하지 않습니다. 이러한 테이블스페이스는 Oracle이 자동으로 관리하며, 사용자가 직접 객체를 생성하지 않습니다.",
-      "sqlExamplesIds": ["sql10", "sql11", "sql12"],
+      "sqlExamplesIds": [
+        "sql10",
+        "sql11",
+        "sql12"
+      ],
       "subsections": [
         {
           "title": "쿼터 설정 및 관리 (Quota Configuration and Management)",
@@ -137,6 +183,16 @@
             "UNLIMITED TABLESPACE 권한을 REVOKE하면 이전에 설정된 개별 쿼터가 다시 적용됨",
             "RESOURCE 역할에는 Oracle 12c 이후 UNLIMITED TABLESPACE 권한이 포함되지 않으므로 별도 쿼터 설정 필요"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/04/04_03_s04_tablespace_quota.svg",
+          "caption": "테이블스페이스 쿼터 구조 및 UNLIMITED TABLESPACE 권한 상호작용",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

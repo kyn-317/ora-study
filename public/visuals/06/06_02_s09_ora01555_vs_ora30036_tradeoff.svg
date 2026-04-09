@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" fill="none">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; fill: #6F6BEA; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 13px; font-weight: 600; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .mono { font-family: 'Consolas', monospace; font-size: 11px; }
+  </style>
+
+  <text x="400" y="30" text-anchor="middle" class="title">ORA-01555 vs ORA-30036 트레이드오프</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">읽기 보호(Read Protection) vs 쓰기 보호(Write Protection) 균형</text>
+
+  <!-- Balance diagram -->
+  <!-- Center pivot -->
+  <polygon points="400,80 410,100 390,100" fill="#6F6BEA"/>
+  <line x1="400" y1="100" x2="400" y2="110" stroke="#6F6BEA" stroke-width="2"/>
+
+  <!-- Balance bar -->
+  <line x1="140" y1="100" x2="660" y2="100" stroke="#E2E8F0" stroke-width="3"/>
+
+  <!-- ORA-01555 side (left) -->
+  <rect x="50" y="110" width="280" height="160" rx="10" fill="#1E1F2E" stroke="#F43F5E" stroke-width="2"/>
+  <text x="190" y="135" text-anchor="middle" class="label" fill="#F43F5E">ORA-01555 방지 (읽기 보호)</text>
+  <text x="190" y="152" text-anchor="middle" class="small">Snapshot Too Old 방지</text>
+  <line x1="65" y1="160" x2="315" y2="160" stroke="#2A2B3D" stroke-width="1"/>
+
+  <text x="80" y="180" class="small" fill="#10B981">UNDO_RETENTION</text>
+  <text x="230" y="180" class="small" fill="#10B981">크게 설정</text>
+  <text x="80" y="198" class="small" fill="#10B981">RETENTION</text>
+  <text x="230" y="198" class="small" fill="#10B981">GUARANTEE</text>
+  <text x="80" y="216" class="small" fill="#10B981">UNDO 크기</text>
+  <text x="230" y="216" class="small" fill="#10B981">크게 설정</text>
+
+  <rect x="70" y="232" width="250" height="28" rx="4" fill="#F43F5E" fill-opacity="0.1" stroke="#F43F5E" stroke-width="1"/>
+  <text x="195" y="250" text-anchor="middle" class="small" fill="#F43F5E">부작용: ORA-30036 위험 증가</text>
+
+  <!-- ORA-30036 side (right) -->
+  <rect x="470" y="110" width="280" height="160" rx="10" fill="#1E1F2E" stroke="#F59E0B" stroke-width="2"/>
+  <text x="610" y="135" text-anchor="middle" class="label" fill="#F59E0B">ORA-30036 방지 (쓰기 보호)</text>
+  <text x="610" y="152" text-anchor="middle" class="small">Unable to Extend Undo 방지</text>
+  <line x1="485" y1="160" x2="735" y2="160" stroke="#2A2B3D" stroke-width="1"/>
+
+  <text x="500" y="180" class="small" fill="#10B981">UNDO_RETENTION</text>
+  <text x="650" y="180" class="small" fill="#10B981">작게 설정</text>
+  <text x="500" y="198" class="small" fill="#10B981">RETENTION</text>
+  <text x="650" y="198" class="small" fill="#10B981">NOGUARANTEE</text>
+  <text x="500" y="216" class="small" fill="#10B981">UNDO 크기</text>
+  <text x="650" y="216" class="small" fill="#10B981">적절하게</text>
+
+  <rect x="490" y="232" width="250" height="28" rx="4" fill="#F59E0B" fill-opacity="0.1" stroke="#F59E0B" stroke-width="1"/>
+  <text x="615" y="250" text-anchor="middle" class="small" fill="#F59E0B">부작용: ORA-01555 위험 증가</text>
+
+  <!-- Optimal solution -->
+  <rect x="100" y="290" width="600" height="90" rx="10" fill="#10B981" fill-opacity="0.08" stroke="#10B981" stroke-width="1.5"/>
+  <text x="400" y="312" text-anchor="middle" class="label" fill="#10B981">최적 균형 전략 (Optimal Balance)</text>
+
+  <text x="200" y="335" text-anchor="middle" class="small">V$UNDOSTAT 분석으로</text>
+  <text x="200" y="350" text-anchor="middle" class="small">워크로드 기반 산정</text>
+  <text x="200" y="365" text-anchor="middle" class="mono" fill="#3B82F6">SSOLDERRCNT + NOSPACEERRCNT</text>
+
+  <text x="400" y="335" text-anchor="middle" class="small">AUTOEXTEND ON +</text>
+  <text x="400" y="350" text-anchor="middle" class="small">Auto-Tuning 활용</text>
+  <text x="400" y="365" text-anchor="middle" class="mono" fill="#6F6BEA">TUNED_UNDORETENTION 모니터링</text>
+
+  <text x="600" y="335" text-anchor="middle" class="small">UNDO Advisor</text>
+  <text x="600" y="350" text-anchor="middle" class="small">(DBMS_UNDO_ADV) 활용</text>
+  <text x="600" y="365" text-anchor="middle" class="mono" fill="#10B981">피크 기준 크기 산정</text>
+</svg>

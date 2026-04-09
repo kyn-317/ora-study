@@ -111,7 +111,7 @@ function SectionRenderer({ section, level = 0 }: { section: StudySectionData; le
         {section.title}
       </h4>
       <div className="markdown-content" style={{ fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--foreground)' }}>
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{section.content}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ table: ({ children, ...props }) => (<div className="table-wrapper"><table {...props}>{children}</table></div>) }}>{section.content}</ReactMarkdown>
       </div>
       {section.key_points && section.key_points.length > 0 && (
         <div style={{

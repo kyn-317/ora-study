@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">PDB Lockdown Profile 아키텍처</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Lockdown Profile — PDB 기능 제한 보안 메커니즘</text>
+
+  <!-- CDB Admin creates profile -->
+  <rect x="40" y="70" width="720" height="90" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <text x="400" y="93" text-anchor="middle" class="label" fill="#F59E0B">CDB$ROOT — CDB 관리자가 Lockdown Profile 생성/관리</text>
+
+  <!-- Profile box -->
+  <rect x="60" y="105" width="200" height="42" class="box" fill="#F59E0B" opacity="0.15" stroke="#F59E0B" stroke-width="1"/>
+  <text x="160" y="122" text-anchor="middle" class="sublabel" fill="#F59E0B">Lockdown Profile</text>
+  <text x="160" y="138" text-anchor="middle" class="code">CREATE LOCKDOWN PROFILE</text>
+
+  <!-- Rules -->
+  <rect x="280" y="105" width="140" height="42" rx="4" ry="4" fill="#F43F5E" opacity="0.12" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="350" y="122" text-anchor="middle" class="small" fill="#F43F5E">DISABLE</text>
+  <text x="350" y="138" text-anchor="middle" class="small" fill="#F43F5E">STATEMENT</text>
+
+  <rect x="430" y="105" width="140" height="42" rx="4" ry="4" fill="#F43F5E" opacity="0.12" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="500" y="122" text-anchor="middle" class="small" fill="#F43F5E">DISABLE</text>
+  <text x="500" y="138" text-anchor="middle" class="small" fill="#F43F5E">FEATURE</text>
+
+  <rect x="580" y="105" width="140" height="42" rx="4" ry="4" fill="#F43F5E" opacity="0.12" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="650" y="122" text-anchor="middle" class="small" fill="#F43F5E">DISABLE</text>
+  <text x="650" y="138" text-anchor="middle" class="small" fill="#F43F5E">OPTION</text>
+
+  <!-- Arrow to PDBs -->
+  <line x1="200" y1="160" x2="200" y2="195" stroke="#F59E0B" stroke-width="1.5"/>
+  <polygon points="195,193 200,203 205,193" fill="#F59E0B"/>
+  <text x="210" y="185" class="code">PDB_LOCKDOWN = profile_name</text>
+
+  <!-- PDB with Lockdown -->
+  <rect x="40" y="205" width="320" height="200" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="40" y="205" width="320" height="28" rx="8" ry="8" fill="#6F6BEA" opacity="0.15"/>
+  <text x="200" y="225" text-anchor="middle" class="label" fill="#6F6BEA">PDB1 (Lockdown 적용)</text>
+
+  <!-- Restricted features -->
+  <text x="55" y="253" class="sublabel" fill="#F43F5E">차단된 기능:</text>
+
+  <rect x="55" y="262" width="135" height="26" rx="4" ry="4" fill="#F43F5E" opacity="0.1" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="122" y="280" text-anchor="middle" class="small" fill="#F43F5E">UTL_HTTP</text>
+  <rect x="200" y="262" width="135" height="26" rx="4" ry="4" fill="#F43F5E" opacity="0.1" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="267" y="280" text-anchor="middle" class="small" fill="#F43F5E">UTL_TCP</text>
+
+  <rect x="55" y="295" width="135" height="26" rx="4" ry="4" fill="#F43F5E" opacity="0.1" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="122" y="313" text-anchor="middle" class="small" fill="#F43F5E">UTL_FILE</text>
+  <rect x="200" y="295" width="135" height="26" rx="4" ry="4" fill="#F43F5E" opacity="0.1" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="267" y="313" text-anchor="middle" class="small" fill="#F43F5E">ALTER SYSTEM</text>
+
+  <text x="55" y="342" class="small" fill="#F43F5E">위반 시: ORA-01031 / ORA-65203</text>
+  <text x="55" y="360" class="small">PDB 관리자는 Profile 변경 불가</text>
+  <text x="55" y="378" class="small" fill="#F59E0B">ENABLE STATEMENT로 예외 허용 가능</text>
+  <text x="55" y="396" class="code">DBA_LOCKDOWN_PROFILES 뷰로 규칙 조회</text>
+
+  <!-- PDB without Lockdown -->
+  <rect x="420" y="205" width="340" height="200" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="420" y="205" width="340" height="28" rx="8" ry="8" fill="#10B981" opacity="0.15"/>
+  <text x="590" y="225" text-anchor="middle" class="label" fill="#10B981">PDB2 (Lockdown 미적용)</text>
+
+  <text x="435" y="253" class="sublabel" fill="#10B981">모든 기능 허용:</text>
+
+  <rect x="435" y="262" width="135" height="26" rx="4" ry="4" fill="#10B981" opacity="0.1" stroke="#10B981" stroke-width="0.5"/>
+  <text x="502" y="280" text-anchor="middle" class="small" fill="#10B981">네트워크 접근 O</text>
+  <rect x="580" y="262" width="135" height="26" rx="4" ry="4" fill="#10B981" opacity="0.1" stroke="#10B981" stroke-width="0.5"/>
+  <text x="647" y="280" text-anchor="middle" class="small" fill="#10B981">OS 접근 O</text>
+
+  <rect x="435" y="295" width="135" height="26" rx="4" ry="4" fill="#10B981" opacity="0.1" stroke="#10B981" stroke-width="0.5"/>
+  <text x="502" y="313" text-anchor="middle" class="small" fill="#10B981">파라미터 변경 O</text>
+  <rect x="580" y="295" width="135" height="26" rx="4" ry="4" fill="#10B981" opacity="0.1" stroke="#10B981" stroke-width="0.5"/>
+  <text x="647" y="313" text-anchor="middle" class="small" fill="#10B981">모든 옵션 O</text>
+
+  <text x="435" y="345" class="small">PDB_LOCKDOWN 파라미터 미설정</text>
+  <text x="435" y="365" class="small">PDB 관리자가 모든 기능을 자유롭게 사용</text>
+  <text x="435" y="395" class="code">SHOW PARAMETER PDB_LOCKDOWN → 빈 값</text>
+
+  <!-- Bottom note -->
+  <text x="400" y="425" text-anchor="middle" class="small" fill="#F59E0B">Lockdown Profile: CDB$ROOT에서만 생성/수정 → PDB별 할당 → 중앙 보안 정책 관리</text>
+</svg>

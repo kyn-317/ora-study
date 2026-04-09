@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 12px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="28" text-anchor="middle" class="title">ROWID 구조 — SMALLFILE vs BIGFILE</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">Row Identifier: 행의 물리적 위치를 식별하는 의사 컬럼 (Pseudocolumn)</text>
+
+  <!-- SMALLFILE ROWID -->
+  <rect x="30" y="65" width="740" height="140" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="50" y="88" class="label" fill="#3B82F6">SMALLFILE ROWID (18자리 Base64)</text>
+
+  <rect x="50" y="100" width="160" height="45" fill="rgba(111,107,234,0.2)" stroke="#6F6BEA" stroke-width="2" rx="6"/>
+  <text x="130" y="122" text-anchor="middle" class="label" fill="#6F6BEA">OOOOOO</text>
+  <text x="130" y="138" text-anchor="middle" class="code">32bit</text>
+
+  <rect x="220" y="100" width="100" height="45" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="2" rx="6"/>
+  <text x="270" y="122" text-anchor="middle" class="label" fill="#3B82F6">FFF</text>
+  <text x="270" y="138" text-anchor="middle" class="code">10bit</text>
+
+  <rect x="330" y="100" width="160" height="45" fill="rgba(16,185,129,0.2)" stroke="#10B981" stroke-width="2" rx="6"/>
+  <text x="410" y="122" text-anchor="middle" class="label" fill="#10B981">BBBBBB</text>
+  <text x="410" y="138" text-anchor="middle" class="code">22bit</text>
+
+  <rect x="500" y="100" width="100" height="45" fill="rgba(245,158,11,0.2)" stroke="#F59E0B" stroke-width="2" rx="6"/>
+  <text x="550" y="122" text-anchor="middle" class="label" fill="#F59E0B">RRR</text>
+  <text x="550" y="138" text-anchor="middle" class="code">16bit</text>
+
+  <text x="50" y="168" class="small">Object: 세그먼트 ID</text>
+  <text x="220" y="168" class="small">File: 파일# (1,022)</text>
+  <text x="360" y="168" class="small">Block: 블록# (~4M)</text>
+  <text x="520" y="168" class="small">Row: 행# (~65K)</text>
+
+  <text x="630" y="115" class="sublabel">파일당 최대</text>
+  <text x="630" y="133" class="code">32GB (8KB)</text>
+  <text x="630" y="150" class="sublabel">TS 최대</text>
+  <text x="630" y="168" class="code">~32TB</text>
+
+  <!-- BIGFILE ROWID -->
+  <rect x="30" y="215" width="740" height="140" class="box" fill="rgba(111,107,234,0.06)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="50" y="238" class="label" fill="#6F6BEA">BIGFILE ROWID (18자리 Base64)</text>
+
+  <rect x="50" y="250" width="160" height="45" fill="rgba(111,107,234,0.2)" stroke="#6F6BEA" stroke-width="2" rx="6"/>
+  <text x="130" y="272" text-anchor="middle" class="label" fill="#6F6BEA">OOOOOO</text>
+  <text x="130" y="288" text-anchor="middle" class="code">32bit</text>
+
+  <rect x="220" y="250" width="380" height="45" fill="rgba(16,185,129,0.2)" stroke="#10B981" stroke-width="2" rx="6"/>
+  <text x="410" y="272" text-anchor="middle" class="label" fill="#10B981">BBBBBBBBB (File 없음 — Block에 32bit 할당)</text>
+  <text x="410" y="288" text-anchor="middle" class="code">32bit (File 10bit 흡수)</text>
+
+  <text x="50" y="318" class="small">Object: 세그먼트 ID</text>
+  <text x="220" y="318" class="small">Block: 블록# (~4.3B) — 파일이 1개이므로 File 비트 불필요</text>
+
+  <text x="630" y="265" class="sublabel">파일 최대</text>
+  <text x="630" y="283" class="code">32TB (8KB)</text>
+  <text x="630" y="300" class="sublabel">블록 수</text>
+  <text x="630" y="318" class="code">2^32 = ~43억</text>
+
+  <!-- Key insight -->
+  <rect x="30" y="365" width="740" height="30" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="400" y="385" text-anchor="middle" class="sublabel" fill="#F59E0B">핵심: BIGFILE은 File 비트를 Block에 할당하여 단일 파일로 SMALLFILE TS 전체 크기와 동일한 최대 용량 확보</text>
+</svg>

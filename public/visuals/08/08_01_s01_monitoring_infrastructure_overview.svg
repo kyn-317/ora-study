@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" fill="none">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .label { font-size: 13px; font-weight: 600; }
+    .desc { font-size: 11px; fill: #94A3B8; }
+    .mono { font-family: 'Consolas', monospace; font-size: 11px; }
+    .box { rx: 8; ry: 8; }
+    .connector { stroke: #6F6BEA; stroke-width: 1.5; stroke-dasharray: 5,3; }
+  </style>
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" class="title">Oracle 모니터링 인프라 4대 구성요소</text>
+  <text x="400" y="52" text-anchor="middle" class="subtitle">Monitoring Infrastructure Core Components</text>
+  
+  <!-- V$ Views Box -->
+  <rect x="30" y="80" width="355" height="130" fill="#1E1F2E" stroke="#3B82F6" stroke-width="2" class="box"/>
+  <circle cx="55" cy="105" r="12" fill="#3B82F6" opacity="0.2"/>
+  <text x="55" y="110" text-anchor="middle" class="mono" fill="#3B82F6">V$</text>
+  <text x="75" y="105" class="label" fill="#3B82F6">동적 성능 뷰 (Dynamic Performance Views)</text>
+  <text x="50" y="130" class="desc">유형: 실시간 (Real-Time)</text>
+  <text x="50" y="148" class="desc">역할: 인스턴스 현재 상태 및 메모리 내 통계 정보</text>
+  <text x="50" y="166" class="desc">위치: SGA 메모리</text>
+  <text x="50" y="184" class="desc">특성: 인스턴스 종료 시 소멸, NOMOUNT부터 부분 접근</text>
+  <rect x="280" y="120" width="90" height="24" rx="12" fill="#3B82F6" opacity="0.15"/>
+  <text x="325" y="136" text-anchor="middle" class="mono" fill="#3B82F6">SELECT SQL</text>
+
+  <!-- Data Dictionary Box -->
+  <rect x="415" y="80" width="355" height="130" fill="#1E1F2E" stroke="#10B981" stroke-width="2" class="box"/>
+  <circle cx="440" cy="105" r="12" fill="#10B981" opacity="0.2"/>
+  <text x="440" y="110" text-anchor="middle" class="mono" fill="#10B981">DD</text>
+  <text x="460" y="105" class="label" fill="#10B981">데이터 딕셔너리 (Data Dictionary)</text>
+  <text x="435" y="130" class="desc">유형: 구조적 (Structural)</text>
+  <text x="435" y="148" class="desc">역할: 객체 메타데이터 및 구조 정보</text>
+  <text x="435" y="166" class="desc">위치: SYSTEM/SYSAUX 테이블스페이스</text>
+  <text x="435" y="184" class="desc">특성: 영구 보존, DDL 시 자동 갱신</text>
+  <rect x="660" y="120" width="95" height="24" rx="12" fill="#10B981" opacity="0.15"/>
+  <text x="707" y="136" text-anchor="middle" class="mono" fill="#10B981">DBA_/ALL_</text>
+
+  <!-- ADR Box -->
+  <rect x="30" y="230" width="355" height="130" fill="#1E1F2E" stroke="#F59E0B" stroke-width="2" class="box"/>
+  <circle cx="55" cy="255" r="12" fill="#F59E0B" opacity="0.2"/>
+  <text x="55" y="260" text-anchor="middle" class="mono" fill="#F59E0B">ADR</text>
+  <text x="75" y="255" class="label" fill="#F59E0B">자동 진단 리포지토리 (ADR)</text>
+  <text x="50" y="280" class="desc">유형: 진단 (Diagnostic)</text>
+  <text x="50" y="298" class="desc">역할: Alert Log, Trace, 인시던트 관리</text>
+  <text x="50" y="316" class="desc">위치: 파일 시스템 (ADR_BASE)</text>
+  <text x="50" y="334" class="desc">특성: 이벤트 발생 시 자동 기록, 파일로 영구 보존</text>
+  <rect x="280" y="270" width="90" height="24" rx="12" fill="#F59E0B" opacity="0.15"/>
+  <text x="325" y="286" text-anchor="middle" class="mono" fill="#F59E0B">ADRCI</text>
+
+  <!-- AWR Box -->
+  <rect x="415" y="230" width="355" height="130" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="2" class="box"/>
+  <circle cx="440" cy="255" r="12" fill="#6F6BEA" opacity="0.2"/>
+  <text x="440" y="260" text-anchor="middle" class="mono" fill="#6F6BEA">AWR</text>
+  <text x="460" y="255" class="label" fill="#6F6BEA">자동 워크로드 리포지토리 (AWR)</text>
+  <text x="435" y="280" class="desc">유형: 이력 (Historical)</text>
+  <text x="435" y="298" class="desc">역할: 성능 통계 스냅샷 주기적 수집</text>
+  <text x="435" y="316" class="desc">위치: SYSAUX 테이블스페이스</text>
+  <text x="435" y="334" class="desc">특성: MMON 프로세스 수집, 보존 기간 내 보존</text>
+  <rect x="660" y="270" width="95" height="24" rx="12" fill="#6F6BEA" opacity="0.15"/>
+  <text x="707" y="286" text-anchor="middle" class="mono" fill="#6F6BEA">MMON</text>
+
+  <!-- Center connection arrows -->
+  <line x1="207" y1="210" x2="207" y2="230" class="connector"/>
+  <line x1="592" y1="210" x2="592" y2="230" class="connector"/>
+  <line x1="385" y1="145" x2="415" y2="145" class="connector"/>
+  <line x1="385" y1="295" x2="415" y2="295" class="connector"/>
+
+  <!-- Relationship annotations -->
+  <rect x="100" y="385" width="600" height="110" fill="#1E1F2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
+  <text x="400" y="410" text-anchor="middle" class="label">구성요소 간 관계 (Inter-Component Relationships)</text>
+  <text x="120" y="435" class="desc">V$ Views  ──MMON──▶  AWR : V$ 통계를 AWR 스냅샷으로 주기적 저장 (기본 1시간)</text>
+  <text x="120" y="455" class="desc">V$ Views  ──ASH───▶  AWR : V$ACTIVE_SESSION_HISTORY → DBA_HIST_ACTIVE_SESS_HISTORY</text>
+  <text x="120" y="475" class="desc">ADR       ──진단──▶  Alert Log/Trace : 장애 발생 시 자동 기록, V$DIAG_INFO로 경로 조회</text>
+  <text x="120" y="495" class="desc">Dictionary ──DDL──▶  자동 갱신 : DDL 실행 시 메타데이터 자동 반영</text>
+</svg>

@@ -14,7 +14,10 @@
       "sectionId": "s01",
       "title": "데이터베이스 링크 개요 (Database Link Overview)",
       "content": "**데이터베이스 링크(Database Link)**는 분산 데이터베이스(Distributed Database) 환경에서 하나의 데이터베이스에서 다른 원격 데이터베이스의 객체에 접근할 수 있도록 하는 스키마 객체입니다.\n\n### 데이터베이스 링크의 핵심 개념\n\n데이터베이스 링크는 **로컬 데이터베이스(Local Database)**에서 **원격 데이터베이스(Remote Database)**로의 단방향 연결 경로를 정의합니다. 링크를 통해 원격 데이터베이스의 테이블, 뷰, 프로시저 등에 마치 로컬 객체처럼 접근할 수 있습니다.\n\n```\n┌──────────────────┐          DB Link          ┌──────────────────┐\n│  Local Database  │ ────────────────────────>  │ Remote Database  │\n│  (링크 소유)      │   접속 정보 + 인증 정보     │ (원격 객체 제공)  │\n└──────────────────┘                           └──────────────────┘\n```\n\n### 데이터베이스 링크 활용 시나리오\n\n| 시나리오 | 설명 |\n|---|---|\n| **분산 쿼리 (Distributed Query)** | 여러 DB에 분산된 데이터를 단일 SQL로 조인/조회 |\n| **분산 트랜잭션 (Distributed Transaction)** | 여러 DB에 걸친 DML 수행 및 2PC(Two-Phase Commit) |\n| **데이터 복제 (Data Replication)** | 원격 DB의 데이터를 주기적으로 복사 |\n| **원격 프로시저 호출 (Remote Procedure Call)** | 원격 DB에 저장된 PL/SQL 프로시저/함수 실행 |\n| **PDB 원격 복제 (Remote PDB Clone)** | 멀티테넌트 환경에서 원격 PDB를 DB 링크를 통해 복제 |\n\n### 데이터베이스 링크 유형 비교\n\n| 유형 | 생성 권한 | 사용 범위 | 생성 구문 |\n|---|---|---|---|\n| **Private** | CREATE DATABASE LINK | 링크 소유자만 사용 가능 | `CREATE DATABASE LINK ...` |\n| **Public** | CREATE PUBLIC DATABASE LINK | 데이터베이스 내 모든 사용자 사용 가능 | `CREATE PUBLIC DATABASE LINK ...` |\n| **Global** | Oracle Net 구성 | 네트워크 내 모든 데이터베이스에서 사용 | Oracle Names/LDAP 기반 자동 생성 |\n\n### 데이터베이스 링크 접속 방식 비교\n\n| 접속 방식 | 인증 대상 | 구문 특징 | 사용 사례 |\n|---|---|---|---|\n| **고정 사용자 (Fixed User)** | 링크에 지정된 고정 계정 | `CONNECT TO user IDENTIFIED BY pwd` | 특정 계정으로 항상 접속 |\n| **연결 사용자 (Connected User)** | 현재 로컬 세션 사용자 | 인증 절 생략 | 동일 계정이 양쪽 DB에 존재 시 |\n| **현재 사용자 (Current User)** | 글로벌 사용자 (Enterprise User) | `CONNECT TO CURRENT_USER` | Enterprise User Security 환경 |",
-      "sqlExamplesIds": ["sql01", "sql02"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02"
+      ],
       "subsections": [
         {
           "title": "분산 데이터베이스 환경의 이해 (Distributed Database Environment)",
@@ -40,13 +43,26 @@
             "최소 권한 원칙에 따라 가능하면 Private 링크 사용이 권장됨"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/03/03_04_s01_dblink_overview.svg",
+          "caption": "데이터베이스 링크 개요 - Private/Public/Global 유형 비교 및 이름 해석 우선순위",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s02",
       "title": "Private 데이터베이스 링크 (Private Database Link)",
       "content": "**Private 데이터베이스 링크**는 특정 사용자(스키마) 소유의 링크로, 해당 소유자만 사용할 수 있습니다. 가장 기본적이고 보안성이 높은 링크 유형입니다.\n\n### Private 링크 생성 구문\n\n```sql\nCREATE DATABASE LINK dblink_name\n  CONNECT TO remote_user IDENTIFIED BY password\n  USING 'connect_string';\n```\n\n### 구문 요소\n\n| 요소 | 설명 |\n|---|---|\n| **dblink_name** | 링크의 이름 (글로벌 이름 또는 사용자 정의 이름) |\n| **CONNECT TO ... IDENTIFIED BY** | 원격 DB 접속 계정/비밀번호 (고정 사용자 방식) |\n| **USING 'connect_string'** | TNS 접속 문자열 또는 서비스 이름 |\n\n### 필요 권한\n\n| 권한 | 설명 |\n|---|---|\n| **CREATE DATABASE LINK** | Private 링크 생성에 필요한 시스템 권한 |\n| **CREATE SESSION** | 원격 DB 접속 시 원격 사용자에게 필요한 권한 |",
-      "sqlExamplesIds": ["sql03", "sql04"],
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04"
+      ],
       "subsections": [
         {
           "title": "Private 링크 생성 및 사용 (Creating and Using Private Links)",
@@ -66,7 +82,10 @@
       "sectionId": "s03",
       "title": "Public 데이터베이스 링크 (Public Database Link)",
       "content": "**Public 데이터베이스 링크**는 데이터베이스 내 **모든 사용자**가 사용할 수 있는 링크입니다. 관리의 편의성이 높지만, 보안 측면에서 신중한 사용이 필요합니다.\n\n### Public 링크 생성 구문\n\n```sql\nCREATE PUBLIC DATABASE LINK dblink_name\n  CONNECT TO remote_user IDENTIFIED BY password\n  USING 'connect_string';\n```\n\n### Private vs Public 링크 비교\n\n| 비교 항목 | Private Link | Public Link |\n|---|---|---|\n| **생성 권한** | CREATE DATABASE LINK | CREATE PUBLIC DATABASE LINK |\n| **삭제 권한** | 소유자 / DROP ANY DATABASE LINK | DROP PUBLIC DATABASE LINK |\n| **사용 범위** | 소유자 스키마만 | 전체 사용자 |\n| **저장 위치** | 소유자 스키마 | PUBLIC 스키마 |\n| **보안 수준** | 높음 | 상대적으로 낮음 |\n| **관리 편의성** | 사용자별 개별 관리 | 중앙 집중 관리 |",
-      "sqlExamplesIds": ["sql05", "sql06"],
+      "sqlExamplesIds": [
+        "sql05",
+        "sql06"
+      ],
       "subsections": [
         {
           "title": "Public 링크 설정 및 보안 고려사항 (Public Link Setup and Security)",
@@ -86,7 +105,9 @@
       "sectionId": "s04",
       "title": "데이터베이스 링크 접속 방식 (Database Link Authentication Methods)",
       "content": "데이터베이스 링크가 원격 데이터베이스에 접속할 때 사용하는 인증 방식은 세 가지로 구분됩니다: **고정 사용자(Fixed User)**, **연결 사용자(Connected User)**, **현재 사용자(Current User)**.\n\n### 접속 방식 상세 비교\n\n| 비교 항목 | 고정 사용자 (Fixed User) | 연결 사용자 (Connected User) | 현재 사용자 (Current User) |\n|---|---|---|---|\n| **인증 대상** | 링크에 지정된 고정 계정 | 현재 로컬 세션 사용자 | 글로벌 사용자 (Enterprise User) |\n| **구문** | CONNECT TO user IDENTIFIED BY pwd | 인증 절 생략 | CONNECT TO CURRENT_USER |\n| **비밀번호 저장** | 링크 정의에 암호화 저장 | 저장하지 않음 | 저장하지 않음 |\n| **계정 요구사항** | 원격 DB에 해당 계정 존재 | 양쪽 DB에 동일 계정/비밀번호 | 글로벌 사용자 디렉토리 필요 |\n| **보안 수준** | 중간 (비밀번호 저장) | 높음 (비밀번호 미저장) | 가장 높음 (중앙 인증) |\n| **사용 편의성** | 가장 간편 | 계정 동기화 필요 | Enterprise User Security 설정 필요 |\n| **대표 사용 사례** | 애플리케이션 계정 접속 | 개발/테스트 환경 | 대규모 엔터프라이즈 환경 |",
-      "sqlExamplesIds": ["sql07"],
+      "sqlExamplesIds": [
+        "sql07"
+      ],
       "subsections": [
         {
           "title": "고정 사용자 링크와 보안 메커니즘 (Fixed User Link Security)",
@@ -100,13 +121,26 @@
             "Oracle Net 암호화(SQLNET.ENCRYPTION_SERVER)를 적용하여 네트워크 전송 보안 강화 권장"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/03/03_04_s04_dblink_auth_methods.svg",
+          "caption": "DB 링크 3가지 접속 방식 비교 - Fixed/Connected/Current User",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s05",
       "title": "데이터베이스 링크 사용법 (Using Database Links)",
       "content": "데이터베이스 링크를 통해 원격 데이터베이스의 다양한 객체에 접근할 수 있습니다. **@dblink_name** 접미사를 사용하여 원격 객체를 참조하며, 동의어(Synonym)를 활용하여 투명한 위치 투명성(Location Transparency)을 구현할 수 있습니다.\n\n### 원격 객체 접근 방법\n\n| 작업 | 구문 | 설명 |\n|---|---|---|\n| **원격 테이블 조회** | `SELECT * FROM table@dblink` | 원격 테이블의 데이터 조회 |\n| **원격 테이블 DML** | `INSERT/UPDATE/DELETE ... table@dblink` | 원격 테이블에 대한 데이터 변경 |\n| **분산 조인** | `SELECT ... FROM local_t JOIN remote_t@dblink` | 로컬과 원격 테이블 간 조인 |\n| **원격 프로시저 호출** | `EXEC procedure@dblink` | 원격 PL/SQL 프로시저 실행 |\n| **원격 함수 호출** | `SELECT function@dblink() FROM DUAL` | 원격 함수 호출 |\n| **동의어 활용** | `CREATE SYNONYM syn FOR table@dblink` | DB 링크를 숨긴 투명한 접근 |",
-      "sqlExamplesIds": ["sql08", "sql09"],
+      "sqlExamplesIds": [
+        "sql08",
+        "sql09"
+      ],
       "subsections": [
         {
           "title": "원격 객체 액세스 및 동의어 활용 (Remote Object Access and Synonyms)",
@@ -125,7 +159,9 @@
       "sectionId": "s06",
       "title": "데이터베이스 링크 내부 동작 (Database Link Internal Operations)",
       "content": "데이터베이스 링크를 통한 원격 접속은 내부적으로 Oracle Net Services를 활용한 세션 관리, 글로벌 네이밍 메커니즘, 그리고 접속 생명주기 관리 등의 복잡한 동작을 포함합니다.\n\n### 접속 과정 (Connection Flow)\n\n```\nDB 링크 접속 과정\n1. 사용자가 remote_table@dblink_name 참조\n   ↓\n2. 로컬 DB가 데이터 딕셔너리에서 링크 정보 조회\n   ↓\n3. 링크 유형(Private/Public/Global) 확인 및 이름 해석\n   ↓\n4. USING 절의 접속 문자열로 원격 DB 위치 확인\n   ↓\n5. Oracle Net을 통해 원격 리스너(Listener)에 접속 요청\n   ↓\n6. 원격 DB에서 인증 수행 (Fixed/Connected/Current User)\n   ↓\n7. 원격 세션 생성 (V$SESSION에 기록됨)\n   ↓\n8. SQL 실행 및 결과 반환\n   ↓\n9. 세션은 로컬 세션 종료 또는 명시적 닫기까지 유지\n```\n\n### 세션 관리 메커니즘\n\n| 항목 | 설명 |\n|---|---|\n| **세션 생성 시점** | DB 링크를 처음 참조할 때 원격 세션 자동 생성 |\n| **세션 유지** | 로컬 세션이 종료되거나 명시적으로 닫을 때까지 유지 |\n| **세션 정보** | 원격 DB의 V$SESSION에서 확인 가능 |\n| **동시 세션 수** | OPEN_LINKS 파라미터로 제한 (기본값 4) |",
-      "sqlExamplesIds": ["sql10"],
+      "sqlExamplesIds": [
+        "sql10"
+      ],
       "subsections": [
         {
           "title": "글로벌 네이밍과 DB_DOMAIN (Global Naming and DB_DOMAIN)",
@@ -150,13 +186,26 @@
             "원격 세션은 원격 DB의 V$SESSION에서 확인 가능하며, 리소스를 소비하므로 불필요 시 닫아야 함"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/03/03_04_s06_dblink_internal_flow.svg",
+          "caption": "DB 링크 내부 동작 흐름 - 원격 세션 생성, SQL 전송, 결과 반환",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s07",
       "title": "데이터베이스 링크 관리 (Managing Database Links)",
       "content": "데이터베이스 링크의 생성 이후 삭제, 닫기, 상태 확인 등의 관리 작업은 DBA의 중요한 업무입니다. 링크의 생명주기 관리와 관련 뷰를 통한 모니터링이 핵심입니다.\n\n### 관리 작업 요약\n\n| 작업 | 명령/방법 | 권한 |\n|---|---|---|\n| **Private 링크 삭제** | `DROP DATABASE LINK link_name` | 소유자 또는 DROP ANY DATABASE LINK |\n| **Public 링크 삭제** | `DROP PUBLIC DATABASE LINK link_name` | DROP PUBLIC DATABASE LINK |\n| **링크 세션 닫기** | `ALTER SESSION CLOSE DATABASE LINK link_name` | 세션 소유자 |\n| **상태 확인** | `SELECT * FROM DBA_DB_LINKS` | SELECT_CATALOG_ROLE 또는 DBA |\n| **열린 링크 확인** | `SELECT * FROM V$DBLINK` | 세션 소유자 |",
-      "sqlExamplesIds": ["sql11", "sql12"],
+      "sqlExamplesIds": [
+        "sql11",
+        "sql12"
+      ],
       "subsections": [
         {
           "title": "링크 삭제, 닫기 및 상태 확인 (Drop, Close, and Status Check)",
@@ -176,7 +225,10 @@
       "sectionId": "s08",
       "title": "멀티테넌트 환경의 데이터베이스 링크 (Database Links in Multitenant)",
       "content": "Oracle 멀티테넌트(CDB/PDB) 환경에서 데이터베이스 링크는 **PDB 로컬 링크**와 **공통(Common) 링크**로 구분됩니다. CDB와 PDB 간, 또는 서로 다른 CDB의 PDB 간 연결에 DB 링크가 활용됩니다.\n\n### 멀티테넌트 환경의 링크 유형\n\n| 유형 | 생성 위치 | 사용 범위 | 특징 |\n|---|---|---|---|\n| **PDB 로컬 링크** | 특정 PDB 내 | 해당 PDB 내 사용자만 | 가장 일반적인 형태 |\n| **공통 Private 링크** | CDB$ROOT | 모든 PDB에서 사용 | CONTAINER=ALL 필요 |\n| **공통 Public 링크** | CDB$ROOT | 모든 PDB의 모든 사용자 | CONTAINER=ALL 필요 |",
-      "sqlExamplesIds": ["sql13", "sql14"],
+      "sqlExamplesIds": [
+        "sql13",
+        "sql14"
+      ],
       "subsections": [
         {
           "title": "CDB/PDB 간 링크 및 공통 데이터베이스 링크 (CDB/PDB Links and Common Links)",
@@ -190,13 +242,25 @@
             "PDB 간 링크 생성 시 USING 절에 대상 PDB의 서비스 이름을 지정해야 함"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/03/03_04_s08_multitenant_dblinks.svg",
+          "caption": "멀티테넌트 환경 DB 링크 - 공통 링크, 로컬 링크, PDB 원격 복제",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s09",
       "title": "관련 파라미터 및 뷰 (Related Parameters and Views)",
       "content": "데이터베이스 링크와 관련된 초기화 파라미터와 데이터 딕셔너리 뷰/동적 성능 뷰를 종합적으로 정리합니다.\n\n### 관련 초기화 파라미터\n\n| 파라미터 | 기본값 | 동적 변경 | 설명 |\n|---|---|---|---|\n| **OPEN_LINKS** | 4 | 아니오 (Static) | 세션당 동시에 열 수 있는 최대 DB 링크 수 |\n| **OPEN_LINKS_PER_INSTANCE** | 4 | 아니오 (Static) | 인스턴스당 이행(Migratable) DB 링크 최대 수 (XA) |\n| **GLOBAL_NAMES** | FALSE | 예 (ALTER SYSTEM) | DB 링크 이름을 원격 DB의 글로벌 이름과 일치 강제 여부 |\n| **DB_DOMAIN** | 없음 | 아니오 (Static) | 데이터베이스 도메인, 글로벌 이름 구성에 사용 |\n| **HS_AUTOREGISTER** | TRUE | 아니오 (Static) | Heterogeneous Services 자동 등록 여부 |\n| **COMMIT_POINT_STRENGTH** | 1 | 아니오 (Static) | 분산 트랜잭션에서 커밋 포인트 결정 가중치 |\n\n### 관련 데이터 딕셔너리 뷰\n\n| 뷰 | 설명 | 주요 컬럼 |\n|---|---|---|\n| **DBA_DB_LINKS** | 모든 DB 링크 정보 | OWNER, DB_LINK, USERNAME, HOST, CREATED |\n| **ALL_DB_LINKS** | 접근 가능한 링크 | OWNER, DB_LINK, USERNAME, HOST |\n| **USER_DB_LINKS** | 현재 사용자 링크 | DB_LINK, USERNAME, HOST, CREATED |\n| **DBA_DB_LINK_SOURCES** | 원격 접속 소스 정보 | DB_LINK, SOURCE_ID, SOURCE_SCHEMA |\n\n### 관련 동적 성능 뷰\n\n| 뷰 | 설명 | 주요 컬럼 |\n|---|---|---|\n| **V$DBLINK** | 현재 열린 DB 링크 | DB_LINK, OWNER_ID, LOGGED_ON, OPEN_CURSORS |\n| **V$GLOBAL_TRANSACTION** | 글로벌(분산) 트랜잭션 정보 | GLOBALID, STATE, STATUS |\n| **GV$DBLINK** | RAC 전체의 열린 DB 링크 | INST_ID, DB_LINK, OWNER_ID |",
-      "sqlExamplesIds": ["sql15"],
+      "sqlExamplesIds": [
+        "sql15"
+      ],
       "subsections": [
         {
           "title": "파라미터 및 뷰 상세 설명 (Parameter and View Details)",

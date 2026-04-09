@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <text x="400" y="30" class="title" text-anchor="middle">접속 디스크립터 상세 구조 (Connect Descriptor)</text>
+  <text x="400" y="50" class="subtitle" text-anchor="middle">Failover / Load Balancing 구성을 포함한 전체 계층 구조</text>
+
+  <!-- Hierarchy tree -->
+  <!-- DESCRIPTION_LIST -->
+  <rect x="30" y="70" width="740" height="310" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+
+  <rect x="50" y="80" width="200" height="26" rx="4" ry="4" fill="#6F6BEA" opacity="0.3" stroke="#6F6BEA"/>
+  <text x="150" y="98" class="code" text-anchor="middle">DESCRIPTION_LIST</text>
+  <text x="270" y="98" class="small">여러 DESCRIPTION 그룹화 (선택)</text>
+
+  <!-- DESCRIPTION 1 -->
+  <line x1="150" y1="106" x2="150" y2="118" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="70" y="118" width="320" height="26" rx="4" ry="4" fill="#3B82F6" opacity="0.3" stroke="#3B82F6"/>
+  <text x="230" y="136" class="code" text-anchor="middle">DESCRIPTION (FAILOVER=ON, LOAD_BALANCE=ON)</text>
+
+  <!-- ADDRESS_LIST -->
+  <line x1="230" y1="144" x2="230" y2="158" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="90" y="158" width="200" height="26" rx="4" ry="4" fill="#10B981" opacity="0.3" stroke="#10B981"/>
+  <text x="190" y="176" class="code" text-anchor="middle">ADDRESS_LIST</text>
+
+  <!-- ADDRESS 1 -->
+  <line x1="190" y1="184" x2="150" y2="198" stroke="#10B981" stroke-width="1"/>
+  <rect x="60" y="198" width="200" height="40" rx="3" ry="3" fill="#1A1A2E" stroke="#10B981"/>
+  <text x="75" y="215" class="code" font-size="10">ADDRESS 1 (Primary)</text>
+  <text x="75" y="232" class="small">PROTOCOL=TCP, HOST=db1, PORT=1521</text>
+
+  <!-- ADDRESS 2 -->
+  <line x1="190" y1="184" x2="340" y2="198" stroke="#10B981" stroke-width="1"/>
+  <rect x="275" y="198" width="200" height="40" rx="3" ry="3" fill="#1A1A2E" stroke="#10B981"/>
+  <text x="290" y="215" class="code" font-size="10">ADDRESS 2 (Standby)</text>
+  <text x="290" y="232" class="small">PROTOCOL=TCP, HOST=db2, PORT=1521</text>
+
+  <!-- CONNECT_DATA -->
+  <line x1="230" y1="144" x2="560" y2="158" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="500" y="158" width="200" height="26" rx="4" ry="4" fill="#F59E0B" opacity="0.3" stroke="#F59E0B"/>
+  <text x="600" y="176" class="code" text-anchor="middle">CONNECT_DATA</text>
+
+  <!-- CONNECT_DATA details -->
+  <line x1="600" y1="184" x2="600" y2="198" stroke="#F59E0B" stroke-width="1"/>
+  <rect x="500" y="198" width="220" height="65" rx="3" ry="3" fill="#1A1A2E" stroke="#F59E0B"/>
+  <text x="515" y="215" class="code" font-size="10">SERVICE_NAME = orcl.example.com</text>
+  <text x="515" y="232" class="code" font-size="10">SERVER = DEDICATED</text>
+  <text x="515" y="248" class="code" font-size="10">FAILOVER_MODE = (TYPE=SELECT)</text>
+
+  <!-- Failover vs LB explanation -->
+  <rect x="50" y="280" width="320" height="85" rx="6" ry="6" fill="#10B981" opacity="0.1" stroke="#10B981"/>
+  <text x="70" y="300" class="label" fill="#10B981" font-size="12">FAILOVER (장애 전환)</text>
+  <text x="70" y="318" class="small">ADDRESS 1 실패 시 ADDRESS 2로 자동 전환</text>
+  <text x="70" y="336" class="code">FAILOVER = ON</text>
+  <text x="70" y="354" class="small">TAF: 세션 투명 장애 전환 (SELECT 재실행)</text>
+
+  <rect x="400" y="280" width="320" height="85" rx="6" ry="6" fill="#3B82F6" opacity="0.1" stroke="#3B82F6"/>
+  <text x="420" y="300" class="label" fill="#3B82F6" font-size="12">LOAD_BALANCE (부하 분산)</text>
+  <text x="420" y="318" class="small">ADDRESS 목록 중 랜덤으로 접속 시도</text>
+  <text x="420" y="336" class="code">LOAD_BALANCE = ON</text>
+  <text x="420" y="354" class="small">RAC 환경에서 인스턴스 간 부하 분산</text>
+
+  <text x="400" y="395" class="small" text-anchor="middle">DESCRIPTION_LIST: 서로 다른 DB간 Failover | ADDRESS_LIST: 같은 DB의 여러 리스너간 Failover/LB</text>
+</svg>

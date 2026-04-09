@@ -36,6 +36,16 @@
             "ASM 미러링 수준: External(미러링 없음), Normal(2-way), High(3-way), Flex(파일별 지정)",
             "Oracle 12c 이상에서 ALTER DATABASE MOVE DATAFILE로 ASM↔파일 시스템 간 온라인 이동 가능",
             "V$ASM_DISKGROUP, V$ASM_DISK 등의 동적 성능 뷰로 ASM 상태 모니터링 가능"
+          ],
+          "visuals": [
+            {
+              "id": "v01",
+              "type": "svg",
+              "src": "/visuals/05/05_02_s01_asm_vs_filesystem.svg",
+              "caption": "ASM vs 파일 시스템 저장 비교 — 구조, 경로, 미러링",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
         }
       ]
@@ -61,6 +71,16 @@
             "이중 쓰기로 인해 약 10~20% 추가 I/O 오버헤드 발생 가능",
             "V$SESSION_LONGOPS 뷰로 대용량 데이터 파일 이동의 진행 상태를 실시간 모니터링 가능",
             "경로 전환 시 아주 짧은 순간의 파일 잠금(Lock)이 발생하지만 사실상 무중단"
+          ],
+          "visuals": [
+            {
+              "id": "v02",
+              "type": "svg",
+              "src": "/visuals/05/05_02_s02_shadow_copy_mechanism.svg",
+              "caption": "온라인 데이터 파일 이동 — 섀도 복사(Shadow Copy) + 이중 쓰기(Dual Write) 메커니즘",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
         },
         {
@@ -122,6 +142,16 @@
             "원본 파일은 자동 삭제되지 않으므로 DBA가 수동으로 정리 필요"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/05/05_02_s03_offline_move_process.svg",
+          "caption": "오프라인 데이터 파일 이동 2가지 방법 — RENAME FILE(MOUNT) vs RENAME DATAFILE(OPEN)",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -157,6 +187,16 @@
             "행 마이그레이션은 SELECT 시 추가 I/O를 유발하므로 PCTFREE 적절히 설정 필요",
             "V$SYSSTAT의 'table fetch continued row' 통계로 체이닝/마이그레이션 영향 모니터링"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/05/05_02_s04_data_block_structure.svg",
+          "caption": "Oracle 데이터 블록 내부 구조 — Header, Row Directory, Free Space, Row Data",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     },
@@ -240,6 +280,16 @@
             "IOT(Index-Organized Table)는 물리적 ROWID 대신 Primary Key 기반 논리적 ROWID 사용",
             "Extended ROWID(10바이트)는 테이블스페이스당 최대 4096개 데이터 파일 지원"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/05/05_02_s07_rowid_structure.svg",
+          "caption": "ROWID 구조 — SMALLFILE(File 10bit) vs BIGFILE(Block 32bit) 비교",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

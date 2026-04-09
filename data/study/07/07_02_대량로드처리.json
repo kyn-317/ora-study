@@ -14,7 +14,10 @@
       "sectionId": "s01",
       "title": "SQL*Loader 개요 및 아키텍처 (SQL*Loader Overview and Architecture)",
       "content": "SQL*Loader는 Oracle 데이터베이스에 외부 데이터 파일을 로드하기 위한 **클라이언트 측 유틸리티(Client-Side Utility)**이다. 플랫 파일(CSV, 고정 길이 등)의 데이터를 하나 이상의 Oracle 테이블에 고속으로 적재할 수 있으며, Conventional Path와 Direct Path 두 가지 로드 방식을 지원한다.",
-      "sqlExamplesIds": ["sql01", "sql02"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02"
+      ],
       "subsections": [
         {
           "title": "정의 및 역할 (Definition and Role)",
@@ -89,13 +92,27 @@
             "External Table은 서버 측에서 SQL로 접근하는 대안적 방식이다"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/07/07_02_s01_sqlldr_architecture.svg",
+          "caption": "SQL*Loader 아키텍처 - 5단계 실행 과정(초기화->읽기->변환->적재->후처리)과 입출력 파일 구조",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s02",
       "title": "컨트롤 파일 구조와 문법 (Control File Structure and Syntax)",
       "content": "SQL*Loader **컨트롤 파일(Control File)**은 데이터 로드의 모든 규칙을 정의하는 텍스트 파일로, 데이터 파일의 위치, 형식, 대상 테이블, 필드 매핑, 로드 조건 등을 기술한다. 확장자는 관례적으로 `.ctl`을 사용한다.",
-      "sqlExamplesIds": ["sql03", "sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04",
+        "sql05"
+      ],
       "subsections": [
         {
           "title": "컨트롤 파일 기본 문법 (Control File Basic Syntax)",
@@ -139,7 +156,10 @@
       "sectionId": "s03",
       "title": "Express Mode (Express Mode)",
       "content": "SQL*Loader **Express Mode**는 컨트롤 파일 없이 간편하게 데이터를 로드할 수 있는 모드로, 대상 테이블의 DDL(컬럼 정의)에서 자동으로 필드 매핑을 유추한다. Oracle 26ai에서 더욱 강화된 이 모드는 1Z0-182 시험의 핵심 출제 포인트이다.",
-      "sqlExamplesIds": ["sql06", "sql07"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07"
+      ],
       "subsections": [
         {
           "title": "Express Mode 정의 및 사용법 (Express Mode Definition and Usage)",
@@ -167,13 +187,26 @@
             "테이블이 사전에 존재해야 Express Mode를 사용할 수 있다"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/07/07_02_s03_express_mode.svg",
+          "caption": "Standard Mode(.ctl 필수) vs Express Mode(컨트롤 파일 불필요) 비교 - Oracle 26ai 강화 기능",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "로드 방식과 로드 모드 (Loading Methods and Load Modes)",
       "content": "SQL*Loader는 데이터를 테이블에 적재하는 **로드 방식(Path)**과 기존 데이터 처리를 결정하는 **로드 모드(Mode)**를 구분하여 제공한다. 이 두 가지 개념을 정확히 이해하는 것이 시험에서 중요하다.",
-      "sqlExamplesIds": ["sql08", "sql09"],
+      "sqlExamplesIds": [
+        "sql08",
+        "sql09"
+      ],
       "subsections": [
         {
           "title": "Conventional Path Load vs Direct Path Load (Conventional Path Load vs Direct Path Load)",
@@ -202,13 +235,26 @@
             "TRUNCATE는 HWM을 리셋하지만 REPLACE는 HWM을 유지한다"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/07/07_02_s04_load_path_comparison.svg",
+          "caption": "Conventional Path vs Direct Path Load 비교 및 INSERT/APPEND/REPLACE/TRUNCATE 4가지 로드 모드",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s05",
       "title": "에러 처리 및 로그 분석 (Error Handling and Log Analysis)",
       "content": "SQL*Loader는 **Bad 파일**, **Discard 파일**, **로그 파일**의 세 가지 출력 파일을 통해 체계적인 에러 처리와 실행 결과 분석을 지원한다.",
-      "sqlExamplesIds": ["sql10", "sql11"],
+      "sqlExamplesIds": [
+        "sql10",
+        "sql11"
+      ],
       "subsections": [
         {
           "title": "Bad 파일과 Discard 파일 (Bad File and Discard File)",
@@ -235,13 +281,25 @@
             "로그 파일의 통계로 로드 성공/실패/Discard 건수를 확인한다"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/07/07_02_s05_error_handling_log.svg",
+          "caption": "SQL*Loader 에러 처리 흐름 - Parse/WHEN 검증 후 Bad File, Discard File 분기 및 Log File 분석 항목",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s06",
       "title": "기타 로드 유틸리티와의 비교 (Comparison with Other Loading Utilities)",
       "content": "Oracle은 SQL*Loader 외에도 **External Table**과 **Data Pump**를 제공하며, 각 도구의 특성을 이해하고 적절한 상황에서 선택하는 것이 중요하다.",
-      "sqlExamplesIds": ["sql12"],
+      "sqlExamplesIds": [
+        "sql12"
+      ],
       "subsections": [
         {
           "title": "SQL*Loader vs External Table vs Data Pump 비교 (Comparison)",
@@ -254,6 +312,16 @@
             "EXTERNAL_TABLE=GENERATE_ONLY로 외부 테이블 DDL을 자동 생성할 수 있다",
             "간단한 CSV 로드는 Express Mode, 복잡한 ETL은 External Table이 권장된다"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/07/07_02_s06_loader_utility_comparison.svg",
+          "caption": "SQL*Loader vs External Table vs Data Pump 비교표 - 상황별 최적 로드 도구 선택 가이드",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">EXCLUDE / INCLUDE Filters</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Data Pump 객체 필터링 - 제외/포함 규칙으로 정밀한 Export/Import 제어</text>
+
+  <!-- EXCLUDE Section -->
+  <rect x="30" y="70" width="355" height="350" class="box" fill="rgba(244,63,94,0.05)" stroke="#F43F5E" stroke-width="1.5" />
+  <text x="207" y="95" text-anchor="middle" class="label" fill="#F43F5E">EXCLUDE (제외 필터)</text>
+  <text x="207" y="115" text-anchor="middle" class="small">지정한 객체 유형을 Export/Import에서 제외</text>
+
+  <!-- EXCLUDE examples -->
+  <rect x="50" y="130" width="315" height="30" class="box" fill="rgba(42,43,61,0.5)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="70" y="150" class="code">EXCLUDE=INDEX</text>
+  <text x="220" y="150" class="small">모든 인덱스 제외</text>
+
+  <rect x="50" y="170" width="315" height="30" class="box" fill="rgba(42,43,61,0.3)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="70" y="190" class="code">EXCLUDE=GRANT</text>
+  <text x="220" y="190" class="small">모든 권한 부여 제외</text>
+
+  <rect x="50" y="210" width="315" height="30" class="box" fill="rgba(42,43,61,0.5)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="70" y="230" class="code">EXCLUDE=TABLE:"='EMP'"</text>
+  <text x="260" y="230" class="small">EMP 테이블만 제외</text>
+
+  <rect x="50" y="250" width="315" height="30" class="box" fill="rgba(42,43,61,0.3)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="70" y="270" class="code">EXCLUDE=INDEX:"LIKE 'PK_%'"</text>
+  <text x="280" y="270" class="small">PK_ 인덱스 제외</text>
+
+  <rect x="50" y="290" width="315" height="40" class="box" fill="rgba(42,43,61,0.5)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="70" y="310" class="code">EXCLUDE=SCHEMA:"='HR'"</text>
+  <text x="70" y="323" class="small">FULL Export에서 HR 스키마 전체 제외</text>
+
+  <!-- EXCLUDE behavior note -->
+  <rect x="50" y="345" width="315" height="55" class="box" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1" />
+  <text x="70" y="365" class="sublabel" fill="#F43F5E">EXCLUDE 동작 규칙</text>
+  <text x="70" y="383" class="small">여러 EXCLUDE를 동시 지정 가능 (AND 조건)</text>
+  <text x="70" y="398" class="small">EXCLUDE와 INCLUDE는 동시 사용 불가</text>
+
+  <!-- INCLUDE Section -->
+  <rect x="415" y="70" width="355" height="350" class="box" fill="rgba(16,185,129,0.05)" stroke="#10B981" stroke-width="1.5" />
+  <text x="592" y="95" text-anchor="middle" class="label" fill="#10B981">INCLUDE (포함 필터)</text>
+  <text x="592" y="115" text-anchor="middle" class="small">지정한 객체 유형만 Export/Import에 포함</text>
+
+  <!-- INCLUDE examples -->
+  <rect x="435" y="130" width="315" height="30" class="box" fill="rgba(42,43,61,0.5)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="455" y="150" class="code">INCLUDE=TABLE</text>
+  <text x="600" y="150" class="small">테이블만 포함</text>
+
+  <rect x="435" y="170" width="315" height="30" class="box" fill="rgba(42,43,61,0.3)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="455" y="190" class="code">INCLUDE=TABLE:"='EMP'"</text>
+  <text x="640" y="190" class="small">EMP 테이블만</text>
+
+  <rect x="435" y="210" width="315" height="30" class="box" fill="rgba(42,43,61,0.5)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="455" y="230" class="code">INCLUDE=INDEX</text>
+  <text x="600" y="230" class="small">인덱스만 포함</text>
+
+  <rect x="435" y="250" width="315" height="40" class="box" fill="rgba(42,43,61,0.3)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="455" y="270" class="code">INCLUDE=TABLE:"IN('EMP','DEPT')"</text>
+  <text x="455" y="285" class="small">EMP, DEPT 두 테이블만 포함</text>
+
+  <rect x="435" y="300" width="315" height="30" class="box" fill="rgba(42,43,61,0.5)" stroke="#2A2B3D" stroke-width="1" />
+  <text x="455" y="320" class="code">INCLUDE=PROCEDURE</text>
+  <text x="620" y="320" class="small">프로시저만 포함</text>
+
+  <!-- INCLUDE behavior note -->
+  <rect x="435" y="345" width="315" height="55" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1" />
+  <text x="455" y="365" class="sublabel" fill="#10B981">INCLUDE 동작 규칙</text>
+  <text x="455" y="383" class="small">지정한 유형 + 해당 유형의 종속 객체 포함</text>
+  <text x="455" y="398" class="small">INCLUDE=TABLE 시 관련 인덱스/제약 자동 포함</text>
+
+  <!-- Object types reference -->
+  <text x="400" y="435" text-anchor="middle" class="small">주요 객체 유형: TABLE, INDEX, CONSTRAINT, GRANT, TRIGGER, PROCEDURE, FUNCTION, PACKAGE, VIEW, SEQUENCE, SCHEMA</text>
+</svg>

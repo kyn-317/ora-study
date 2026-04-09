@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="28" text-anchor="middle" class="title">저장 공간 최적화 워크플로우</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">Space Optimization Workflow — 식별 → 분석 → 선택 → 실행</text>
+
+  <!-- Step 1: Identify -->
+  <rect x="30" y="70" width="170" height="130" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="2"/>
+  <text x="115" y="93" text-anchor="middle" class="label" fill="#3B82F6">1. 식별</text>
+  <text x="115" y="110" text-anchor="middle" class="sublabel">Space Waste Detection</text>
+  <text x="40" y="132" class="code">Segment Advisor</text>
+  <text x="40" y="148" class="code">DBA_SEGMENTS</text>
+  <text x="40" y="164" class="code">DBA_FREE_SPACE</text>
+  <text x="40" y="180" class="code">DBMS_SPACE</text>
+  <text x="40" y="195" class="small">유지보수 윈도우 자동실행</text>
+
+  <!-- Arrow -->
+  <line x1="200" y1="135" x2="225" y2="135" stroke="#6F6BEA" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+
+  <!-- Step 2: Analyze -->
+  <rect x="230" y="70" width="170" height="130" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="2"/>
+  <text x="315" y="93" text-anchor="middle" class="label" fill="#F59E0B">2. 분석</text>
+  <text x="315" y="110" text-anchor="middle" class="sublabel">Root Cause Analysis</text>
+  <text x="240" y="132" class="small">Migration/Chaining?</text>
+  <text x="240" y="148" class="code">V$SYSSTAT</text>
+  <text x="240" y="164" class="small">HWM 위치 확인</text>
+  <text x="240" y="180" class="code">DBMS_SPACE.SPACE_USAGE</text>
+  <text x="240" y="195" class="small">단편화 수준 측정</text>
+
+  <!-- Arrow -->
+  <line x1="400" y1="135" x2="425" y2="135" stroke="#6F6BEA" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+
+  <!-- Step 3: Choose -->
+  <rect x="430" y="70" width="170" height="130" class="box" fill="rgba(111,107,234,0.1)" stroke="#6F6BEA" stroke-width="2"/>
+  <text x="515" y="93" text-anchor="middle" class="label" fill="#6F6BEA">3. 선택</text>
+  <text x="515" y="110" text-anchor="middle" class="sublabel">Method Selection</text>
+  <text x="440" y="132" class="small">온라인 필요?</text>
+  <text x="440" y="148" class="small">→ SHRINK SPACE</text>
+  <text x="440" y="164" class="small">대규모 재구성?</text>
+  <text x="440" y="180" class="small">→ ALTER TABLE MOVE</text>
+  <text x="440" y="195" class="small">전체 삭제? → TRUNCATE</text>
+
+  <!-- Arrow -->
+  <line x1="600" y1="135" x2="625" y2="135" stroke="#6F6BEA" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+
+  <!-- Step 4: Execute -->
+  <rect x="630" y="70" width="140" height="130" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="2"/>
+  <text x="700" y="93" text-anchor="middle" class="label" fill="#10B981">4. 실행/검증</text>
+  <text x="700" y="110" text-anchor="middle" class="sublabel">Execute + Verify</text>
+  <text x="640" y="132" class="small">세그먼트 크기 확인</text>
+  <text x="640" y="148" class="small">Full Scan 시간 비교</text>
+  <text x="640" y="164" class="small">I/O 통계 비교</text>
+  <text x="640" y="180" class="code">V$SEGMENT_STATISTICS</text>
+
+  <!-- Waste causes -->
+  <rect x="30" y="220" width="360" height="225" class="box" fill="rgba(244,63,94,0.06)" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="50" y="243" class="label" fill="#F43F5E">공간 낭비의 주요 원인</text>
+
+  <rect x="50" y="258" width="320" height="28" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1" rx="4"/>
+  <text x="60" y="276" class="sublabel">DELETE 후 미회수 — HWM 미하향</text>
+
+  <rect x="50" y="292" width="320" height="28" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1" rx="4"/>
+  <text x="60" y="310" class="sublabel">Row Migration — UPDATE 시 행 이동</text>
+
+  <rect x="50" y="326" width="320" height="28" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1" rx="4"/>
+  <text x="60" y="344" class="sublabel">Row Chaining — 행 크기 > 블록 크기</text>
+
+  <rect x="50" y="360" width="320" height="28" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1" rx="4"/>
+  <text x="60" y="378" class="sublabel">PCTFREE 부적절 — 여유 공간 과소/과다</text>
+
+  <rect x="50" y="394" width="320" height="28" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1" rx="4"/>
+  <text x="60" y="412" class="sublabel">단편화 — 반복 INSERT/DELETE</text>
+
+  <!-- Optimization techniques -->
+  <rect x="410" y="220" width="360" height="225" class="box" fill="rgba(16,185,129,0.06)" stroke="#10B981" stroke-width="1.5"/>
+  <text x="430" y="243" class="label" fill="#10B981">공간 최적화 기법 요약</text>
+
+  <rect x="430" y="258" width="320" height="28" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1" rx="4"/>
+  <text x="440" y="276" class="code">SHRINK SPACE</text>
+  <text x="570" y="276" class="small">온라인, HWM 하향</text>
+
+  <rect x="430" y="292" width="320" height="28" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1" rx="4"/>
+  <text x="440" y="310" class="code">ALTER TABLE MOVE</text>
+  <text x="590" y="310" class="small">새 세그먼트 재구성</text>
+
+  <rect x="430" y="326" width="320" height="28" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1" rx="4"/>
+  <text x="440" y="344" class="code">TRUNCATE</text>
+  <text x="540" y="344" class="small">전체 삭제 + HWM 초기화</text>
+
+  <rect x="430" y="360" width="320" height="28" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1" rx="4"/>
+  <text x="440" y="378" class="code">Compression</text>
+  <text x="550" y="378" class="small">Basic/Advanced/HCC</text>
+
+  <rect x="430" y="394" width="320" height="28" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1" rx="4"/>
+  <text x="440" y="412" class="code">INDEX UNUSABLE</text>
+  <text x="580" y="412" class="small">인덱스 공간 회수</text>
+</svg>

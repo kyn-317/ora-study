@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+    .arrow-line { stroke: #6F6BEA; stroke-width: 2; fill: none; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="ah-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+    </marker>
+    <marker id="ah-amber" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Transportable Tablespace &amp; Network Import</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">고급 데이터 이동 기능 - 데이터파일 직접 복사 &amp; DB 간 직접 Import</text>
+
+  <!-- === Transportable Tablespace (Top) === -->
+  <rect x="30" y="70" width="740" height="190" class="box" fill="rgba(245,158,11,0.04)" stroke="#F59E0B" stroke-width="1.5" />
+  <text x="50" y="95" class="label" fill="#F59E0B">Transportable Tablespace (TTS)</text>
+  <text x="50" y="112" class="small">메타데이터만 Export + 데이터파일(.dbf) 직접 복사 → 대용량 이관 시 가장 빠름</text>
+
+  <!-- Source DB -->
+  <rect x="50" y="130" width="190" height="110" class="box" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1" />
+  <text x="145" y="152" text-anchor="middle" class="sublabel" fill="#3B82F6">Source DB</text>
+  <text x="70" y="172" class="code">1. TS를 READ ONLY 설정</text>
+  <text x="70" y="190" class="code">2. expdp TRANSPORT_</text>
+  <text x="70" y="205" class="code">   TABLESPACES=TS1</text>
+  <text x="70" y="222" class="small">→ 메타데이터 .dmp 생성</text>
+
+  <!-- Data File copy -->
+  <rect x="290" y="145" width="170" height="80" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <text x="375" y="170" text-anchor="middle" class="sublabel" fill="#F59E0B">OS Level Copy</text>
+  <text x="375" y="192" text-anchor="middle" class="code">cp ts1.dbf /target/</text>
+  <text x="375" y="210" text-anchor="middle" class="small">데이터파일 직접 복사</text>
+
+  <line x1="240" y1="185" x2="288" y2="185" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#ah-amber)" />
+
+  <!-- Target DB -->
+  <rect x="510" y="130" width="240" height="110" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1" />
+  <text x="630" y="152" text-anchor="middle" class="sublabel" fill="#10B981">Target DB</text>
+  <text x="530" y="172" class="code">3. 데이터파일 배치</text>
+  <text x="530" y="190" class="code">4. impdp TRANSPORT_</text>
+  <text x="530" y="205" class="code">   DATAFILES=ts1.dbf</text>
+  <text x="530" y="222" class="small">→ 메타데이터 Import + 파일 연결</text>
+
+  <line x1="460" y1="185" x2="508" y2="185" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#ah-green)" />
+
+  <!-- === Network Import (Bottom) === -->
+  <rect x="30" y="280" width="740" height="200" class="box" fill="rgba(111,107,234,0.04)" stroke="#6F6BEA" stroke-width="1.5" />
+  <text x="50" y="305" class="label" fill="#6F6BEA">Network Import (NETWORK_LINK)</text>
+  <text x="50" y="322" class="small">덤프 파일 없이 DB Link를 통해 소스 DB에서 직접 Import (네트워크 경유)</text>
+
+  <!-- Source DB -->
+  <rect x="50" y="340" width="240" height="120" class="box" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1.5" />
+  <text x="170" y="365" text-anchor="middle" class="label" fill="#3B82F6">Source DB (원본)</text>
+  <text x="170" y="385" text-anchor="middle" class="sublabel">데이터 + 메타데이터</text>
+  <text x="170" y="410" text-anchor="middle" class="small">별도 Export 작업 불필요</text>
+  <text x="170" y="430" text-anchor="middle" class="small">DB Link로 직접 접근</text>
+  <text x="170" y="450" text-anchor="middle" class="code">PUBLIC DATABASE LINK</text>
+
+  <!-- Network arrow -->
+  <line x1="290" y1="400" x2="480" y2="400" stroke="#6F6BEA" stroke-width="2.5" fill="none" marker-end="url(#ah)" stroke-dasharray="8,4" />
+  <text x="385" y="390" text-anchor="middle" class="code">NETWORK_LINK=src_link</text>
+  <text x="385" y="418" text-anchor="middle" class="small">DB Link 경유 (네트워크)</text>
+
+  <!-- Target DB -->
+  <rect x="480" y="340" width="270" height="120" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1.5" />
+  <text x="615" y="365" text-anchor="middle" class="label" fill="#10B981">Target DB (대상)</text>
+  <text x="500" y="390" class="code">impdp hr/hr</text>
+  <text x="500" y="408" class="code">  NETWORK_LINK=src_link</text>
+  <text x="500" y="426" class="code">  SCHEMAS=HR</text>
+  <text x="500" y="446" class="code">  REMAP_SCHEMA=HR:SCOTT</text>
+
+  <!-- Comparison note -->
+  <text x="400" y="495" text-anchor="middle" class="small">TTS: 대용량 데이터에 최적 (데이터파일 복사 + 메타데이터만 Import) | Network Import: 덤프 파일 불필요, DB Link 경유 직접 이관</text>
+</svg>

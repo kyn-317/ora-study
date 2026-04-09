@@ -17,12 +17,26 @@
       "title": "모니터링 및 로깅 개요 (Monitoring and Logging Overview)",
       "sqlExamplesIds": [],
       "content": "Oracle Database의 모니터링 및 로깅 인프라는 **실시간 상태 확인**, **성능 이력 분석**, **장애 진단**이라는 세 가지 축으로 구성됩니다. DBA는 이 인프라를 통해 데이터베이스의 현재 상태를 파악하고, 과거 성능 추이를 분석하며, 장애 발생 시 원인을 신속하게 규명할 수 있습니다.\n\n## Oracle 모니터링 인프라 4대 핵심 구성요소\n\n| 구성요소 | 분류 | 주요 역할 | 데이터 위치 |\n|---|---|---|---|\n| **동적 성능 뷰 (V$ Views)** | 실시간 | 인스턴스의 현재 상태 및 메모리 내 통계 정보 제공 | SGA (메모리) |\n| **데이터 딕셔너리 (Data Dictionary)** | 구조적 | 데이터베이스 객체의 메타데이터 및 구조 정보 제공 | SYSTEM/SYSAUX 테이블스페이스 |\n| **ADR (Automatic Diagnostic Repository)** | 진단 | Alert Log, Trace 파일, 인시던트 덤프 등 진단 데이터 관리 | 파일 시스템 (ADR_BASE) |\n| **AWR (Automatic Workload Repository)** | 이력 | 성능 통계 스냅샷의 주기적 수집 및 이력 관리 | SYSAUX 테이블스페이스 |\n\n## 모니터링 인프라 계층 구조\n\n```\nOracle Database 모니터링 인프라\n├── 실시간 계층 (Real-Time Layer)\n│   ├── 동적 성능 뷰 (V$ Views) — SGA 메모리 내 실시간 데이터\n│   └── 고정 테이블 (X$ Tables) — V$ 뷰의 실제 데이터 소스\n├── 영속 메타데이터 계층 (Persistent Metadata Layer)\n│   ├── 데이터 딕셔너리 기본 테이블 (SYS 소유)\n│   └── 데이터 딕셔너리 뷰 (DBA_/ALL_/USER_)\n├── 이력 통계 계층 (Historical Statistics Layer)\n│   ├── AWR 스냅샷 (WRM$_/WRH$_ 테이블)\n│   ├── AWR 베이스라인 (Baselines)\n│   └── ASH (Active Session History)\n└── 진단 로깅 계층 (Diagnostic Logging Layer)\n    ├── Alert Log (경고 로그)\n    ├── Trace Files (추적 파일)\n    ├── Incident Dumps (인시던트 덤프)\n    └── Health Monitor Reports (건강 점검 보고서)\n```\n\n## 구성요소 간 관계 비교\n\n| 비교 항목 | V$ Views | Data Dictionary | ADR | AWR |\n|---|---|---|---|---|\n| **데이터 유형** | 실시간 통계 | 메타데이터 | 진단 로그 | 이력 통계 |\n| **저장 위치** | SGA 메모리 | 디스크 (SYSTEM/SYSAUX) | 파일 시스템 | 디스크 (SYSAUX) |\n| **영속성** | 인스턴스 종료 시 소멸 | 영구 보존 | 파일로 영구 보존 | 보존 기간 내 보존 |\n| **접근 방법** | SELECT (SQL) | SELECT (SQL) | ADRCI / SQL / OS | SQL / EM / DBMS_WORKLOAD_REPOSITORY |\n| **수집 방식** | 자동 (커널 수준) | DDL 시 자동 갱신 | 이벤트 발생 시 자동 기록 | MMON 프로세스가 주기적 수집 |\n| **Oracle 26ai 기본 제공** | 예 | 예 | 예 | 예 (Diagnostics Pack 라이선스 필요) |",
-      "subsections": []
+      "subsections": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/08/08_01_s01_monitoring_infrastructure_overview.svg",
+          "caption": "Oracle 모니터링 인프라 4대 구성요소 (V$ Views, Data Dictionary, ADR, AWR)",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ]
     },
     {
       "sectionId": "s02",
       "title": "동적 성능 뷰 (Dynamic Performance Views / V$ Views)",
-      "sqlExamplesIds": ["sql01", "sql02", "sql03"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02",
+        "sql03"
+      ],
       "content": "**동적 성능 뷰(Dynamic Performance Views)**는 Oracle 인스턴스가 기동(Startup)된 시점부터 메모리(SGA) 내에 유지되는 실시간 성능 및 상태 정보를 SQL로 조회할 수 있게 하는 뷰입니다. 접두어 **V$**로 시작하며, 실제로는 **GV$** (Global V$) 뷰의 로컬 인스턴스 필터링 버전입니다.",
       "subsections": [
         {
@@ -50,12 +64,25 @@
             "AWR의 MMON 프로세스가 V$ 뷰 통계를 주기적으로 스냅샷으로 저장하여 이력 보존"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/08/08_01_s02_vdollar_view_hierarchy.svg",
+          "caption": "V$ 뷰 내부 계층 구조 (Public Synonym → View → Fixed View → X$ Table → SGA)",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s03",
       "title": "데이터 딕셔너리 (Data Dictionary)",
-      "sqlExamplesIds": ["sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql04",
+        "sql05"
+      ],
       "content": "**데이터 딕셔너리(Data Dictionary)**는 Oracle Database의 모든 객체, 사용자, 권한, 저장 구조 등에 대한 **메타데이터(Metadata)**를 저장하는 읽기 전용 테이블과 뷰의 집합입니다. 데이터베이스의 '카탈로그(Catalog)'라고도 하며, Oracle 커널이 DDL 작업 시 자동으로 갱신합니다.",
       "subsections": [
         {
@@ -71,12 +98,26 @@
             "데이터베이스 생성 시 catalog.sql/catproc.sql 스크립트로 딕셔너리 뷰와 PL/SQL 패키지가 생성됨"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/08/08_01_s03_data_dictionary_structure.svg",
+          "caption": "데이터 딕셔너리 뷰 계층 비교 (DBA_/ALL_/USER_/CDB_)",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "자동 진단 리포지토리 (Automatic Diagnostic Repository / ADR)",
-      "sqlExamplesIds": ["sql06", "sql07", "sql08"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07",
+        "sql08"
+      ],
       "content": "**자동 진단 리포지토리(ADR, Automatic Diagnostic Repository)**는 Oracle 11g부터 도입된 파일 시스템 기반의 통합 진단 데이터 저장소입니다. Alert Log, Trace 파일, 인시던트 덤프, 건강 점검 보고서 등 모든 진단 데이터를 일원화된 디렉터리 구조로 관리합니다.",
       "subsections": [
         {
@@ -119,12 +160,27 @@
             "V$HM_RUN, V$HM_FINDING, V$HM_RECOMMENDATION으로 Health Monitor 결과를 SQL로 조회"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/08/08_01_s04_adr_directory_structure.svg",
+          "caption": "ADR 디렉터리 구조 및 인시던트 관리 흐름",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s05",
       "title": "자동 워크로드 리포지토리 (Automatic Workload Repository / AWR)",
-      "sqlExamplesIds": ["sql09", "sql10", "sql11", "sql12"],
+      "sqlExamplesIds": [
+        "sql09",
+        "sql10",
+        "sql11",
+        "sql12"
+      ],
       "content": "**자동 워크로드 리포지토리(AWR, Automatic Workload Repository)**는 Oracle Database의 성능 통계 데이터를 주기적으로 수집하여 **SYSAUX 테이블스페이스**에 저장하는 성능 이력 관리 인프라입니다. **MMON(Manageability Monitor)** 백그라운드 프로세스가 자동으로 스냅샷을 생성하며, 성능 분석의 기초 데이터를 제공합니다.",
       "subsections": [
         {
@@ -153,6 +209,16 @@
             "awrddrpt.sql로 두 기간의 AWR 데이터를 비교하는 Diff 보고서 생성 가능",
             "DB Time이 Elapsed Time × CPU 수를 초과하면 데이터베이스가 과부하 상태임을 나타냄"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/08/08_01_s05_awr_snapshot_lifecycle.svg",
+          "caption": "AWR 스냅샷 수집 및 활용 흐름 (MMON → V$ → AWR → ADDM/Report)",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Refreshable Clone PDB 라이프사이클</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Refreshable Clone Lifecycle — 주기적 동기화 및 SWITCHOVER</text>
+
+  <!-- Source PDB -->
+  <rect x="40" y="80" width="300" height="100" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <text x="190" y="105" text-anchor="middle" class="label" fill="#10B981">소스 PDB (Source)</text>
+  <text x="190" y="125" text-anchor="middle" class="sublabel">READ WRITE — 운영 데이터</text>
+  <text x="190" y="148" text-anchor="middle" class="small">변경 사항 발생 → Redo 생성</text>
+  <text x="190" y="168" text-anchor="middle" class="small" fill="#F59E0B">ARCHIVELOG 모드 필수</text>
+
+  <!-- Arrow: Initial Clone -->
+  <line x1="340" y1="100" x2="450" y2="100" stroke="#F59E0B" stroke-width="2"/>
+  <polygon points="448,95 458,100 448,105" fill="#F59E0B"/>
+  <text x="395" y="92" text-anchor="middle" class="sublabel" fill="#F59E0B">초기 클론</text>
+
+  <!-- Clone PDB -->
+  <rect x="460" y="80" width="300" height="100" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <text x="610" y="105" text-anchor="middle" class="label" fill="#3B82F6">Refreshable Clone PDB</text>
+  <text x="610" y="125" text-anchor="middle" class="sublabel" fill="#F43F5E">READ ONLY 전용</text>
+  <text x="610" y="148" text-anchor="middle" class="small">주기적 동기화 (Redo 적용)</text>
+  <text x="610" y="168" text-anchor="middle" class="small" fill="#F59E0B">REFRESH 중 접속 불가</text>
+
+  <!-- Refresh arrows -->
+  <line x1="340" y1="140" x2="460" y2="140" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <polygon points="458,135 468,140 458,145" fill="#3B82F6"/>
+  <text x="400" y="155" text-anchor="middle" class="small" fill="#3B82F6">Redo 전송 &amp; 적용</text>
+
+  <!-- Refresh Modes -->
+  <rect x="40" y="200" width="720" height="60" class="box" fill="#2A2B3D" stroke="#F59E0B" stroke-width="1"/>
+  <text x="400" y="222" text-anchor="middle" class="label" fill="#F59E0B">REFRESH MODE 옵션</text>
+
+  <rect x="55" y="232" width="190" height="22" rx="4" ry="4" fill="#10B981" opacity="0.12" stroke="#10B981" stroke-width="0.5"/>
+  <text x="150" y="248" text-anchor="middle" class="small" fill="#10B981">MANUAL (수동 동기화)</text>
+
+  <rect x="260" y="232" width="230" height="22" rx="4" ry="4" fill="#3B82F6" opacity="0.12" stroke="#3B82F6" stroke-width="0.5"/>
+  <text x="375" y="248" text-anchor="middle" class="small" fill="#3B82F6">EVERY n MINUTES (자동)</text>
+
+  <rect x="505" y="232" width="240" height="22" rx="4" ry="4" fill="#F43F5E" opacity="0.12" stroke="#F43F5E" stroke-width="0.5"/>
+  <text x="625" y="248" text-anchor="middle" class="small" fill="#F43F5E">NONE (비활성화 → 일반 PDB)</text>
+
+  <!-- SWITCHOVER Process -->
+  <text x="400" y="290" text-anchor="middle" class="label" fill="#6F6BEA">SWITCHOVER (역할 전환)</text>
+
+  <!-- Before -->
+  <rect x="40" y="305" width="330" height="50" class="box" fill="#2A2B3D" stroke="#10B981" stroke-width="1"/>
+  <text x="205" y="325" text-anchor="middle" class="sublabel" fill="#10B981">전환 전 (Before)</text>
+  <text x="105" y="345" text-anchor="middle" class="small" fill="#10B981">소스: READ WRITE</text>
+  <text x="270" y="345" text-anchor="middle" class="small" fill="#3B82F6">클론: READ ONLY</text>
+
+  <!-- Arrow -->
+  <line x1="370" y1="330" x2="425" y2="330" stroke="#F59E0B" stroke-width="2"/>
+  <polygon points="423,325 433,330 423,335" fill="#F59E0B"/>
+  <text x="398" y="350" text-anchor="middle" class="code">SWITCHOVER</text>
+
+  <!-- After -->
+  <rect x="435" y="305" width="325" height="50" class="box" fill="#2A2B3D" stroke="#F59E0B" stroke-width="1"/>
+  <text x="597" y="325" text-anchor="middle" class="sublabel" fill="#F59E0B">전환 후 (After)</text>
+  <text x="510" y="345" text-anchor="middle" class="small" fill="#3B82F6">소스: READ ONLY</text>
+  <text x="680" y="345" text-anchor="middle" class="small" fill="#10B981">클론: READ WRITE</text>
+
+  <!-- Use cases -->
+  <rect x="40" y="375" width="720" height="50" class="box" fill="#2A2B3D" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="400" y="395" text-anchor="middle" class="label">SWITCHOVER 활용 시나리오</text>
+  <text x="140" y="415" text-anchor="middle" class="small" fill="#F43F5E">재해 복구 (DR)</text>
+  <text x="340" y="415" text-anchor="middle" class="small" fill="#F59E0B">롤링 업그레이드</text>
+  <text x="530" y="415" text-anchor="middle" class="small" fill="#3B82F6">유지보수 전환</text>
+  <text x="700" y="415" text-anchor="middle" class="small" fill="#10B981">재 SWITCHOVER 복원</text>
+
+  <!-- Note -->
+  <text x="400" y="438" text-anchor="middle" class="code">SWITCHOVER 전 최종 REFRESH 수행 필수 | 소스 활성 트랜잭션 없어야 함</text>
+</svg>

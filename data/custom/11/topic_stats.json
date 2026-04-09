@@ -1,0 +1,16 @@
+{
+  "chapter": "11",
+  "chapter_name": "監査の概要",
+  "original_topic_ratio": {
+    "統合監査ポリシー": 2,
+    "監査トレール管理": 1,
+    "ファイングレイン監査（FGA）": 1
+  },
+  "custom_topic_counts": {
+    "統合監査ポリシー": 5,
+    "監査トレール管理": 3,
+    "ファイングレイン監査（FGA）": 2
+  },
+  "total_custom": 10,
+  "last_number": "C_11_010"
+}

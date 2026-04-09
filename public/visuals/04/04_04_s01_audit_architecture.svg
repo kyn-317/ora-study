@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <text x="400" y="32" class="title" text-anchor="middle">Oracle 감사 아키텍처 전체 흐름 (Audit Architecture)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">감사 유형별 정의, 데이터 흐름, 트레일 저장 구조</text>
+
+  <!-- User Activity -->
+  <rect x="300" y="70" width="200" height="38" class="box" fill="#6F6BEA" stroke="none"/>
+  <text x="400" y="94" class="label" text-anchor="middle" fill="#FFF">사용자 활동 (SQL 실행)</text>
+
+  <line x1="400" y1="108" x2="400" y2="135" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Audit Policy Evaluation -->
+  <rect x="250" y="135" width="300" height="38" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="400" y="159" class="label" text-anchor="middle">감사 정책 평가 (Policy Evaluation)</text>
+
+  <line x1="400" y1="173" x2="400" y2="200" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- SGA Audit Queue -->
+  <rect x="250" y="200" width="300" height="48" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <text x="400" y="220" class="label" text-anchor="middle">SGA 감사 버퍼 (Audit Queue)</text>
+  <text x="400" y="238" class="code" text-anchor="middle">UNIFIED_AUDIT_SGA_QUEUE_SIZE (기본: 1MB)</text>
+
+  <line x1="400" y1="248" x2="400" y2="275" stroke="#10B981" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="420" y="268" class="small">주기적 Flush</text>
+
+  <!-- AUDSYS Schema -->
+  <rect x="200" y="275" width="400" height="55" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <text x="400" y="295" class="label" text-anchor="middle">AUDSYS 스키마 (AUD$UNIFIED 테이블)</text>
+  <text x="400" y="315" class="small" text-anchor="middle">SYSAUX 테이블스페이스 저장 | SET_AUDIT_TRAIL_LOCATION으로 변경 가능</text>
+
+  <line x1="400" y1="330" x2="400" y2="357" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Unified Audit Trail view -->
+  <rect x="200" y="357" width="400" height="38" class="box" fill="#F59E0B" opacity="0.2" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="400" y="381" class="code" text-anchor="middle">UNIFIED_AUDIT_TRAIL 뷰 (조회)</text>
+
+  <!-- Three audit types -->
+  <rect x="30" y="415" width="230" height="90" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="30" y="415" width="230" height="25" rx="8" ry="8" fill="#3B82F6"/>
+  <text x="145" y="433" class="label" text-anchor="middle" fill="#FFF">통합 감사 (Unified)</text>
+  <text x="50" y="458" class="small">정책 기반: CREATE AUDIT POLICY</text>
+  <text x="50" y="473" class="small">SGA 큐 비동기 기록 (고성능)</text>
+  <text x="50" y="488" class="small">Oracle 12c+ 기본, 권장 방식</text>
+  <text x="50" y="500" class="code">AUDIT_ADMIN / AUDIT_VIEWER</text>
+
+  <rect x="280" y="415" width="240" height="90" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5"/>
+  <rect x="280" y="415" width="240" height="25" rx="8" ry="8" fill="#F43F5E"/>
+  <text x="400" y="433" class="label" text-anchor="middle" fill="#FFF">강제 감사 (Mandatory)</text>
+  <text x="300" y="458" class="small">비활성화 불가능</text>
+  <text x="300" y="473" class="small">SYSDBA/SYSOPER 접속</text>
+  <text x="300" y="488" class="small">DB 기동/종료</text>
+  <text x="300" y="500" class="small">DBMS_AUDIT_MGMT 사용</text>
+
+  <rect x="540" y="415" width="230" height="90" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <rect x="540" y="415" width="230" height="25" rx="8" ry="8" fill="#10B981"/>
+  <text x="655" y="433" class="label" text-anchor="middle" fill="#FFF">FGA (Fine-Grained)</text>
+  <text x="560" y="458" class="small">열/행 수준 세밀한 감사</text>
+  <text x="560" y="473" class="small">SELECT 문 감사 가능</text>
+  <text x="560" y="488" class="small">핸들러 프로시저 지원</text>
+  <text x="560" y="500" class="code">DBMS_FGA.ADD_POLICY</text>
+
+  <!-- OS Audit file note -->
+  <rect x="620" y="200" width="160" height="80" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="700" y="218" class="sublabel" text-anchor="middle">OS 감사 파일</text>
+  <text x="700" y="238" class="code" text-anchor="middle">$ORACLE_BASE/audit/</text>
+  <text x="700" y="258" class="small" text-anchor="middle">혼합 모드 강제 감사</text>
+  <text x="700" y="273" class="small" text-anchor="middle">DB 미기동 시 기록</text>
+
+  <line x1="550" y1="220" x2="620" y2="220" stroke="#2A2B3D" stroke-width="1" stroke-dasharray="3"/>
+
+  <!-- Mode info -->
+  <rect x="30" y="135" width="200" height="50" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="50" y="155" class="sublabel">감사 모드:</text>
+  <text x="50" y="172" class="small">혼합 (Mixed): 전통+통합 공존</text>
+  <text x="50" y="183" class="small">순수 (Pure): 통합만 동작</text>
+</svg>

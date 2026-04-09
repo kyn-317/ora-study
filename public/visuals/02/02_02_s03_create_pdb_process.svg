@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .box { rx: 8; ry: 8; }
+  </style>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">PDB 생성 내부 프로세스 및 파일 경로 우선순위</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">CREATE PLUGGABLE DATABASE Internal Process &amp; File Path Priority</text>
+
+  <!-- Process Steps -->
+  <text x="400" y="78" text-anchor="middle" class="label" fill="#6F6BEA">PDB 생성 내부 프로세스 (6단계)</text>
+
+  <!-- Step 1 -->
+  <rect x="40" y="90" width="230" height="50" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1.5"/>
+  <circle cx="60" cy="115" r="12" fill="#3B82F6" opacity="0.3" stroke="#3B82F6" stroke-width="1"/>
+  <text x="60" y="120" text-anchor="middle" class="small" fill="#3B82F6">1</text>
+  <text x="80" y="110" class="sublabel" fill="#3B82F6">유효성 검증</text>
+  <text x="80" y="128" class="small">PDB 이름, 권한, CDB 상태 확인</text>
+
+  <!-- Step 2 -->
+  <rect x="285" y="90" width="230" height="50" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1.5"/>
+  <circle cx="305" cy="115" r="12" fill="#F59E0B" opacity="0.3" stroke="#F59E0B" stroke-width="1"/>
+  <text x="305" y="120" text-anchor="middle" class="small" fill="#F59E0B">2</text>
+  <text x="325" y="110" class="sublabel" fill="#F59E0B">PDB$SEED 파일 복사</text>
+  <text x="325" y="128" class="small">SYSTEM, SYSAUX 데이터 파일</text>
+
+  <!-- Step 3 -->
+  <rect x="530" y="90" width="230" height="50" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <circle cx="550" cy="115" r="12" fill="#10B981" opacity="0.3" stroke="#10B981" stroke-width="1"/>
+  <text x="550" y="120" text-anchor="middle" class="small" fill="#10B981">3</text>
+  <text x="570" y="110" class="sublabel" fill="#10B981">딕셔너리 초기화</text>
+  <text x="570" y="128" class="small">GUID 생성, 딕셔너리 갱신</text>
+
+  <!-- Arrows -->
+  <line x1="270" y1="115" x2="285" y2="115" stroke="#94A3B8" stroke-width="1.5"/>
+  <polygon points="283,110 293,115 283,120" fill="#94A3B8"/>
+  <line x1="515" y1="115" x2="530" y2="115" stroke="#94A3B8" stroke-width="1.5"/>
+  <polygon points="528,110 538,115 528,120" fill="#94A3B8"/>
+
+  <!-- Step 4 -->
+  <rect x="40" y="155" width="230" height="50" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1.5"/>
+  <circle cx="60" cy="180" r="12" fill="#6F6BEA" opacity="0.3" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="60" y="185" text-anchor="middle" class="small" fill="#6F6BEA">4</text>
+  <text x="80" y="175" class="sublabel" fill="#6F6BEA">관리자 계정 생성</text>
+  <text x="80" y="193" class="small">ADMIN USER + PDB_DBA 역할</text>
+
+  <!-- Step 5 -->
+  <rect x="285" y="155" width="230" height="50" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5"/>
+  <circle cx="305" cy="180" r="12" fill="#F43F5E" opacity="0.3" stroke="#F43F5E" stroke-width="1"/>
+  <text x="305" y="185" text-anchor="middle" class="small" fill="#F43F5E">5</text>
+  <text x="325" y="175" class="sublabel" fill="#F43F5E">서비스 등록</text>
+  <text x="325" y="193" class="small">PDB명과 동일한 서비스 자동 생성</text>
+
+  <!-- Step 6 -->
+  <rect x="530" y="155" width="230" height="50" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1.5"/>
+  <circle cx="550" cy="180" r="12" fill="#F59E0B" opacity="0.3" stroke="#F59E0B" stroke-width="1"/>
+  <text x="550" y="185" text-anchor="middle" class="small" fill="#F59E0B">6</text>
+  <text x="570" y="175" class="sublabel" fill="#F59E0B">MOUNTED 상태 완료</text>
+  <text x="570" y="193" class="small">수동 OPEN 필요</text>
+
+  <line x1="270" y1="180" x2="285" y2="180" stroke="#94A3B8" stroke-width="1.5"/>
+  <polygon points="283,175 293,180 283,185" fill="#94A3B8"/>
+  <line x1="515" y1="180" x2="530" y2="180" stroke="#94A3B8" stroke-width="1.5"/>
+  <polygon points="528,175 538,180 528,185" fill="#94A3B8"/>
+
+  <!-- File Path Priority -->
+  <text x="400" y="240" text-anchor="middle" class="label" fill="#F59E0B">파일 경로 결정 우선순위 (File Path Resolution Priority)</text>
+
+  <!-- Priority pyramid -->
+  <rect x="130" y="260" width="540" height="45" class="box" fill="#F43F5E" opacity="0.15" stroke="#F43F5E" stroke-width="1.5"/>
+  <text x="180" y="278" class="label" fill="#F43F5E">1순위</text>
+  <text x="260" y="280" class="sublabel">CREATE PDB 문의 FILE_NAME_CONVERT</text>
+  <text x="260" y="295" class="code">(소스경로, 대상경로) 쌍으로 매핑</text>
+
+  <rect x="130" y="310" width="540" height="45" class="box" fill="#F59E0B" opacity="0.12" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="180" y="328" class="label" fill="#F59E0B">2순위</text>
+  <text x="260" y="330" class="sublabel">CREATE PDB 문의 CREATE_FILE_DEST</text>
+  <text x="260" y="345" class="code">OMF 기반 — 디렉토리만 지정, 파일명 자동</text>
+
+  <rect x="130" y="360" width="540" height="45" class="box" fill="#3B82F6" opacity="0.12" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="180" y="378" class="label" fill="#3B82F6">3순위</text>
+  <text x="260" y="380" class="sublabel">PDB_FILE_NAME_CONVERT 초기화 파라미터</text>
+  <text x="260" y="395" class="code">CDB 레벨 기본 경로 매핑 (SCOPE=SPFILE)</text>
+
+  <rect x="130" y="410" width="540" height="45" class="box" fill="#10B981" opacity="0.12" stroke="#10B981" stroke-width="1.5"/>
+  <text x="180" y="428" class="label" fill="#10B981">4순위</text>
+  <text x="260" y="430" class="sublabel">DB_CREATE_FILE_DEST 초기화 파라미터</text>
+  <text x="260" y="445" class="code">Oracle Managed Files 기본 위치</text>
+
+  <rect x="130" y="460" width="540" height="40" class="box" fill="#F43F5E" opacity="0.08" stroke="#F43F5E" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="180" y="478" class="label" fill="#F43F5E">없음</text>
+  <text x="260" y="483" class="sublabel" fill="#F43F5E">위 모두 미지정 시 → ORA 오류 발생</text>
+
+  <!-- Priority arrows -->
+  <text x="80" y="285" class="small" fill="#F43F5E">높음</text>
+  <line x1="105" y1="270" x2="105" y2="490" stroke="#94A3B8" stroke-width="1" stroke-dasharray="3,3"/>
+  <polygon points="100,488 105,498 110,488" fill="#94A3B8"/>
+  <text x="80" y="495" class="small" fill="#94A3B8">낮음</text>
+</svg>

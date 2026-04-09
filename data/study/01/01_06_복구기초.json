@@ -16,7 +16,17 @@
       "title": "Oracle 복구 메커니즘 개요 (Recovery Mechanism Overview)",
       "sqlExamplesIds": [],
       "content": "Oracle Database는 다양한 장애 상황에서 데이터의 **일관성(Consistency)**과 **내구성(Durability)**을 보장하기 위해 체계적인 복구 메커니즘을 갖추고 있습니다. 이 메커니즘의 핵심은 **Redo 로그**와 **UNDO 데이터**, 그리고 **체크포인트(Checkpoint)**의 협력적 동작입니다.\n\nOracle의 복구는 크게 세 가지 범주로 나뉩니다:\n\n| 복구 유형 | 발생 원인 | 자동/수동 | 주요 메커니즘 |\n|---|---|---|---|\n| **인스턴스 복구 (Instance Recovery)** | 비정상 인스턴스 종료 (정전, 장애 등) | 자동 | Redo Log를 이용한 Roll Forward + UNDO를 이용한 Roll Back |\n| **미디어 복구 (Media Recovery)** | 데이터 파일 손실/손상 (디스크 장애 등) | 수동 (DBA 개입) | 백업 + 아카이브 로그를 이용한 복원 및 복구 |\n| **블록 미디어 복구 (Block Media Recovery)** | 개별 데이터 블록 손상 | 수동/자동 | RMAN을 이용한 블록 단위 복구 |\n\n### 복구의 기본 원칙: Write-Ahead Logging (WAL)\n\nOracle의 모든 복구 메커니즘은 **Write-Ahead Logging(WAL)** 원칙에 기반합니다:\n\n1. **데이터 변경 전에 반드시 Redo 로그를 먼저 기록**합니다.\n2. LGWR이 Redo Log Buffer의 내용을 Online Redo Log File에 기록한 후에야 트랜잭션이 커밋된 것으로 간주됩니다.\n3. 이를 통해 커밋된 트랜잭션은 어떤 장애 상황에서도 복구할 수 있습니다.\n\n### 복구 관련 핵심 구성요소 관계\n\n```\n트랜잭션 변경 → Redo Log Buffer → LGWR → Online Redo Log Files\n                                              ↓ (ARCn)\n                                         Archived Redo Log Files\n\n트랜잭션 변경 → Database Buffer Cache (Dirty Buffer) → DBWn → Data Files\n                                                         ↑\n                                                    Checkpoint (CKPT)\n\n트랜잭션 롤백 ← UNDO Tablespace ← UNDO 데이터 기록\n```\n\n| 구성요소 | 복구에서의 역할 |\n|---|---|\n| **Online Redo Log** | 모든 데이터 변경 사항 기록. 인스턴스 복구 시 Roll Forward에 사용 |\n| **Archived Redo Log** | 미디어 복구 시 과거 변경 사항 재적용에 사용 |\n| **UNDO Tablespace** | 커밋되지 않은 트랜잭션의 원래 값 보관. 롤백/인스턴스 복구 시 Roll Back에 사용 |\n| **Control File** | 데이터 파일, Redo 로그 위치, SCN 정보 등 데이터베이스 구조 메타데이터 |\n| **Checkpoint** | 디스크와 메모리 간 동기화 시점 기록. 복구 시작점 결정 |\n| **Data File Header** | 마지막 체크포인트 SCN 기록. 복구 필요 여부 판단 기준 |",
-      "subsections": []
+      "subsections": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/01/01_06_s01_recovery_overview.svg",
+          "caption": "Oracle 복구 메커니즘 개요: WAL 원칙 기반의 3가지 복구 유형(인스턴스/미디어/블록)과 핵심 구성요소 관계",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ]
     },
     {
       "sectionId": "s02",
@@ -59,6 +69,24 @@
             "V$INSTANCE_RECOVERY 뷰에서 현재 예상 복구 시간과 필요 Redo 양을 확인",
             "MTTR 설정은 Incremental Checkpoint 빈도에 직접적으로 영향을 미침"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/01/01_06_s02_instance_recovery_phases.svg",
+          "caption": "인스턴스 복구 2단계 흐름: Roll Forward(Redo 적용) → DB OPEN → Roll Back(UNDO 적용)",
+          "placement": "after-content",
+          "width": "100%"
+        },
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/01/01_06_s02_scn_recovery_decision.svg",
+          "caption": "SCN 비교를 통한 복구 판단: Checkpoint SCN과 Data File Header SCN 비교로 복구 유형 결정",
+          "placement": "after-keypoints",
+          "width": "100%"
         }
       ]
     },
@@ -104,6 +132,24 @@
             "최소 3개 이상의 Redo Log 그룹 구성 권장"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/01/01_06_s03_checkpoint_mechanism.svg",
+          "caption": "Full Checkpoint vs Incremental Checkpoint 비교: 동작 방식, I/O 패턴, 발생 조건",
+          "placement": "after-content",
+          "width": "100%"
+        },
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/01/01_06_s03_log_switch_checkpoint.svg",
+          "caption": "로그 스위치와 체크포인트 연동: 상태 전환 흐름과 checkpoint not complete 경고",
+          "placement": "after-keypoints",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -147,6 +193,16 @@
             "FRA는 아카이브 로그, RMAN 백업셋, Flashback 로그, Control File 자동 백업 등을 저장"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "svg",
+          "src": "/visuals/01/01_06_s04_media_recovery_types.svg",
+          "caption": "미디어 복구 유형 비교: Complete Recovery vs Incomplete Recovery(PITR) 절차와 복구 범위",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -177,6 +233,16 @@
             "Redo Log 크기는 15~30분 간격의 로그 스위치를 기준으로 설정 권장",
             "너무 작은 Redo Log는 과도한 로그 스위치와 체크포인트를 유발하여 성능 저하"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v07",
+          "type": "svg",
+          "src": "/visuals/01/01_06_s05_redo_log_circular.svg",
+          "caption": "Redo Log 그룹/멤버 구조와 순환 사용: LGWR 기록 조건, 로그 상태 전환, 아카이빙 흐름",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }

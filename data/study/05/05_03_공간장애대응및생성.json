@@ -30,6 +30,16 @@
             "DBA_SEGMENTS, DBA_EXTENTS, DBA_FREE_SPACE 뷰를 통해 공간 사용 현황을 모니터링"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/05/05_03_s01_space_error_handling_flow.svg",
+          "caption": "공간 부족 시 Oracle 동작 흐름 — AUTOEXTEND → Resumable → ORA 오류",
+          "placement": "after-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -54,6 +64,16 @@
             "RESUMABLE 시스템 권한이 없으면 ALTER SESSION ENABLE RESUMABLE 실행 시 ORA-01031 오류 발생",
             "RESUMABLE_TIMEOUT은 ALTER SYSTEM/ALTER SESSION으로 동적 변경 가능 (재시작 불필요)",
             "멀티테넌트 환경에서 PDB 레벨로 RESUMABLE_TIMEOUT을 개별 설정 가능"
+          ],
+          "visuals": [
+            {
+              "id": "v03",
+              "type": "svg",
+              "src": "/visuals/05/05_03_s02_resumable_config_priority.svg",
+              "caption": "Resumable Space Allocation 설정 우선순위 — 세션 레벨 > 시스템 레벨",
+              "placement": "after-content",
+              "width": "100%"
+            }
           ]
         },
         {
@@ -81,6 +101,16 @@
             "UNDO 테이블스페이스 및 임시 테이블스페이스의 공간 부족도 재개 가능 대상",
             "RAC 환경에서 RESUMABLE_TIMEOUT은 인스턴스별 독립 설정이며, GV$SESSION으로 교차 인스턴스 모니터링 가능"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/05/05_03_s02_resumable_space_flow.svg",
+          "caption": "재개 가능 영역 할당 흐름 — 일시 중지(Suspend) → DBA 개입 → 자동 재개(Resume)",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     },
@@ -120,6 +150,16 @@
             "SYS/SYSTEM 소유 테이블은 데이터베이스 운영 핵심 객체이므로 항상 즉시 세그먼트 할당",
             "멀티테넌트 환경에서 PDB 클론/플러그/언플러그 시 지연 세그먼트 상태가 보존됨"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/05/05_03_s03_deferred_segment_lifecycle.svg",
+          "caption": "지연 세그먼트 생성 라이프사이클 — CREATE TABLE → 첫 INSERT → 세그먼트 할당",
+          "placement": "after-content",
+          "width": "100%"
         }
       ]
     }
