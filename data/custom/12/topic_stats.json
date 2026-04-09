@@ -7,10 +7,10 @@
     "Resource Manager連携": 1
   },
   "custom_topic_counts": {
-    "自動メンテナンスタスク": 4,
-    "メンテナンス・ウィンドウ": 4,
-    "Resource Manager連携": 2
+    "自動メンテナンスタスク": 6,
+    "メンテナンス・ウィンドウ": 5,
+    "Resource Manager連携": 4
   },
-  "total_custom": 10,
-  "last_number": "C_12_010"
+  "total_custom": 15,
+  "last_number": "C_12_015"
 }

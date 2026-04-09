@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_011",
+    "title": "DML操作ごとにUNDOデータとして記録される内容について正しく述べているものを選択してください。",
+    "options": [
+      "A) INSERT操作では、挿入された行のROWID情報がUNDOレコードに記録され、ロールバック時にその行を削除するために使用される。",
+      "B) UPDATE操作では、変更後の新しいカラム値がUNDOレコードに記録される。",
+      "C) DELETE操作では、削除された行の主キー値のみがUNDOレコードに記録される。",
+      "D) SELECT操作でもUNDOデータが生成され、読取り一貫性のために使用される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — INSERT 작업 시에는 삽입된 행의 ROWID 정보가 UNDO 레코드에 기록됩니다. 롤백 시 해당 ROWID를 사용하여 삽입된 행을 삭제함으로써 원래 상태로 복원합니다.\n\nB) 오답 — UPDATE 작업에서는 변경 후의 새로운 값이 아니라 변경 전의 원래 컬럼 값(Before Image)이 UNDO 레코드에 기록됩니다. 롤백 시 이 변경 전 값을 사용하여 원래 상태로 복원합니다.\n\nC) 오답 — DELETE 작업에서는 주키 값만이 아니라 삭제 전의 전체 행 데이터가 UNDO 레코드에 기록됩니다. 롤백 시 전체 행을 다시 삽입해야 하므로 행의 모든 컬럼 데이터가 필요합니다.\n\nD) 오답 — SELECT 문은 데이터를 변경하지 않으므로 UNDO 데이터를 생성하지 않습니다. SELECT는 기존의 UNDO 데이터를 읽기 일관성(Read Consistency)을 위해 참조할 수는 있지만, 새로운 UNDO 데이터를 생성하는 것은 아닙니다.\n\n핵심 개념: UNDO 데이터는 DML(INSERT, UPDATE, DELETE, MERGE) 작업 시에만 생성되며, INSERT는 ROWID, UPDATE는 변경 전 컬럼 값, DELETE는 전체 행 데이터를 UNDO 레코드로 저장합니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_012",
+    "title": "UNDO表領域の切り替え操作に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) ALTER SYSTEM SET UNDO_TABLESPACE文を使用して、運用中にUNDO表領域を別のUNDO表領域に切り替えることができる。",
+      "B) UNDO表領域を切り替えると、旧UNDO表領域のアクティブなトランザクションは即座に中断される。",
+      "C) 切り替え後、旧UNDO表領域のアクティブなトランザクションがすべて完了するまで旧UNDO表領域は維持される。",
+      "D) 1つのインスタンスで複数のUNDO表領域を同時にアクティブとして使用できる。",
+      "E) UNDO表領域の切り替えにはデータベースの再起動が必須である。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — ALTER SYSTEM SET UNDO_TABLESPACE 명령을 사용하여 운영 중에 UNDO 테이블스페이스를 다른 UNDO 테이블스페이스로 전환할 수 있습니다. 이는 동적으로 변경 가능한 파라미터입니다.\n\nC) 정답 — 전환 후에도 구 UNDO 테이블스페이스에서 활성 트랜잭션이 완료될 때까지 해당 테이블스페이스는 유지됩니다. 모든 활성 트랜잭션이 종료된 후에야 구 UNDO 테이블스페이스를 삭제할 수 있습니다.\n\nB) 오답 — UNDO 테이블스페이스 전환 시 기존 테이블스페이스의 활성 트랜잭션은 중단되지 않습니다. 기존 트랜잭션은 구 UNDO 테이블스페이스에서 정상적으로 완료되며, 새로운 트랜잭션만 새 UNDO 테이블스페이스를 사용합니다.\n\nD) 오답 — 하나의 인스턴스에서는 하나의 UNDO 테이블스페이스만 활성 상태로 사용할 수 있습니다. UNDO_TABLESPACE 파라미터로 지정된 단일 테이블스페이스가 활성 상태입니다.\n\nE) 오답 — UNDO 테이블스페이스 전환은 ALTER SYSTEM SET UNDO_TABLESPACE 명령으로 온라인에서 수행할 수 있으며, 데이터베이스 재시작이 필요하지 않습니다.\n\n핵심 개념: UNDO 테이블스페이스는 ALTER SYSTEM으로 온라인 전환이 가능하며, 인스턴스당 하나만 활성화됩니다. 전환 시 기존 활성 트랜잭션이 완료될 때까지 구 테이블스페이스가 유지됩니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_013",
+    "title": "一時UNDO(Temporary UNDO)の制限事項に関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) 分散トランザクション(Distributed Transaction)ではTemporary UNDOがサポートされない。",
+      "B) Temporary UNDOを有効にすると、通常の永続テーブルに対するDML操作のUNDOデータも一時表領域に格納される。",
+      "C) Temporary UNDOのデータはData Guard環境でスタンバイ・データベースに伝播される。",
+      "D) Temporary UNDOを使用している場合、インスタンス障害後の復旧処理でTemporary UNDOを使用してロールバックを行う必要がある。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 분산 트랜잭션(Distributed Transaction)에서는 Temporary UNDO가 지원되지 않습니다. 이는 Temporary UNDO의 알려진 제한사항 중 하나입니다.\n\nB) 오답 — Temporary UNDO는 글로벌 임시 테이블(GTT), Private Temporary Table, 임시 LOB에만 적용됩니다. 일반 영구 테이블에 대한 DML 작업의 UNDO 데이터는 여전히 UNDO 테이블스페이스에 저장됩니다.\n\nC) 오답 — Temporary UNDO 데이터는 Data Guard 환경에서 스탠바이 데이터베이스로 전파되지 않습니다. 임시 데이터의 특성상 복제 대상이 아닙니다.\n\nD) 오답 — Temporary UNDO는 인스턴스 복구(Instance Recovery) 시 사용되지 않습니다. GTT 데이터는 세션 또는 트랜잭션 범위로 한정되어 있어 인스턴스 재시작 시 자동으로 소멸되므로 복구 대상이 아닙니다.\n\n핵심 개념: Temporary UNDO는 GTT 전용 최적화 기능으로, 분산 트랜잭션 미지원, Data Guard 미전파, 인스턴스 복구 불필요 등의 제한사항이 있습니다. 일반 영구 테이블에는 적용되지 않습니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_014",
+    "title": "マルチテナント環境における共有UNDOモードの特性について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 共有UNDOモードではCDB$ROOTに存在する単一のUNDO表領域をすべてのPDBが共有する。",
+      "B) 共有UNDOモードでは各PDBごとに独立したUNDO_RETENTIONパラメータを設定できる。",
+      "C) 共有UNDOモードでは1つのPDBの大量トランザクションが他のPDBのUNDO空間を圧迫する可能性がある。",
+      "D) 共有UNDOモードではPDB Hot CloneやPDB Relocate機能を使用できる。",
+      "E) 共有UNDOモードはOracle 26aiにおけるCDBのデフォルトのUNDOモードである。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 공유 UNDO 모드에서는 CDB$ROOT에 위치한 단일 UNDO 테이블스페이스를 모든 PDB가 공유합니다. 각 PDB의 트랜잭션에 대해 CDB$ROOT의 UNDO 세그먼트가 할당됩니다.\n\nC) 정답 — 공유 UNDO 모드에서는 모든 PDB가 하나의 UNDO 공간을 공유하므로, 한 PDB의 대량 트랜잭션이 다른 PDB의 UNDO 공간을 압박할 수 있습니다. 이로 인해 PDB 간 UNDO 공간 경합이 발생할 수 있으며, 한 PDB의 장기 쿼리가 다른 PDB에서 ORA-01555를 유발할 수도 있습니다.\n\nB) 오답 — 공유 UNDO 모드에서는 UNDO_RETENTION 파라미터가 CDB 레벨에서 단일로 적용됩니다. PDB별로 독립적인 UNDO_RETENTION을 설정할 수 없습니다. 독립적인 UNDO_RETENTION 설정은 로컬 UNDO 모드에서만 가능합니다.\n\nD) 오답 — 공유 UNDO 모드에서는 PDB Hot Clone 및 PDB Relocate 기능을 사용할 수 없습니다. 이러한 고급 PDB 이동성 기능은 로컬 UNDO 모드에서만 지원됩니다.\n\nE) 오답 — Oracle 21c 이후(Oracle 26ai 포함)에서는 로컬 UNDO 모드가 CDB의 기본 UNDO 모드입니다. 공유 UNDO 모드는 레거시 호환 목적으로만 유지되며 비권장(Deprecated)입니다.\n\n핵심 개념: 공유 UNDO 모드는 관리가 단순하지만 PDB 간 격리성이 부족하고, Hot Clone/Relocate/Flashback PDB 등 고급 기능을 사용할 수 없습니다. Oracle 26ai에서는 로컬 UNDO 모드가 기본이며 권장됩니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_015",
+    "title": "Oracleの読取り一貫性(Read Consistency)メカニズムにおけるCR(Consistent Read)ブロックの生成について正しく述べているものを選択してください。",
+    "options": [
+      "A) 問合せ開始時点のSCN(System Change Number)よりもデータブロックのBlock SCNが大きい場合、サーバー・プロセスはUNDOデータを使用してCRブロックを生成する。",
+      "B) CRブロックの生成にはREDOログのデータが使用され、UNDOデータは使用されない。",
+      "C) CRブロックはディスク上のデータファイルに永続的に保存される。",
+      "D) トランザクション・レベルの読取り一貫性(SERIALIZABLE)がOracleのデフォルトの分離レベルである。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 쿼리 시작 시점의 SCN(Query SCN)보다 데이터 블록의 Block SCN이 큰 경우, 해당 블록에는 쿼리 시작 이후의 변경이 포함되어 있습니다. 서버 프로세스는 Current Block의 복사본을 생성하고 UNDO 레코드를 역적용하여 쿼리 시작 시점의 일관된 데이터 이미지(CR 블록)를 만듭니다.\n\nB) 오답 — CR 블록 생성에는 REDO 로그가 아닌 UNDO 데이터가 사용됩니다. REDO 로그는 장애 복구(Instance/Media Recovery)에 사용되며, 읽기 일관성을 위한 과거 시점 이미지 복원에는 UNDO 데이터가 사용됩니다.\n\nC) 오답 — CR 블록은 버퍼 캐시(Buffer Cache) 내에 일시적으로 생성되는 과거 시점의 블록 복사본입니다. 디스크의 데이터 파일에 영구적으로 저장되지 않으며, 사용 후 버퍼 캐시에서 해제됩니다.\n\nD) 오답 — Oracle의 기본 분리 수준은 문장 수준 읽기 일관성(READ COMMITTED)입니다. 트랜잭션 수준의 읽기 일관성(SERIALIZABLE)은 SET TRANSACTION ISOLATION LEVEL SERIALIZABLE로 명시적으로 설정해야 합니다.\n\n핵심 개념: Oracle은 UNDO 데이터를 활용한 다중 버전 읽기 일관성(MVCC)을 제공하며, Query SCN과 Block SCN을 비교하여 CR 블록 생성 여부를 결정합니다. 기본 분리 수준은 READ COMMITTED(문장 수준)입니다."
+  }
+]

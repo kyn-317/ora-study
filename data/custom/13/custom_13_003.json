@@ -1,0 +1,70 @@
+[
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_011",
+    "title": "AWRベースラインに関する説明として正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) AWRベースラインは、特定期間のAWRスナップショットに名前を付けて保存し、通常時のパフォーマンスとの比較分析に使用できる。",
+      "B) AWRベースラインに含まれるスナップショットは、AWRの保存期間(デフォルト8日)が経過すると自動的に削除される。",
+      "C) DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINEプロシージャを使用してベースラインを作成できる。",
+      "D) AWRベースラインは1つのデータベースにつき1つのみ作成できる。",
+      "E) AWRベースラインを作成するには、STATISTICS_LEVELパラメータをALLに設定する必要がある。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — AWR 베이스라인은 특정 기간의 AWR 스냅샷에 이름을 부여하여 보존하는 기능으로, 정상 운영 시점의 성능 데이터를 기준점으로 저장하여 문제 발생 시 비교 분석에 활용할 수 있습니다.\n\nC) 정답 — DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE 프로시저를 사용하여 시작 스냅샷 ID와 종료 스냅샷 ID를 지정하고 베이스라인을 생성할 수 있습니다.\n\nB) 오답 — AWR 베이스라인에 포함된 스냅샷은 보존 기간이 경과하더라도 자동으로 삭제되지 않습니다. 베이스라인으로 지정된 스냅샷은 베이스라인이 명시적으로 삭제될 때까지 보존됩니다.\n\nD) 오답 — AWR 베이스라인은 1개 데이터베이스에 여러 개를 생성할 수 있습니다. 예를 들어 '정상 운영 시점', '피크 부하 시점' 등 여러 비교 기준을 동시에 유지할 수 있습니다.\n\nE) 오답 — AWR 베이스라인을 생성하기 위해 STATISTICS_LEVEL을 ALL로 설정할 필요는 없습니다. TYPICAL(기본값)이면 AWR 스냅샷이 활성화되어 베이스라인 생성이 가능합니다.\n\n핵심 개념: AWR 베이스라인은 특정 기간의 스냅샷을 보존하여 성능 비교의 기준점으로 활용하는 기능이며, DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE으로 생성합니다. 베이스라인에 포함된 스냅샷은 보존 기간과 관계없이 보존됩니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_012",
+    "title": "動的パフォーマンス・ビュー(V$ビュー)の特性について正しく述べているものを選択してください。",
+    "options": [
+      "A) V$ビューのデータはSYSAUX表領域に永続的に格納されるため、インスタンスを再起動してもデータは保持される。",
+      "B) V$ビューはSGAメモリ内のカーネル・データ構造を参照する読取り専用の仮想テーブルであり、インスタンスの現在の状態を確認するために使用される。",
+      "C) V$ビューにアクセスするためには、データベースがOPEN状態である必要があり、MOUNT状態ではいずれのV$ビューにもアクセスできない。",
+      "D) V$ビューはデータ・ディクショナリ・ビューと同様に、DDL操作によって内容が更新される。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — V$ 뷰는 SGA 메모리 내의 커널 데이터 구조(X$ 테이블)를 SQL로 접근 가능하게 만든 읽기 전용 가상 테이블입니다. 인스턴스의 현재 상태 및 실시간 성능 통계를 확인하는 데 사용됩니다.\n\nA) 오답 — V$ 뷰의 데이터는 SYSAUX 테이블스페이스에 저장되는 것이 아니라 SGA 메모리에 존재합니다. 인스턴스를 재시작하면 모든 V$ 뷰의 누적 통계가 초기화됩니다. SYSAUX에 저장되는 것은 AWR 스냅샷 데이터입니다.\n\nC) 오답 — MOUNT 상태에서도 V$DATABASE, V$DATAFILE, V$LOGFILE 등 컨트롤 파일 기반의 V$ 뷰에 접근할 수 있습니다. NOMOUNT 상태에서도 V$INSTANCE, V$PARAMETER, V$SGA 등 SGA 관련 V$ 뷰에 접근 가능합니다.\n\nD) 오답 — V$ 뷰는 DDL 조작으로 갱신되는 데이터 딕셔너리 뷰와 달리, Oracle 커널에 의해 실시간으로 자동 갱신됩니다. V$ 뷰의 데이터 소스는 SGA 메모리 내 C 구조체입니다.\n\n핵심 개념: V$ 뷰는 SGA 메모리 내의 실시간 성능 데이터를 SQL로 조회할 수 있게 하는 가상 테이블이며, 인스턴스 재시작 시 데이터가 초기화됩니다. 인스턴스 상태(NOMOUNT/MOUNT/OPEN)에 따라 접근 가능한 V$ 뷰의 범위가 달라집니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_013",
+    "title": "SQLチューニング・セット(STS)に関する説明として正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) STSは、SQL文とその実行統計を含むデータベース・オブジェクトであり、SQLチューニング・アドバイザやSQLアクセス・アドバイザの入力ソースとして使用される。",
+      "B) STSにSQL文をロードする際、AWRからのロードはサポートされておらず、カーソル・キャッシュからのみロード可能である。",
+      "C) STSは、PACK_STGTAB_SQLSET/UNPACK_STGTAB_SQLSETプロシージャを使用して別のデータベースに転送することができる。",
+      "D) STSに含まれるSQL文には実行計画は含まれず、SQL文テキストと実行統計のみが格納される。",
+      "E) STSはDBMS_ADVISORパッケージを使用して作成および管理される。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — SQL Tuning Set(STS)은 하나 이상의 SQL 문과 그 실행 통계(경과 시간, CPU 시간, 버퍼 읽기 등)를 포함하는 데이터베이스 객체로, SQL 튜닝 어드바이저와 SQL 액세스 어드바이저의 입력 소스로 활용됩니다.\n\nC) 정답 — DBMS_SQLTUNE.PACK_STGTAB_SQLSET으로 STS를 스테이징 테이블에 패킹하고, 다른 데이터베이스로 전송한 후 UNPACK_STGTAB_SQLSET으로 언패킹하여 STS를 이전할 수 있습니다.\n\nB) 오답 — STS에 SQL 문을 로드할 때 커서 캐시(SELECT_CURSOR_CACHE)뿐만 아니라 AWR(SELECT_WORKLOAD_REPOSITORY), SQL 트레이스(SELECT_SQL_TRACE) 등 다양한 소스에서 로드할 수 있습니다.\n\nD) 오답 — STS에는 SQL 문 텍스트와 실행 통계뿐만 아니라 실행 계획(선택적), 실행 컨텍스트(파싱 스키마, 바인드 값, 컴파일 환경) 등도 포함될 수 있습니다.\n\nE) 오답 — STS는 DBMS_ADVISOR가 아니라 DBMS_SQLTUNE 패키지를 사용하여 생성(CREATE_SQLSET) 및 관리됩니다. DBMS_ADVISOR는 SQL 액세스 어드바이저 등 다른 어드바이저의 태스크 관리에 사용됩니다.\n\n핵심 개념: SQL Tuning Set(STS)은 SQL 문과 실행 통계를 포함하는 객체로 DBMS_SQLTUNE 패키지로 관리됩니다. 커서 캐시, AWR, SQL 트레이스 등 다양한 소스에서 SQL을 로드할 수 있으며, 스테이징 테이블을 통해 다른 데이터베이스로 전송이 가능합니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_014",
+    "title": "増分統計(Incremental Statistics)と保留統計(Pending Statistics)に関する説明として正しく述べているものを選択してください。",
+    "options": [
+      "A) 増分統計は、パーティション・テーブルで変更されたパーティションのみを分析してグローバル統計を導出する方法であり、シノプシス(Synopsis)を使用して正確なNDV計算を行う。",
+      "B) 増分統計を使用するためには、CONTROL_MANAGEMENT_PACK_ACCESSパラメータをDIAGNOSTIC+TUNINGに設定する必要がある。",
+      "C) 保留統計は、OPTIMIZER_USE_PENDING_STATISTICSパラメータをTRUEに設定しなくてもオプティマイザが自動的に参照する。",
+      "D) 保留統計をデータ・ディクショナリに公開するには、DBMS_STATS.DELETE_PENDING_STATSで既存の保留統計を削除してから再収集する必要がある。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 증분 통계(Incremental Statistics)는 파티션 테이블에서 변경된 파티션만 분석하여 글로벌 통계를 효율적으로 도출하는 방법입니다. 내부적으로 각 파티션에 시놉시스(Synopsis, HyperLogLog 기반의 NDV 추정 구조체)를 저장하여 전체 테이블을 다시 스캔하지 않고도 정확한 글로벌 NDV(Number of Distinct Values)를 계산합니다.\n\nB) 오답 — 증분 통계를 사용하기 위해 CONTROL_MANAGEMENT_PACK_ACCESS를 DIAGNOSTIC+TUNING으로 설정할 필요는 없습니다. DBMS_STATS.SET_TABLE_PREFS 등으로 INCREMENTAL 기본 설정을 TRUE로 변경하면 활성화됩니다. CONTROL_MANAGEMENT_PACK_ACCESS는 AWR, ADDM, SQL 튜닝 어드바이저 등 진단/튜닝 팩 기능의 접근 권한을 제어하는 파라미터이며, 기본 통계 수집 기능과는 무관합니다.\n\nC) 오답 — 보류 통계(Pending Statistics)는 기본적으로 옵티마이저가 참조하지 않습니다. 보류 통계를 기반으로 실행 계획을 테스트하려면 세션 레벨에서 OPTIMIZER_USE_PENDING_STATISTICS=TRUE로 설정해야 합니다.\n\nD) 오답 — 보류 통계를 데이터 딕셔너리에 공개(게시)하려면 DBMS_STATS.PUBLISH_PENDING_STATS 프로시저를 실행하면 됩니다. 기존 보류 통계를 삭제할 필요 없이 직접 공개가 가능합니다. DELETE_PENDING_STATS는 불필요한 보류 통계를 정리할 때 사용하는 별도의 프로시저입니다.\n\n핵심 개념: 증분 통계는 대규모 파티션 테이블의 통계 수집 효율성을 높이며, 보류 통계는 새 통계를 본 적용 전에 테스트할 수 있는 기능입니다. 증분 통계는 INCREMENTAL=TRUE 설정으로, 보류 통계는 PUBLISH=FALSE와 OPTIMIZER_USE_PENDING_STATISTICS=TRUE 조합으로 활용합니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_015",
+    "title": "セグメント・アドバイザに関する説明として正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 自動セグメント・アドバイザは、メンテナンス・ウィンドウの間にAUTO_SPACE_ADVISOR_JOBとして自動的に実行される。",
+      "B) セグメント・アドバイザが推奨するオンライン・セグメント縮小(Online Segment Shrink)は、MSSM(手動セグメント空間管理)表領域のセグメントでも実行できる。",
+      "C) セグメント・アドバイザの分析結果は、DBA_ADVISOR_FINDINGSおよびDBA_ADVISOR_RECOMMENDATIONSビューで確認できる。",
+      "D) セグメント・アドバイザは、テーブルとインデックスのみを分析対象とし、表領域を分析対象に指定することはできない。",
+      "E) セグメント・アドバイザはDBMS_SQLTUNEパッケージを使用してタスクを生成する。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 자동 세그먼트 어드바이저는 Oracle 자동 유지 관리 태스크 중 하나로, 유지 관리 윈도우(Maintenance Window) 동안 AUTO_SPACE_ADVISOR_JOB으로 자동 실행됩니다. 공간 낭비 가능성이 높은 세그먼트를 자동으로 선정하여 분석합니다.\n\nC) 정답 — 세그먼트 어드바이저의 분석 결과(발견 사항)는 DBA_ADVISOR_FINDINGS 뷰에서, 권고 사항은 DBA_ADVISOR_RECOMMENDATIONS 뷰에서 확인할 수 있습니다. 구체적 실행 조치는 DBA_ADVISOR_ACTIONS 뷰에서 확인 가능합니다.\n\nB) 오답 — 온라인 세그먼트 축소(Online Segment Shrink)는 ASSM(Automatic Segment Space Management) 테이블스페이스에서만 실행할 수 있으며, MSSM(Manual Segment Space Management) 테이블스페이스의 세그먼트에서는 지원되지 않습니다.\n\nD) 오답 — 세그먼트 어드바이저는 테이블과 인덱스뿐만 아니라 테이블스페이스도 분석 대상으로 지정할 수 있습니다. DBMS_ADVISOR.CREATE_OBJECT에서 OBJECT_TYPE을 'TABLESPACE'로 지정하면 해당 테이블스페이스 내 모든 세그먼트를 분석합니다.\n\nE) 오답 — 세그먼트 어드바이저는 DBMS_SQLTUNE이 아니라 DBMS_ADVISOR 패키지를 사용하여 태스크를 생성합니다. DBMS_ADVISOR.CREATE_TASK에서 advisor_name을 'Segment Advisor'로 지정합니다. DBMS_SQLTUNE은 SQL 튜닝 어드바이저용 패키지입니다.\n\n핵심 개념: 세그먼트 어드바이저는 세그먼트의 공간 사용을 분석하여 Shrink, 재구성 등의 권고를 제공합니다. 자동 실행(AUTO_SPACE_ADVISOR_JOB)과 수동 실행(DBMS_ADVISOR)이 모두 가능하며, Online Segment Shrink는 ASSM 테이블스페이스에서만 지원됩니다."
+  }
+]

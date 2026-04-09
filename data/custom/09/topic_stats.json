@@ -7,10 +7,10 @@
     "SQL*Loader": 1
   },
   "custom_topic_counts": {
-    "外部表": 1,
-    "Data Pump": 6,
-    "SQL*Loader": 3
+    "外部表": 3,
+    "Data Pump": 8,
+    "SQL*Loader": 4
   },
-  "total_custom": 10,
-  "last_number": "C_09_010"
+  "total_custom": 15,
+  "last_number": "C_09_015"
 }

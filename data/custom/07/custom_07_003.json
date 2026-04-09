@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_011",
+    "title": "Oracleデータベースの行移行(Row Migration)と行連鎖(Row Chaining)に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 行移行はUPDATEにより行サイズが増加し元のブロックに収まらなくなった場合に行全体が別のブロックに移動し、元のブロックには新しい位置を示すポインターが残る。",
+      "B) 行連鎖はPCTFREEの設定値を適切に調整することで完全に回避することができる。",
+      "C) 行移行と行連鎖の両方ともV$SYSSTATの「table fetch continued row」統計値に反映される。",
+      "D) 行連鎖が発生すると行データが元のブロックから完全に削除され新しいブロックに移動するため、ROWIDは変更される。",
+      "E) 行移行の発生状況はDBA_TABLESのCHAIN_CNT列では確認できず、V$SYSSTATでのみ確認可能である。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 행 이동(Row Migration)은 UPDATE에 의해 행 크기가 증가하여 원래 블록에 수용할 수 없게 되었을 때, 행 전체가 다른 블록으로 이동하고 원래 블록에는 새 위치를 가리키는 포인터(forwarding pointer)만 남는 현상입니다.\n\nC) 정답 — 행 이동과 행 체이닝 모두 추가 블록 접근이 필요하며, 두 현상 모두 V$SYSSTAT의 'table fetch continued row' 통계값에 반영됩니다.\n\nB) 오답 — 행 체이닝(Row Chaining)은 행 데이터 자체가 단일 블록보다 클 때 발생하는 현상이므로, PCTFREE 조정으로는 해결할 수 없습니다. PCTFREE 조정으로 완화할 수 있는 것은 행 이동(Row Migration)입니다. 행 체이닝을 해결하려면 DB_BLOCK_SIZE를 더 큰 값으로 변경하거나 테이블 설계를 변경해야 합니다.\n\nD) 오답 — 행 연쇄(Row Chaining)는 행 데이터가 여러 블록에 걸쳐 분산 저장되는 것이며, 원래 블록에서 완전히 삭제되는 것이 아닙니다. 또한 ROWID는 변경되지 않고 첫 번째 블록 조각(piece)의 위치를 계속 가리킵니다.\n\nE) 오답 — 행 이동 및 행 체이닝의 발생 상황은 V$SYSSTAT의 'table fetch continued row' 통계 외에도, ANALYZE TABLE ... LIST CHAINED ROWS 명령이나 DBA_TABLES의 CHAIN_CNT 열을 통해 테이블 단위로 확인할 수 있습니다. V$SYSSTAT에서만 확인 가능하다는 것은 틀립니다.\n\n핵심 개념: 행 이동(Row Migration)은 UPDATE로 인한 행 크기 증가로 발생하며 PCTFREE 조정이나 ALTER TABLE MOVE로 해소 가능하고, 행 체이닝(Row Chaining)은 행 자체가 블록보다 커서 발생하며 블록 크기 변경이 필요합니다. 두 현상 모두 'table fetch continued row' 통계에 반영됩니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_012",
+    "title": "OracleデータベースのBasic Compression(ROW STORE COMPRESS BASIC)に関する説明として正しいものを選択してください。",
+    "options": [
+      "A) Basic Compressionを使用するにはAdvanced Compression Optionライセンスの購入が必要である。",
+      "B) Basic Compressionが適用された表では標準のINSERT文で挿入された行も自動的に圧縮される。",
+      "C) Basic Compressionはブロック内の重複値をシンボル・テーブルに置き換えることで圧縮を実現する。",
+      "D) Basic Compressionが適用された表ではUPDATEされた行も圧縮状態が維持される。"
+    ],
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — Basic Compression(ROW STORE COMPRESS BASIC)은 동일 블록 내의 중복 값을 심볼 테이블(Symbol Table)로 대체하여 공간을 절약하는 방식으로 압축을 수행합니다. 중복되는 열 값이 심볼 테이블의 참조로 대체되어 저장 공간이 절약됩니다.\n\nA) 오답 — Basic Compression은 Oracle Enterprise Edition에 기본 포함되어 있으며, 별도의 Advanced Compression Option 라이선스가 필요하지 않습니다. Advanced Compression Option 라이선스가 필요한 것은 Advanced Row Compression(ROW STORE COMPRESS ADVANCED)입니다.\n\nB) 오답 — Basic Compression은 Direct-Path Insert(INSERT /*+ APPEND */, CTAS, SQL*Loader Direct Path) 작업에서만 압축이 적용됩니다. 표준 INSERT 문으로 삽입된 행은 비압축 상태로 저장되며, 동일 테이블 내에 압축된 블록과 비압축 블록이 혼재할 수 있습니다.\n\nD) 오답 — Basic Compression이 적용된 테이블에서 UPDATE가 수행된 행은 비압축 상태로 저장됩니다. 모든 DML에서 압축 상태를 유지하는 것은 Advanced Row Compression의 특징입니다.\n\n핵심 개념: Basic Compression은 Enterprise Edition에 포함된 압축 기능으로, 블록 내 중복 값을 심볼 테이블로 대체하여 압축하며, Direct-Path Insert에서만 압축이 적용됩니다. 일반 INSERT/UPDATE로 변경된 행은 비압축 상태로 저장됩니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_013",
+    "title": "Oracleデータベースの索引の状態に関する説明として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) INVISIBLE状態の索引はセグメントが削除されるため、DML操作のオーバーヘッドがなくなる。",
+      "B) SKIP_UNUSABLE_INDEXESパラメータがTRUE(デフォルト)に設定されている場合、UNUSABLE状態の索引が存在してもDML操作は正常に実行される。",
+      "C) ALTER TABLE MOVE ONLINEを実行すると表に依存するすべての索引がUNUSABLE状態になる。",
+      "D) UNUSABLE状態の索引はデータ・ディクショナリにメタデータ(構造定義、列情報)が保持されるため、ALTER INDEX ... REBUILDで復元できる。",
+      "E) TRUNCATE TABLE操作を実行するとテーブルに依存するすべての索引がUNUSABLE状態になる。"
+    ],
+    "answer": ["B", "D"],
+    "explanation": "정답: B, D\nB) 정답 — SKIP_UNUSABLE_INDEXES 파라미터가 TRUE(기본값)로 설정되어 있으면, UNUSABLE 상태의 인덱스가 존재하더라도 DML(INSERT, UPDATE, DELETE) 작업이 정상적으로 수행됩니다. UNUSABLE 인덱스를 건너뛰고 DML이 실행됩니다.\n\nD) 정답 — UNUSABLE 상태의 인덱스는 세그먼트(물리적 저장 공간)가 삭제되지만, 데이터 딕셔너리에 인덱스의 메타데이터(구조 정의, 열 정보 등)가 유지됩니다. 따라서 ALTER INDEX ... REBUILD 명령으로 인덱스를 재구성하여 복원할 수 있습니다.\n\nA) 오답 — INVISIBLE 상태의 인덱스는 옵티마이저에 보이지 않을 뿐이며, 세그먼트는 그대로 존재하고 DML 시 인덱스 유지관리(메인터넌스)도 계속 수행됩니다. 세그먼트가 삭제되는 것은 UNUSABLE 상태의 인덱스입니다.\n\nC) 오답 — ALTER TABLE MOVE ONLINE은 인덱스를 자동으로 유지하므로, 종속 인덱스가 UNUSABLE 상태가 되지 않고 VALID 상태를 유지합니다. 인덱스가 UNUSABLE 상태가 되는 것은 비Online의 ALTER TABLE MOVE입니다.\n\nE) 오답 — TRUNCATE TABLE 작업은 모든 데이터를 삭제하지만, 인덱스를 UNUSABLE 상태로 만들지 않습니다. 인덱스 데이터도 함께 삭제되며, 인덱스는 빈 상태로 VALID를 유지합니다.\n\n핵심 개념: 인덱스의 UNUSABLE 상태는 세그먼트 삭제로 공간이 회수되지만 메타데이터는 유지되어 REBUILD가 가능합니다. INVISIBLE 상태는 옵티마이저에만 보이지 않을 뿐 세그먼트와 DML 메인터넌스는 유지됩니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_014",
+    "title": "HCC(Hybrid Columnar Compression)に関する説明として正しいものを選択してください。",
+    "options": [
+      "A) HCCはすべてのOracle Database環境で使用可能であり、特定のストレージは不要である。",
+      "B) HCCで圧縮されたデータに対して通常のDMLを実行してもCompression Unit(CU)の圧縮状態は常に維持される。",
+      "C) HCCはCompression Unit(CU)という単位で複数のブロックをまとめ、列ごとにデータを圧縮することで高い圧縮率を実現する。",
+      "D) HCCはQuery LowモードとArchive Highモードの2種類のみ提供される。"
+    ],
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — HCC(Hybrid Columnar Compression)는 Compression Unit(CU)라는 단위로 여러 Oracle 블록을 묶어 열별로 데이터를 압축합니다. 동일 열의 데이터가 모여 있으므로 중복 제거 효과가 극대화되어 10~50배의 높은 압축률을 달성할 수 있습니다.\n\nA) 오답 — HCC는 모든 Oracle Database 환경에서 사용할 수 있는 것이 아니라, Oracle Exadata, ZFS Storage Appliance 등 특정 스토리지에서만 지원됩니다.\n\nB) 오답 — HCC로 압축된 데이터에 대해 일반 DML(INSERT, UPDATE, DELETE)이 발생하면 해당 Compression Unit(CU)이 비압축 상태로 전환될 수 있습니다. 압축 상태를 유지하려면 주기적으로 ALTER TABLE MOVE로 재압축을 수행해야 합니다.\n\nD) 오답 — HCC는 Query Low, Query High, Archive Low, Archive High의 4종류가 제공됩니다. 2종류만 제공된다는 것은 틀립니다. Query Low(6~10배)부터 Archive High(15~50배)까지 용도에 따라 압축률과 CPU 오버헤드가 달라집니다.\n\n핵심 개념: HCC는 Compression Unit(CU) 단위로 열 기반 압축을 수행하여 10~50배의 높은 압축률을 달성하며, Exadata 등 특정 스토리지에서만 지원됩니다. 일반 DML 발생 시 CU의 압축이 해제될 수 있어 주기적인 재압축이 필요합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_015",
+    "title": "再開可能領域割当て(Resumable Space Allocation)のAFTER SUSPENDトリガーに関する説明として正しいものを選択してください。",
+    "options": [
+      "A) AFTER SUSPENDトリガーは再開可能な作業がタイムアウトした後にのみ実行される。",
+      "B) AFTER SUSPENDトリガー内でDBMS_RESUMABLE.SPACE_ERROR_INFO関数を使用すると、空間不足の原因となったテーブルスペース名やオブジェクト情報を取得できる。",
+      "C) AFTER SUSPENDトリガーはセッション・レベルでのみ作成可能であり、データベース・レベルでは作成できない。",
+      "D) AFTER SUSPENDトリガー内でDBMS_RESUMABLE.ABORTを実行すると中断された作業が自動的に再開される。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — AFTER SUSPEND 트리거 내에서 DBMS_RESUMABLE.SPACE_ERROR_INFO 함수를 사용하면 공간 오류의 상세 정보(오류 유형, 객체 유형, 객체 소유자, 테이블스페이스명 등)를 반환받을 수 있습니다. 이를 통해 공간 부족의 원인을 정확히 파악하고 자동화된 대응을 구현할 수 있습니다.\n\nA) 오답 — AFTER SUSPEND 트리거는 재개 가능 작업이 일시 중지(Suspend)될 때 즉시 실행됩니다. 타임아웃 후가 아니라 일시 중지 시점에 실행되므로, DBA에게 알림을 보내거나 자동으로 데이터파일을 추가하는 등의 즉각적인 대응이 가능합니다.\n\nC) 오답 — AFTER SUSPEND 트리거는 DATABASE 레벨 또는 SCHEMA 레벨에서 생성할 수 있습니다. 세션 레벨에서만 생성 가능한 것이 아니며, 데이터베이스 전체에 대해 공간 부족 이벤트를 처리하는 트리거를 생성할 수 있습니다.\n\nD) 오답 — DBMS_RESUMABLE.ABORT 프로시저는 지정된 세션의 재개 가능 작업을 강제로 중단(Abort)시키는 기능이며, 중단된 작업을 재개하는 것이 아닙니다. 공간이 확보되면 일시 중지된 작업은 Oracle이 자동으로 재개하며, ABORT는 이와 반대로 작업을 완전히 종료시킵니다.\n\n핵심 개념: AFTER SUSPEND 트리거는 재개 가능 작업이 일시 중지될 때 즉시 실행되는 시스템 이벤트 트리거로, DBMS_RESUMABLE.SPACE_ERROR_INFO를 통해 공간 오류 원인을 파악하고 자동 알림이나 공간 확보 등의 자동화 대응을 구현할 수 있습니다."
+  }
+]

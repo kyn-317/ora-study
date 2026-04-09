@@ -9,12 +9,12 @@
     "UNDO監視とサイズ算定": 0
   },
   "custom_topic_counts": {
-    "UNDOデータと状態管理": 3,
-    "UNDO保持とRetention管理": 3,
-    "一時UNDOとTemp UNDO": 1,
-    "マルチテナントUNDO管理": 1,
+    "UNDOデータと状態管理": 5,
+    "UNDO保持とRetention管理": 4,
+    "一時UNDOとTemp UNDO": 2,
+    "マルチテナントUNDO管理": 2,
     "UNDO監視とサイズ算定": 2
   },
-  "total_custom": 10,
-  "last_number": "C_08_010"
+  "total_custom": 15,
+  "last_number": "C_08_015"
 }

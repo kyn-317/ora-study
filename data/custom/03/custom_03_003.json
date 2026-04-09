@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_011",
+    "title": "Oracle AI DatabaseのMOUNT状態で実行可能な操作について正しく述べているものを選択してください。",
+    "options": [
+      "A) ALTER DATABASE ARCHIVELOGコマンドを実行して、アーカイブ・ログ・モードに変更することができる。",
+      "B) 一般ユーザーがSELECT文を使用してデータ・ディクショナリのDBA_ビューを参照できる。",
+      "C) CREATE DATABASE文を実行して新しいデータベースを作成することができる。",
+      "D) ALTER SYSTEM SET文を使用して動的パラメータを変更することはできない。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — MOUNT 상태에서는 컨트롤 파일이 열려 있으므로 ALTER DATABASE ARCHIVELOG/NOARCHIVELOG 명령을 실행하여 아카이브 로그 모드를 변경할 수 있습니다. 아카이브 로그 모드 변경은 반드시 MOUNT 상태에서만 수행 가능합니다.\n\nB) 오답 — 데이터 딕셔너리의 DBA_ 뷰는 SYSTEM/SYSAUX 테이블스페이스에 저장되어 있으며, 데이터 파일이 열려야 접근 가능합니다. 따라서 OPEN 상태에서만 참조할 수 있으며 MOUNT 상태에서는 참조할 수 없습니다.\n\nC) 오답 — CREATE DATABASE 문은 컨트롤 파일이 아직 존재하지 않는 NOMOUNT 상태에서만 실행 가능합니다. MOUNT 상태에서는 이미 컨트롤 파일이 열려 있으므로 새로운 데이터베이스를 생성할 수 없습니다.\n\nD) 오답 — MOUNT 상태에서도 ALTER SYSTEM SET 문으로 동적 파라미터를 변경할 수 있습니다. 인스턴스가 기동되어 SGA가 할당된 NOMOUNT 이후의 모든 상태에서 ALTER SYSTEM SET은 사용 가능합니다.\n\n핵심 개념: MOUNT 상태에서는 컨트롤 파일이 열리고 데이터베이스 구조 정보를 인식하지만, 데이터 파일과 Redo Log 파일은 아직 열리지 않습니다. ARCHIVELOG 모드 변경, 데이터 파일 이름/위치 변경(RENAME FILE), 미디어 복구 등이 MOUNT 상태에서 수행 가능한 주요 작업입니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_012",
+    "title": "マルチテナント環境においてPDBのオープンおよびクローズに関して正しく述べているものを選択してください。",
+    "options": [
+      "A) CDBをSTARTUPすると、CDB$ROOTとすべてのユーザーPDBが自動的にOPEN状態になる。",
+      "B) PDBコンテキストでSTARTUPコマンドを実行すると、ALTER PLUGGABLE DATABASE OPENと同じ動作をする。",
+      "C) ALTER PLUGGABLE DATABASE ALL CLOSEを実行すると、CDB$ROOTも含めてすべてのコンテナが閉じられる。",
+      "D) SAVE STATEを設定していないPDBは、CDB再起動後にNOMOUNT状態となる。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — PDB 컨텍스트(ALTER SESSION SET CONTAINER = pdb_name)에서 STARTUP 명령을 실행하면 ALTER PLUGGABLE DATABASE OPEN과 동일하게 동작합니다. CDB 레벨이 아닌 해당 PDB만 OPEN됩니다.\n\nA) 오답 — CDB를 STARTUP하면 CDB$ROOT는 자동으로 OPEN되고 PDB$SEED는 READ ONLY로 자동 OPEN되지만, 사용자 PDB는 기본적으로 MOUNTED 상태가 됩니다. 사용자 PDB를 사용하려면 별도로 OPEN해야 합니다.\n\nC) 오답 — ALTER PLUGGABLE DATABASE ALL CLOSE는 사용자 PDB만 닫습니다. CDB$ROOT는 CDB 자체의 SHUTDOWN 명령으로만 종료할 수 있으며, 이 명령의 대상이 되지 않습니다.\n\nD) 오답 — SAVE STATE를 설정하지 않은 PDB는 CDB 재기동 후 NOMOUNT가 아닌 MOUNTED 상태가 됩니다. PDB에는 NOMOUNT라는 상태가 존재하지 않으며, MOUNTED, READ WRITE, READ ONLY, MIGRATE 등의 상태를 가집니다.\n\n핵심 개념: CDB STARTUP 시 사용자 PDB는 기본적으로 MOUNTED 상태이며, ALTER PLUGGABLE DATABASE ... SAVE STATE로 상태를 저장해 두면 CDB 재기동 시 이전 OPEN 상태가 자동으로 복원됩니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_013",
+    "title": "Oracle AI Databaseの初期化パラメータ・ファイルの管理について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) インスタンス起動時のパラメータ・ファイル検索順序は、spfile<SID>.ora → spfile.ora → init<SID>.ora の順である。",
+      "B) STARTUPコマンドのオプションでSPFILEの場所を直接指定することができる。",
+      "C) CREATE PFILE FROM SPFILEコマンドは、SPFILEの内容をテキスト形式で抽出し、SPFILEのバックアップとして使用できる。",
+      "D) PFILE環境でALTER SYSTEM SET文にSCOPE=SPFILEを指定して、パラメータをファイルに永続的に反映できる。",
+      "E) SPFILEが存在しない場合、OracleはデフォルトのPFILEも検索せずにエラーを返す。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — Oracle 인스턴스 기동 시 파라미터 파일 검색 순서는 spfile<SID>.ora → spfile.ora → init<SID>.ora입니다. SPFILE이 우선순위가 높으며, SPFILE이 존재하지 않을 때 PFILE을 검색합니다.\n\nC) 정답 — CREATE PFILE FROM SPFILE 명령은 바이너리 형식의 SPFILE 내용을 사람이 읽을 수 있는 텍스트 형식(PFILE)으로 추출합니다. SPFILE 손상 시 복구를 위한 백업 수단으로 활용할 수 있습니다.\n\nB) 오답 — STARTUP 명령의 PFILE 옵션으로는 PFILE의 위치만 지정할 수 있습니다(STARTUP PFILE='경로'). SPFILE의 위치를 직접 지정하는 STARTUP 옵션은 존재하지 않습니다. SPFILE의 위치를 변경하려면 PFILE 내에 SPFILE 파라미터로 경로를 지정해야 합니다.\n\nD) 오답 — PFILE 환경에서는 SCOPE=SPFILE 및 SCOPE=BOTH를 사용할 수 없습니다. PFILE 환경에서는 SCOPE=MEMORY만 사용 가능하며, 파라미터를 영구적으로 변경하려면 텍스트 에디터로 PFILE을 직접 편집해야 합니다.\n\nE) 오답 — SPFILE이 존재하지 않으면 Oracle은 기본 PFILE(init<SID>.ora)을 자동으로 검색합니다. SPFILE과 PFILE 모두 존재하지 않는 경우에만 ORA-01078 오류가 발생합니다.\n\n핵심 개념: Oracle은 기동 시 spfile<SID>.ora → spfile.ora → init<SID>.ora 순서로 파라미터 파일을 검색하며, SPFILE을 Oracle이 공식 권장합니다. CREATE PFILE FROM SPFILE로 텍스트 백업을 생성하여 SPFILE 손상에 대비할 수 있습니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_014",
+    "title": "Oracle AI Databaseのアラート・ログに記録されるイベントについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) ALTER SYSTEM SET文によって変更された初期化パラメータの情報が記録される。",
+      "B) すべてのDDL文はデフォルトでアラート・ログに記録される。",
+      "C) アラート・ログはXML形式とテキスト形式の2種類で保持される。",
+      "D) アラート・ログは一定のサイズに達すると自動的にローテーションされる。",
+      "E) アプリケーションが発行した個々のSELECT文やDML文の実行情報が記録される。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — ALTER SYSTEM SET으로 변경된 파라미터 정보는 Alert Log에 기록됩니다. Alert Log에는 기동/종료, Redo Log 전환, 체크포인트, 파라미터 변경, ORA- 에러 등 주요 운영 이벤트가 시간순으로 기록됩니다.\n\nC) 정답 — Alert Log는 ADR Home 내에 XML 형식(alert/log.xml)과 텍스트 형식(trace/alert_<SID>.log) 두 가지로 동시에 유지됩니다. XML 형식은 V$DIAG_ALERT_EXT 뷰로 SQL 조회가 가능하고, 텍스트 형식은 OS 명령(tail, grep 등)으로 직접 조회할 수 있습니다.\n\nB) 오답 — DDL 문장은 기본적으로 Alert Log에 기록되지 않습니다. DDL 문장을 Alert Log에 기록하려면 초기화 파라미터 ENABLE_DDL_LOGGING을 TRUE로 설정해야 합니다. 기본값은 FALSE입니다.\n\nD) 오답 — Alert Log는 자동 로테이션되지 않습니다. 시간이 지나면 파일 크기가 매우 커질 수 있으므로, OS 레벨에서 주기적으로 아카이빙하거나 관리해야 합니다.\n\nE) 오답 — 개별 SELECT 문이나 DML 문의 실행 정보는 Alert Log에 기록되지 않습니다. 개별 SQL의 실행 정보를 기록하려면 SQL Trace(ALTER SESSION SET SQL_TRACE=TRUE 등)를 활성화하여 Trace 파일에 기록해야 합니다.\n\n핵심 개념: Alert Log는 데이터베이스의 주요 운영 이벤트(기동/종료, 에러, 파라미터 변경, Redo 전환 등)를 시간순으로 기록하는 핵심 진단 파일이며, XML과 텍스트 두 가지 형식으로 ADR 내에 보관됩니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_015",
+    "title": "Oracle AI DatabaseをREAD ONLYモードでオープンした場合の動作について正しく述べているものを選択してください。",
+    "options": [
+      "A) READ ONLYモードではオンラインREDOログへの書き込みが発生しないため、一時表領域への書き込みも不可である。",
+      "B) ALTER DATABASE OPEN READ ONLYコマンドはNOMOUNT状態から直接実行できる。",
+      "C) READ ONLYモードではDML文は実行できないが、一時表領域への書き込みは可能である。",
+      "D) READ ONLYモードでデータベースをオープンするには、STARTUP RESTRICTコマンドを使用する。"
+    ],
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — READ ONLY 모드에서는 데이터 파일에 대한 쓰기가 불가능하므로 DML 문을 실행할 수 없습니다. 그러나 임시 테이블스페이스에 대한 쓰기는 가능합니다. 이를 통해 정렬(Sort)이나 해시 조인 등 임시 공간이 필요한 읽기 쿼리를 수행할 수 있습니다.\n\nA) 오답 — READ ONLY 모드에서는 온라인 Redo Log에 대한 쓰기가 발생하지 않지만, 임시 테이블스페이스에 대한 쓰기는 가능합니다. 임시 테이블스페이스의 쓰기는 Redo Log와 무관합니다.\n\nB) 오답 — ALTER DATABASE OPEN READ ONLY 명령은 MOUNT 상태에서만 실행할 수 있습니다. NOMOUNT 상태에서는 컨트롤 파일이 아직 열리지 않았으므로 데이터베이스를 OPEN할 수 없습니다. 먼저 ALTER DATABASE MOUNT로 MOUNT 상태로 전환한 후에 실행해야 합니다.\n\nD) 오답 — READ ONLY 모드로 오픈하려면 ALTER DATABASE OPEN READ ONLY 명령을 사용합니다. STARTUP RESTRICT는 RESTRICTED SESSION 권한을 가진 사용자만 접속 가능한 제한 모드로 오픈하는 명령이며, READ ONLY와는 다른 기능입니다.\n\n핵심 개념: READ ONLY 모드는 데이터 파일에 대한 쓰기를 차단하여 DML을 불가능하게 하지만, 임시 테이블스페이스에 대한 쓰기는 허용하여 정렬 등의 읽기 쿼리 처리를 가능하게 합니다. 주로 리포팅, 분석 또는 Standby 데이터베이스 용도로 사용됩니다."
+  }
+]

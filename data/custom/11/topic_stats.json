@@ -7,10 +7,11 @@
     "ファイングレイン監査（FGA）": 1
   },
   "custom_topic_counts": {
-    "統合監査ポリシー": 5,
-    "監査トレール管理": 3,
-    "ファイングレイン監査（FGA）": 2
+    "統合監査ポリシー": 7,
+    "監査トレール管理": 4,
+    "ファイングレイン監査（FGA）": 3,
+    "強制監査（Mandatory Auditing）": 1
   },
-  "total_custom": 10,
-  "last_number": "C_11_010"
+  "total_custom": 15,
+  "last_number": "C_11_015"
 }

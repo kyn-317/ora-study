@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_011",
+    "title": "CDB内のコンテナ構造について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) CDB$ROOTはCON_ID=1の最上位コンテナであり、CDB全体のマスター・データ・ディクショナリを保持している。",
+      "B) PDB$SEEDはCON_ID=3の読取り専用テンプレート・コンテナであり、新規PDB作成時にデータ・ファイルがコピーされる。",
+      "C) 各PDBは独立したデータ・ディクショナリを持ち、PDB間で完全な論理的データ分離が保証される。",
+      "D) CDB内のすべてのコンテナは同一のSYSTEM表領域を共有して使用する。",
+      "E) PDB$SEEDは管理者が任意に削除でき、削除後もPDB$SEEDなしでPDBを作成できる。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — CDB$ROOT는 CON_ID=1인 최상위 컨테이너로, CDB 전체의 마스터 데이터 딕셔너리를 보유합니다. Oracle 제공 메타데이터의 원본을 저장하며, 각 PDB는 이를 참조(링크)하는 구조입니다.\n\nC) 정답 — 각 PDB는 독립된 데이터 딕셔너리를 가지므로 다른 PDB와 완전한 논리적 데이터 격리가 보장됩니다. 이것이 멀티테넌트 아키텍처의 핵심 장점 중 하나입니다.\n\nB) 오답 — PDB$SEED의 CON_ID는 3이 아니라 '2'입니다. CON_ID 3 이상은 사용자 PDB에 할당됩니다. PDB$SEED가 읽기 전용 템플릿이며 데이터 파일이 복사된다는 설명 자체는 맞습니다.\n\nD) 오답 — SYSTEM 테이블스페이스는 CDB 전체에서 공유되지 않습니다. CDB$ROOT와 각 PDB가 각각 별도의 SYSTEM 테이블스페이스를 보유합니다. 제어 파일과 온라인 Redo Log는 CDB 전체에서 공유됩니다.\n\nE) 오답 — PDB$SEED는 CDB의 필수 구성요소이므로 삭제할 수 없습니다. PDB$SEED는 새로운 PDB 생성의 기반이 되는 템플릿으로, CDB가 존재하는 한 반드시 유지되어야 합니다.\n\n핵심 개념: CDB는 CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2), 사용자 PDB(CON_ID=3 이상)로 구성되며, 각 PDB는 독립적인 데이터 딕셔너리와 테이블스페이스를 보유하여 논리적 격리를 보장합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_012",
+    "title": "マルチテナント・アーキテクチャにおけるCDB内の共有資源とPDB固有の資源について正しく述べているものを選択してください。",
+    "options": [
+      "A) 制御ファイルとオンラインREDOログ・ファイルはCDB全体で共有されるが、SYSTEM表領域は各PDBごとに別々に保持される。",
+      "B) SGAはPDBごとに独立して割り当てられ、各PDBが専用のSGAメモリー領域を使用する。",
+      "C) LGWRやDBWnなどのバックグラウンド・プロセスはPDBごとに個別に起動される。",
+      "D) UNDO表領域はShared Undo ModeでもLocal Undo Modeでも常にPDBごとに独立して管理される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 제어 파일과 온라인 Redo Log 파일은 CDB 전체에서 공유되는 자원입니다. 반면 SYSTEM 테이블스페이스는 CDB$ROOT와 각 PDB가 각각 별도로 보유합니다.\n\nB) 오답 — SGA는 PDB별로 독립적으로 할당되지 않습니다. 모든 PDB가 하나의 SGA를 공유합니다. 다만 SGA_TARGET과 SGA_MIN_SIZE 파라미터를 통해 PDB별 SGA 사용량을 제한할 수 있습니다.\n\nC) 오답 — LGWR, DBWn, PMON, SMON 등의 백그라운드 프로세스는 CDB 단위로 공유됩니다. PDB별로 개별 기동되지 않으며, 하나의 인스턴스에서 모든 PDB에 대한 처리를 수행합니다.\n\nD) 오답 — UNDO 테이블스페이스의 관리 방식은 모드에 따라 다릅니다. Shared Undo Mode에서는 CDB 전체에서 하나의 UNDO 테이블스페이스를 공유하고, Local Undo Mode(Oracle 26ai 기본값)에서는 PDB별 독립적인 UNDO 테이블스페이스를 사용합니다.\n\n핵심 개념: CDB에서 제어 파일, Redo Log, SGA, 백그라운드 프로세스는 공유 자원이며, SYSTEM/SYSAUX 테이블스페이스와 데이터 딕셔너리는 PDB별 독립 자원입니다. UNDO는 모드에 따라 공유 또는 독립으로 운영됩니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_013",
+    "title": "PDB$SEEDコンテナの特性について正しく述べているものを選択してください。",
+    "options": [
+      "A) PDB$SEEDは読取り/書込みモードで運用されており、管理者が随時テンプレートの内容を更新できる。",
+      "B) CREATE PLUGGABLE DATABASE文を実行すると、PDB$SEEDのデータ・ファイルがコピーされ、新しいPDBはMOUNTED状態で作成される。",
+      "C) PDB$SEEDから作成されたPDBは自動的にREAD WRITEモードでオープンされるため、作成直後から使用できる。",
+      "D) PDB$SEEDのCON_IDは可変であり、CDB内のコンテナの数に応じて動的に変更される。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — CREATE PLUGGABLE DATABASE 문을 실행하면 PDB$SEED의 데이터 파일(SYSTEM, SYSAUX)이 복사되어 새 PDB가 생성됩니다. 생성된 PDB는 MOUNTED 상태이므로, ALTER PLUGGABLE DATABASE ... OPEN 명령으로 수동으로 열어야 사용 가능합니다.\n\nA) 오답 — PDB$SEED는 기본적으로 READ ONLY 상태입니다. 커스터마이징을 위해 일시적으로 READ WRITE로 변경할 수는 있지만, 작업 후 반드시 READ ONLY로 복원해야 합니다. 평상시에는 변경 불가능한 읽기 전용 상태로 운용됩니다.\n\nC) 오답 — PDB$SEED로부터 생성된 PDB는 자동으로 READ WRITE 모드로 열리지 않습니다. MOUNTED 상태로 생성되므로, 관리자가 수동으로 OPEN해야 합니다.\n\nD) 오답 — PDB$SEED의 CON_ID는 항상 2로 고정되어 있습니다. CDB$ROOT가 CON_ID=1, PDB$SEED가 CON_ID=2이며, 사용자 PDB는 CON_ID 3 이상을 사용합니다. 이 체계는 CDB 내 컨테이너 수와 관계없이 변하지 않습니다.\n\n핵심 개념: PDB$SEED는 CON_ID=2인 읽기 전용 템플릿 컨테이너로, 새 PDB 생성 시 데이터 파일이 복사되며, 생성된 PDB는 MOUNTED 상태이므로 수동 OPEN이 필요합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_014",
+    "title": "LREGプロセスに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) LREGプロセスはインスタンスおよびサービスの情報をOracle Netリスナーに動的に登録する。",
+      "B) LREGは約60秒ごとにリスナーに情報を更新するが、ALTER SYSTEM REGISTER文で即時登録を強制できる。",
+      "C) LREGはリスナーにインスタンスの負荷情報を提供しないため、接続時のロード・バランシングに使用できない。",
+      "D) LREGによる動的登録を使用する場合、listener.oraファイルによる静的登録は併用できない。",
+      "E) LREGはサーバー・プロセスの一種であり、ユーザー接続ごとに個別に起動される。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — LREG(Listener Registration) 프로세스는 인스턴스 이름, 서비스 이름, 디스패처 정보, PDB 서비스 정보 등을 Oracle Net Listener에 동적으로 등록합니다.\n\nB) 정답 — LREG는 약 60초마다 리스너에 정보를 갱신합니다. 새 PDB가 오픈되거나 서비스가 변경된 경우, ALTER SYSTEM REGISTER 명령으로 즉시 등록을 강제할 수 있습니다.\n\nC) 오답 — LREG에 의한 동적 등록은 현재 세션 수, CPU 사용량 등의 실시간 부하 정보(워크로드 메트릭)를 리스너에 제공합니다. 이를 통해 리스너가 접속 시 로드 밸런싱을 수행할 수 있습니다. 부하 정보를 제공하지 않는 것은 정적 등록(listener.ora)입니다.\n\nD) 오답 — 동적 등록(LREG)과 정적 등록(listener.ora)은 동시에 사용할 수 있습니다. 정적 등록은 인스턴스 시작 전 원격 접속이 필요한 경우나 RAC 환경 등에서 활용됩니다.\n\nE) 오답 — LREG는 서버 프로세스가 아닌 백그라운드 프로세스입니다. 인스턴스 기동 시 자동으로 시작되며, 사용자 접속과 무관하게 하나만 실행됩니다.\n\n핵심 개념: LREG는 인스턴스/서비스 정보를 리스너에 동적으로 등록하는 백그라운드 프로세스로, 실시간 부하 정보를 제공하여 로드 밸런싱을 지원합니다. 약 60초 주기로 갱신되며 ALTER SYSTEM REGISTER로 즉시 등록이 가능합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_015",
+    "title": "オンラインREDOログ・ファイルのグループおよびメンバーに関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) LGWRは複数のREDOログ・グループに対して同時に書き込みを行い、I/Oパフォーマンスを向上させる。",
+      "B) 同一グループ内のメンバー・ファイルはOracleによって同時に同一内容が書き込まれ、ディスク障害に対する保護を提供する。",
+      "C) REDOログ・グループの状態がACTIVEの場合、インスタンス復旧には不要であり、すぐに再使用できる。",
+      "D) データベースは最低1つのREDOログ・グループがあれば運用可能であり、Oracleが内部的にログを管理する。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 같은 Redo Log 그룹 내의 멤버 파일들은 Oracle이 동시에 동일한 내용을 기록합니다. 이는 물리적 디스크 장애에 대한 보호(다중화)를 위한 것이며, Oracle은 각 그룹에 최소 2개 멤버를 서로 다른 디스크에 배치할 것을 권장합니다.\n\nA) 오답 — LGWR은 한 번에 하나의 그룹(Current Group)에만 기록합니다. 현재 그룹이 가득 차면 다음 그룹으로 전환(Log Switch)하는 순환 기록 방식을 사용하며, 복수 그룹에 동시 기록하지 않습니다.\n\nC) 오답 — ACTIVE 상태의 Redo Log 그룹은 인스턴스 복구에 아직 필요한 상태이며(체크포인트가 완료되지 않음), 즉시 재사용할 수 없습니다. 인스턴스 복구에 더 이상 필요하지 않은 상태는 INACTIVE이며, 이 상태에서만 재사용이 가능합니다.\n\nD) 오답 — 데이터베이스는 최소 2개 이상의 Redo Log 그룹이 필요합니다. LGWR이 순환 기록 방식으로 그룹 간 전환(Log Switch)을 수행하기 때문에, 최소 2개 그룹이 반드시 유지되어야 합니다.\n\n핵심 개념: 온라인 Redo Log는 최소 2개 이상의 그룹으로 구성되며, LGWR이 순환 기록합니다. 같은 그룹의 멤버는 동시 기록되어 디스크 장애에 대비하며, 그룹 상태는 CURRENT → ACTIVE → INACTIVE 순으로 전이됩니다."
+  }
+]

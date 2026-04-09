@@ -8,11 +8,11 @@
     "PDBの状態管理とパラメータ": 1
   },
   "custom_topic_counts": {
-    "PDB作成と削除": 2,
-    "PDBの切断とプラグイン": 1,
-    "PDBクローニング": 3,
+    "PDB作成と削除": 4,
+    "PDBの切断とプラグイン": 3,
+    "PDBクローニング": 4,
     "PDBの状態管理とパラメータ": 4
   },
-  "total_custom": 10,
-  "last_number": "C_10_010"
+  "total_custom": 15,
+  "last_number": "C_10_015"
 }

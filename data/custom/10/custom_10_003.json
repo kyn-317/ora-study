@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_011",
+    "title": "PDB$SEEDから新規PDBを作成する際のADMIN USER句について正しく述べているものを選択してください。",
+    "options": [
+      "A) ADMIN USER句で作成されるユーザーはCDB$ROOTを含むすべてのコンテナで有効な共通ユーザーとして作成される。",
+      "B) ADMIN USER句で作成されるユーザーにはPDB_DBAロールが自動的に付与され、CREATE SESSION権限を含む基本的なDDL権限が与えられる。",
+      "C) ADMIN USER句は省略可能であり、省略した場合はSYSユーザーがPDBのローカル管理者として設定される。",
+      "D) ADMIN USER句で指定するユーザー名にはC##プレフィックスを付ける必要がある。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — ADMIN USER 절로 생성되는 사용자에게는 PDB_DBA 역할이 자동으로 부여됩니다. PDB_DBA 역할에는 CREATE SESSION, CREATE TABLE, CREATE VIEW, CREATE SEQUENCE, CREATE PROCEDURE, CREATE TRIGGER, CREATE SYNONYM, UNLIMITED TABLESPACE 등의 기본 DDL 권한이 포함되어 있습니다.\n\nA) 오답 — ADMIN USER로 생성되는 사용자는 해당 PDB 내에서만 유효한 로컬 사용자(Local User)입니다. 공통 사용자(Common User)는 CDB$ROOT에서 C## 접두사를 붙여 생성하는 사용자이며, ADMIN USER로 생성되는 사용자와는 다릅니다.\n\nC) 오답 — PDB$SEED에서 PDB를 생성할 때 ADMIN USER 절은 필수입니다. 생략할 수 없으며, 반드시 PDB 로컬 관리자 계정을 지정해야 합니다. 단, 클론이나 Plug-in 방식에서는 선택사항입니다.\n\nD) 오답 — ADMIN USER로 생성되는 사용자는 로컬 사용자이므로 C## 접두사를 붙이지 않습니다. C## 접두사는 공통 사용자(Common User) 생성 시에만 사용됩니다.\n\n핵심 개념: PDB$SEED에서 PDB를 생성할 때 ADMIN USER 절은 필수이며, 로컬 관리자 계정을 생성합니다. 이 계정에는 PDB_DBA 역할이 자동 부여되며, 해당 PDB 내에서만 유효합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_012",
+    "title": "PDBのUnplug時に使用するXMLメタデータ方式と単一アーカイブ(.pdb)方式について正しく述べているものを2つ選択してください。(2つ選択してください)",
+    "options": [
+      "A) XML方式ではメタデータのみがXMLファイルに生成され、データ・ファイルは元の場所にそのまま維持される。",
+      "B) 単一アーカイブ(.pdb)方式ではデータ・ファイルとアーカイブREDOログファイルが圧縮されて出力される。",
+      "C) Unplugの出力形式はALTER PLUGGABLE DATABASE文で指定するファイル拡張子(.xmlまたは.pdb)によって決定される。",
+      "D) XML方式は単一アーカイブ方式よりもディスク容量が多く必要となる。",
+      "E) 単一アーカイブ(.pdb)方式の出力ファイルは独自の圧縮形式を使用しており、標準的なツールでは展開できない。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — XML 방식에서는 PDB의 메타데이터(데이터 파일 경로, 테이블스페이스 정보, DBID, 캐릭터셋 등)만 XML 파일에 저장되며, 데이터 파일은 원래 경로에 그대로 유지됩니다.\n\nC) 정답 — Unplug 시 출력 형식은 ALTER PLUGGABLE DATABASE 문에서 지정하는 파일 확장자에 의해 결정됩니다. .xml 확장자를 지정하면 XML 메타데이터만 생성되고, .pdb 확장자를 지정하면 단일 아카이브 파일이 생성됩니다.\n\nB) 오답 — 단일 아카이브(.pdb) 방식에는 XML 메타데이터와 데이터 파일이 포함되지만, 아카이브 REDO 로그 파일은 포함되지 않습니다.\n\nD) 오답 — XML 방식은 메타데이터만 생성하므로 추가 디스크 공간이 거의 필요하지 않습니다. 반대로 단일 아카이브(.pdb) 방식이 데이터 파일 크기만큼 추가 디스크 공간이 필요합니다.\n\nE) 오답 — 단일 아카이브(.pdb) 파일은 내부적으로 ZIP 형식을 사용하므로, 표준 ZIP 도구로 내용을 확인할 수 있습니다.\n\n핵심 개념: PDB Unplug 시 파일 확장자(.xml 또는 .pdb)로 출력 형식이 결정됩니다. XML 방식은 메타데이터만 생성하여 빠르고, .pdb 아카이브 방식은 데이터 파일을 ZIP 형식으로 통합하여 서버 간 이동에 적합합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_013",
+    "title": "PDB_PLUG_IN_VIOLATIONSビューに関する内容について正しく述べているものを選択してください。",
+    "options": [
+      "A) TYPEがWARNINGの違反事項はPlug In操作を完全にブロックするため、先に解決する必要がある。",
+      "B) TYPEがERRORの違反事項がある場合でもPlug In操作は実行できるが、PDBのOPEN時にエラーが発生する。",
+      "C) Plug Inの互換性を事前に確認するにはDBMS_PDB.CHECK_PLUG_COMPATIBILITYファンクションを使用し、結果はPDB_PLUG_IN_VIOLATIONSビューに記録される。",
+      "D) PDB_PLUG_IN_VIOLATIONSビューはPlug In操作が完了した後にのみ参照可能であり、事前確認には使用できない。"
+    ],
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수를 사용하여 Plug In 전에 호환성을 사전 검사할 수 있으며, 검사 결과(위반 사항)는 PDB_PLUG_IN_VIOLATIONS 뷰에 기록됩니다. 이를 통해 캐릭터셋, Endian, 데이터베이스 버전, 컴포넌트, 패치 수준 등의 호환성 문제를 사전에 파악할 수 있습니다.\n\nA) 오답 — TYPE이 WARNING인 위반 사항은 Plug In 작업을 차단하지 않습니다. WARNING은 PDB를 오픈한 후 자동으로 해결되는 경우가 많습니다. Plug In을 차단하는 것은 TYPE이 ERROR인 경우입니다.\n\nB) 오답 — TYPE이 ERROR인 위반 사항이 있으면 Plug In 자체가 차단됩니다. 먼저 해당 오류를 해결한 후 Plug In을 재시도해야 합니다.\n\nD) 오답 — PDB_PLUG_IN_VIOLATIONS 뷰는 DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수 실행 후 사전에도 참조할 수 있습니다. Plug In 완료 후뿐만 아니라 사전 호환성 검사 결과도 기록됩니다.\n\n핵심 개념: DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수로 Plug In 전 호환성을 사전 검사하고, 결과를 PDB_PLUG_IN_VIOLATIONS 뷰에서 확인합니다. ERROR는 Plug In을 차단하고, WARNING은 오픈 후 자동 해결이 가능합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_014",
+    "title": "Refreshable Clone PDBのREFRESH MODEオプションについて正しく述べているものを2つ選択してください。(2つ選択してください)",
+    "options": [
+      "A) REFRESH MODE MANUALでは、DBAがALTER PLUGGABLE DATABASE ... REFRESH文を手動で実行した場合にのみ同期が行われる。",
+      "B) REFRESH MODE EVERY n MINUTESを設定すると、クローンPDBがREAD WRITEモードのままでバックグラウンドで自動同期が実行される。",
+      "C) REFRESH MODE NONEに変更すると、クローンPDBは同期接続が解除されREAD WRITEモードで使用可能な通常のPDBに変換される。",
+      "D) REFRESH MODE設定はクローンPDB作成後に変更することができず、作成時にのみ指定可能である。",
+      "E) REFRESH実行中はソースPDBへの接続がブロックされ、DML操作が制限される。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — REFRESH MODE MANUAL에서는 DBA가 ALTER PLUGGABLE DATABASE ... REFRESH 문을 수동으로 실행한 경우에만 동기화가 수행됩니다. 필요한 시점에만 동기화를 제어할 수 있어, 정밀한 관리가 필요한 환경에 적합합니다.\n\nC) 정답 — REFRESH MODE NONE으로 변경하면 소스 PDB와의 동기화 연결이 완전히 해제되며, 클론 PDB는 READ WRITE 모드로 사용할 수 있는 일반 PDB로 전환됩니다. 이후 다시 Refreshable Clone으로 되돌릴 수 없습니다.\n\nB) 오답 — Refreshable Clone PDB는 READ ONLY 모드로만 오픈할 수 있습니다. REFRESH 실행 시에는 클론 PDB가 CLOSE(MOUNTED)되었다가 Redo 적용 후 다시 READ ONLY로 오픈됩니다. READ WRITE 상태에서 자동 동기화가 실행되는 것은 아닙니다.\n\nD) 오답 — REFRESH MODE는 클론 PDB 생성 후에도 변경할 수 있습니다. 예를 들어 MANUAL에서 EVERY n MINUTES로, 또는 NONE으로 변경이 가능합니다.\n\nE) 오답 — REFRESH 실행 중 접속이 제한되는 것은 클론 PDB 쪽입니다. 소스 PDB는 REFRESH 동안에도 정상적으로 운영되며 DML 작업이 제한되지 않습니다.\n\n핵심 개념: Refreshable Clone PDB의 REFRESH MODE는 MANUAL(수동 동기화), EVERY n MINUTES(자동 동기화), NONE(동기화 해제 및 일반 PDB 전환)의 세 가지 옵션이 있으며, 생성 후에도 변경할 수 있습니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_015",
+    "title": "PDB作成時のデータ・ファイル管理に関して、CREATE_FILE_DESTオプションについて正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) CREATE_FILE_DESTはFILE_NAME_CONVERTと同時に指定することはできず、いずれか一方のみを使用する必要がある。",
+      "B) CREATE_FILE_DESTを指定すると、Oracle Managed Files（OMF）に基づいてデータ・ファイル名がOracleによって自動的に生成される。",
+      "C) CREATE_FILE_DESTはASMディスク・グループを指定することはできず、ファイルシステムのディレクトリ・パスのみを指定する必要がある。",
+      "D) CREATE_FILE_DESTはPDB_FILE_NAME_CONVERT初期化パラメータよりも低い優先順位を持つ。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — CREATE_FILE_DEST를 지정하면 Oracle Managed Files(OMF)에 기반하여 디렉토리만 지정하면 Oracle이 데이터 파일명을 자동으로 생성하고 관리합니다. FILE_NAME_CONVERT보다 단순하지만 파일 이름을 직접 제어할 수 없습니다.\n\nA) 오답 — CREATE_FILE_DEST와 FILE_NAME_CONVERT는 동시에 지정할 수 있습니다. 이 경우 FILE_NAME_CONVERT가 CREATE_FILE_DEST보다 높은 우선순위를 가지며, FILE_NAME_CONVERT가 적용됩니다.\n\nC) 오답 — CREATE_FILE_DEST는 ASM 디스크 그룹도 지정할 수 있습니다. 예를 들어 CREATE_FILE_DEST = '+DATA'와 같이 ASM 환경에서도 활용 가능합니다.\n\nD) 오답 — CREATE PLUGGABLE DATABASE 문의 CREATE_FILE_DEST 절(2순위)은 PDB_FILE_NAME_CONVERT 초기화 파라미터(3순위)보다 높은 우선순위를 가집니다. 파일 경로 결정 우선순위는 FILE_NAME_CONVERT > CREATE_FILE_DEST > PDB_FILE_NAME_CONVERT > DB_CREATE_FILE_DEST입니다.\n\n핵심 개념: CREATE_FILE_DEST는 OMF 기반으로 디렉토리(또는 ASM 디스크 그룹)만 지정하면 Oracle이 파일명을 자동 생성하며, FILE_NAME_CONVERT보다 낮지만 PDB_FILE_NAME_CONVERT보다 높은 우선순위를 가집니다."
+  }
+]

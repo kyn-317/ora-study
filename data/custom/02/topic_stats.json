@@ -9,12 +9,12 @@
     "Oracle Netツール": 0
   },
   "custom_topic_counts": {
-    "DBCA": 2,
-    "SQL*PlusとSQL Developer": 3,
-    "Enterprise Manager": 2,
-    "RMAN": 2,
+    "DBCA": 3,
+    "SQL*PlusとSQL Developer": 5,
+    "Enterprise Manager": 3,
+    "RMAN": 3,
     "Oracle Netツール": 1
   },
-  "total_custom": 10,
-  "last_number": "C_02_010"
+  "total_custom": 15,
+  "last_number": "C_02_015"
 }

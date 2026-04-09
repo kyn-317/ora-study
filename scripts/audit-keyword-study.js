@@ -27,6 +27,9 @@ for (const ch of chapters) {
   for (const sf of studyFiles) {
     const study = JSON.parse(fs.readFileSync(path.join(studyDir, ch, sf), 'utf8'));
     const studyId = study.id;
+
+    // 챕터 개요 파일(XX_00)은 keyword-study 대상이 아니므로 건너뜀
+    if (/_00$/.test(studyId)) continue;
     const ksFile = path.join(ksDir, ch, studyId + '.json');
     const hasKs = fs.existsSync(ksFile);
 
