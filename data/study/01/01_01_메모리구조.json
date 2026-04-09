@@ -151,7 +151,7 @@
       "sectionId": "s03",
       "title": "PGA (Program Global Area / 프로그램 글로벌 영역)",
       "sqlExamplesIds": ["sql04", "sql05", "sql10", "sql12"],
-      "content": "PGA는 각 **서버 프로세스(또는 백그라운드 프로세스)에 독립적으로 할당**되는 **비공유(Private) 메모리 영역**입니다. SGA와 달리 다른 프로세스와 공유되지 않으며, 해당 프로세스만 읽고 쓸 수 있습니다.\n\n| 특성 | 설명 |\n|---|---|\n| **할당 시점** | 서버 프로세스 생성 시 |\n| **해제 시점** | 서버 프로세스 종료 시 |\n| **공유 여부** | 비공유 (해당 프로세스 전용) |\n| **개수** | 서버 프로세스당 1개 + 백그라운드 프로세스당 1개 |\n\n### PGA의 전체 구성\n\n```\nPGA\n├── Private SQL Area (개인 SQL 영역)\n│   ├── Persistent Area (지속 영역) — 바인드 변수 정보\n│   └── Runtime Area (런타임 영역) — 실행 상태 정보\n├── SQL Work Area (SQL 작업 영역)\n│   ├── Sort Area — 정렬 작업\n│   ├── Hash Area — 해시 조인 작업\n│   └── Bitmap Merge Area — 비트맵 인덱스 병합\n└── Session Memory (세션 메모리)\n    └── 세션 변수, 로그인 정보, PLSQL 변수 등\n```",
+      "content": "PGA는 각 **서버 프로세스(또는 백그라운드 프로세스)에 독립적으로 할당**되는 **비공유(Private) 메모리 영역**입니다. SGA와 달리 다른 프로세스와 공유되지 않으며, 해당 프로세스만 읽고 쓸 수 있습니다.\n\n| 특성 | 설명 |\n|---|---|\n| **할당 시점** | 서버 프로세스 생성 시 |\n| **해제 시점** | 서버 프로세스 종료 시 |\n| **공유 여부** | 비공유 (해당 프로세스 전용) |\n| **개수** | 서버 프로세스당 1개 + 백그라운드 프로세스당 1개 |\n\n### PGA의 전체 구성",
       "visuals": [
         {
           "id": "v06",
@@ -253,7 +253,7 @@
         },
         {
           "title": "메모리 관리 방식 비교 요약 (Comparison Summary)",
-          "content": "세 가지 메모리 관리 방식의 핵심 차이를 비교합니다:\n\n| 구분 | AMM | ASMM | Manual |\n|---|---|---|---|\n| **핵심 파라미터** | `MEMORY_TARGET` | `SGA_TARGET` + `PGA_AGGREGATE_TARGET` | 개별 파라미터 |\n| **SGA 관리** | 자동 | 자동 | 수동 |\n| **PGA 관리** | 자동 | 자동 (별도) | 수동 |\n| **SGA↔PGA 재분배** | 가능 | 불가 | 불가 |\n| **자동화 수준** | 최고 | 중간 | 없음 |\n| **DBA 개입** | 최소 | 부분적 | 전면적 |\n| **적합 환경** | 일반적인 대부분 환경 | SGA/PGA 비율을 고정하고 싶을 때 | 매우 특수한 환경 |\n\n### 판단 플로우차트\n\n```\nMEMORY_TARGET > 0 ?\n  └── Yes → AMM (SGA + PGA 통합 자동 관리)\n  └── No → SGA_TARGET > 0 ?\n              └── Yes → ASMM (SGA 자동 + PGA 별도 자동)\n              └── No → Manual (모두 수동 관리)\n```",
+          "content": "세 가지 메모리 관리 방식의 핵심 차이를 비교합니다:\n\n| 구분 | AMM | ASMM | Manual |\n|---|---|---|---|\n| **핵심 파라미터** | `MEMORY_TARGET` | `SGA_TARGET` + `PGA_AGGREGATE_TARGET` | 개별 파라미터 |\n| **SGA 관리** | 자동 | 자동 | 수동 |\n| **PGA 관리** | 자동 | 자동 (별도) | 수동 |\n| **SGA↔PGA 재분배** | 가능 | 불가 | 불가 |\n| **자동화 수준** | 최고 | 중간 | 없음 |\n| **DBA 개입** | 최소 | 부분적 | 전면적 |\n| **적합 환경** | 일반적인 대부분 환경 | SGA/PGA 비율을 고정하고 싶을 때 | 매우 특수한 환경 |\n\n### 판단 플로우차트",
           "key_points": [
             "AMM: MEMORY_TARGET으로 SGA+PGA 통합 관리, SGA↔PGA 간 자동 재분배 가능",
             "ASMM: SGA_TARGET으로 SGA 내부만 자동 관리, PGA는 PGA_AGGREGATE_TARGET으로 별도 관리",

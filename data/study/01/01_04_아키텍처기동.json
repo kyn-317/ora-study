@@ -13,7 +13,9 @@
     {
       "sectionId": "s01",
       "title": "인스턴스와 데이터베이스의 관계 (Instance vs Database Overview)",
-      "sqlExamplesIds": ["sql01"],
+      "sqlExamplesIds": [
+        "sql01"
+      ],
       "content": "Oracle Database 시스템은 **인스턴스(Instance)**와 **데이터베이스(Database)**라는 두 가지 핵심 구성요소로 이루어져 있으며, 기동(Startup)과 종료(Shutdown)를 이해하려면 이 둘의 관계를 명확히 구분해야 합니다.\n\n- **인스턴스(Instance)**: SGA(System Global Area) 메모리 구조 + 백그라운드 프로세스의 조합\n- **데이터베이스(Database)**: 디스크에 저장된 물리적 파일의 집합 (데이터 파일, 컨트롤 파일, Redo Log 파일 등)\n\n인스턴스는 데이터베이스에 대한 **접근 경로(Access Path)**이며, 사용자가 데이터에 접근하기 위해서는 반드시 인스턴스가 기동되어 데이터베이스와 연결되어야 합니다.\n\n| 구분 | 인스턴스 (Instance) | 데이터베이스 (Database) |\n|---|---|---|\n| **구성** | 메모리(SGA) + 프로세스 | 물리적 파일 (디스크) |\n| **생명주기** | STARTUP 시 생성, SHUTDOWN 시 소멸 | 영구적으로 존재 |\n| **관계** | 보통 1:1 (RAC에서는 N:1) | 하나 이상의 인스턴스에 의해 접근 가능 |\n| **식별** | `ORACLE_SID` 환경 변수 | 컨트롤 파일에 기록된 DB 이름 |\n\n### RAC(Real Application Clusters) 환경에서의 관계\n\n단일 인스턴스 환경에서는 인스턴스와 데이터베이스가 **1:1** 관계이지만, **RAC** 환경에서는 하나의 데이터베이스에 **여러 인스턴스**가 동시에 접근합니다(N:1 관계). 각 인스턴스는 고유한 SGA와 백그라운드 프로세스를 가지며, 공유 스토리지(ASM 등)를 통해 동일한 데이터 파일에 접근합니다.",
       "subsections": [],
       "visuals": [
@@ -30,7 +32,9 @@
     {
       "sectionId": "s02",
       "title": "기동에 필요한 사전 조건 (Startup Prerequisites)",
-      "sqlExamplesIds": ["sql02"],
+      "sqlExamplesIds": [
+        "sql02"
+      ],
       "content": "Oracle 인스턴스를 기동하기 위해서는 여러 사전 조건이 충족되어야 합니다. 기동 명령 실행 전에 확인해야 할 항목들을 정리합니다.\n\n### 필요 권한 및 인증\n\n인스턴스를 기동하려면 **SYSDBA** 또는 **SYSOPER** 권한이 필요합니다. 이 시점에서는 데이터베이스가 열려 있지 않으므로, 일반적인 데이터베이스 인증(딕셔너리 인증)은 사용할 수 없고 **외부 인증(External Authentication)** 방식이 사용됩니다.\n\n| 인증 방식 | 설명 |\n|---|---|\n| **OS 인증** | OS의 DBA 그룹(OSDBA, OSOPER)에 속한 사용자로 접속. `/ AS SYSDBA` 형태 |\n| **Password File 인증** | `orapwd` 유틸리티로 생성한 비밀번호 파일을 통한 원격 인증 |\n\n### SYSDBA vs SYSOPER 권한 비교\n\n| 권한 | SYSDBA | SYSOPER |\n|---|---|---|\n| **STARTUP / SHUTDOWN** | O | O |\n| **ALTER DATABASE OPEN/MOUNT** | O | O |\n| **ALTER DATABASE ARCHIVELOG** | O | O |\n| **복구(RECOVER)** | O | O |\n| **CREATE DATABASE** | O | X |\n| **DROP DATABASE** | O | X |\n| **CREATE SPFILE** | O | O |\n| **RESTRICTED SESSION** | O | O |\n| **접속 스키마** | SYS | PUBLIC |\n| **데이터 딕셔너리 접근** | 완전 접근 | 제한적 접근 |\n\n### 초기화 파라미터 파일 (Parameter File)\n\n기동 시 Oracle은 **초기화 파라미터 파일**을 읽어 인스턴스 구성 정보를 결정합니다. 두 종류가 있습니다:\n\n| 항목 | SPFILE (서버 파라미터 파일) | PFILE (텍스트 파라미터 파일) |\n|---|---|---|\n| **형식** | 바이너리 파일 | 텍스트 파일 |\n| **기본 이름** | `spfile<SID>.ora` | `init<SID>.ora` |\n| **위치** | `$ORACLE_HOME/dbs` (Linux) / `$ORACLE_HOME\\database` (Windows) | 동일 |\n| **ALTER SYSTEM 반영** | `SCOPE=BOTH`로 영구 반영 가능 | 불가 (수동 편집 필요) |\n| **우선순위** | 1순위 | SPFILE 없을 때 사용 |\n\n기동 시 파라미터 파일 검색 순서:\n1. `spfile<SID>.ora` (SPFILE)\n2. `spfileSID.ora` 없으면 → `init<SID>.ora` (PFILE)\n3. `STARTUP PFILE='경로'`로 명시 지정 가능",
       "subsections": [
         {
@@ -49,8 +53,13 @@
     {
       "sectionId": "s03",
       "title": "기동 단계 (Startup Stages: NOMOUNT → MOUNT → OPEN)",
-      "sqlExamplesIds": ["sql03", "sql04", "sql05", "sql06"],
-      "content": "Oracle 인스턴스의 기동은 **3단계**를 순차적으로 거칩니다. 각 단계에서 수행되는 작업이 다르며, 특정 관리 작업을 위해 중간 단계에서 멈출 수 있습니다.\n\n```\n종료 상태 (SHUTDOWN)\n    │\n    ▼  STARTUP NOMOUNT\n[NOMOUNT 단계] ── 인스턴스 시작 (SGA 할당 + 프로세스 기동)\n    │\n    ▼  ALTER DATABASE MOUNT\n[MOUNT 단계] ── 컨트롤 파일 오픈\n    │\n    ▼  ALTER DATABASE OPEN\n[OPEN 단계] ── 데이터 파일 + Redo Log 파일 오픈\n    │\n    ▼  사용자 접속 가능\n```\n\n### 각 단계 비교표\n\n| 항목 | NOMOUNT | MOUNT | OPEN |\n|---|---|---|---|\n| **SGA 할당** | O | O | O |\n| **백그라운드 프로세스** | 기동됨 | 기동됨 | 기동됨 |\n| **컨트롤 파일** | 읽지 않음 | 열림 | 열림 |\n| **데이터 파일** | 접근 불가 | 접근 불가 (경로만 인식) | 열림 |\n| **Redo Log 파일** | 접근 불가 | 접근 불가 (경로만 인식) | 열림 |\n| **데이터 딕셔너리** | 접근 불가 | 접근 불가 | 접근 가능 |\n| **일반 사용자 접속** | 불가 | 불가 | 가능 |\n| **사용하는 파일** | 파라미터 파일만 | + 컨트롤 파일 | + 데이터/Redo 파일 |\n\n`STARTUP` 명령은 기본적으로 세 단계를 모두 거쳐 **OPEN** 상태까지 진행합니다. 특정 단계에서 멈추려면 `STARTUP NOMOUNT` 또는 `STARTUP MOUNT`를 사용합니다.",
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04",
+        "sql05",
+        "sql06"
+      ],
+      "content": "Oracle 인스턴스의 기동은 **3단계**를 순차적으로 거칩니다. 각 단계에서 수행되는 작업이 다르며, 특정 관리 작업을 위해 중간 단계에서 멈출 수 있습니다.\n\n### 각 단계 비교표\n\n| 항목 | NOMOUNT | MOUNT | OPEN |\n|---|---|---|---|\n| **SGA 할당** | O | O | O |\n| **백그라운드 프로세스** | 기동됨 | 기동됨 | 기동됨 |\n| **컨트롤 파일** | 읽지 않음 | 열림 | 열림 |\n| **데이터 파일** | 접근 불가 | 접근 불가 (경로만 인식) | 열림 |\n| **Redo Log 파일** | 접근 불가 | 접근 불가 (경로만 인식) | 열림 |\n| **데이터 딕셔너리** | 접근 불가 | 접근 불가 | 접근 가능 |\n| **일반 사용자 접속** | 불가 | 불가 | 가능 |\n| **사용하는 파일** | 파라미터 파일만 | + 컨트롤 파일 | + 데이터/Redo 파일 |\n\n`STARTUP` 명령은 기본적으로 세 단계를 모두 거쳐 **OPEN** 상태까지 진행합니다. 특정 단계에서 멈추려면 `STARTUP NOMOUNT` 또는 `STARTUP MOUNT`를 사용합니다.",
       "subsections": [
         {
           "title": "NOMOUNT 단계 (Instance Started)",
@@ -108,7 +117,10 @@
     {
       "sectionId": "s04",
       "title": "종료 제어 (Shutdown Modes)",
-      "sqlExamplesIds": ["sql07", "sql08"],
+      "sqlExamplesIds": [
+        "sql07",
+        "sql08"
+      ],
       "content": "Oracle 데이터베이스를 종료하는 **SHUTDOWN** 명령에는 4가지 모드가 있으며, 각 모드의 동작 방식과 데이터 일관성 보장 수준이 다릅니다.\n\n### 종료 모드 비교표\n\n| 항목 | NORMAL | TRANSACTIONAL | IMMEDIATE | ABORT |\n|---|---|---|---|---|\n| **새 접속 허용** | X | X | X | X |\n| **현재 세션 대기** | O (모두 종료 대기) | X (트랜잭션 완료만 대기) | X | X |\n| **현재 트랜잭션 대기** | O | O | X (롤백) | X (롤백 안 함) |\n| **체크포인트 수행** | O | O | O | X |\n| **Redo Log 기록** | O | O | O | X |\n| **인스턴스 복구 필요** | X | X | X | O |\n| **사용 빈도** | 낮음 | 중간 | 가장 높음 | 비상시만 |\n\n종료 시에도 **SYSDBA** 또는 **SYSOPER** 권한이 필요합니다.",
       "subsections": [
         {
@@ -171,8 +183,13 @@
     {
       "sectionId": "s05",
       "title": "멀티테넌트 환경에서의 기동과 종료 (CDB/PDB Startup and Shutdown)",
-      "sqlExamplesIds": ["sql09", "sql10", "sql11", "sql12"],
-      "content": "멀티테넌트 아키텍처(CDB/PDB)에서는 **CDB 레벨의 기동/종료**와 **PDB 레벨의 기동/종료**가 분리되어 있습니다. CDB가 OPEN 상태여야 PDB를 개별적으로 열거나 닫을 수 있습니다.\n\n### CDB와 PDB의 기동 관계\n\n```\nCDB STARTUP\n    │\n    ├── CDB$ROOT: OPEN (자동)\n    ├── PDB$SEED: READ ONLY (자동)\n    └── 사용자 PDB: MOUNTED (기본) → 개별 OPEN 필요\n```\n\n**중요**: CDB를 `STARTUP`하면 CDB$ROOT는 자동으로 OPEN되지만, **사용자 PDB는 기본적으로 MOUNTED 상태**입니다. PDB를 사용하려면 별도로 OPEN해야 합니다.\n\n### PDB 상태 유형\n\n| 상태 | 설명 |\n|---|---|\n| **MOUNTED** | PDB가 마운트되었지만 열리지 않은 상태 |\n| **READ WRITE** | 정상 운영 모드. 읽기/쓰기 모두 가능 |\n| **READ ONLY** | 읽기 전용 모드 |\n| **MIGRATE** | 업그레이드/패치 적용 시 사용되는 특수 모드 |",
+      "sqlExamplesIds": [
+        "sql09",
+        "sql10",
+        "sql11",
+        "sql12"
+      ],
+      "content": "멀티테넌트 아키텍처(CDB/PDB)에서는 **CDB 레벨의 기동/종료**와 **PDB 레벨의 기동/종료**가 분리되어 있습니다. CDB가 OPEN 상태여야 PDB를 개별적으로 열거나 닫을 수 있습니다.\n\n### CDB와 PDB의 기동 관계\n\n**중요**: CDB를 `STARTUP`하면 CDB$ROOT는 자동으로 OPEN되지만, **사용자 PDB는 기본적으로 MOUNTED 상태**입니다. PDB를 사용하려면 별도로 OPEN해야 합니다.\n\n### PDB 상태 유형\n\n| 상태 | 설명 |\n|---|---|\n| **MOUNTED** | PDB가 마운트되었지만 열리지 않은 상태 |\n| **READ WRITE** | 정상 운영 모드. 읽기/쓰기 모두 가능 |\n| **READ ONLY** | 읽기 전용 모드 |\n| **MIGRATE** | 업그레이드/패치 적용 시 사용되는 특수 모드 |",
       "subsections": [
         {
           "title": "PDB 열기 및 닫기 (PDB Open and Close)",
@@ -213,7 +230,11 @@
     {
       "sectionId": "s06",
       "title": "기동/종료 관련 주요 동적 성능 뷰 및 딕셔너리 뷰 (Views for Startup/Shutdown Monitoring)",
-      "sqlExamplesIds": ["sql13", "sql14", "sql15"],
+      "sqlExamplesIds": [
+        "sql13",
+        "sql14",
+        "sql15"
+      ],
       "content": "인스턴스의 현재 상태와 기동/종료 이력을 모니터링하기 위해 사용하는 주요 뷰들을 정리합니다.\n\n### 동적 성능 뷰 (V$ Views)\n\n| 뷰 | 설명 | 조회 가능 시점 |\n|---|---|---|\n| **V$INSTANCE** | 인스턴스 상태(STATUS), 기동 시각(STARTUP_TIME), 호스트명, 버전 등 | NOMOUNT 이상 |\n| **V$DATABASE** | 데이터베이스 이름, OPEN_MODE, DBID, 로그 모드 등 | MOUNT 이상 |\n| **V$PARAMETER** | 현재 설정된 초기화 파라미터 값 | NOMOUNT 이상 |\n| **V$SPPARAMETER** | SPFILE에 설정된 파라미터 값 | NOMOUNT 이상 |\n| **V$DIAG_INFO** | ADR(Automatic Diagnostic Repository) 경로 정보 | NOMOUNT 이상 |\n| **V$RECOVER_FILE** | 복구가 필요한 데이터 파일 목록 | MOUNT 이상 |\n| **V$LOG** | 온라인 Redo Log 그룹 상태 | MOUNT 이상 |\n| **V$PDBS** | PDB별 상태, OPEN_MODE, RESTRICTED 여부 | OPEN (CDB) |\n\n### 데이터 딕셔너리 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **DBA_PDB_SAVED_STATES** | PDB의 SAVE STATE 설정 정보 |\n| **CDB_PDBS** | CDB 내 모든 PDB 정보 |\n| **V$CONTAINERS** | CDB 내 모든 컨테이너(CDB$ROOT, PDB$SEED, 사용자 PDB) 정보 |",
       "subsections": [
         {
@@ -234,8 +255,12 @@
     {
       "sectionId": "s07",
       "title": "멀티테넌트 아키텍처 상세 (Multitenant Architecture Detail)",
-      "sqlExamplesIds": ["sql16", "sql17", "sql18"],
-      "content": "Oracle 12c에서 도입된 **멀티테넌트 아키텍처(Multitenant Architecture)**는 하나의 인스턴스에서 여러 데이터베이스(PDB)를 통합 운영할 수 있는 구조입니다. Oracle 26ai에서는 멀티테넌트가 기본 아키텍처이며, **CDB(Container Database)** 내부에 **PDB(Pluggable Database)**를 배치하여 자원을 효율적으로 공유합니다.\n\n### CDB 구조 개요\n\n```\nCDB (Container Database)\n├── CDB$ROOT (Root Container)   ── 공통 메타데이터, 공통 사용자, 공통 객체\n├── PDB$SEED (Seed Container)   ── 새 PDB 생성 시 템플릿으로 사용\n├── PDB1 (사용자 PDB)            ── 애플리케이션 데이터\n├── PDB2 (사용자 PDB)            ── 애플리케이션 데이터\n└── PDBn (사용자 PDB)            ── 애플리케이션 데이터\n```\n\n### 컨테이너 간 관계\n\n| 컨테이너 | CON_ID | 역할 | 필수 여부 |\n|---|---|---|---|\n| **CDB$ROOT** | 1 | 공통 메타데이터/딕셔너리 관리, 시스템 표영역 보유 | 필수 |\n| **PDB$SEED** | 2 | 새 PDB 생성 시 복제 원본(템플릿) | 필수 |\n| **사용자 PDB** | 3 이상 | 실제 애플리케이션 데이터를 저장하는 독립적 데이터베이스 | 선택 |\n\n### 핵심 원리: 1 인스턴스 = 1 CDB\n\n멀티테넌트 환경에서 **하나의 인스턴스는 하나의 CDB에만 연결**됩니다. CDB 내에 여러 PDB가 존재하더라도, **인스턴스는 1개만 기동**되며, 모든 PDB는 동일한 SGA 메모리와 백그라운드 프로세스를 공유합니다. 컨테이너마다 별도의 인스턴스가 기동되는 것이 아닙니다.",
+      "sqlExamplesIds": [
+        "sql16",
+        "sql17",
+        "sql18"
+      ],
+      "content": "Oracle 12c에서 도입된 **멀티테넌트 아키텍처(Multitenant Architecture)**는 하나의 인스턴스에서 여러 데이터베이스(PDB)를 통합 운영할 수 있는 구조입니다. Oracle 26ai에서는 멀티테넌트가 기본 아키텍처이며, **CDB(Container Database)** 내부에 **PDB(Pluggable Database)**를 배치하여 자원을 효율적으로 공유합니다.\n\n### CDB 구조 개요\n\n### 컨테이너 간 관계\n\n| 컨테이너 | CON_ID | 역할 | 필수 여부 |\n|---|---|---|---|\n| **CDB$ROOT** | 1 | 공통 메타데이터/딕셔너리 관리, 시스템 표영역 보유 | 필수 |\n| **PDB$SEED** | 2 | 새 PDB 생성 시 복제 원본(템플릿) | 필수 |\n| **사용자 PDB** | 3 이상 | 실제 애플리케이션 데이터를 저장하는 독립적 데이터베이스 | 선택 |\n\n### 핵심 원리: 1 인스턴스 = 1 CDB\n\n멀티테넌트 환경에서 **하나의 인스턴스는 하나의 CDB에만 연결**됩니다. CDB 내에 여러 PDB가 존재하더라도, **인스턴스는 1개만 기동**되며, 모든 PDB는 동일한 SGA 메모리와 백그라운드 프로세스를 공유합니다. 컨테이너마다 별도의 인스턴스가 기동되는 것이 아닙니다.",
       "subsections": [
         {
           "title": "PDB$SEED의 역할과 특성 (Seed Container)",
@@ -275,8 +300,10 @@
     {
       "sectionId": "s08",
       "title": "RAC 기본 아키텍처 (Real Application Clusters Architecture)",
-      "sqlExamplesIds": ["sql19"],
-      "content": "**RAC(Real Application Clusters)**는 Oracle의 고가용성(HA) 및 확장성(Scalability) 솔루션으로, **복수의 서버(노드)에서 복수의 인스턴스가 하나의 데이터베이스를 동시에 공유**하는 아키텍처입니다. 각 노드는 독립적인 인스턴스를 실행하지만, 모든 인스턴스가 동일한 데이터베이스 파일에 접근합니다.\n\n### RAC 기본 구성도\n\n```\n[노드 1]              [노드 2]              [노드 N]\nインスタンス1          インスタンス2          インスタンスN\n(SGA + 프로세스)      (SGA + 프로세스)      (SGA + 프로세스)\n     │                     │                     │\n     └──── 인터커넥트 (Private Network) ────┘\n                           │\n              ┌────────────┴────────────┐\n              │    공유 스토리지 (ASM)     │\n              │  ┌─────────────────────┐ │\n              │  │ 데이터 파일          │ │\n              │  │ 제어파일             │ │\n              │  │ 온라인 Redo 로그     │ │\n              │  │ 아카이브 로그         │ │\n              │  └─────────────────────┘ │\n              └─────────────────────────┘\n```\n\n### RAC의 핵심 관계: N개 인스턴스 : 1개 데이터베이스\n\n| 구분 | 단일 인스턴스 | RAC |\n|---|---|---|\n| **인스턴스 수** | 1개 | N개 (노드 수만큼) |\n| **데이터베이스 수** | 1개 | 1개 (공유) |\n| **인스턴스:DB 관계** | 1:1 | N:1 |\n| **스토리지** | 로컬 또는 공유 | 반드시 공유 스토리지 |\n| **장애 시** | 전체 서비스 중단 | 다른 노드에서 서비스 계속 |",
+      "sqlExamplesIds": [
+        "sql19"
+      ],
+      "content": "**RAC(Real Application Clusters)**는 Oracle의 고가용성(HA) 및 확장성(Scalability) 솔루션으로, **복수의 서버(노드)에서 복수의 인스턴스가 하나의 데이터베이스를 동시에 공유**하는 아키텍처입니다. 각 노드는 독립적인 인스턴스를 실행하지만, 모든 인스턴스가 동일한 데이터베이스 파일에 접근합니다.\n\n### RAC 기본 구성도\n\n### RAC의 핵심 관계: N개 인스턴스 : 1개 데이터베이스\n\n| 구분 | 단일 인스턴스 | RAC |\n|---|---|---|\n| **인스턴스 수** | 1개 | N개 (노드 수만큼) |\n| **데이터베이스 수** | 1개 | 1개 (공유) |\n| **인스턴스:DB 관계** | 1:1 | N:1 |\n| **스토리지** | 로컬 또는 공유 | 반드시 공유 스토리지 |\n| **장애 시** | 전체 서비스 중단 | 다른 노드에서 서비스 계속 |",
       "subsections": [
         {
           "title": "RAC 핵심 구성요소 (RAC Components)",
@@ -305,8 +332,10 @@
     {
       "sectionId": "s09",
       "title": "멀티테넌트 + RAC 조합 (Multitenant with RAC)",
-      "sqlExamplesIds": ["sql20"],
-      "content": "멀티테넌트 아키텍처와 RAC를 결합하면, **여러 노드의 인스턴스가 하나의 CDB를 공유**하면서 그 CDB 안에 **여러 PDB를 운영**할 수 있습니다. 이는 Oracle의 가장 강력한 통합 아키텍처이며, 고가용성과 자원 통합을 동시에 달성합니다.\n\n### CDB + RAC 구성도\n\n```\n[노드 1]                    [노드 2]\nインスタンス1                インスタンス2\n(SGA + 프로세스)            (SGA + 프로세스)\n  │                           │\n  └─── 인터커넥트 ────────────┘\n                │\n    ┌───────────┴───────────┐\n    │      CDB (공유)        │\n    │  ├── CDB$ROOT          │\n    │  ├── PDB$SEED          │\n    │  ├── PDB1              │\n    │  ├── PDB2              │\n    │  └── PDBn              │\n    │   (공유 스토리지/ASM)   │\n    └───────────────────────┘\n```\n\n### 핵심 포인트\n\n| 항목 | 설명 | 오답 주의 |\n|---|---|---|\n| **인스턴스와 CDB의 관계** | 각 노드에 1개 인스턴스, 모두 동일한 CDB에 접속 | CDB별로 인스턴스가 분리되는 것이 아님 |\n| **PDB 수 제한** | CDB 내 PDB 수에 아키텍처적 제한 없음 | 1개 PDB 제한은 잘못된 정보 |\n| **RAC 노드 수 제한** | 노드 수에 아키텍처적 제한 없음 | 4노드 제한은 잘못된 정보 |\n| **데이터베이스 파일 배치** | 공유 스토리지에 집중 배치 | 노드별 분산 배치가 아님 |\n| **PDB 서비스 매핑** | PDB 서비스를 특정 노드에 매핑 가능 | 모든 PDB가 모든 노드에서 실행되어야 하는 것은 아님 |",
+      "sqlExamplesIds": [
+        "sql20"
+      ],
+      "content": "멀티테넌트 아키텍처와 RAC를 결합하면, **여러 노드의 인스턴스가 하나의 CDB를 공유**하면서 그 CDB 안에 **여러 PDB를 운영**할 수 있습니다. 이는 Oracle의 가장 강력한 통합 아키텍처이며, 고가용성과 자원 통합을 동시에 달성합니다.\n\n### CDB + RAC 구성도\n\n```\n[Node 1]                [Node 2]\nInstance 1              Instance 2\n(SGA + Processes)       (SGA + Processes)\n  |                       |\n  +--- Interconnect ------+\n              |\n  +-----------+-----------+\n  |     CDB (Shared)      |\n  |  +-- CDB$ROOT         |\n  |  +-- PDB$SEED         |\n  |  +-- PDB1             |\n  |  +-- PDB2             |\n  |  +-- PDBn             |\n  | (Shared Storage/ASM)  |\n  +-----------------------+\n```\n\n### 핵심 포인트\n\n| 항목 | 설명 | 오답 주의 |\n|---|---|---|\n| **인스턴스와 CDB의 관계** | 각 노드에 1개 인스턴스, 모두 동일한 CDB에 접속 | CDB별로 인스턴스가 분리되는 것이 아님 |\n| **PDB 수 제한** | CDB 내 PDB 수에 아키텍처적 제한 없음 | 1개 PDB 제한은 잘못된 정보 |\n| **RAC 노드 수 제한** | 노드 수에 아키텍처적 제한 없음 | 4노드 제한은 잘못된 정보 |\n| **데이터베이스 파일 배치** | 공유 스토리지에 집중 배치 | 노드별 분산 배치가 아님 |\n| **PDB 서비스 매핑** | PDB 서비스를 특정 노드에 매핑 가능 | 모든 PDB가 모든 노드에서 실행되어야 하는 것은 아님 |",
       "subsections": [
         {
           "title": "PDB 서비스와 워크로드 분산 (PDB Service and Workload Distribution)",

@@ -35,7 +35,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
                   <span style={{ color: 'var(--color-1)', fontWeight: 600, fontSize: '0.9rem' }}>{ex.title}</span>
                 </div>
                 <div style={{ padding: '1rem', overflowX: 'auto' }}>
-                  <pre style={{ margin: 0, color: '#e2e8f0', fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}>
+                  <pre style={{ margin: 0, color: '#e2e8f0', fontFamily: "var(--font-geist-mono), 'Courier New', monospace", fontSize: '0.9rem' }}>
                     <code>{ex.sql}</code>
                   </pre>
                 </div>

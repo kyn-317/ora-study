@@ -15,7 +15,7 @@
       "sectionId": "s01",
       "title": "Oracle 복구 메커니즘 개요 (Recovery Mechanism Overview)",
       "sqlExamplesIds": [],
-      "content": "Oracle Database는 다양한 장애 상황에서 데이터의 **일관성(Consistency)**과 **내구성(Durability)**을 보장하기 위해 체계적인 복구 메커니즘을 갖추고 있습니다. 이 메커니즘의 핵심은 **Redo 로그**와 **UNDO 데이터**, 그리고 **체크포인트(Checkpoint)**의 협력적 동작입니다.\n\nOracle의 복구는 크게 세 가지 범주로 나뉩니다:\n\n| 복구 유형 | 발생 원인 | 자동/수동 | 주요 메커니즘 |\n|---|---|---|---|\n| **인스턴스 복구 (Instance Recovery)** | 비정상 인스턴스 종료 (정전, 장애 등) | 자동 | Redo Log를 이용한 Roll Forward + UNDO를 이용한 Roll Back |\n| **미디어 복구 (Media Recovery)** | 데이터 파일 손실/손상 (디스크 장애 등) | 수동 (DBA 개입) | 백업 + 아카이브 로그를 이용한 복원 및 복구 |\n| **블록 미디어 복구 (Block Media Recovery)** | 개별 데이터 블록 손상 | 수동/자동 | RMAN을 이용한 블록 단위 복구 |\n\n### 복구의 기본 원칙: Write-Ahead Logging (WAL)\n\nOracle의 모든 복구 메커니즘은 **Write-Ahead Logging(WAL)** 원칙에 기반합니다:\n\n1. **데이터 변경 전에 반드시 Redo 로그를 먼저 기록**합니다.\n2. LGWR이 Redo Log Buffer의 내용을 Online Redo Log File에 기록한 후에야 트랜잭션이 커밋된 것으로 간주됩니다.\n3. 이를 통해 커밋된 트랜잭션은 어떤 장애 상황에서도 복구할 수 있습니다.\n\n### 복구 관련 핵심 구성요소 관계\n\n```\n트랜잭션 변경 → Redo Log Buffer → LGWR → Online Redo Log Files\n                                              ↓ (ARCn)\n                                         Archived Redo Log Files\n\n트랜잭션 변경 → Database Buffer Cache (Dirty Buffer) → DBWn → Data Files\n                                                         ↑\n                                                    Checkpoint (CKPT)\n\n트랜잭션 롤백 ← UNDO Tablespace ← UNDO 데이터 기록\n```\n\n| 구성요소 | 복구에서의 역할 |\n|---|---|\n| **Online Redo Log** | 모든 데이터 변경 사항 기록. 인스턴스 복구 시 Roll Forward에 사용 |\n| **Archived Redo Log** | 미디어 복구 시 과거 변경 사항 재적용에 사용 |\n| **UNDO Tablespace** | 커밋되지 않은 트랜잭션의 원래 값 보관. 롤백/인스턴스 복구 시 Roll Back에 사용 |\n| **Control File** | 데이터 파일, Redo 로그 위치, SCN 정보 등 데이터베이스 구조 메타데이터 |\n| **Checkpoint** | 디스크와 메모리 간 동기화 시점 기록. 복구 시작점 결정 |\n| **Data File Header** | 마지막 체크포인트 SCN 기록. 복구 필요 여부 판단 기준 |",
+      "content": "Oracle Database는 다양한 장애 상황에서 데이터의 **일관성(Consistency)**과 **내구성(Durability)**을 보장하기 위해 체계적인 복구 메커니즘을 갖추고 있습니다. 이 메커니즘의 핵심은 **Redo 로그**와 **UNDO 데이터**, 그리고 **체크포인트(Checkpoint)**의 협력적 동작입니다.\n\nOracle의 복구는 크게 세 가지 범주로 나뉩니다:\n\n| 복구 유형 | 발생 원인 | 자동/수동 | 주요 메커니즘 |\n|---|---|---|---|\n| **인스턴스 복구 (Instance Recovery)** | 비정상 인스턴스 종료 (정전, 장애 등) | 자동 | Redo Log를 이용한 Roll Forward + UNDO를 이용한 Roll Back |\n| **미디어 복구 (Media Recovery)** | 데이터 파일 손실/손상 (디스크 장애 등) | 수동 (DBA 개입) | 백업 + 아카이브 로그를 이용한 복원 및 복구 |\n| **블록 미디어 복구 (Block Media Recovery)** | 개별 데이터 블록 손상 | 수동/자동 | RMAN을 이용한 블록 단위 복구 |\n\n### 복구의 기본 원칙: Write-Ahead Logging (WAL)\n\nOracle의 모든 복구 메커니즘은 **Write-Ahead Logging(WAL)** 원칙에 기반합니다:\n\n1. **데이터 변경 전에 반드시 Redo 로그를 먼저 기록**합니다.\n2. LGWR이 Redo Log Buffer의 내용을 Online Redo Log File에 기록한 후에야 트랜잭션이 커밋된 것으로 간주됩니다.\n3. 이를 통해 커밋된 트랜잭션은 어떤 장애 상황에서도 복구할 수 있습니다.\n\n### 복구 관련 핵심 구성요소 관계\n\n| 구성요소 | 복구에서의 역할 |\n|---|---|\n| **Online Redo Log** | 모든 데이터 변경 사항 기록. 인스턴스 복구 시 Roll Forward에 사용 |\n| **Archived Redo Log** | 미디어 복구 시 과거 변경 사항 재적용에 사용 |\n| **UNDO Tablespace** | 커밋되지 않은 트랜잭션의 원래 값 보관. 롤백/인스턴스 복구 시 Roll Back에 사용 |\n| **Control File** | 데이터 파일, Redo 로그 위치, SCN 정보 등 데이터베이스 구조 메타데이터 |\n| **Checkpoint** | 디스크와 메모리 간 동기화 시점 기록. 복구 시작점 결정 |\n| **Data File Header** | 마지막 체크포인트 SCN 기록. 복구 필요 여부 판단 기준 |",
       "subsections": [],
       "visuals": [
         {
@@ -31,7 +31,12 @@
     {
       "sectionId": "s02",
       "title": "인스턴스 복구 (Instance Recovery)",
-      "sqlExamplesIds": ["sql01", "sql02", "sql03", "sql04"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02",
+        "sql03",
+        "sql04"
+      ],
       "content": "인스턴스 복구는 Oracle 인스턴스가 **비정상적으로 종료**된 후 재시작할 때 **자동으로 수행**되는 복구 과정입니다. `SHUTDOWN ABORT`, 정전, 시스템 크래시 등의 상황 후에 발생하며, DBA의 개입 없이 SMON(System Monitor) 백그라운드 프로세스가 자동으로 처리합니다.\n\n인스턴스 복구의 목적은 데이터베이스를 **마지막 커밋 시점의 일관된 상태(Transaction-Consistent State)**로 되돌리는 것입니다.",
       "subsections": [
         {
@@ -46,7 +51,7 @@
         },
         {
           "title": "인스턴스 복구 동작 단계 (Instance Recovery Phases)",
-          "content": "인스턴스 복구는 **두 단계**로 수행됩니다. 이 과정은 인스턴스 재시작 시 MOUNT 단계에서 OPEN 단계로 전환하는 과정에서 SMON에 의해 자동 실행됩니다.\n\n### 1단계: Roll Forward (Cache Recovery / Redo Apply)\n\nOnline Redo Log File의 변경 사항을 데이터 파일에 **재적용**하는 단계입니다.\n\n1. SMON이 **Control File**에서 마지막 체크포인트 SCN(System Change Number)을 확인합니다.\n2. 체크포인트 SCN 이후의 모든 Redo 레코드를 Online Redo Log File에서 읽습니다.\n3. 이 Redo 레코드를 데이터 파일에 순서대로 적용합니다.\n4. 이 과정에서 **커밋된 트랜잭션**과 **커밋되지 않은 트랜잭션** 모두의 변경 사항이 적용됩니다.\n5. Roll Forward가 완료되면 데이터베이스는 장애 직전의 상태로 복원됩니다.\n\n### 2단계: Roll Back (Transaction Recovery / Undo Apply)\n\nRoll Forward에서 복원된 데이터 중 **커밋되지 않은 트랜잭션**의 변경 사항을 **UNDO 데이터를 이용해 되돌리는** 단계입니다.\n\n1. Roll Forward 완료 후, 데이터베이스가 OPEN 상태로 전환됩니다.\n2. SMON이 UNDO 세그먼트를 스캔하여 커밋되지 않은 활성 트랜잭션을 식별합니다.\n3. 각 미완료 트랜잭션에 대해 UNDO 데이터를 적용하여 변경 사항을 되돌립니다.\n4. Roll Back은 **데이터베이스가 OPEN된 후 백그라운드에서** 수행됩니다.\n5. 사용자가 아직 롤백되지 않은 데이터에 접근하면, 해당 블록의 롤백이 **즉시(on-demand)** 처리됩니다.\n\n### 인스턴스 복구 전체 흐름도\n\n```\n[장애 발생] → [인스턴스 재시작]\n     ↓\n[MOUNT 단계]\n     ↓\n[Control File 확인 → 마지막 Checkpoint SCN 확인]\n     ↓\n[1단계: Roll Forward]\n  Online Redo Log → 데이터 파일에 Redo 적용\n  (커밋된 + 커밋 안 된 트랜잭션 모두 적용)\n     ↓\n[데이터베이스 OPEN]\n     ↓\n[2단계: Roll Back]\n  UNDO 데이터 → 커밋되지 않은 트랜잭션 되돌림\n  (백그라운드 수행, 사용자 접근 시 on-demand 롤백)\n```\n\n### SCN (System Change Number)\n\nSCN은 Oracle 내부에서 사용하는 **논리적 타임스탬프**로, 데이터베이스 내 모든 변경에 순서를 부여합니다.\n\n| SCN 관련 항목 | 설명 |\n|---|---|\n| **System SCN** | 현재 시스템의 최신 SCN |\n| **Checkpoint SCN** | 마지막 체크포인트 시점의 SCN. Control File과 Data File Header에 기록 |\n| **Data File Header SCN** | 각 데이터 파일이 마지막으로 동기화된 SCN |\n| **Redo Record SCN** | 각 Redo 레코드에 기록된 SCN |\n\nSCN 비교를 통해 복구 필요 여부와 복구 범위를 결정합니다:\n- Data File Header SCN < Control File Checkpoint SCN → 해당 파일에 대해 미디어 복구 필요\n- Control File Checkpoint SCN < 마지막 Redo SCN → 인스턴스 복구 필요",
+          "content": "인스턴스 복구는 **두 단계**로 수행됩니다. 이 과정은 인스턴스 재시작 시 MOUNT 단계에서 OPEN 단계로 전환하는 과정에서 SMON에 의해 자동 실행됩니다.\n\n### 1단계: Roll Forward (Cache Recovery / Redo Apply)\n\nOnline Redo Log File의 변경 사항을 데이터 파일에 **재적용**하는 단계입니다.\n\n1. SMON이 **Control File**에서 마지막 체크포인트 SCN(System Change Number)을 확인합니다.\n2. 체크포인트 SCN 이후의 모든 Redo 레코드를 Online Redo Log File에서 읽습니다.\n3. 이 Redo 레코드를 데이터 파일에 순서대로 적용합니다.\n4. 이 과정에서 **커밋된 트랜잭션**과 **커밋되지 않은 트랜잭션** 모두의 변경 사항이 적용됩니다.\n5. Roll Forward가 완료되면 데이터베이스는 장애 직전의 상태로 복원됩니다.\n\n### 2단계: Roll Back (Transaction Recovery / Undo Apply)\n\nRoll Forward에서 복원된 데이터 중 **커밋되지 않은 트랜잭션**의 변경 사항을 **UNDO 데이터를 이용해 되돌리는** 단계입니다.\n\n1. Roll Forward 완료 후, 데이터베이스가 OPEN 상태로 전환됩니다.\n2. SMON이 UNDO 세그먼트를 스캔하여 커밋되지 않은 활성 트랜잭션을 식별합니다.\n3. 각 미완료 트랜잭션에 대해 UNDO 데이터를 적용하여 변경 사항을 되돌립니다.\n4. Roll Back은 **데이터베이스가 OPEN된 후 백그라운드에서** 수행됩니다.\n5. 사용자가 아직 롤백되지 않은 데이터에 접근하면, 해당 블록의 롤백이 **즉시(on-demand)** 처리됩니다.\n\n### 인스턴스 복구 전체 흐름도\n\n### SCN (System Change Number)\n\nSCN은 Oracle 내부에서 사용하는 **논리적 타임스탬프**로, 데이터베이스 내 모든 변경에 순서를 부여합니다.\n\n| SCN 관련 항목 | 설명 |\n|---|---|\n| **System SCN** | 현재 시스템의 최신 SCN |\n| **Checkpoint SCN** | 마지막 체크포인트 시점의 SCN. Control File과 Data File Header에 기록 |\n| **Data File Header SCN** | 각 데이터 파일이 마지막으로 동기화된 SCN |\n| **Redo Record SCN** | 각 Redo 레코드에 기록된 SCN |\n\nSCN 비교를 통해 복구 필요 여부와 복구 범위를 결정합니다:\n- Data File Header SCN < Control File Checkpoint SCN → 해당 파일에 대해 미디어 복구 필요\n- Control File Checkpoint SCN < 마지막 Redo SCN → 인스턴스 복구 필요",
           "key_points": [
             "인스턴스 복구는 Roll Forward(Redo 적용) → Roll Back(UNDO 적용) 두 단계로 수행",
             "Roll Forward에서는 커밋 여부와 관계없이 모든 변경 사항을 Redo Log로부터 재적용",
@@ -93,7 +98,11 @@
     {
       "sectionId": "s03",
       "title": "체크포인트 관리 (Checkpoint Management)",
-      "sqlExamplesIds": ["sql05", "sql06", "sql07"],
+      "sqlExamplesIds": [
+        "sql05",
+        "sql06",
+        "sql07"
+      ],
       "content": "체크포인트(Checkpoint)는 Database Buffer Cache의 **Dirty Buffer를 데이터 파일에 기록**하고, **Control File과 Data File Header를 업데이트**하는 동기화 이벤트입니다. 체크포인트는 데이터의 일관성 보장과 인스턴스 복구 시간 단축에 핵심적인 역할을 합니다.",
       "subsections": [
         {
@@ -155,7 +164,12 @@
     {
       "sectionId": "s04",
       "title": "미디어 복구 (Media Recovery)",
-      "sqlExamplesIds": ["sql08", "sql09", "sql10", "sql11"],
+      "sqlExamplesIds": [
+        "sql08",
+        "sql09",
+        "sql10",
+        "sql11"
+      ],
       "content": "미디어 복구는 **디스크 장애, 파일 삭제, 파일 손상** 등으로 인해 데이터 파일이 손실 또는 손상된 경우에 수행하는 복구 작업입니다. 인스턴스 복구와 달리 **DBA가 수동으로** 백업과 아카이브 로그를 이용하여 복구를 진행합니다.",
       "subsections": [
         {
@@ -208,12 +222,16 @@
     {
       "sectionId": "s05",
       "title": "Redo 로그와 복구의 관계 (Redo Log and Recovery Relationship)",
-      "sqlExamplesIds": ["sql12", "sql13", "sql14"],
+      "sqlExamplesIds": [
+        "sql12",
+        "sql13",
+        "sql14"
+      ],
       "content": "Redo 로그는 Oracle 복구 체계의 **근간**이 되는 구성요소입니다. 모든 데이터 변경은 Redo 로그에 기록되며, 이를 통해 장애 발생 시 변경 사항을 재현할 수 있습니다.",
       "subsections": [
         {
           "title": "Redo 로그의 구조와 기록 메커니즘 (Redo Log Structure and Write Mechanism)",
-          "content": "### Online Redo Log 구조\n\nOnline Redo Log는 **그룹(Group)**과 **멤버(Member)**로 구성됩니다.\n\n- **그룹(Group)**: 논리적 단위. 최소 2개 이상 필요 (3개 이상 권장)\n- **멤버(Member)**: 그룹 내의 물리적 파일. 다중화(Multiplexing)를 위해 그룹당 2개 이상 권장\n- 같은 그룹의 멤버들은 **동일한 내용**을 가짐 (미러링)\n\n```\nRedo Log Group 1 ─┬─ /disk1/redo01a.log\n                   └─ /disk2/redo01b.log  (멤버 다중화)\n\nRedo Log Group 2 ─┬─ /disk1/redo02a.log\n                   └─ /disk2/redo02b.log\n\nRedo Log Group 3 ─┬─ /disk1/redo03a.log\n                   └─ /disk2/redo03b.log\n```\n\n### LGWR의 기록 조건\n\nLGWR(Log Writer) 프로세스는 다음 조건에서 Redo Log Buffer의 내용을 Online Redo Log File에 기록합니다:\n\n| 기록 조건 | 설명 |\n|---|---|\n| **COMMIT 발생 시** | 트랜잭션 커밋 시 해당 Redo를 즉시 기록 (동기식) |\n| **Redo Log Buffer 1/3 이상 사용 시** | 버퍼 공간 확보를 위해 |\n| **3초마다** | 주기적 기록 |\n| **DBWn이 기록 전** | Write-Ahead Logging 원칙에 따라 Redo가 먼저 기록 |\n| **로그 스위치 시** | 현재 그룹의 남은 내용을 모두 기록 |\n\n### Redo 레코드 구조\n\n각 Redo 레코드는 **변경 벡터(Change Vector)**의 집합입니다:\n\n- **Change Vector**: 단일 데이터 블록에 대한 하나의 변경 사항을 기술\n- 하나의 DML 문장은 여러 Change Vector를 생성할 수 있음 (데이터 블록 + UNDO 블록 + UNDO 세그먼트 헤더 등)\n- 각 Redo 레코드에는 **SCN**과 **타임스탬프**가 포함됨",
+          "content": "### Online Redo Log 구조\n\nOnline Redo Log는 **그룹(Group)**과 **멤버(Member)**로 구성됩니다.\n\n- **그룹(Group)**: 논리적 단위. 최소 2개 이상 필요 (3개 이상 권장)\n- **멤버(Member)**: 그룹 내의 물리적 파일. 다중화(Multiplexing)를 위해 그룹당 2개 이상 권장\n- 같은 그룹의 멤버들은 **동일한 내용**을 가짐 (미러링)\n\n### LGWR의 기록 조건\n\nLGWR(Log Writer) 프로세스는 다음 조건에서 Redo Log Buffer의 내용을 Online Redo Log File에 기록합니다:\n\n| 기록 조건 | 설명 |\n|---|---|\n| **COMMIT 발생 시** | 트랜잭션 커밋 시 해당 Redo를 즉시 기록 (동기식) |\n| **Redo Log Buffer 1/3 이상 사용 시** | 버퍼 공간 확보를 위해 |\n| **3초마다** | 주기적 기록 |\n| **DBWn이 기록 전** | Write-Ahead Logging 원칙에 따라 Redo가 먼저 기록 |\n| **로그 스위치 시** | 현재 그룹의 남은 내용을 모두 기록 |\n\n### Redo 레코드 구조\n\n각 Redo 레코드는 **변경 벡터(Change Vector)**의 집합입니다:\n\n- **Change Vector**: 단일 데이터 블록에 대한 하나의 변경 사항을 기술\n- 하나의 DML 문장은 여러 Change Vector를 생성할 수 있음 (데이터 블록 + UNDO 블록 + UNDO 세그먼트 헤더 등)\n- 각 Redo 레코드에는 **SCN**과 **타임스탬프**가 포함됨",
           "key_points": [
             "Online Redo Log는 그룹(Group)과 멤버(Member)로 구성되며, 다중화로 안정성 확보",
             "최소 2개 그룹 필요, 3개 이상 권장. 멤버는 서로 다른 디스크에 배치 권장",
