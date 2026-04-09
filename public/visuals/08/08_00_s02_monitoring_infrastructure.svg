@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+  <style>
+    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .label-sm { font-size: 13px; font-weight: 600; }
+    .sublabel { font-size: 11px; fill: #94A3B8; }
+    .code { font-family: monospace; font-size: 12px; fill: #F59E0B; }
+    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 8; }
+    .box-primary { fill: rgba(111,107,234,0.15); stroke: #6F6BEA; stroke-width: 2; rx: 8; }
+    .box-blue { fill: rgba(59,130,246,0.1); stroke: #3B82F6; stroke-width: 1.5; rx: 8; }
+    .box-yellow { fill: rgba(245,158,11,0.1); stroke: #F59E0B; stroke-width: 1.5; rx: 8; }
+    .box-green { fill: rgba(16,185,129,0.1); stroke: #10B981; stroke-width: 1.5; rx: 8; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2; fill: none; marker-end: url(#arrowP); }
+    .arrow-down { stroke: #94A3B8; stroke-width: 1.5; fill: none; marker-end: url(#arrowGray); }
+    .layer-num { font-size: 22px; font-weight: 700; }
+    .layer-label { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; }
+  </style>
+  <defs>
+    <marker id="arrowP" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">정보 수집 4계층 아키텍처 (Monitoring Infrastructure)</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">08_01 기본 모니터링 및 로깅 — 실시간 메모리에서 이력 저장소까지</text>
+
+  <!-- Layer 1: V$ Views (Real-time) -->
+  <text x="30" y="95" class="layer-num" fill="#6F6BEA">L1</text>
+  <text x="30" y="112" class="layer-label" fill="#6F6BEA">실시간</text>
+  <text x="30" y="124" class="layer-label" fill="#6F6BEA">Real-time</text>
+  <rect x="70" y="70" width="700" height="75" class="box-primary" />
+  <text x="400" y="93" text-anchor="middle" class="label">동적 성능 뷰 (V$ Views)</text>
+  <text x="145" y="115" text-anchor="middle" class="code">V$INSTANCE</text>
+  <text x="275" y="115" text-anchor="middle" class="code">V$SESSION</text>
+  <text x="400" y="115" text-anchor="middle" class="code">V$SQL</text>
+  <text x="525" y="115" text-anchor="middle" class="code">V$SYSSTAT</text>
+  <text x="670" y="115" text-anchor="middle" class="code">V$SYSTEM_EVENT</text>
+  <text x="400" y="137" text-anchor="middle" class="sublabel">SGA 메모리의 X$ 테이블 기반 · 인스턴스 재시작 시 초기화 · RAC: GV$ 뷰</text>
+
+  <!-- Arrow L1 → L2 -->
+  <path d="M 400 145 L 400 170" class="arrow-down" />
+
+  <!-- Layer 2: Data Dictionary (Persistent Metadata) -->
+  <text x="30" y="205" class="layer-num" fill="#3B82F6">L2</text>
+  <text x="30" y="222" class="layer-label" fill="#3B82F6">메타데이터</text>
+  <text x="30" y="234" class="layer-label" fill="#3B82F6">Metadata</text>
+  <rect x="70" y="180" width="700" height="75" class="box-blue" />
+  <text x="400" y="203" text-anchor="middle" class="label">데이터 딕셔너리 (Data Dictionary)</text>
+  <rect x="110" y="212" width="100" height="30" rx="4" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="160" y="232" text-anchor="middle" class="label-sm" fill="#3B82F6">DBA_</text>
+  <rect x="230" y="212" width="100" height="30" rx="4" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="280" y="232" text-anchor="middle" class="label-sm" fill="#3B82F6">ALL_</text>
+  <rect x="350" y="212" width="100" height="30" rx="4" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="400" y="232" text-anchor="middle" class="label-sm" fill="#3B82F6">USER_</text>
+  <rect x="470" y="212" width="100" height="30" rx="4" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="520" y="232" text-anchor="middle" class="label-sm" fill="#3B82F6">CDB_</text>
+  <text x="660" y="232" text-anchor="middle" class="sublabel">SYSTEM/SYSAUX</text>
+  <text x="660" y="245" text-anchor="middle" class="sublabel">테이블스페이스 저장</text>
+
+  <!-- Arrow L2 → L3 -->
+  <path d="M 400 255 L 400 285" class="arrow-down" />
+
+  <!-- Layer 3: ADR (Fault Diagnostics) -->
+  <text x="30" y="320" class="layer-num" fill="#F59E0B">L3</text>
+  <text x="30" y="337" class="layer-label" fill="#F59E0B">장애진단</text>
+  <text x="30" y="349" class="layer-label" fill="#F59E0B">Diagnostics</text>
+  <rect x="70" y="295" width="700" height="90" class="box-yellow" />
+  <text x="400" y="318" text-anchor="middle" class="label">ADR (Automatic Diagnostic Repository)</text>
+
+  <!-- ADR subdirectories -->
+  <rect x="100" y="328" width="170" height="44" rx="5" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="185" y="348" text-anchor="middle" class="code">alert/</text>
+  <text x="185" y="364" text-anchor="middle" class="sublabel">XML Alert Log</text>
+
+  <rect x="290" y="328" width="170" height="44" rx="5" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="375" y="348" text-anchor="middle" class="code">trace/</text>
+  <text x="375" y="364" text-anchor="middle" class="sublabel">텍스트 Alert + Trace</text>
+
+  <rect x="480" y="328" width="170" height="44" rx="5" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="565" y="348" text-anchor="middle" class="code">incident/</text>
+  <text x="565" y="364" text-anchor="middle" class="sublabel">인시던트 덤프</text>
+
+  <text x="720" y="348" text-anchor="middle" class="sublabel">ADRCI</text>
+  <text x="720" y="364" text-anchor="middle" class="sublabel">도구로 조회</text>
+
+  <!-- Arrow L3 → L4 -->
+  <path d="M 400 385 L 400 415" class="arrow-down" />
+
+  <!-- Layer 4: AWR (Performance History) -->
+  <text x="30" y="450" class="layer-num" fill="#10B981">L4</text>
+  <text x="30" y="467" class="layer-label" fill="#10B981">성능이력</text>
+  <text x="30" y="479" class="layer-label" fill="#10B981">History</text>
+  <rect x="70" y="425" width="700" height="90" class="box-green" />
+  <text x="400" y="448" text-anchor="middle" class="label">AWR (Automatic Workload Repository)</text>
+
+  <rect x="100" y="458" width="140" height="44" rx="5" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1"/>
+  <text x="170" y="476" text-anchor="middle" class="label-sm" fill="#10B981">스냅샷</text>
+  <text x="170" y="492" text-anchor="middle" class="sublabel">MMON 60분 주기</text>
+
+  <rect x="260" y="458" width="140" height="44" rx="5" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1"/>
+  <text x="330" y="476" text-anchor="middle" class="label-sm" fill="#10B981">베이스라인</text>
+  <text x="330" y="492" text-anchor="middle" class="sublabel">Baseline 성능 비교</text>
+
+  <rect x="420" y="458" width="140" height="44" rx="5" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1"/>
+  <text x="490" y="476" text-anchor="middle" class="label-sm" fill="#10B981">AWR 보고서</text>
+  <text x="490" y="492" text-anchor="middle" class="sublabel">Top 5 Timed Events</text>
+
+  <rect x="580" y="458" width="170" height="44" rx="5" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1"/>
+  <text x="665" y="476" text-anchor="middle" class="label-sm" fill="#10B981">PDB AWR</text>
+  <text x="665" y="492" text-anchor="middle" class="sublabel">26ai 기본 활성화</text>
+
+  <!-- MMON process indicator -->
+  <rect x="300" y="530" width="200" height="30" rx="15" fill="rgba(111,107,234,0.2)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="400" y="550" text-anchor="middle" class="label-sm" fill="#6F6BEA">MMON 프로세스가 L1→L4 전달</text>
+
+  <!-- Vertical flow arrow on right side -->
+  <path d="M 755 100 L 755 470" stroke="#6F6BEA" stroke-width="1" stroke-dasharray="4,4" fill="none"/>
+  <text x="780" y="290" text-anchor="middle" class="sublabel" transform="rotate(90,780,290)">데이터 영속성 증가 →</text>
+</svg>

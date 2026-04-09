@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <style>
+    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .label-sm { font-size: 12px; font-weight: 600; }
+    .sublabel { font-size: 11px; fill: #94A3B8; }
+    .desc { font-size: 11px; fill: #CBD5E1; }
+    .code { font-family: monospace; font-size: 12px; fill: #F59E0B; }
+    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 8; }
+    .box-cdb { fill: rgba(111,107,234,0.08); stroke: #6F6BEA; stroke-width: 2; rx: 12; }
+    .box-root { fill: rgba(111,107,234,0.2); stroke: #6F6BEA; stroke-width: 2; rx: 8; }
+    .box-seed { fill: rgba(245,158,11,0.12); stroke: #F59E0B; stroke-width: 1.5; rx: 8; }
+    .box-pdb { fill: rgba(59,130,246,0.12); stroke: #3B82F6; stroke-width: 1.5; rx: 8; }
+    .box-app { fill: rgba(16,185,129,0.1); stroke: #10B981; stroke-width: 1.5; rx: 8; stroke-dasharray: 6,3; }
+    .box-instance { fill: rgba(255,255,255,0.03); stroke: #E2E8F0; stroke-width: 1; rx: 8; stroke-dasharray: 4,4; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    .arrow-dash { stroke: #94A3B8; stroke-width: 1.5; fill: none; stroke-dasharray: 5,3; }
+    .con-id { font-family: monospace; font-size: 11px; font-weight: 700; fill: #F59E0B; }
+    .shared { font-size: 10px; fill: #6F6BEA; font-weight: 600; }
+    .dedicated { font-size: 10px; fill: #3B82F6; font-weight: 600; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">CDB / PDB 컨테이너 아키텍처 개요도</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">Container Database Architecture Overview — Oracle 26ai</text>
+
+  <!-- CDB outer boundary -->
+  <rect x="20" y="60" width="760" height="530" class="box-cdb"/>
+  <text x="40" y="82" class="label" style="fill:#6F6BEA; font-size:15px;">CDB (Container Database)</text>
+
+  <!-- Instance area (shared) -->
+  <rect x="40" y="95" width="720" height="75" class="box-instance"/>
+  <text x="55" y="115" class="label-sm" style="fill:#E2E8F0;">Oracle Instance (인스턴스)</text>
+  <text x="55" y="132" class="sublabel">CDB 전체 공유 (Shared across all containers)</text>
+
+  <!-- SGA box -->
+  <rect x="60" y="140" width="150" height="22" rx="4" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="135" y="155" text-anchor="middle" class="desc" style="fill:#E2E8F0; font-weight:600;">SGA (공유 메모리)</text>
+
+  <!-- Background processes -->
+  <rect x="225" y="140" width="200" height="22" rx="4" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="325" y="155" text-anchor="middle" class="desc" style="fill:#E2E8F0; font-weight:600;">Background Processes</text>
+
+  <!-- Shared resources -->
+  <rect x="440" y="140" width="140" height="22" rx="4" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="510" y="155" text-anchor="middle" class="desc" style="fill:#E2E8F0; font-weight:600;">Redo Log / Control</text>
+
+  <text x="610" y="155" class="shared">&#x25C6; CDB 공유</text>
+
+  <!-- CDB$ROOT -->
+  <rect x="40" y="185" width="200" height="130" class="box-root"/>
+  <rect x="52" y="191" width="60" height="18" rx="9" fill="#6F6BEA"/>
+  <text x="82" y="204" text-anchor="middle" style="font-size:10px; fill:#1E1E2E; font-weight:700;">CON_ID=1</text>
+  <text x="140" y="220" text-anchor="middle" class="label" style="fill:#E2E8F0;">CDB$ROOT</text>
+  <text x="140" y="236" text-anchor="middle" class="sublabel">마스터 데이터 딕셔너리</text>
+  <text x="140" y="252" text-anchor="middle" class="sublabel">Master Data Dictionary</text>
+  <line x1="55" y1="262" x2="225" y2="262" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="140" y="278" text-anchor="middle" class="desc">공통 사용자 (C##)</text>
+  <text x="140" y="293" text-anchor="middle" class="desc">공통 역할·권한 저장</text>
+  <text x="140" y="308" text-anchor="middle" class="code" style="font-size:10px;">항상 OPEN</text>
+
+  <!-- PDB$SEED -->
+  <rect x="260" y="185" width="200" height="130" class="box-seed"/>
+  <rect x="272" y="191" width="60" height="18" rx="9" fill="#F59E0B"/>
+  <text x="302" y="204" text-anchor="middle" style="font-size:10px; fill:#1E1E2E; font-weight:700;">CON_ID=2</text>
+  <text x="360" y="220" text-anchor="middle" class="label" style="fill:#E2E8F0;">PDB$SEED</text>
+  <text x="360" y="236" text-anchor="middle" class="sublabel">골든 이미지 (템플릿)</text>
+  <text x="360" y="252" text-anchor="middle" class="sublabel">Golden Image Template</text>
+  <line x1="275" y1="262" x2="445" y2="262" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="360" y="278" text-anchor="middle" class="desc">새 PDB 생성 시 복사 대상</text>
+  <text x="360" y="293" text-anchor="middle" class="desc">수정 불가</text>
+  <text x="360" y="308" text-anchor="middle" class="code" style="font-size:10px;">항상 READ ONLY</text>
+
+  <!-- User PDB 1 -->
+  <rect x="480" y="185" width="135" height="130" class="box-pdb"/>
+  <rect x="490" y="191" width="60" height="18" rx="9" fill="#3B82F6"/>
+  <text x="520" y="204" text-anchor="middle" style="font-size:10px; fill:#1E1E2E; font-weight:700;">CON_ID=3</text>
+  <text x="547" y="220" text-anchor="middle" class="label-sm" style="fill:#E2E8F0;">사용자 PDB 1</text>
+  <text x="547" y="236" text-anchor="middle" class="sublabel">User PDB</text>
+  <line x1="495" y1="246" x2="600" y2="246" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="547" y="262" text-anchor="middle" class="desc">애플리케이션 데이터</text>
+  <text x="547" y="277" text-anchor="middle" class="desc">로컬 사용자·객체</text>
+  <text x="547" y="292" text-anchor="middle" class="desc">전용 테이블스페이스</text>
+  <text x="547" y="308" text-anchor="middle" class="code" style="font-size:10px;">READ WRITE</text>
+
+  <!-- User PDB 2 -->
+  <rect x="630" y="185" width="135" height="130" class="box-pdb"/>
+  <rect x="640" y="191" width="60" height="18" rx="9" fill="#3B82F6"/>
+  <text x="670" y="204" text-anchor="middle" style="font-size:10px; fill:#1E1E2E; font-weight:700;">CON_ID=4</text>
+  <text x="697" y="220" text-anchor="middle" class="label-sm" style="fill:#E2E8F0;">사용자 PDB 2</text>
+  <text x="697" y="236" text-anchor="middle" class="sublabel">User PDB</text>
+  <line x1="645" y1="246" x2="750" y2="246" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="697" y="262" text-anchor="middle" class="desc">애플리케이션 데이터</text>
+  <text x="697" y="277" text-anchor="middle" class="desc">로컬 사용자·객체</text>
+  <text x="697" y="292" text-anchor="middle" class="desc">전용 테이블스페이스</text>
+  <text x="697" y="308" text-anchor="middle" class="code" style="font-size:10px;">MOUNTED</text>
+
+  <!-- PDB count badge -->
+  <text x="697" y="330" text-anchor="middle" class="sublabel" style="font-size:10px;">... 최대 4,098+ PDB (26ai)</text>
+
+  <!-- Application Container (optional) -->
+  <rect x="40" y="335" width="350" height="105" class="box-app"/>
+  <text x="55" y="355" class="label-sm" style="fill:#10B981;">Application Container (선택 사항)</text>
+  <text x="55" y="370" class="sublabel">공유 메타데이터/공통 데이터를 Application Root에서 관리</text>
+
+  <!-- App Root -->
+  <rect x="55" y="380" width="100" height="45" rx="6" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <text x="105" y="400" text-anchor="middle" class="desc" style="fill:#10B981; font-weight:600;">App Root</text>
+  <text x="105" y="415" text-anchor="middle" class="sublabel" style="font-size:9px;">공통 정의</text>
+
+  <!-- App Seed -->
+  <rect x="170" y="380" width="95" height="45" rx="6" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="217" y="400" text-anchor="middle" class="desc" style="fill:#10B981;">App Seed</text>
+  <text x="217" y="415" text-anchor="middle" class="sublabel" style="font-size:9px;">템플릿</text>
+
+  <!-- App PDB -->
+  <rect x="280" y="380" width="95" height="45" rx="6" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="327" y="400" text-anchor="middle" class="desc" style="fill:#3B82F6;">App PDB</text>
+  <text x="327" y="415" text-anchor="middle" class="sublabel" style="font-size:9px;">사용자 데이터</text>
+
+  <!-- Shared vs Dedicated Resources Legend -->
+  <rect x="410" y="335" width="350" height="105" class="box" rx="10"/>
+  <text x="585" y="355" text-anchor="middle" class="label-sm" style="fill:#F59E0B;">공유 vs 전용 자원 비교 (Shared vs Dedicated)</text>
+  <line x1="425" y1="362" x2="745" y2="362" stroke="#2A2B3D" stroke-width="1"/>
+
+  <!-- Shared -->
+  <rect x="425" y="370" width="12" height="12" rx="2" fill="#6F6BEA"/>
+  <text x="443" y="381" class="desc" style="font-size:11px;">SGA, 백그라운드 프로세스, Redo Log, Control File</text>
+  <text x="443" y="396" class="shared">CDB 전체 공유</text>
+
+  <!-- Dedicated -->
+  <rect x="425" y="405" width="12" height="12" rx="2" fill="#3B82F6"/>
+  <text x="443" y="416" class="desc" style="font-size:11px;">SYSTEM/SYSAUX 테이블스페이스, 데이터 딕셔너리</text>
+  <text x="443" y="431" class="dedicated">PDB별 전용</text>
+
+  <!-- Dictionary Links info -->
+  <rect x="40" y="455" width="720" height="75" class="box" rx="10"/>
+  <text x="400" y="475" text-anchor="middle" class="label-sm" style="fill:#6F6BEA;">딕셔너리 링크 메커니즘 (Dictionary Link Mechanism)</text>
+  <line x1="55" y1="483" x2="745" y2="483" stroke="#2A2B3D" stroke-width="1"/>
+
+  <!-- Metadata Link -->
+  <rect x="60" y="492" width="130" height="22" rx="4" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="125" y="507" text-anchor="middle" class="desc" style="fill:#E2E8F0; font-weight:600;">Metadata Link</text>
+  <text x="205" y="507" class="desc">정의는 ROOT, 데이터는 PDB에 저장</text>
+
+  <!-- Object Link -->
+  <rect x="430" y="492" width="110" height="22" rx="4" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="485" y="507" text-anchor="middle" class="desc" style="fill:#E2E8F0; font-weight:600;">Object Link</text>
+  <text x="555" y="507" class="desc">정의+데이터 모두 ROOT에서 참조</text>
+
+  <!-- Arrow from SEED to PDB (creation) -->
+  <path d="M 460 250 L 478 250" class="arrow" style="stroke:#F59E0B;"/>
+  <text x="469" y="242" class="sublabel" style="font-size:9px; fill:#F59E0B;">복사</text>
+
+  <!-- Arrow from ROOT down (dictionary links) -->
+  <path d="M 140 315 L 140 335" class="arrow-dash"/>
+
+  <!-- Oracle 26ai note -->
+  <rect x="605" y="545" width="160" height="28" rx="14" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="685" y="563" text-anchor="middle" class="desc" style="fill:#F59E0B; font-size:11px; font-weight:600;">Oracle 26ai — CDB Only</text>
+</svg>

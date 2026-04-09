@@ -13,7 +13,7 @@ export default async function Home() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
         {chapters.map(chapter => (
-          <Link href={`/${chapter}`} key={chapter}>
+          <Link href={chapter === '00' ? '/00/00_00' : `/${chapter}`} key={chapter}>
             <div className="glass card-hover" style={{
               padding: '2rem',
               borderRadius: '16px',

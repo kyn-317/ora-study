@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 650">
+  <style>
+    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .label-sm { font-size: 12px; font-weight: 600; }
+    .sublabel { font-size: 11px; fill: #94A3B8; }
+    .desc { font-size: 11px; fill: #CBD5E1; }
+    .code { font-family: monospace; font-size: 11px; fill: #F59E0B; }
+    .conn-label { font-size: 10px; font-weight: 600; }
+    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 10; }
+    .box-unit { rx: 12; stroke-width: 2; }
+    .unit-01 { fill: rgba(111,107,234,0.15); stroke: #6F6BEA; }
+    .unit-02 { fill: rgba(245,158,11,0.12); stroke: #F59E0B; }
+    .unit-03 { fill: rgba(59,130,246,0.12); stroke: #3B82F6; }
+    .unit-04 { fill: rgba(16,185,129,0.12); stroke: #10B981; }
+    .conn-box { fill: rgba(255,255,255,0.03); stroke: #2A2B3D; stroke-width: 1; rx: 6; }
+  </style>
+  <defs>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA" />
+    </marker>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3B82F6" />
+    </marker>
+    <marker id="arrowYellow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#F59E0B" />
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#10B981" />
+    </marker>
+    <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#94A3B8" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">단원 간 연결 관계도 (Cross-Section Connections)</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">챕터 02의 4개 단원이 서로 연결되는 5가지 핵심 관계</text>
+
+  <!-- Four unit boxes arranged in 2x2 grid -->
+  <!-- 02_01 (top-left) -->
+  <rect x="40" y="70" width="340" height="100" class="box-unit unit-01"/>
+  <text x="60" y="95" class="label" style="fill:#6F6BEA;">02_01 구조 및 토대</text>
+  <text x="60" y="112" class="sublabel">Architecture Foundation</text>
+  <text x="60" y="132" class="desc">CDB$ROOT, PDB$SEED, 사용자 PDB 구조</text>
+  <text x="60" y="147" class="desc">공통/로컬 객체, 메모리·프로세스 공유, Resource Manager</text>
+
+  <!-- 02_02 (top-right) -->
+  <rect x="420" y="70" width="340" height="100" class="box-unit unit-02"/>
+  <text x="440" y="95" class="label" style="fill:#F59E0B;">02_02 PDB 생성 및 템플릿</text>
+  <text x="440" y="112" class="sublabel">PDB Creation &amp; Templates</text>
+  <text x="440" y="132" class="desc">CREATE PLUGGABLE DATABASE, PDB$SEED 복사</text>
+  <text x="440" y="147" class="desc">FILE_NAME_CONVERT, OMF, Application Container</text>
+
+  <!-- 02_03 (bottom-left) -->
+  <rect x="40" y="200" width="340" height="100" class="box-unit unit-03"/>
+  <text x="60" y="225" class="label" style="fill:#3B82F6;">02_03 PDB 상태 관리 및 분리</text>
+  <text x="60" y="242" class="sublabel">State Management &amp; Unplugging</text>
+  <text x="60" y="262" class="desc">오픈 모드(RW/RO/MOUNTED), SAVE STATE</text>
+  <text x="60" y="277" class="desc">Unplug/Plug In, DROP PLUGGABLE DATABASE</text>
+
+  <!-- 02_04 (bottom-right) -->
+  <rect x="420" y="200" width="340" height="100" class="box-unit unit-04"/>
+  <text x="440" y="225" class="label" style="fill:#10B981;">02_04 파라미터 및 복제 관리</text>
+  <text x="440" y="242" class="sublabel">Parameters &amp; Cloning</text>
+  <text x="440" y="262" class="desc">ISPDB_MODIFIABLE, Lockdown Profile</text>
+  <text x="440" y="277" class="desc">Local/Remote/Refreshable Clone, Snapshot Copy</text>
+
+  <!-- Connection arrows and labels -->
+
+  <!-- Connection 1: PDB$SEED → PDB 생성 → CDB$ROOT (01→02, horizontal top) -->
+  <line x1="380" y1="105" x2="418" y2="105" stroke="#6F6BEA" stroke-width="2.5" marker-end="url(#arrowPurple)"/>
+  <rect x="365" y="75" width="70" height="20" rx="10" fill="#6F6BEA"/>
+  <text x="400" y="89" text-anchor="middle" class="conn-label" style="fill:#1E1E2E;">연결 1</text>
+
+  <!-- Connection 2: PDB 오픈 모드 → CDB 기동 (01→03, vertical left) -->
+  <line x1="140" y1="170" x2="140" y2="198" stroke="#3B82F6" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+  <rect x="105" y="176" width="70" height="20" rx="10" fill="#3B82F6"/>
+  <text x="140" y="190" text-anchor="middle" class="conn-label" style="fill:#1E1E2E;">연결 2</text>
+
+  <!-- Connection 3: Unplug/Plug In ↔ CDB + PDB 생성 (03→02, diagonal) -->
+  <line x1="380" y1="235" x2="418" y2="155" stroke="#F59E0B" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrowYellow)"/>
+  <rect x="378" y="185" width="70" height="20" rx="10" fill="#F59E0B"/>
+  <text x="413" y="199" text-anchor="middle" class="conn-label" style="fill:#1E1E2E;">연결 3</text>
+
+  <!-- Connection 4: PDB 파라미터 → 메모리 공유 (01→04, diagonal) -->
+  <line x1="350" y1="155" x2="420" y2="220" stroke="#10B981" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrowGreen)"/>
+  <rect x="365" y="178" width="70" height="20" rx="10" fill="#10B981"/>
+  <text x="400" y="192" text-anchor="middle" class="conn-label" style="fill:#1E1E2E;">연결 4</text>
+
+  <!-- Connection 5: PDB 클론 → PDB 상태 (03↔04, horizontal bottom) -->
+  <line x1="380" y1="260" x2="418" y2="260" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#arrowGray)"/>
+  <rect x="365" y="268" width="70" height="20" rx="10" fill="rgba(148,163,184,0.8)"/>
+  <text x="400" y="282" text-anchor="middle" class="conn-label" style="fill:#1E1E2E;">연결 5</text>
+
+  <!-- Connection detail boxes -->
+  <!-- Connection 1 detail -->
+  <rect x="40" y="325" width="350" height="60" class="conn-box"/>
+  <rect x="50" y="332" width="70" height="18" rx="9" fill="#6F6BEA"/>
+  <text x="85" y="345" text-anchor="middle" class="conn-label" style="fill:#1E1E2E;">연결 1</text>
+  <text x="130" y="345" class="label-sm" style="fill:#6F6BEA;">PDB$SEED → PDB 생성 → CDB$ROOT</text>
+  <text x="55" y="365" class="desc">CDB$ROOT 딕셔너리 기반으로 PDB$SEED가 구성되고,</text>
+  <text x="55" y="378" class="desc">PDB 생성(02_02)에서 PDB$SEED를 복사하여 새 PDB를 생성</text>
+
+  <!-- Connection 2 detail -->
+  <rect x="410" y="325" width="350" height="60" class="conn-box"/>
+  <rect x="420" y="332" width="70" height="18" rx="9" fill="#3B82F6"/>
+  <text x="455" y="345" text-anchor="middle" class="conn-label" style="fill:#1E1E2E;">연결 2</text>
+  <text x="500" y="345" class="label-sm" style="fill:#3B82F6;">오픈 모드 → SAVE STATE → CDB 기동</text>
+  <text x="425" y="365" class="desc">CDB 시작 시 PDB는 기본 MOUNTED 상태;</text>
+  <text x="425" y="378" class="desc">SAVE STATE로 자동 오픈을 구현 (02_01 설계 ↔ 02_03 운영)</text>
+
+  <!-- Connection 3 detail -->
+  <rect x="40" y="400" width="350" height="60" class="conn-box"/>
+  <rect x="50" y="407" width="70" height="18" rx="9" fill="#F59E0B"/>
+  <text x="85" y="420" text-anchor="middle" class="conn-label" style="fill:#1E1E2E;">연결 3</text>
+  <text x="130" y="420" class="label-sm" style="fill:#F59E0B;">Unplug/Plug In → CDB 구조 → PDB 생성</text>
+  <text x="55" y="440" class="desc">"플러거블" 개념의 실현; Plug In 시 CREATE PLUGGABLE</text>
+  <text x="55" y="453" class="desc">DATABASE ... USING 구문 사용 (02_01 구조 + 02_02 구문 + 02_03 운영)</text>
+
+  <!-- Connection 4 detail -->
+  <rect x="410" y="400" width="350" height="60" class="conn-box"/>
+  <rect x="420" y="407" width="70" height="18" rx="9" fill="#10B981"/>
+  <text x="455" y="420" text-anchor="middle" class="conn-label" style="fill:#1E1E2E;">연결 4</text>
+  <text x="500" y="420" class="label-sm" style="fill:#10B981;">PDB 파라미터 → 메모리 공유 → Resource Mgr</text>
+  <text x="425" y="440" class="desc">SGA_TARGET 등은 CDB 루트에서만 변경 가능;</text>
+  <text x="425" y="453" class="desc">PDB별 자원 제한은 Resource Manager + Lockdown Profile</text>
+
+  <!-- Connection 5 detail -->
+  <rect x="40" y="475" width="720" height="55" class="conn-box"/>
+  <rect x="50" y="482" width="70" height="18" rx="9" fill="rgba(148,163,184,0.8)"/>
+  <text x="85" y="495" text-anchor="middle" class="conn-label" style="fill:#1E1E2E;">연결 5</text>
+  <text x="130" y="495" class="label-sm" style="fill:#94A3B8;">PDB 클론 → PDB 상태 → 파일 관리</text>
+  <text x="55" y="517" class="desc">클론(02_04)은 소스 PDB 오픈 모드(02_03)에 따라 동작이 달라짐 — 기본 클론: READ ONLY 필요, Hot Clone: READ WRITE 가능. 파일 경로(FILE_NAME_CONVERT, OMF)는 생성(02_02)과 클론(02_04) 모두 동일 메커니즘</text>
+
+  <!-- Key takeaway box -->
+  <rect x="40" y="550" width="720" height="80" class="box" rx="10"/>
+  <text x="400" y="572" text-anchor="middle" class="label-sm" style="fill:#F59E0B;">핵심 통찰 (Key Insight)</text>
+  <line x1="55" y1="580" x2="745" y2="580" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="400" y="598" text-anchor="middle" class="desc" style="font-size:12px;">4개 단원은 독립적이지 않습니다. 02_01의 CDB 아키텍처가 모든 단원의 기반이며,</text>
+  <text x="400" y="616" text-anchor="middle" class="desc" style="font-size:12px;">생성(02_02) → 운영(02_03) → 복제(02_04) 순서로 PDB 라이프사이클이 흐릅니다.</text>
+</svg>

@@ -1,0 +1,103 @@
+{
+  "id": "07_00",
+  "title": "챕터 흐름 요약 — 데이터 이동 (데이터 로드/추출) (Chapter Flow Overview)",
+  "chapter": "07. 데이터 이동 (데이터 로드/추출)",
+  "description": "챕터 07의 3개 학습 단원(외부 파일 조작, 대량 로드 처리, Data Pump)을 학습하기 전에 전체 흐름과 각 단원 간의 관계를 파악하기 위한 사전 요약 자료입니다. 이 자료를 먼저 읽고 챕터 학습에 들어가면 개별 단원의 위치와 역할을 빠르게 이해할 수 있습니다.",
+  "oracle26ai_changes": [
+    "Inline External Table 구문이 안정화되어 DDL 없이 SELECT 문 내에서 바로 외부 파일을 조회할 수 있으며, ORACLE_BIGDATA 드라이버로 Object Storage의 Parquet/Avro/ORC 파일 직접 조회가 가능합니다.",
+    "SQL*Loader Express Mode에서 JSON 및 확장 데이터 타입 지원이 강화되고, MULTITHREADING 기본 동작이 최적화되었습니다.",
+    "Data Pump가 JSON Duality View 및 JSON Relational Duality 객체의 Export/Import를 지원합니다.",
+    "FULL TRANSPORTABLE EXPORT/IMPORT가 PDB 환경에서 최적화되어 Cross-PDB 이관 시 자동 리매핑 기능이 강화되었습니다.",
+    "Data Pump의 PARALLEL 파라미터가 Auto DOP와 긴밀하게 통합되고, ENCRYPTION 옵션이 TDE와 개선된 연동을 제공합니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "챕터 전체 흐름 개관 (Chapter Big Picture)",
+      "sqlExamplesIds": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/07/07_00_s01_learning_flow.svg",
+          "caption": "챕터 07 학습 순서 흐름도 — 3개 핵심 축(외부 파일 접근 → 대량 로드 → DB 간 이동)과 실행 위치 분류",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "content": "데이터 이동(Data Movement)을 이해하려면 **3개의 핵심 축**을 먼저 잡아야 합니다:\n\n| 축 | 핵심 질문 | 관련 단원 |\n|---|---|---|\n| **외부 파일 접근** | DB 외부의 파일 데이터를 SQL로 어떻게 조회하는가? | 07_01 외부 파일 조작 (External Tables) |\n| **대량 데이터 로드** | 외부 파일의 데이터를 DB 테이블에 어떻게 고속으로 적재하는가? | 07_02 대량 로드 처리 (SQL*Loader) |\n| **DB 간 데이터 이동** | Oracle DB 간 데이터와 메타데이터를 어떻게 추출/적재하는가? | 07_03 Data Pump (expdp/impdp) |\n\n### 학습 순서와 이유\n\n```\n07_01 외부 파일 조작 ──▶ 07_02 대량 로드 처리 ──▶ 07_03 Data Pump\n (External Tables)        (SQL*Loader)            (expdp / impdp)\n```\n\n1. **외부 파일 조작(07_01)** → 외부 테이블의 개념과 Directory Object, 액세스 드라이버를 먼저 이해합니다. 외부 테이블은 데이터를 로드하지 않고 SQL로 직접 접근하는 방식으로, 데이터 이동의 기본 개념(파일 ↔ DB 인터페이스)을 잡는 출발점입니다.\n2. **대량 로드 처리(07_02)** → SQL*Loader로 외부 파일 데이터를 실제로 DB 테이블에 적재하는 방법을 배웁니다. 외부 테이블의 ORACLE_LOADER 드라이버가 내부적으로 SQL*Loader 엔진을 사용하므로, 07_01의 지식이 자연스럽게 연결됩니다.\n3. **Data Pump(07_03)** → Oracle DB 간 데이터 및 메타데이터를 이동하는 서버 측 유틸리티를 배웁니다. 외부 테이블의 ORACLE_DATAPUMP 드라이버와 동일한 바이너리 형식을 사용하며, Directory Object 개념도 공유합니다.\n\n### 실행 위치에 따른 분류\n\n```\n┌──────────────────────────────────────────────────────────────┐\n│                     클라이언트 측 (Client-Side)               │\n│  ┌──────────────────────────────────────────────────────┐    │\n│  │  SQL*Loader (sqlldr)                                 │    │\n│  │  - 플랫 파일 → Oracle 테이블 로드                     │    │\n│  │  - 컨트롤 파일 또는 Express Mode                      │    │\n│  └──────────────────────────────────────────────────────┘    │\n└──────────────────────────────────────────────────────────────┘\n\n┌──────────────────────────────────────────────────────────────┐\n│                     서버 측 (Server-Side)                     │\n│  ┌──────────────────────┐  ┌─────────────────────────────┐  │\n│  │ External Tables       │  │ Data Pump (expdp/impdp)     │  │\n│  │ - SQL로 외부 파일 접근 │  │ - DB 간 데이터/메타데이터   │  │\n│  │ - ORACLE_LOADER       │  │   Export/Import             │  │\n│  │ - ORACLE_DATAPUMP     │  │ - Direct Path API           │  │\n│  │ - ORACLE_BIGDATA      │  │ - DBMS_DATAPUMP 엔진        │  │\n│  └──────────────────────┘  └─────────────────────────────┘  │\n│                                                              │\n│  ※ 모두 Directory Object를 통해 파일 경로 지정               │\n└──────────────────────────────────────────────────────────────┘\n```",
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "SQL 기반 파일 접근 — 외부 테이블 (External Tables, 07_01)",
+      "sqlExamplesIds": [],
+      "content": "**외부 테이블(External Table)**은 DB 외부 파일을 SQL로 직접 조회할 수 있게 해주는 읽기 전용 테이블 구조입니다.\n\n> **핵심 공식**: 외부 테이블 = **Directory Object**(파일 위치) + **액세스 드라이버**(파싱 엔진) + **테이블 정의**(컬럼 매핑)\n\n### 외부 테이블의 핵심 특성\n\n| 특성 | 설명 |\n|---|---|\n| **데이터 위치** | DB 외부 OS 파일 시스템 (데이터는 DB에 저장되지 않음) |\n| **메타데이터** | 데이터 딕셔너리에 테이블 정의만 저장 |\n| **접근 방식** | SELECT 시점에 파일을 실시간으로 읽음 |\n| **DML** | SELECT만 가능 (INSERT/UPDATE/DELETE 불가, ORACLE_DATAPUMP 언로드 제외) |\n| **인덱스/제약조건** | 생성 불가 (NOT NULL만 선언 가능, 미적용) |\n| **Parallel Query** | 지원됨 |\n\n### 액세스 드라이버 3종 비교\n\n| 드라이버 | 용도 | 파일 형식 | 방향 |\n|---|---|---|---|\n| **ORACLE_LOADER** | 텍스트 파일 로드 | CSV, 고정폭, 구분자 기반 | 읽기 전용 |\n| **ORACLE_DATAPUMP** | Oracle 형식 로드/언로드 | Oracle 바이너리 덤프 | **읽기/쓰기 양방향** |\n| **ORACLE_BIGDATA** | 빅데이터 형식 조회 | Parquet, Avro, ORC | 읽기 전용 |\n\n### Directory Object\n\n- **CREATE DIRECTORY**로 생성 → OS 경로를 논리적 이름으로 추상화\n- **READ/WRITE/EXECUTE ON DIRECTORY** 권한을 개별 부여\n- 생성 시 OS 경로 존재 여부를 검증하지 않음 → 실제 접근 시 ORA-29913 발생 가능\n- RAC 환경에서는 모든 노드에서 동일 경로 접근 필수 (공유 스토리지)\n\n### ORACLE_LOADER 핵심 파라미터\n\n| 파라미터 | 역할 |\n|---|---|\n| **RECORDS DELIMITED BY** | 레코드(행) 구분자 지정 |\n| **FIELDS TERMINATED BY** | 필드(열) 구분자 지정 |\n| **OPTIONALLY ENCLOSED BY** | 필드 감싸기 문자 |\n| **SKIP** | 헤더 행 건너뛰기 |\n| **BADFILE / LOGFILE / DISCARDFILE** | 오류·로그·폐기 파일 |\n| **PREPROCESSOR** | .gz 등 압축 파일 직접 읽기 |\n\n### 데이터 언로드 (ORACLE_DATAPUMP)\n\n- `CREATE TABLE ... ORGANIZATION EXTERNAL ... AS SELECT` 구문으로 데이터를 파일로 추출\n- Oracle 바이너리 형식으로 데이터 타입을 그대로 보존\n- 외부 테이블을 DROP해도 OS 상의 데이터 파일은 자동 삭제되지 않음\n\n### 인라인 외부 테이블 (Oracle 18c+)\n\n- DDL 없이 **SELECT 문 내에서** 바로 외부 파일 조회 가능\n- Oracle 23ai/26ai에서 구문이 안정화되어 Ad-hoc 분석에 적합",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s03",
+      "title": "고속 데이터 적재 — SQL*Loader (SQL*Loader, 07_02)",
+      "sqlExamplesIds": [],
+      "content": "**SQL*Loader(sqlldr)**는 외부 파일 데이터를 Oracle 테이블에 고속으로 적재하는 **클라이언트 측 유틸리티**입니다.\n\n### 2가지 사용 모드\n\n| 모드 | 컨트롤 파일 | 특징 |\n|---|---|---|\n| **Standard Mode** | 필수 | LOAD DATA + INFILE + INTO TABLE로 상세 매핑 정의 |\n| **Express Mode** | 불필요 | TABLE 파라미터만 지정, 테이블 DDL 기반 자동 매핑, CSV 기본 가정 |\n\n### 2가지 로드 방식 비교\n\n| 항목 | Conventional Path | Direct Path |\n|---|---|---|\n| **동작** | SQL INSERT → 버퍼 캐시 경유 | SQL 레이어 우회 → HWM 위에 블록 직접 생성 |\n| **속도** | 기준 | 2~10배 빠름 |\n| **Redo 생성** | 완전한 Redo | 최소 Redo (NOLOGGING 시 거의 없음) |\n| **Undo 생성** | 정상 생성 | 최소화 (롤백 불가) |\n| **트리거** | 실행됨 | 실행 안 됨 |\n| **제약조건** | 실시간 확인 | 로드 후 확인 |\n| **인덱스** | 실시간 유지 | 로드 후 재구축 (UNUSABLE 가능) |\n| **활성화** | 기본 | DIRECT=TRUE |\n\n### 4가지 로드 모드\n\n| 모드 | 동작 | 비고 |\n|---|---|---|\n| **INSERT** | 테이블이 비어 있어야 함 (기본값) | 데이터 존재 시 에러 |\n| **APPEND** | 기존 데이터에 추가 | Express Mode 기본값 |\n| **REPLACE** | DELETE 후 INSERT | Undo 생성, 롤백 가능 |\n| **TRUNCATE** | TRUNCATE 후 INSERT | Undo 없음, HWM 리셋 |\n\n### 컨트롤 파일 핵심 구문\n\n```\nLOAD DATA\nINFILE 'data.csv'\nINTO TABLE emp\nFIELDS TERMINATED BY ','\nOPTIONALLY ENCLOSED BY '\"'\nTRAILING NULLCOLS\n( empno, ename, hiredate DATE 'YYYY-MM-DD', sal )\n```\n\n### Express Mode 핵심 포인트\n\n- `sqlldr userid=scott/tiger TABLE=emp` — 컨트롤 파일 없이 실행\n- 테이블이 사전에 존재해야 하며, 데이터 파일은 `테이블명.dat` 또는 `테이블명.csv` 자동 검색\n- VIRTUAL/INVISIBLE 컬럼은 자동 매핑에서 제외\n- 데이터 파일의 컬럼 순서가 테이블 DDL 정의 순서와 일치해야 함\n\n### 에러 처리\n\n| 파일 | 내용 |\n|---|---|\n| **Bad 파일** | 데이터 타입 불일치, 제약조건 위반 등으로 거부된 레코드 |\n| **Discard 파일** | WHEN 조건 불만족 레코드 (DISCARDFILE 명시 필요) |\n| **Log 파일** | 실행 통계, 에러 상세, 컬럼 매핑 정보 |",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s04",
+      "title": "DB 간 데이터 이동 — Data Pump (expdp/impdp, 07_03)",
+      "sqlExamplesIds": [],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/07/07_00_s04_datapump_architecture.svg",
+          "caption": "Data Pump 아키텍처 — DBMS_DATAPUMP 엔진, MCP/Worker 구조, Direct Path API, 대화형 모드",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "content": "**Data Pump(expdp/impdp)**는 Oracle DB 간 데이터와 메타데이터를 고속으로 Export/Import하는 **서버 측 유틸리티**입니다.\n\n### 아키텍처 핵심 구성요소\n\n| 구성요소 | 역할 |\n|---|---|\n| **DBMS_DATAPUMP** | Data Pump 엔진 — 작업 생성, 실행, 모니터링 API |\n| **DBMS_METADATA** | 객체 DDL을 XML로 추출/변환 |\n| **expdp / impdp** | 커맨드 라인 클라이언트 |\n| **Master Control Process (MCP)** | 작업 전체 조율 |\n| **Worker Process** | 실제 데이터 이동 수행 (PARALLEL로 개수 결정) |\n| **Master Table** | 작업 진행 상태 저장 → 재시작(Restartable) 지원 |\n| **Direct Path API** | SQL 레이어 우회 고속 데이터 읽기/쓰기 |\n\n### Data Pump vs 기존 exp/imp\n\n| 구분 | Data Pump | 기존 exp/imp |\n|---|---|---|\n| **실행 위치** | 서버 측 | 클라이언트 측 |\n| **병렬 처리** | PARALLEL로 다중 Worker | 미지원 |\n| **재시작** | Master Table 기반 재시작 가능 | 불가 |\n| **대화형 모드** | Ctrl+C로 동적 제어 | 없음 |\n| **REMAP** | REMAP_SCHEMA, REMAP_TABLESPACE 등 | 제한적 |\n| **암호화/압축** | ENCRYPTION, COMPRESSION 지원 | 미지원 |\n\n### Export 5가지 모드\n\n| 모드 | 범위 |\n|---|---|\n| **FULL** | 데이터베이스 전체 |\n| **SCHEMAS** | 특정 스키마 (기본값) |\n| **TABLES** | 특정 테이블 |\n| **TABLESPACES** | 특정 테이블스페이스 |\n| **TRANSPORTABLE** | 메타데이터만 Export (데이터파일은 OS 복사) |\n\n### Import 핵심 — TABLE_EXISTS_ACTION\n\n| 옵션 | 동작 |\n|---|---|\n| **SKIP** | 테이블 존재 시 건너뜀 (기본값) |\n| **APPEND** | 기존 데이터에 추가 |\n| **TRUNCATE** | TRUNCATE 후 적재 |\n| **REPLACE** | DROP + CREATE 후 적재 |\n\n### REMAP 파라미터\n\n| 파라미터 | 용도 |\n|---|---|\n| **REMAP_SCHEMA** | 소스 → 대상 스키마 리매핑 |\n| **REMAP_TABLESPACE** | 소스 → 대상 테이블스페이스 리매핑 |\n| **REMAP_TABLE** | 테이블 이름 변경 |\n| **REMAP_DATAFILE** | 데이터파일 경로 변환 |\n\n### 대화형 모드 (Ctrl+C)\n\n| 명령 | 동작 | Master Table | 재시작 |\n|---|---|---|---|\n| **STOP_JOB** | 정상 종료 | 유지 | **가능** |\n| **KILL_JOB** | 강제 종료 | 삭제 | 불가 |\n| **EXIT_CLIENT** | 클라이언트만 분리 | 유지 | 서버 측 계속 실행 |\n| **ATTACH** | 실행 중 작업에 재연결 | - | 모니터링/제어 가능 |\n\n### EXCLUDE / INCLUDE 필터\n\n- **EXCLUDE**: 지정 객체 제외 / **INCLUDE**: 지정 객체만 포함 → **동시 사용 불가**\n- `EXCLUDE=TABLE:\"IN ('T1','T2')\"` 형식으로 특정 객체 필터링\n- 종속 객체(인덱스, 제약조건, 트리거)도 자동 제외/포함\n\n### Transportable Tablespace\n\n- 메타데이터만 Export → 데이터파일은 OS 복사 → 대량 데이터 고속 이관\n- 전제조건: Self-Contained, READ ONLY, 플랫폼 호환, 블록 크기 일치",
+      "subsections": []
+    },
+    {
+      "sectionId": "s05",
+      "title": "단원 간 연결 관계 (Cross-Section Connections)",
+      "sqlExamplesIds": [],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/07/07_00_s05_cross_section_connections.svg",
+          "caption": "단원 간 5가지 연결 관계 — Directory Object, 엔진 공유, 바이너리 형식, Direct Path, 실행 위치",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "content": "각 단원은 독립적이지 않으며, 다음과 같은 핵심 연결고리가 존재합니다:\n\n### 연결 1: Directory Object — 모든 서버 측 데이터 이동의 공통 기반\n외부 테이블(07_01)과 Data Pump(07_03)는 모두 **Directory Object**를 통해 파일 경로를 지정합니다. CREATE DIRECTORY로 OS 경로를 논리적 이름으로 추상화하고, READ/WRITE ON DIRECTORY 권한으로 접근을 제어합니다. 하나의 Directory Object 설정이 외부 테이블 생성과 Data Pump Export/Import 양쪽에 공유됩니다.\n\n### 연결 2: ORACLE_LOADER 드라이버 — 외부 테이블과 SQL*Loader의 엔진 공유\n외부 테이블(07_01)의 ORACLE_LOADER 액세스 드라이버는 내부적으로 SQL*Loader(07_02) 엔진을 사용합니다. 따라서 ACCESS PARAMETERS 구문이 SQL*Loader 컨트롤 파일과 유사하며, FIELDS TERMINATED BY, OPTIONALLY ENCLOSED BY 등의 파싱 규칙을 공유합니다. SQL*Loader의 EXTERNAL_TABLE=GENERATE_ONLY 옵션으로 외부 테이블 DDL을 자동 생성할 수도 있습니다.\n\n### 연결 3: ORACLE_DATAPUMP 드라이버 — 외부 테이블과 Data Pump의 형식 공유\n외부 테이블(07_01)의 ORACLE_DATAPUMP 액세스 드라이버는 Data Pump(07_03)와 동일한 Oracle 바이너리 덤프 형식을 사용합니다. CREATE TABLE ... ORGANIZATION EXTERNAL ... AS SELECT로 언로드한 파일을 Data Pump impdp로 Import하거나, 그 반대도 가능합니다.\n\n### 연결 4: Direct Path — SQL*Loader와 Data Pump의 성능 핵심\nSQL*Loader(07_02)의 Direct Path Load와 Data Pump(07_03)의 Direct Path API는 모두 SQL 레이어를 우회하여 데이터 블록을 직접 생성/읽기합니다. 이 방식이 두 도구의 고속 성능의 핵심이며, Redo/Undo 최소화, 트리거 미실행, 제약조건 후처리라는 공통 특성을 가집니다.\n\n### 연결 5: 클라이언트 측 vs 서버 측 — 도구 선택의 기준\nSQL*Loader(07_02)는 **클라이언트 측**에서 실행되어 로컬 파일을 직접 읽을 수 있고, 외부 테이블(07_01)과 Data Pump(07_03)는 **서버 측**에서 실행되어 Directory Object를 통해 서버의 파일에 접근합니다. 파일 위치(클라이언트 vs 서버)와 작업 유형(로드 vs SQL 접근 vs DB 간 이동)에 따라 적절한 도구를 선택합니다.",
+      "subsections": []
+    }
+  ],
+  "sql_examples": [],
+  "keywords": [
+    "External Table (외부 테이블)", "ORGANIZATION EXTERNAL",
+    "ORACLE_LOADER", "ORACLE_DATAPUMP", "ORACLE_BIGDATA",
+    "Directory Object", "CREATE DIRECTORY", "ACCESS PARAMETERS",
+    "FIELDS TERMINATED BY", "REJECT LIMIT", "PREPROCESSOR",
+    "Inline External Table", "DBA_EXTERNAL_TABLES", "DBA_DIRECTORIES",
+    "SQL*Loader", "sqlldr", "Express Mode", "Control File",
+    "Conventional Path Load", "Direct Path Load", "DIRECT",
+    "APPEND", "REPLACE", "TRUNCATE",
+    "Bad File", "Discard File", "WHEN Clause",
+    "PARALLEL", "MULTITHREADING", "NOLOGGING",
+    "Data Pump", "expdp", "impdp",
+    "DBMS_DATAPUMP", "DBMS_METADATA", "Direct Path API",
+    "Master Table",
+    "REMAP_SCHEMA", "REMAP_TABLESPACE", "TABLE_EXISTS_ACTION",
+    "EXCLUDE", "INCLUDE", "NETWORK_LINK",
+    "Transportable Tablespace", "DUMPFILE",
+    "STOP_JOB", "KILL_JOB", "ATTACH",
+    "DBA_DATAPUMP_JOBS", "V$SESSION_LONGOPS"
+  ]
+}

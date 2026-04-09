@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+  <style>
+    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #94A3B8; }
+    .detail { font-size: 11px; fill: #CBD5E1; }
+    .code { font-family: monospace; font-size: 12px; fill: #F59E0B; }
+    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 8; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2; fill: none; marker-end: url(#arrowPurple); }
+    .arrow-blue { stroke: #3B82F6; stroke-width: 2; fill: none; marker-end: url(#arrowBlue); }
+    .arrow-yellow { stroke: #F59E0B; stroke-width: 2; fill: none; marker-end: url(#arrowYellow); }
+    .arrow-red { stroke: #EF4444; stroke-width: 2; fill: none; marker-end: url(#arrowRed); }
+    .arrow-dashed { stroke: #F59E0B; stroke-width: 1.5; fill: none; stroke-dasharray: 6,3; marker-end: url(#arrowYellow); }
+    .state-active { fill: rgba(239,68,68,0.15); stroke: #EF4444; stroke-width: 2; rx: 12; }
+    .state-unexpired { fill: rgba(245,158,11,0.15); stroke: #F59E0B; stroke-width: 2; rx: 12; }
+    .state-expired { fill: rgba(59,130,246,0.15); stroke: #3B82F6; stroke-width: 2; rx: 12; }
+    .trigger-box { fill: rgba(255,255,255,0.03); stroke: #2A2B3D; stroke-width: 1; rx: 6; }
+    .priority-num { font-size: 16px; font-weight: 800; }
+  </style>
+  <defs>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+    </marker>
+    <marker id="arrowYellow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B" />
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#EF4444" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" class="title">UNDO Extent 상태 전이와 공간 재사용 흐름</text>
+  <text x="400" y="52" text-anchor="middle" class="subtitle">UNDO Extent State Transition &amp; Space Reuse Priority</text>
+
+  <!-- ===== State Transition Section ===== -->
+  <text x="40" y="85" class="label" style="font-size:13px;">상태 전이 (State Transition)</text>
+
+  <!-- ACTIVE State -->
+  <rect x="50" y="100" width="180" height="90" class="state-active"/>
+  <text x="140" y="128" text-anchor="middle" class="label" fill="#EF4444">ACTIVE</text>
+  <text x="140" y="145" text-anchor="middle" class="sublabel">트랜잭션 실행 중</text>
+  <text x="140" y="160" text-anchor="middle" class="detail">덮어쓰기 불가</text>
+  <text x="140" y="175" text-anchor="middle" class="detail" style="font-size:10px;">롤백·읽기 일관성·복구에 필수</text>
+
+  <!-- Arrow: ACTIVE → UNEXPIRED -->
+  <path d="M 230 145 L 300 145" class="arrow"/>
+  <text x="265" y="135" text-anchor="middle" class="sublabel" style="font-size:10px;">COMMIT</text>
+  <text x="265" y="160" text-anchor="middle" class="sublabel" style="font-size:10px;">ROLLBACK</text>
+
+  <!-- UNEXPIRED State -->
+  <rect x="300" y="100" width="200" height="90" class="state-unexpired"/>
+  <text x="400" y="128" text-anchor="middle" class="label" fill="#F59E0B">UNEXPIRED</text>
+  <text x="400" y="145" text-anchor="middle" class="sublabel">RETENTION 미경과</text>
+  <text x="400" y="160" text-anchor="middle" class="detail">조건부 덮어쓰기 가능</text>
+  <text x="400" y="175" text-anchor="middle" class="detail" style="font-size:10px;">NOGUARANTEE 시 공간 부족하면 강제 재사용</text>
+
+  <!-- Arrow: UNEXPIRED → EXPIRED -->
+  <path d="M 500 145 L 570 145" class="arrow-blue"/>
+  <text x="535" y="130" text-anchor="middle" class="sublabel" style="font-size:10px;">UNDO_RETENTION</text>
+  <text x="535" y="160" text-anchor="middle" class="sublabel" style="font-size:10px;">시간 경과</text>
+
+  <!-- EXPIRED State -->
+  <rect x="570" y="100" width="180" height="90" class="state-expired"/>
+  <text x="660" y="128" text-anchor="middle" class="label" fill="#3B82F6">EXPIRED</text>
+  <text x="660" y="145" text-anchor="middle" class="sublabel">RETENTION 경과</text>
+  <text x="660" y="160" text-anchor="middle" class="detail">덮어쓰기 가능 (1순위)</text>
+  <text x="660" y="175" text-anchor="middle" class="detail" style="font-size:10px;">새 트랜잭션이 우선 재사용</text>
+
+  <!-- GUARANTEE branch -->
+  <path d="M 400 190 L 400 218" class="arrow-dashed"/>
+  <rect x="300" y="220" width="200" height="36" style="fill:rgba(245,158,11,0.1); stroke:#F59E0B; stroke-width:1.5; rx:6; stroke-dasharray:4,2;"/>
+  <text x="400" y="238" text-anchor="middle" class="code" style="font-size:11px;">RETENTION GUARANTEE</text>
+  <text x="400" y="250" text-anchor="middle" class="detail" style="font-size:10px;">→ UNEXPIRED 절대 보호 (재사용 불가)</text>
+
+  <!-- ===== Space Reuse Priority Section ===== -->
+  <text x="40" y="295" class="label" style="font-size:13px;">공간 부족 시 자동 동작 순서 (Space Reuse Priority)</text>
+
+  <!-- Priority boxes -->
+  <rect x="50" y="310" width="130" height="80" class="box" style="fill:rgba(59,130,246,0.1); stroke:#3B82F6;"/>
+  <text x="60" y="335" class="priority-num" fill="#3B82F6">1</text>
+  <text x="82" y="335" class="detail" style="font-weight:600;">EXPIRED</text>
+  <text x="115" y="352" text-anchor="middle" class="detail">Extent 재사용</text>
+  <text x="115" y="367" text-anchor="middle" class="sublabel" style="font-size:10px;">가장 먼저 회수</text>
+  <text x="115" y="382" text-anchor="middle" class="sublabel" style="font-size:10px;">안전한 재사용</text>
+
+  <path d="M 180 350 L 200 350" class="arrow-blue"/>
+
+  <rect x="200" y="310" width="130" height="80" class="box" style="fill:rgba(111,107,234,0.1); stroke:#6F6BEA;"/>
+  <text x="210" y="335" class="priority-num" fill="#6F6BEA">2</text>
+  <text x="232" y="335" class="detail" style="font-weight:600;">Free Space</text>
+  <text x="265" y="352" text-anchor="middle" class="detail">새 Extent 할당</text>
+  <text x="265" y="367" text-anchor="middle" class="sublabel" style="font-size:10px;">테이블스페이스</text>
+  <text x="265" y="382" text-anchor="middle" class="sublabel" style="font-size:10px;">여유 공간 사용</text>
+
+  <path d="M 330 350 L 350 350" class="arrow"/>
+
+  <rect x="350" y="310" width="130" height="80" class="box" style="fill:rgba(111,107,234,0.1); stroke:#6F6BEA;"/>
+  <text x="360" y="335" class="priority-num" fill="#6F6BEA">3</text>
+  <text x="382" y="335" class="detail" style="font-weight:600;">AUTOEXTEND</text>
+  <text x="415" y="352" text-anchor="middle" class="detail">데이터파일 확장</text>
+  <text x="415" y="367" text-anchor="middle" class="sublabel" style="font-size:10px;">MAXSIZE까지</text>
+  <text x="415" y="382" text-anchor="middle" class="sublabel" style="font-size:10px;">자동 확장</text>
+
+  <path d="M 480 350 L 500 350" class="arrow"/>
+
+  <rect x="500" y="310" width="130" height="80" class="box" style="fill:rgba(245,158,11,0.1); stroke:#F59E0B;"/>
+  <text x="510" y="335" class="priority-num" fill="#F59E0B">4</text>
+  <text x="532" y="335" class="detail" style="font-weight:600;">UNEXPIRED</text>
+  <text x="565" y="352" text-anchor="middle" class="detail">강제 전환</text>
+  <text x="565" y="367" text-anchor="middle" class="sublabel" style="font-size:10px;">NOGUARANTEE만</text>
+  <text x="565" y="382" text-anchor="middle" class="sublabel" style="font-size:10px;">ORA-01555 위험↑</text>
+
+  <path d="M 630 350 L 650 350" class="arrow-yellow"/>
+
+  <rect x="650" y="310" width="110" height="80" style="fill:rgba(239,68,68,0.12); stroke:#EF4444; stroke-width:2; rx:8;"/>
+  <text x="660" y="335" class="priority-num" fill="#EF4444">5</text>
+  <text x="682" y="335" class="detail" style="font-weight:600; fill:#EF4444;">실패</text>
+  <text x="705" y="352" text-anchor="middle" class="code" style="fill:#EF4444; font-size:11px;">ORA-30036</text>
+  <text x="705" y="367" text-anchor="middle" class="detail" style="fill:#EF4444;">DML 실패</text>
+  <text x="705" y="382" text-anchor="middle" class="sublabel" style="font-size:10px;">공간 부족 에러</text>
+
+  <!-- ===== UNDO Space Formula ===== -->
+  <rect x="50" y="415" width="710" height="65" class="box" style="fill:rgba(111,107,234,0.06);"/>
+  <text x="400" y="438" text-anchor="middle" class="label" style="font-size:13px;">UNDO 공간 산정 공식 (UNDO Space Sizing Formula)</text>
+  <text x="400" y="460" text-anchor="middle" class="code" style="font-size:14px;">UNDO Space = UNDO_RETENTION × 초당 UNDO 생성률 + 여유 공간</text>
+  <text x="400" y="475" text-anchor="middle" class="sublabel">V$UNDOSTAT.UNDOBLKS / 시간 간격 → 초당 생성률 산출</text>
+
+  <!-- ===== Monitoring Views ===== -->
+  <rect x="50" y="498" width="225" height="68" class="box"/>
+  <text x="162" y="520" text-anchor="middle" class="code" style="font-size:12px;">V$UNDOSTAT</text>
+  <text x="162" y="536" text-anchor="middle" class="detail">10분 간격 통계</text>
+  <text x="162" y="550" text-anchor="middle" class="sublabel" style="font-size:10px;">SSOLDERRCNT / NOSPACEERRCNT</text>
+
+  <rect x="292" y="498" width="225" height="68" class="box"/>
+  <text x="404" y="520" text-anchor="middle" class="code" style="font-size:12px;">DBA_UNDO_EXTENTS</text>
+  <text x="404" y="536" text-anchor="middle" class="detail">Extent 상태별 현황</text>
+  <text x="404" y="550" text-anchor="middle" class="sublabel" style="font-size:10px;">ACTIVE / UNEXPIRED / EXPIRED</text>
+
+  <rect x="534" y="498" width="225" height="68" class="box"/>
+  <text x="646" y="520" text-anchor="middle" class="code" style="font-size:12px;">V$TRANSACTION</text>
+  <text x="646" y="536" text-anchor="middle" class="detail">활성 트랜잭션 UNDO</text>
+  <text x="646" y="550" text-anchor="middle" class="sublabel" style="font-size:10px;">USED_UBLK / USED_UREC</text>
+</svg>

@@ -1,0 +1,112 @@
+{
+  "id": "02_00",
+  "title": "챕터 흐름 요약 — 멀티테넌트 아키텍처 (CDB 및 PDB 구성) (Chapter Flow Overview)",
+  "chapter": "02. 멀티테넌트 아키텍처 (CDB 및 PDB 구성)",
+  "description": "챕터 02의 4개 학습 단원(구조 및 토대, PDB 생성 및 템플릿, PDB 상태 관리 및 분리, 파라미터 및 복제 관리)을 학습하기 전에 전체 흐름과 각 단원 간의 관계를 파악하기 위한 사전 요약 자료입니다. 이 자료를 먼저 읽고 챕터 학습에 들어가면 개별 단원의 위치와 역할을 빠르게 이해할 수 있습니다.",
+  "oracle26ai_changes": [
+    "Oracle 26ai에서 PDB 최대 개수 제한이 대폭 확대되어, 단일 CDB에서 4,098개 이상의 PDB를 지원합니다 (MAX_PDBS 파라미터 기본값 변경).",
+    "PDB Snapshot Carousel 기능이 강화되어 PDB 단위의 시점 복구(Point-in-Time Recovery)가 더욱 세밀해졌습니다.",
+    "CDB Fleet Management 기능이 향상되어, 여러 CDB를 하나의 논리적 Fleet으로 관리하고 PDB를 Fleet 내에서 자유롭게 재배치할 수 있습니다.",
+    "PDB Lockdown Profile의 세분화된 제어가 강화되어, 네트워크 접근 및 OS 명령 실행에 대한 보다 정밀한 제한이 가능합니다.",
+    "Refreshable Clone PDB의 SWITCHOVER 기능이 개선되어, 소스 PDB와 클론 PDB 간 역할 전환 시 다운타임이 최소화되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "챕터 전체 흐름 개관 (Chapter Big Picture)",
+      "sqlExamplesIds": [],
+      "content": "멀티테넌트 아키텍처를 이해하려면 **2개의 핵심 축**을 먼저 잡아야 합니다:\n\n| 축 | 핵심 질문 | 관련 단원 |\n|---|---|---|\n| **아키텍처 + 생성** | CDB/PDB 구조는 어떻게 구성되고, PDB는 어떻게 만드는가? | 02_01 구조 및 토대, 02_02 PDB 생성 및 템플릿 |\n| **운영 + 관리** | PDB를 어떻게 열고 닫고 이동하며, 파라미터와 복제는 어떻게 관리하는가? | 02_03 PDB 상태 관리 및 분리, 02_04 파라미터 및 복제 관리 |\n\n### 학습 순서와 이유\n\n```\n02_01 구조 및 토대 ──▶ 02_02 PDB 생성 ──▶ 02_03 상태 관리 및 분리 ──▶ 02_04 파라미터 및 복제\n```\n\n1. **구조 및 토대(02_01)** → CDB, CDB$ROOT, PDB$SEED, 사용자 PDB의 구조와 공통/로컬 객체 분리, 메모리·프로세스 공유 구조를 먼저 이해합니다. 이것이 멀티테넌트의 \"뼈대\"입니다.\n2. **PDB 생성 및 템플릿(02_02)** → 구조를 이해한 뒤, PDB$SEED에서 PDB를 실제로 생성하는 방법, 파일 관리, Application Container 등을 배웁니다.\n3. **PDB 상태 관리 및 분리(02_03)** → 생성된 PDB의 오픈 모드(READ WRITE / READ ONLY / MOUNTED) 전환, SAVE STATE, Unplug/Plug In, 삭제까지 PDB 라이프사이클을 배웁니다.\n4. **파라미터 및 복제 관리(02_04)** → PDB별 독립 파라미터 설정, Lockdown Profile을 통한 보안 제한, 그리고 로컬/원격/Refreshable/Snapshot 등 다양한 클론 방법을 배웁니다.",
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/02/02_00_s01_learning_flow.svg",
+          "caption": "챕터 02 학습 순서 흐름도 — 4개 단원의 학습 경로와 2개의 핵심 축 (아키텍처+생성, 운영+관리)",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "멀티테넌트의 뼈대 — CDB/PDB 구조 및 토대 (Architecture Foundation, 02_01)",
+      "sqlExamplesIds": [],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/02/02_00_s02_cdb_container_overview.svg",
+          "caption": "CDB/PDB 컨테이너 아키텍처 개요도 — CDB$ROOT, PDB$SEED, 사용자 PDB의 구조와 공유/전용 자원 비교",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "content": "Oracle 멀티테넌트 아키텍처의 가장 기본적인 공식:\n\n> **CDB = Oracle Instance(SGA + 백그라운드 프로세스) + 컨테이너들(CDB$ROOT + PDB$SEED + 사용자 PDB)**\n>\n> - Oracle 21c부터 Non-CDB는 **Desupported**, Oracle 26ai에서는 CDB 아키텍처만 지원\n> - 단일 CDB에서 **4,098개 이상**의 PDB 지원 (26ai)\n\n### CDB 컨테이너 유형\n\n| 컨테이너 | CON_ID | 역할 | 상태 |\n|---|---|---|---|\n| **CDB$ROOT** | 1 | 마스터 데이터 딕셔너리, 공통 객체 저장 | 항상 OPEN |\n| **PDB$SEED** | 2 | 새 PDB 생성 시 골든 이미지(템플릿) | 항상 READ ONLY |\n| **사용자 PDB** | 3+ | 실제 애플리케이션 데이터 저장 | MOUNTED/READ ONLY/READ WRITE |\n| **Application Container** | 가변 | 애플리케이션 정의 공유 데이터 | 선택 사항 |\n\n### 공유 자원 vs PDB별 전용 자원\n\n| 자원 | 공유/전용 |\n|---|---|\n| SGA, 백그라운드 프로세스, Control File, Redo Log | **CDB 전체 공유** |\n| SYSTEM/SYSAUX 테이블스페이스, 데이터 딕셔너리 | **PDB별 전용** |\n| UNDO 테이블스페이스 | 공유(기본) / PDB별 전용(Local Undo Mode) |\n\n### 공통 객체 vs 로컬 객체\n\n| 구분 | 공통(Common) | 로컬(Local) |\n|---|---|---|\n| **사용자** | C## 접두사, CDB$ROOT에서 생성 | PDB 내에서 생성, 해당 PDB에서만 유효 |\n| **역할** | CDB 전체에 걸쳐 유효 | PDB 내에서만 유효 |\n| **딕셔너리 링크** | Metadata Link / Object Link로 PDB에서 참조 | 각 PDB가 독립 보유 |",
+      "subsections": []
+    },
+    {
+      "sectionId": "s03",
+      "title": "PDB 만들기 — 생성 및 템플릿 (PDB Creation & Templates, 02_02)",
+      "sqlExamplesIds": [],
+      "content": "### PDB 생성 4가지 방법\n\n| 생성 방법 | 소스 | 주요 용도 | 소요 시간 |\n|---|---|---|---|\n| **PDB$SEED에서 생성** | PDB$SEED | 새로운 빈 PDB 생성 | 빠름 |\n| **기존 PDB 클론** | 기존 PDB | 동일 데이터를 가진 PDB 복제 | 데이터 크기 비례 |\n| **PDB Plugging** | XML/아카이브 + 데이터 파일 | 다른 CDB에서 PDB 이전 | 빠름 (파일 복사 제외) |\n| **Non-CDB → PDB 변환** | Non-CDB | 기존 Non-CDB의 멀티테넌트 전환 | 데이터 크기 비례 |\n\n### PDB$SEED에서 생성 핵심 포인트\n\n- PDB$SEED(CON_ID=2)는 항상 **READ ONLY** — 새 PDB 생성 시 데이터 파일이 복사됨\n- `CREATE PLUGGABLE DATABASE` 구문 사용\n- **ADMIN USER** 절로 PDB 관리자 계정 설정\n- **FILE_NAME_CONVERT** 또는 **CREATE_FILE_DEST**(OMF)로 파일 경로 지정\n- **STORAGE** 절로 PDB별 스토리지 제한 설정 (MAXSIZE, MAX_SHARED_TEMP_SIZE)\n\n### 생성 공통 프로세스\n\n```\nCDB$ROOT 접속 (공통 사용자)\n  └── CREATE PLUGGABLE DATABASE 실행\n       └── 새 PDB: MOUNTED 상태로 생성\n            └── ALTER PLUGGABLE DATABASE ... OPEN\n                 └── SAVE STATE 설정 (선택)\n```\n\n### Application Container\n\n- 여러 Application PDB가 공유하는 메타데이터/공통 데이터를 **Application Root**에서 관리\n- Application Seed를 통해 Application PDB를 표준화된 템플릿으로 생성\n- DBCA GUI 또는 Silent 모드로도 PDB 생성 가능",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s04",
+      "title": "열고 닫고 옮기기 — PDB 상태 관리 및 분리 (State Management & Unplugging, 02_03)",
+      "sqlExamplesIds": [],
+      "content": "### PDB 오픈 모드 3가지\n\n| 모드 | 허용 작업 | 주요 용도 |\n|---|---|---|\n| **READ WRITE** | 모든 DML/DDL | 운영 환경 (기본 운영 모드) |\n| **READ ONLY** | SELECT만 | 보고서 전용, 데이터 보호, Standby |\n| **MOUNTED** | 관리 작업만 (복구, Unplug 등) | CDB 시작 후 PDB 기본 상태 |\n\n### 상태 전환 핵심 구문\n\n```\nALTER PLUGGABLE DATABASE pdb_name OPEN;                    -- READ WRITE\nALTER PLUGGABLE DATABASE pdb_name OPEN READ ONLY;          -- READ ONLY\nALTER PLUGGABLE DATABASE pdb_name CLOSE IMMEDIATE;         -- MOUNTED\nALTER PLUGGABLE DATABASE pdb_name OPEN READ WRITE FORCE;   -- 모드 직접 전환\n```\n\n### CDB 재시작 시 PDB 자동 오픈\n\n| 방법 | 설명 | 권장 여부 |\n|---|---|---|\n| **SAVE STATE** | PDB별 오픈 상태를 저장, 재시작 시 자동 복원 | **권장** |\n| **AFTER STARTUP 트리거** | CDB 레벨 트리거로 모든 PDB 일괄 오픈 | 대안 |\n| **수동 오픈** | DBA가 직접 ALTER PLUGGABLE DATABASE 실행 | 비권장 (운영) |\n\n### Unplug / Plug In\n\n| 단계 | 설명 |\n|---|---|\n| **Unplug** | PDB를 CLOSE → XML 메타데이터 또는 **.pdb 아카이브 파일**로 분리 |\n| **호환성 검사** | `DBMS_PDB.CHECK_PLUG_COMPATIBILITY` 함수로 대상 CDB 호환성 확인 |\n| **Plug In** | `CREATE PLUGGABLE DATABASE ... USING '...'`로 다른 CDB에 연결 |\n| **PDB_PLUG_IN_VIOLATIONS** | Plug In 후 위반 사항 확인 뷰 (26ai: AUTO_FIXABLE 컬럼 추가) |\n\n### PDB 삭제\n\n- `DROP PLUGGABLE DATABASE pdb_name INCLUDING DATAFILES` — 데이터 파일까지 삭제\n- `DROP PLUGGABLE DATABASE pdb_name KEEP DATAFILES` — 메타데이터만 삭제, 파일 보존\n- PDB는 반드시 **MOUNTED(CLOSE)** 상태에서만 삭제 가능",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s05",
+      "title": "설정과 복제 — 파라미터 및 복제 관리 (Parameters & Cloning, 02_04)",
+      "sqlExamplesIds": [],
+      "content": "### PDB별 파라미터 관리\n\n| 항목 | 설명 |\n|---|---|\n| **ISPDB_MODIFIABLE=TRUE** | PDB 수준에서 독립 설정 가능한 파라미터 (OPEN_CURSORS, OPTIMIZER_MODE 등) |\n| **ISPDB_MODIFIABLE=FALSE** | CDB 루트에서만 변경 가능 (SGA_TARGET, DB_BLOCK_SIZE 등) |\n| **CONTAINER=CURRENT** | 현재 PDB에만 파라미터 적용 |\n| **CONTAINER=ALL** | CDB 루트 + 모든 PDB에 적용 (CDB$ROOT에서만 사용) |\n| **ALTER SYSTEM RESET** | PDB 파라미터를 CDB 기본값으로 복원 |\n\n### 파라미터 우선순위\n\n```\n1순위: ALTER SESSION SET (세션 레벨)\n  └── 2순위: PDB 레벨 ALTER SYSTEM SET\n       └── 3순위: CDB 루트 ALTER SYSTEM SET\n            └── 4순위: Oracle 기본값 (Default)\n```\n\n> **핵심**: CONTAINER=ALL로 변경해도 PDB에 명시적 설정이 있으면 덮어쓰지 않습니다.\n\n### Lockdown Profile\n\n- PDB에서 실행 가능한 작업을 제한하는 보안 프로파일\n- 네트워크 접근, OS 명령 실행, 특정 SQL 기능을 정밀하게 제한\n- `PDB_LOCKDOWN` 파라미터로 적용\n\n### PDB 복제(클론) 방법 비교\n\n| 복제 방법 | 소스 위치 | 동기화 | 주요 용도 |\n|---|---|---|---|\n| **로컬 클론** | 동일 CDB | 1회성 | 개발/테스트 환경 구축 |\n| **원격 클론** | 다른 CDB (DB Link) | 1회성 | 크로스 서버 복제 |\n| **Refreshable Clone** | 동일/다른 CDB | 주기적 동기화 | 준 실시간 DR, 보고용 |\n| **Snapshot Copy** | 동일 CDB | 1회성 (Copy-on-Write) | 빠른 프로비저닝, 테스트 |\n| **PDB Relocate** | 다른 CDB | 이관 완료 시 삭제 | 무중단 PDB 이관 |",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s06",
+      "title": "단원 간 연결 관계 (Cross-Section Connections)",
+      "sqlExamplesIds": [],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/02/02_00_s06_cross_section_connections.svg",
+          "caption": "단원 간 연결 관계도 — 4개 단원의 5가지 핵심 연결고리와 의존 관계 시각화",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
+      "content": "각 단원은 독립적이지 않으며, 다음과 같은 핵심 연결고리가 존재합니다:\n\n### 연결 1: PDB$SEED — PDB 생성 — CDB$ROOT\nCDB$ROOT(02_01)의 데이터 딕셔너리를 기반으로 PDB$SEED(02_01)가 구성되고, PDB 생성(02_02)에서 이 PDB$SEED를 복사하여 새 PDB를 만듭니다. PDB$SEED의 구조를 이해해야 생성 프로세스의 동작 원리를 파악할 수 있습니다.\n\n### 연결 2: PDB 오픈 모드 — SAVE STATE — CDB 기동\nPDB 상태 관리(02_03)의 오픈 모드(READ WRITE, READ ONLY, MOUNTED)는 CDB 아키텍처(02_01)에서 \"CDB 시작 시 PDB는 기본 MOUNTED\"라는 설계와 직결됩니다. SAVE STATE는 이 제한을 극복하여 CDB 재시작 시 PDB를 자동 오픈합니다.\n\n### 연결 3: Unplug/Plug In — CDB 구조 — PDB 생성\nPDB Unplug/Plug In(02_03)은 CDB 구조(02_01)의 \"플러거블\" 개념을 실현하는 메커니즘이며, Plug In 시 `CREATE PLUGGABLE DATABASE ... USING` 구문(02_02)을 사용합니다. 호환성 검사(DBMS_PDB.CHECK_PLUG_COMPATIBILITY)는 CDB 간 문자셋, 엔디안, 컴포넌트 버전을 검증합니다.\n\n### 연결 4: PDB 파라미터 — 메모리/프로세스 공유 — Resource Manager\nPDB별 파라미터(02_04)는 CDB의 메모리·프로세스 공유 구조(02_01)를 전제로 합니다. SGA_TARGET 등 인스턴스 전체 파라미터는 CDB 루트에서만 변경 가능하고, PDB별 자원 제한은 Resource Manager(02_01)와 Lockdown Profile(02_04)로 제어합니다.\n\n### 연결 5: PDB 클론 — PDB 상태 — 파일 관리\nPDB 클론(02_04)은 소스 PDB의 오픈 모드(02_03)에 따라 동작이 달라집니다. 기본 클론은 소스가 READ ONLY여야 하고, Hot Clone은 READ WRITE 상태에서도 가능합니다. 파일 경로 관리(FILE_NAME_CONVERT, OMF)는 생성(02_02)과 클론(02_04) 모두에서 동일한 메커니즘을 공유합니다.",
+      "subsections": []
+    }
+  ],
+  "sql_examples": [],
+  "keywords": [
+    "CDB (Container Database)", "PDB (Pluggable Database)", "CDB$ROOT", "PDB$SEED",
+    "멀티테넌트 (Multitenant)", "CON_ID", "MAX_PDBS",
+    "Common User (C##)", "Local User", "Metadata Link", "Object Link",
+    "Application Container", "Local Undo Mode", "CDB Resource Plan",
+    "CREATE PLUGGABLE DATABASE", "ADMIN USER", "FILE_NAME_CONVERT",
+    "Oracle Managed Files (OMF)",
+    "SAVE STATE", "DISCARD STATE",
+    "READ WRITE", "READ ONLY", "MOUNTED",
+    "ALTER PLUGGABLE DATABASE", "CLOSE IMMEDIATE",
+    "Unplug", "Plug In", ".pdb Archive",
+    "DBMS_PDB.CHECK_PLUG_COMPATIBILITY", "PDB_PLUG_IN_VIOLATIONS",
+    "DROP PLUGGABLE DATABASE",
+    "ISPDB_MODIFIABLE", "CONTAINER=CURRENT", "CONTAINER=ALL",
+    "ALTER SYSTEM SET", "ALTER SYSTEM RESET",
+    "PDB Lockdown Profile", "PDB_LOCKDOWN",
+    "Local Clone", "Remote Clone", "Refreshable Clone PDB",
+    "Snapshot Copy PDB", "PDB Relocate", "SWITCHOVER",
+    "V$PDBS", "V$CONTAINERS", "DBA_PDBS",
+    "DBCA", "RAC", "CDB Fleet Management"
+  ]
+}

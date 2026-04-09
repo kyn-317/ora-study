@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #94A3B8; }
+    .desc { font-size: 11px; fill: #94A3B8; }
+    .code { font-family: monospace; font-size: 13px; fill: #F59E0B; }
+    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 8; }
+    .box-primary { fill: rgba(111,107,234,0.15); stroke: #6F6BEA; stroke-width: 2; rx: 10; }
+    .box-blue { fill: rgba(59,130,246,0.1); stroke: #3B82F6; stroke-width: 1.5; rx: 8; }
+    .box-yellow { fill: rgba(245,158,11,0.1); stroke: #F59E0B; stroke-width: 1.5; rx: 8; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2.5; fill: none; marker-end: url(#arrowPurple); }
+    .arrow-blue { stroke: #3B82F6; stroke-width: 2; fill: none; marker-end: url(#arrowBlue); }
+    .arrow-dash { stroke: #3B82F6; stroke-width: 1.5; fill: none; stroke-dasharray: 6,4; marker-end: url(#arrowBlue); }
+    .axis-tag { font-size: 11px; font-weight: 600; }
+    .step-num { font-size: 20px; font-weight: 700; fill: #6F6BEA; }
+  </style>
+  <defs>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" class="title">챕터 08 학습 순서 흐름도 (Learning Flow)</text>
+  <text x="400" y="52" text-anchor="middle" class="subtitle">성능 모니터링, 어드바이저 및 자동 관리 태스크 — 3개의 핵심 축</text>
+
+  <!-- Axis Legend -->
+  <rect x="30" y="68" width="740" height="42" class="box" rx="6" />
+  <circle cx="80" cy="89" r="8" fill="rgba(111,107,234,0.3)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="95" y="93" class="axis-tag" fill="#6F6BEA">축 1: 정보 수집 인프라</text>
+  <circle cx="300" cy="89" r="8" fill="rgba(245,158,11,0.3)" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="315" y="93" class="axis-tag" fill="#F59E0B">축 2: 자동 유지관리</text>
+  <circle cx="520" cy="89" r="8" fill="rgba(59,130,246,0.3)" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="535" y="93" class="axis-tag" fill="#3B82F6">축 3: 진단 · 분석 · 최적화</text>
+
+  <!-- Step 1: 08_01 -->
+  <text x="60" y="155" class="step-num">1</text>
+  <rect x="80" y="128" width="300" height="90" class="box-primary" />
+  <text x="230" y="155" text-anchor="middle" class="label">08_01 기본 모니터링 및 로깅</text>
+  <text x="230" y="173" text-anchor="middle" class="sublabel">Basic Monitoring &amp; Logging</text>
+  <text x="230" y="196" text-anchor="middle" class="desc">V$ 뷰 · 데이터 딕셔너리 · ADR · AWR</text>
+  <text x="230" y="211" text-anchor="middle" class="desc">→ 모든 성능 관리의 "데이터 기반"</text>
+
+  <!-- Arrow Step1 → Step2 -->
+  <path d="M 380 173 L 430 173" class="arrow" />
+
+  <!-- Step 2: 08_02 -->
+  <text x="450" y="155" class="step-num">2</text>
+  <rect x="470" y="128" width="300" height="90" class="box-yellow" />
+  <text x="620" y="155" text-anchor="middle" class="label">08_02 자동화 기반 태스크</text>
+  <text x="620" y="173" text-anchor="middle" class="sublabel">Automated Maintenance Tasks</text>
+  <text x="620" y="196" text-anchor="middle" class="desc">Maintenance Window · AutoTask · Resource Mgr</text>
+  <text x="620" y="211" text-anchor="middle" class="desc">→ 자동 통계 수집 · 자동 SQL 튜닝 실행 스케줄</text>
+
+  <!-- Step 3: 08_03 -->
+  <text x="60" y="295" class="step-num">3</text>
+  <rect x="80" y="268" width="300" height="90" class="box-blue" />
+  <text x="230" y="295" text-anchor="middle" class="label">08_03 문제 해결 어드바이저</text>
+  <text x="230" y="313" text-anchor="middle" class="sublabel">Problem Resolution Advisors</text>
+  <text x="230" y="336" text-anchor="middle" class="desc">세그먼트 · SQL 튜닝 · SQL 액세스 어드바이저</text>
+  <text x="230" y="351" text-anchor="middle" class="desc">→ 개별 어드바이저 사용법과 권고 해석</text>
+
+  <!-- Arrow Step2 → Step4 (diagonal) -->
+  <path d="M 620 218 L 620 268" class="arrow" />
+
+  <!-- Arrow Step3 → Step4 -->
+  <path d="M 380 313 L 430 313" class="arrow-blue" />
+
+  <!-- Step 4: 08_04 -->
+  <text x="450" y="295" class="step-num">4</text>
+  <rect x="470" y="268" width="300" height="90" class="box-blue" />
+  <text x="620" y="295" text-anchor="middle" class="label">08_04 진단 모니터 (ADDM)</text>
+  <text x="620" y="313" text-anchor="middle" class="sublabel">Automatic Database Diagnostic Monitor</text>
+  <text x="620" y="336" text-anchor="middle" class="desc">AWR 스냅샷 기반 자동 성능 진단</text>
+  <text x="620" y="351" text-anchor="middle" class="desc">→ DB Time 하향식 분석 · 튜닝 방법론</text>
+
+  <!-- Vertical arrow from Step1 to Step3 -->
+  <path d="M 230 218 L 230 268" class="arrow" />
+
+  <!-- Key Parameter Box -->
+  <rect x="130" y="400" width="540" height="100" class="box" rx="10" />
+  <text x="400" y="425" text-anchor="middle" class="label" fill="#F59E0B">핵심 파라미터 (Key Parameter)</text>
+  <text x="400" y="450" text-anchor="middle" class="code">STATISTICS_LEVEL = TYPICAL | ALL</text>
+  <text x="400" y="475" text-anchor="middle" class="sublabel">BASIC으로 설정하면 AWR · ADDM · AutoTask가 모두 비활성화됩니다</text>
+  <text x="400" y="490" text-anchor="middle" class="sublabel">이 단일 파라미터가 챕터 08 전체 기능의 활성화를 좌우합니다</text>
+
+  <!-- Dashed arrows from key param to steps -->
+  <path d="M 250 400 L 230 358" class="arrow-dash" />
+  <path d="M 550 400 L 620 358" class="arrow-dash" />
+</svg>

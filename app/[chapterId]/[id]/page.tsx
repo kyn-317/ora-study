@@ -192,8 +192,8 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
       {/* Header Banner */}
       <div className="bg-gradient-primary study-header-banner" style={{ padding: '4rem 2rem', borderRadius: '0 0 30px 30px' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <Link href={`/${chapterId}`} style={{ color: 'white', opacity: 0.8, textDecoration: 'none', marginBottom: '1rem', display: 'inline-block', fontSize: '0.9rem' }}>
-            &larr; Back to {chapterId}
+          <Link href={chapterId === '00' ? '/' : `/${chapterId}`} style={{ color: 'white', opacity: 0.8, textDecoration: 'none', marginBottom: '1rem', display: 'inline-block', fontSize: '0.9rem' }}>
+            &larr; {chapterId === '00' ? 'Back to Home' : `Back to ${chapterId}`}
           </Link>
           <div style={{ color: 'var(--color-6)', fontWeight: 600, fontSize: '1rem', marginBottom: '0.5rem' }}>
             {data.chapter}

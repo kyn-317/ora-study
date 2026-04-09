@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #94A3B8; }
+    .code { font-family: monospace; font-size: 13px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .axis-label { font-size: 13px; font-weight: 600; }
+    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 8; }
+    .box-primary { fill: rgba(111,107,234,0.15); stroke: #6F6BEA; stroke-width: 1.5; rx: 10; }
+    .box-blue { fill: rgba(59,130,246,0.12); stroke: #3B82F6; stroke-width: 1.5; rx: 10; }
+    .box-yellow { fill: rgba(245,158,11,0.12); stroke: #F59E0B; stroke-width: 1.5; rx: 10; }
+    .box-green { fill: rgba(16,185,129,0.12); stroke: #10B981; stroke-width: 1.5; rx: 10; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    .arrow-dim { stroke: #475569; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead-dim); stroke-dasharray: 6,3; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="arrowhead-dim" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" class="title">챕터 04 학습 흐름 개관 (Chapter 04 Big Picture)</text>
+  <text x="400" y="55" text-anchor="middle" class="subtitle">보안, 권한 및 감사 — 3개의 핵심 축과 4단계 학습 순서</text>
+
+  <!-- 3 Security Axes -->
+  <text x="50" y="95" class="axis-label" fill="#6F6BEA">보안의 3대 핵심 축 (Three Pillars of Security)</text>
+
+  <!-- Axis 1: Subject Management -->
+  <rect x="50" y="110" width="220" height="70" class="box-primary" />
+  <text x="160" y="135" text-anchor="middle" class="label" fill="#6F6BEA">주체 관리</text>
+  <text x="160" y="152" text-anchor="middle" class="sublabel">Subject Management</text>
+  <text x="160" y="170" text-anchor="middle" class="small">누가 접속하는가?</text>
+
+  <!-- Axis 2: Privilege Management -->
+  <rect x="290" y="110" width="220" height="70" class="box-blue" />
+  <text x="400" y="135" text-anchor="middle" class="label" fill="#3B82F6">권한 관리</text>
+  <text x="400" y="152" text-anchor="middle" class="sublabel">Privilege Management</text>
+  <text x="400" y="170" text-anchor="middle" class="small">무엇을 허용하는가?</text>
+
+  <!-- Axis 3: Activity Tracking -->
+  <rect x="530" y="110" width="220" height="70" class="box-yellow" />
+  <text x="640" y="135" text-anchor="middle" class="label" fill="#F59E0B">활동 추적</text>
+  <text x="640" y="152" text-anchor="middle" class="sublabel">Activity Tracking</text>
+  <text x="640" y="170" text-anchor="middle" class="small">무엇을 했는가?</text>
+
+  <!-- Arrows between axes -->
+  <path d="M270,145 L290,145" class="arrow" />
+  <path d="M510,145 L530,145" class="arrow" />
+
+  <!-- Learning Flow Section -->
+  <text x="50" y="225" class="axis-label" fill="#6F6BEA">학습 순서 (Learning Path)</text>
+
+  <!-- Step 1: 04_01 -->
+  <rect x="30" y="245" width="160" height="105" class="box-primary" />
+  <text x="110" y="270" text-anchor="middle" class="code">04_01</text>
+  <text x="110" y="290" text-anchor="middle" class="label" font-size="13">사용자 및</text>
+  <text x="110" y="308" text-anchor="middle" class="label" font-size="13">인증 관리</text>
+  <text x="110" y="328" text-anchor="middle" class="sublabel">User &amp; Auth</text>
+  <text x="110" y="343" text-anchor="middle" class="small">누가?</text>
+
+  <!-- Arrow 1->2 -->
+  <path d="M190,297 L220,297" class="arrow" />
+
+  <!-- Step 2: 04_02 -->
+  <rect x="220" y="245" width="160" height="105" class="box-blue" />
+  <text x="300" y="270" text-anchor="middle" class="code">04_02</text>
+  <text x="300" y="290" text-anchor="middle" class="label" font-size="13">권한 계층</text>
+  <text x="300" y="308" text-anchor="middle" class="label" font-size="13">및 롤</text>
+  <text x="300" y="328" text-anchor="middle" class="sublabel">Privileges &amp; Roles</text>
+  <text x="300" y="343" text-anchor="middle" class="small">무엇을 할 수 있나?</text>
+
+  <!-- Arrow 2->3 -->
+  <path d="M380,297 L410,297" class="arrow" />
+
+  <!-- Step 3: 04_03 -->
+  <rect x="410" y="245" width="160" height="105" class="box-blue" />
+  <text x="490" y="270" text-anchor="middle" class="code">04_03</text>
+  <text x="490" y="290" text-anchor="middle" class="label" font-size="13">보안 통제 및</text>
+  <text x="490" y="308" text-anchor="middle" class="label" font-size="13">자원 제한</text>
+  <text x="490" y="328" text-anchor="middle" class="sublabel">Controls &amp; Limits</text>
+  <text x="490" y="343" text-anchor="middle" class="small">어떻게 제한하나?</text>
+
+  <!-- Arrow 3->4 -->
+  <path d="M570,297 L600,297" class="arrow" />
+
+  <!-- Step 4: 04_04 -->
+  <rect x="600" y="245" width="160" height="105" class="box-yellow" />
+  <text x="680" y="270" text-anchor="middle" class="code">04_04</text>
+  <text x="680" y="290" text-anchor="middle" class="label" font-size="13">감사 체계</text>
+  <text x="680" y="308" text-anchor="middle" class="label" font-size="13">(Auditing)</text>
+  <text x="680" y="328" text-anchor="middle" class="sublabel">Audit System</text>
+  <text x="680" y="343" text-anchor="middle" class="small">무엇을 했나?</text>
+
+  <!-- Mapping lines from axes to steps -->
+  <path d="M160,180 L110,245" class="arrow-dim" />
+  <path d="M370,180 L300,245" class="arrow-dim" />
+  <path d="M430,180 L490,245" class="arrow-dim" />
+  <path d="M640,180 L680,245" class="arrow-dim" />
+
+  <!-- Oracle 26ai Changes -->
+  <text x="50" y="395" class="axis-label" fill="#F59E0B">Oracle 26ai 주요 변경사항 (Key Changes)</text>
+
+  <rect x="30" y="410" width="740" height="95" class="box" />
+
+  <circle cx="55" cy="432" r="4" fill="#6F6BEA" />
+  <text x="70" y="436" class="small" fill="#E2E8F0" font-size="12">CMU 강화 — Microsoft Entra ID 통합, Schema-Only Account 확장</text>
+
+  <circle cx="55" cy="455" r="4" fill="#3B82F6" />
+  <text x="70" y="459" class="small" fill="#E2E8F0" font-size="12">Schema-Level Privilege 확장 — 스키마 내 모든 객체에 세밀한 권한 부여</text>
+
+  <circle cx="55" cy="478" r="4" fill="#F59E0B" />
+  <text x="70" y="482" class="small" fill="#E2E8F0" font-size="12">DBMS_PRIVILEGE_CAPTURE 개선 — CDB/PDB별 권한 사용 현황 정밀 분석</text>
+
+  <circle cx="430" cy="432" r="4" fill="#10B981" />
+  <text x="445" y="436" class="small" fill="#E2E8F0" font-size="12">통합 감사 JSON 구성 강화, AI Vector Search 감사 추가</text>
+
+  <circle cx="430" cy="455" r="4" fill="#F59E0B" />
+  <text x="445" y="459" class="small" fill="#E2E8F0" font-size="12">ora_complexity_check — AI 기반 취약 패스워드 탐지</text>
+</svg>

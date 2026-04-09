@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <style>
+    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #94A3B8; }
+    .detail { font-size: 11px; fill: #CBD5E1; }
+    .code { font-family: monospace; font-size: 13px; fill: #F59E0B; }
+    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 10; }
+    .box-step1 { fill: rgba(111,107,234,0.15); stroke: #6F6BEA; stroke-width: 2; rx: 10; }
+    .box-step2 { fill: rgba(59,130,246,0.12); stroke: #3B82F6; stroke-width: 2; rx: 10; }
+    .box-step3 { fill: rgba(245,158,11,0.12); stroke: #F59E0B; stroke-width: 2; rx: 10; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2.5; fill: none; marker-end: url(#arrow1); }
+    .arrow2 { stroke: #3B82F6; stroke-width: 2.5; fill: none; marker-end: url(#arrow2); }
+    .step-num { font-size: 28px; font-weight: 800; }
+    .axis-label { font-size: 11px; font-weight: 600; }
+    .badge { rx: 4; }
+  </style>
+  <defs>
+    <marker id="arrow1" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="arrow2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" class="title">UNDO 데이터베이스 제어 — 학습 순서 흐름도</text>
+  <text x="400" y="55" text-anchor="middle" class="subtitle">Chapter 06 Learning Flow Overview</text>
+
+  <!-- 3 Axes Legend -->
+  <rect x="30" y="72" width="12" height="12" fill="#6F6BEA" rx="2"/>
+  <text x="48" y="83" class="axis-label" fill="#6F6BEA">축 1: 구조와 역할 (Structure &amp; Role)</text>
+  <rect x="280" y="72" width="12" height="12" fill="#3B82F6" rx="2"/>
+  <text x="298" y="83" class="axis-label" fill="#3B82F6">축 2: 생명주기 (Lifecycle)</text>
+  <rect x="490" y="72" width="12" height="12" fill="#F59E0B" rx="2"/>
+  <text x="508" y="83" class="axis-label" fill="#F59E0B">축 3: 특수 환경 (Special Env)</text>
+
+  <!-- Step 1: 06_01 -->
+  <rect x="40" y="105" width="220" height="260" class="box-step1"/>
+  <text x="60" y="138" class="step-num" fill="#6F6BEA">01</text>
+  <text x="100" y="132" class="label">기능 및 목적</text>
+  <text x="100" y="148" class="sublabel">Functions &amp; Purpose (06_01)</text>
+
+  <rect x="55" y="162" width="190" height="28" class="box" style="fill:rgba(111,107,234,0.08)"/>
+  <text x="150" y="181" text-anchor="middle" class="detail">UNDO 데이터 = Before Image</text>
+
+  <rect x="55" y="198" width="190" height="28" class="box" style="fill:rgba(111,107,234,0.08)"/>
+  <text x="150" y="217" text-anchor="middle" class="detail">UNDO 세그먼트 / 테이블스페이스</text>
+
+  <rect x="55" y="234" width="190" height="28" class="box" style="fill:rgba(111,107,234,0.08)"/>
+  <text x="150" y="253" text-anchor="middle" class="detail">읽기 일관성 (Read Consistency)</text>
+
+  <rect x="55" y="270" width="190" height="28" class="box" style="fill:rgba(111,107,234,0.08)"/>
+  <text x="150" y="289" text-anchor="middle" class="detail">롤백 / Flashback 기능</text>
+
+  <rect x="55" y="306" width="190" height="28" class="box" style="fill:rgba(111,107,234,0.08)"/>
+  <text x="150" y="325" text-anchor="middle" class="detail">ORA-01555 원리 이해</text>
+
+  <text x="150" y="355" text-anchor="middle" class="sublabel">전체 그림을 먼저 파악</text>
+
+  <!-- Arrow 1→2 -->
+  <path d="M 260 235 L 290 235" class="arrow"/>
+  <text x="275" y="225" text-anchor="middle" class="sublabel" style="font-size:10px">기초 →</text>
+
+  <!-- Step 2: 06_02 -->
+  <rect x="290" y="105" width="220" height="260" class="box-step2"/>
+  <text x="310" y="138" class="step-num" fill="#3B82F6">02</text>
+  <text x="350" y="132" class="label">데이터 상태</text>
+  <text x="350" y="148" class="sublabel">Data States (06_02)</text>
+
+  <rect x="305" y="162" width="190" height="28" class="box" style="fill:rgba(59,130,246,0.08)"/>
+  <text x="400" y="181" text-anchor="middle" class="detail">ACTIVE → UNEXPIRED → EXPIRED</text>
+
+  <rect x="305" y="198" width="190" height="28" class="box" style="fill:rgba(59,130,246,0.08)"/>
+  <text x="400" y="217" text-anchor="middle" class="detail">공간 부족 시 자동 동작 순서</text>
+
+  <rect x="305" y="234" width="190" height="28" class="box" style="fill:rgba(59,130,246,0.08)"/>
+  <text x="400" y="253" text-anchor="middle" class="detail">UNDO_RETENTION Auto-Tuning</text>
+
+  <rect x="305" y="270" width="190" height="28" class="box" style="fill:rgba(59,130,246,0.08)"/>
+  <text x="400" y="289" text-anchor="middle" class="detail">RETENTION GUARANTEE</text>
+
+  <rect x="305" y="306" width="190" height="28" class="box" style="fill:rgba(59,130,246,0.08)"/>
+  <text x="400" y="325" text-anchor="middle" class="detail">V$UNDOSTAT 모니터링</text>
+
+  <text x="400" y="355" text-anchor="middle" class="sublabel">운영 관점의 상태 관리</text>
+
+  <!-- Arrow 2→3 -->
+  <path d="M 510 235 L 540 235" class="arrow2"/>
+  <text x="525" y="225" text-anchor="middle" class="sublabel" style="font-size:10px">심화 →</text>
+
+  <!-- Step 3: 06_03 -->
+  <rect x="540" y="105" width="220" height="260" class="box-step3"/>
+  <text x="560" y="138" class="step-num" fill="#F59E0B">03</text>
+  <text x="600" y="132" class="label">특수 환경 제어</text>
+  <text x="600" y="148" class="sublabel">Special Environment (06_03)</text>
+
+  <rect x="555" y="162" width="190" height="28" class="box" style="fill:rgba(245,158,11,0.08)"/>
+  <text x="650" y="181" text-anchor="middle" class="detail">Temporary UNDO (GTT 최적화)</text>
+
+  <rect x="555" y="198" width="190" height="28" class="box" style="fill:rgba(245,158,11,0.08)"/>
+  <text x="650" y="217" text-anchor="middle" class="detail">TEMP_UNDO_ENABLED = TRUE</text>
+
+  <rect x="555" y="234" width="190" height="28" class="box" style="fill:rgba(245,158,11,0.08)"/>
+  <text x="650" y="253" text-anchor="middle" class="detail">Local UNDO vs Shared UNDO</text>
+
+  <rect x="555" y="270" width="190" height="28" class="box" style="fill:rgba(245,158,11,0.08)"/>
+  <text x="650" y="289" text-anchor="middle" class="detail">PDB별 독립 UNDO 운영</text>
+
+  <rect x="555" y="306" width="190" height="28" class="box" style="fill:rgba(245,158,11,0.08)"/>
+  <text x="650" y="325" text-anchor="middle" class="detail">UNDO 모드 전환 절차</text>
+
+  <text x="650" y="355" text-anchor="middle" class="sublabel">앞 두 단원 지식이 전제</text>
+
+  <!-- Bottom: Key Question per axis -->
+  <rect x="40" y="385" width="720" height="120" class="box" style="fill:rgba(255,255,255,0.03)"/>
+  <text x="400" y="410" text-anchor="middle" class="label" style="font-size:13px;">핵심 질문 (Key Questions)</text>
+
+  <rect x="55" y="422" width="12" height="12" fill="#6F6BEA" rx="2"/>
+  <text x="73" y="433" class="detail" style="fill:#E2E8F0;">UNDO 데이터는 무엇이고, 어떻게 저장·활용되는가?</text>
+  <text x="73" y="448" class="sublabel" style="font-size:10px;">What is UNDO data and how is it stored/used?</text>
+
+  <rect x="55" y="458" width="12" height="12" fill="#3B82F6" rx="2"/>
+  <text x="73" y="469" class="detail" style="fill:#E2E8F0;">UNDO Extent 상태는 어떻게 전이되고, 공간은 어떻게 관리하는가?</text>
+  <text x="73" y="484" class="sublabel" style="font-size:10px;">How do UNDO Extent states transition and how is space managed?</text>
+
+  <rect x="55" y="494" width="12" height="12" fill="#F59E0B" rx="2"/>
+  <text x="73" y="505" class="detail" style="fill:#E2E8F0;">Temporary UNDO와 멀티테넌트 UNDO 모드는 어떻게 운영하는가?</text>
+  <text x="73" y="518" class="sublabel" style="font-size:10px;">How to operate Temporary UNDO and Multitenant UNDO modes?</text>
+</svg>

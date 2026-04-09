@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .step-num { font-size: 20px; font-weight: 700; }
+    .box { rx: 8; ry: 8; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="32" class="title" text-anchor="middle">챕터 03 학습 순서 흐름도 (Chapter 03 Learning Flow)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">관리 도구 축과 네트워크 통신 축의 학습 경로</text>
+
+  <!-- Two Pillars Header -->
+  <rect x="40" y="70" width="340" height="35" rx="6" fill="rgba(111,107,234,0.2)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="210" y="93" class="label" text-anchor="middle" fill="#6F6BEA">관리 도구 축 (Administration Tools)</text>
+  <rect x="420" y="70" width="340" height="35" rx="6" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="590" y="93" class="label" text-anchor="middle" fill="#3B82F6">네트워크 통신 축 (Network Communication)</text>
+
+  <!-- Step 1: 03_01 -->
+  <rect x="60" y="130" width="300" height="100" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <circle cx="85" cy="155" r="15" fill="#6F6BEA"/>
+  <text x="85" y="161" class="step-num" text-anchor="middle" fill="#FFFFFF">1</text>
+  <text x="115" y="158" class="label">03_01 주요 운영 환경 툴</text>
+  <text x="115" y="158" class="label" dx="0" dy="0"> </text>
+  <text x="80" y="183" class="sublabel">DBA Tools &amp; Utilities</text>
+  <text x="80" y="200" class="small">DBCA, SQL*Plus, EM CC, RMAN, SQL Developer</text>
+  <text x="80" y="217" class="code">모든 관리 작업의 출발점</text>
+
+  <!-- Arrow from Step 1 to Step 2 -->
+  <line x1="360" y1="180" x2="430" y2="180" stroke="#6F6BEA" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="395" y="173" class="small" text-anchor="middle">접속</text>
+  <text x="395" y="185" class="small" text-anchor="middle">필요</text>
+
+  <!-- Step 2: 03_02 -->
+  <rect x="440" y="130" width="300" height="100" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <circle cx="465" cy="155" r="15" fill="#3B82F6"/>
+  <text x="465" y="161" class="step-num" text-anchor="middle" fill="#FFFFFF">2</text>
+  <text x="495" y="158" class="label">03_02 네트워크 진단 제어 툴</text>
+  <text x="460" y="183" class="sublabel">Network Diagnostic &amp; Control Tools</text>
+  <text x="460" y="200" class="small">tnsping, lsnrctl, NETCA, NETMGR</text>
+  <text x="460" y="217" class="code">네트워크 인프라 구성/진단</text>
+
+  <!-- Arrow from Step 2 to Step 3 -->
+  <path d="M 590 230 L 590 260 L 210 260 L 210 290" fill="none" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="400" y="255" class="small" text-anchor="middle">인프라 위에서 접속 규약 학습</text>
+
+  <!-- Step 3: 03_03 -->
+  <rect x="60" y="290" width="300" height="100" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <circle cx="85" cy="315" r="15" fill="#3B82F6"/>
+  <text x="85" y="321" class="step-num" text-anchor="middle" fill="#FFFFFF">3</text>
+  <text x="115" y="318" class="label">03_03 네이밍 및 접속 규약</text>
+  <text x="80" y="343" class="sublabel">Naming Methods &amp; Connection</text>
+  <text x="80" y="360" class="small">tnsnames.ora, Easy Connect, SERVICE_NAME</text>
+  <text x="80" y="377" class="code">클라이언트 접속 메커니즘</text>
+
+  <!-- Arrow from Step 3 to Step 4 -->
+  <line x1="360" y1="340" x2="430" y2="340" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="395" y="333" class="small" text-anchor="middle">규약</text>
+  <text x="395" y="345" class="small" text-anchor="middle">활용</text>
+
+  <!-- Step 4: 03_04 -->
+  <rect x="440" y="290" width="300" height="100" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <circle cx="465" cy="315" r="15" fill="#F59E0B"/>
+  <text x="465" y="321" class="step-num" text-anchor="middle" fill="#1E1E2E">4</text>
+  <text x="495" y="318" class="label">03_04 DB 간 연결 구성</text>
+  <text x="460" y="343" class="sublabel">Database Links Configuration</text>
+  <text x="460" y="360" class="small">Private/Public/Global Link, 분산 트랜잭션</text>
+  <text x="460" y="377" class="code">원격 DB 접근 및 분산 환경 관리</text>
+
+  <!-- Legend -->
+  <rect x="60" y="415" width="680" height="50" rx="6" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <circle cx="90" cy="440" r="8" fill="#6F6BEA"/>
+  <text x="105" y="444" class="small">관리 도구</text>
+  <circle cx="200" cy="440" r="8" fill="#3B82F6"/>
+  <text x="215" y="444" class="small">네트워크/접속</text>
+  <circle cx="330" cy="440" r="8" fill="#F59E0B"/>
+  <text x="345" y="444" class="small">분산 환경</text>
+  <text x="500" y="444" class="small">학습 순서: 도구 이해 → 네트워크 인프라 → 접속 규약 → 분산 연결</text>
+</svg>

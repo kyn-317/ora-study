@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+  <style>
+    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #94A3B8; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .code { font-family: monospace; font-size: 12px; fill: #F59E0B; }
+    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 8; }
+    .box-primary { fill: rgba(111,107,234,0.15); stroke: #6F6BEA; stroke-width: 2; rx: 10; }
+    .box-blue { fill: rgba(59,130,246,0.1); stroke: #3B82F6; stroke-width: 1.5; rx: 8; }
+    .box-yellow { fill: rgba(245,158,11,0.08); stroke: #F59E0B; stroke-width: 1.5; rx: 8; }
+    .box-dim { fill: rgba(255,255,255,0.03); stroke: #374151; stroke-width: 1; rx: 6; }
+    .arrow { stroke: #6F6BEA; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    .arrow-blue { stroke: #3B82F6; stroke-width: 1.5; fill: none; marker-end: url(#arrowBlue); }
+    .connector { stroke: #4B5563; stroke-width: 1.5; fill: none; stroke-dasharray: 5,3; }
+    .highlight { font-weight: 700; fill: #6F6BEA; }
+    .tag-bg { rx: 4; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="32" class="title" text-anchor="middle">Oracle 논리적 저장 구조 계층 (Logical Storage Hierarchy)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">Tablespace → Segment → Extent → Data Block + 물리적 대응(Datafile)</text>
+
+  <!-- === Left Side: Logical Hierarchy === -->
+  <text x="60" y="82" class="sublabel" font-weight="600" fill="#6F6BEA">논리적 구조 (Logical)</text>
+
+  <!-- Database level -->
+  <rect x="110" y="95" width="300" height="44" class="box-primary"/>
+  <text x="260" y="115" class="label" text-anchor="middle" fill="#E2E8F0">데이터베이스 (Database)</text>
+  <text x="260" y="131" class="sublabel" text-anchor="middle">최상위 논리적 컨테이너</text>
+
+  <!-- Arrow down -->
+  <path d="M 260 139 L 260 158" class="arrow"/>
+
+  <!-- Tablespace level -->
+  <rect x="70" y="160" width="380" height="60" class="box-primary"/>
+  <text x="260" y="183" class="label" text-anchor="middle">테이블스페이스 (Tablespace)</text>
+  <text x="260" y="200" class="sublabel" text-anchor="middle">논리적 저장 최상위 단위 — SYSTEM, SYSAUX, TEMP, UNDO, USERS</text>
+  <!-- SMALLFILE/BIGFILE tags -->
+  <rect x="80" y="163" width="70" height="16" rx="8" fill="rgba(59,130,246,0.2)"/>
+  <text x="115" y="175" class="small" text-anchor="middle" fill="#3B82F6" font-weight="600">SMALLFILE</text>
+  <rect x="156" y="163" width="56" height="16" rx="8" fill="rgba(245,158,11,0.2)"/>
+  <text x="184" y="175" class="small" text-anchor="middle" fill="#F59E0B" font-weight="600">BIGFILE</text>
+
+  <!-- Arrow down -->
+  <path d="M 260 220 L 260 242" class="arrow"/>
+
+  <!-- Segment level -->
+  <rect x="100" y="244" width="320" height="60" class="box-blue"/>
+  <text x="260" y="268" class="label" text-anchor="middle">세그먼트 (Segment)</text>
+  <text x="260" y="286" class="sublabel" text-anchor="middle">테이블, 인덱스, LOB, 임시 세그먼트 등 객체 단위</text>
+
+  <!-- Arrow down -->
+  <path d="M 260 304 L 260 326" class="arrow"/>
+
+  <!-- Extent level -->
+  <rect x="130" y="328" width="260" height="56" class="box-blue"/>
+  <text x="260" y="352" class="label" text-anchor="middle">익스텐트 (Extent)</text>
+  <text x="260" y="368" class="sublabel" text-anchor="middle">연속된 데이터 블록의 묶음</text>
+
+  <!-- Extent management tags -->
+  <rect x="140" y="388" width="100" height="20" rx="4" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="190" y="402" class="code" text-anchor="middle" font-size="10" fill="#3B82F6">AUTOALLOCATE</text>
+  <rect x="250" y="388" width="70" height="20" rx="4" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="285" y="402" class="code" text-anchor="middle" font-size="10" fill="#3B82F6">UNIFORM</text>
+
+  <!-- Arrow down -->
+  <path d="M 260 410 L 260 430" class="arrow"/>
+
+  <!-- Data Block level -->
+  <rect x="160" y="432" width="200" height="56" class="box-yellow"/>
+  <text x="260" y="456" class="label" text-anchor="middle">데이터 블록 (Data Block)</text>
+  <text x="260" y="472" class="sublabel" text-anchor="middle">최소 I/O 단위 — 기본 8KB</text>
+
+  <!-- Block detail mini -->
+  <rect x="160" y="496" width="200" height="40" rx="4" fill="rgba(255,255,255,0.03)" stroke="#374151" stroke-width="1"/>
+  <text x="190" y="512" class="small" font-size="10">Header</text>
+  <line x1="220" y1="498" x2="220" y2="534" stroke="#374151" stroke-width="0.5"/>
+  <text x="237" y="512" class="small" font-size="10">Dir</text>
+  <line x1="254" y1="498" x2="254" y2="534" stroke="#374151" stroke-width="0.5"/>
+  <text x="276" y="512" class="small" font-size="10">Free</text>
+  <line x1="302" y1="498" x2="302" y2="534" stroke="#374151" stroke-width="0.5"/>
+  <text x="330" y="512" class="small" font-size="10">Row Data</text>
+  <text x="260" y="530" class="code" text-anchor="middle" font-size="9">PCTFREE (기본 10%)</text>
+
+  <!-- === Right Side: Physical Mapping === -->
+  <text x="540" y="82" class="sublabel" font-weight="600" fill="#F59E0B">물리적 구조 (Physical)</text>
+
+  <!-- Datafile -->
+  <rect x="510" y="160" width="240" height="60" class="box-yellow"/>
+  <text x="630" y="184" class="label" text-anchor="middle">데이터 파일 (Datafile)</text>
+  <text x="630" y="200" class="sublabel" text-anchor="middle">OS 파일 — .dbf</text>
+
+  <!-- AUTOEXTEND info -->
+  <rect x="520" y="230" width="220" height="44" rx="6" fill="rgba(255,255,255,0.03)" stroke="#374151" stroke-width="1"/>
+  <text x="630" y="248" class="code" text-anchor="middle" font-size="11">AUTOEXTEND ON NEXT ... MAXSIZE ...</text>
+  <text x="630" y="264" class="small" text-anchor="middle">공간 부족 시 자동 확장</text>
+
+  <!-- SMALLFILE vs BIGFILE comparison -->
+  <rect x="510" y="290" width="112" height="70" rx="6" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1"/>
+  <text x="566" y="308" class="small" text-anchor="middle" fill="#3B82F6" font-weight="600">SMALLFILE</text>
+  <text x="566" y="324" class="small" text-anchor="middle">1~1,022 파일</text>
+  <text x="566" y="340" class="small" text-anchor="middle">파일당 ~32GB</text>
+  <text x="566" y="354" class="small" text-anchor="middle">파일 단위 관리</text>
+
+  <rect x="632" y="290" width="118" height="70" rx="6" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1"/>
+  <text x="691" y="308" class="small" text-anchor="middle" fill="#F59E0B" font-weight="600">BIGFILE</text>
+  <text x="691" y="324" class="small" text-anchor="middle">정확히 1개 파일</text>
+  <text x="691" y="340" class="small" text-anchor="middle">최대 ~32TB</text>
+  <text x="691" y="354" class="small" text-anchor="middle">TS 단위 관리</text>
+
+  <!-- 5 default tablespaces -->
+  <text x="630" y="390" class="sublabel" text-anchor="middle" font-weight="600" fill="#E2E8F0">기본 테이블스페이스 5종 (Default Tablespaces)</text>
+  <rect x="510" y="400" width="80" height="30" rx="5" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="550" y="420" class="small" text-anchor="middle" fill="#E2E8F0" font-weight="600">SYSTEM</text>
+  <rect x="596" y="400" width="72" height="30" rx="5" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="632" y="420" class="small" text-anchor="middle" fill="#E2E8F0" font-weight="600">SYSAUX</text>
+  <rect x="674" y="400" width="60" height="30" rx="5" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="704" y="420" class="small" text-anchor="middle" fill="#E2E8F0" font-weight="600">TEMP</text>
+  <rect x="524" y="436" width="60" height="30" rx="5" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="554" y="456" class="small" text-anchor="middle" fill="#E2E8F0" font-weight="600">UNDO</text>
+  <rect x="590" y="436" width="66" height="30" rx="5" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="623" y="456" class="small" text-anchor="middle" fill="#E2E8F0" font-weight="600">USERS</text>
+
+  <!-- Connecting dashed lines: Tablespace <-> Datafile -->
+  <path d="M 450 190 L 508 190" class="connector"/>
+  <text x="479" y="184" class="small" text-anchor="middle" font-size="10" fill="#4B5563">1:N 대응</text>
+
+  <!-- Legend -->
+  <rect x="510" y="490" width="240" height="60" rx="8" class="box"/>
+  <text x="630" y="510" class="sublabel" text-anchor="middle" font-weight="600" fill="#E2E8F0">범례 (Legend)</text>
+  <rect x="525" y="518" width="12" height="12" rx="3" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.5"/>
+  <text x="544" y="528" class="small" fill="#E2E8F0">논리적 계층</text>
+  <rect x="620" y="518" width="12" height="12" rx="3" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="639" y="528" class="small" fill="#E2E8F0">물리적 구조</text>
+</svg>

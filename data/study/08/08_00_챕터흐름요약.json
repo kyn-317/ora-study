@@ -1,0 +1,111 @@
+{
+  "id": "08_00",
+  "title": "챕터 흐름 요약 — 성능 모니터링, 어드바이저 및 자동 관리 태스크 (Chapter Flow Overview)",
+  "chapter": "08. 성능 모니터링, 어드바이저 및 자동 관리 태스크",
+  "description": "챕터 08의 4개 학습 단원(기본 모니터링 및 로깅, 자동화 기반 태스크, 문제 해결 어드바이저, 진단 모니터)을 학습하기 전에 전체 흐름과 각 단원 간의 관계를 파악하기 위한 사전 요약 자료입니다. 이 자료를 먼저 읽고 챕터 학습에 들어가면 개별 단원의 위치와 역할을 빠르게 이해할 수 있습니다.",
+  "oracle26ai_changes": [
+    "AWR의 PDB 레벨 자동 플러시(AWR_PDB_AUTOFLUSH_ENABLED)가 기본 활성화되어, PDB별 독립적인 AWR 스냅샷 수집과 ADDM 분석이 별도 설정 없이 가능합니다.",
+    "ADR에서 JSON 형식의 Alert Log 출력이 기본 지원되고 V$DIAG_ALERT_EXT 뷰가 개선되어, 구조화된 로그 분석과 SQL 기반 Alert Log 조회가 용이해졌습니다.",
+    "Machine Learning 기반 이상 탐지(Anomaly Detection)와 ADDM/Health Monitor의 연계가 강화되어, 규칙 기반 진단을 보완하는 예측적 권장 사항이 제공됩니다.",
+    "SQL 튜닝 어드바이저가 AI 기반 워크로드 분석을 통합하고, SQL 액세스 어드바이저가 벡터 인덱스(Vector Index) 등 26ai 신규 기능에 대한 권고를 생성할 수 있도록 확장되었습니다.",
+    "Resource Manager에서 PDB 레벨 I/O Rate Limiting(MAX_IOPS, MAX_MBPS)이 세밀화되고, AutoTask Framework의 AI 기반 지능형 스케줄링이 강화되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "챕터 전체 흐름 개관 (Chapter Big Picture)",
+      "sqlExamplesIds": [],
+      "content": "Oracle Database 성능 관리를 이해하려면 **3개의 핵심 축**을 먼저 잡아야 합니다:\n\n| 축 | 핵심 질문 | 관련 단원 |\n|---|---|---|\n| **정보 수집 인프라** | 성능 데이터를 어디서, 어떻게 수집하는가? | 08_01 기본 모니터링 및 로깅 |\n| **자동 유지관리** | 수집된 데이터를 기반으로 어떤 작업이 자동으로 수행되는가? | 08_02 자동화 기반 태스크 |\n| **진단 · 분석 · 최적화** | 성능 문제를 어떻게 진단하고 해결하는가? | 08_03 문제 해결 어드바이저, 08_04 진단 모니터 |\n\n### 학습 순서와 이유\n\n```\n08_01 기본 모니터링 및 로깅 ──▶ 08_02 자동화 기반 태스크 ──┐\n                                                           ├──▶ 08_04 진단 모니터 (ADDM)\n                               08_03 문제 해결 어드바이저 ──┘\n```\n\n1. **기본 모니터링 및 로깅(08_01)** → V$ 뷰, 데이터 딕셔너리, ADR, AWR 등 Oracle의 **정보 수집 인프라** 전체를 먼저 이해합니다. 이것이 모든 성능 관리의 \"데이터 기반\"입니다.\n2. **자동화 기반 태스크(08_02)** → Maintenance Window, AutoTask Framework, Resource Manager를 배웁니다. 자동 통계 수집, 자동 SQL 튜닝 등이 **언제, 어떻게 자동 실행**되는지 이해합니다.\n3. **문제 해결 어드바이저(08_03)** → 세그먼트 어드바이저, SQL 튜닝 어드바이저, SQL 액세스 어드바이저 등 **개별 어드바이저의 사용법과 권고 사항 해석**을 배웁니다.\n4. **진단 모니터(08_04)** → ADDM이 AWR 스냅샷을 기반으로 **자동 성능 진단**을 수행하는 전체 메커니즘과 Oracle 권장 튜닝 방법론을 배웁니다.",
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/08/08_00_s01_learning_flow.svg",
+          "caption": "챕터 08 학습 순서 흐름도 — 3개의 핵심 축과 4개 단원의 학습 경로",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "정보 수집의 기반 — 기본 모니터링 및 로깅 (Basic Monitoring and Logging, 08_01)",
+      "sqlExamplesIds": [],
+      "content": "Oracle의 성능 관리는 **4개의 정보 수집 계층**으로 구성됩니다:\n\n> **실시간 메모리 데이터(V$ 뷰)** → **영구 메타데이터(데이터 딕셔너리)** → **장애 진단(ADR)** → **성능 이력(AWR)**\n\n### 동적 성능 뷰 (V$ Views)\n\n| 뷰 카테고리 | 대표 뷰 | 역할 |\n|---|---|---|\n| 인스턴스/DB 상태 | V$INSTANCE, V$DATABASE | 기동 상태, DB 역할 확인 |\n| 세션/SQL | V$SESSION, V$SQL | 현재 세션 활동, SQL 실행 통계 |\n| 대기/통계 | V$SYSSTAT, V$SYSTEM_EVENT, ASH | 성능 병목 식별 |\n| 진단 | V$DIAG_INFO, V$DIAG_ALERT_EXT | ADR 경로, Alert Log 조회 |\n\n- V$ 뷰는 **SGA 메모리의 X$ 테이블** 위에 구축된 읽기 전용 가상 테이블\n- 인스턴스 재시작 시 누적 통계가 초기화되므로 **AWR로 이력 보존** 필요\n- RAC 환경에서는 **GV$ 뷰**를 사용하여 모든 인스턴스를 통합 조회\n\n### 데이터 딕셔너리\n\n| 뷰 접두어 | 범위 | 특징 |\n|---|---|---|\n| **DBA_** | 전체 객체 | DBA 권한 필요 |\n| **ALL_** | 접근 가능 객체 | 세션 사용자 기준 |\n| **USER_** | 소유 객체 | 스키마 소유자 기준 |\n| **CDB_** | 전체 PDB 통합 | CDB 환경 전용 |\n\n### ADR (Automatic Diagnostic Repository)\n\n```\nDIAGNOSTIC_DEST ($ORACLE_BASE)\n  └── diag/rdbms/<db_name>/<instance_name>/\n       ├── alert/     ← XML Alert Log\n       ├── trace/     ← 텍스트 Alert Log + Trace 파일\n       └── incident/  ← 인시던트 덤프\n```\n\n- **Problem**(오류 유형) vs **Incident**(개별 발생 건) 구분\n- **ADRCI** 도구로 DB 미기동 상태에서도 진단 데이터 조회 가능\n- **Flood Control**: 동일 Problem의 과도한 Incident 생성 방지 (기본 5분 내 최대 5개)\n\n### AWR (Automatic Workload Repository)\n\n| 항목 | 기본값 | 설정 방법 |\n|---|---|---|\n| 스냅샷 주기 | 60분 | DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS |\n| 보존 기간 | 8일 | DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS |\n| 필수 파라미터 | STATISTICS_LEVEL=TYPICAL | BASIC이면 AWR 비활성화 |\n| PDB 독립 AWR | AWR_PDB_AUTOFLUSH_ENABLED=TRUE | Oracle 26ai 기본 활성화 |\n\n- **MMON** 프로세스가 V$ 뷰 통계를 주기적으로 SYSAUX에 스냅샷 저장\n- **Baseline**으로 정상 운영 시 스냅샷을 보존하여 성능 비교 기준점 활용\n- AWR 보고서의 **Top 5 Timed Events** 섹션이 성능 병목 식별의 핵심",
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/08/08_00_s02_monitoring_infrastructure.svg",
+          "caption": "정보 수집 4계층 아키텍처 — 실시간 V$ 뷰에서 AWR 성능 이력까지의 데이터 흐름",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "subsections": []
+    },
+    {
+      "sectionId": "s03",
+      "title": "자동으로 돌아가는 관리 — 자동화 기반 태스크 (Automated Maintenance Tasks, 08_02)",
+      "sqlExamplesIds": [],
+      "content": "### 사전 정의된 자동 유지관리 태스크 3종\n\n| 태스크 | 역할 | 우선순위 |\n|---|---|---|\n| **auto optimizer stats collection** | 옵티마이저 통계 자동 수집 | HIGH (최우선) |\n| **sql tuning advisor** | SQL 프로파일 자동 생성/적용 | MEDIUM |\n| **auto space advisor** | 세그먼트 공간 분석/권고 | MEDIUM |\n\n### Maintenance Window 구조\n\n| 요일 | 기본 시간 | 기본 시간 길이 |\n|---|---|---|\n| 월~금 | 22:00 ~ 02:00 | 4시간 |\n| 토~일 | 06:00 ~ 다음날 02:00 | 20시간 |\n\n- 윈도우가 열리면 **resource_plan** 속성의 Resource Plan이 자동 활성화\n- **MAINTENANCE_WINDOW_GROUP**에 속한 윈도우만 AutoTask 실행 대상\n- **DBMS_AUTO_TASK_ADMIN**으로 클라이언트 · 윈도우 단위의 세밀한 제어 가능\n\n### Resource Manager 핵심 구조\n\n```\nResource Plan ──── Plan Directive ──── Consumer Group ──── 세션\n     │                  │                    │\n  인스턴스당         CPU/IO/병렬          동일 정책을\n   1개만 활성       리소스 규칙 정의      적용받는 세션 그룹\n```\n\n| 핵심 개념 | 설명 |\n|---|---|\n| **Resource Plan** | 인스턴스당 1개만 활성, RESOURCE_MANAGER_PLAN 파라미터로 설정 |\n| **Plan Directive** | Consumer Group에 CPU(MGMT_P1~P8), IO, 병렬, 세션 규칙 정의 |\n| **Consumer Group** | 매핑 규칙으로 세션 자동 할당, SWITCH_TIME으로 자동 전환 |\n| **Pending Area** | 설정 변경을 트랜잭션처럼 관리 (생성→정의→검증→제출) |\n| **DBRM** | Resource Manager의 실제 집행 엔진 (백그라운드 프로세스) |\n\n### CDB/PDB 2계층 리소스 관리\n\n| 계층 | 제어 대상 | 핵심 속성 |\n|---|---|---|\n| **CDB Resource Plan** | PDB 간 리소스 배분 | shares, utilization_limit, MAX_IOPS, MAX_MBPS |\n| **PDB Resource Plan** | PDB 내부 Consumer Group 간 배분 | MGMT_P1~P8, SWITCH_TIME |",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s04",
+      "title": "문제를 찾아 해결하기 — 문제 해결 어드바이저 (Problem Resolution Advisors, 08_03)",
+      "sqlExamplesIds": [],
+      "content": "### 어드바이저 프레임워크 공통 구조\n\n```\nDBMS_ADVISOR (공통 인터페이스)\n  └── CREATE_TASK → SET_TASK_PARAMETER → EXECUTE_TASK → GET_TASK_REPORT\n       │\n       └── 결과 계층: Task → Execution → Finding → Recommendation → Action\n```\n\n### 5대 어드바이저 한눈에 보기\n\n| 어드바이저 | 목적 | 핵심 패키지 | 주요 결과물 |\n|---|---|---|---|\n| **세그먼트 어드바이저** | 공간 낭비 식별/회수 | DBMS_SPACE, DBMS_ADVISOR | Shrink/Reorganize 권고 |\n| **SQL 튜닝 어드바이저** | 개별 SQL 최적화 | DBMS_SQLTUNE | SQL Profile, 인덱스/통계 권고 |\n| **SQL 액세스 어드바이저** | 스키마 구조 최적화 | DBMS_ADVISOR | 인덱스, MV, 파티션 권고 |\n| **옵티마이저 통계 어드바이저** | 통계 수집 전략 진단 | DBMS_STATS | 통계 관리 개선안 |\n| **SQL 퍼포먼스 애널라이저 (SPA)** | 변경 전후 성능 비교 | DBMS_SQLPA | Regressed/Improved SQL 분류 |\n\n### 옵티마이저 통계 관리 핵심\n\n| 항목 | 기본값/설정 | 설명 |\n|---|---|---|\n| 수집 도구 | **DBMS_STATS** (ANALYZE 대체) | Oracle 공식 권장 |\n| 샘플링 비율 | AUTO_SAMPLE_SIZE (자동) | 옵티마이저가 최적 비율 결정 |\n| 히스토그램 | FOR ALL COLUMNS SIZE AUTO | 워크로드 기반 자동 판단 |\n| 노후화 기준 | STALE_PERCENT=10% | 데이터 10% 이상 변경 시 |\n| 증분 통계 | INCREMENTAL=TRUE | 파티션 테이블 효율적 통계 수집 |\n| 보류 통계 | PUBLISH=FALSE 후 수집 | 적용 전 테스트 가능 |\n\n### SQL 튜닝 어드바이저 vs SQL 액세스 어드바이저 vs SPA\n\n| 비교 항목 | SQL 튜닝 어드바이저 | SQL 액세스 어드바이저 | SPA |\n|---|---|---|---|\n| 초점 | 개별 SQL 최적화 | 스키마 구조 최적화 | 변경 영향도 평가 |\n| 입력 | SQL ID / SQL 텍스트 / STS | STS / 현재 워크로드 | STS |\n| 주요 결과 | SQL Profile | 인덱스/MV/파티션 DDL | Regressed/Improved 분류 |\n| 자동 실행 | SYS_AUTO_SQL_TUNING_TASK | 수동 실행 필요 | 수동 실행 필요 |",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s05",
+      "title": "자동 성능 진단 — ADDM (Diagnostic Monitor, 08_04)",
+      "sqlExamplesIds": [],
+      "content": "### ADDM 핵심 개념\n\n> **ADDM = AWR 스냅샷 기반의 자동 성능 진단 엔진**\n>\n> MMON 프로세스가 매 AWR 스냅샷 후 자동 실행하여 **DB Time**을 핵심 메트릭으로 하향식(Top-Down) 분석 수행\n\n### ADDM 분석 흐름\n\n```\nAWR 스냅샷 생성 (MMON)\n       │\n       ▼\nADDM 자동 분석 트리거\n       │\n       ▼\nDB Time 계층적 분해 (CPU Time + Wait Time)\n       │\n       ▼\nFinding 생성 (Problem / Symptom / Information)\n       │\n       ▼\nRecommendation 도출 (Hardware / Configuration / Schema / Application)\n       │\n       ▼\nAction + Rationale + Benefit 제시\n```\n\n### ADDM 결과 구조\n\n| 구성요소 | 설명 |\n|---|---|\n| **Finding** | 식별된 문제 — Problem(근본 원인), Symptom(증상), Information(정보) |\n| **Impact** | 전체 DB Time 대비 비율(%)과 절대 시간(초)으로 정량화 |\n| **Recommendation** | 4대 유형: Hardware, Configuration, Schema, Application |\n| **Action** | 구체적 조치 사항 (SQL 튜닝, 파라미터 변경, 인덱스 생성 등) |\n| **Benefit** | 예상 DB Time 절약량 — 우선순위 정렬 기준 |\n\n### ADDM 필수 파라미터\n\n| 파라미터 | 필수값 | 설명 |\n|---|---|---|\n| STATISTICS_LEVEL | TYPICAL 이상 | BASIC이면 AWR/ADDM 비활성화 |\n| CONTROL_MANAGEMENT_PACK_ACCESS | DIAGNOSTIC+TUNING | Diagnostic Pack 라이선스 제어 |\n| DBTIME_THRESHOLD | 기본 1% | DB Time의 이 비율 이상만 보고 |\n\n### PDB 레벨 ADDM\n\n- Oracle 26ai: **AWR_PDB_AUTOFLUSH_ENABLED=TRUE 기본** → PDB ADDM 자동 활성화\n- PDB ADDM은 해당 PDB 워크로드만 분석, CDB 공유 자원(SGA, CPU) 분석은 제한적\n- DBMS_ADDM 패키지로 PDB 컨텍스트에서 직접 태스크 생성 및 분석 가능\n\n### Oracle 권장 성능 튜닝 방법론\n\n```\n① 애플리케이션/SQL 튜닝  ← 최우선 (효과 최대)\n       │\n       ▼\n② 인스턴스 튜닝 (메모리, I/O, 동시성)\n       │\n       ▼\n③ OS/하드웨어 튜닝  ← 마지막 수단\n```\n\n- ADDM의 **하향식 DB Time 분해 분석**이 이 방법론과 자연스럽게 일치\n- 대부분의 성능 문제는 **비효율적 SQL이나 부적절한 애플리케이션 설계**에서 기인",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s06",
+      "title": "단원 간 연결 관계 (Cross-Section Connections)",
+      "sqlExamplesIds": [],
+      "content": "각 단원은 독립적이지 않으며, 다음과 같은 핵심 연결고리가 존재합니다:\n\n### 연결 1: AWR — ADDM — 어드바이저 (데이터 수집 → 자동 진단 → 권고)\nAWR(08_01)이 V$ 뷰 통계를 스냅샷으로 저장하면, ADDM(08_04)이 자동으로 성능 분석을 수행하고, 분석 결과에 따라 SQL 튜닝 어드바이저(08_03) 실행을 권고합니다. 이 파이프라인이 Oracle 자동 성능 관리의 핵심 축입니다.\n\n### 연결 2: Maintenance Window — AutoTask — 어드바이저 (스케줄 → 실행 → 최적화)\nMaintenance Window(08_02)가 열리면 AutoTask Framework가 자동 통계 수집, 자동 SQL 튜닝, 자동 세그먼트 분석(08_03의 어드바이저들)을 자동 실행합니다. 윈도우 시간 내에 우선순위(HIGH → MEDIUM)에 따라 작업이 배분됩니다.\n\n### 연결 3: STATISTICS_LEVEL — AWR — ADDM — AutoTask (하나의 파라미터가 전체 연쇄)\nSTATISTICS_LEVEL 파라미터가 BASIC이면 AWR 스냅샷(08_01), ADDM 분석(08_04), 자동 유지관리 태스크(08_02)가 모두 비활성화됩니다. 이 단일 파라미터가 챕터 08 전체 기능의 활성화를 좌우하므로 반드시 TYPICAL 이상을 유지해야 합니다.\n\n### 연결 4: Resource Manager — Maintenance Window — PDB 리소스 격리\nResource Manager(08_02)의 Plan이 Maintenance Window 열림/닫힘에 연동되어 자동 전환됩니다. CDB 환경에서는 CDB Resource Plan이 PDB 간 리소스를 배분하고, PDB 내부에서는 PDB Resource Plan이 Consumer Group 간 리소스를 제어하여 유지관리 작업이 업무 워크로드에 영향을 주지 않도록 격리합니다.\n\n### 연결 5: SQL Tuning Set — SQL 튜닝 어드바이저 — SQL 액세스 어드바이저 — SPA (공유 입력, 다른 분석)\nSQL Tuning Set(STS)(08_03)은 SQL 튜닝 어드바이저, SQL 액세스 어드바이저, SPA의 공통 입력 데이터로 사용됩니다. AWR(08_01)이나 커서 캐시에서 STS로 SQL을 로드한 뒤, 목적에 따라 개별 SQL 최적화(튜닝), 스키마 구조 최적화(액세스), 변경 영향도 평가(SPA)를 수행합니다.",
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/08/08_00_s06_cross_section_connections.svg",
+          "caption": "단원 간 5대 연결 관계 — 4개 단원이 상호 연결되는 핵심 파이프라인",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "subsections": []
+    }
+  ],
+  "sql_examples": [],
+  "keywords": [
+    "V$ Views", "V$SESSION", "V$SQL", "V$ACTIVE_SESSION_HISTORY (ASH)",
+    "데이터 딕셔너리 (Data Dictionary)", "DBA_ Views", "CDB_ Views",
+    "ADR (Automatic Diagnostic Repository)", "ADRCI", "Alert Log", "Trace Files",
+    "AWR (Automatic Workload Repository)", "AWR Snapshot", "AWR Baseline",
+    "MMON", "STATISTICS_LEVEL", "CONTROL_MANAGEMENT_PACK_ACCESS",
+    "AWR_PDB_AUTOFLUSH_ENABLED", "DB Time",
+    "Maintenance Window", "DBMS_AUTO_TASK_ADMIN",
+    "Resource Manager", "Resource Plan", "Consumer Group",
+    "CDB Resource Plan", "MAX_IOPS", "MAX_MBPS",
+    "DBMS_ADVISOR", "Segment Advisor", "Online Segment Shrink",
+    "SQL Tuning Advisor", "DBMS_SQLTUNE", "SQL Profile",
+    "SQL Access Advisor", "SQL Tuning Set (STS)",
+    "DBMS_STATS", "Optimizer Statistics", "Incremental Statistics",
+    "SQL Performance Analyzer (SPA)", "DBMS_SQLPA",
+    "ADDM (Automatic Database Diagnostic Monitor)", "DBMS_ADDM",
+    "Finding", "Recommendation", "Impact", "Benefit",
+    "Top-Down Analysis", "Real-Time ADDM", "Performance Hub",
+    "SYS_AUTO_SQL_TUNING_TASK"
+  ]
+}

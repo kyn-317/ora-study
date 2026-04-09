@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 13px; font-weight: 600; }
+    .sublabel { font-size: 11.5px; fill: #CBD5E1; }
+    .small { font-size: 10.5px; fill: #94A3B8; }
+    .conn-num { font-size: 13px; font-weight: 700; }
+    .box { rx: 8; ry: 8; }
+    .arrow-line { stroke-width: 2; fill: none; }
+    .unit-box { rx: 6; ry: 6; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 9 3, 0 6" fill="#6F6BEA" />
+    </marker>
+    <marker id="ah-blue" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 9 3, 0 6" fill="#3B82F6" />
+    </marker>
+    <marker id="ah-amber" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 9 3, 0 6" fill="#F59E0B" />
+    </marker>
+    <marker id="ah-green" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 9 3, 0 6" fill="#10B981" />
+    </marker>
+    <marker id="ah-rose" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 9 3, 0 6" fill="#F43F5E" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="28" text-anchor="middle" class="title">단원 간 연결 관계 (Cross-Section Connections)</text>
+  <text x="400" y="46" text-anchor="middle" class="subtitle">5개 핵심 연결고리로 보는 단원 간 유기적 관계</text>
+
+  <!-- === Unit boxes at the top === -->
+  <rect x="25" y="60" width="110" height="36" class="unit-box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1.2" />
+  <text x="80" y="83" text-anchor="middle" class="label" fill="#3B82F6">01_01 메모리</text>
+
+  <rect x="155" y="60" width="120" height="36" class="unit-box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1.2" />
+  <text x="215" y="83" text-anchor="middle" class="label" fill="#3B82F6">01_02 프로세스</text>
+
+  <rect x="295" y="60" width="120" height="36" class="unit-box" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="1.2" />
+  <text x="355" y="83" text-anchor="middle" class="label" fill="#F59E0B">01_03 저장구조</text>
+
+  <rect x="435" y="60" width="100" height="36" class="unit-box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.2" />
+  <text x="485" y="83" text-anchor="middle" class="label" fill="#6F6BEA">01_04 기동</text>
+
+  <rect x="555" y="60" width="120" height="36" class="unit-box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.2" />
+  <text x="615" y="83" text-anchor="middle" class="label" fill="#6F6BEA">01_05 파라미터</text>
+
+  <rect x="695" y="60" width="85" height="36" class="unit-box" fill="rgba(244,63,94,0.15)" stroke="#F43F5E" stroke-width="1.2" />
+  <text x="737" y="83" text-anchor="middle" class="label" fill="#F43F5E">01_06 복구</text>
+
+  <!-- ====== Connection 1 ====== -->
+  <rect x="20" y="115" width="760" height="85" class="box" fill="rgba(59,130,246,0.04)" stroke="#3B82F6" stroke-width="1" />
+  <circle cx="45" cy="140" r="14" fill="#3B82F6" />
+  <text x="45" y="145" text-anchor="middle" class="conn-num" fill="#fff">1</text>
+  <text x="70" y="135" class="label" fill="#3B82F6">Buffer Cache — DBWn — 데이터 파일 — 체크포인트</text>
+  <text x="70" y="152" class="small">메모리(01_01) → 프로세스(01_02) → 디스크(01_03) → 복구(01_06)</text>
+
+  <!-- Flow boxes for connection 1 -->
+  <rect x="70" y="162" width="130" height="28" rx="5" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="0.8" />
+  <text x="135" y="181" text-anchor="middle" class="sublabel">Buffer Cache (Dirty)</text>
+
+  <line x1="200" y1="176" x2="225" y2="176" class="arrow-line" stroke="#3B82F6" marker-end="url(#ah-blue)" />
+
+  <rect x="228" y="162" width="100" height="28" rx="5" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="0.8" />
+  <text x="278" y="181" text-anchor="middle" class="sublabel">DBWn 기록</text>
+
+  <line x1="328" y1="176" x2="353" y2="176" class="arrow-line" stroke="#3B82F6" marker-end="url(#ah-blue)" />
+
+  <rect x="356" y="162" width="120" height="28" rx="5" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="0.8" />
+  <text x="416" y="181" text-anchor="middle" class="sublabel">데이터 파일 갱신</text>
+
+  <line x1="476" y1="176" x2="501" y2="176" class="arrow-line" stroke="#3B82F6" marker-end="url(#ah-blue)" />
+
+  <rect x="504" y="162" width="130" height="28" rx="5" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="0.8" />
+  <text x="569" y="181" text-anchor="middle" class="sublabel">CKPT 동기화 조율</text>
+
+  <!-- ====== Connection 2 ====== -->
+  <rect x="20" y="215" width="760" height="85" class="box" fill="rgba(111,107,234,0.04)" stroke="#6F6BEA" stroke-width="1" />
+  <circle cx="45" cy="240" r="14" fill="#6F6BEA" />
+  <text x="45" y="245" text-anchor="middle" class="conn-num" fill="#fff">2</text>
+  <text x="70" y="235" class="label" fill="#6F6BEA">Redo Log Buffer — LGWR — Online Redo Log — 인스턴스 복구</text>
+  <text x="70" y="252" class="small">Redo Buffer(01_01) → LGWR(01_02) → Redo Log(01_03) → SMON 복구(01_06)</text>
+
+  <rect x="70" y="262" width="130" height="28" rx="5" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="0.8" />
+  <text x="135" y="281" text-anchor="middle" class="sublabel">Redo Log Buffer</text>
+
+  <line x1="200" y1="276" x2="225" y2="276" class="arrow-line" stroke="#6F6BEA" marker-end="url(#ah)" />
+
+  <rect x="228" y="262" width="100" height="28" rx="5" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="0.8" />
+  <text x="278" y="281" text-anchor="middle" class="sublabel">LGWR 기록</text>
+
+  <line x1="328" y1="276" x2="353" y2="276" class="arrow-line" stroke="#6F6BEA" marker-end="url(#ah)" />
+
+  <rect x="356" y="262" width="130" height="28" rx="5" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="0.8" />
+  <text x="421" y="281" text-anchor="middle" class="sublabel">Online Redo Log</text>
+
+  <line x1="486" y1="276" x2="511" y2="276" class="arrow-line" stroke="#6F6BEA" marker-end="url(#ah)" />
+
+  <rect x="514" y="262" width="140" height="28" rx="5" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="0.8" />
+  <text x="584" y="281" text-anchor="middle" class="sublabel">SMON 인스턴스 복구</text>
+
+  <!-- ====== Connection 3 ====== -->
+  <rect x="20" y="315" width="760" height="85" class="box" fill="rgba(245,158,11,0.04)" stroke="#F59E0B" stroke-width="1" />
+  <circle cx="45" cy="340" r="14" fill="#F59E0B" />
+  <text x="45" y="345" text-anchor="middle" class="conn-num" fill="#fff">3</text>
+  <text x="70" y="335" class="label" fill="#F59E0B">파라미터 파일 — NOMOUNT — SGA 할당</text>
+  <text x="70" y="352" class="small">파라미터(01_05) → 기동 NOMOUNT(01_04) → SGA 메모리(01_01) + 프로세스(01_02)</text>
+
+  <rect x="70" y="362" width="130" height="28" rx="5" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="0.8" />
+  <text x="135" y="381" text-anchor="middle" class="sublabel">PFILE / SPFILE 읽기</text>
+
+  <line x1="200" y1="376" x2="225" y2="376" class="arrow-line" stroke="#F59E0B" marker-end="url(#ah-amber)" />
+
+  <rect x="228" y="362" width="120" height="28" rx="5" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="0.8" />
+  <text x="288" y="381" text-anchor="middle" class="sublabel">NOMOUNT 단계</text>
+
+  <line x1="348" y1="376" x2="373" y2="376" class="arrow-line" stroke="#F59E0B" marker-end="url(#ah-amber)" />
+
+  <rect x="376" y="362" width="120" height="28" rx="5" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="0.8" />
+  <text x="436" y="381" text-anchor="middle" class="sublabel">SGA 메모리 할당</text>
+
+  <line x1="496" y1="376" x2="521" y2="376" class="arrow-line" stroke="#F59E0B" marker-end="url(#ah-amber)" />
+
+  <rect x="524" y="362" width="145" height="28" rx="5" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="0.8" />
+  <text x="596" y="381" text-anchor="middle" class="sublabel">백그라운드 프로세스 기동</text>
+
+  <!-- ====== Connection 4 ====== -->
+  <rect x="20" y="415" width="760" height="85" class="box" fill="rgba(16,185,129,0.04)" stroke="#10B981" stroke-width="1" />
+  <circle cx="45" cy="440" r="14" fill="#10B981" />
+  <text x="45" y="445" text-anchor="middle" class="conn-num" fill="#fff">4</text>
+  <text x="70" y="435" class="label" fill="#10B981">UNDO — 트랜잭션 롤백 — 인스턴스 복구</text>
+  <text x="70" y="452" class="small">UNDO 테이블스페이스(01_03) → Roll Back(01_06) 미커밋 트랜잭션 되돌리기</text>
+
+  <rect x="70" y="462" width="150" height="28" rx="5" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="0.8" />
+  <text x="145" y="481" text-anchor="middle" class="sublabel">UNDO (Before Image)</text>
+
+  <line x1="220" y1="476" x2="245" y2="476" class="arrow-line" stroke="#10B981" marker-end="url(#ah-green)" />
+
+  <rect x="248" y="462" width="150" height="28" rx="5" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="0.8" />
+  <text x="323" y="481" text-anchor="middle" class="sublabel">Roll Forward 후</text>
+
+  <line x1="398" y1="476" x2="423" y2="476" class="arrow-line" stroke="#10B981" marker-end="url(#ah-green)" />
+
+  <rect x="426" y="462" width="180" height="28" rx="5" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="0.8" />
+  <text x="516" y="481" text-anchor="middle" class="sublabel">Roll Back (미커밋 트랜잭션)</text>
+
+  <!-- ====== Connection 5 ====== -->
+  <rect x="20" y="515" width="760" height="85" class="box" fill="rgba(244,63,94,0.04)" stroke="#F43F5E" stroke-width="1" />
+  <circle cx="45" cy="540" r="14" fill="#F43F5E" />
+  <text x="45" y="545" text-anchor="middle" class="conn-num" fill="#fff">5</text>
+  <text x="70" y="535" class="label" fill="#F43F5E">컨트롤 파일 — MOUNT 단계 — SCN 검증</text>
+  <text x="70" y="552" class="small">컨트롤 파일(01_03) → MOUNT(01_04) → SCN 비교 → 복구 필요 여부 판단(01_06)</text>
+
+  <rect x="70" y="562" width="130" height="28" rx="5" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="0.8" />
+  <text x="135" y="581" text-anchor="middle" class="sublabel">컨트롤 파일 열기</text>
+
+  <line x1="200" y1="576" x2="225" y2="576" class="arrow-line" stroke="#F43F5E" marker-end="url(#ah-rose)" />
+
+  <rect x="228" y="562" width="120" height="28" rx="5" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="0.8" />
+  <text x="288" y="581" text-anchor="middle" class="sublabel">MOUNT 단계</text>
+
+  <line x1="348" y1="576" x2="373" y2="576" class="arrow-line" stroke="#F43F5E" marker-end="url(#ah-rose)" />
+
+  <rect x="376" y="562" width="140" height="28" rx="5" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="0.8" />
+  <text x="446" y="581" text-anchor="middle" class="sublabel">SCN 비교 검증</text>
+
+  <line x1="516" y1="576" x2="541" y2="576" class="arrow-line" stroke="#F43F5E" marker-end="url(#ah-rose)" />
+
+  <rect x="544" y="562" width="155" height="28" rx="5" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="0.8" />
+  <text x="621" y="581" text-anchor="middle" class="sublabel">복구 필요 여부 판단</text>
+</svg>

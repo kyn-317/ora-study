@@ -1,0 +1,112 @@
+{
+  "id": "04_00",
+  "title": "챕터 흐름 요약 — 보안, 권한 및 감사 (Chapter Flow Overview)",
+  "chapter": "04. 보안, 권한 및 감사 (Security & Auditing)",
+  "description": "챕터 04의 4개 학습 단원(사용자 및 인증 관리, 권한 계층 및 롤, 보안 통제 및 자원 제한, 감사 체계)을 학습하기 전에 전체 흐름과 각 단원 간의 관계를 파악하기 위한 사전 요약 자료입니다. 이 자료를 먼저 읽고 챕터 학습에 들어가면 개별 단원의 위치와 역할을 빠르게 이해할 수 있습니다.",
+  "oracle26ai_changes": [
+    "Centrally Managed Users(CMU) 기능이 강화되어 Microsoft Entra ID(구 Azure AD)와의 통합 인증이 개선되고, Schema-Only Account 기능이 확장되었습니다.",
+    "Schema-Level Privilege(스키마 레벨 권한)가 확장되어 특정 스키마 내 모든 객체에 대한 세밀한 권한 부여가 가능해졌습니다.",
+    "DBMS_PRIVILEGE_CAPTURE의 성능이 개선되고 권한 분석 결과 뷰(DBA_USED_PRIVS, DBA_UNUSED_PRIVS)가 확장되어 멀티테넌트 환경에서 CDB/PDB별 권한 사용 현황을 정밀하게 파악할 수 있습니다.",
+    "통합 감사 정책의 JSON 기반 구성 및 내보내기/가져오기 기능이 강화되고, AI Vector Search 관련 작업에 대한 감사 이벤트가 추가되었습니다.",
+    "PASSWORD_VERIFY_FUNCTION에 AI 기반 취약 패스워드 탐지 로직이 추가되고, ora_complexity_check 함수가 새로 제공되어 비밀번호 보안이 강화되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "챕터 전체 흐름 개관 (Chapter Big Picture)",
+      "sqlExamplesIds": [],
+      "content": "Oracle Database의 보안을 이해하려면 **3개의 핵심 축**을 먼저 잡아야 합니다:\n\n| 축 | 핵심 질문 | 관련 단원 |\n|---|---|---|\n| **주체 관리** | 누가 데이터베이스에 접속하는가? 어떻게 신원을 검증하는가? | 04_01 사용자 및 인증 관리 |\n| **권한 관리** | 접속한 사용자에게 무엇을 허용하는가? 어떻게 제한하는가? | 04_02 권한 계층 및 롤, 04_03 보안 통제 및 자원 제한 |\n| **활동 추적** | 사용자가 실제로 무엇을 했는가? 어떻게 기록하는가? | 04_04 감사 체계 |\n\n### 학습 순서와 이유\n\n```\n04_01 사용자 및 인증 관리 ──▶ 04_02 권한 계층 및 롤 ──▶ 04_03 보안 통제 및 자원 제한 ──▶ 04_04 감사 체계\n       (누가?)                    (무엇을 할 수 있나?)          (어떻게 제한하나?)              (무엇을 했나?)\n```\n\n1. **사용자 및 인증 관리(04_01)** → 보안의 출발점입니다. 사용자 계정 생성, 로컬/공통 사용자 구분, 패스워드/OS/특권 인증 등 \"누가 접속하는가\"를 먼저 이해합니다.\n2. **권한 계층 및 롤(04_02)** → 인증된 사용자에게 부여하는 시스템 권한, 객체 권한, 롤의 체계를 배웁니다. ADMIN OPTION과 GRANT OPTION의 차이, 멀티테넌트 환경의 공통/로컬 롤을 이해합니다.\n3. **보안 통제 및 자원 제한(04_03)** → 부여된 권한을 분석하고(DBMS_PRIVILEGE_CAPTURE), 프로파일로 자원과 비밀번호를 제한하며, 쿼터로 저장 공간을 통제하는 방법을 배웁니다.\n4. **감사 체계(04_04)** → 위 모든 보안 메커니즘이 실제로 어떻게 동작하는지를 기록하고 추적하는 감사(Auditing) 체계를 배웁니다. 통합 감사, 강제 감사, 파인 그레인 감사를 이해합니다.",
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/04/04_00_s01_learning_flow.svg",
+          "caption": "챕터 04 보안의 3대 핵심 축과 4단계 학습 순서 흐름도",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "보안의 출발점 — 사용자 및 인증 관리 (User and Authentication Management, 04_01)",
+      "sqlExamplesIds": [],
+      "content": "Oracle Database 보안의 가장 기본적인 공식:\n\n> **보안 = 사용자(누구인가) + 인증(어떻게 검증하는가) + 권한(무엇을 허용하는가)**\n\n### 사용자 유형\n\n| 유형 | 설명 | 이름 규칙 | 존재 범위 |\n|---|---|---|---|\n| **로컬 사용자** | 특정 PDB에서만 존재 | 제한 없음 | 해당 PDB만 |\n| **공통 사용자** | CDB 루트와 모든 PDB에 걸쳐 존재 | **C## 접두사** 필수 | CDB 전체 |\n| **관리자 사용자** | SYS, SYSTEM 등 사전 정의 계정 | 고정 | CDB 전체 |\n\n### 인증 방식 비교\n\n| 인증 방식 | 인증 주체 | 사용 사례 |\n|---|---|---|\n| **패스워드 인증** | 데이터베이스 (데이터 딕셔너리) | 일반 사용자 접속 |\n| **OS 인증** | 운영체제 (OS 그룹 멤버십) | 로컬 관리자 접속 |\n| **특권 인증** | 패스워드 파일 또는 OS | SYSDBA/SYSOPER 접속 |\n| **외부 인증** | OS 또는 네트워크 서비스 | SSO, Kerberos |\n| **글로벌 인증** | 디렉토리 서비스 (LDAP) | 중앙 집중 인증 |\n\n### 관리자 사용자와 특수 권한\n\n| 관리자 권한 | 용도 | 접속 구문 |\n|---|---|---|\n| **SYSDBA** | 최상위 관리 (기동/종료, 백업/복구) | AS SYSDBA |\n| **SYSOPER** | 기동/종료, 아카이브 로그 관리 | AS SYSOPER |\n| **SYSBACKUP** | 백업/복구 전용 | AS SYSBACKUP |\n| **SYSDG** | Data Guard 관리 전용 | AS SYSDG |\n| **SYSKM** | 암호화 키 관리 전용 | AS SYSKM |\n\n### 스키마와 사용자\n\n- **사용자(User) = 스키마(Schema)**: 1:1 대응, 사용자 생성 시 스키마 자동 생성\n- **Schema-Only Account**: NO AUTHENTICATION으로 생성하여 로그인 불가, 스키마만 존재하는 계정\n- **패스워드 파일**: orapwd 유틸리티로 생성, REMOTE_LOGIN_PASSWORDFILE 파라미터로 관리",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s03",
+      "title": "허가의 체계 — 권한 계층 및 롤 (Privileges and Roles, 04_02)",
+      "sqlExamplesIds": [],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/04/04_00_s03_privilege_hierarchy.svg",
+          "caption": "시스템 권한, 객체 권한, 롤의 계층 구조 및 ADMIN/GRANT OPTION 차이 비교",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "content": "### 권한 체계 구조\n\n```\n                     ┌─────────────────────┐\n                     │   Oracle 권한 체계    │\n                     └──────────┬──────────┘\n                ┌───────────────┼───────────────┐\n          ┌─────┴─────┐  ┌─────┴─────┐  ┌──────┴──────┐\n          │ 시스템 권한 │  │ 객체 권한  │  │    롤       │\n          │ (System)  │  │ (Object)  │  │  (Role)     │\n          └───────────┘  └───────────┘  └─────────────┘\n```\n\n### 시스템 권한 vs 객체 권한\n\n| 구분 | 시스템 권한 | 객체 권한 |\n|---|---|---|\n| **정의** | DDL/DML 등 특정 SQL 문 실행 허가 | 특정 객체에 대한 접근/조작 허가 |\n| **범위** | 데이터베이스 전체 또는 스키마 레벨 | 특정 객체(테이블, 뷰 등) 단위 |\n| **부여 옵션** | WITH ADMIN OPTION | WITH GRANT OPTION |\n| **취소 연쇄** | **연쇄 취소 없음** (No Cascade) | **연쇄 취소 발생** (Cascade Revoke) |\n| **부여자 추적** | 미추적 | 추적 |\n| **관리 뷰** | DBA_SYS_PRIVS | DBA_TAB_PRIVS, DBA_COL_PRIVS |\n\n### ADMIN OPTION vs GRANT OPTION\n\n| 항목 | ADMIN OPTION (시스템 권한) | GRANT OPTION (객체 권한) |\n|---|---|---|\n| **대상** | 시스템 권한, 롤 | 객체 권한 |\n| **부여 전파** | 타인에게 재부여 가능 | 타인에게 재부여 가능 |\n| **REVOKE 시** | 연쇄 취소 **없음** | 연쇄 취소 **발생** |\n| **부여자 추적** | 추적하지 않음 | 부여자를 추적 |\n\n### 롤(Role) 유형\n\n| 롤 유형 | 설명 | 예시 |\n|---|---|---|\n| **기본 제공 롤** | Oracle이 미리 정의한 롤 | CONNECT, RESOURCE, DBA |\n| **사용자 정의 롤** | DBA가 생성한 롤 | APP_READONLY, HR_ADMIN |\n| **공통 롤** | CDB 전체에 적용 (C## 접두사) | C##APP_ROLE |\n| **로컬 롤** | 특정 PDB에서만 유효 | PDB_APP_ROLE |\n| **Secure Application Role** | PL/SQL 패키지로 활성화 조건 제어 | 애플리케이션 보안 |\n\n### 멀티테넌트 권한 관리\n\n- **CONTAINER=ALL**: CDB 루트에서 부여 시 모든 PDB에 전파\n- **CONTAINER=CURRENT**: 현재 컨테이너(PDB)에서만 유효\n- 공통 사용자/롤에 공통 권한 부여 → 전체 PDB에 일관된 권한 적용",
+      "subsections": []
+    },
+    {
+      "sectionId": "s04",
+      "title": "통제와 제한 — 보안 통제 및 자원 제한 (Security Controls and Resource Limits, 04_03)",
+      "sqlExamplesIds": [],
+      "content": "### 권한 분석 (Privilege Analysis)\n\n**DBMS_PRIVILEGE_CAPTURE** 패키지를 사용하여 실제 사용되는 권한과 미사용 권한을 식별합니다.\n\n```\nCREATE_CAPTURE ──▶ ENABLE_CAPTURE ──▶ 워크로드 실행 ──▶ DISABLE_CAPTURE ──▶ GENERATE_RESULT\n(정책 생성)        (캡처 시작)         (일반 업무)        (캡처 중지)         (결과 생성)\n                                                                              │\n                                                                              v\n                                                          DBA_USED_PRIVS / DBA_UNUSED_PRIVS 조회\n```\n\n| 캡처 유형 | 설명 |\n|---|---|\n| **DATABASE** | 전체 데이터베이스 권한 캡처 (동시 1개만 가능) |\n| **ROLE** | 특정 역할의 권한 사용 여부 캡처 |\n| **CONTEXT** | SYS_CONTEXT 조건별 선택적 캡처 |\n| **ROLE_AND_CONTEXT** | 역할 + 조건 결합 캡처 |\n\n### 프로파일을 통한 자원 제한\n\n| 구분 | 자원 제한 파라미터 | 비밀번호 관리 파라미터 |\n|---|---|---|\n| **핵심 항목** | CPU_PER_SESSION, CONNECT_TIME, IDLE_TIME, SESSIONS_PER_USER | PASSWORD_LIFE_TIME, FAILED_LOGIN_ATTEMPTS, PASSWORD_LOCK_TIME |\n| **활성화 조건** | RESOURCE_LIMIT=TRUE 필요 | **항상 활성** (별도 설정 불필요) |\n| **기본 프로파일** | DEFAULT 프로파일 (모든 사용자 기본 적용) | DEFAULT 프로파일 |\n\n### 비밀번호 관리 핵심\n\n| 파라미터 | 기능 |\n|---|---|\n| **PASSWORD_LIFE_TIME** | 비밀번호 유효 기간 (일) |\n| **PASSWORD_GRACE_TIME** | 만료 후 유예 기간 (일) |\n| **FAILED_LOGIN_ATTEMPTS** | 연속 실패 허용 횟수 → 초과 시 계정 잠금 |\n| **PASSWORD_LOCK_TIME** | 잠금 해제까지 대기 시간 (일) |\n| **PASSWORD_VERIFY_FUNCTION** | 비밀번호 복잡성 검증 함수 |\n| **INACTIVE_ACCOUNT_TIME** | 미사용 계정 자동 잠금 기간 (일) |\n\n### 테이블스페이스 쿼터 (Quota)\n\n- **QUOTA n{K|M|G|T} ON tablespace**: 특정 테이블스페이스 사용 한도 설정\n- **UNLIMITED TABLESPACE**: 시스템 권한으로 모든 테이블스페이스 무제한 사용 (쿼터 무시)\n- **DBA_TS_QUOTAS**: 쿼터 할당 현황 모니터링",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s05",
+      "title": "활동 기록 — 감사 체계 (Auditing System, 04_04)",
+      "sqlExamplesIds": [],
+      "content": "### 감사 유형 분류\n\n| 감사 유형 | 설명 | 비활성화 가능 |\n|---|---|---|\n| **통합 감사 (Unified Auditing)** | 정책 기반 단일 감사 프레임워크 (12c~, 권장 방식) | O |\n| **강제 감사 (Mandatory Auditing)** | SYSDBA/SYSOPER 접속, DB 기동/종료 등 필수 항목 | **X (항상 활성)** |\n| **파인 그레인 감사 (FGA)** | 열/행 수준의 조건부 세밀 감사 | O |\n\n### 통합 감사 아키텍처\n\n```\nCREATE AUDIT POLICY ──▶ AUDIT POLICY (활성화) ──▶ 사용자 활동\n                                                        │\n                                                        v\n                                               감사 정책 평가\n                                                        │\n                                                        v\n                                            SGA 감사 버퍼에 기록\n                                                        │\n                                                        v\n                                        AUDSYS.AUD$UNIFIED에 플러시\n                                                        │\n                                                        v\n                                        UNIFIED_AUDIT_TRAIL 뷰로 조회\n```\n\n### 감사 정책 유형\n\n| 정책 유형 | 감사 대상 | 예시 |\n|---|---|---|\n| **권한 감사** | 시스템 권한 사용 | PRIVILEGES CREATE TABLE, ALTER USER |\n| **액션 감사** | 특정 객체에 대한 DML/DDL | ACTIONS SELECT ON hr.employees |\n| **롤 감사** | 롤에 포함된 권한 사용 | ROLES dba, resource |\n| **조건부 감사** | WHEN 절로 조건 지정 | WHEN 'SYS_CONTEXT(...)' != 'appserver' |\n\n### 사전 정의 감사 정책\n\n| 정책 | 감사 대상 |\n|---|---|\n| **ORA_SECURECONFIG** | 보안 관련 설정 변경 (ALTER SYSTEM, CREATE USER 등) |\n| **ORA_LOGON_FAILURES** | 로그인 실패 이벤트 |\n\n### 파인 그레인 감사 (FGA)\n\n- **DBMS_FGA.ADD_POLICY**로 정책 생성\n- SELECT 문 감사 가능 (통합 감사에서는 불가능한 세밀한 조건 지정)\n- **핸들러 프로시저** 지정으로 감사 이벤트 발생 시 자동 처리 가능\n- **ALL_COLUMNS**: 지정된 모든 열이 참조될 때만 감사\n- **ANY_COLUMNS**: 지정된 열 중 하나라도 참조되면 감사\n\n### 감사 관리\n\n| 관리 항목 | 도구/뷰 |\n|---|---|\n| 정책 생성/삭제 | CREATE/DROP AUDIT POLICY |\n| 정책 활성화/비활성화 | AUDIT/NOAUDIT POLICY |\n| 트레일 관리 | DBMS_AUDIT_MGMT (아카이브, 정리) |\n| 트레일 조회 | UNIFIED_AUDIT_TRAIL, DBA_FGA_AUDIT_TRAIL |\n| 관리 롤 | AUDIT_ADMIN (전체 관리), AUDIT_VIEWER (조회만) |",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s06",
+      "title": "단원 간 연결 관계 (Cross-Section Connections)",
+      "sqlExamplesIds": [],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/04/04_00_s06_cross_section_connections.svg",
+          "caption": "4개 학습 단원(사용자, 권한, 통제, 감사) 간 5가지 핵심 연결 관계도",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "content": "각 단원은 독립적이지 않으며, 다음과 같은 핵심 연결고리가 존재합니다:\n\n### 연결 1: 사용자 생성 — 권한 부여 — 접속 가능\n사용자(04_01)를 CREATE USER로 생성한 후, 최소한 CREATE SESSION 시스템 권한(04_02)을 GRANT해야 실제 접속이 가능합니다. 사용자 생성과 권한 부여는 항상 함께 수행되는 작업입니다.\n\n### 연결 2: 프로파일 — 사용자 — 비밀번호/자원 제한\n프로파일(04_03)은 사용자(04_01)에게 할당되어 비밀번호 정책(만료, 복잡성, 잠금)과 자원 제한(CPU, 세션 수, 접속 시간)을 적용합니다. 모든 사용자는 명시적으로 지정하지 않으면 DEFAULT 프로파일이 적용됩니다.\n\n### 연결 3: 권한 부여 — 권한 분석 — 최소 권한 원칙\n권한(04_02)을 부여한 후, DBMS_PRIVILEGE_CAPTURE(04_03)로 실제 사용 여부를 분석하여 미사용 권한을 REVOKE(04_02)합니다. 이 순환 과정이 최소 권한 원칙(Principle of Least Privilege)의 핵심입니다.\n\n### 연결 4: 모든 보안 활동 — 감사 추적\n사용자 생성(04_01), 권한 부여/취소(04_02), 프로파일 변경(04_03) 등 모든 보안 관련 활동은 통합 감사(04_04)의 감사 정책에 의해 기록됩니다. ORA_SECURECONFIG 사전 정의 정책이 이러한 보안 설정 변경을 자동으로 감사합니다.\n\n### 연결 5: 멀티테넌트 관통 — 공통 사용자/롤/감사 정책\n공통 사용자(04_01)에게 공통 롤(04_02)을 CONTAINER=ALL로 부여하고, CDB 루트에서 생성한 감사 정책(04_04)을 전체 PDB에 적용할 수 있습니다. 멀티테넌트의 공통/로컬 개념이 사용자, 권한, 감사 모든 영역에 일관되게 적용됩니다.",
+      "subsections": []
+    }
+  ],
+  "sql_examples": [],
+  "keywords": [
+    "사용자 (User)", "스키마 (Schema)", "인증 (Authentication)",
+    "로컬 사용자 (Local User)", "공통 사용자 (Common User)", "C## 접두사",
+    "SYS", "SYSDBA", "SYSOPER", "Schema-Only Account",
+    "패스워드 인증", "OS 인증", "특권 인증", "orapwd",
+    "시스템 권한 (System Privilege)", "객체 권한 (Object Privilege)",
+    "GRANT", "REVOKE", "WITH ADMIN OPTION", "WITH GRANT OPTION",
+    "연쇄 취소 (Cascade Revoke)", "롤 (Role)",
+    "공통 롤 (Common Role)", "로컬 롤 (Local Role)",
+    "CONTAINER=ALL", "Secure Application Role",
+    "DBMS_PRIVILEGE_CAPTURE", "DBA_USED_PRIVS", "DBA_UNUSED_PRIVS",
+    "PROFILE",
+    "PASSWORD_LIFE_TIME", "FAILED_LOGIN_ATTEMPTS", "PASSWORD_VERIFY_FUNCTION",
+    "INACTIVE_ACCOUNT_TIME", "QUOTA", "UNLIMITED TABLESPACE",
+    "통합 감사 (Unified Auditing)", "UNIFIED_AUDIT_TRAIL", "AUDSYS",
+    "강제 감사 (Mandatory Auditing)",
+    "파인 그레인 감사 (FGA)", "DBMS_FGA", "DBMS_AUDIT_MGMT",
+    "ORA_SECURECONFIG", "ORA_LOGON_FAILURES",
+    "DBA_SYS_PRIVS", "DBA_TAB_PRIVS",
+    "DBA_USERS", "DBA_PROFILES", "멀티테넌트"
+  ]
+}

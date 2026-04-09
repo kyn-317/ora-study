@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620">
+  <style>
+    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #94A3B8; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .code { font-family: monospace; font-size: 12px; fill: #F59E0B; }
+    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 8; }
+    .box-primary { fill: rgba(111,107,234,0.15); stroke: #6F6BEA; stroke-width: 2; rx: 12; }
+    .box-blue { fill: rgba(59,130,246,0.1); stroke: #3B82F6; stroke-width: 1.5; rx: 8; }
+    .box-yellow { fill: rgba(245,158,11,0.1); stroke: #F59E0B; stroke-width: 1.5; rx: 8; }
+    .conn-1 { stroke: #6F6BEA; stroke-width: 2; fill: none; }
+    .conn-2 { stroke: #3B82F6; stroke-width: 2; fill: none; }
+    .conn-3 { stroke: #F59E0B; stroke-width: 2; fill: none; }
+    .conn-4 { stroke: #10B981; stroke-width: 2; fill: none; }
+    .conn-5 { stroke: #EF4444; stroke-width: 2; fill: none; }
+    .conn-label { font-size: 11px; font-weight: 600; }
+    .unit-title { font-size: 13px; font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="arr1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA" />
+    </marker>
+    <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3B82F6" />
+    </marker>
+    <marker id="arr3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#F59E0B" />
+    </marker>
+    <marker id="arr4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#10B981" />
+    </marker>
+    <marker id="arr5" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#EF4444" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="32" class="title" text-anchor="middle">단원 간 연결 관계 (Cross-Section Connections)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">5개의 핵심 연결고리로 이해하는 스토리지 최적화 전체 구조</text>
+
+  <!-- 4 Unit Boxes arranged in 2x2 grid -->
+  <!-- 05_01: top-left -->
+  <rect x="40" y="80" width="340" height="90" class="box-blue"/>
+  <text x="210" y="104" class="unit-title" text-anchor="middle" fill="#3B82F6">05_01 테이블스페이스 구조</text>
+  <text x="210" y="120" class="sublabel" text-anchor="middle">Tablespace Structure</text>
+  <text x="210" y="140" class="small" text-anchor="middle">논리적 계층 | SMALLFILE/BIGFILE | AUTOEXTEND</text>
+  <text x="210" y="156" class="small" text-anchor="middle">AUTOALLOCATE/UNIFORM | 기본 TS 5종</text>
+
+  <!-- 05_02: top-right -->
+  <rect x="420" y="80" width="340" height="90" class="box-blue"/>
+  <text x="590" y="104" class="unit-title" text-anchor="middle" fill="#3B82F6">05_02 경로 및 블록 관리</text>
+  <text x="590" y="120" class="sublabel" text-anchor="middle">Datafile &amp; Block Management</text>
+  <text x="590" y="140" class="small" text-anchor="middle">온라인/오프라인 이동 | 블록 내부 구조</text>
+  <text x="590" y="156" class="small" text-anchor="middle">PCTFREE | ROWID | 비표준 블록 사이즈</text>
+
+  <!-- 05_03: bottom-left -->
+  <rect x="40" y="210" width="340" height="90" class="box-yellow"/>
+  <text x="210" y="234" class="unit-title" text-anchor="middle" fill="#F59E0B">05_03 공간 장애 대응 및 생성</text>
+  <text x="210" y="250" class="sublabel" text-anchor="middle">Resumable Space &amp; Deferred Segment</text>
+  <text x="210" y="270" class="small" text-anchor="middle">Resumable Space Allocation | RESUMABLE_TIMEOUT</text>
+  <text x="210" y="286" class="small" text-anchor="middle">Deferred Segment Creation | 사전 예방</text>
+
+  <!-- 05_04: bottom-right -->
+  <rect x="420" y="210" width="340" height="90" class="box-yellow"/>
+  <text x="590" y="234" class="unit-title" text-anchor="middle" fill="#F59E0B">05_04 저장 공간 축소 및 최적화</text>
+  <text x="590" y="250" class="sublabel" text-anchor="middle">Space Reclamation &amp; Optimization</text>
+  <text x="590" y="270" class="small" text-anchor="middle">HWM | SHRINK SPACE | Row Migration</text>
+  <text x="590" y="286" class="small" text-anchor="middle">데이터 압축 | Direct-Path Insert | Segment Advisor</text>
+
+  <!-- === Connection Lines === -->
+
+  <!-- Connection 1: 05_01 -> 05_02 (저장 계층 관통) - top horizontal -->
+  <path d="M 380 115 L 420 115" class="conn-1" marker-end="url(#arr1)"/>
+  <rect x="381" y="92" width="38" height="16" rx="8" fill="#6F6BEA"/>
+  <text x="400" y="104" class="small" text-anchor="middle" fill="#fff" font-weight="700" font-size="10">C1</text>
+
+  <!-- Connection 2: 05_01 -> 05_03 (AUTOEXTEND -> Resumable) - left vertical -->
+  <path d="M 130 170 L 130 210" class="conn-2" marker-end="url(#arr2)"/>
+  <rect x="111" y="180" width="38" height="16" rx="8" fill="#3B82F6"/>
+  <text x="130" y="192" class="small" text-anchor="middle" fill="#fff" font-weight="700" font-size="10">C2</text>
+
+  <!-- Connection 3: 05_02 -> 05_04 (PCTFREE -> Migration -> SHRINK) - right vertical -->
+  <path d="M 660 170 L 660 210" class="conn-3" marker-end="url(#arr3)"/>
+  <rect x="641" y="180" width="38" height="16" rx="8" fill="#F59E0B"/>
+  <text x="660" y="192" class="small" text-anchor="middle" fill="#1a1a2e" font-weight="700" font-size="10">C3</text>
+
+  <!-- Connection 4: 05_03 -> 05_01 -> 05_04 (Segment Lifecycle) - diagonal -->
+  <path d="M 380 255 C 410 255, 410 255, 420 255" class="conn-4" marker-end="url(#arr4)"/>
+  <rect x="381" y="244" width="38" height="16" rx="8" fill="#10B981"/>
+  <text x="400" y="256" class="small" text-anchor="middle" fill="#fff" font-weight="700" font-size="10">C4</text>
+
+  <!-- Connection 5: 05_04 internal (Direct-Path -> HWM -> Compression) - shown as loop -->
+  <path d="M 760 250 C 780 250, 785 270, 760 270" class="conn-5" marker-end="url(#arr5)"/>
+  <rect x="770" y="248" width="26" height="16" rx="8" fill="#EF4444"/>
+  <text x="783" y="260" class="small" text-anchor="middle" fill="#fff" font-weight="700" font-size="10">C5</text>
+
+  <!-- === Connection Details (Bottom Section) === -->
+  <line x1="40" y1="330" x2="760" y2="330" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="400" y="354" class="label" text-anchor="middle" fill="#E2E8F0">5개의 핵심 연결고리 (5 Key Connections)</text>
+
+  <!-- C1 -->
+  <rect x="40" y="370" width="26" height="20" rx="10" fill="#6F6BEA"/>
+  <text x="53" y="384" class="small" text-anchor="middle" fill="#fff" font-weight="700" font-size="10">C1</text>
+  <text x="76" y="384" class="conn-label" fill="#6F6BEA" text-anchor="start">저장 계층 관통 (Storage Hierarchy Through)</text>
+  <text x="76" y="398" class="small" text-anchor="start">Tablespace → Segment → Extent → Block 논리 구조가 Datafile/Block Header/ROWID로 구체화</text>
+  <text x="76" y="412" class="small" text-anchor="start">05_01 논리적 계층 → 05_02 물리적 실체 (SMALLFILE/BIGFILE 선택이 ROWID 구조에 영향)</text>
+
+  <!-- C2 -->
+  <rect x="40" y="426" width="26" height="20" rx="10" fill="#3B82F6"/>
+  <text x="53" y="440" class="small" text-anchor="middle" fill="#fff" font-weight="700" font-size="10">C2</text>
+  <text x="76" y="440" class="conn-label" fill="#3B82F6" text-anchor="start">공간 부족 대응 체인 (Space Shortage Defense Chain)</text>
+  <text x="76" y="454" class="small" text-anchor="start">AUTOEXTEND(05_01) = 1차 방어선 → 실패 시 Resumable(05_03) = 2차 방어선</text>
+  <text x="76" y="468" class="small" text-anchor="start">두 메커니즘의 관계를 이해해야 공간 부족 장애에 체계적 대응 가능</text>
+
+  <!-- C3 -->
+  <rect x="40" y="482" width="26" height="20" rx="10" fill="#F59E0B"/>
+  <text x="53" y="496" class="small" text-anchor="middle" fill="#1a1a2e" font-weight="700" font-size="10">C3</text>
+  <text x="76" y="496" class="conn-label" fill="#F59E0B" text-anchor="start">공간 효율 사이클 (Space Efficiency Cycle)</text>
+  <text x="76" y="510" class="small" text-anchor="start">PCTFREE 부적절(05_02) → Row Migration(05_04) → HWM 위 공간 낭비 → SHRINK SPACE(05_04)</text>
+  <text x="76" y="524" class="small" text-anchor="start">블록 구조 이해가 공간 최적화의 출발점</text>
+
+  <!-- C4 -->
+  <rect x="40" y="538" width="26" height="20" rx="10" fill="#10B981"/>
+  <text x="53" y="552" class="small" text-anchor="middle" fill="#fff" font-weight="700" font-size="10">C4</text>
+  <text x="76" y="552" class="conn-label" fill="#10B981" text-anchor="start">세그먼트 생명주기 (Segment Lifecycle)</text>
+  <text x="76" y="566" class="small" text-anchor="start">Deferred Segment(05_03) → AUTOALLOCATE(05_01) → Segment Advisor(05_04) 축소 권고</text>
+  <text x="76" y="580" class="small" text-anchor="start">생성 → 할당 → 최적화: 세그먼트의 전체 생명주기를 관통하는 연결</text>
+
+  <!-- C5 -->
+  <rect x="40" y="590" width="26" height="20" rx="10" fill="#EF4444"/>
+  <text x="53" y="604" class="small" text-anchor="middle" fill="#fff" font-weight="700" font-size="10">C5</text>
+  <text x="76" y="604" class="conn-label" fill="#EF4444" text-anchor="start">대량 적재 최적화 (Bulk Load Optimization)</text>
+  <text x="76" y="618" class="small" text-anchor="start">Direct-Path Insert → HWM 상승 → Basic Compression은 Direct-Path에서만 동작 (모두 05_04 내부)</text>
+</svg>

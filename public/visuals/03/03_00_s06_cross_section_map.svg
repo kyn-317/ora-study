@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620">
+  <style>
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    .title { font-size: 18px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .label { font-size: 14px; font-weight: 600; }
+    .sublabel { font-size: 12px; fill: #CBD5E1; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
+    .small { font-size: 11px; fill: #94A3B8; }
+    .conn-label { font-size: 11px; font-weight: 600; }
+    .box { rx: 8; ry: 8; }
+  </style>
+  <defs>
+    <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA"/>
+    </marker>
+    <marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3B82F6"/>
+    </marker>
+    <marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#F59E0B"/>
+    </marker>
+    <marker id="a4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#10B981"/>
+    </marker>
+    <marker id="a5" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#F43F5E"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="32" class="title" text-anchor="middle">단원 간 연결 관계 (Cross-Section Connection Map)</text>
+  <text x="400" y="52" class="subtitle" text-anchor="middle">챕터 03의 4개 단원이 어떻게 서로 연결되는지 한눈에 파악</text>
+
+  <!-- 4 Unit Boxes arranged in a grid -->
+  <!-- 03_01 Top Left -->
+  <rect x="60" y="80" width="300" height="90" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="60" y="80" width="300" height="26" rx="8" ry="0" fill="rgba(111,107,234,0.3)"/>
+  <text x="210" y="98" class="label" text-anchor="middle">03_01 주요 운영 환경 툴</text>
+  <text x="80" y="122" class="sublabel">DBCA, SQL*Plus, EM CC, RMAN</text>
+  <text x="80" y="140" class="small">DB 생성/관리/모니터링 도구</text>
+  <text x="80" y="156" class="code">sqlplus user/pass@service</text>
+
+  <!-- 03_02 Top Right -->
+  <rect x="440" y="80" width="300" height="90" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="440" y="80" width="300" height="26" rx="8" ry="0" fill="rgba(59,130,246,0.3)"/>
+  <text x="590" y="98" class="label" text-anchor="middle">03_02 네트워크 진단 제어 툴</text>
+  <text x="460" y="122" class="sublabel">tnsping, lsnrctl, NETCA, NETMGR</text>
+  <text x="460" y="140" class="small">네트워크 구성/제어/진단 도구</text>
+  <text x="460" y="156" class="code">lsnrctl start | tnsping orcl</text>
+
+  <!-- 03_03 Bottom Left -->
+  <rect x="60" y="220" width="300" height="90" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
+  <rect x="60" y="220" width="300" height="26" rx="8" ry="0" fill="rgba(245,158,11,0.2)"/>
+  <text x="210" y="238" class="label" text-anchor="middle">03_03 네이밍 및 접속 규약</text>
+  <text x="80" y="262" class="sublabel">tnsnames.ora, Easy Connect, 서비스 이름</text>
+  <text x="80" y="280" class="small">클라이언트 접속 메커니즘</text>
+  <text x="80" y="296" class="code">ORA-12154 | ORA-12514 | ORA-12541</text>
+
+  <!-- 03_04 Bottom Right -->
+  <rect x="440" y="220" width="300" height="90" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="2"/>
+  <rect x="440" y="220" width="300" height="26" rx="8" ry="0" fill="rgba(244,63,94,0.2)"/>
+  <text x="590" y="238" class="label" text-anchor="middle">03_04 DB 간 연결 구성</text>
+  <text x="460" y="262" class="sublabel">Database Link, 분산 트랜잭션</text>
+  <text x="460" y="280" class="small">원격 DB 접근 및 분산 환경</text>
+  <text x="460" y="296" class="code">SELECT * FROM emp@remote_db</text>
+
+  <!-- Connection 1: 03_01 → 03_02 (DBCA-NETCA) -->
+  <path d="M 360 115 L 430 115" fill="none" stroke="#6F6BEA" stroke-width="2.5" marker-end="url(#a1)"/>
+  <rect x="365" y="98" width="60" height="16" rx="3" fill="#6F6BEA"/>
+  <text x="395" y="110" class="conn-label" text-anchor="middle" fill="#FFF" font-size="9">연결 1</text>
+
+  <!-- Connection 2: 03_02 → 03_03 (Listener-Service) -->
+  <path d="M 590 170 L 590 195 L 210 195 L 210 212" fill="none" stroke="#3B82F6" stroke-width="2.5" marker-end="url(#a2)"/>
+  <rect x="365" y="187" width="60" height="16" rx="3" fill="#3B82F6"/>
+  <text x="395" y="199" class="conn-label" text-anchor="middle" fill="#FFF" font-size="9">연결 2</text>
+
+  <!-- Connection 3: 03_03 → 03_04 (tnsnames-USING) -->
+  <path d="M 360 265 L 430 265" fill="none" stroke="#F59E0B" stroke-width="2.5" marker-end="url(#a3)"/>
+  <rect x="365" y="248" width="60" height="16" rx="3" fill="#F59E0B"/>
+  <text x="395" y="260" class="conn-label" text-anchor="middle" fill="#1E1E2E" font-size="9">연결 3</text>
+
+  <!-- Connection 4: 03_02 ↔ 03_03 (tnsping-errors) -->
+  <path d="M 440 155 L 360 260" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#a4)"/>
+  <rect x="370" y="195" width="60" height="16" rx="3" fill="#10B981"/>
+  <text x="400" y="207" class="conn-label" text-anchor="middle" fill="#FFF" font-size="9">연결 4</text>
+
+  <!-- Connection 5: 03_01 → 03_03 (SQL*Plus @service) -->
+  <path d="M 110 170 L 110 212" fill="none" stroke="#F43F5E" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#a5)"/>
+  <rect x="80" y="183" width="60" height="16" rx="3" fill="#F43F5E"/>
+  <text x="110" y="195" class="conn-label" text-anchor="middle" fill="#FFF" font-size="9">연결 5</text>
+
+  <!-- Connection Details Section -->
+  <rect x="40" y="335" width="720" height="265" rx="8" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="60" y="358" class="label">5가지 핵심 연결고리 (Key Connections)</text>
+
+  <!-- Connection 1 Detail -->
+  <rect x="55" y="370" width="16" height="16" rx="3" fill="#6F6BEA"/>
+  <text x="63" y="382" class="conn-label" text-anchor="middle" fill="#FFF" font-size="9">1</text>
+  <text x="80" y="382" class="sublabel">DBCA → NETCA → 리스너 → DB 접속</text>
+  <text x="80" y="396" class="small">DB 생성 전 NETCA로 리스너를 먼저 구성. DBCA는 기존 리스너를 선택만 함</text>
+
+  <!-- Connection 2 Detail -->
+  <rect x="55" y="410" width="16" height="16" rx="3" fill="#3B82F6"/>
+  <text x="63" y="422" class="conn-label" text-anchor="middle" fill="#FFF" font-size="9">2</text>
+  <text x="80" y="422" class="sublabel">리스너 → 동적 등록(LREG) → SERVICE_NAME → 접속 디스크립터</text>
+  <text x="80" y="436" class="small">lsnrctl 기동 → LREG 서비스 등록 → tnsnames.ora SERVICE_NAME으로 접속. LOCAL_LISTENER가 제어점</text>
+
+  <!-- Connection 3 Detail -->
+  <rect x="55" y="450" width="16" height="16" rx="3" fill="#F59E0B"/>
+  <text x="63" y="462" class="conn-label" text-anchor="middle" fill="#1E1E2E" font-size="9">3</text>
+  <text x="80" y="462" class="sublabel">tnsnames.ora / Easy Connect → DB Link USING 절</text>
+  <text x="80" y="476" class="small">DB 링크의 원격 접속은 네이밍 규약(tnsnames.ora 또는 Easy Connect) 위에서 동작</text>
+
+  <!-- Connection 4 Detail -->
+  <rect x="55" y="490" width="16" height="16" rx="3" fill="#10B981"/>
+  <text x="63" y="502" class="conn-label" text-anchor="middle" fill="#FFF" font-size="9">4</text>
+  <text x="80" y="502" class="sublabel">tnsping + lsnrctl status → ORA-12154/12514/12541 오류 진단</text>
+  <text x="80" y="516" class="small">진단 도구(03_02)와 오류 코드(03_03)가 접속 문제 해결의 양 축</text>
+
+  <!-- Connection 5 Detail -->
+  <rect x="55" y="530" width="16" height="16" rx="3" fill="#F43F5E"/>
+  <text x="63" y="542" class="conn-label" text-anchor="middle" fill="#FFF" font-size="9">5</text>
+  <text x="80" y="542" class="sublabel">SQL*Plus / RMAN @service → 네이밍 메서드 해석 → 원격 관리</text>
+  <text x="80" y="556" class="small">관리 도구의 원격 접속, DB 링크의 원격 쿼리 모두 동일한 Oracle Net Services 인프라 사용</text>
+
+  <!-- Key Insight -->
+  <rect x="55" y="570" width="690" height="22" rx="4" fill="rgba(111,107,234,0.1)" stroke="#6F6BEA" stroke-width="1"/>
+  <text x="400" y="585" class="code" text-anchor="middle">핵심: 모든 단원은 Oracle Net Services라는 공통 인프라 위에서 상호 연결됩니다</text>
+</svg>

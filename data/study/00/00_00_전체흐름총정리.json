@@ -1,0 +1,143 @@
+{
+  "id": "00_00",
+  "title": "전체 흐름 총정리 — Oracle DBA 1Z0-182 시험 학습 개요 (Master Overview)",
+  "chapter": "00. 전체 흐름 총정리",
+  "description": "1Z0-182-JPN Oracle Database Administration I (Oracle 26ai 기준) 시험의 8개 챕터(32개 학습 단원)를 학습하기 전에, 전체 학습 범위와 챕터 간 관계를 조감하기 위한 최상위 사전 요약 자료입니다. 이 자료를 먼저 읽으면 개별 챕터가 전체 DBA 역량 체계에서 어떤 위치와 역할을 갖는지 파악할 수 있습니다.",
+  "oracle26ai_changes": [
+    "AMM 향상, PDB 단위 STARTUP/SHUTDOWN 세분화, RMAN 자동 복구 최적화 등 인스턴스 관리 자동화가 강화되었습니다.",
+    "PDB 최대 4,098개 이상 지원, CDB Fleet Management, Refreshable Clone SWITCHOVER 등 멀티테넌트 확장성이 대폭 향상되었습니다.",
+    "Easy Connect Plus 확장, TLS 1.3 기본 지원, AI 워크로드 분류 서비스 등 네트워크 보안 및 라우팅이 강화되었습니다.",
+    "Schema-Level Privilege, Centrally Managed Users(CMU) 강화, 통합 감사 JSON 구성 등 보안 체계가 정교해졌습니다.",
+    "BIGFILE 기본화, AI 기반 Segment Advisor, Advanced Row Compression 개선 등 스토리지 자동화가 진화했습니다.",
+    "Automatic UNDO Management 완전 기본화, Local UNDO 모드 정착, UNDO Auto-Tuning 향상이 이루어졌습니다.",
+    "Data Pump의 JSON Duality View 지원, Inline External Table 안정화, SQL*Loader Express Mode 강화가 이루어졌습니다.",
+    "AWR PDB 자동 플러시 기본 활성화, ML 기반 이상 탐지, AI 기반 SQL 어드바이저 통합이 강화되었습니다."
+  ],
+  "sections": [
+    {
+      "sectionId": "s01",
+      "title": "시험 전체 학습 범위 조감 (Exam Scope Overview)",
+      "sqlExamplesIds": [],
+      "content": "1Z0-182 시험은 Oracle Database DBA의 핵심 역량 8개 영역을 평가합니다.\n\n| 챕터 | 주제 | 단원 수 | 핵심 질문 |\n|---|---|---|---|\n| **01** | Oracle Database 아키텍처 및 인스턴스 | 6 | DB의 내부 구조는 어떻게 동작하는가? |\n| **02** | 멀티테넌트 아키텍처 (CDB/PDB) | 4 | 하나의 인스턴스에서 여러 DB를 어떻게 운영하는가? |\n| **03** | 관리 툴 및 네트워크 | 4 | 어떤 도구로 관리하고, 어떻게 접속하는가? |\n| **04** | 보안, 권한 및 감사 | 4 | 누가, 무엇을, 어떻게 제어하고 추적하는가? |\n| **05** | 스토리지 최적화 및 테이블스페이스 | 4 | 데이터는 어떻게 저장되고, 공간은 어떻게 관리하는가? |\n| **06** | UNDO 데이터베이스 제어 | 3 | 변경 전 데이터는 어떻게 보존하고 활용하는가? |\n| **07** | 데이터 이동 (로드/추출) | 3 | 외부 데이터를 어떻게 적재하고, DB 간에 어떻게 이동하는가? |\n| **08** | 성능 모니터링 및 자동 관리 | 4 | 성능을 어떻게 측정하고, 자동으로 최적화하는가? |\n\n**총 32개 학습 단원**으로 구성되며, Oracle 26ai 기준의 최신 기능 변화가 각 챕터에 반영되어 있습니다.",
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/00/00_00_s01_exam_scope_map.svg",
+          "caption": "1Z0-182 시험의 8개 챕터와 32개 단원의 전체 학습 범위를 한눈에 보는 조감도",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "subsections": []
+    },
+    {
+      "sectionId": "s02",
+      "title": "3대 학습 영역과 챕터 분류 (Three Learning Domains)",
+      "sqlExamplesIds": [],
+      "content": "8개 챕터는 크게 **3대 학습 영역**으로 분류됩니다:\n\n#### 영역 1: 구조와 아키텍처 — \"Oracle DB는 어떻게 생겼는가?\"\n\n| 챕터 | 핵심 키워드 |\n|---|---|\n| **Ch01** 아키텍처 및 인스턴스 | 메모리 + 프로세스 + 저장구조, 기동/종료 + 파라미터 + 복구 |\n| **Ch02** 멀티테넌트 (CDB/PDB) | CDB$ROOT + PDB$SEED + 사용자 PDB, PDB 생성/관리/클론/이동 |\n\n#### 영역 2: 운영과 관리 — \"Oracle DB를 어떻게 운영하는가?\"\n\n| 챕터 | 핵심 키워드 |\n|---|---|\n| **Ch03** 관리 툴 및 네트워크 | DBCA/SQL*Plus/EM/RMAN, 리스너/접속/DB Link |\n| **Ch04** 보안/권한/감사 | 사용자/인증/권한/롤/감사, 프로파일/쿼터/Privilege Capture |\n| **Ch05** 스토리지 최적화 | 테이블스페이스/블록/공간관리, Resumable/Shrink/압축 |\n| **Ch06** UNDO 제어 | UNDO 상태/Retention/Temp UNDO, Local UNDO/읽기 일관성 |\n\n#### 영역 3: 데이터 이동과 성능 — \"데이터를 어떻게 다루고, 성능을 어떻게 유지하는가?\"\n\n| 챕터 | 핵심 키워드 |\n|---|---|\n| **Ch07** 데이터 이동 | External Table/SQL*Loader, Data Pump(expdp/impdp) |\n| **Ch08** 성능 모니터링/자동 관리 | AWR/ADR/V$ 뷰, ADDM/어드바이저/Resource Manager |\n\n### 왜 이렇게 나뉘는가?\n\n| 영역 | 비유 | DBA 역량 |\n|---|---|---|\n| **구조와 아키텍처** | 건물의 설계도 | DB의 내부 동작 원리를 이해하는 능력 |\n| **운영과 관리** | 건물의 관리/보안 | DB를 안전하고 효율적으로 운영하는 능력 |\n| **데이터 이동과 성능** | 건물의 물류/에너지 | 데이터를 이동하고 성능을 유지하는 능력 |",
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/00/00_00_s02_three_domains.svg",
+          "caption": "3대 학습 영역(구조/운영/성능)과 8개 챕터의 분류 다이어그램",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "subsections": []
+    },
+    {
+      "sectionId": "s03",
+      "title": "권장 학습 순서와 이유 (Recommended Study Order)",
+      "sqlExamplesIds": [],
+      "content": "### 전체 학습 로드맵\n\n| Phase | 순서 | 챕터 |\n|---|---|---|\n| **Phase 1: 기초 아키텍처** | 1 → 2 | Ch01 아키텍처 → Ch02 멀티테넌트 |\n| **Phase 2: 운영 기반** | 3 → 4 | Ch03 관리 툴/네트워크 → Ch04 보안/권한/감사 |\n| **Phase 3: 심화 운영** | 5 → 6 | Ch05 스토리지 → Ch06 UNDO |\n| **Phase 4: 활용** | 7 → 8 | Ch07 데이터 이동 → Ch08 성능 모니터링 |\n\n> **Ch01은 모든 챕터의 전제 지식**, **Ch08은 모든 챕터의 집대성** (상세 흐름은 아래 시각자료 참조)\n\n### 학습 순서의 근거\n\n| 순서 | 챕터 | 이유 |\n|---|---|---|\n| **1단계** | Ch01 아키텍처 및 인스턴스 | **모든 챕터의 전제 지식**. SGA, PGA, 백그라운드 프로세스, 저장구조, 기동/종료를 모르면 이후 챕터 이해 불가 |\n| **2단계** | Ch02 멀티테넌트 | Oracle 26ai는 **CDB 전용**. Ch01의 인스턴스 위에 CDB/PDB 구조를 겹쳐 이해해야 함 |\n| **3단계** | Ch03 관리 툴/네트워크 | 실습과 운영의 기반 도구. DBCA, SQL*Plus, 리스너, 접속 규약을 알아야 이후 실습 가능 |\n| **4단계** | Ch04 보안/권한/감사 | 사용자 생성, 권한 부여, 감사 설정은 모든 운영 작업의 전제 조건 |\n| **5단계** | Ch05 스토리지 최적화 | Ch01의 저장구조를 심화. 테이블스페이스 관리, 공간 최적화는 DBA 일상 업무의 핵심 |\n| **6단계** | Ch06 UNDO 제어 | Ch01의 UNDO 개념을 심화. 읽기 일관성, ORA-01555, Local UNDO 등 전문 지식 |\n| **7단계** | Ch07 데이터 이동 | Ch05(스토리지)와 Ch03(네트워크)의 지식을 전제로 External Table, SQL*Loader, Data Pump 학습 |\n| **8단계** | Ch08 성능 모니터링 | **모든 챕터의 집대성**. AWR, ADDM, 어드바이저는 Ch01~07의 개념을 통합적으로 활용 |\n\n### 핵심 의존 관계\n\n- **Ch01은 필수 선행**: Ch01의 메모리/프로세스/저장구조 지식 없이는 Ch02~Ch08 어느 것도 깊이 이해 불가\n- **Ch02는 Ch03~Ch08에 관통**: 모든 챕터에서 CDB/PDB 관점의 운영이 나오므로 Ch02를 반드시 Ch03 이전에 학습\n- **Ch08은 최종 통합**: 성능 모니터링은 아키텍처(Ch01), 스토리지(Ch05), UNDO(Ch06), SQL 실행(전체)을 종합적으로 이해해야 효과적",
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/00/00_00_s03_study_roadmap.svg",
+          "caption": "4단계 학습 로드맵과 챕터 간 의존 관계를 화살표로 연결한 흐름도",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "subsections": []
+    },
+    {
+      "sectionId": "s04",
+      "title": "챕터별 핵심 요약 — 구조와 아키텍처 영역 (Chapters 01-02)",
+      "sqlExamplesIds": [],
+      "content": "### Ch01. Oracle Database 아키텍처 및 인스턴스 (6개 단원)\n\n> **핵심 공식**: Oracle Database = **인스턴스**(SGA + PGA + 백그라운드 프로세스) + **데이터베이스**(물리적 파일)\n\n| 단원 | 핵심 내용 | 시험 핵심 포인트 |\n|---|---|---|\n| 01_01 메모리 구조 | SGA(Buffer Cache, Shared Pool, Redo Log Buffer, Large Pool), PGA | AMM/ASMM/Manual 메모리 관리 3단계, MEMORY_TARGET vs SGA_TARGET |\n| 01_02 프로세스 구조 | DBWn, LGWR, CKPT, SMON, PMON, ARCn, 서버 프로세스 | 각 프로세스의 역할과 연결 메모리, Dedicated/Shared/DRCP 차이 |\n| 01_03 저장 구조 | 물리적 파일 3종, 논리적 계층(TS > Seg > Ext > Block) | 컨트롤 파일/Redo Log/데이터 파일 손상 시 영향, UNDO 테이블스페이스 역할 |\n| 01_04 기동/종료 | NOMOUNT > MOUNT > OPEN 3단계, 종료 4모드 | 각 단계에서 수행 가능한 작업, ABORT 후 인스턴스 복구 필요, PDB SAVE STATE |\n| 01_05 초기화 파라미터 | PFILE vs SPFILE, ALTER SYSTEM SCOPE 옵션 | SCOPE=MEMORY/SPFILE/BOTH 차이, 동적/정적 파라미터, PDB 파라미터 상속 |\n| 01_06 복구 기초 | 인스턴스 복구(Roll Forward > Roll Back), 미디어 복구 | SMON 자동 복구, ARCHIVELOG 모드, FRA, FAST_START_MTTR_TARGET |\n\n### Ch02. 멀티테넌트 아키텍처 (4개 단원)\n\n> **핵심 공식**: CDB = **인스턴스** + **컨테이너들**(CDB$ROOT + PDB$SEED + 사용자 PDB)\n\n| 단원 | 핵심 내용 | 시험 핵심 포인트 |\n|---|---|---|\n| 02_01 구조 및 토대 | CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2), 사용자 PDB(CON_ID=3+) | 공유 자원(SGA, Redo, Control File) vs PDB 전용 자원, C## 공통 사용자 |\n| 02_02 PDB 생성 | PDB$SEED/클론/Plug In/Non-CDB 변환 4가지 방법 | CREATE PLUGGABLE DATABASE 구문, FILE_NAME_CONVERT, ADMIN USER |\n| 02_03 상태 관리 및 분리 | READ WRITE/READ ONLY/MOUNTED, Unplug/Plug In | SAVE STATE, DBMS_PDB.CHECK_PLUG_COMPATIBILITY, PDB 삭제 전 CLOSE 필수 |\n| 02_04 파라미터 및 복제 | ISPDB_MODIFIABLE, Lockdown Profile, 5가지 클론 방법 | CONTAINER=ALL/CURRENT, Refreshable Clone, Snapshot Copy, PDB Relocate |",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s05",
+      "title": "챕터별 핵심 요약 — 운영과 관리 영역 (Chapters 03-06)",
+      "sqlExamplesIds": [],
+      "content": "### Ch03. 데이터베이스 관리 툴 및 네트워크 (4개 단원)\n\n> **핵심 공식**: 클라이언트 접속 = **네이밍 해석**(tnsnames.ora/Easy Connect) + **리스너**(listener.ora) + **세션 수립**\n\n| 단원 | 핵심 내용 | 시험 핵심 포인트 |\n|---|---|---|\n| 03_01 운영 환경 툴 | DBCA, SQL*Plus, EM Cloud Control, RMAN, SQL Developer | 각 도구의 역할 구분, DBCA Seed/Non-Seed Template |\n| 03_02 네트워크 진단 제어 | NETCA, NETMGR, lsnrctl, tnsping | 각 도구가 \"할 수 없는 것\", 동적/정적 등록 차이, LOCAL_LISTENER |\n| 03_03 네이밍 및 접속 규약 | tnsnames.ora, Easy Connect, 접속 디스크립터, SERVICE_NAME | ORA-12154/12514/12541 의미, TNS_ADMIN, NAMES.DIRECTORY_PATH |\n| 03_04 DB 간 연결 구성 | Private/Public/Global DB Link, 분산 처리 | GLOBAL_NAMES, DRIVING_SITE, 고정/연결/현재 사용자 접속 방식 |\n\n### Ch04. 보안, 권한 및 감사 (4개 단원)\n\n> **핵심 공식**: 보안 = **인증**(누가) + **인가**(무엇을) + **감사**(추적)\n\n| 단원 | 핵심 내용 | 시험 핵심 포인트 |\n|---|---|---|\n| 04_01 사용자 및 인증 | 로컬/공통 사용자, 패스워드/OS/특권 인증, Schema-Only Account | C## 접두사 필수, SYSDBA/SYSOPER/SYSBACKUP 차이, 패스워드 파일 |\n| 04_02 권한 계층 및 롤 | 시스템 권한, 객체 권한, 롤, 공통/로컬 구분 | ADMIN OPTION(연쇄 취소 없음) vs GRANT OPTION(연쇄 취소), CONTAINER=ALL |\n| 04_03 보안 통제 및 자원 제한 | DBMS_PRIVILEGE_CAPTURE, 프로파일, 쿼터 | 비밀번호 관리는 항상 활성, 자원 제한은 RESOURCE_LIMIT=TRUE 필요, UNLIMITED TABLESPACE |\n| 04_04 감사 체계 | 통합 감사, 강제 감사, 파인 그레인 감사(FGA) | 강제 감사는 비활성화 불가, ORA_SECURECONFIG, AUDIT_ADMIN vs AUDIT_VIEWER |\n\n### Ch05. 스토리지 최적화 및 테이블스페이스 (4개 단원)\n\n> **핵심 공식**: 논리적 계층 = **Tablespace** > **Segment** > **Extent** > **Data Block(8KB)**\n\n| 단원 | 핵심 내용 | 시험 핵심 포인트 |\n|---|---|---|\n| 05_01 테이블스페이스 구조 | SMALLFILE/BIGFILE, AUTOEXTEND, 기본 5종 TS | BIGFILE은 데이터 파일 정확히 1개, AUTOALLOCATE vs UNIFORM |\n| 05_02 경로 및 블록 관리 | 온라인/오프라인 파일 이동, 블록 내부 구조, ROWID | 온라인 이동은 서비스 중단 없음, PCTFREE 기본 10%, DB_BLOCK_SIZE 변경 불가 |\n| 05_03 공간 장애 대응 | Resumable Space Allocation, Deferred Segment Creation | RESUMABLE_TIMEOUT 기본 0(비활성), DEFERRED_SEGMENT_CREATION 기본 TRUE |\n| 05_04 공간 축소 및 최적화 | HWM, SHRINK SPACE, 데이터 압축, Direct-Path Insert | DELETE로 HWM 미하향, ROW MOVEMENT ENABLE 필수, Basic 압축은 Direct-Path만 |\n\n### Ch06. UNDO 데이터베이스 제어 (3개 단원)\n\n> **핵심 공식**: UNDO 데이터 = **DML 변경 전 이미지**(Before Image) → 읽기 일관성 + 롤백 + Flashback\n\n| 단원 | 핵심 내용 | 시험 핵심 포인트 |\n|---|---|---|\n| 06_01 기능 및 목적 | UNDO 3대 기능, UNDO vs Redo 차이, ORA-01555 | INSERT의 UNDO=ROWID, UPDATE의 UNDO=Before Image, Flashback Drop은 UNDO 무관 |\n| 06_02 데이터 상태 | ACTIVE/UNEXPIRED/EXPIRED 전이, Auto-Tuning, V$UNDOSTAT | RETENTION GUARANTEE vs NOGUARANTEE 트레이드오프, 공간 산정 공식 |\n| 06_03 특수 환경 제어 | Temporary UNDO, Local/Shared UNDO 모드 | TEMP_UNDO_ENABLED 기본 TRUE(21c+), Local UNDO가 26ai 기본/권장 |",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s06",
+      "title": "챕터별 핵심 요약 — 데이터 이동과 성능 영역 (Chapters 07-08)",
+      "sqlExamplesIds": [],
+      "content": "### Ch07. 데이터 이동 (3개 단원)\n\n> **핵심 공식**: 데이터 이동 = **파일 접근**(External Table) + **대량 적재**(SQL*Loader) + **DB 간 이동**(Data Pump)\n\n| 단원 | 핵심 내용 | 시험 핵심 포인트 |\n|---|---|---|\n| 07_01 외부 파일 조작 | External Table, Directory Object, 3종 액세스 드라이버 | ORACLE_LOADER(읽기 전용)/ORACLE_DATAPUMP(읽기+쓰기)/ORACLE_BIGDATA |\n| 07_02 대량 로드 처리 | SQL*Loader Standard/Express Mode, Conventional/Direct Path | Direct Path: Redo/Undo 최소, 트리거 미실행, 인덱스 UNUSABLE 가능 |\n| 07_03 Data Pump | expdp/impdp, 5가지 Export 모드, REMAP, 대화형 모드 | STOP_JOB(재시작 가능) vs KILL_JOB(재시작 불가), TABLE_EXISTS_ACTION |\n\n### Ch08. 성능 모니터링, 어드바이저 및 자동 관리 (4개 단원)\n\n> **핵심 공식**: 성능 관리 = **정보 수집**(AWR/V$) + **자동 유지관리**(AutoTask) + **진단 분석**(ADDM/어드바이저)\n\n| 단원 | 핵심 내용 | 시험 핵심 포인트 |\n|---|---|---|\n| 08_01 기본 모니터링/로깅 | V$ 뷰, 데이터 딕셔너리, ADR, AWR | STATISTICS_LEVEL=BASIC이면 AWR/ADDM 비활성화, AWR 기본 60분/8일 |\n| 08_02 자동화 기반 태스크 | Maintenance Window, AutoTask, Resource Manager | 자동 태스크 3종(통계/SQL튜닝/세그먼트), CDB/PDB 2계층 리소스 관리 |\n| 08_03 문제 해결 어드바이저 | 5대 어드바이저, DBMS_STATS, SQL Tuning Set | SQL 튜닝(개별 SQL) vs SQL 액세스(스키마 구조) vs SPA(변경 영향도) |\n| 08_04 진단 모니터 (ADDM) | DB Time 하향식 분석, Finding/Recommendation/Benefit | ADDM은 AWR 스냅샷마다 MMON이 자동 실행, PDB ADDM 26ai 기본 활성화 |",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s07",
+      "title": "챕터 간 핵심 연결 관계 (Cross-Chapter Connections)",
+      "sqlExamplesIds": [],
+      "content": "8개 챕터는 독립적이지 않으며, 다음과 같은 **10대 핵심 연결고리**가 존재합니다:\n\n### 연결 1: 인스턴스 아키텍처 — 멀티테넌트 (Ch01 ↔ Ch02)\nCh01의 SGA, 백그라운드 프로세스, Redo Log는 Ch02에서 **CDB 전체가 공유하는 자원**이 됩니다. Ch01의 기동/종료는 CDB 레벨이고, PDB는 별도 OPEN이 필요합니다. Ch01의 파라미터 관리(SPFILE)가 Ch02의 PDB 파라미터 상속 구조의 기반입니다.\n\n### 연결 2: 저장 구조 — 스토리지 최적화 (Ch01 ↔ Ch05)\nCh01의 논리적/물리적 저장 구조(Tablespace > Segment > Extent > Block)가 Ch05에서 심화됩니다. Ch01에서 개념으로 배운 테이블스페이스를 Ch05에서 실제로 생성/관리/최적화합니다.\n\n### 연결 3: UNDO 개념 — UNDO 심화 (Ch01 ↔ Ch06)\nCh01의 UNDO 테이블스페이스와 트랜잭션 롤백 개념이 Ch06에서 UNDO 상태 전이(ACTIVE/UNEXPIRED/EXPIRED), Auto-Tuning, Temporary UNDO, Local UNDO 모드로 심화됩니다.\n\n### 연결 4: 인스턴스 복구 — UNDO 롤백 (Ch01 ↔ Ch06)\nCh01의 인스턴스 복구(Roll Forward + Roll Back)에서 Roll Back 단계가 Ch06의 UNDO 데이터(Before Image)를 사용합니다. UNDO 테이블스페이스의 ACTIVE 상태 Extent가 인스턴스 복구에 필수입니다.\n\n### 연결 5: 멀티테넌트 — 보안 (Ch02 ↔ Ch04)\nCh02의 공통 사용자(C##)와 로컬 사용자 구분이 Ch04의 권한 체계(CONTAINER=ALL/CURRENT)와 직결됩니다. CDB$ROOT에서 공통 사용자에게 공통 롤을 부여하면 모든 PDB에 전파됩니다.\n\n### 연결 6: 네트워크 — 데이터 이동 (Ch03 ↔ Ch07)\nCh03의 네이밍 규약(tnsnames.ora, Easy Connect)과 DB Link가 Ch07의 Data Pump NETWORK_LINK 모드와 원격 클론에서 사용됩니다. 서비스 이름과 접속 디스크립터 지식이 원격 데이터 이동의 전제입니다.\n\n### 연결 7: 스토리지 — 데이터 이동 (Ch05 ↔ Ch07)\nCh05의 Direct-Path Insert 개념이 Ch07의 SQL*Loader Direct Path Load와 Data Pump Direct Path API의 동작 원리입니다. Ch05의 HWM, NOLOGGING, 인덱스 UNUSABLE이 대량 적재 전략에 직접 영향을 줍니다.\n\n### 연결 8: UNDO — 스토리지 (Ch06 ↔ Ch05)\nCh06의 UNDO 테이블스페이스 공간 관리와 Ch05의 테이블스페이스 일반 관리(AUTOEXTEND, AUTOALLOCATE)가 동일한 메커니즘을 공유합니다. UNDO 공간 부족 시 Ch05의 Resumable Space Allocation이 적용될 수 있습니다.\n\n### 연결 9: 감사 — 성능 모니터링 (Ch04 ↔ Ch08)\nCh04의 통합 감사 트레일(AUDSYS.AUD$UNIFIED)이 Ch08의 SYSAUX 테이블스페이스에 저장됩니다. 감사 데이터 과다 시 Ch08의 세그먼트 어드바이저가 공간 회수를 권고할 수 있습니다.\n\n### 연결 10: 모든 챕터 — 성능 모니터링 (Ch01~07 → Ch08)\nCh08의 AWR은 Ch01의 V$ 뷰 통계를 저장하고, ADDM은 Ch01(메모리/I/O), Ch05(공간), Ch06(UNDO)의 문제를 진단하며, SQL 튜닝 어드바이저는 Ch03(네트워크), Ch07(데이터 이동)에서 발생한 SQL 성능 문제를 분석합니다. Ch08은 모든 챕터의 **통합 관찰 지점**입니다.",
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/00/00_00_s07_cross_chapter_connections.svg",
+          "caption": "8개 챕터 간 10대 핵심 연결고리를 네트워크 그래프로 시각화한 관계도",
+          "placement": "after-content",
+          "width": "100%"
+        }
+      ],
+      "subsections": []
+    },
+    {
+      "sectionId": "s08",
+      "title": "Oracle 26ai 핵심 변화 총정리 (Oracle 26ai Key Changes Summary)",
+      "sqlExamplesIds": [],
+      "content": "Oracle 26ai에서 시험에 영향을 주는 핵심 변화를 영역별로 정리합니다:\n\n### 아키텍처 및 멀티테넌트\n\n| 변화 | 영향 챕터 | 시험 포인트 |\n|---|---|---|\n| Non-CDB **Desupported**, CDB 전용 | Ch02 | 모든 시나리오가 CDB/PDB 환경 전제 |\n| PDB 최대 **4,098개** 이상 지원 | Ch02 | MAX_PDBS 기본값 변경 |\n| PDB 단위 STARTUP/SHUTDOWN 세분화 | Ch01, Ch02 | PDB 독립 기동/종료 제어 강화 |\n| AMM 자동 재분배 알고리즘 개선 | Ch01 | MEMORY_TARGET 사용 시 워크로드 대응 향상 |\n\n### 보안 및 네트워크\n\n| 변화 | 영향 챕터 | 시험 포인트 |\n|---|---|---|\n| TLS 1.3 기본 지원, mTLS 마법사 | Ch03 | 리스너 보안 강화 |\n| Easy Connect Plus 확장 | Ch03 | 다중 호스트, 로드 밸런싱, TLS 인증서 경로 지원 |\n| Schema-Level Privilege 확장 | Ch04 | 스키마 내 모든 객체에 대한 세밀한 권한 부여 |\n| CMU(Centrally Managed Users) 강화 | Ch04 | Microsoft Entra ID 통합 |\n\n### 스토리지 및 UNDO\n\n| 변화 | 영향 챕터 | 시험 포인트 |\n|---|---|---|\n| BIGFILE이 ASM/OMF 기본 | Ch05 | PDB 레벨 BIGFILE/SMALLFILE 독립 관리 |\n| AI 기반 Segment Advisor | Ch05, Ch08 | 자동 SHRINK 권고 정밀화 |\n| Automatic UNDO Management 완전 기본화 | Ch06 | MANUAL 모드 사실상 Deprecated |\n| Local UNDO 모드 기본값 완전 정착 | Ch06 | Shared UNDO는 레거시 호환만 |\n\n### 데이터 이동 및 성능\n\n| 변화 | 영향 챕터 | 시험 포인트 |\n|---|---|---|\n| Inline External Table 안정화 | Ch07 | DDL 없이 SELECT 내 외부 파일 조회 |\n| Data Pump JSON Duality View 지원 | Ch07 | 26ai 신규 기능 Export/Import |\n| AWR PDB 자동 플러시 기본 활성화 | Ch08 | AWR_PDB_AUTOFLUSH_ENABLED=TRUE 기본 |\n| ML 기반 이상 탐지 + ADDM 연계 | Ch08 | 예측적 권장 사항 제공 |",
+      "visuals": [],
+      "subsections": []
+    },
+    {
+      "sectionId": "s09",
+      "title": "시험 전략 가이드 — 핵심 출제 패턴 (Exam Strategy Guide)",
+      "sqlExamplesIds": [],
+      "content": "### 챕터별 예상 출제 비중\n\n| 챕터 | 예상 비중 | 근거 |\n|---|---|---|\n| Ch01 아키텍처 | **높음** | 기초 개념이자 다른 모든 챕터의 전제 |\n| Ch02 멀티테넌트 | **높음** | Oracle 26ai의 핵심 차별점, CDB 전용 환경 |\n| Ch03 관리 툴/네트워크 | 중간 | 도구 구분, 접속 오류 해석 |\n| Ch04 보안/권한/감사 | 중간~높음 | 권한 체계, 감사 유형 구분 |\n| Ch05 스토리지 | 중간 | 테이블스페이스 관리, 공간 최적화 |\n| Ch06 UNDO | 중간 | UNDO 상태, Retention, 에러 대응 |\n| Ch07 데이터 이동 | 중간 | 도구 비교, 모드 차이 |\n| Ch08 성능 모니터링 | 중간~높음 | AWR/ADDM, 어드바이저, Resource Manager |\n\n### 자주 출제되는 패턴\n\n| 출제 패턴 | 대표 예시 |\n|---|---|\n| **\"할 수 없는 것\" 문제** | tnsping이 확인할 수 없는 것, NETCA가 할 수 없는 것, PDB$SEED의 상태 변경 가능 여부 |\n| **비교/구분 문제** | ADMIN OPTION vs GRANT OPTION, PFILE vs SPFILE, Conventional vs Direct Path |\n| **순서 나열 문제** | 기동 3단계 순서, UNDO 공간 부족 시 자동 동작 순서, 클라이언트 접속 흐름 |\n| **기본값 문제** | PCTFREE 기본값(10%), UNDO_RETENTION 기본값(900초), AWR 스냅샷 주기(60분) |\n| **에러 해석 문제** | ORA-01555(UNDO 부족), ORA-12154(네이밍 실패), ORA-30036(UNDO 공간 부족) |\n| **멀티테넌트 시나리오** | PDB SAVE STATE, CONTAINER=ALL/CURRENT, Local vs Shared UNDO |\n\n### 학습 체크리스트\n\n- [ ] Ch01의 기동 3단계(NOMOUNT/MOUNT/OPEN)에서 각각 수행 가능한 작업을 즉시 답할 수 있는가?\n- [ ] Ch02의 PDB 생성 4가지 방법과 각각의 전제조건을 구분할 수 있는가?\n- [ ] Ch03의 ORA-12154/12514/12541을 보고 원인을 바로 특정할 수 있는가?\n- [ ] Ch04의 ADMIN OPTION과 GRANT OPTION의 연쇄 취소 차이를 설명할 수 있는가?\n- [ ] Ch05의 DELETE 후 HWM이 하향되지 않는 이유와 해결 방법을 설명할 수 있는가?\n- [ ] Ch06의 UNDO Extent 3가지 상태와 전이 흐름을 그릴 수 있는가?\n- [ ] Ch07의 SQL*Loader Direct Path와 Conventional Path의 7가지 차이를 열거할 수 있는가?\n- [ ] Ch08의 STATISTICS_LEVEL=BASIC이 미치는 연쇄 영향을 설명할 수 있는가?",
+      "visuals": [],
+      "subsections": []
+    }
+  ],
+  "sql_examples": [],
+  "keywords": [
+    "1Z0-182", "Oracle 26ai", "Oracle DBA", "시험 총정리",
+    "SGA", "PGA", "인스턴스", "데이터베이스", "메모리 구조", "프로세스 구조", "저장 구조",
+    "CDB", "PDB", "멀티테넌트", "CDB$ROOT", "PDB$SEED",
+    "DBCA", "SQL*Plus", "EM Cloud Control", "RMAN",
+    "리스너", "tnsnames.ora", "Easy Connect", "DB Link",
+    "사용자", "인증", "권한", "롤", "감사", "프로파일",
+    "테이블스페이스", "세그먼트", "익스텐트", "데이터 블록",
+    "UNDO", "읽기 일관성", "Flashback", "ORA-01555",
+    "External Table", "SQL*Loader", "Data Pump", "expdp", "impdp",
+    "AWR", "ADDM", "Resource Manager", "Maintenance Window",
+    "STARTUP", "SHUTDOWN", "SPFILE", "ALTER SYSTEM",
+    "STATISTICS_LEVEL", "MEMORY_TARGET", "UNDO_RETENTION",
+    "Direct Path", "HWM", "SHRINK SPACE",
+    "통합 감사", "V$ Views", "데이터 딕셔너리", "ADR"
+  ]
+}
