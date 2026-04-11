@@ -2,81 +2,68 @@
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_001",
-    "title": "Oracle AI Databaseの停止モードに関して正しい内容を述べているものを選択してください。",
+    "title": "SHUTDOWNコマンドの各モードに関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) SHUTDOWN NORMALモードは、未完了のトランザクションを即座にロールバックしてから停止する。",
-      "B) SHUTDOWN TRANSACTIONALモードは、アクティブなトランザクションの完了を待ってから停止し、トランザクションが完了したセッションは即座に切断される。",
-      "C) SHUTDOWN IMMEDIATEモードは、チェックポイントを実行しないため、次回起動時にインスタンス・リカバリが必要となる。",
-      "D) SHUTDOWN ABORTモードは、すべてのダーティ・バッファをデータ・ファイルに書き込んでから停止する。"
+      "A) SHUTDOWN NORMALは接続中のすべてのユーザー・セッションが自発的にログアウトするまで待機し、次回起動時にインスタンス・リカバリは不要である。",
+      "B) SHUTDOWN IMMEDIATEは未コミットのトランザクションをロールバックせずにすべてのセッションを強制終了するため、次回起動時にインスタンス・リカバリが必要である。",
+      "C) SHUTDOWN TRANSACTIONALはアクティブなトランザクションの完了を待たずにすべてのセッションを即座に終了する。",
+      "D) SHUTDOWN ABORTはチェックポイントを実行し、すべてのデータ・ファイルを正常にクローズしてから停止する。"
     ],
-    "answer": [
-      "B"
-    ],
-    "explanation": "정답: B) SHUTDOWN TRANSACTIONAL 모드는 활성 트랜잭션이 COMMIT 또는 ROLLBACK으로 완료될 때까지 대기한 후 종료합니다. 트랜잭션이 완료된 세션은 즉시 종료됩니다. 트랜잭션이 없는 세션 역시 즉시 종료됩니다.\n\n오답 분석:\nA) SHUTDOWN NORMAL은 미완료 트랜잭션을 롤백하지 않습니다. 모든 사용자가 자발적으로 로그아웃할 때까지 무한정 대기하는 모드입니다. 미완료 트랜잭션의 즉시 롤백은 SHUTDOWN IMMEDIATE의 동작입니다.\nC) SHUTDOWN IMMEDIATE는 체크포인트를 수행합니다. 따라서 다음 기동 시 인스턴스 리커버리가 필요하지 않습니다(Clean Shutdown). 체크포인트를 수행하지 않는 것은 SHUTDOWN ABORT입니다.\nD) SHUTDOWN ABORT는 체크포인트를 수행하지 않으므로 더티 버퍼를 데이터 파일에 기록하지 않습니다. 따라서 다음 기동 시 인스턴스 리커버리가 필요합니다.\n\n핵심 개념: 4가지 SHUTDOWN 모드(NORMAL, TRANSACTIONAL, IMMEDIATE, ABORT) 중 ABORT만 체크포인트를 수행하지 않아 인스턴스 리커버리가 필요하며, 나머지 3개는 Clean Shutdown입니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — SHUTDOWN NORMAL(기본 종료 모드)은 새로운 접속을 차단한 뒤, 현재 접속 중인 모든 사용자가 자발적으로 로그아웃할 때까지 대기합니다. 종료 전에 체크포인트가 수행되므로 다음 기동 시 인스턴스 복구가 필요 없습니다(Clean Shutdown).\n\nB) 오답 — SHUTDOWN IMMEDIATE는 미커밋 트랜잭션을 자동 ROLLBACK한 후 종료합니다. 체크포인트를 수행하므로 인스턴스 복구는 불필요합니다. 롤백을 수행하지 않는 것은 SHUTDOWN ABORT입니다.\n\nC) 오답 — SHUTDOWN TRANSACTIONAL은 활성 트랜잭션이 COMMIT 또는 ROLLBACK으로 완료될 때까지 대기합니다. 트랜잭션이 없는 세션만 즉시 종료되며, 활성 트랜잭션이 있는 세션은 완료까지 대기합니다.\n\nD) 오답 — SHUTDOWN ABORT는 체크포인트를 수행하지 않으며, 파일을 정상적으로 닫지 않고 즉시 인스턴스를 종료합니다. 따라서 다음 기동 시 인스턴스 복구가 반드시 필요합니다.\n\n핵심 개념: SHUTDOWN 모드 4종(NORMAL/TRANSACTIONAL/IMMEDIATE/ABORT) 중 ABORT만이 체크포인트를 수행하지 않아 인스턴스 복구가 필요합니다. NORMAL/TRANSACTIONAL/IMMEDIATE는 모두 Clean Shutdown으로 인스턴스 복구가 불필요합니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_002",
-    "title": "SPFILE(サーバー・パラメータ・ファイル)を使用している環境でALTER SYSTEM SET文のSCOPEオプションに関して正しい内容を述べているものを選択してください。",
+    "title": "動的パフォーマンス・ビュー(V$ビュー)に関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SCOPE=MEMORYを指定すると、変更はSPFILEに記録され、次回起動時に適用される。",
-      "B) SCOPE=BOTHを指定すると、現在のメモリとSPFILEの両方に変更が反映される。",
-      "C) 静的パラメータは、SCOPE=BOTHを指定して現在のメモリとSPFILEの両方に反映できる。",
-      "D) SPFILE環境でSCOPEオプションを省略した場合、デフォルトはSCOPE=MEMORYとなる。",
-      "E) SCOPE=SPFILEを指定すると、変更は現在のインスタンスのメモリにのみ反映される。"
+      "A) V$INSTANCEビューはデータベースがMOUNT状態以上でないと参照できない。",
+      "B) V$DATABASEビューはデータベースがMOUNT状態以上で参照できる。",
+      "C) V$ビューはSGA内の情報を基にしているため、インスタンスを再起動すると累積統計がリセットされる。",
+      "D) V$ビューはディスク上のデータ・ディクショナリを読み取るため、読取り一貫性が保証される。",
+      "E) V$ビューへのアクセスにはDBA_ROLE権限のみが必要であり、他の権限は不要である。"
     ],
-    "answer": [
-      "B"
-    ],
-    "explanation": "정답: B) SCOPE=BOTH를 지정하면 현재 실행 중인 인스턴스의 메모리와 SPFILE 양쪽 모두에 변경이 반영됩니다. 이것이 SPFILE 환경에서의 기본값이기도 합니다.\n\n오답 분석:\nA) SCOPE=MEMORY는 현재 인스턴스의 메모리에만 반영되며, SPFILE에는 기록되지 않습니다. 인스턴스를 재기동하면 변경 사항이 사라집니다. SPFILE에만 기록되는 것은 SCOPE=SPFILE입니다.\nC) 정적(Static) 파라미터는 SCOPE=SPFILE만 사용 가능합니다. SCOPE=BOTH 또는 SCOPE=MEMORY를 지정하면 ORA-02095 오류가 발생합니다. 정적 파라미터는 인스턴스 기동 시에만 설정되므로 실행 중 메모리 변경이 불가능합니다.\nD) SPFILE 환경에서 SCOPE를 생략하면 기본값은 SCOPE=BOTH입니다(동적 파라미터의 경우). SCOPE=MEMORY가 기본인 것은 PFILE 환경입니다.\nE) SCOPE=SPFILE은 SPFILE에만 기록하며, 현재 인스턴스의 메모리에는 반영되지 않습니다. 변경 사항은 다음 인스턴스 재기동 시에 적용됩니다. 설명이 SCOPE=MEMORY와 뒤바뀌어 있습니다.\n\n핵심 개념: SPFILE 환경에서 ALTER SYSTEM SET의 SCOPE 옵션은 MEMORY(메모리만), SPFILE(파일만), BOTH(양쪽 모두, 기본값)의 3가지이며, 정적 파라미터는 SCOPE=SPFILE만 사용 가능합니다."
+    "answer": ["B", "C"],
+    "explanation": "정답: B, C\nB) 정답 — V$DATABASE 뷰는 컨트롤 파일의 정보(데이터베이스 이름, OPEN_MODE, LOG_MODE 등)를 표시하므로, 컨트롤 파일이 열리는 MOUNT 상태 이상에서 참조할 수 있습니다.\n\nC) 정답 — V$ 뷰는 SGA 메모리 내의 커널 데이터 구조를 SQL로 접근 가능하게 한 읽기 전용 가상 테이블이며, 인스턴스 종료 시 SGA가 해제되므로 누적 통계가 초기화됩니다.\n\nA) 오답 — V$INSTANCE 뷰는 SGA 할당 후 사용 가능하므로, NOMOUNT 상태부터 참조할 수 있습니다. MOUNT 이상이 아니라 NOMOUNT 이상입니다.\n\nD) 오답 — V$ 뷰는 디스크가 아닌 SGA 메모리를 직접 읽으므로, 조회 중에도 데이터가 변경될 수 있어 완벽한 읽기 일관성이 보장되지 않습니다.\n\nE) 오답 — V$ 뷰 조회에는 SELECT_CATALOG_ROLE 또는 SELECT ANY DICTIONARY 시스템 권한이 필요합니다. DBA_ROLE만으로 접근이 보장되는 것은 아닙니다.\n\n핵심 개념: V$ 뷰(동적 성능 뷰)는 SGA 메모리 기반의 읽기 전용 가상 테이블로, 인스턴스 상태(NOMOUNT/MOUNT/OPEN)에 따라 참조 가능한 범위가 달라지며, 인스턴스 재시작 시 누적 통계가 초기화됩니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_003",
-    "title": "Oracle AI Databaseの動的パフォーマンス・ビュー(V$ビュー)のアーキテクチャについて正しく述べているものを選択してください。",
+    "title": "自動診断リポジトリ(ADR)のアラート・ログに関して正しく述べているものを選択してください。",
     "options": [
-      "A) V$ビューはSYSスキーマが所有する実テーブルであり、データ・ファイルに格納されている。",
-      "B) V$ビューの実体はV_$ビューであり、V$はそのパブリック・シノニムである。",
-      "C) GV$ビューはV$ビューのサブセットであり、現在のインスタンスの情報のみを表示する。",
-      "D) V$ビューのデータソースであるX$テーブルは、すべてのデータベース・ユーザーがアクセスできる。",
-      "E) V$ビューの累積統計情報はインスタンスを再起動しても初期化されずに保持される。"
+      "A) アラート・ログの保存場所はV$DIAG_INFOビューで確認でき、データベースがNOMOUNT状態からでも参照可能である。",
+      "B) アラート・ログにはユーザーが実行した個々のSELECT文やDML文の実行履歴が記録される。",
+      "C) アラート・ログはOracle Databaseにより定期的に自動でローテーションされるため、手動での管理は不要である。",
+      "D) アラート・ログはSYSAUX表領域に格納されており、SQLでのみ参照が可能である。"
     ],
-    "answer": [
-      "B"
-    ],
-    "explanation": "정답: B) V$ 뷰는 실제로 V_$ 뷰(SYS 소유)에 대한 퍼블릭 시노님(Public Synonym)입니다. 내부 계층 구조는 V$(Public Synonym) → V_$(View) → Fixed View → X$(Fixed Table) → SGA 메모리입니다.\n\n오답 분석:\nA) V$ 뷰는 실테이블이 아니라 SGA 메모리 내의 커널 데이터 구조(X$ 테이블)를 SQL로 접근 가능하게 만든 읽기 전용 가상 테이블입니다. 데이터 파일에 저장되지 않고 SGA 메모리에 존재합니다.\nC) GV$ 뷰는 V$ 뷰의 서브셋이 아닙니다. 반대로 GV$(Global V$) 뷰가 RAC 환경에서 모든 인스턴스의 데이터를 포함하는 상위 뷰이며, V$ 뷰는 GV$ 뷰에서 현재 인스턴스만 필터링한 버전입니다.\nD) X$ 테이블(Fixed Table)은 SYS 사용자만 접근할 수 있습니다. 문서화되지 않은 내부 구조이므로 버전 간 호환성도 보장되지 않습니다.\nE) V$ 뷰의 누적 통계 정보는 인스턴스 재시작 시 모두 초기화됩니다. 이력을 보존하려면 AWR 스냅샷을 활용해야 합니다.\n\n핵심 개념: V$ 뷰는 SGA 메모리의 커널 데이터 구조를 SQL로 접근 가능하게 한 퍼블릭 시노님이며, 실체는 SYS 소유의 V_$ 뷰입니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — V$DIAG_INFO 뷰로 ADR Home 경로와 Alert Log 위치를 SQL로 확인할 수 있으며, 이 뷰는 SGA 기반이므로 NOMOUNT 상태부터 참조 가능합니다. Alert Log는 ADR 디렉터리 구조 내의 trace/ 및 alert/ 디렉터리에 파일로 저장됩니다.\n\nB) 오답 — Alert Log에는 데이터베이스의 기동/종료, Redo 로그 전환, 체크포인트, ORA-에러 등 주요 운영 이벤트가 기록됩니다. 개별 사용자의 SELECT문이나 DML문 실행 이력은 기록되지 않습니다.\n\nC) 오답 — Alert Log는 자동 로테이션되지 않으므로, OS 레벨에서 주기적으로 관리(백업/삭제)해야 합니다. 방치하면 파일 크기가 계속 증가합니다.\n\nD) 오답 — Alert Log는 SYSAUX 표영역이 아닌 파일 시스템(ADR 디렉터리)에 저장됩니다. SQL(V$DIAG_ALERT_EXT 뷰)로도 조회 가능하고, ADRCI 도구나 OS 레벨의 텍스트 편집기로도 확인할 수 있습니다.\n\n핵심 개념: Alert Log는 ADR(DIAGNOSTIC_DEST 하위 파일 시스템)에 관리되며, 기동/종료/에러 등 주요 이벤트가 기록됩니다. V$DIAG_INFO로 경로를 확인하고, V$DIAG_ALERT_EXT나 ADRCI로 내용을 조회할 수 있습니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_004",
-    "title": "Oracle AI Databaseのインスタンス・リカバリの処理段階について正しく述べているものを選択してください。",
+    "title": "SPFILE(サーバー・パラメータ・ファイル)に関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ロールフォワード(Roll Forward)段階では、コミット済みのトランザクションの変更のみがREDOログから再適用される。",
-      "B) ロールバック(Roll Back)段階は、データベースがOPENされる前に完了してからユーザーのアクセスが可能となる。",
-      "C) ロールフォワード段階の完了後、データベースがOPENされ、ロールバック段階はバックグラウンドで実行される。",
-      "D) インスタンス・リカバリはPMONバックグラウンド・プロセスによって自動的に実行される。",
-      "E) インスタンス・リカバリにはアーカイブREDOログ・ファイルが必要である。"
+      "A) SPFILEはバイナリ形式のファイルであり、テキスト・エディタで直接編集するとファイルが破損してインスタンスが起動できなくなる可能性がある。",
+      "B) SPFILEを使用している場合、ALTER SYSTEM SET文のSCOPEオプションのデフォルト値はMEMORYである。",
+      "C) 静的パラメータを変更する場合、ALTER SYSTEM SET文でSCOPE=BOTHを指定して即座にメモリとSPFILEの両方に反映できる。",
+      "D) CREATE PFILE FROM SPFILEコマンドでSPFILEの内容をテキスト形式のPFILEとして抽出し、バックアップとして保管できる。",
+      "E) STARTUPコマンドのオプションでSPFILEの場所を直接指定して起動することができる。"
     ],
-    "answer": [
-      "C"
-    ],
-    "explanation": "정답: C) 인스턴스 리커버리는 Roll Forward(Redo 적용) 완료 후 데이터베이스가 OPEN되고, Roll Back(UNDO 적용)은 데이터베이스 OPEN 이후 백그라운드에서 수행됩니다. 이를 통해 빠른 서비스 재개가 가능합니다.\n\n오답 분석:\nA) Roll Forward 단계에서는 커밋 여부와 관계없이 모든 변경 사항을 Online Redo Log로부터 재적용합니다. 커밋된 트랜잭션과 커밋되지 않은 트랜잭션 모두 포함됩니다. 커밋되지 않은 변경은 이후 Roll Back 단계에서 되돌려집니다.\nB) Roll Back 단계는 데이터베이스 OPEN 이전이 아닌 OPEN 이후 백그라운드에서 수행됩니다. 사용자가 아직 롤백되지 않은 데이터에 접근하면 on-demand 방식으로 즉시 롤백 처리됩니다.\nD) 인스턴스 리커버리는 PMON이 아닌 SMON(System Monitor) 백그라운드 프로세스가 자동으로 수행합니다.\nE) 인스턴스 리커버리에는 아카이브 Redo 로그가 아닌 Online Redo Log 파일이 사용됩니다. 아카이브 Redo 로그가 필요한 것은 미디어 리커버리(Media Recovery)입니다.\n\n핵심 개념: 인스턴스 리커버리는 SMON에 의해 Roll Forward(모든 변경 재적용) → DB OPEN → Roll Back(미커밋 트랜잭션 되돌림, 백그라운드) 순서로 수행됩니다."
+    "answer": ["A", "D"],
+    "explanation": "정답: A, D\nA) 정답 — SPFILE은 바이너리 형식의 서버 파라미터 파일로, Oracle이 내부적으로 관리합니다. 텍스트 에디터로 직접 편집하면 바이너리 헤더가 손상되어 인스턴스 기동 시 ORA-01078 오류가 발생할 수 있습니다.\n\nD) 정답 — CREATE PFILE FROM SPFILE 명령으로 SPFILE의 내용을 텍스트 형식의 PFILE로 추출할 수 있습니다. 이를 통해 파라미터 설정 내용을 확인하거나 백업으로 보관할 수 있으며, SPFILE 손상 시 복구에도 활용됩니다.\n\nB) 오답 — SPFILE 환경에서 ALTER SYSTEM SET의 SCOPE 기본값은 BOTH(메모리 + SPFILE 동시 반영)입니다. MEMORY가 아닙니다.\n\nC) 오답 — 정적(Static) 파라미터는 인스턴스 기동 시에만 설정되므로 실행 중에 메모리를 변경할 수 없습니다. 따라서 SCOPE=SPFILE만 사용 가능하며, SCOPE=BOTH를 지정하면 ORA-02095 오류가 발생합니다.\n\nE) 오답 — STARTUP 명령에서 직접 지정할 수 있는 것은 PFILE뿐입니다(STARTUP PFILE='경로'). SPFILE의 위치를 변경하려면 PFILE 내에 SPFILE 파라미터로 경로를 지정해야 합니다.\n\n핵심 개념: SPFILE은 Oracle 권장 바이너리 파라미터 파일로, ALTER SYSTEM으로만 변경해야 합니다. SCOPE의 기본값은 BOTH이며, 정적 파라미터는 SCOPE=SPFILE만 가능합니다. STARTUP 명령에서는 PFILE만 직접 지정할 수 있습니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_005",
-    "title": "Oracle AI Databaseのデータ・ディクショナリと動的パフォーマンス・ビュー(V$ビュー)の比較について正しい内容を述べているものを選択してください。(2つ選択してください)",
+    "title": "CDB環境において、CDB再起動後にPDBを自動的にオープンする方法について正しく述べているものを選択してください。",
     "options": [
-      "A) データ・ディクショナリのDBA_ビューはSGA内のメモリにのみ格納されているため、インスタンスの停止時にデータが失われる。",
-      "B) V$ビューはメモリを直接読み取るため、完全な読取り一貫性が保証されない。",
-      "C) データ・ディクショナリはNOMOUNT状態から参照可能であり、V$ビューはOPEN状態でのみ参照できる。",
-      "D) データ・ディクショナリの基本テーブルはSYSスキーマが所有し、SYSTEM表領域に格納される。",
-      "E) V$ビューのデータはDDL操作の実行時に自動的に更新される。"
+      "A) CDBを起動するとすべてのPDBは自動的にREAD WRITE状態でオープンされる。",
+      "B) ALTER PLUGGABLE DATABASE ALL SAVE STATEを実行すると、すべてのPDBの現在のオープン状態がCDB$ROOTのデータ・ディクショナリに保存され、次回CDB起動時に自動的に復元される。",
+      "C) SAVE STATE情報が保存されたPDBのオープン状態を確認するにはV$PDBSビューを使用する。",
+      "D) SAVE STATEの設定は一度行うと解除することができず、PDBは常に自動オープンされる。"
     ],
-    "answer": [
-      "B",
-      "D"
-    ],
-    "explanation": "정답:\nB) V$ 뷰는 SGA 메모리를 직접 읽으므로 조회 중에도 데이터가 변경될 수 있어 완벽한 읽기 일관성이 보장되지 않습니다. 이는 디스크 기반인 데이터 딕셔너리 뷰(일반 테이블과 동일하게 읽기 일관성 보장)와의 중요한 차이점입니다.\nD) 데이터 딕셔너리의 기본 테이블(Base Tables)은 SYS 스키마가 소유하며 SYSTEM 테이블스페이스에 저장됩니다. 데이터베이스 생성 시 자동으로 생성됩니다.\n\n오답 분석:\nA) 데이터 딕셔너리의 DBA_ 뷰는 SGA 메모리가 아닌 SYSTEM/SYSAUX 테이블스페이스(디스크)에 저장됩니다. 따라서 인스턴스가 종료되어도 영구적으로 보존됩니다. SGA 메모리에 저장되어 인스턴스 종료 시 소멸되는 것은 V$ 뷰의 통계 데이터입니다.\nC) 설명이 반대입니다. V$ 뷰는 NOMOUNT 이후부터 부분적으로 접근 가능하며(V$INSTANCE, V$PARAMETER 등), 데이터 딕셔너리(DBA_/ALL_/USER_ 뷰)는 OPEN 상태에서만 접근 가능합니다.\nE) DDL 실행 시 자동으로 갱신되는 것은 데이터 딕셔너리입니다. V$ 뷰는 Oracle 커널이 실시간으로 SGA 메모리 내 통계를 지속적으로 갱신합니다.\n\n핵심 개념: 데이터 딕셔너리는 디스크 기반으로 읽기 일관성이 보장되고 OPEN 상태에서 접근 가능한 반면, V$ 뷰는 메모리 기반으로 읽기 일관성이 보장되지 않고 NOMOUNT 이후부터 부분적으로 접근 가능합니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — ALTER PLUGGABLE DATABASE ALL SAVE STATE 명령으로 모든 PDB의 현재 오픈 상태를 CDB$ROOT의 데이터 딕셔너리에 저장할 수 있습니다. CDB 재기동 시 Oracle은 저장된 상태 정보를 확인하여 해당 PDB를 이전 상태(READ WRITE 등)로 자동 오픈합니다.\n\nA) 오답 — CDB를 STARTUP하면 CDB$ROOT는 자동으로 OPEN되지만, 사용자 PDB는 기본적으로 MOUNTED 상태입니다. PDB를 사용하려면 별도로 OPEN하거나 SAVE STATE를 미리 설정해야 합니다.\n\nC) 오답 — V$PDBS 뷰는 PDB의 현재 오픈 상태(OPEN_MODE)를 확인하는 용도이며, SAVE STATE로 저장된 상태 정보를 확인하려면 DBA_PDB_SAVED_STATES 뷰를 사용해야 합니다.\n\nD) 오답 — ALTER PLUGGABLE DATABASE <PDB명> DISCARD STATE 명령으로 저장된 상태를 해제할 수 있습니다. 해제 후에는 CDB 재기동 시 해당 PDB가 MOUNTED 상태로 시작됩니다.\n\n핵심 개념: CDB 재기동 시 PDB는 기본적으로 MOUNTED 상태이며, SAVE STATE를 설정하면 이전 오픈 상태가 자동 복원됩니다. DISCARD STATE로 설정을 해제할 수 있으며, DBA_PDB_SAVED_STATES 뷰로 저장 상태를 확인합니다."
   }
 ]

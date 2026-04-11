@@ -2,82 +2,68 @@
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_001",
-    "title": "Oracle AI Databaseのデータ・ファイルの自動拡張(AUTOEXTEND)機能に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle AI Databaseのbigfile表領域について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) AUTOEXTENDがOFFに設定されたデータ・ファイルで領域が不足した場合、ORA-01653やORA-01654エラーが発生する可能性がある。",
-      "B) MAXSIZE UNLIMITEDを指定した場合、OSやファイル・システムの制限に関係なく無制限にデータ・ファイルを拡張できる。",
-      "C) BIGFILE表領域の場合、ALTER TABLESPACE文を使用してAUTOEXTEND設定を変更できる。",
-      "D) AUTOEXTEND設定はデータ・ファイル作成時のみ指定可能であり、後から変更することはできない。",
-      "E) AUTOEXTEND ONのデータ・ファイルが拡張される際、NEXT値にかかわらず常に1GBずつ拡張される。"
+      "A) bigfile表領域ではALTER TABLESPACE文を使用して表領域レベルでサイズ変更および自動拡張の設定が可能である。",
+      "B) bigfile表領域はOracle Managed Files (OMF)環境でのみ作成が可能であり、手動でデータ・ファイル名を指定する環境では使用できない。",
+      "C) bigfile表領域ではALTER TABLESPACE ADD DATAFILE文を使用してデータ・ファイルを追加することが可能である。",
+      "D) bigfile表領域はASM環境でなくても、標準のファイル・システム環境での使用が推奨されている。",
+      "E) bigfile表領域のデータ・ファイルの最大サイズはブロック・サイズによって決定され、8KBブロックの場合は約32TBである。"
     ],
-    "answer": [
-      "A",
-      "C"
-    ],
-    "explanation": "정답 분석:\n\nA) 정답 — AUTOEXTEND OFF 상태에서 데이터 파일에 여유 공간이 부족하면 테이블 세그먼트 확장 실패(ORA-01653) 또는 인덱스 세그먼트 확장 실패(ORA-01654) 오류가 발생할 수 있습니다.\n\nC) 정답 — BIGFILE 테이블스페이스는 단일 데이터 파일로 구성되므로, ALTER TABLESPACE ... AUTOEXTEND 구문을 사용하여 테이블스페이스 레벨에서 자동 확장 설정을 변경할 수 있습니다. SMALLFILE의 경우에는 ALTER DATABASE DATAFILE 단위로 설정합니다.\n\n오답 분석:\n\nB) 오답 — MAXSIZE UNLIMITED를 지정해도 실제로는 블록 크기에 의한 물리적 최대 크기(SMALLFILE: 8KB 블록 기준 약 32GB, BIGFILE: 약 32TB)까지만 확장되며, OS나 파일 시스템의 제한에도 영향을 받습니다. 무제한으로 확장되는 것은 아닙니다.\n\nD) 오답 — AUTOEXTEND 설정은 데이터 파일 생성 후에도 ALTER DATABASE DATAFILE ... AUTOEXTEND ON/OFF 구문으로 변경할 수 있습니다.\n\nE) 오답 — AUTOEXTEND ON 시 확장 크기는 NEXT 파라미터로 지정된 값만큼 확장됩니다. 항상 1GB씩 확장되는 것이 아니라 DBA가 설정한 NEXT 크기에 따릅니다.\n\n핵심 개념: AUTOEXTEND는 데이터 파일 공간 부족 시 자동 확장하는 기능으로, NEXT(증가 크기)와 MAXSIZE(최대 한계)를 설정하며, BIGFILE은 테이블스페이스 레벨, SMALLFILE은 데이터 파일 단위로 설정합니다."
+    "answer": ["A", "E"],
+    "explanation": "정답: A, E\nA) 정답 — BIGFILE 테이블스페이스는 단일 데이터 파일로 구성되므로, ALTER TABLESPACE ... RESIZE 및 ALTER TABLESPACE ... AUTOEXTEND 명령으로 테이블스페이스 레벨에서 직접 크기 변경과 자동 확장 설정이 가능합니다. SMALLFILE에서는 데이터 파일 단위(ALTER DATABASE DATAFILE)로만 관리해야 합니다.\n\nE) 정답 — BIGFILE 테이블스페이스의 최대 크기는 블록 크기에 따라 결정됩니다. 8KB 블록 기준으로 약 32TB, 16KB 블록 기준으로 약 64TB, 32KB 블록 기준으로 약 128TB까지 지원합니다.\n\nB) 오답 — BIGFILE 테이블스페이스는 OMF 환경뿐만 아니라 수동으로 데이터 파일 경로를 지정하는 일반 파일 시스템 환경에서도 생성할 수 있습니다. 다만 ASM/OMF 환경에서 사용이 권장되며, Non-ASM 환경에서는 단일 파일에 I/O가 집중되어 병목이 발생할 수 있습니다.\n\nC) 오답 — BIGFILE 테이블스페이스는 정확히 1개의 데이터 파일로만 구성되므로, ADD DATAFILE은 사용할 수 없습니다. 공간 확장은 데이터 파일의 크기를 늘리거나 자동 확장으로 대응합니다.\n\nD) 오답 — BIGFILE 테이블스페이스는 ASM(Automatic Storage Management) 또는 OMF(Oracle Managed Files) 환경에서 사용이 권장됩니다. Non-ASM 파일 시스템 환경에서는 단일 파일에 I/O가 집중되어 병목이 발생할 수 있습니다.\n\n핵심 개념: BIGFILE 테이블스페이스는 단일 데이터 파일로 구성되며, 테이블스페이스 레벨에서 직접 RESIZE/AUTOEXTEND가 가능합니다. 8KB 블록 기준 약 32TB까지 지원하며, ASM/OMF 환경에서 사용이 권장됩니다."
   },
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_002",
-    "title": "オフライン状態でのデータ・ファイルの移動方法について正しい内容を述べているものを選択してください。",
+    "title": "smallfile表領域の特性について正しく述べているものを選択してください。",
     "options": [
-      "A) ALTER DATABASE RENAME FILE文はデータベースがOPEN状態でのみ使用可能であり、MOUNT状態では使用できない。",
-      "B) ALTER TABLESPACE RENAME DATAFILE文を使用する場合、対象テーブルスペースをオフラインにした上で、DBAがOSレベルでファイルをコピーする必要がある。",
-      "C) ALTER DATABASE RENAME FILE文は、Oracle側で自動的にファイルのコピーを実行し、新しい場所にデータ・ファイルを移動する。",
-      "D) SYSTEM表領域のデータ・ファイルをオフライン移動する場合、ALTER TABLESPACE RENAME DATAFILE文のみ使用可能である。"
+      "A) smallfile表領域では1つの表領域に最大1,022個のデータ・ファイルを含めることができる。",
+      "B) smallfile表領域ではALTER TABLESPACE文でサイズ変更を直接行うことができる。",
+      "C) smallfile表領域のデータ・ファイルの自動拡張設定はALTER TABLESPACE文で変更できる。",
+      "D) smallfile表領域では1つのデータ・ファイルのみ含めることができる。"
     ],
-    "answer": [
-      "B"
-    ],
-    "explanation": "정답 분석:\n\nB) 정답 — ALTER TABLESPACE RENAME DATAFILE 문은 테이블스페이스가 오프라인 상태일 때 사용합니다. 이 명령은 제어 파일(Control File)의 경로 정보만 갱신할 뿐, 실제 파일 복사는 수행하지 않습니다. 따라서 DBA가 먼저 OS 레벨에서 파일을 수동으로 복사한 후 이 명령으로 경로를 갱신해야 합니다.\n\n오답 분석:\n\nA) 오답 — ALTER DATABASE RENAME FILE 문은 데이터베이스가 MOUNT 상태이거나 데이터 파일이 오프라인일 때 사용할 수 있습니다. OPEN 상태에서만 사용 가능하다는 설명은 잘못되었습니다. 특히 SYSTEM 테이블스페이스의 데이터 파일을 이동할 때는 DB를 MOUNT 상태로 전환하여 이 명령을 사용합니다.\n\nC) 오답 — ALTER DATABASE RENAME FILE 문은 제어 파일의 경로 정보만 갱신하는 명령입니다. Oracle이 자동으로 파일을 복사하지 않습니다. 자동 파일 복사는 온라인 이동(ALTER DATABASE MOVE DATAFILE)에서 수행됩니다.\n\nD) 오답 — SYSTEM 테이블스페이스의 데이터 파일을 오프라인으로 이동하려면 ALTER DATABASE RENAME FILE 문을 MOUNT 상태에서 사용해야 합니다. SYSTEM 테이블스페이스는 오프라인으로 전환할 수 없으므로 ALTER TABLESPACE RENAME DATAFILE은 사용할 수 없습니다.\n\n핵심 개념: 오프라인 데이터 파일 이동에서는 DBA가 OS 레벨에서 파일을 수동 복사한 후, ALTER DATABASE RENAME FILE(MOUNT 상태) 또는 ALTER TABLESPACE RENAME DATAFILE(테이블스페이스 오프라인 상태)로 제어 파일의 경로 정보를 갱신합니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — SMALLFILE 테이블스페이스는 하나의 테이블스페이스에 최대 1,022개의 데이터 파일을 포함할 수 있습니다. 여러 데이터 파일에 데이터를 분산 저장하여 I/O를 자연스럽게 분산시킬 수 있는 것이 SMALLFILE의 특징입니다.\n\nB) 오답 — ALTER TABLESPACE 레벨에서 직접 RESIZE를 수행할 수 있는 것은 BIGFILE 테이블스페이스입니다. SMALLFILE에서는 ALTER DATABASE DATAFILE ... RESIZE 명령으로 데이터 파일 단위로 크기를 변경해야 합니다.\n\nC) 오답 — ALTER TABLESPACE 레벨에서 자동 확장(AUTOEXTEND)을 설정할 수 있는 것은 BIGFILE 테이블스페이스입니다. SMALLFILE에서는 ALTER DATABASE DATAFILE ... AUTOEXTEND ON/OFF 명령으로 데이터 파일 단위로 설정해야 합니다.\n\nD) 오답 — SMALLFILE 테이블스페이스는 최대 1,022개의 데이터 파일을 포함할 수 있습니다. 단일 데이터 파일로만 구성되는 것은 BIGFILE 테이블스페이스의 특성입니다.\n\n핵심 개념: SMALLFILE 테이블스페이스는 최대 1,022개의 데이터 파일을 포함할 수 있으며, 데이터 파일 단위(ALTER DATABASE DATAFILE)로 크기 변경과 자동 확장을 관리합니다. 테이블스페이스 레벨에서 직접 RESIZE/AUTOEXTEND를 수행할 수 있는 것은 BIGFILE 테이블스페이스입니다."
   },
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_003",
-    "title": "Oracle AI Databaseの一時表領域(TEMPORARY TABLESPACE)に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "DB_BLOCK_SIZEが8KBで設定されているOracle AI Databaseにおいて、16KBのブロック・サイズを使用する表領域を作成する際に必要な対応について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) 一時表領域を作成する際にはDATAFILEキーワードではなくTEMPFILEキーワードを使用する。",
-      "B) 一時表領域のファイルはALTER DATABASE MOVE DATAFILE文で他の場所にオンライン移動することができる。",
-      "C) デフォルトの一時表領域は、SYSTEM表領域やUNDO表領域と同様に非標準ブロック・サイズを使用することはできない。",
-      "D) 一時表領域はソート処理やハッシュ結合で使用される一時データを格納するために使用され、セッション終了時に一時セグメントは自動的に解放される。",
-      "E) 一時表領域のファイルに対してもAUTOEXTENDの設定は行うことができない。"
+      "A) DB_16K_CACHE_SIZEパラメータを設定して、バッファ・キャッシュ内に16KBブロック用のキャッシュ領域を確保する。",
+      "B) 非標準ブロック・サイズのキャッシュ領域はPGA内に確保されるため、PGA_AGGREGATE_TARGETを適切に調整する。",
+      "C) 非標準ブロック・サイズの表領域を作成する前に、データベースを再作成して標準ブロック・サイズを16KBに変更する必要がある。",
+      "D) 表領域の作成にはCREATE TABLESPACE文のBLOCKSIZE句で16Kを明示的に指定する。",
+      "E) 非標準ブロック・サイズの表領域を作成する場合、DB_BLOCK_SIZEパラメータの値を変更する必要がある。"
     ],
-    "answer": [
-      "A",
-      "D"
-    ],
-    "explanation": "정답 분석:\n\nA) 정답 — 일시 테이블스페이스를 생성할 때는 일반 데이터 파일용 DATAFILE 키워드 대신 TEMPFILE 키워드를 사용합니다. 예: CREATE TEMPORARY TABLESPACE temp_data TEMPFILE '/path/temp01.dbf' SIZE 2G;\n\nD) 정답 — 일시 테이블스페이스는 정렬(Sort), 해시 조인(Hash Join), Global Temporary Table 등의 임시 데이터를 저장하며, 세션 종료 시 임시 세그먼트가 자동으로 해제됩니다.\n\n오답 분석:\n\nB) 오답 — 임시 파일(Tempfile)은 ALTER DATABASE MOVE DATAFILE 명령의 대상이 아닙니다. 임시 파일을 이동하려면 별도로 재생성해야 합니다.\n\nC) 오답 — 설명의 전반부는 맞지만, '비표준 블록 사이즈를 사용할 수 없다'는 것이 SYSTEM, SYSAUX, UNDO, 기본 TEMP 테이블스페이스 모두에 해당하므로 이 선택지 자체는 정확합니다. 그러나 이 선택지는 정답이 아닙니다. 기본 TEMP 테이블스페이스는 반드시 표준 블록 사이즈를 사용해야 하지만, 추가로 생성하는 비기본 임시 테이블스페이스에는 비표준 블록 사이즈를 사용할 수 있는 가능성이 있어 '사용할 수 없다'는 단정은 부정확합니다.\n\nE) 오답 — 임시 파일에도 AUTOEXTEND 설정이 가능합니다. DBA_TEMP_FILES 뷰의 AUTOEXTENSIBLE 컬럼으로 자동 확장 상태를 확인할 수 있습니다.\n\n핵심 개념: 일시 테이블스페이스는 TEMPFILE을 사용하며 정렬/해시 조인 등의 임시 데이터를 저장합니다. TEMPFILE은 ALTER DATABASE MOVE DATAFILE의 대상이 아니며, AUTOEXTEND 설정은 가능합니다."
+    "answer": ["A", "D"],
+    "explanation": "정답: A, D\nA) 정답 — 비표준 블록 크기의 테이블스페이스를 사용하려면 해당 크기에 맞는 버퍼 캐시 영역을 확보해야 합니다. 16KB 블록의 경우 DB_16K_CACHE_SIZE 파라미터를 설정하여 SGA의 버퍼 캐시 내에 16KB 블록 전용 캐시를 할당합니다.\n\nD) 정답 — 비표준 블록 크기의 테이블스페이스를 생성할 때는 CREATE TABLESPACE 문에서 BLOCKSIZE 절을 사용하여 원하는 블록 크기(예: 16K)를 명시적으로 지정해야 합니다.\n\nB) 오답 — 비표준 블록 크기의 캐시(DB_nK_CACHE_SIZE)는 PGA가 아닌 SGA(System Global Area)의 버퍼 캐시 내에 확보됩니다. PGA_AGGREGATE_TARGET과는 관련이 없습니다.\n\nC) 오답 — 비표준 블록 크기의 테이블스페이스는 표준 블록 크기(DB_BLOCK_SIZE)와 다른 블록 크기를 사용하는 것이므로, 데이터베이스를 재작성할 필요 없이 기존 데이터베이스 내에 생성할 수 있습니다.\n\nE) 오답 — 비표준 블록 크기의 테이블스페이스를 사용하기 위해 DB_BLOCK_SIZE 파라미터를 변경할 필요는 없습니다. DB_BLOCK_SIZE는 데이터베이스 생성 시 설정되는 표준 블록 크기이며, 이후 변경할 수 없습니다. 비표준 블록 크기를 사용하려면 DB_nK_CACHE_SIZE 파라미터를 추가로 설정하면 됩니다.\n\n핵심 개념: 비표준 블록 크기의 테이블스페이스를 사용하려면 DB_nK_CACHE_SIZE 파라미터로 SGA 버퍼 캐시 내에 해당 블록 크기 전용 캐시를 확보하고, CREATE TABLESPACE 문에서 BLOCKSIZE 절로 블록 크기를 명시적으로 지정해야 합니다."
   },
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_004",
-    "title": "ALTER TABLE SHRINK SPACE文を使用したセグメント縮小について正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "ALTER DATABASE MOVE DATAFILE文を使用したオンラインのデータ・ファイル移動に関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) SHRINK SPACE文を実行すると、セグメント内のデータが再配置され、HWM(High Water Mark)が下方に移動する。",
-      "B) SHRINK SPACE文はMSSM(手動セグメント領域管理)環境とASSM(自動セグメント領域管理)環境の両方で使用可能である。",
-      "C) SHRINK SPACE文を実行するためには、事前にテーブルの行移動(ROW MOVEMENT)が有効化されている必要がある。",
-      "D) SHRINK SPACE COMPACT文を実行した場合、データの再配置とHWMの下方移動が同時に行われる。",
-      "E) SHRINK SPACE文は、すでに圧縮(COMPRESS)が適用されたテーブルに対しても実行可能である。"
+      "A) データ・ファイルの移動中はシャドウ・コピー・メカニズムを使用するため、DML操作は完全にブロックされる。",
+      "B) KEEP オプションを指定した場合、移動完了後に元のデータ・ファイルは削除されずに保持される。",
+      "C) 一時ファイル(Tempfile)もALTER DATABASE MOVE DATAFILE文で移動することが可能である。",
+      "D) 移動対象のデータ・ファイルはオフライン状態であっても移動を実行することが可能である。"
     ],
-    "answer": [
-      "A",
-      "C"
-    ],
-    "explanation": "정답 분석:\n\nA) 정답 — SHRINK SPACE 문을 실행하면 세그먼트 끝쪽(HWM 부근)의 행 데이터를 앞쪽 빈 블록으로 재배치한 후, HWM(High Water Mark)을 하향시킵니다. 이를 통해 Full Table Scan 시 불필요한 빈 블록을 읽지 않게 되어 성능이 개선됩니다.\n\nC) 정답 — SHRINK SPACE는 행을 재배치하면서 ROWID가 변경되므로, 사전에 ALTER TABLE ... ENABLE ROW MOVEMENT를 실행하여 행 이동을 허용해야 합니다. ROW MOVEMENT가 비활성화 상태이면 SHRINK SPACE는 오류가 발생합니다.\n\n오답 분석:\n\nB) 오답 — SHRINK SPACE는 ASSM(Automatic Segment Space Management) 테이블스페이스에서만 지원됩니다. MSSM(Manual Segment Space Management, Freelist 기반) 환경에서는 사용할 수 없습니다.\n\nD) 오답 — SHRINK SPACE COMPACT는 데이터 재배치만 수행하고 HWM 하향은 수행하지 않습니다. HWM 하향은 별도로 SHRINK SPACE 명령을 실행해야 합니다. 이 2단계 전략은 업무 시간에 COMPACT를 수행하고 유지보수 윈도우에서 SHRINK SPACE로 HWM을 하향시키는 실무 패턴입니다.\n\nE) 오답 — 이미 압축(Compressed)이 적용된 테이블에 대해서는 SHRINK SPACE를 실행할 수 없습니다. 이는 SHRINK SPACE의 제약사항 중 하나입니다.\n\n핵심 개념: SHRINK SPACE는 ASSM 환경에서 ROW MOVEMENT가 활성화된 테이블에 대해 데이터를 재배치하고 HWM을 하향시키는 온라인 공간 회수 기법입니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — KEEP 옵션을 지정하면 이동 완료 후 원본 데이터 파일이 삭제되지 않고 유지됩니다. 기본 동작(KEEP 미사용)에서는 이동 완료 후 원본 파일이 자동으로 삭제됩니다. KEEP 옵션은 백업 목적이나 롤백 대비를 위해 사용됩니다.\n\nA) 오답 — 데이터 파일 이동 중에도 DML(INSERT, UPDATE, DELETE) 작업이 계속 가능합니다. ALTER DATABASE MOVE DATAFILE은 온라인 이동을 지원하는 명령으로, 서비스 중단 없이 수행됩니다.\n\nC) 오답 — 임시 파일(Tempfile)은 ALTER DATABASE MOVE DATAFILE 명령의 대상이 아닙니다. 임시 파일을 이동하려면 별도로 재생성하는 방법을 사용해야 합니다.\n\nD) 오답 — ALTER DATABASE MOVE DATAFILE 명령은 데이터 파일이 온라인(Online) 상태일 때만 사용할 수 있습니다. 오프라인 데이터 파일은 이 명령으로 이동할 수 없으며, 오프라인 이동 방법(ALTER DATABASE RENAME FILE 등)을 사용해야 합니다.\n\n핵심 개념: ALTER DATABASE MOVE DATAFILE은 온라인 상태에서 데이터 파일을 이동하는 명령으로, DML 중단 없이 수행됩니다. KEEP 옵션으로 원본 파일 유지, REUSE 옵션으로 대상 경로 덮어쓰기가 가능하며, 임시 파일은 대상에 포함되지 않습니다."
   },
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_005",
-    "title": "Oracle AI Databaseの表領域のデフォルト設定および関連するデータ・ディクショナリ・ビューについて正しい内容を述べているものを選択してください。",
+    "title": "Oracle AI Databaseのデータ・ファイルの自動拡張(AUTOEXTEND)機能について正しく述べているものを選択してください。",
     "options": [
-      "A) データベースのデフォルトの永続表領域が設定されていない場合、新規ユーザー作成時のデフォルト表領域はSYSAUX表領域になる。",
-      "B) ALTER DATABASE SET DEFAULT BIGFILE TABLESPACE文を実行すると、既存のSMALLFILE表領域がすべてBIGFILE表領域に変換される。",
-      "C) DATABASE_PROPERTIESビューでDEFAULT_TBS_TYPEプロパティを確認すると、CREATE TABLESPACE文でSMALLFILE/BIGFILEを省略した際に適用されるデフォルト・タイプを確認できる。",
-      "D) DBA_TABLESPACESビューのBIGFILEカラムの値が「NO」の場合、そのテーブルスペースはBIGFILE表領域であることを意味する。"
+      "A) AUTOEXTEND ON設定時のNEXT句は拡張時に増加するサイズを指定し、MAXSIZE句は最大拡張限度を指定する。",
+      "B) AUTOEXTEND設定はデータベース作成後に変更することができないため、テーブルスペース作成時に決定する必要がある。",
+      "C) MAXSIZE UNLIMITEDを指定した場合、データ・ファイルはファイル・システムやブロック・サイズの制限に関係なく無制限に拡張される。",
+      "D) AUTOEXTEND ON設定はsmallfile表領域でのみ使用可能であり、bigfile表領域では使用できない。"
     ],
-    "answer": [
-      "C"
-    ],
-    "explanation": "정답 분석:\n\nC) 정답 — DATABASE_PROPERTIES 뷰에서 PROPERTY_NAME = 'DEFAULT_TBS_TYPE'을 조회하면 현재 데이터베이스의 기본 테이블스페이스 타입(SMALLFILE 또는 BIGFILE)을 확인할 수 있습니다. 이 설정은 CREATE TABLESPACE 문에서 SMALLFILE/BIGFILE을 명시하지 않았을 때 적용됩니다.\n\n오답 분석:\n\nA) 오답 — 데이터베이스의 기본 영구 테이블스페이스가 설정되지 않은 경우, 새 사용자의 기본 테이블스페이스는 SYSAUX가 아닌 SYSTEM 테이블스페이스가 됩니다. 이로 인해 사용자 데이터가 SYSTEM에 저장되는 문제가 발생할 수 있어, ALTER DATABASE DEFAULT TABLESPACE로 USERS 등을 기본으로 설정하는 것이 권장됩니다.\n\nB) 오답 — ALTER DATABASE SET DEFAULT BIGFILE TABLESPACE 문은 향후 새로 생성하는 테이블스페이스의 기본 타입만 BIGFILE로 변경합니다. 기존에 생성된 SMALLFILE 테이블스페이스가 자동으로 BIGFILE로 변환되는 것은 아닙니다.\n\nD) 오답 — DBA_TABLESPACES 뷰의 BIGFILE 컬럼 값이 'NO'이면 해당 테이블스페이스는 SMALLFILE 테이블스페이스입니다. BIGFILE 테이블스페이스의 경우 이 컬럼 값이 'YES'로 표시됩니다.\n\n핵심 개념: DATABASE_PROPERTIES 뷰에서 DEFAULT_PERMANENT_TABLESPACE, DEFAULT_TEMP_TABLESPACE, DEFAULT_TBS_TYPE 등의 데이터베이스 레벨 기본 설정을 확인할 수 있으며, DBA_TABLESPACES의 BIGFILE 컬럼으로 각 테이블스페이스의 유형을 구분합니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — AUTOEXTEND ON 설정 시 NEXT 절은 공간 부족 시 데이터 파일이 확장되는 크기를 지정하고, MAXSIZE 절은 데이터 파일의 최대 확장 한도를 지정합니다. 예를 들어 AUTOEXTEND ON NEXT 100M MAXSIZE 30G로 설정하면 100MB씩 확장되며 최대 30GB까지 증가합니다.\n\nB) 오답 — AUTOEXTEND 설정은 데이터베이스 운영 중에도 변경할 수 있습니다. ALTER DATABASE DATAFILE ... AUTOEXTEND ON/OFF 명령으로 동적으로 변경이 가능합니다.\n\nC) 오답 — MAXSIZE UNLIMITED를 지정하더라도 데이터 파일은 파일 시스템의 제한이나 블록 크기에 따른 최대 크기(예: SMALLFILE 8KB 블록 기준 약 32GB) 제한을 초과할 수 없습니다. UNLIMITED는 Oracle 레벨의 제한을 해제하는 것이지, 물리적 제한까지 무시하는 것은 아닙니다.\n\nD) 오답 — AUTOEXTEND 기능은 SMALLFILE과 BIGFILE 테이블스페이스 모두에서 사용 가능합니다. BIGFILE에서는 ALTER TABLESPACE ... AUTOEXTEND 명령으로 테이블스페이스 레벨에서도 설정할 수 있습니다.\n\n핵심 개념: AUTOEXTEND는 데이터 파일의 자동 확장 기능으로, NEXT(확장 크기)와 MAXSIZE(최대 한도)를 지정합니다. MAXSIZE UNLIMITED를 지정해도 파일 시스템/블록 크기의 물리적 제한은 적용되며, SMALLFILE과 BIGFILE 모두 사용 가능합니다."
   }
 ]

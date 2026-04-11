@@ -2,84 +2,68 @@
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_006",
-    "title": "PGAのSQL Work Areaにおける動作モードについて正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle Databaseのデータベース・バッファ・キャッシュにおけるバッファ・プールについて正しく述べているものを選択してください。",
     "options": [
-      "A) Optimalモードでは、ソートやハッシュ結合などの操作がすべてメモリー内で完了する。",
-      "B) One-passモードでは、作業データがメモリーを超過し、一時ディスクを複数回使用する。",
-      "C) PGA_AGGREGATE_TARGETを設定すると、OracleがSQL Work Areaのサイズを自動的に調整する。",
-      "D) WORKAREA_SIZE_POLICYがAUTOの場合でも、SORT_AREA_SIZEパラメータの値が優先的に使用される。",
-      "E) Multi-passモードはメモリーが十分にある場合に選択される最も効率的な動作モードである。"
+      "A) DEFAULTプールの他に、KEEPプールとRECYCLEプールを構成することで、アクセス特性に応じてデータ・ブロックのキャッシュ戦略を分離できる。",
+      "B) KEEPプールは大規模な表のフルスキャンに最適化されたバッファ・プールであり、ブロックを短時間で再利用可能にする。",
+      "C) RECYCLEプールのサイズはDB_CACHE_SIZEパラメータで制御され、DEFAULTプールと共有される。",
+      "D) バッファ・プールの指定はデータベース作成時のみ可能であり、後からオブジェクト単位で変更することはできない。"
     ],
-    "answer": [
-      "A",
-      "C"
-    ],
-    "explanation": "정답: A, C\nA) 정답 — Optimal 모드에서는 정렬, 해시 조인 등의 작업이 모두 메모리 내에서 완료됩니다. 이것이 가장 성능이 좋은 모드입니다.\n\nC) 정답 — PGA_AGGREGATE_TARGET을 설정하면 WORKAREA_SIZE_POLICY가 AUTO(기본값)일 때 Oracle이 각 프로세스의 SQL Work Area 크기를 워크로드에 따라 자동으로 조정합니다.\n\nB) 오답 — One-pass 모드는 임시 디스크를 '1회' 사용하는 모드입니다. 임시 디스크를 여러 번 사용하는 것은 Multi-pass 모드입니다.\n\nD) 오답 — WORKAREA_SIZE_POLICY가 AUTO인 경우 SORT_AREA_SIZE, HASH_AREA_SIZE 등의 수동 파라미터는 무시됩니다. Oracle이 PGA_AGGREGATE_TARGET에 기반하여 자동 관리합니다.\n\nE) 오답 — Multi-pass 모드는 메모리가 매우 부족할 때 임시 디스크를 여러 번 사용하는 가장 성능이 낮은 모드입니다. 가장 효율적인 모드는 Optimal 모드입니다.\n\n핵심 개념: SQL Work Area는 Optimal(메모리 내 완료), One-pass(디스크 1회 사용), Multi-pass(디스크 복수회 사용)의 3가지 모드로 동작하며, PGA_AGGREGATE_TARGET 설정으로 자동 관리하는 것이 Oracle 권장 방식입니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — Database Buffer Cache는 DEFAULT, KEEP, RECYCLE 3가지 버퍼 풀로 분리하여 운영할 수 있습니다. KEEP Pool은 자주 접근하는 소규모 객체를 캐시에 상주시키는 용도이고, RECYCLE Pool은 재사용 가능성이 낮은 대규모 객체용으로 빠르게 교체됩니다. 이를 통해 접근 특성에 따라 캐싱 전략을 분리할 수 있습니다.\n\nB) 오답 — KEEP Pool은 자주 접근하는 소규모 테이블/인덱스를 캐시에 상주시키기 위한 풀입니다. 대규모 테이블의 풀 스캔에 최적화된 것이 아니라, 오히려 소규모 객체의 캐시 히트율을 높이기 위한 것입니다.\n\nC) 오답 — RECYCLE Pool의 크기는 DB_RECYCLE_CACHE_SIZE 파라미터로 개별 제어됩니다. DB_CACHE_SIZE는 DEFAULT Pool의 크기를 제어하는 파라미터입니다.\n\nD) 오답 — ALTER TABLE 또는 ALTER INDEX의 STORAGE절에서 BUFFER_POOL 속성을 지정하여 개별 객체의 버퍼 풀을 변경할 수 있습니다(예: ALTER TABLE employees STORAGE (BUFFER_POOL KEEP)).\n\n핵심 개념: Database Buffer Cache는 DEFAULT(DB_CACHE_SIZE), KEEP(DB_KEEP_CACHE_SIZE), RECYCLE(DB_RECYCLE_CACHE_SIZE) 3가지 풀로 분리 운영 가능하며, 각 파라미터로 크기를 개별 제어합니다. 오브젝트의 STORAGE절 BUFFER_POOL 속성으로 캐싱 대상 풀을 지정합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_007",
-    "title": "Oracleデータベースのメモリー管理方式であるAMM(自動メモリー管理)とASMM(自動共有メモリー管理)に関して正しい内容を述べているものを選択してください。",
+    "title": "Oracle DatabaseのLGWR(ログ・ライター)プロセスがREDOログ・バッファの内容をディスクに書き込む条件として正しいものを選択してください(2つ選択してください)。",
     "options": [
-      "A) AMMはMEMORY_TARGETパラメータを使用してSGAとPGAを統合的に自動管理する方式である。",
-      "B) ASMMではSGA_TARGETを設定すると、SGA内の各構成要素のサイズがすべて固定される。",
-      "C) AMMを使用する場合、SGA_TARGETとPGA_AGGREGATE_TARGETの値を個別に設定する必要がある。",
-      "D) ASMMではワークロードに応じてSGAとPGA間のメモリー再分配が自動的に行われる。",
-      "E) AMMとASMMのいずれを使用する場合でも、LOG_BUFFERは自動調整の対象外である。"
+      "A) ユーザーがCOMMITを発行したとき",
+      "B) サーバー・プロセスがデータ・ブロックをバッファ・キャッシュにロードしたとき",
+      "C) DBWnがDirtyバッファをデータ・ファイルに書き込む前",
+      "D) データ・ディクショナリ・キャッシュの内容が変更されたとき",
+      "E) REDOログ・バッファの使用量がDB_CACHE_SIZE の1/3に達したとき"
     ],
-    "answer": [
-      "A"
-    ],
-    "explanation": "정답: A\nA) 정답 — AMM(Automatic Memory Management)은 MEMORY_TARGET 파라미터를 사용하여 SGA와 PGA를 하나의 통합 메모리 풀로 관리하며, 워크로드에 따라 SGA ↔ PGA 간 메모리를 자동으로 재분배합니다.\n\nB) 오답 — ASMM에서 SGA_TARGET을 설정하면 SGA 내부 구성요소(DB_CACHE_SIZE, SHARED_POOL_SIZE, LARGE_POOL_SIZE 등)의 크기가 '자동으로 조정'됩니다. 개별 파라미터에 값을 지정하면 해당 값이 최솟값(하한선)으로 작동합니다.\n\nC) 오답 — AMM을 사용할 때는 MEMORY_TARGET만 설정하면 됩니다. SGA_TARGET과 PGA_AGGREGATE_TARGET을 0으로 설정하면 완전 자동 관리가 됩니다.\n\nD) 오답 — ASMM에서는 SGA 내부 구성요소 간의 자동 조정은 수행하지만, SGA와 PGA 간의 메모리 재분배는 수행하지 않습니다. SGA ↔ PGA 간 재분배가 가능한 것은 AMM입니다.\n\nE) 오답 — LOG_BUFFER는 ASMM에서는 자동 조정 대상 외이지만(수동 지정 필요), AMM에서도 마찬가지로 자동 조정 대상 외입니다. 그러나 이 선택지의 설명은 맞는 내용이긴 하나, 문제에서 '正しい内容'으로 가장 적절한 것은 A입니다. 실제로 LOG_BUFFER는 AMM/ASMM 모두에서 자동 조정 대상 외이므로 이 선택지도 기술적으로 맞지만, A가 보다 핵심적이고 명확한 정답입니다.\n\n핵심 개념: AMM은 MEMORY_TARGET으로 SGA+PGA 통합 관리(SGA↔PGA 재분배 가능), ASMM은 SGA_TARGET+PGA_AGGREGATE_TARGET으로 각각 관리(SGA 내부만 자동 조정)하는 방식입니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 사용자가 COMMIT을 발행하면, LGWR은 해당 트랜잭션의 Redo Entry를 즉시 온라인 Redo Log 파일에 기록합니다(Log Force at Commit). 이를 통해 트랜잭션의 영속성(Durability)을 보장합니다.\n\nC) 정답 — Write-Ahead Logging 원칙에 따라, DBWn이 Dirty Buffer를 데이터 파일에 기록하기 전에 해당 변경에 대한 Redo가 먼저 디스크에 기록되어야 합니다. 따라서 LGWR이 관련 Redo를 먼저 기록합니다.\n\nB) 오답 — 서버 프로세스가 데이터 블록을 버퍼 캐시에 로드하는 것은 읽기(Read) 작업이며, 이 동작이 LGWR의 기록을 트리거하지 않습니다.\n\nD) 오답 — 데이터 딕셔너리 캐시의 내용 변경은 LGWR의 기록 조건이 아닙니다. LGWR은 Redo Log Buffer의 기록 조건(COMMIT, 1/3 사용, 1MB 축적, 3초 타임아웃, DBWn 기록 전)에 의해 동작합니다.\n\nE) 오답 — Redo Log Buffer 사용량이 약 1/3에 달하면 LGWR이 기록하지만, 기준은 DB_CACHE_SIZE가 아니라 Redo Log Buffer 자체의 1/3입니다. DB_CACHE_SIZE는 Database Buffer Cache의 크기를 제어하는 파라미터입니다.\n\n핵심 개념: LGWR은 COMMIT 발행, Redo Log Buffer 1/3 사용, 1MB 이상 축적, 3초 타임아웃, DBWn 기록 전(Write-Ahead Logging)의 5가지 조건에서 Redo Log Buffer를 디스크에 기록합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_008",
-    "title": "Oracleデータベースの起動段階(NOMOUNT、MOUNT、OPEN)について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "PDB(Pluggable Database)のオープン・モードについて正しく述べているものを選択してください。",
     "options": [
-      "A) NOMOUNT段階では、パラメータ・ファイルの読み込み、SGAの割り当て、およびバックグラウンド・プロセスの起動が行われる。",
-      "B) MOUNT段階では、制御ファイルを開き、データ・ファイルの存在を検証してオープンする。",
-      "C) OPEN段階で整合性チェックに失敗した場合、SMONプロセスによるインスタンス・リカバリが自動的に実行される。",
-      "D) MOUNT段階ではV$INSTANCEビューを参照することができない。",
-      "E) NOMOUNT段階でARCHIVELOGモードの変更が可能である。"
+      "A) 新規に作成されたPDBはREAD WRITE状態で自動的にオープンされるため、手動でオープンする必要はない。",
+      "B) PDBをMOUNTED状態にすると、PDBのメタデータのみがロードされ、ユーザーはそのPDB内のデータにアクセスできない。",
+      "C) PDBのオープン・モードをREAD ONLYに変更するには、CDB全体を停止する必要がある。",
+      "D) PDBがREAD WRITEモードで稼働中の場合、他のPDBを独立してMOUNTED状態に変更することはできない。"
     ],
-    "answer": [
-      "A",
-      "C"
-    ],
-    "explanation": "정답: A, C\nA) 정답 — NOMOUNT 단계에서는 파라미터 파일을 읽고, SGA 메모리를 할당하며, 백그라운드 프로세스(SMON, PMON, DBWn, LGWR, CKPT, LREG 등)를 기동합니다.\n\nC) 정답 — OPEN 단계에서 컨트롤 파일의 체크포인트 SCN과 데이터 파일 헤더의 SCN이 불일치하면, SMON 프로세스가 인스턴스 복구(Roll Forward → Roll Back)를 자동으로 수행합니다.\n\nB) 오답 — MOUNT 단계에서는 컨트롤 파일을 열어 데이터 파일의 '경로 정보만 인식'할 뿐, 실제로 데이터 파일을 열거나 검증하지 않습니다. 데이터 파일과 Redo Log 파일을 열고 검증하는 것은 OPEN 단계에서 수행됩니다.\n\nD) 오답 — V$INSTANCE 뷰는 NOMOUNT 단계부터 참조 가능합니다. MOUNT 단계에서도 당연히 조회할 수 있습니다.\n\nE) 오답 — ARCHIVELOG 모드 변경은 MOUNT 단계에서 수행 가능합니다. NOMOUNT 단계에서는 컨트롤 파일이 열리지 않은 상태이므로 데이터베이스 레벨의 설정 변경이 불가능합니다.\n\n핵심 개념: Oracle 기동 3단계는 NOMOUNT(SGA 할당+프로세스 기동) → MOUNT(컨트롤 파일 오픈) → OPEN(데이터 파일/Redo Log 오픈+정합성 검증)의 순서로 진행됩니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — PDB가 MOUNTED 상태일 때는 메타데이터만 로드되며, 사용자는 해당 PDB 내의 데이터에 접근할 수 없습니다. PDB를 사용하려면 READ ONLY 또는 READ WRITE 모드로 OPEN해야 합니다.\n\nA) 오답 — 새로 생성된 PDB는 MOUNTED 상태로 생성됩니다. 사용하려면 ALTER PLUGGABLE DATABASE ... OPEN 명령으로 수동으로 오픈해야 합니다.\n\nC) 오답 — PDB의 오픈 모드 변경은 CDB 전체를 중지할 필요 없이, ALTER PLUGGABLE DATABASE ... CLOSE 후 ALTER PLUGGABLE DATABASE ... OPEN READ ONLY 명령으로 개별 PDB 단위로 수행할 수 있습니다.\n\nD) 오답 — CDB 내의 각 PDB는 독립적으로 상태를 관리할 수 있습니다. 하나의 PDB가 READ WRITE로 운영 중이더라도, 다른 PDB를 독립적으로 CLOSE하거나 MOUNTED 상태로 변경할 수 있습니다.\n\n핵심 개념: PDB는 MOUNTED, READ ONLY, READ WRITE, MIGRATE의 4가지 오픈 모드를 가지며, 각 PDB는 CDB 내에서 독립적으로 상태를 전환할 수 있습니다. 새 PDB는 MOUNTED 상태로 생성되므로 수동 OPEN이 필요합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_009",
-    "title": "Oracleデータベースの停止(SHUTDOWN)モードに関して正しい内容を述べているものを選択してください。",
+    "title": "CDB(コンテナ・データベース)内の共有資源と個別資源について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SHUTDOWN NORMALは、すべてのユーザーが自発的にログアウトするまで待機する方式であり、次回起動時にインスタンス・リカバリは不要である。",
-      "B) SHUTDOWN IMMEDIATEは、未完了トランザクションのロールバックを行わず、チェックポイントのみ実行して停止する。",
-      "C) SHUTDOWN ABORTは、チェックポイントを実行してからプロセスを強制終了するため、次回起動時にインスタンス・リカバリは不要である。",
-      "D) SHUTDOWN TRANSACTIONALは、新規接続を許可しつつ、既存のトランザクション完了を待ってから停止する。",
-      "E) SHUTDOWN IMMEDIATEは、チェックポイントを実行した後に未完了トランザクションのロールバックを行い、すべてのセッションを終了する。"
+      "A) オンラインREDOログ・ファイルはCDB全体で共有され、各PDBが個別のREDOログを持つことはない。",
+      "B) UNDO表領域はLocal UNDOモードの場合であってもCDB内で1つのみ共有される。",
+      "C) 各PDBは独自のSYSTEM表領域とSYSAUX表領域を持ち、PDB固有のデータ・ディクショナリを保持する。",
+      "D) SGAはPDBごとに独立して割り当てられ、PDB間でメモリーを共有することはない。",
+      "E) バックグラウンド・プロセスはPDBの数に合わせて個別に起動される。"
     ],
-    "answer": [
-      "A"
-    ],
-    "explanation": "정답: A\nA) 정답 — SHUTDOWN NORMAL은 모든 사용자가 자발적으로 로그아웃할 때까지 무한정 대기하며, 체크포인트를 수행하므로(Clean Shutdown) 다음 기동 시 인스턴스 복구가 불필요합니다.\n\nB) 오답 — SHUTDOWN IMMEDIATE는 미완료 트랜잭션을 자동으로 ROLLBACK한 후 체크포인트를 수행합니다. 롤백을 수행하지 않는다는 설명은 틀립니다.\n\nC) 오답 — SHUTDOWN ABORT는 체크포인트를 수행하지 않고 프로세스를 강제 종료합니다. 따라서 다음 기동 시 인스턴스 복구(Instance Recovery)가 필수적으로 수행됩니다.\n\nD) 오답 — SHUTDOWN TRANSACTIONAL은 새 접속을 '차단'합니다. 새 접속을 허용하면서 대기하는 것이 아니라, 기존 활성 트랜잭션이 완료될 때까지만 대기합니다.\n\nE) 오답 — SHUTDOWN IMMEDIATE의 순서가 잘못되어 있습니다. 실제로는 먼저 모든 세션을 즉시 종료하고 실행 중인 SQL을 중단한 후, 미완료 트랜잭션을 롤백하고, 마지막에 체크포인트를 수행합니다. 체크포인트를 먼저 실행한 후 롤백하는 것이 아닙니다.\n\n핵심 개념: SHUTDOWN 모드는 NORMAL(모든 사용자 로그아웃 대기), TRANSACTIONAL(트랜잭션 완료 대기), IMMEDIATE(즉시 롤백 후 종료, 실무 권장), ABORT(강제 종료, 복구 필요)의 4가지이며, ABORT만 다음 기동 시 인스턴스 복구가 필요합니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 온라인 Redo Log 파일은 CDB 전체에서 공유되는 자원입니다. LGWR 프로세스가 CDB 단위로 하나의 Redo Log 세트에 기록하며, 각 PDB가 개별적으로 Redo Log를 보유하지 않습니다.\n\nC) 정답 — 각 PDB는 자체 SYSTEM 테이블스페이스와 SYSAUX 테이블스페이스를 보유합니다. 이 테이블스페이스에 PDB 고유의 데이터 딕셔너리(메타데이터)가 저장되어, PDB 간 완전한 논리적 격리를 보장합니다.\n\nB) 오답 — Local UNDO Mode에서는 각 PDB가 자체 UNDO 테이블스페이스를 보유합니다. CDB 전체에서 1개만 공유되는 것은 Shared UNDO Mode(기본)의 경우입니다.\n\nD) 오답 — SGA는 CDB 전체에서 하나만 할당되며, 모든 PDB가 공유합니다. PDB별로 별도의 SGA가 할당되는 것이 아니라, 하나의 SGA를 효율적으로 공유하는 것이 멀티테넌트 아키텍처의 핵심 이점입니다.\n\nE) 오답 — 백그라운드 프로세스(LGWR, DBWn, PMON 등)는 CDB 전체에서 공유됩니다. PDB 수에 따라 개별적으로 기동되지 않으며, 모든 PDB의 요청을 공유 프로세스가 처리합니다.\n\n핵심 개념: CDB에서 SGA, 백그라운드 프로세스, 컨트롤 파일, 온라인 Redo Log는 전체 공유 자원이며, 각 PDB는 SYSTEM/SYSAUX 테이블스페이스와 데이터 딕셔너리를 개별 보유합니다. UNDO 테이블스페이스는 모드(Shared/Local)에 따라 공유 또는 개별 보유됩니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_010",
-    "title": "データベース・バッファ・キャッシュの内部管理メカニズムに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle Databaseの接続(Connection)とセッション(Session)について正しく述べているものを選択してください。",
     "options": [
-      "A) LRUリストは、すべてのバッファの参照順序を管理しており、Hot End(MRU)には最近アクセスされたバッファが配置される。",
-      "B) Keep Buffer Pool(DB_KEEP_CACHE_SIZE)は、再利用の可能性が低い大規模テーブルのブロックを素早く置き換えるために使用される。",
-      "C) 大規模テーブルに対するフルテーブルスキャン時、データ・ブロックはLRU Endに配置されるか、またはDirect Path Readによりバッファ・キャッシュをバイパスする。",
-      "D) Recycle Buffer Pool(DB_RECYCLE_CACHE_SIZE)は、頻繁にアクセスされる小規模テーブルをキャッシュに常駐させるために使用される。",
-      "E) ASMMを使用する場合、DB_KEEP_CACHE_SIZEおよびDB_RECYCLE_CACHE_SIZEも自動調整の対象に含まれる。"
+      "A) セッションはユーザーがOracle Databaseに対する認証を完了した後に作成される論理的なエンティティである。",
+      "B) 1つの接続に対して作成できるセッションは常に1つのみに限定される。",
+      "C) セッションはプロセスID(PID)で一意に識別され、接続の切断後もセッション情報が保持される。",
+      "D) Dedicated Server構成の場合、複数のユーザー・プロセスが1つのサーバー・プロセスを共有して使用する。"
     ],
-    "answer": [
-      "A",
-      "C"
-    ],
-    "explanation": "정답: A, C\nA) 정답 — LRU(Least Recently Used) 리스트는 모든 버퍼의 접근 순서를 관리합니다. Hot End(MRU)에는 최근 접근된, 자주 사용되는 버퍼가 배치되고, Cold End(LRU)에는 오래 전 접근된 교체 후보 버퍼가 배치됩니다.\n\nC) 정답 — 대규모 테이블의 Full Table Scan 시 데이터 블록은 LRU End에 배치되어 빠르게 교체되거나, Direct Path Read로 버퍼 캐시를 우회합니다. 이는 Full Table Scan이 캐시 내 유용한 데이터를 밀어내지 않도록 하기 위한 최적화입니다.\n\nB) 오답 — Keep Buffer Pool은 '자주 접근하는 소규모 테이블/인덱스'를 캐시에 상주시키기 위해 사용됩니다. 재사용 가능성이 낮은 대규모 테이블에 사용되는 것은 Recycle Buffer Pool입니다.\n\nD) 오답 — Recycle Buffer Pool은 '재사용 가능성이 낮은 대규모 테이블'의 블록을 위해 사용되며 빠르게 교체됩니다. 자주 접근하는 소규모 테이블을 상주시키는 것은 Keep Buffer Pool의 역할입니다. B와 D는 Keep과 Recycle의 설명이 반대로 되어 있습니다.\n\nE) 오답 — ASMM 사용 시 DB_KEEP_CACHE_SIZE와 DB_RECYCLE_CACHE_SIZE는 자동 조정 대상에 포함되지 않으며, DBA가 수동으로 지정해야 합니다. 자동 조정 대상은 DB_CACHE_SIZE, SHARED_POOL_SIZE, LARGE_POOL_SIZE, JAVA_POOL_SIZE, STREAMS_POOL_SIZE입니다.\n\n핵심 개념: Buffer Cache는 LRU 리스트로 버퍼 접근 순서를 관리하며, Default/Keep/Recycle 3종의 Buffer Pool로 용도별 분리 관리가 가능합니다. 대규모 Full Table Scan은 캐시 오염 방지를 위해 LRU End 배치 또는 Direct Path Read로 처리됩니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 세션(Session)은 사용자가 Oracle Database에 대한 인증(Authentication)을 완료한 후에 생성되는 논리적 엔티티입니다. 세션은 사용자 로그인부터 로그아웃(또는 비정상 종료)까지의 기간을 나타내며, SID와 Serial#의 조합으로 고유하게 식별됩니다.\n\nB) 오답 — 1개의 Connection(연결)에 여러 Session이 존재할 수 있습니다. Oracle Net의 Session Multiplexing 기능을 통해 하나의 물리적 연결에서 복수의 세션을 운용할 수 있습니다.\n\nC) 오답 — 세션은 프로세스 ID(PID)가 아니라 SID(Session ID)와 Serial#의 조합으로 고유하게 식별됩니다. 또한 연결이 종료되면 해당 세션도 종료되어 V$SESSION에서 제거됩니다.\n\nD) 오답 — Dedicated Server 구성에서는 각 사용자 프로세스에 전용 서버 프로세스가 1:1로 할당됩니다. 복수의 사용자 프로세스가 하나의 서버 프로세스를 공유하는 것은 Shared Server 구성의 특징입니다.\n\n핵심 개념: Connection은 사용자 프로세스와 인스턴스 간의 물리적 통신 경로이고, Session은 인증 완료 후 생성되는 논리적 엔티티입니다. 세션은 SID+Serial#로 식별되며, 하나의 Connection에 여러 Session이 존재할 수 있습니다. Dedicated Server는 1:1, Shared Server는 N:M 연결 방식입니다."
   }
 ]

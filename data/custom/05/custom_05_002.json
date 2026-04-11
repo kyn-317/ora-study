@@ -2,70 +2,68 @@
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_006",
-    "title": "マルチテナント環境におけるCONTAINER句を使用した権限付与に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle Databaseの管理者ユーザーおよび管理権限について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) CDBルートでCONTAINER=ALLを指定して権限を付与すると、CDBルートおよび既存・将来のすべてのPDBで有効になる。",
-      "B) PDBに接続している場合、CONTAINER=ALLを指定して共通ユーザーに権限を付与することができる。",
-      "C) CDBルートでCONTAINER句を省略した場合、デフォルトでCONTAINER=ALLとなり、すべてのコンテナに適用される。",
-      "D) 共通ロールに対してCONTAINER=CURRENTで付与された権限は、CDBルートでのみ有効であり、PDBには伝播しない。",
-      "E) PDBでは、CONTAINER=CURRENTとCONTAINER=ALLのどちらも指定可能である。"
+      "A) SYSユーザーはAS SYSDBAまたはAS SYSOPERを指定して接続する必要があり、指定なしで接続するとエラーが発生する。",
+      "B) SYSTEMユーザーはSYSユーザーと同様にデータ・ディクショナリの基本テーブルを所有している。",
+      "C) SYSBACKUP権限はRMANバックアップ・リカバリ専用の管理権限であり、SYSDBA権限をすべて含んでいる。",
+      "D) SYSTEMユーザーはAS SYSDBAを指定せずに通常の接続方法でデータベースに接続することが可能である。",
+      "E) SYSユーザーのパスワードはデータ・ディクショナリにのみ保存され、パスワード・ファイルには保存されない。"
     ],
     "answer": ["A", "D"],
-    "explanation": "정답: A, D\nA) 정답 — CONTAINER=ALL로 권한을 부여하면 CDB 루트와 기존 및 미래의 모든 PDB에서 해당 권한이 유효합니다.\n\nD) 정답 — 공통 롤이라 하더라도 CONTAINER=CURRENT로 부여된 권한은 현재 컨테이너(CDB 루트)에서만 유효하며, PDB에는 전파되지 않습니다. 공통 롤의 권한이 모든 PDB에서 유효하려면 반드시 CONTAINER=ALL로 부여해야 합니다.\n\nB) 오답 — CONTAINER=ALL은 CDB 루트에서만 지정할 수 있으며, PDB에서는 사용할 수 없습니다.\n\nC) 오답 — CDB 루트에서 CONTAINER 절을 생략하면 기본값은 CONTAINER=CURRENT(현재 컨테이너만)이며, CONTAINER=ALL이 아닙니다.\n\nE) 오답 — PDB에서는 CONTAINER=CURRENT만 가능하며, CONTAINER=ALL은 지정할 수 없습니다.\n\n핵심 개념: CONTAINER 절은 멀티테넌트 환경에서 권한의 적용 범위를 제어합니다. CONTAINER=ALL은 CDB 루트에서만 사용 가능하고, 생략 시 기본값은 CURRENT입니다."
+    "explanation": "정답: A, D\nA) 정답 — SYS 사용자로 접속할 때는 반드시 AS SYSDBA 또는 AS SYSOPER를 지정해야 합니다. AS 절 없이 접속하면 ORA-28009 오류가 발생합니다. SYS는 데이터 딕셔너리의 소유자로서 최상위 권한을 보유하고 있습니다.\n\nD) 정답 — SYSTEM 사용자는 SYS 다음 수준의 관리 권한을 가지며, AS SYSDBA를 지정하지 않고 일반적인 접속 방법으로 데이터베이스에 접속할 수 있습니다. 일반 DBA 관리 작업에는 SYSTEM 계정 사용이 권장됩니다.\n\nB) 오답 — 데이터 딕셔너리의 기본 테이블(TAB$, OBJ$, COL$ 등)은 SYS 스키마가 소유합니다. SYSTEM 사용자는 추가적인 관리용 테이블과 뷰를 소유하지만, 데이터 딕셔너리의 기본 테이블은 소유하지 않습니다.\n\nC) 오답 — SYSBACKUP는 RMAN 백업/복구 전용의 관리 권한이며, SYSDBA 권한의 모든 기능을 포함하지 않습니다. 이는 직무 분리(Separation of Duties)와 최소 권한 원칙에 따라 설계된 세분화된 관리 권한입니다.\n\nE) 오답 — SYS 사용자의 패스워드는 데이터 딕셔너리와 패스워드 파일 양쪽에 모두 저장됩니다. 패스워드 파일은 데이터베이스가 기동되지 않은 상태에서도 원격 인증이 가능하게 합니다.\n\n핵심 개념: SYS는 데이터 딕셔너리 소유자로 AS SYSDBA/SYSOPER 필수 접속이며, SYSTEM은 일반 접속 가능한 관리자 계정입니다. SYSBACKUP, SYSDG, SYSKM 등은 직무 분리 원칙에 따른 세분화된 관리 권한으로, SYSDBA의 모든 권한을 포함하지 않습니다."
   },
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_007",
-    "title": "プロファイルのリソース制限パラメータに関する内容で正しいものを選択してください。",
+    "title": "DBMS_PRIVILEGE_CAPTUREパッケージを使用した権限分析について正しく述べているものを選択してください。",
     "options": [
-      "A) プロファイルのリソース制限パラメータとパスワード管理パラメータの両方が適用されるためには、初期化パラメータRESOURCE_LIMITをTRUEに設定する必要がある。",
-      "B) CPU_PER_CALLの制限を超過した場合、該当セッションが終了される。",
-      "C) CONNECT_TIMEの制限を超過した場合、該当セッションのアカウントがロックされる。",
-      "D) IDLE_TIMEはセッションがアイドル状態で維持できる最大時間を分単位で制限し、超過するとセッションが終了される。",
-      "E) PRIVATE_SGAパラメータは専用サーバー(Dedicated Server)モードおよび共有サーバー(Shared Server)モードの両方で適用される。"
+      "A) DATABASE型のキャプチャでは、SYSおよびSYSTEMユーザーの権限使用も含めてデータベース全体の権限分析が可能である。",
+      "B) GENERATE_RESULTプロシージャを実行しなくても、キャプチャを有効化した時点でDBA_USED_PRIVSビューにデータが表示される。",
+      "C) DATABASE型のキャプチャは同時に複数有効化することが可能であり、用途別に分けて分析できる。",
+      "D) オブジェクト所有者が自身のスキーマ・オブジェクトにアクセスした場合、そのアクセスは権限キャプチャの対象にならない。"
     ],
     "answer": ["D"],
-    "explanation": "정답: D\nD) 정답 — IDLE_TIME은 세션이 유휴 상태로 유지될 수 있는 최대 시간을 분(minutes) 단위로 제한하며, 초과 시 해당 세션이 종료됩니다.\n\nA) 오답 — RESOURCE_LIMIT=TRUE는 자원 제한 파라미터(CPU_PER_SESSION, CONNECT_TIME 등)에만 필요하며, 비밀번호 관리 파라미터는 RESOURCE_LIMIT 설정과 무관하게 항상 적용됩니다.\n\nB) 오답 — CPU_PER_CALL은 호출(Call) 레벨 파라미터로, 제한 초과 시 해당 명령문(SQL)만 롤백되고 세션은 유지됩니다. 세션이 종료되는 것은 세션 레벨 파라미터인 CPU_PER_SESSION입니다.\n\nC) 오답 — CONNECT_TIME 초과 시 세션이 종료되는 것이지, 계정이 잠기는 것이 아닙니다.\n\nE) 오답 — PRIVATE_SGA는 공유 서버(Shared Server) 모드에서만 의미가 있는 파라미터로, 전용 서버(Dedicated Server) 모드에서는 무시됩니다.\n\n핵심 개념: 프로파일의 자원 제한 파라미터는 세션 레벨(초과 시 세션 종료)과 호출 레벨(초과 시 명령문만 롤백)로 구분되며, 자원 제한이 적용되려면 RESOURCE_LIMIT=TRUE 설정이 필요하지만, 비밀번호 관리는 항상 적용됩니다."
+    "explanation": "정답: D\nD) 정답 — 객체 소유자가 자신의 스키마 객체에 접근하는 경우, 별도의 객체 권한(Object Privilege)이 필요하지 않으므로 권한 캡처 대상이 되지 않습니다. 권한 분석은 명시적으로 부여받은 권한(시스템 권한, 객체 권한, 롤)의 사용 여부만 추적합니다.\n\nA) 오답 — DATABASE 유형의 캡처라 하더라도 ORACLE_MAINTAINED='Y'인 Oracle 유지 관리 계정(SYS, SYSTEM 등)의 권한 사용은 자동으로 제외됩니다. Oracle 내부 동작에 의한 권한 사용은 사용자 권한 분석과 무관하므로 노이즈 제거 목적으로 제외합니다.\n\nB) 오답 — DBA_USED_PRIVS 등의 결과 뷰에 데이터가 표시되려면 GENERATE_RESULT 프로시저를 반드시 호출해야 합니다. 캡처를 활성화하여 데이터를 수집한 후, GENERATE_RESULT를 호출해야 결과 뷰에 분석 데이터가 생성됩니다.\n\nC) 오답 — DATABASE 유형의 캡처는 동시에 하나만 활성화할 수 있습니다. 다만 ROLE, CONTEXT, ROLE_AND_CONTEXT 유형의 캡처는 동시에 여러 개를 활성화할 수 있습니다.\n\n핵심 개념: DBMS_PRIVILEGE_CAPTURE의 DATABASE 유형 캡처는 Oracle 유지 관리 계정(ORACLE_MAINTAINED='Y')을 자동 제외하며, 객체 소유자의 자기 스키마 접근은 암묵적 권한이므로 캡처 대상이 아닙니다. GENERATE_RESULT 호출 후에만 결과 뷰에 데이터가 표시됩니다."
   },
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_008",
-    "title": "ANY権限およびスキーマレベル権限に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracleデータベースのシステム権限に関するANYキーワードの動作について正しく述べているものを選択してください。",
     "options": [
-      "A) SELECT ANY TABLEシステム権限を付与されたユーザーは、SYSスキーマを含むすべてのスキーマのテーブルをSELECTすることができる。",
-      "B) ANY権限はシステム権限に分類され、O7_DICTIONARY_ACCESSIBILITYパラメータがFALSE(デフォルト)の場合、SYSスキーマのオブジェクトにはアクセスできない。",
-      "C) Oracle AI Databaseのスキーマレベル権限を使用すると、特定のスキーマ内の既存オブジェクトのみに対して権限が付与され、将来作成されるオブジェクトには適用されない。",
-      "D) ANY権限は保安リスクが非常に高いため、DBA以外のユーザーへの付与は最小限にすべきである。",
-      "E) スキーマレベル権限はオブジェクト権限に分類されるため、WITH GRANT OPTIONで付与することができる。"
+      "A) SELECT ANY TABLE権限を持つユーザーは、SYSスキーマのデータ・ディクショナリ・テーブルに対しても常にアクセス可能である。",
+      "B) CREATE ANY TABLE権限を持つユーザーは、すべてのスキーマでテーブルを作成することができる。",
+      "C) ANY権限はロールに付与することができず、ユーザーに対してのみ付与可能である。",
+      "D) CREATE TABLE権限とCREATE ANY TABLE権限は同じスコープで動作し、どちらも自身のスキーマでのみテーブルを作成できる。"
     ],
-    "answer": ["B", "D"],
-    "explanation": "정답: B, D\nB) 정답 — ANY 키워드가 포함된 시스템 권한(SELECT ANY TABLE 등)은 O7_DICTIONARY_ACCESSIBILITY=FALSE(기본값)일 때 SYS 스키마의 데이터 딕셔너리 객체에 접근할 수 없습니다.\n\nD) 정답 — ANY 권한은 SYS 스키마를 제외한 모든 스키마에서 작업이 가능하므로 보안 위험이 매우 높습니다. 최소 권한 원칙에 따라 DBA 이외의 사용자에게는 부여를 최소화해야 합니다.\n\nA) 오답 — O7_DICTIONARY_ACCESSIBILITY의 기본값은 FALSE이며, 이 경우 ANY 권한으로는 SYS 스키마의 객체에 접근할 수 없습니다. SYS를 포함한 모든 스키마에 접근하려면 이 파라미터를 TRUE로 변경해야 하지만, 보안상 비권장됩니다.\n\nC) 오답 — Oracle 26ai의 스키마 레벨 권한은 특정 스키마 내의 현재 및 미래의 모든 객체에 대해 권한을 부여합니다. 기존 객체만이 아닙니다.\n\nE) 오답 — 스키마 레벨 권한은 시스템 권한(스키마 지정)으로 분류되며, 객체 권한이 아닙니다. 따라서 WITH GRANT OPTION이 아닌 WITH ADMIN OPTION이 적용됩니다.\n\n핵심 개념: ANY 권한은 SYS를 제외한 모든 스키마에 적용되는 강력한 시스템 권한이며, 스키마 레벨 권한은 특정 스키마 내의 현재/미래 객체에 권한을 부여하는 중간 수준의 권한입니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — CREATE ANY TABLE 권한을 가진 사용자는 모든 스키마에서 테이블을 생성할 수 있습니다. ANY 키워드가 포함된 시스템 권한은 자신의 스키마뿐만 아니라 데이터베이스 내 모든 스키마에 걸쳐 해당 작업을 수행할 수 있음을 의미합니다.\n\nA) 오답 — O7_DICTIONARY_ACCESSIBILITY 파라미터가 FALSE(기본값)인 경우, ANY 권한을 보유하고 있더라도 SYS 소유의 데이터 딕셔너리 객체에 접근할 수 없습니다. ANY 권한으로 SYS 딕셔너리 객체에 접근하려면 이 파라미터를 TRUE로 설정해야 하지만, 보안상 권장되지 않습니다.\n\nC) 오답 — ANY 권한도 일반적인 시스템 권한과 마찬가지로 롤(Role)에 부여할 수 있습니다. 예를 들어 DBA 롤에는 SELECT ANY TABLE 등 여러 ANY 권한이 포함되어 있습니다.\n\nD) 오답 — CREATE TABLE 권한은 자신의 스키마에서만 테이블을 생성할 수 있지만, CREATE ANY TABLE 권한은 모든 스키마에서 테이블을 생성할 수 있어 스코프가 다릅니다. ANY 키워드가 데이터베이스 전체로 범위를 확장합니다.\n\n핵심 개념: ANY 키워드가 포함된 시스템 권한은 모든 스키마에 걸쳐 작업을 수행할 수 있는 강력한 권한입니다. 다만 O7_DICTIONARY_ACCESSIBILITY가 FALSE(기본값)인 경우 ANY 권한으로도 SYS 딕셔너리 객체에는 접근할 수 없으며, 운영 환경에서는 최소 권한 원칙에 따라 ANY 권한을 신중하게 부여해야 합니다."
   },
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_009",
-    "title": "PASSWORD_REUSE_TIMEとPASSWORD_REUSE_MAXパラメータの相互作用について正しい内容を述べているものを選択してください。",
+    "title": "プロファイルのリソース制限パラメータについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) PASSWORD_REUSE_TIMEを365日、PASSWORD_REUSE_MAXを12回に設定した場合、365日経過またはパスワードを12回変更した時点でパスワードの再使用が可能になる。",
-      "B) PASSWORD_REUSE_TIMEをUNLIMITED、PASSWORD_REUSE_MAXをUNLIMITEDに設定した場合、パスワードの再使用は不可能になる。",
-      "C) PASSWORD_REUSE_TIMEをUNLIMITED、PASSWORD_REUSE_MAXを10回に設定した場合、パスワードを10回変更すれば再使用が可能になる。",
-      "D) PASSWORD_REUSE_TIMEを180日、PASSWORD_REUSE_MAXをUNLIMITEDに設定した場合、パスワードの再使用は不可能になる。"
+      "A) リソース制限パラメータが適用されるためには、初期化パラメータRESOURCE_LIMITがTRUEに設定されている必要がある。",
+      "B) CPU_PER_CALL制限を超過した場合、該当セッションが即座に終了される。",
+      "C) CONNECT_TIMEパラメータはセッションの最大接続維持時間を分単位で制限する。",
+      "D) PRIVATE_SGAパラメータは専用サーバー(Dedicated Server)モードでのみ適用される。",
+      "E) IDLE_TIMEパラメータはロング・ランニング・クエリの実行中にも適用されるため、大量データの処理時に注意が必要である。"
     ],
-    "answer": ["C"],
-    "explanation": "정답: C\nC) 정답 — PASSWORD_REUSE_TIME이 UNLIMITED이고 PASSWORD_REUSE_MAX가 10회로 설정된 경우, 비밀번호를 10회 변경하면 재사용이 가능합니다. 한쪽이 UNLIMITED이면 다른 쪽의 조건만 충족하면 됩니다.\n\nA) 오답 — 두 파라미터가 모두 명시적 값으로 설정된 경우, '또는(OR)' 조건이 아니라 '그리고(AND)' 조건입니다. 즉, 365일이 경과하고 동시에 12회 이상 변경해야만 재사용이 가능합니다.\n\nB) 오답 — 두 파라미터가 모두 UNLIMITED로 설정되면 비밀번호를 무제한으로 재사용할 수 있습니다. 재사용이 불가능해지는 것이 아닙니다.\n\nD) 오답 — PASSWORD_REUSE_TIME이 180일이고 PASSWORD_REUSE_MAX가 UNLIMITED인 경우, 180일이 경과하면 재사용이 가능합니다. 한쪽이 UNLIMITED이면 다른 쪽의 조건만 충족하면 되므로 재사용이 불가능하지 않습니다.\n\n핵심 개념: PASSWORD_REUSE_TIME과 PASSWORD_REUSE_MAX가 모두 명시적 값이면 양쪽 조건을 모두(AND) 충족해야 하고, 한쪽이 UNLIMITED이면 다른 쪽 조건만 충족하면 되며, 양쪽 모두 UNLIMITED이면 무제한 재사용이 가능합니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 프로파일의 자원 제한 파라미터(CPU_PER_SESSION, CONNECT_TIME, IDLE_TIME 등)가 실제로 적용되려면 초기화 파라미터 RESOURCE_LIMIT이 TRUE로 설정되어야 합니다. 이 파라미터는 ALTER SYSTEM으로 동적 변경이 가능합니다. 참고로 비밀번호 관리 파라미터는 RESOURCE_LIMIT 설정과 무관하게 항상 적용됩니다.\n\nC) 정답 — CONNECT_TIME 파라미터는 세션의 총 연결 유지 시간을 분(minutes) 단위로 제한합니다. 설정된 시간을 초과하면 세션이 종료됩니다. 배치 작업이나 장시간 연결을 제어하는 데 유용합니다.\n\nB) 오답 — CPU_PER_CALL은 호출(Call) 레벨의 파라미터로, 제한을 초과하면 해당 명령문(SQL)만 롤백되고 세션은 유지됩니다. 세션이 종료되는 것은 세션 레벨 파라미터(CPU_PER_SESSION, CONNECT_TIME 등)의 제한을 초과한 경우입니다.\n\nD) 오답 — PRIVATE_SGA 파라미터는 공유 서버(Shared Server) 모드에서만 의미가 있으며, 세션이 SGA의 Large Pool에서 사용할 수 있는 메모리 양을 제한합니다. 전용 서버(Dedicated Server) 모드에서는 이 파라미터가 무시됩니다.\n\nE) 오답 — IDLE_TIME은 세션이 유휴(Idle) 상태로 유지되는 시간을 제한하지만, 장시간 실행되는 쿼리(Long-running Query) 실행 중에는 IDLE_TIME이 적용되지 않습니다. 쿼리가 실행 중인 동안은 세션이 유휴 상태가 아니기 때문입니다.\n\n핵심 개념: 프로파일의 자원 제한은 RESOURCE_LIMIT=TRUE일 때만 적용되며(비밀번호 제한은 항상 적용), 호출 레벨 파라미터(CPU_PER_CALL) 초과 시 해당 명령문만 롤백되고 세션은 유지되지만, 세션 레벨 파라미터(CONNECT_TIME, CPU_PER_SESSION) 초과 시에는 세션이 종료됩니다."
   },
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_010",
-    "title": "プロファイルの作成・変更・削除に関して正しい内容を述べているものを選択してください。",
+    "title": "Oracleデータベースのパスワード・ファイルに関して正しく述べているものを選択してください。",
     "options": [
-      "A) CREATE PROFILE文で明示的に指定しなかったパラメータはUNLIMITEDがデフォルトとして適用される。",
-      "B) ALTER PROFILEでパラメータを変更すると、該当プロファイルが割り当てられた既存セッションにも即座に反映される。",
-      "C) DROP PROFILE文にCASCADEオプションを指定すると、該当プロファイルが割り当てられたユーザーはDEFAULTプロファイルに自動的に変更された後にプロファイルが削除される。",
-      "D) DEFAULTプロファイルはDROP PROFILE DEFAULT CASCADE文で削除することができる。",
-      "E) 1人のユーザーに対して複数のプロファイルを同時に割り当てることが可能であり、最も制限の厳しい設定が適用される。"
+      "A) パスワード・ファイルはorapwdユーティリティを使用して作成し、SYSDBA権限でのリモート接続時の認証に利用される。",
+      "B) REMOTE_LOGIN_PASSWORDFILEパラメータをNONEに設定した場合でも、ネットワーク経由のSYSDBA接続は可能である。",
+      "C) パスワード・ファイルにはSYSユーザーの認証情報のみが格納され、他の管理ユーザーは登録できない。",
+      "D) パスワード・ファイルが必要な理由は、データベースが起動していない状態ではOS認証のみでしか接続できないためである。"
     ],
-    "answer": ["C"],
-    "explanation": "정답: C\nC) 정답 — DROP PROFILE ... CASCADE를 사용하면, 해당 프로파일이 할당된 사용자를 자동으로 DEFAULT 프로파일로 전환한 후 프로파일이 삭제됩니다.\n\nA) 오답 — CREATE PROFILE 시 명시적으로 지정하지 않은 파라미터는 UNLIMITED가 아니라 DEFAULT 프로파일의 해당 파라미터 값을 상속합니다.\n\nB) 오답 — ALTER PROFILE로 변경한 값은 다음 세션부터 적용되며, 현재 활성 세션에는 즉시 적용되지 않습니다.\n\nD) 오답 — DEFAULT 프로파일은 삭제할 수 없습니다(ORA-02380 오류 발생). ALTER PROFILE DEFAULT LIMIT 구문으로 파라미터를 수정하는 것만 가능합니다.\n\nE) 오답 — 각 사용자는 반드시 하나의 프로파일만 할당할 수 있습니다. 복수의 프로파일을 동시에 할당하는 것은 불가능합니다.\n\n핵심 개념: 프로파일 관리에서 CREATE PROFILE 시 미지정 파라미터는 DEFAULT 프로파일 값을 상속하고, ALTER PROFILE 변경은 다음 세션부터 적용되며, DEFAULT 프로파일은 삭제 불가능합니다. 각 사용자는 하나의 프로파일만 가질 수 있습니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 패스워드 파일은 orapwd 유틸리티를 사용하여 생성하며, 주로 원격(네트워크 경유)에서 SYSDBA, SYSOPER 등의 관리 권한으로 접속할 때의 인증에 사용됩니다. 데이터베이스가 기동되지 않은 상태에서는 데이터 딕셔너리에 접근할 수 없으므로 패스워드 파일이 인증 수단으로 필수적입니다.\n\nB) 오답 — REMOTE_LOGIN_PASSWORDFILE을 NONE으로 설정하면 패스워드 파일을 사용하지 않으므로, 네트워크를 통한 SYSDBA 접속이 불가능합니다. 원격 관리자 접속에는 EXCLUSIVE 또는 SHARED 설정이 필요합니다.\n\nC) 오답 — REMOTE_LOGIN_PASSWORDFILE이 EXCLUSIVE 모드인 경우, SYS 이외의 사용자(SYSBACKUP, SYSDG 등 관리 권한을 가진 사용자)도 패스워드 파일에 등록할 수 있습니다. V$PWFILE_USERS 뷰로 등록된 사용자를 확인할 수 있습니다.\n\nD) 오답 — 패스워드 파일이 필요한 이유는 데이터베이스 미기동 상태에서의 인증뿐만 아니라, 원격 관리자 접속 시 OS 인증을 사용할 수 없기 때문이기도 합니다. 로컬 환경에서는 OS 인증(sqlplus / as sysdba)으로 접속 가능하지만, 원격 환경에서는 패스워드 파일을 통한 인증이 필요합니다.\n\n핵심 개념: 패스워드 파일은 orapwd 유틸리티로 생성하며, 데이터베이스 미기동 상태 및 원격 관리자 접속 시 인증에 사용됩니다. REMOTE_LOGIN_PASSWORDFILE 파라미터로 사용 모드를 제어하며, EXCLUSIVE 모드에서는 SYS 이외의 관리 사용자도 등록 가능합니다."
   }
 ]

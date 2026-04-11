@@ -2,68 +2,68 @@
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_011",
-    "title": "PDB$SEEDから新規PDBを作成する際のADMIN USER句について正しく述べているものを選択してください。",
+    "title": "CDB（コンテナ・データベース）内のコンテナ構成およびリソース共有について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ADMIN USER句で作成されるユーザーはCDB$ROOTを含むすべてのコンテナで有効な共通ユーザーとして作成される。",
-      "B) ADMIN USER句で作成されるユーザーにはPDB_DBAロールが自動的に付与され、CREATE SESSION権限を含む基本的なDDL権限が与えられる。",
-      "C) ADMIN USER句は省略可能であり、省略した場合はSYSユーザーがPDBのローカル管理者として設定される。",
-      "D) ADMIN USER句で指定するユーザー名にはC##プレフィックスを付ける必要がある。"
+      "A) CDB$ROOTはCON_ID=1の最上位コンテナであり、Oracle提供のマスター・データ・ディクショナリを保持している。",
+      "B) Redo LogファイルはPDBごとに独立して管理されるため、各PDBが個別のREDOストリームを持つ。",
+      "C) SYSTEM表領域およびSYSAUX表領域は各PDBごとに独立して存在する。",
+      "D) PDB$SEEDはCON_ID=3で作成され、ユーザーPDBの生成後にCON_IDが変更される。",
+      "E) 制御ファイルはPDBごとに個別に作成されるため、PDB単位のバックアップ時に制御ファイルも個別にバックアップする必要がある。"
     ],
-    "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — ADMIN USER 절로 생성되는 사용자에게는 PDB_DBA 역할이 자동으로 부여됩니다. PDB_DBA 역할에는 CREATE SESSION, CREATE TABLE, CREATE VIEW, CREATE SEQUENCE, CREATE PROCEDURE, CREATE TRIGGER, CREATE SYNONYM, UNLIMITED TABLESPACE 등의 기본 DDL 권한이 포함되어 있습니다.\n\nA) 오답 — ADMIN USER로 생성되는 사용자는 해당 PDB 내에서만 유효한 로컬 사용자(Local User)입니다. 공통 사용자(Common User)는 CDB$ROOT에서 C## 접두사를 붙여 생성하는 사용자이며, ADMIN USER로 생성되는 사용자와는 다릅니다.\n\nC) 오답 — PDB$SEED에서 PDB를 생성할 때 ADMIN USER 절은 필수입니다. 생략할 수 없으며, 반드시 PDB 로컬 관리자 계정을 지정해야 합니다. 단, 클론이나 Plug-in 방식에서는 선택사항입니다.\n\nD) 오답 — ADMIN USER로 생성되는 사용자는 로컬 사용자이므로 C## 접두사를 붙이지 않습니다. C## 접두사는 공통 사용자(Common User) 생성 시에만 사용됩니다.\n\n핵심 개념: PDB$SEED에서 PDB를 생성할 때 ADMIN USER 절은 필수이며, 로컬 관리자 계정을 생성합니다. 이 계정에는 PDB_DBA 역할이 자동 부여되며, 해당 PDB 내에서만 유효합니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — CDB$ROOT는 CON_ID=1인 CDB의 최상위 컨테이너로, Oracle이 제공하는 마스터 데이터 딕셔너리의 원본을 보유합니다. 각 PDB는 이 원본을 메타데이터 링크 또는 객체 링크를 통해 참조합니다. 공통 사용자, 공통 역할 등도 CDB$ROOT에서 관리됩니다.\n\nC) 정답 — 멀티테넌트 아키텍처에서 SYSTEM 테이블스페이스와 SYSAUX 테이블스페이스는 각 PDB마다 독립적으로 존재합니다. PDB 생성 시 PDB$SEED의 데이터 파일이 복사되어 새 PDB 전용의 SYSTEM 및 SYSAUX 테이블스페이스가 생성됩니다.\n\nB) 오답 — Redo Log 파일은 CDB 전체에서 공유됩니다. 모든 PDB의 변경 사항이 하나의 Redo Log 세트에 기록되며, PDB별로 별도의 Redo 스트림을 가지지 않습니다.\n\nD) 오답 — PDB$SEED의 CON_ID는 항상 2로 고정되어 있습니다. CON_ID=3 이상은 사용자 PDB에 할당됩니다. PDB$SEED는 CDB의 필수 구성요소이며 삭제할 수 없습니다.\n\nE) 오답 — 제어 파일(Control File)은 CDB당 하나의 세트만 존재하며, CDB 전체에서 공유됩니다. PDB별로 개별 제어 파일이 생성되지 않습니다.\n\n핵심 개념: CDB는 CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2), 사용자 PDB(CON_ID≥3)로 구성됩니다. SGA, 백그라운드 프로세스, 제어 파일, Redo Log는 CDB 전체가 공유하지만, SYSTEM 및 SYSAUX 테이블스페이스와 데이터 딕셔너리는 각 PDB마다 독립적으로 존재합니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_012",
-    "title": "PDBのUnplug時に使用するXMLメタデータ方式と単一アーカイブ(.pdb)方式について正しく述べているものを2つ選択してください。(2つ選択してください)",
+    "title": "マルチテナント環境における共通ユーザーとローカル・ユーザーについて正しく述べているものを選択してください。",
     "options": [
-      "A) XML方式ではメタデータのみがXMLファイルに生成され、データ・ファイルは元の場所にそのまま維持される。",
-      "B) 単一アーカイブ(.pdb)方式ではデータ・ファイルとアーカイブREDOログファイルが圧縮されて出力される。",
-      "C) Unplugの出力形式はALTER PLUGGABLE DATABASE文で指定するファイル拡張子(.xmlまたは.pdb)によって決定される。",
-      "D) XML方式は単一アーカイブ方式よりもディスク容量が多く必要となる。",
-      "E) 単一アーカイブ(.pdb)方式の出力ファイルは独自の圧縮形式を使用しており、標準的なツールでは展開できない。"
+      "A) 共通ユーザーはCDB$ROOTで作成され、C##プレフィックスが必要であり、すべてのPDBで認識される。",
+      "B) ローカル・ユーザーはCDB$ROOTに接続した状態でCONTAINER=CURRENTを指定して作成する必要がある。",
+      "C) SYSおよびSYSTEMユーザーはC##プレフィックスを持たないためローカル・ユーザーとして分類される。",
+      "D) 共通ユーザーに権限を付与する際、CONTAINER=ALLを指定するとCDB$ROOTのみに権限が適用される。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — XML 방식에서는 PDB의 메타데이터(데이터 파일 경로, 테이블스페이스 정보, DBID, 캐릭터셋 등)만 XML 파일에 저장되며, 데이터 파일은 원래 경로에 그대로 유지됩니다.\n\nC) 정답 — Unplug 시 출력 형식은 ALTER PLUGGABLE DATABASE 문에서 지정하는 파일 확장자에 의해 결정됩니다. .xml 확장자를 지정하면 XML 메타데이터만 생성되고, .pdb 확장자를 지정하면 단일 아카이브 파일이 생성됩니다.\n\nB) 오답 — 단일 아카이브(.pdb) 방식에는 XML 메타데이터와 데이터 파일이 포함되지만, 아카이브 REDO 로그 파일은 포함되지 않습니다.\n\nD) 오답 — XML 방식은 메타데이터만 생성하므로 추가 디스크 공간이 거의 필요하지 않습니다. 반대로 단일 아카이브(.pdb) 방식이 데이터 파일 크기만큼 추가 디스크 공간이 필요합니다.\n\nE) 오답 — 단일 아카이브(.pdb) 파일은 내부적으로 ZIP 형식을 사용하므로, 표준 ZIP 도구로 내용을 확인할 수 있습니다.\n\n핵심 개념: PDB Unplug 시 파일 확장자(.xml 또는 .pdb)로 출력 형식이 결정됩니다. XML 방식은 메타데이터만 생성하여 빠르고, .pdb 아카이브 방식은 데이터 파일을 ZIP 형식으로 통합하여 서버 간 이동에 적합합니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 공통 사용자(Common User)는 CDB$ROOT에서만 생성할 수 있으며, 이름에 C## 접두사가 필수입니다(예: C##DBA_ADMIN). 공통 사용자는 CDB$ROOT와 모든 PDB에서 인식되며, CDB 전체 관리나 모니터링 계정으로 사용됩니다.\n\nB) 오답 — 로컬 사용자는 개별 PDB 내에서 생성됩니다. 해당 PDB에 직접 접속하거나 ALTER SESSION SET CONTAINER 명령으로 PDB에 전환한 후 CREATE USER 문을 실행합니다. CDB$ROOT에서 생성하는 것이 아닙니다.\n\nC) 오답 — SYS와 SYSTEM은 C## 접두사가 없지만, Oracle이 제공하는 특수 계정으로서 공통 사용자(Common User)로 분류됩니다. Oracle 제공 계정은 C## 접두사 규칙의 예외입니다.\n\nD) 오답 — CONTAINER=ALL을 지정하면 CDB$ROOT뿐만 아니라 모든 PDB에 걸쳐 권한이 적용됩니다. CDB$ROOT에서만 권한을 적용하려면 CONTAINER=CURRENT를 지정합니다.\n\n핵심 개념: 멀티테넌트 환경의 사용자는 공통 사용자와 로컬 사용자로 구분됩니다. 공통 사용자는 CDB$ROOT에서 C## 접두사로 생성되어 모든 컨테이너에서 인식되며, 로컬 사용자는 개별 PDB 내에서만 유효합니다. SYS, SYSTEM 등 Oracle 제공 계정은 C## 없이도 공통 사용자입니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_013",
-    "title": "PDB_PLUG_IN_VIOLATIONSビューに関する内容について正しく述べているものを選択してください。",
+    "title": "リフレッシュ可能なクローンPDBについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) TYPEがWARNINGの違反事項はPlug In操作を完全にブロックするため、先に解決する必要がある。",
-      "B) TYPEがERRORの違反事項がある場合でもPlug In操作は実行できるが、PDBのOPEN時にエラーが発生する。",
-      "C) Plug Inの互換性を事前に確認するにはDBMS_PDB.CHECK_PLUG_COMPATIBILITYファンクションを使用し、結果はPDB_PLUG_IN_VIOLATIONSビューに記録される。",
-      "D) PDB_PLUG_IN_VIOLATIONSビューはPlug In操作が完了した後にのみ参照可能であり、事前確認には使用できない。"
+      "A) リフレッシュ可能なクローンPDBはREAD ONLYモードでのみオープン可能であり、READ WRITEモードではオープンできない。",
+      "B) REFRESH MODEをNONEに変更すると、クローンPDBが通常のPDBに永続的に変換され、ソースPDBとの同期化接続が解除される。",
+      "C) リフレッシュ可能なクローンPDBのREFRESH MODE EVERYを使用すると、クローンPDBがREAD ONLYでオープンされた状態のままリフレッシュ処理が実行される。",
+      "D) リフレッシュ可能なクローンPDBを作成するにはソースPDBがNOARCHIVELOGモードで運用されている必要がある。",
+      "E) SWITCHOVERを実行すると、ソースPDBとクローンPDBの同期化接続が解除され、両方とも通常のPDBとして独立して運用される。"
     ],
-    "answer": ["C"],
-    "explanation": "정답: C\nC) 정답 — DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수를 사용하여 Plug In 전에 호환성을 사전 검사할 수 있으며, 검사 결과(위반 사항)는 PDB_PLUG_IN_VIOLATIONS 뷰에 기록됩니다. 이를 통해 캐릭터셋, Endian, 데이터베이스 버전, 컴포넌트, 패치 수준 등의 호환성 문제를 사전에 파악할 수 있습니다.\n\nA) 오답 — TYPE이 WARNING인 위반 사항은 Plug In 작업을 차단하지 않습니다. WARNING은 PDB를 오픈한 후 자동으로 해결되는 경우가 많습니다. Plug In을 차단하는 것은 TYPE이 ERROR인 경우입니다.\n\nB) 오답 — TYPE이 ERROR인 위반 사항이 있으면 Plug In 자체가 차단됩니다. 먼저 해당 오류를 해결한 후 Plug In을 재시도해야 합니다.\n\nD) 오답 — PDB_PLUG_IN_VIOLATIONS 뷰는 DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수 실행 후 사전에도 참조할 수 있습니다. Plug In 완료 후뿐만 아니라 사전 호환성 검사 결과도 기록됩니다.\n\n핵심 개념: DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수로 Plug In 전 호환성을 사전 검사하고, 결과를 PDB_PLUG_IN_VIOLATIONS 뷰에서 확인합니다. ERROR는 Plug In을 차단하고, WARNING은 오픈 후 자동 해결이 가능합니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — Refreshable Clone PDB는 소스 PDB와 주기적으로 동기화하는 특수 클론이므로 READ ONLY 모드로만 열 수 있습니다. READ WRITE 모드로 오픈하면 동기화가 불가능해지므로 허용되지 않습니다.\n\nB) 정답 — REFRESH MODE를 NONE으로 변경하면 소스 PDB와의 동기화 연결이 완전히 해제되고, 클론 PDB는 일반 PDB로 영구 전환됩니다. 이후에는 READ WRITE 모드로 오픈할 수 있지만, 다시 Refreshable Clone으로 복원할 수는 없습니다.\n\nC) 오답 — REFRESH 실행 시 클론 PDB는 먼저 CLOSE(MOUNTED) 상태로 전환된 후 소스 PDB의 Redo 데이터를 수신하여 적용합니다. 적용 완료 후 다시 READ ONLY로 오픈됩니다. READ ONLY 상태를 유지한 채 리프레시가 수행되는 것이 아닙니다.\n\nD) 오답 — Refreshable Clone PDB를 생성하고 동기화하려면 소스 PDB가 ARCHIVELOG 모드에서 운영되어야 합니다. NOARCHIVELOG 모드에서는 Redo 데이터를 전송하여 동기화할 수 없습니다.\n\nE) 오답 — SWITCHOVER는 소스 PDB와 클론 PDB의 역할을 교환하지만, 동기화 연결은 해제되지 않고 방향만 반대로 전환됩니다. 동기화 연결을 해제하여 일반 PDB로 독립시키는 것은 REFRESH MODE NONE 전환입니다. SWITCHOVER는 동기화 연결을 유지하므로 재 SWITCHOVER로 원래 상태로 복원할 수 있습니다.\n\n핵심 개념: Refreshable Clone PDB는 소스 PDB와의 주기적 동기화를 위해 READ ONLY로만 열 수 있으며, REFRESH MODE는 MANUAL(수동), EVERY n MINUTES(자동), NONE(비활성화) 세 가지입니다. REFRESH 수행 시 클론 PDB는 CLOSE 상태에서 Redo를 적용하며, NONE으로 전환하면 일반 PDB로 영구 변환됩니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_014",
-    "title": "Refreshable Clone PDBのREFRESH MODEオプションについて正しく述べているものを2つ選択してください。(2つ選択してください)",
+    "title": "PDB関連のデータ・ディクショナリ・ビューおよび動的パフォーマンス・ビューについて正しく述べているものを選択してください。",
     "options": [
-      "A) REFRESH MODE MANUALでは、DBAがALTER PLUGGABLE DATABASE ... REFRESH文を手動で実行した場合にのみ同期が行われる。",
-      "B) REFRESH MODE EVERY n MINUTESを設定すると、クローンPDBがREAD WRITEモードのままでバックグラウンドで自動同期が実行される。",
-      "C) REFRESH MODE NONEに変更すると、クローンPDBは同期接続が解除されREAD WRITEモードで使用可能な通常のPDBに変換される。",
-      "D) REFRESH MODE設定はクローンPDB作成後に変更することができず、作成時にのみ指定可能である。",
-      "E) REFRESH実行中はソースPDBへの接続がブロックされ、DML操作が制限される。"
+      "A) CDB_PDBSビューのSTATUS列はPDBの現在のオープン・モード（READ WRITE、READ ONLY等）を表示する。",
+      "B) V$PDBSビューではPDBのデータ・ディクショナリ・レベルの状態情報（NORMAL、UNPLUGGED等）を確認でき、CON_IDでPDBを識別する。",
+      "C) V$CONTAINERSビューはCDB$ROOT、PDB$SEED、およびすべてのユーザーPDBを含む全コンテナの情報を提供する。",
+      "D) CDB_PDBSビューのSTATUS列がNORMALのPDBは必ずREAD WRITEモードでオープンされている状態を意味する。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — REFRESH MODE MANUAL에서는 DBA가 ALTER PLUGGABLE DATABASE ... REFRESH 문을 수동으로 실행한 경우에만 동기화가 수행됩니다. 필요한 시점에만 동기화를 제어할 수 있어, 정밀한 관리가 필요한 환경에 적합합니다.\n\nC) 정답 — REFRESH MODE NONE으로 변경하면 소스 PDB와의 동기화 연결이 완전히 해제되며, 클론 PDB는 READ WRITE 모드로 사용할 수 있는 일반 PDB로 전환됩니다. 이후 다시 Refreshable Clone으로 되돌릴 수 없습니다.\n\nB) 오답 — Refreshable Clone PDB는 READ ONLY 모드로만 오픈할 수 있습니다. REFRESH 실행 시에는 클론 PDB가 CLOSE(MOUNTED)되었다가 Redo 적용 후 다시 READ ONLY로 오픈됩니다. READ WRITE 상태에서 자동 동기화가 실행되는 것은 아닙니다.\n\nD) 오답 — REFRESH MODE는 클론 PDB 생성 후에도 변경할 수 있습니다. 예를 들어 MANUAL에서 EVERY n MINUTES로, 또는 NONE으로 변경이 가능합니다.\n\nE) 오답 — REFRESH 실행 중 접속이 제한되는 것은 클론 PDB 쪽입니다. 소스 PDB는 REFRESH 동안에도 정상적으로 운영되며 DML 작업이 제한되지 않습니다.\n\n핵심 개념: Refreshable Clone PDB의 REFRESH MODE는 MANUAL(수동 동기화), EVERY n MINUTES(자동 동기화), NONE(동기화 해제 및 일반 PDB 전환)의 세 가지 옵션이 있으며, 생성 후에도 변경할 수 있습니다."
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — V$CONTAINERS 뷰는 CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2), 모든 사용자 PDB(CON_ID≥3)를 포함한 전체 컨테이너 정보를 제공합니다. NAME, CON_ID, OPEN_MODE, TOTAL_SIZE 등의 컬럼을 통해 CDB 내 모든 컨테이너의 상태를 한 번에 모니터링할 수 있습니다.\n\nA) 오답 — CDB_PDBS 뷰의 STATUS 열은 PDB의 딕셔너리 수준 상태(NORMAL, UNPLUGGED, RELOCATING 등)를 표시합니다. READ WRITE나 READ ONLY 같은 실시간 오픈 모드는 V$PDBS 뷰의 OPEN_MODE 열에서 확인합니다.\n\nB) 오답 — V$PDBS 뷰는 PDB의 실시간 상태 정보(OPEN_MODE, RESTRICTED 등)를 제공하는 동적 퍼포먼스 뷰입니다. NORMAL, UNPLUGGED 등 딕셔너리 수준의 상태 정보는 CDB_PDBS 뷰의 STATUS 열에서 확인합니다. 이 선택지는 V$PDBS의 역할을 CDB_PDBS의 역할과 혼동하고 있습니다.\n\nD) 오답 — CDB_PDBS의 STATUS가 NORMAL인 PDB는 CDB에 정상적으로 등록(Plug In)된 상태를 의미합니다. NORMAL 상태의 PDB도 MOUNTED, READ ONLY, READ WRITE 등 다양한 오픈 모드일 수 있으며, 반드시 READ WRITE로 오픈되어 있는 것은 아닙니다.\n\n핵심 개념: PDB 모니터링에서 CDB_PDBS는 딕셔너리 수준의 상태(NORMAL, UNPLUGGED)를, V$PDBS는 실시간 오픈 모드(READ WRITE, READ ONLY, MOUNTED)를 제공합니다. V$CONTAINERS는 CDB$ROOT를 포함한 전체 컨테이너 정보를 통합적으로 조회할 수 있는 뷰입니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_015",
-    "title": "PDB作成時のデータ・ファイル管理に関して、CREATE_FILE_DESTオプションについて正しい内容を述べているものを選択してください。",
+    "title": "PDB作成時のストレージ制限およびPATH_PREFIXに関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) CREATE_FILE_DESTはFILE_NAME_CONVERTと同時に指定することはできず、いずれか一方のみを使用する必要がある。",
-      "B) CREATE_FILE_DESTを指定すると、Oracle Managed Files（OMF）に基づいてデータ・ファイル名がOracleによって自動的に生成される。",
-      "C) CREATE_FILE_DESTはASMディスク・グループを指定することはできず、ファイルシステムのディレクトリ・パスのみを指定する必要がある。",
-      "D) CREATE_FILE_DESTはPDB_FILE_NAME_CONVERT初期化パラメータよりも低い優先順位を持つ。"
+      "A) STORAGE句のMAXSIZEはPDB内のすべてのデータ・ファイルの合計サイズを制限し、この制限に達するとORA-65114エラーが発生する。",
+      "B) MAXSIZEの制限にはTEMP表領域のファイルサイズも含まれるため、大量のソート操作実行時にMAXSIZE超過が発生する場合がある。",
+      "C) PATH_PREFIXはPDB作成後にALTER PLUGGABLE DATABASE文で自由に変更できる。",
+      "D) STORAGE句のMAXSIZEを指定しない場合、PDBのストレージ使用量はCDB$ROOTのMAXSIZE設定値を自動的に継承する。"
     ],
-    "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — CREATE_FILE_DEST를 지정하면 Oracle Managed Files(OMF)에 기반하여 디렉토리만 지정하면 Oracle이 데이터 파일명을 자동으로 생성하고 관리합니다. FILE_NAME_CONVERT보다 단순하지만 파일 이름을 직접 제어할 수 없습니다.\n\nA) 오답 — CREATE_FILE_DEST와 FILE_NAME_CONVERT는 동시에 지정할 수 있습니다. 이 경우 FILE_NAME_CONVERT가 CREATE_FILE_DEST보다 높은 우선순위를 가지며, FILE_NAME_CONVERT가 적용됩니다.\n\nC) 오답 — CREATE_FILE_DEST는 ASM 디스크 그룹도 지정할 수 있습니다. 예를 들어 CREATE_FILE_DEST = '+DATA'와 같이 ASM 환경에서도 활용 가능합니다.\n\nD) 오답 — CREATE PLUGGABLE DATABASE 문의 CREATE_FILE_DEST 절(2순위)은 PDB_FILE_NAME_CONVERT 초기화 파라미터(3순위)보다 높은 우선순위를 가집니다. 파일 경로 결정 우선순위는 FILE_NAME_CONVERT > CREATE_FILE_DEST > PDB_FILE_NAME_CONVERT > DB_CREATE_FILE_DEST입니다.\n\n핵심 개념: CREATE_FILE_DEST는 OMF 기반으로 디렉토리(또는 ASM 디스크 그룹)만 지정하면 Oracle이 파일명을 자동 생성하며, FILE_NAME_CONVERT보다 낮지만 PDB_FILE_NAME_CONVERT보다 높은 우선순위를 가집니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — STORAGE 절의 MAXSIZE는 PDB 내 모든 영구 데이터 파일의 합계 크기를 제한합니다. 데이터 파일의 자동 확장(AUTOEXTEND)이 활성화되어 있어도 MAXSIZE를 초과할 수 없으며, 제한에 도달하면 공간 할당 요청이 ORA-65114 오류와 함께 실패합니다.\n\nB) 오답 — TEMP 파일은 MAXSIZE 제한에 포함되지 않습니다. TEMP 테이블스페이스의 사용량은 MAX_SHARED_TEMP_SIZE 파라미터로 별도로 제어합니다. 따라서 대량의 정렬 작업이 MAXSIZE 초과를 유발하지 않습니다.\n\nC) 오답 — PATH_PREFIX는 PDB 내 디렉토리 객체의 경로를 제한하는 보안 메커니즘이며, PDB 생성 후에는 변경할 수 없습니다. 이는 PDB 사용자가 임의의 OS 경로에 접근하는 것을 방지하기 위한 설계입니다.\n\nD) 오답 — MAXSIZE를 지정하지 않은 경우 기본값은 UNLIMITED이며, CDB$ROOT의 설정을 상속하는 것이 아닙니다. ALTER PLUGGABLE DATABASE 문으로 생성 후에도 MAXSIZE를 동적으로 변경하거나 해제할 수 있습니다.\n\n핵심 개념: PDB의 STORAGE 절에서 MAXSIZE는 영구 데이터 파일의 합계 크기를 제한하며 TEMP 파일은 포함하지 않습니다. PATH_PREFIX는 PDB 내 디렉토리 객체의 경로를 제한하는 보안 설정으로 생성 후 변경이 불가합니다. MAXSIZE 미지정 시 기본값은 UNLIMITED입니다."
   }
 ]

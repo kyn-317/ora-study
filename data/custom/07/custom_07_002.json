@@ -2,71 +2,71 @@
   {
     "chapter": "ストレージの管理",
     "number": "C_07_006",
-    "title": "ローカル管理表領域のエクステント管理方式に関する説明として正しいものを選択してください(2つ選択してください)。",
+    "title": "TRUNCATE文とDELETE文によるHWM(最高水位標)への影響について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) AUTOALLOCATE方式では、エクステントのサイズが64KB→1MB→8MB→64MBの段階で増加する。",
-      "B) UNIFORM方式で作成した表領域のエクステントサイズは作成後にALTER TABLESPACEで変更可能である。",
-      "C) AUTOALLOCATE方式はデフォルト設定であり、EXTENT MANAGEMENT LOCALを指定すると自動的に適用される。",
-      "D) UNIFORM方式のデフォルトのエクステントサイズは64KBである。",
-      "E) AUTOALLOCATE方式では、すべてのセグメントに対して同一サイズのエクステントが割り当てられる。"
+      "A) DELETE文で表の全行を削除すると、HWM(最高水位標)がセグメントの先頭位置まで自動的に下方移動する。",
+      "B) TRUNCATE文を実行するとHWMがセグメントの開始位置に初期化され、以後のFull Table Scanで読み取るブロック数が大幅に減少する。",
+      "C) TRUNCATE文はDML文であるため、実行後にROLLBACKで元のデータを復元することが可能である。",
+      "D) DELETE文で大量の行を削除した後もHWMは下方移動しないため、Full Table Scanでは削除前と同じ数のブロックが読み取られる。",
+      "E) DELETE文で行を削除すると、空いたブロックは以後のINSERT操作でも再利用されず、完全に無駄な領域となる。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답 A: AUTOALLOCATE 방식은 Oracle이 익스텐트 크기를 자동으로 결정하며, 64KB → 1MB → 8MB → 64MB 단계로 증가합니다. 세그먼트 크기에 따라 적절한 익스텐트 크기를 자동으로 선택합니다.\n\n정답 C: EXTENT MANAGEMENT LOCAL을 지정할 때 AUTOALLOCATE와 UNIFORM 중 별도 지정하지 않으면 AUTOALLOCATE가 기본값으로 적용됩니다.\n\n오답 B: UNIFORM 방식으로 생성한 테이블스페이스의 익스텐트 크기는 생성 후 변경할 수 없습니다. 변경하려면 테이블스페이스를 재생성해야 합니다.\n\n오답 D: UNIFORM 방식의 기본 익스텐트 크기는 1MB입니다. 64KB가 아닙니다.\n\n오답 E: 모든 세그먼트에 동일 크기 익스텐트를 할당하는 것은 UNIFORM 방식의 특징입니다. AUTOALLOCATE는 세그먼트 크기에 따라 다양한 크기의 익스텐트를 할당합니다.\n\n핵심 개념: 로컬 관리 테이블스페이스의 익스텐트 관리 방식은 AUTOALLOCATE(자동, 단계적 크기 증가)와 UNIFORM(균등, 기본 1MB)이 있으며, AUTOALLOCATE가 기본값입니다."
+    "answer": ["B", "D"],
+    "explanation": "정답: B, D\nB) 정답 — TRUNCATE 문은 DDL이며 실행 시 HWM(High Water Mark)을 세그먼트의 시작점으로 초기화합니다. 이에 따라 Full Table Scan 시 읽어야 할 블록 수가 대폭 감소하여 성능이 즉시 개선됩니다.\n\nD) 정답 — DELETE 문으로 대량의 행을 삭제하더라도 HWM은 절대 자동으로 하향되지 않습니다. 따라서 Full Table Scan은 여전히 HWM까지의 모든 블록(빈 블록 포함)을 읽으므로 성능 개선이 없습니다.\n\nA) 오답 — DELETE 문으로는 HWM이 하향되지 않습니다. HWM을 하향하려면 TRUNCATE, SHRINK SPACE, 또는 ALTER TABLE MOVE를 사용해야 합니다.\n\nC) 오답 — TRUNCATE는 DML이 아닌 DDL(Data Definition Language)입니다. DDL은 실행 시 자동으로 COMMIT되므로 ROLLBACK이 불가능합니다.\n\nE) 오답 — DELETE로 빈 블록이 된 HWM 아래의 블록은 이후 INSERT 시 재사용됩니다. ASSM 환경에서는 비트맵이 블록의 여유 공간 상태를 추적하여 새로운 INSERT 시 여유 공간이 있는 블록에 먼저 삽입을 시도합니다.\n\n핵심 개념: DELETE는 행 데이터를 제거하지만 HWM을 하향시키지 않아 Full Table Scan 성능에 영향이 없습니다. TRUNCATE는 DDL로서 HWM을 초기화하여 공간을 즉시 회수하지만 ROLLBACK이 불가능합니다. 대량 DELETE 후 HWM을 하향하려면 SHRINK SPACE 또는 ALTER TABLE MOVE가 필요합니다."
   },
   {
     "chapter": "ストレージの管理",
     "number": "C_07_007",
-    "title": "ALTER TABLE MOVEとSHRINK SPACEの比較に関する説明として正しいものはどれになりますか。",
+    "title": "Oracle DatabaseのSegment Advisorの役割と動作について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SHRINK SPACEは新しいセグメントを作成するため、追加のディスク領域が必要となる。",
-      "B) ALTER TABLE MOVE(非Online)を実行するとテーブルに依存するすべての索引がUSABLE状態を維持する。",
-      "C) SHRINK SPACEはMSSM(手動セグメント領域管理)環境でのみ使用可能である。",
-      "D) ALTER TABLE MOVE ONLINEはOracle 12c R2以降でサポートされ、DML操作との同時実行が可能である。",
-      "E) SHRINK SPACEは表領域の変更や圧縮オプションの同時変更に対応している。"
+      "A) Segment Advisorは自動メンテナンス・タスクとしてメンテナンス・ウィンドウ内で自動的に実行され、空間の無駄が大きいセグメントを識別する。",
+      "B) Segment Advisorの推奨事項はDBA_ADVISOR_FINDINGSビューで確認することができる。",
+      "C) Segment Advisorは空間の無駄を検出するとSHRINK SPACEを自動的に実行してセグメントを縮小する。",
+      "D) Segment Advisorはデータベースのパフォーマンス・チューニング用アドバイザであり、SQL文の実行計画を分析して改善提案を行う。",
+      "E) Segment Advisorはテーブルスペース・レベルでのみ動作し、個別のセグメント単位での分析は行えない。"
     ],
-    "answer": ["D"],
-    "explanation": "정답 D: ALTER TABLE MOVE ONLINE은 Oracle 12c R2부터 지원되며, DML 동시 수행이 가능합니다. Online MOVE는 인덱스를 자동으로 유지하므로 별도의 REBUILD가 필요하지 않습니다.\n\n오답 A: 새로운 세그먼트를 생성하여 추가 디스크 공간이 필요한 것은 ALTER TABLE MOVE의 특징입니다. SHRINK SPACE는 기존 세그먼트 내에서 동작하므로 추가 공간이 불필요합니다.\n\n오답 B: ALTER TABLE MOVE(비Online)를 실행하면 테이블의 모든 인덱스가 UNUSABLE 상태가 됩니다. 이후 반드시 인덱스 REBUILD가 필요합니다.\n\n오답 C: SHRINK SPACE는 ASSM(Automatic Segment Space Management) 테이블스페이스에서만 사용 가능합니다. MSSM 환경에서는 SHRINK SPACE를 사용할 수 없으며, ALTER TABLE MOVE가 유일한 대안입니다.\n\n오답 E: 테이블스페이스 변경이나 압축 옵션 변경을 동시에 수행할 수 있는 것은 ALTER TABLE MOVE의 특징입니다. SHRINK SPACE는 기존 세그먼트 내에서 데이터 재배치와 HWM 하향만 수행합니다.\n\n핵심 개념: SHRINK SPACE는 추가 공간 없이 ASSM 환경에서 세그먼트를 축소하고, ALTER TABLE MOVE는 세그먼트를 재생성하여 테이블스페이스/압축 변경이 가능하며, MOVE ONLINE은 DML 동시 수행을 지원합니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — Segment Advisor는 자동 유지보수 태스크(Auto Maintenance Task)의 일부로 유지보수 윈도우(Maintenance Window) 내에서 자동 실행됩니다. 공간 낭비가 심한 세그먼트를 자동으로 식별하고 SHRINK 권고를 제공합니다.\n\nB) 정답 — Segment Advisor의 분석 결과와 축소 권고 사항은 DBA_ADVISOR_FINDINGS 뷰를 통해 확인할 수 있습니다. 또한 DBA_ADVISOR_RECOMMENDATIONS 뷰에서 구체적인 조치 권고를 확인할 수 있습니다.\n\nC) 오답 — Segment Advisor는 공간 낭비를 분석하고 축소를 '권고'할 뿐, SHRINK SPACE를 자동으로 실행하지는 않습니다. 실제 축소 작업은 DBA가 권고를 검토한 후 수동으로 수행해야 합니다.\n\nD) 오답 — SQL 실행 계획을 분석하여 성능 개선 제안을 하는 것은 SQL Tuning Advisor입니다. Segment Advisor는 저장 공간 관리에 특화된 어드바이저로, 세그먼트의 공간 낭비를 분석합니다.\n\nE) 오답 — Segment Advisor는 테이블스페이스 레벨뿐만 아니라 개별 세그먼트(테이블, 인덱스 등) 단위로도 분석이 가능합니다. DBMS_ADVISOR 패키지를 사용하여 수동으로 특정 세그먼트에 대해 실행할 수도 있습니다.\n\n핵심 개념: Segment Advisor는 공간 최적화 전용 어드바이저로, 자동 유지보수 태스크로 자동 실행되며 DBA_ADVISOR_FINDINGS 뷰로 결과를 확인합니다. 축소를 권고할 뿐 자동 실행하지는 않으며, 테이블스페이스 및 개별 세그먼트 레벨 모두에서 분석 가능합니다."
   },
   {
     "chapter": "ストレージの管理",
     "number": "C_07_008",
-    "title": "Advanced Row CompressionとHCC(Hybrid Columnar Compression)に関する説明として正しいものを選択してください(2つ選択してください)。",
+    "title": "再開可能領域割当て(Resumable Space Allocation)に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) Advanced Row Compressionはすべての標準DML操作で圧縮を維持し、使用にはAdvanced Compression Optionライセンスが必要である。",
-      "B) HCCはすべてのOracle Database環境で使用可能であり、特定のストレージ要件はない。",
-      "C) Advanced Row Compressionはブロックが一定レベルまで満たされるとバッチ方式で自動圧縮を実行する。",
-      "D) HCC環境で通常のDMLが発生してもCompression Unit(CU)の圧縮状態は常に維持される。",
-      "E) Advanced Row CompressionはDirect-Path Insertのみに対応しており、標準INSERT/UPDATE時にはデータ圧縮が行われない。"
+      "A) RESUMABLE_TIMEOUT初期化パラメータを0より大きい値に設定すると、すべてのセッションでデフォルトで再開可能領域割当てが有効になる。",
+      "B) 再開可能な作業が一時停止されると、AFTER SUSPEND システム・トリガーを使用して自動化された対応(アラートやデータファイルの追加など)を実装できる。",
+      "C) 再開可能な作業が一時停止中に複数回中断された場合、各中断ごとにTIMEOUT値がリセットされる。",
+      "D) ALTER SESSION ENABLE RESUMABLEを実行するために特別なシステム権限は不要であり、すべてのユーザーが利用可能である。",
+      "E) 再開可能領域割当ては分散トランザクションにおいてリモート・サイトで発生した領域不足にも適用される。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답 A: Advanced Row Compression(ROW STORE COMPRESS ADVANCED)은 모든 DML(INSERT, UPDATE, DELETE)에서 압축을 유지하며, 사용하려면 Advanced Compression Option 라이선스가 필요합니다.\n\n정답 C: Advanced Compression은 블록이 일정 수준 채워지면 배치(Batch) 방식으로 자동 압축을 수행하여 DML 성능에 미치는 영향을 최소화합니다.\n\n오답 B: HCC(Hybrid Columnar Compression)는 Oracle Exadata, ZFS Storage Appliance 등 특정 스토리지에서만 지원됩니다. 모든 Oracle Database 환경에서 사용할 수 있는 것은 아닙니다.\n\n오답 D: HCC 환경에서 일반 DML이 발생하면 해당 Compression Unit(CU)이 비압축 상태로 전환될 수 있습니다. 압축 상태를 유지하려면 주기적인 ALTER TABLE MOVE로 재압축이 필요합니다.\n\n오답 E: Direct-Path Insert에서만 압축이 적용되는 것은 Basic Compression(ROW STORE COMPRESS BASIC)의 특징입니다. Advanced Row Compression은 모든 DML에서 압축을 유지합니다.\n\n핵심 개념: Advanced Row Compression은 모든 DML에서 배치 방식 자동 압축을 지원하며(라이선스 필요), HCC는 Exadata 등 특정 스토리지에서만 지원되고 DML 발생 시 CU 압축이 해제될 수 있습니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — RESUMABLE_TIMEOUT 초기화 파라미터를 0보다 큰 값으로 설정하면 모든 세션에서 기본적으로 재개 가능 영역 할당이 활성화됩니다. 기본값은 0(비활성)이며, ALTER SYSTEM으로 동적 변경이 가능합니다.\n\nB) 정답 — AFTER SUSPEND 시스템 트리거는 재개 가능 작업이 일시 중지될 때 자동으로 실행됩니다. 이 트리거를 통해 DBA에게 알림을 보내거나, 데이터파일을 자동으로 추가하거나, 테이블스페이스 쿼터를 자동 조정하는 등의 자동화된 대응을 구현할 수 있습니다.\n\nC) 오답 — TIMEOUT은 첫 번째 일시 중지 시점부터 누적되며, 각 일시 중지마다 리셋되지 않습니다. 총 경과 시간이 TIMEOUT 값을 초과하면 작업이 실패합니다.\n\nD) 오답 — ALTER SESSION ENABLE RESUMABLE을 실행하려면 RESUMABLE 시스템 권한이 필요합니다. 이 권한이 없는 사용자가 실행하면 ORA-01031 오류가 발생합니다.\n\nE) 오답 — 분산 트랜잭션에서는 로컬 사이트의 공간 부족에만 적용되며, 원격 사이트에서 발생한 공간 부족에는 적용되지 않습니다.\n\n핵심 개념: 재개 가능 영역 할당은 RESUMABLE_TIMEOUT 파라미터(시스템 레벨) 또는 ALTER SESSION(세션 레벨)으로 설정하며, AFTER SUSPEND 트리거로 자동 대응을 구현할 수 있습니다. TIMEOUT은 누적 방식이며, RESUMABLE 시스템 권한이 필요합니다."
   },
   {
     "chapter": "ストレージの管理",
     "number": "C_07_009",
-    "title": "Oracleデータベースのセグメント領域分析ツールに関する説明として正しいものはどれになりますか。",
+    "title": "ローカル管理表領域のエクステント管理方式であるAUTOALLOCATEとUNIFORMについて正しく述べているものを選択してください。",
     "options": [
-      "A) DBMS_SPACE.SPACE_USAGEプロシージャはMSSM環境専用で、ASSM環境では使用できない。",
-      "B) Segment Advisorはメンテナンス・ウィンドウ内で自動実行され、縮小推奨はDBA_ADVISOR_FINDINGSビューで確認できる。",
-      "C) DBMS_COMPRESSION.GET_COMPRESSION_RATIOは圧縮適用後の実際の圧縮率のみを返し、事前推定はできない。",
-      "D) DBA_SEGMENTSビューのBYTES列はセグメントに格納されている実データの正確なサイズを示す。",
-      "E) DBA_TAB_MODIFICATIONSビューは、最後のDBMS_STATS統計収集以降のDML変更回数を記録しない。"
+      "A) AUTOALLOCATE方式では、エクステント・サイズが64KB→1MB→8MB→64MBのように段階的に増加し、Oracleが自動的にサイズを決定する。",
+      "B) UNIFORM方式ではデフォルトのエクステント・サイズが8MBであり、変更することはできない。",
+      "C) AUTOALLOCATE方式は一時表領域(TEMPORARY TABLESPACE)でのみ使用可能であり、永続表領域では使用できない。",
+      "D) UNIFORM方式は常にAUTOALLOCATE方式よりも空間効率が高く、すべての用途で推奨される。",
+      "E) ディクショナリ管理表領域でもAUTOALLOCATEおよびUNIFORM方式を使用することができる。"
     ],
-    "answer": ["B"],
-    "explanation": "정답 B: Segment Advisor는 유지보수 윈도우(Maintenance Window)에서 자동으로 실행되며, 공간 낭비가 심한 세그먼트를 식별하고 축소 권고를 제공합니다. 권고 결과는 DBA_ADVISOR_FINDINGS 뷰에서 확인할 수 있습니다.\n\n오답 A: DBMS_SPACE.SPACE_USAGE는 ASSM(Automatic Segment Space Management) 세그먼트의 블록을 상태별(full, 75-100%, 50-75% 등)로 분류하여 공간 사용 효율을 정밀 분석하는 프로시저입니다. MSSM 전용이 아니라 ASSM 환경에서 사용합니다.\n\n오답 C: DBMS_COMPRESSION.GET_COMPRESSION_RATIO는 압축 적용 전에 예상 압축률을 사전에 추정할 수 있는 기능입니다. 실제 적용 후의 결과만 반환하는 것이 아닙니다.\n\n오답 D: DBA_SEGMENTS의 BYTES 열은 세그먼트에 할당된 전체 디스크 공간 크기를 나타내며, 실제 데이터 크기가 아닙니다. 실제 데이터 크기는 DBA_TABLES의 NUM_ROWS * AVG_ROW_LEN으로 추정할 수 있습니다.\n\n오답 E: DBA_TAB_MODIFICATIONS 뷰는 마지막 통계 수집(DBMS_STATS) 이후 발생한 INSERT, UPDATE, DELETE 횟수를 기록하여 공간 변화를 추정하는 데 활용됩니다.\n\n핵심 개념: Segment Advisor는 유지보수 윈도우에서 자동 실행되어 공간 낭비 세그먼트를 식별하고, DBMS_SPACE.SPACE_USAGE는 ASSM 환경에서 블록 상태별 분석을, DBMS_COMPRESSION은 압축률 사전 추정을 제공합니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — AUTOALLOCATE 방식에서는 Oracle이 익스텐트 크기를 자동으로 결정하며, 64KB → 1MB → 8MB → 64MB로 단계적으로 증가합니다. 이는 로컬 관리 테이블스페이스의 기본 익스텐트 관리 방식입니다.\n\nB) 오답 — UNIFORM 방식의 기본 익스텐트 크기는 1MB이며, CREATE TABLESPACE 문에서 SIZE 절을 사용하여 원하는 크기로 지정할 수 있습니다. 예: EXTENT MANAGEMENT LOCAL UNIFORM SIZE 5M.\n\nC) 오답 — AUTOALLOCATE 방식은 영구 테이블스페이스의 기본 익스텐트 관리 방식입니다. 일시 테이블스페이스에서만 사용되는 것이 아니라, 오히려 일시 테이블스페이스는 UNIFORM 방식이 권장됩니다.\n\nD) 오답 — UNIFORM 방식이 항상 더 효율적인 것은 아닙니다. AUTOALLOCATE는 세그먼트 크기에 따라 익스텐트 크기를 자동 조절하여 유연한 공간 관리가 가능하고, UNIFORM은 모든 익스텐트가 동일 크기이므로 일시 테이블스페이스나 크기가 비슷한 세그먼트가 많은 환경에 적합합니다.\n\nE) 오답 — AUTOALLOCATE와 UNIFORM은 로컬 관리 테이블스페이스(Locally Managed Tablespace)의 익스텐트 관리 방식입니다. 딕셔너리 관리 테이블스페이스(Dictionary Managed Tablespace)에서는 사용할 수 없으며, 딕셔너리 관리 방식은 별도의 메커니즘을 사용합니다.\n\n핵심 개념: 로컬 관리 테이블스페이스는 AUTOALLOCATE(기본, 단계적 크기 증가)와 UNIFORM(균등 크기, 기본 1MB) 두 가지 익스텐트 관리 방식을 제공합니다. AUTOALLOCATE는 다양한 크기의 세그먼트가 혼재하는 일반 테이블스페이스에 적합하고, UNIFORM은 크기가 비슷한 세그먼트나 일시 테이블스페이스에 적합합니다."
   },
   {
     "chapter": "ストレージの管理",
     "number": "C_07_010",
-    "title": "SHRINK SPACE操作の前提条件と関連オプションに関する説明として正しいものを選択してください(2つ選択してください)。",
+    "title": "遅延セグメント作成(Deferred Segment Creation)のセグメント割当て制御に関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SHRINK SPACEを実行する前にALTER TABLE ... ENABLE ROW MOVEMENTを実行して行移動を有効にする必要がある。",
-      "B) SHRINK SPACE CASCADEは表のみを縮小し、依存する索引やLOBセグメントは個別に縮小する必要がある。",
-      "C) 既に圧縮(Compressed)されている表やLONG型の列を含む表でもSHRINK SPACEを実行することができる。",
-      "D) SHRINK SPACEは行のROWIDを変更するため、ROWIDをハードコーディングしているアプリケーションでは注意が必要である。",
-      "E) SHRINK SPACE COMPACTを実行するとデータの再配置とHWMの下方調整が同時に行われる。"
+      "A) CREATE TABLE文でSEGMENT CREATION IMMEDIATE句を指定すると、DEFERRED_SEGMENT_CREATIONパラメータの設定にかかわらず、表作成時に即座にセグメントが割り当てられる。",
+      "B) 遅延セグメント状態(SEGMENT_CREATED = 'NO')の表は、DBA_SEGMENTSビューで確認することができる。",
+      "C) DEFERRED_SEGMENT_CREATIONパラメータの値を変更すると、変更前に作成済みの既存の表のセグメント割当て状態にも影響する。",
+      "D) 遅延セグメント状態の表に対して、データを挿入しなくてもDBMS_SPACE_ADMINパッケージのプロシージャを使用してセグメントを強制的に割り当てることができる。",
+      "E) 遅延セグメント状態の表に対してALTER TABLE ... MOVE TABLESPACEを実行して、別の表領域にそのまま移動させることができる。"
     ],
     "answer": ["A", "D"],
-    "explanation": "정답 A: SHRINK SPACE를 수행하기 전에 반드시 ALTER TABLE ... ENABLE ROW MOVEMENT를 실행하여 행 이동을 허용해야 합니다. 행 이동이 비활성화된 상태에서는 SHRINK SPACE를 실행할 수 없습니다.\n\n정답 D: SHRINK SPACE는 데이터를 세그먼트 앞쪽으로 재배치하는 과정에서 행의 ROWID를 변경합니다. 따라서 ROWID를 직접 하드코딩한 애플리케이션이 있으면 SHRINK 후 참조 오류가 발생할 수 있으므로 주의가 필요합니다.\n\n오답 B: SHRINK SPACE CASCADE는 테이블뿐 아니라 종속 인덱스, LOB 세그먼트까지 함께 축소합니다. 개별적으로 축소할 필요가 없습니다.\n\n오답 C: 이미 압축(Compressed)된 테이블, LONG 타입 열이 있는 테이블, 클러스터 테이블에서는 SHRINK SPACE를 실행할 수 없습니다.\n\n오답 E: SHRINK SPACE COMPACT는 데이터 재배치만 수행하고 HWM 하향은 수행하지 않습니다. HWM을 하향하려면 이후 별도로 SHRINK SPACE를 실행해야 합니다. 이것은 DML 영향을 최소화하기 위한 2단계 전략에 해당합니다.\n\n핵심 개념: SHRINK SPACE는 ROW MOVEMENT 활성화가 필수 전제조건이며, ROWID 변경이 발생합니다. COMPACT 옵션은 데이터 재배치만 수행하고, CASCADE 옵션은 종속 객체까지 함께 축소합니다."
+    "explanation": "정답: A, D\nA) 정답 — CREATE TABLE 문의 SEGMENT CREATION IMMEDIATE 절은 최우선으로 적용됩니다. 시스템 레벨이나 세션 레벨의 DEFERRED_SEGMENT_CREATION 파라미터 설정과 관계없이, 이 절이 지정되면 테이블 생성 시 즉시 세그먼트가 할당됩니다.\n\nD) 정답 — DBMS_SPACE_ADMIN 패키지의 MATERIALIZE_DEFERRED_SEGMENTS 프로시저를 사용하면 데이터를 삽입하지 않고도 지연 세그먼트 상태의 테이블에 세그먼트를 강제로 할당할 수 있습니다. 특정 테이블 단위 또는 스키마 전체에 대해 실행 가능합니다.\n\nB) 오답 — 지연 세그먼트 상태(SEGMENT_CREATED = 'NO')의 테이블은 아직 세그먼트가 할당되지 않았으므로 DBA_SEGMENTS 뷰에 나타나지 않습니다. DBA_TABLES의 SEGMENT_CREATED 컬럼으로 확인해야 합니다.\n\nC) 오답 — DEFERRED_SEGMENT_CREATION 파라미터 변경은 변경 이후 새로 생성되는 객체에만 적용됩니다. 기존에 생성된 테이블의 세그먼트 할당 상태에는 영향을 주지 않습니다.\n\nE) 오답 — 세그먼트가 없는 테이블은 ALTER TABLE ... MOVE TABLESPACE 명령으로 이동할 수 없습니다. 먼저 DBMS_SPACE_ADMIN 패키지 등으로 세그먼트를 강제 할당한 후에 이동해야 합니다.\n\n핵심 개념: 지연 세그먼트 생성의 제어는 DDL 구문(SEGMENT CREATION 절) > 세션 레벨 > 시스템 레벨 순서의 우선순위로 적용됩니다. 지연 상태의 테이블은 DBA_SEGMENTS에 나타나지 않으며, MATERIALIZE_DEFERRED_SEGMENTS로 강제 할당하거나 첫 번째 INSERT로 자동 할당됩니다."
   }
 ]

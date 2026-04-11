@@ -3,13 +3,26 @@
   "chapter_name": "データの移動",
   "original_topic_ratio": {
     "外部表": 1,
-    "Data Pump": 2,
-    "SQL*Loader": 1
+    "Data Pump Importパラメータ": 1,
+    "Data Pump対話型モード": 1,
+    "SQL*Loaderモード": 1
   },
   "custom_topic_counts": {
-    "外部表": 3,
-    "Data Pump": 8,
-    "SQL*Loader": 4
+    "外部表アクセス・ドライバ": 1,
+    "Data Pump Exportモード": 1,
+    "SQL*Loader制御ファイル構成": 1,
+    "Data Pumpディレクトリ・オブジェクト": 1,
+    "トランスポータブル表領域": 1,
+    "外部表（ディレクトリ・オブジェクトとドライバ特性）": 1,
+    "SQL*Loader（Conventional vs Direct Path）": 1,
+    "Data Pump Import（REMAP機能）": 1,
+    "Data Pump Import（TABLE_EXISTS_ACTION詳細）": 1,
+    "Data Pump アーキテクチャ（サーバー側 vs exp/imp）": 1,
+    "外部表（ORACLE_DATAPUMPアンロード）": 1,
+    "Data Pump Export（FULLモードと権限）": 1,
+    "Data Pump Import（TABLE_EXISTS_ACTION比較）": 1,
+    "SQL*Loader（ロード方式とインデックス）": 1,
+    "ディレクトリ・オブジェクト（権限とセキュリティ）": 1
   },
   "total_custom": 15,
   "last_number": "C_09_015"

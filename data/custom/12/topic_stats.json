@@ -2,14 +2,19 @@
   "chapter": "12",
   "chapter_name": "自動メンテナンス",
   "original_topic_ratio": {
-    "自動メンテナンスタスク": 2,
-    "メンテナンス・ウィンドウ": 1,
-    "Resource Manager連携": 1
+    "事前定義済みタスク": 2,
+    "メンテナンス・ウィンドウとリソース管理": 1
   },
   "custom_topic_counts": {
-    "自動メンテナンスタスク": 6,
-    "メンテナンス・ウィンドウ": 5,
-    "Resource Manager連携": 4
+    "事前定義済みタスク": 2,
+    "メンテナンス・ウィンドウとリソース管理": 5,
+    "DBMS_AUTO_TASK_ADMIN制御": 2,
+    "AutoTask実行履歴モニタリング": 1,
+    "ウィンドウ終了時タスク動作": 1,
+    "ウィンドウ中重複処理": 1,
+    "AutoTask全体無効化": 1,
+    "DBA_AUTOTASK_WINDOW_CLIENTSビュー": 1,
+    "DEFAULT_MAINTENANCE_PLANリソース構造": 1
   },
   "total_custom": 15,
   "last_number": "C_12_015"

@@ -2,69 +2,69 @@
   {
     "chapter": "監査の概要",
     "number": "C_11_011",
-    "title": "マルチテナント環境における統合監査ポリシーのCONTAINER句について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "統合監査ポリシーの変更に関して正しく述べているものを選択してください。",
     "options": [
-      "A) CONTAINER=ALLを指定してCDBルートで作成・有効化された監査ポリシーは、CDB全体のすべてのPDBに共通で適用される。",
-      "B) CONTAINER=ALLの監査ポリシーは各PDBで個別にAUDIT POLICY文で有効化する必要があり、CDBルートでの有効化だけでは適用されない。",
-      "C) PDB内で作成された監査ポリシーにはCONTAINER=CURRENTがデフォルトで設定され、そのPDB内でのみ有効となる。",
-      "D) CONTAINER=ALLで作成された共通監査ポリシーは、各PDB管理者がALTER AUDIT POLICY文で自由に変更できる。",
-      "E) CDBルートで作成されたローカル監査ポリシーは、自動的にすべてのPDBに継承される。"
+      "A) ALTER AUDIT POLICY文を使用して、既存のポリシーにACTIONSやPRIVILEGESの監査項目を追加または削除できる。",
+      "B) 統合監査ポリシーの変更は、ポリシーが有効化されている状態では実行できず、必ずNOAUDIT POLICYで無効化してから変更する必要がある。",
+      "C) ALTER AUDIT POLICY文で監査項目を追加する場合、ポリシー全体を再作成(DROP＋CREATE)する必要がある。",
+      "D) ALTER AUDIT POLICY文は事前定義監査ポリシー(ORA_SECURECONFIGなど)に対しても使用でき、監査項目のカスタマイズが可能である。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — CONTAINER=ALL을 지정하여 CDB 루트에서 생성하고 AUDIT POLICY 문으로 활성화한 감사 정책은 CDB 전체(모든 PDB 포함)에 공통으로 적용됩니다. 정책 생성만으로는 감사가 수행되지 않으며, 반드시 활성화 단계를 거쳐야 합니다.\n\nC) 정답 — PDB 내에서 생성된 감사 정책은 기본적으로 CONTAINER=CURRENT가 적용되어 해당 PDB 내에서만 유효합니다. 다른 PDB나 CDB 루트에는 영향을 주지 않습니다.\n\nB) 오답 — CONTAINER=ALL로 생성된 공통 감사 정책은 CDB 루트에서 AUDIT POLICY로 활성화하면 모든 PDB에 자동 적용됩니다. 각 PDB에서 개별적으로 활성화할 필요가 없습니다.\n\nD) 오답 — CONTAINER=ALL로 생성된 공통 감사 정책은 PDB 관리자가 ALTER AUDIT POLICY로 변경할 수 없습니다. 공통 정책의 수정은 CDB 루트의 공통 사용자만 수행할 수 있습니다.\n\nE) 오답 — CDB 루트에서 생성된 로컬 감사 정책(CONTAINER=CURRENT)은 CDB 루트에서만 유효하며, PDB에 자동 상속되지 않습니다. PDB에 적용하려면 CONTAINER=ALL을 지정해야 합니다.\n\n핵심 개념: 멀티테넌트 환경에서 CONTAINER=ALL은 CDB 전체에 공통 감사 정책을 적용하고, CONTAINER=CURRENT(기본값)는 현재 컨테이너에서만 유효한 로컬 정책을 생성합니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — ALTER AUDIT POLICY 문을 사용하면 기존 통합 감사 정책에 ADD 절로 ACTIONS, PRIVILEGES, ROLES를 추가하거나, DROP 절로 제거할 수 있습니다. 정책을 삭제하고 재생성할 필요 없이 유연하게 감사 항목을 변경할 수 있습니다.\n\nB) 오답 — 통합 감사 정책은 활성화된 상태에서도 ALTER AUDIT POLICY 문으로 변경할 수 있습니다. 변경 사항은 해당 정책이 적용된 새로운 세션부터 반영됩니다.\n\nC) 오답 — ALTER AUDIT POLICY 문에서 ADD 절을 사용하면 기존 정책에 감사 항목을 추가할 수 있으므로, 정책을 DROP하고 다시 CREATE할 필요가 없습니다.\n\nD) 오답 — 사전 정의 감사 정책(ORA_SECURECONFIG, ORA_LOGON_FAILURES 등)은 ALTER AUDIT POLICY 문으로 수정할 수 없습니다. 사전 정의 정책은 AUDIT POLICY/NOAUDIT POLICY로 활성화/비활성화만 가능합니다.\n\n핵심 개념: ALTER AUDIT POLICY 문은 사용자 정의 통합 감사 정책에 대해 ADD/DROP 절로 ACTIONS, PRIVILEGES, ROLES를 유연하게 추가/제거할 수 있으며, 사전 정의 정책에는 적용할 수 없습니다."
   },
   {
     "chapter": "監査の概要",
     "number": "C_11_012",
-    "title": "統合監査ポリシーにおけるコンポーネント監査(ACTIONS COMPONENT)について正しい内容を述べているのはどれになりますか。",
+    "title": "統合監査に関連するデータディクショナリ・ビューについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ACTIONS COMPONENT句を使用すると、Oracle Data PumpやOracle Label Securityなどのデータベース・コンポーネントの操作を監査できる。",
-      "B) コンポーネント監査はACTIONS句と同じポリシー内には含めることができず、別のポリシーとして作成する必要がある。",
-      "C) ACTIONS COMPONENT句で指定できるコンポーネントはData PumpのEXPORTおよびIMPORT操作のみに限定される。",
-      "D) コンポーネント監査のポリシーが有効になると、コンポーネントの通常のアクションに加えてすべてのSQLアクションも自動的に監査される。"
+      "A) AUDIT_UNIFIED_POLICIESビューは、データベースに定義されている統合監査ポリシーの一覧と、各ポリシーに含まれる監査項目を確認できる。",
+      "B) AUDIT_UNIFIED_ENABLED_POLICIESビューは、現在有効化されている監査ポリシーとその適用対象ユーザーを確認できる。",
+      "C) UNIFIED_AUDIT_TRAILビューは監査証跡の確認専用であり、このビューを参照するために特別なロールは必要ない。",
+      "D) AUDIT_UNIFIED_POLICIESビューには、ポリシーが現在有効化されているかどうかのステータス情報も含まれている。",
+      "E) DBA_COMMON_AUDIT_TRAILビューは統合監査トレイルのみを参照するビューであり、FGA監査レコードは含まれない。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — ACTIONS COMPONENT 절을 사용하면 Oracle Data Pump(EXPORT/IMPORT), Oracle Label Security, Oracle Database Vault 등 데이터베이스 컴포넌트의 특정 작업을 감사 대상으로 지정할 수 있습니다.\n\nB) 오답 — 하나의 통합 감사 정책에 PRIVILEGES, ACTIONS, ROLES, ACTIONS COMPONENT를 모두 조합하여 복합적인 감사 조건을 정의할 수 있습니다. 별도의 정책으로 분리할 필요가 없습니다.\n\nC) 오답 — ACTIONS COMPONENT는 Data Pump뿐만 아니라 Oracle Label Security(OLS), Oracle Database Vault, Real Application Security 등 여러 Oracle 컴포넌트의 작업을 감사 대상으로 지정할 수 있습니다.\n\nD) 오답 — 컴포넌트 감사 정책은 지정된 컴포넌트의 특정 작업만 감사합니다. 모든 SQL 액션이 자동으로 감사되는 것이 아니며, SQL 액션 감사는 별도로 ACTIONS 절에서 지정해야 합니다.\n\n핵심 개념: ACTIONS COMPONENT는 Data Pump, Label Security, Database Vault 등 Oracle 컴포넌트별 특정 작업을 통합 감사 정책에서 감사할 수 있게 하며, 다른 감사 조건(PRIVILEGES, ACTIONS, ROLES)과 하나의 정책에 함께 정의 가능합니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — AUDIT_UNIFIED_POLICIES 뷰는 데이터베이스에 정의된 통합 감사 정책의 목록과 각 정책에 포함된 감사 항목(PRIVILEGES, ACTIONS, ROLES 등)을 확인할 수 있는 딕셔너리 뷰입니다.\n\nB) 정답 — AUDIT_UNIFIED_ENABLED_POLICIES 뷰는 현재 활성화된 감사 정책과 해당 정책이 적용된 대상 사용자(BY/EXCEPT 절 지정 포함) 정보를 확인할 수 있습니다.\n\nC) 오답 — UNIFIED_AUDIT_TRAIL 뷰를 참조하려면 AUDIT_VIEWER 또는 AUDIT_ADMIN 롤이 필요합니다. 일반 사용자에게는 기본적으로 이 뷰에 대한 조회 권한이 부여되지 않습니다.\n\nD) 오답 — AUDIT_UNIFIED_POLICIES 뷰는 정의된 정책의 감사 항목을 보여주지만, 정책이 현재 활성화되었는지 여부는 포함하지 않습니다. 활성화 상태는 AUDIT_UNIFIED_ENABLED_POLICIES 뷰에서 확인해야 합니다.\n\nE) 오답 — DBA_COMMON_AUDIT_TRAIL 뷰는 통합 감사 트레일과 FGA 감사 트레일을 하나의 뷰로 통합하여 조회할 수 있는 뷰입니다. FGA 레코드도 포함됩니다.\n\n핵심 개념: 통합 감사 관련 딕셔너리 뷰는 역할이 구분되어 있으며, AUDIT_UNIFIED_POLICIES는 정의된 정책 내용을, AUDIT_UNIFIED_ENABLED_POLICIES는 활성화 상태 및 적용 대상을, UNIFIED_AUDIT_TRAIL은 감사 레코드를 조회하는 데 사용됩니다."
   },
   {
     "chapter": "監査の概要",
     "number": "C_11_013",
-    "title": "統合監査におけるAUDIT_ADMINロールとAUDIT_VIEWERロールの職務分離について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "統合監査と従来型監査(Traditional Auditing)を比較した内容として正しいものを選択してください(2つ選択してください)。",
     "options": [
-      "A) DBAロールを持つユーザーは、AUDIT_ADMINロールがなくても統合監査ポリシーの作成および変更が可能である。",
-      "B) AUDIT_VIEWERロールを持つユーザーはUNIFIED_AUDIT_TRAILビューを照会できるが、監査ポリシーの作成や監査トレールの削除はできない。",
-      "C) AUDIT_ADMINロールにはDBMS_AUDIT_MGMTパッケージの実行権限が含まれており、監査トレールの管理操作を実行できる。",
-      "D) AUDIT_VIEWERロールを持つユーザーはDBMS_FGA.ADD_POLICYプロシージャを使用してFGA監査ポリシーを作成できる。",
-      "E) AUDIT_ADMINロールとAUDIT_VIEWERロールは同一ユーザーに付与することができず、必ず異なるユーザーに付与する必要がある。"
+      "A) 統合監査はSGA内のキューを使用した非同期的な記録方式であるため、従来型監査と比べてパフォーマンスへの影響が少ない。",
+      "B) 従来型監査では、すべての監査証跡がUNIFIED_AUDIT_TRAILビューで一元的に確認できた。",
+      "C) 統合監査ではSYSユーザーの活動も統合監査トレイルに記録可能であるが、従来型監査ではSYSユーザーの監査レコードは別途のOSファイルにのみ記録されていた。",
+      "D) 従来型監査は統合監査よりもポリシーベースの柔軟な監査設定が可能であった。",
+      "E) 統合監査と従来型監査はどちらもCREATE AUDIT POLICY文を使用して監査対象を定義する。"
     ],
-    "answer": ["B", "C"],
-    "explanation": "정답: B, C\nB) 정답 — AUDIT_VIEWER 롤은 감사 트레일 조회 전용 롤로, UNIFIED_AUDIT_TRAIL 뷰를 조회할 수 있지만 감사 정책 생성(CREATE AUDIT POLICY), 변경(ALTER AUDIT POLICY), 감사 트레일 삭제(DBMS_AUDIT_MGMT) 등의 관리 작업은 수행할 수 없습니다.\n\nC) 정답 — AUDIT_ADMIN 롤은 감사 정책의 생성/수정/삭제뿐만 아니라 DBMS_AUDIT_MGMT 패키지의 실행 권한도 포함하여, 감사 트레일의 정리(Purge), 아카이브 타임스탬프 설정 등의 관리 작업을 수행할 수 있습니다.\n\nA) 오답 — 통합 감사에서는 DBA 롤만으로는 감사 정책의 생성 및 변경이 불가능합니다. 반드시 AUDIT_ADMIN 롤이 필요하며, 이는 직무 분리(Separation of Duties) 원칙을 실현하기 위한 설계입니다.\n\nD) 오답 — AUDIT_VIEWER 롤은 조회 전용이므로 DBMS_FGA.ADD_POLICY를 사용한 FGA 정책 생성 권한이 없습니다. FGA 정책 관리에는 AUDIT_ADMIN 롤 또는 해당 패키지의 EXECUTE 권한이 필요합니다.\n\nE) 오답 — AUDIT_ADMIN과 AUDIT_VIEWER 롤을 동일 사용자에게 부여하는 것은 기술적으로 가능합니다. 다만 보안 모범 사례 관점에서 직무 분리를 위해 분리하는 것이 권장됩니다.\n\n핵심 개념: 통합 감사는 AUDIT_ADMIN(정책 관리 + 트레일 관리)과 AUDIT_VIEWER(트레일 조회 전용) 롤로 직무를 분리하여, DBA가 자신의 감사 기록을 임의로 변경하거나 삭제하는 것을 방지합니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 통합 감사는 SGA 내의 감사 큐(Audit Queue)에 비동기적으로 레코드를 기록한 후 주기적으로 플러시하는 방식이므로, SQL 실행과 동기적으로 디스크에 기록하는 전통적 감사에 비해 성능 영향이 적습니다.\n\nC) 정답 — 통합 감사에서는 SYS 사용자의 활동도 UNIFIED_AUDIT_TRAIL에 포함하여 기록할 수 있지만, 전통적 감사에서는 SYS 사용자의 감사 레코드가 별도의 OS 파일에만 기록되었습니다.\n\nB) 오답 — 전통적 감사에서는 DB 감사, OS 감사, XML 감사, FGA 등 감사 트레일이 분산되어 있었습니다. UNIFIED_AUDIT_TRAIL 뷰는 통합 감사에서 도입된 단일 감사 트레일 뷰입니다.\n\nD) 오답 — 전통적 감사는 AUDIT 문으로 개별 감사 대상을 지정하는 방식이며, 통합 감사의 CREATE AUDIT POLICY를 통한 정책 기반(Policy-Based) 접근이 훨씬 유연합니다.\n\nE) 오답 — CREATE AUDIT POLICY 문은 통합 감사에서 도입된 문법입니다. 전통적 감사에서는 AUDIT 문을 직접 사용하여 감사 대상을 개별적으로 지정했습니다.\n\n핵심 개념: 통합 감사는 Oracle 12c부터 도입된 단일화된 감사 프레임워크로, 전통적 감사와 비교하여 SGA 큐 기반 비동기 기록에 의한 성능 개선, 단일 감사 트레일(UNIFIED_AUDIT_TRAIL)에 의한 관리 편의성, SYS 사용자 감사의 통합 등의 이점을 제공합니다."
   },
   {
     "chapter": "監査の概要",
     "number": "C_11_014",
-    "title": "ファイングレイン監査(FGA)のaudit_conditionパラメータおよびstatement_typesパラメータの設定について正しい内容を述べているのはどれになりますか。",
+    "title": "ファイングレイン監査(FGA)においてDBMS_FGA.ADD_POLICYプロシージャのaudit_column_optsパラメータについて正しく述べているものを選択してください。",
     "options": [
-      "A) audit_conditionパラメータにはSQL文のWHERE句と同じ構文で行レベルの条件を指定でき、条件に一致する行へのアクセスのみが監査される。",
-      "B) statement_typesパラメータにはSELECTのみ指定可能であり、INSERT、UPDATE、DELETEについてはDBMS_FGA.ADD_POLICYでは設定できない。",
-      "C) audit_conditionをNULLに設定すると、そのFGAポリシーは無効化(DISABLE)された状態で作成される。",
-      "D) 1つのFGAポリシーのstatement_typesにSELECTとUPDATEの両方を指定した場合、SELECT文の実行時にはUPDATE文のaudit_conditionが適用される。"
+      "A) audit_column_optsのデフォルト値はDBMS_FGA.ALL_COLUMNSであり、指定したすべての列にアクセスした場合にのみ監査レコードが生成される。",
+      "B) audit_column_optsにDBMS_FGA.ANY_COLUMNSを指定すると、audit_columnで指定した列のうちいずれか1つでもアクセスがあれば監査レコードが生成される。",
+      "C) audit_column_optsの設定はSELECT文にのみ適用され、INSERT文やUPDATE文には影響しない。",
+      "D) audit_column_optsパラメータを省略した場合、FGAポリシーはエラーとなり作成できない。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — audit_condition 파라미터는 SQL WHERE 절과 동일한 구문으로 행 수준의 조건을 지정합니다. 예를 들어 'SALARY > 100000'과 같은 조건을 설정하면 해당 조건에 일치하는 행에 접근할 때만 감사가 발생합니다.\n\nB) 오답 — statement_types 파라미터에는 SELECT, INSERT, UPDATE, DELETE, MERGE의 5가지 DML 유형을 지정할 수 있습니다. FGA는 SELECT 감사가 핵심 차별점이지만, 다른 DML 유형에 대한 감사도 완전히 지원합니다.\n\nC) 오답 — audit_condition을 NULL로 설정하면 모든 행에 대한 접근이 감사 대상이 됩니다. 정책이 비활성화되는 것이 아니라, 행 수준 필터링 없이 전체 행을 감사합니다. enable 파라미터(기본값 TRUE)가 정책의 활성화 여부를 결정합니다.\n\nD) 오답 — 하나의 FGA 정책에 여러 statement_types를 지정하더라도 각 DML 유형은 독립적으로 평가됩니다. SELECT 문 실행 시에는 SELECT에 대한 audit_condition이 평가되며, UPDATE의 조건이 적용되는 것이 아닙니다.\n\n핵심 개념: FGA의 audit_condition은 SQL WHERE 절과 동일한 구문으로 행 수준 감사 조건을 정의하며, NULL이면 모든 행이 대상입니다. statement_types에는 SELECT, INSERT, UPDATE, DELETE, MERGE 5가지를 지정 가능합니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — audit_column_opts에 DBMS_FGA.ANY_COLUMNS를 지정하면, audit_column에 지정된 열 중 하나라도 접근이 발생하면 감사 레코드가 생성됩니다. 이는 기본값이기도 하며, 민감 열이 여러 개 있을 때 어느 하나라도 접근하면 감사하려는 경우에 사용합니다.\n\nA) 오답 — audit_column_opts의 기본값은 DBMS_FGA.ALL_COLUMNS가 아니라 DBMS_FGA.ANY_COLUMNS입니다. ANY_COLUMNS가 기본값이므로, 지정된 열 중 하나라도 접근하면 감사가 수행됩니다.\n\nC) 오답 — audit_column_opts 설정은 SELECT 문뿐만 아니라 INSERT, UPDATE 등 statement_types에 지정된 모든 DML 유형에 적용됩니다. 단, DELETE 문의 경우에는 audit_column이 무시됩니다.\n\nD) 오답 — audit_column_opts 파라미터를 생략하면 기본값인 DBMS_FGA.ANY_COLUMNS가 적용되어 정상적으로 FGA 정책이 생성됩니다. 이 파라미터는 필수가 아닙니다.\n\n핵심 개념: FGA의 audit_column_opts 파라미터는 ANY_COLUMNS(기본값: 지정된 열 중 하나라도 접근 시 감사)와 ALL_COLUMNS(지정된 모든 열에 접근해야 감사) 두 가지 옵션을 제공하며, DELETE 문에서는 audit_column 설정이 무시됩니다."
   },
   {
     "chapter": "監査の概要",
     "number": "C_11_015",
-    "title": "Oracle AI Databaseの強制監査(Mandatory Auditing)の対象となる操作と、そのレコードの格納先について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "強制監査(Mandatory Auditing)のレコード格納場所に関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SYSDBA、SYSOPER、SYSBACKUPなどの管理者権限による接続は、成功・失敗に関係なく常に強制的に監査される。",
-      "B) 強制監査の対象にはCREATE USER文やGRANT文などのDDL操作が含まれている。",
-      "C) 混合モードにおいて強制監査レコードはOSの監査ファイル($ORACLE_BASE/audit/)に格納される。",
-      "D) 強制監査はNOAUDIT POLICY文を使用して特定の項目だけを選択的に無効化できる。",
-      "E) データベース起動前の強制監査レコードはREDOログに一時的に記録され、起動後にUNIFIED_AUDIT_TRAILに反映される。"
+      "A) 純粋統合監査モードでは、強制監査レコードはAUDSYSスキーマ内に格納され、UNIFIED_AUDIT_TRAILビューで確認できる。",
+      "B) 混合モードでは、強制監査レコードはOS監査ファイル($ORACLE_BASE/audit/ディレクトリなど)に格納される。",
+      "C) データベース起動(STARTUP)時の強制監査レコードは、起動直後にSYSAUXテーブルスペースに直接書き込まれる。",
+      "D) 強制監査レコードの格納場所は、AUDIT_TRAIL初期化パラメータの設定値によって決定される。",
+      "E) 混合モードと純粋統合監査モードのどちらにおいても、強制監査レコードは同一の場所に格納される。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — SYSDBA, SYSOPER, SYSBACKUP, SYSDG, SYSKM 등 모든 관리자 권한에 의한 접속은 성공 및 실패 여부와 관계없이 항상 강제로 감사됩니다. 이 항목은 Oracle 커널에 하드코딩되어 있어 비활성화할 수 없습니다.\n\nC) 정답 — 혼합 모드(Mixed Mode)에서 강제 감사 레코드는 OS 감사 파일($ORACLE_BASE/audit/ 또는 Windows 이벤트 로그)에 저장됩니다. Oracle Database 기본 설치 시 혼합 모드로 동작하므로 이 저장 경로가 기본값입니다. 순수 통합 감사 모드로 전환하면 UNIFIED_AUDIT_TRAIL에 저장됩니다.\n\nB) 오답 — CREATE USER, GRANT 등의 DDL 문은 강제 감사가 아니라 사전 정의 감사 정책(ORA_SECURECONFIG)에 의해 감사됩니다. 강제 감사 대상은 SYSDBA/SYSOPER 접속, 데이터베이스 기동/종료, DBMS_AUDIT_MGMT 패키지 사용입니다.\n\nD) 오답 — 강제 감사 항목은 NOAUDIT 문이나 감사 정책 비활성화로도 해제할 수 없습니다. Oracle 커널에 하드코딩되어 있어 어떤 설정으로도 비활성화가 불가능합니다.\n\nE) 오답 — 데이터베이스 기동 전의 강제 감사 레코드는 REDO 로그가 아니라 OS 감사 파일에 먼저 기록됩니다. 데이터베이스가 완전히 열린 후 순수 통합 감사 모드에서는 해당 OS 파일의 레코드가 UNIFIED_AUDIT_TRAIL로 로드됩니다.\n\n핵심 개념: 강제 감사는 SYSDBA/SYSOPER 접속, DB 기동/종료, DBMS_AUDIT_MGMT 사용을 비활성화 불가능하게 감사하며, 혼합 모드에서는 OS 파일에, 순수 통합 감사 모드에서는 UNIFIED_AUDIT_TRAIL에 저장됩니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — 순수 통합 감사 모드에서는 강제 감사 레코드가 AUDSYS 스키마의 AUD$UNIFIED 테이블에 저장되며, UNIFIED_AUDIT_TRAIL 뷰를 통해 조회할 수 있습니다.\n\nB) 정답 — 혼합 모드에서는 강제 감사 레코드가 OS 감사 파일에 저장됩니다. Linux에서는 $ORACLE_BASE/audit/ 디렉토리에, Windows에서는 Windows 이벤트 로그에 기록됩니다.\n\nC) 오답 — 데이터베이스 기동(STARTUP) 시에는 아직 데이터베이스가 완전히 열리지 않은 상태이므로, 기동 관련 강제 감사 레코드는 먼저 OS 감사 파일에 기록됩니다. 데이터베이스가 열린 후 순수 통합 감사 모드에서는 해당 레코드가 UNIFIED_AUDIT_TRAIL로 로드됩니다.\n\nD) 오답 — AUDIT_TRAIL 초기화 파라미터는 전통적 감사의 트레일 대상을 설정하는 것으로, 통합 감사에서는 사용되지 않습니다. 강제 감사 레코드의 저장 위치는 감사 모드(혼합 모드 vs 순수 통합 감사 모드)에 의해 결정됩니다.\n\nE) 오답 — 혼합 모드에서는 OS 감사 파일에, 순수 통합 감사 모드에서는 AUDSYS 스키마에 저장되므로, 감사 모드에 따라 저장 위치가 다릅니다.\n\n핵심 개념: 강제 감사 레코드의 저장 위치는 감사 모드에 따라 달라집니다. 순수 통합 감사 모드에서는 AUDSYS 스키마(UNIFIED_AUDIT_TRAIL)에, 혼합 모드에서는 OS 감사 파일에 저장되며, 데이터베이스 기동 시에는 DB가 아직 열리지 않았으므로 OS 파일에 먼저 기록됩니다."
   }
 ]

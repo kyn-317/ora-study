@@ -2,71 +2,69 @@
   {
     "chapter": "監査の概要",
     "number": "C_11_001",
-    "title": "Oracle AI Databaseの統合監査ポリシーの作成と管理について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle AI Databaseの統合監査において、監査ポリシーの作成から実際の監査が行われるまでの流れについて正しく述べているものを選択してください。",
     "options": [
-      "A) CREATE AUDIT POLICY文で監査ポリシーを作成すると、そのポリシーは自動的に有効化され、即座に監査が開始される。",
-      "B) 1つの統合監査ポリシーにPRIVILEGES、ACTIONS、ROLESを組み合わせて複合的な監査条件を定義できる。",
-      "C) 統合監査ポリシーを特定のユーザーに適用するには、AUDIT POLICY文でBY句を使用する。",
-      "D) ALTER AUDIT POLICY文は使用できず、ポリシーを変更するには削除後に再作成する必要がある。",
-      "E) NOAUDIT POLICY文で監査ポリシーを無効化すると、そのポリシー定義自体もデータベースから削除される。"
+      "A) CREATE AUDIT POLICY文で監査ポリシーを作成すると、即座に全ユーザーに対して監査が適用される。",
+      "B) CREATE AUDIT POLICY文で監査ポリシーを作成した後、AUDIT POLICY文で明示的にポリシーを有効化する必要がある。",
+      "C) 監査ポリシーを作成する際に、PRIVILEGES、ACTIONSおよびROLESのうちいずれか1つのみ指定できる。",
+      "D) NOAUDIT POLICY文は監査ポリシーの無効化と同時にポリシー自体の削除も実行する。"
     ],
-    "answer": ["B", "C"],
-    "explanation": "정답 해설:\n\nB) 정답 — 하나의 통합 감사 정책에 PRIVILEGES(시스템 권한), ACTIONS(특정 SQL 동작), ROLES(특정 롤에 포함된 모든 권한)를 조합하여 복합적인 감사 조건을 정의할 수 있습니다.\n\nC) 정답 — AUDIT POLICY ... BY user1, user2 형식으로 특정 사용자에게만 감사 정책을 적용할 수 있으며, EXCEPT 절로 특정 사용자를 제외할 수도 있습니다.\n\n오답 해설:\n\nA) 오답 — CREATE AUDIT POLICY로 정책을 생성한 후, 반드시 AUDIT POLICY 문으로 별도 활성화해야 실제 감사가 수행됩니다. 생성만으로는 자동 활성화되지 않습니다.\n\nD) 오답 — ALTER AUDIT POLICY 문으로 기존 정책에 ADD/DROP을 사용하여 감사 대상을 추가하거나 제거할 수 있습니다.\n\nE) 오답 — NOAUDIT POLICY 문은 감사 정책을 비활성화할 뿐이며, 정책 정의 자체는 데이터베이스에 남아 있습니다. 정책을 삭제하려면 DROP AUDIT POLICY 문을 사용해야 합니다.\n\n핵심 개념: 통합 감사 정책은 CREATE AUDIT POLICY로 생성 → AUDIT POLICY로 활성화의 2단계를 거쳐야 하며, ALTER로 수정, NOAUDIT로 비활성화, DROP으로 삭제합니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 통합 감사에서는 CREATE AUDIT POLICY 문으로 감사 정책을 생성한 후, 반드시 AUDIT POLICY 문으로 활성화해야 실제 감사가 수행됩니다. 정책 생성만으로는 감사가 시작되지 않습니다.\n\nA) 오답 — CREATE AUDIT POLICY 문은 정책을 정의만 할 뿐, 자동으로 활성화되지 않습니다. 반드시 별도의 AUDIT POLICY 문으로 활성화해야 합니다.\n\nC) 오답 — 하나의 감사 정책에 PRIVILEGES, ACTIONS, ROLES를 조합하여 복합 감사 조건을 정의할 수 있습니다. 하나만 지정해야 한다는 제한은 없습니다.\n\nD) 오답 — NOAUDIT POLICY 문은 감사 정책을 비활성화만 하며, 정책 자체를 삭제하지 않습니다. 정책을 삭제하려면 DROP AUDIT POLICY 문을 사용해야 합니다.\n\n핵심 개념: 통합 감사 정책은 CREATE AUDIT POLICY로 생성한 후 AUDIT POLICY로 활성화하는 2단계 과정이 필요하며, PRIVILEGES/ACTIONS/ROLES를 조합하여 하나의 정책에 복합 감사 조건을 정의할 수 있습니다."
   },
   {
     "chapter": "監査の概要",
     "number": "C_11_002",
-    "title": "統合監査トレールのデータを格納するAUDSYSスキーマについて正しい内容を述べているのはどれになりますか。",
+    "title": "統合監査におけるAUDIT_ADMINロールとAUDIT_VIEWERロールに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) AUDSYSスキーマにはSYSDBA権限で直接ログインして監査レコードを管理できる。",
-      "B) AUDSYSスキーマのデータはデフォルトでSYSTEMテーブルスペースに格納される。",
-      "C) AUDSYSスキーマはDROP USER文やALTER USER文で変更や削除ができないようOracleが内部的に保護している。",
-      "D) AUDSYSスキーマのAUD$UNIFIEDテーブルには統合監査レコードのみ格納され、FGA監査レコードは別のスキーマに格納される。",
-      "E) AUDSYSスキーマの監査データはREDOログに記録されないため、データベース障害時には監査データが失われる。"
+      "A) AUDIT_VIEWERロールを持つユーザーは、UNIFIED_AUDIT_TRAILビューで監査証跡を確認できるが、監査ポリシーの作成や変更は行えない。",
+      "B) DBAロールを持つユーザーは、AUDIT_ADMINロールがなくても統合監査ポリシーの作成および変更が可能である。",
+      "C) AUDIT_ADMINロールには、監査ポリシーの管理だけでなく、DBMS_AUDIT_MGMTパッケージを使用した監査証跡のパージ(整理)を実行する権限も含まれる。",
+      "D) AUDIT_ADMINロールとAUDIT_VIEWERロールは同じ権限を持っているが、付与される対象ユーザーの業務内容が異なる。",
+      "E) AUDIT_VIEWERロールを持つユーザーは、監査ポリシーを無効化するためのNOAUDIT POLICY文を実行できる。"
     ],
-    "answer": ["C"],
-    "explanation": "정답 해설:\n\nC) 정답 — AUDSYS 스키마는 Oracle 내부적으로 보호되어 DROP, ALTER가 불가능합니다. 이는 감사 트레일의 무결성을 보장하기 위한 설계입니다.\n\n오답 해설:\n\nA) 오답 — AUDSYS 스키마에는 직접 로그인이 불가능합니다. 감사 데이터는 UNIFIED_AUDIT_TRAIL 뷰를 통해서만 조회할 수 있습니다.\n\nB) 오답 — AUDSYS 스키마의 데이터는 기본적으로 SYSAUX 테이블스페이스에 저장됩니다(SYSTEM이 아님). DBMS_AUDIT_MGMT.SET_AUDIT_TRAIL_LOCATION으로 전용 테이블스페이스로 이동할 수 있습니다.\n\nD) 오답 — FGA 감사 레코드도 UNIFIED_AUDIT_TRAIL에서 조회할 수 있으며, FGA_POLICY_NAME 열을 통해 FGA 이벤트를 확인할 수 있습니다. 별도의 스키마에 저장되지 않습니다.\n\nE) 오답 — AUDSYS 스키마의 감사 데이터도 일반 테이블 데이터와 마찬가지로 REDO 로그에 기록됩니다. 따라서 데이터베이스 장애 시에도 복구가 가능합니다.\n\n핵심 개념: AUDSYS는 통합 감사 트레일 전용 내부 스키마로, 직접 로그인 불가, DROP/ALTER 불가이며, 기본적으로 SYSAUX 테이블스페이스에 저장됩니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — AUDIT_VIEWER 롤은 감사 트레일 조회 전용 롤로, UNIFIED_AUDIT_TRAIL 뷰를 통해 감사 기록을 확인할 수 있지만, 감사 정책의 생성(CREATE AUDIT POLICY)이나 변경(ALTER AUDIT POLICY)은 수행할 수 없습니다.\n\nC) 정답 — AUDIT_ADMIN 롤은 감사 정책의 생성/수정/삭제뿐만 아니라, DBMS_AUDIT_MGMT 패키지를 사용한 감사 트레일 정리(Purge) 권한도 포함합니다.\n\nB) 오답 — 통합 감사에서는 DBA 롤만으로는 감사 정책의 관리가 불가능합니다. 감사 정책을 관리하려면 AUDIT_ADMIN 롤이 필요하며, 이는 직무 분리(Separation of Duties) 원칙에 따른 설계입니다.\n\nD) 오답 — AUDIT_ADMIN과 AUDIT_VIEWER는 서로 다른 권한을 가지고 있습니다. AUDIT_ADMIN은 정책 관리 및 트레일 관리 권한을 포함하지만, AUDIT_VIEWER는 트레일 조회 전용입니다.\n\nE) 오답 — AUDIT_VIEWER 롤은 조회 전용이므로 NOAUDIT POLICY 문을 실행할 수 없습니다. 감사 정책의 활성화/비활성화는 AUDIT_ADMIN 롤이 필요합니다.\n\n핵심 개념: 통합 감사는 직무 분리 원칙에 따라 AUDIT_ADMIN(정책 관리 + 트레일 관리)과 AUDIT_VIEWER(트레일 조회 전용) 롤을 분리하여 제공하며, DBA 롤만으로는 통합 감사 정책을 관리할 수 없습니다."
   },
   {
     "chapter": "監査の概要",
     "number": "C_11_003",
-    "title": "Oracle AI Databaseの事前定義済み監査ポリシーに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle AI Databaseの強制監査(Mandatory Auditing)について正しく述べているものを選択してください。",
     "options": [
-      "A) ORA_SECURECONFIGポリシーはデータベース作成時に自動的に有効化され、ALTER SYSTEM、CREATE USER、GRANTなどのセキュリティ関連操作を監査する。",
-      "B) ORA_LOGON_FAILURESポリシーはログイン成功とログイン失敗の両方のイベントを監査する事前定義ポリシーである。",
-      "C) ORA_CIS_RECOMMENDATIONSポリシーはCISベンチマーク基準に基づいており、ORA_SECURECONFIGよりも包括的な監査項目を含んでいる。",
-      "D) 事前定義済み監査ポリシーはALTER AUDIT POLICY文を使用して監査対象を追加・変更できる。",
-      "E) ORA_DATABASE_PARAMETERポリシーはデータベース作成時に自動的に有効化され、すべてのALTER SYSTEM操作を監査する。"
+      "A) 強制監査の対象は、データベース管理者がAUDIT POLICY文で有効化することで初めて機能する。",
+      "B) 強制監査によってデータベースの起動(STARTUP)および停止(SHUTDOWN)イベントが常に記録される。",
+      "C) 強制監査の対象項目は、NOAUDIT POLICY文を使用して個別に無効化できる。",
+      "D) 強制監査はSYSDBAおよびSYSOPER権限での接続のうち、成功した接続のみを記録する。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답 해설:\n\nA) 정답 — ORA_SECURECONFIG는 데이터베이스 생성 시 자동으로 활성화되는 사전 정의 정책으로, ALTER SYSTEM, CREATE USER, DROP USER, GRANT, REVOKE 등 주요 보안 관련 시스템 권한 및 명령을 감사합니다.\n\nC) 정답 — ORA_CIS_RECOMMENDATIONS는 CIS(Center for Internet Security) 벤치마크 기반 권장 항목을 감사하며, ORA_SECURECONFIG보다 더 포괄적인 감사 항목을 포함하고 있습니다.\n\n오답 해설:\n\nB) 오답 — ORA_LOGON_FAILURES는 이름 그대로 로그인 실패(인증 실패) 이벤트만을 감사하는 정책입니다. 로그인 성공은 감사 대상에 포함되지 않습니다.\n\nD) 오답 — 사전 정의 감사 정책은 ALTER AUDIT POLICY로 수정할 수 없습니다. 활성화(AUDIT POLICY) 또는 비활성화(NOAUDIT POLICY)만 가능합니다.\n\nE) 오답 — ORA_DATABASE_PARAMETER 정책은 데이터베이스 생성 시 자동 활성화되지 않습니다. 수동으로 활성화해야 합니다.\n\n핵심 개념: ORA_SECURECONFIG와 ORA_LOGON_FAILURES는 데이터베이스 생성 시 자동 활성화되는 사전 정의 정책이며, 사전 정의 정책은 수정 불가하고 활성화/비활성화만 가능합니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 강제 감사는 데이터베이스 기동(STARTUP)과 종료(SHUTDOWN) 이벤트를 항상 기록합니다. 이 항목들은 감사 설정 여부와 관계없이 자동으로 감사되며, 비인가 기동/종료로 인한 서비스 중단을 탐지하는 데 활용됩니다.\n\nA) 오답 — 강제 감사는 AUDIT POLICY 문으로 활성화할 필요가 없습니다. Oracle 커널 레벨에서 하드코딩되어 있어 감사 설정과 무관하게 항상 동작합니다.\n\nC) 오답 — 강제 감사 항목은 NOAUDIT 문이나 감사 정책 비활성화로 해제할 수 없습니다. 이는 데이터베이스 보안의 최소 감사 기준선(Baseline)을 제공하기 위한 설계입니다.\n\nD) 오답 — SYSDBA 및 SYSOPER 접속의 강제 감사는 성공한 접속뿐만 아니라 실패한 접속 시도도 모두 기록합니다.\n\n핵심 개념: 강제 감사는 SYSDBA/SYSOPER 접속(성공/실패 모두), 데이터베이스 기동/종료, DBMS_AUDIT_MGMT 패키지 사용을 포함하며, 이들은 Oracle 커널에 하드코딩되어 어떤 설정으로도 비활성화할 수 없는 필수 감사 항목입니다."
   },
   {
     "chapter": "監査の概要",
     "number": "C_11_004",
-    "title": "DBMS_AUDIT_MGMTパッケージを使用した統合監査トレールの管理について正しく述べているものを選択してください。",
+    "title": "ファイングレイン監査(FGA)と統合監査ポリシーの違いについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) CLEAN_AUDIT_TRAILプロシージャはアーカイブ・タイムスタンプの設定に関係なく、すべての監査レコードを即座に削除する。",
-      "B) SET_LAST_ARCHIVE_TIMESTAMPでアーカイブ完了時点を設定した後、CLEAN_AUDIT_TRAILでその時点以前のレコードを削除する手順で管理する。",
-      "C) CREATE_PURGE_JOBで作成した自動パージ・ジョブの実行間隔は日単位でのみ指定できる。",
-      "D) 統合監査トレールの格納テーブルスペースはデータベース作成時に決定され、後から変更することはできない。",
-      "E) DBMS_AUDIT_MGMTパッケージはAUDIT_VIEWER権限を持つユーザーであれば実行できる。"
+      "A) FGAは特定の列(Column)および行(Row)レベルでアクセスを監査でき、SELECT文による特定のデータ参照も追跡できる。",
+      "B) 統合監査ポリシーはSELECT文の列レベルの監査をFGAと同等に実行できる。",
+      "C) FGAポリシーはDBMS_FGA.ADD_POLICYプロシージャで作成され、audit_conditionパラメータでWHERE句と同様の行条件を指定できる。",
+      "D) FGAポリシーは1つのテーブルに対して1つのみ設定可能であり、複数のFGAポリシーを同時に適用することはできない。",
+      "E) FGAの監査証跡は統合監査トレイル(UNIFIED_AUDIT_TRAIL)には含まれず、DBA_FGA_AUDIT_TRAILビューでのみ確認できる。"
     ],
-    "answer": ["B"],
-    "explanation": "정답 해설:\n\nB) 정답 — 감사 트레일 정리는 먼저 DBMS_AUDIT_MGMT.SET_LAST_ARCHIVE_TIMESTAMP으로 아카이브 완료 시점을 설정한 후, CLEAN_AUDIT_TRAIL로 해당 시점 이전의 레코드만 삭제하는 2단계 절차를 따릅니다. 이는 데이터 손실을 방지하기 위한 설계입니다.\n\n오답 해설:\n\nA) 오답 — CLEAN_AUDIT_TRAIL은 아카이브 타임스탬프 이전의 감사 레코드만 삭제합니다. 모든 레코드를 무조건 삭제하는 것이 아닙니다.\n\nC) 오답 — CREATE_PURGE_JOB의 audit_trail_purge_interval 파라미터는 시간(hour) 단위로 지정합니다. 예를 들어 24를 지정하면 24시간마다 실행됩니다.\n\nD) 오답 — 기본적으로 SYSAUX 테이블스페이스에 저장되지만, DBMS_AUDIT_MGMT.SET_AUDIT_TRAIL_LOCATION 프로시저를 사용하여 전용 테이블스페이스로 이동할 수 있습니다.\n\nE) 오답 — DBMS_AUDIT_MGMT 패키지는 AUDIT_ADMIN 롤을 가진 사용자만 실행할 수 있습니다. AUDIT_VIEWER 롤은 감사 트레일 조회 전용이며, 트레일 관리(정리/아카이브) 권한은 포함되지 않습니다.\n\n핵심 개념: 감사 트레일 정리는 SET_LAST_ARCHIVE_TIMESTAMP → CLEAN_AUDIT_TRAIL의 순서로 수행하며, CREATE_PURGE_JOB으로 자동화할 수 있습니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — FGA는 특정 열(Column) 및 행(Row) 수준의 세밀한 감사가 가능하며, SELECT 문에 대한 감사가 핵심 차별점입니다. 민감 데이터의 조회를 추적하는 데 필수적인 기능입니다.\n\nC) 정답 — FGA 정책은 DBMS_FGA.ADD_POLICY 프로시저로 생성하며, audit_condition 파라미터에 SQL WHERE 절과 동일한 문법으로 행 조건을 지정할 수 있습니다.\n\nB) 오답 — 통합 감사 정책은 SQL 문, 권한, 롤 단위의 감사를 수행하지만, 특정 열/행 수준의 SELECT 감사는 FGA만큼 세밀하게 수행하기 어렵습니다. 열/행 수준의 데이터 접근 감사는 FGA의 고유 기능입니다.\n\nD) 오답 — 하나의 테이블에 여러 FGA 정책을 동시에 적용할 수 있으며, 각 정책은 독립적으로 평가됩니다.\n\nE) 오답 — FGA 감사 트레일은 DBA_FGA_AUDIT_TRAIL 뷰뿐만 아니라 UNIFIED_AUDIT_TRAIL 뷰에서도 FGA_POLICY_NAME 열을 통해 확인할 수 있습니다.\n\n핵심 개념: FGA는 열/행 수준의 세밀한 감사를 제공하며 특히 SELECT 문 감사가 핵심 차별점입니다. DBMS_FGA.ADD_POLICY로 정책을 생성하고, 하나의 테이블에 여러 정책을 독립적으로 적용할 수 있으며, 감사 트레일은 UNIFIED_AUDIT_TRAIL에서도 확인 가능합니다."
   },
   {
     "chapter": "監査の概要",
     "number": "C_11_005",
-    "title": "ファイングレイン監査(FGA)ポリシーのaudit_column_optsパラメータおよびDML文の監査動作について正しい内容を述べているのはどれになりますか。",
+    "title": "Oracle AI Databaseにおけるデータベース内の活動を監査する目的と対象について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) audit_column_optsのデフォルト値はDBMS_FGA.ALL_COLUMNSであり、指定された監査対象列のすべてにアクセスした場合にのみ監査が発生する。",
-      "B) DELETE文の場合、audit_columnの設定に関係なくすべての列に関連する削除が監査対象となる。",
-      "C) FGAはSELECT文とUPDATE文のみを監査対象にでき、INSERT文やDELETE文には対応していない。",
-      "D) DBMS_FGA.ADD_POLICYのenableパラメータのデフォルト値はFALSEであり、ポリシー作成後にDBMS_FGA.ENABLE_POLICYで明示的に有効化する必要がある。",
-      "E) 1つのテーブルに対して適用できるFGAポリシーは1つのみであり、複数のFGAポリシーを同時に適用することはできない。"
+      "A) データベース監査の目的には、規制遵守(Compliance)の要件を満たすこと、およびセキュリティ侵害の検出が含まれる。",
+      "B) データベース・オブジェクトの作成、変更、削除はデータのアクセスに直接影響しないため、監査の必要はない。",
+      "C) 権限の付与(GRANT)および取り消し(REVOKE)の操作は、セキュリティの観点から重要な監査対象である。",
+      "D) 統合監査トレイルのデータはSYSAUXテーブルスペースに格納され、他のテーブルスペースに移動することはできない。",
+      "E) 監査によるパフォーマンスへの影響を最小限にするため、SYSユーザーなどの特権ユーザーの活動は監査対象から除外すべきである。"
     ],
-    "answer": ["B"],
-    "explanation": "정답 해설:\n\nB) 정답 — DELETE 문의 경우 audit_column이 무시되며, 모든 열 관련 삭제가 감사 대상이 됩니다. 이는 DELETE가 행 전체를 삭제하는 작업이므로 특정 열만 선별하는 것이 의미가 없기 때문입니다.\n\n오답 해설:\n\nA) 오답 — audit_column_opts의 기본값은 DBMS_FGA.ANY_COLUMNS입니다(ALL_COLUMNS가 아님). ANY_COLUMNS는 지정된 열 중 하나라도 접근하면 감사가 발생하고, ALL_COLUMNS는 모든 열에 접근해야 감사가 발생합니다.\n\nC) 오답 — FGA는 SELECT, INSERT, UPDATE, DELETE, MERGE의 5가지 DML 유형에 대해 감사가 가능합니다.\n\nD) 오답 — DBMS_FGA.ADD_POLICY의 enable 파라미터 기본값은 TRUE이므로, ADD_POLICY 호출 시 정책이 즉시 활성화됩니다.\n\nE) 오답 — 하나의 테이블에 여러 FGA 정책을 동시에 적용할 수 있으며, 각 정책은 독립적으로 평가됩니다.\n\n핵심 개념: FGA의 audit_column_opts 기본값은 ANY_COLUMNS이며, DELETE 문에서는 audit_column이 무시됩니다. 하나의 테이블에 복수의 FGA 정책을 독립적으로 적용할 수 있습니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 데이터베이스 감사의 주요 목적에는 SOX, HIPAA, GDPR 등의 규제 준수(Compliance) 요건 충족과 비인가 접근이나 데이터 유출 시도 등의 보안 침해 탐지가 포함됩니다.\n\nC) 정답 — 권한 부여(GRANT) 및 취소(REVOKE) 작업은 보안에 직접적인 영향을 미치는 중요한 이벤트이며, ORA_SECURECONFIG 사전 정의 감사 정책에도 포함되어 있는 핵심 감사 대상입니다.\n\nB) 오답 — 데이터베이스 객체의 생성, 변경, 삭제는 보안 관점에서 중요한 감사 대상입니다. 무단으로 테이블을 삭제하거나 구조를 변경하는 행위는 데이터 무결성에 직접적인 위협이 됩니다.\n\nD) 오답 — 통합 감사 트레일 데이터는 기본적으로 SYSAUX 테이블스페이스에 저장되지만, 이동이 불가능한 것은 아닙니다. DBMS_AUDIT_MGMT.SET_AUDIT_TRAIL_LOCATION을 사용하여 전용 테이블스페이스로 이동할 수 있습니다.\n\nE) 오답 — SYS 등의 특권 사용자는 최고 수준의 권한을 가지고 있으므로 오히려 감사 대상에서 제외해서는 안 됩니다. 강제 감사에서도 SYSDBA/SYSOPER 접속은 필수 감사 대상으로 지정되어 있습니다.\n\n핵심 개념: 데이터베이스 감사는 규제 준수, 보안 침해 탐지, 책임 추적을 위해 필수적이며, 데이터 접근/변경, 로그인 시도, 권한 부여/취소, 객체 DDL, 특권 사용자 접속 등이 주요 감사 대상입니다. 통합 감사 트레일은 기본적으로 SYSAUX 테이블스페이스에 저장됩니다."
   }
 ]

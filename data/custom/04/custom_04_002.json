@@ -2,70 +2,68 @@
   {
     "chapter": "Oracle Net Servicesの構成",
     "number": "C_04_006",
-    "title": "TNS_ADMIN環境変数に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "tnspingコマンドの実行で以下の結果が表示されました。\n\n$ tnsping SALESDB\n\nUsed TNSNAMES adapter to resolve the alias\nAttempting to contact (DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = dbserver01)(PORT = 1521)) (CONNECT_DATA = (SERVICE_NAME = salespdb)))\nTNS-12541: TNS:no listener\n\nこの結果について正しく述べているものを選択してください。",
     "options": [
-      "A) TNS_ADMINはtnsnames.oraファイルへのフルパスを指定する環境変数であり、ディレクトリ単位での指定はできない。",
-      "B) TNS_ADMINが設定されていない場合、Oracle Netの構成ファイルは$ORACLE_HOME/network/adminディレクトリから読み込まれる。",
-      "C) TNS_ADMINの変更は即座にすべての既存セッションに反映され、進行中の接続にも影響を及ぼす。",
-      "D) TNS_ADMINを設定すると、tnsnames.ora、sqlnet.ora、listener.oraなどの構成ファイルがTNS_ADMINの指定するディレクトリから検索される。",
-      "E) TNS_ADMINはサーバー側でのみ有効であり、Oracle Instant Clientなどのクライアント環境では使用できない。"
+      "A) tnsnames.oraにSALESDBの定義が存在しないため、名前解決に失敗している。",
+      "B) データベース・サービス名salespdbがリスナーに登録されていないことを示している。",
+      "C) ホストdbserver01のポート1521でリスナーが実行されていないことを示している。",
+      "D) sqlnet.oraのNAMES.DIRECTORY_PATHにTNSNAMESが含まれていないため、接続に失敗している。"
     ],
-    "answer": ["B", "D"],
-    "explanation": "정답 분석:\nB) 정답 — TNS_ADMIN 환경변수가 설정되지 않은 경우, Oracle Net의 구성 파일(tnsnames.ora, sqlnet.ora, listener.ora 등)은 기본 위치인 $ORACLE_HOME/network/admin 디렉토리에서 검색됩니다.\nD) 정답 — TNS_ADMIN 환경변수를 설정하면, Oracle Net은 $ORACLE_HOME/network/admin 대신 TNS_ADMIN이 가리키는 디렉토리에서 tnsnames.ora, sqlnet.ora, listener.ora 등의 구성 파일을 검색합니다.\n\n오답 분석:\nA) 오류 — TNS_ADMIN은 파일 경로가 아니라 디렉토리 경로를 지정합니다. 해당 디렉토리 내에 있는 tnsnames.ora, sqlnet.ora 등의 파일이 자동으로 검색됩니다.\nC) 오류 — TNS_ADMIN의 변경은 새로운 접속부터 적용되며, 이미 확립된 기존 세션에는 영향을 주지 않습니다.\nE) 오류 — TNS_ADMIN은 서버뿐만 아니라 클라이언트 환경에서도 사용 가능합니다. 특히 Oracle Instant Client 사용 시에는 TNS_ADMIN 설정이 필수적입니다.\n\n핵심 개념: TNS_ADMIN은 Oracle Net 구성 파일의 검색 디렉토리를 지정하는 환경변수로, 미설정 시 $ORACLE_HOME/network/admin이 기본 위치이며, 클라이언트와 서버 양쪽에서 사용 가능합니다."
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — tnsping 출력에서 \"Used TNSNAMES adapter to resolve the alias\"가 표시되었으므로 tnsnames.ora를 통한 이름 해석은 성공한 상태입니다. 이후 해석된 주소(dbserver01:1521)로 리스너에 연결을 시도했으나 TNS-12541(TNS:no listener) 오류가 발생했습니다. 이는 해당 호스트의 지정된 포트에서 리스너 프로세스가 실행되고 있지 않음을 의미합니다.\n\nA) 오답 — 출력의 첫 번째 줄에 \"Used TNSNAMES adapter to resolve the alias\"가 표시되어 있으므로, tnsnames.ora에서 SALESDB의 이름 해석이 성공적으로 수행되었습니다. 이름 해석 실패 시에는 TNS-03505 오류가 발생합니다.\n\nB) 오답 — TNS-12541은 리스너 프로세스 자체에 도달하지 못한 오류입니다. 서비스가 리스너에 등록되어 있지 않은 경우에는 TNS-12514(listener does not currently know of service) 오류가 발생합니다.\n\nD) 오답 — TNSNAMES 어댑터가 사용되어 이름 해석이 성공했으므로, sqlnet.ora의 NAMES.DIRECTORY_PATH에 TNSNAMES가 포함되어 있는 상태입니다.\n\n핵심 개념: tnsping의 오류 코드로 장애 원인을 구분할 수 있습니다. TNS-12541은 리스너 미실행, TNS-03505는 이름 해석 실패, TNS-12514는 서비스 미등록을 의미하며, 단계별로 진단하는 것이 네트워크 트러블슈팅의 기본입니다."
   },
   {
     "chapter": "Oracle Net Servicesの構成",
     "number": "C_04_007",
-    "title": "リスナーのログおよび診断に関して正しい内容を述べているものを選択してください。",
+    "title": "Oracle Net Servicesの各ツールが実行できない作業について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) リスナーのログはADR(Automatic Diagnostic Repository)体系には含まれず、listener.ora内のLOG_FILEパラメータで指定した独立のパスに出力される。",
-      "B) lsnrctl set trc_levelコマンドでリスナーの追跡レベルを動的に変更でき、OFF、USER、ADMIN、SUPPORTの4段階がある。",
-      "C) リスナーの追跡レベルはlistener.oraでのみ設定可能であり、lsnrctlコマンドから動的に変更することはできない。",
-      "D) ADRCIツールはデータベース・インスタンスの診断情報のみを管理でき、リスナーの診断ログの参照には使用できない。"
+      "A) Oracle Net Configuration Assistant(NETCA)はリスナーの起動や停止を行うことができない。",
+      "B) Oracle Net Manager(NETMGR)はSilentモード(応答ファイルベース)での実行をサポートしている。",
+      "C) lsnrctlユーティリティはローカル・ネーミング(tnsnames.ora)の構成を行うことができない。",
+      "D) tnspingはデータベース・サービスがリスナーに登録されているかどうかを確認することができる。",
+      "E) Oracle Net Manager(NETMGR)はlistener.oraの編集は可能だが、sqlnet.oraの編集は行えない。"
     ],
-    "answer": ["B"],
-    "explanation": "정답 분석:\nB) 정답 — lsnrctl set trc_level 명령으로 리스너를 재시작하지 않고 추적(trace) 레벨을 동적으로 변경할 수 있습니다. 추적 레벨은 OFF(비활성) → USER(사용자 수준) → ADMIN(관리자 수준) → SUPPORT(Oracle 지원 수준) 순으로 상세도가 증가합니다.\n\n오답 분석:\nA) 오류 — 리스너 로그는 ADR(Automatic Diagnostic Repository) 체계 내에 저장됩니다. 로그 위치는 $ADR_BASE/diag/tnslsnr/<hostname>/<listener_name>/ 하위에 alert/log.xml과 trace/<listener_name>.log 형식으로 존재합니다.\nC) 오류 — 추적 레벨은 listener.ora에서 정적으로 설정할 수도 있고, lsnrctl set trc_level 명령으로 리스너 재시작 없이 동적으로 변경할 수도 있습니다.\nD) 오류 — ADRCI(ADR Command Interpreter)는 데이터베이스 인스턴스뿐만 아니라 리스너의 진단 정보도 탐색하고 조회할 수 있습니다. set homepath 명령으로 리스너의 ADR 홈을 지정하여 리스너 로그와 인시던트를 조회할 수 있습니다.\n\n핵심 개념: 리스너 로그는 ADR 체계에 통합되어 있으며, ADRCI로 조회 가능합니다. 추적 레벨은 lsnrctl set trc_level로 동적 변경이 가능하고 OFF/USER/ADMIN/SUPPORT 4단계입니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — NETCA(Oracle Net Configuration Assistant)는 listener.ora, tnsnames.ora, sqlnet.ora 등 구성 파일을 생성·편집하는 구성 도구입니다. 리스너 프로세스의 기동(START)이나 정지(STOP) 같은 런타임 제어는 수행할 수 없으며, 이는 lsnrctl 유틸리티의 역할입니다.\n\nC) 정답 — lsnrctl(리스너 제어 유틸리티)은 리스너 프로세스를 시작, 중지, 상태 확인하는 제어 도구입니다. 클라이언트 측 네이밍 구성(tnsnames.ora 편집)은 lsnrctl의 기능 범위에 포함되지 않으며, tnsnames.ora 구성은 NETCA, NETMGR 또는 수동 편집으로 수행합니다.\n\nB) 오답 — NETMGR(Oracle Net Manager)은 GUI 전용 도구이며 Silent 모드(응답 파일 기반 실행)를 지원하지 않습니다. Silent 모드를 지원하는 것은 NETCA입니다.\n\nD) 오답 — tnsping은 리스너까지의 네트워크 도달 가능성만 테스트하는 진단 도구입니다. 데이터베이스 서비스가 리스너에 등록되어 있는지 여부는 확인할 수 없습니다. 서비스 등록 상태는 lsnrctl services 명령으로 확인합니다.\n\nE) 오답 — NETMGR은 프로파일(sqlnet.ora), 서비스 네이밍(tnsnames.ora), 리스너(listener.ora)의 3개 영역을 모두 관리할 수 있는 종합적인 네트워크 구성 도구입니다.\n\n핵심 개념: Oracle Net Services 도구는 구성 도구(NETCA, NETMGR), 제어 도구(lsnrctl), 진단 도구(tnsping)로 분류되며, 각 도구의 기능 범위와 한계를 정확히 구분하는 것이 중요합니다. NETCA는 Silent 모드를 지원하지만 NETMGR은 GUI 전용입니다."
   },
   {
     "chapter": "Oracle Net Servicesの構成",
     "number": "C_04_008",
-    "title": "以下のtnsnames.oraの構成を確認してください。\n\nORCL_HA =\n  (DESCRIPTION =\n    (LOAD_BALANCE = ON)\n    (FAILOVER = ON)\n    (ADDRESS_LIST =\n      (ADDRESS = (PROTOCOL = TCP)(HOST = node1)(PORT = 1521))\n      (ADDRESS = (PROTOCOL = TCP)(HOST = node2)(PORT = 1521))\n      (ADDRESS = (PROTOCOL = TCP)(HOST = node3)(PORT = 1521))\n    )\n    (CONNECT_DATA =\n      (SERVICE_NAME = orcl.example.com)\n    )\n  )\n\nこの構成に関して正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "マルチテナント環境において、CDB内の各PDBの状態とリスナーへのサービス登録状態の関係について正しく述べているものを選択してください。",
     "options": [
-      "A) LOAD_BALANCE = ONにより、クライアントはADDRESS_LIST内のアドレスをランダムに選択して接続を試みる。",
-      "B) FAILOVER = ONはデフォルト値がOFFであるため、この設定を省略すると最初のアドレスの接続が失敗した場合に接続エラーが返される。",
-      "C) FAILOVER = ONにより、接続先のアドレスに接続できない場合、ADDRESS_LIST内の次のアドレスに接続を試みる。",
-      "D) LOAD_BALANCE = ONにより、サーバー側でリスナーがインスタンスの負荷状況に基づいて動的にルーティングを行う。",
-      "E) この構成では3つのノードに対して常に同時接続が確立され、1つのSQL文が3つのノードで並列実行される。"
+      "A) PDBがMOUNTED状態の場合、リスナーへのサービス登録が解除されるため、管理者もPDBにアクセスすることはできない。",
+      "B) PDBがOPEN状態の場合、リスナーにサービスがREADYとして登録され、クライアントからの接続が可能になる。",
+      "C) PDBがCLOSED状態でも、リスナーにサービスがBLOCKEDとして登録されており、管理者のみ接続可能である。",
+      "D) PDBの状態が変更されても、リスナーのサービス登録状態はALTER SYSTEM REGISTERを実行するまで更新されない。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답 분석:\nA) 정답 — LOAD_BALANCE=ON 설정은 클라이언트 측 부하 분산(Client-Side Load Balancing)을 수행합니다. 클라이언트가 ADDRESS_LIST 내의 주소를 무작위(랜덤)로 선택하여 접속을 시도하므로, 여러 노드에 접속이 분산됩니다.\nC) 정답 — FAILOVER=ON 설정은 선택된 주소로의 접속이 실패할 경우 ADDRESS_LIST 내의 다음 주소로 자동 전환하여 접속을 시도합니다. 이를 통해 고가용성 접속이 가능합니다.\n\n오답 분석:\nB) 오류 — ADDRESS_LIST 내에서 FAILOVER의 기본값은 ON입니다. 따라서 이 설정을 생략해도 기본적으로 장애 시 다음 주소로 전환이 이루어집니다.\nD) 오류 — tnsnames.ora의 LOAD_BALANCE=ON은 클라이언트 측 부하 분산 설정입니다. 서버 측에서 리스너가 인스턴스 부하에 기반하여 동적 라우팅을 수행하는 것은 서버 측 로드 밸런싱(Server-Side Load Balancing)으로, 이는 DBMS_SERVICE의 CLB_GOAL 설정으로 제어되는 별도의 기능입니다.\nE) 오류 — 이 구성은 한 번에 하나의 노드에 접속하는 것이며, 3개 노드에 동시 접속하여 SQL을 병렬 실행하는 것이 아닙니다. LOAD_BALANCE는 접속 시점에 랜덤으로 하나의 주소를 선택하는 것입니다.\n\n핵심 개념: tnsnames.ora의 LOAD_BALANCE=ON은 클라이언트 측에서 주소를 랜덤 선택하는 부하 분산이며, FAILOVER=ON은 접속 실패 시 다음 주소로 자동 전환하는 고가용성 기능입니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — PDB가 OPEN 상태일 때, LREG 프로세스에 의해 해당 PDB의 서비스가 리스너에 READY 상태로 등록됩니다. READY 상태는 클라이언트의 접속을 수락할 수 있는 상태를 의미합니다.\n\nA) 오답 — PDB가 MOUNTED 상태인 경우, 리스너에 서비스가 BLOCKED 상태로 등록됩니다. 등록이 해제되는 것이 아니라 BLOCKED로 유지되며, BLOCKED 상태에서는 일반 클라이언트 접속이 거부됩니다. 관리자가 MOUNTED 상태의 PDB에 접근하려면 CDB$ROOT에 접속한 후 ALTER SESSION SET CONTAINER 명령을 사용하는 것이 일반적입니다.\n\nC) 오답 — PDB가 CLOSED 상태인 경우, 리스너에서 서비스 등록이 해제됩니다. BLOCKED가 아니라 등록 자체가 없어지므로 어떤 사용자도 해당 서비스로 접속할 수 없습니다.\n\nD) 오답 — PDB의 상태가 변경되면 LREG 프로세스가 약 60초 이내에 자동으로 리스너에 변경 사항을 반영합니다. ALTER SYSTEM REGISTER는 이 과정을 즉시 실행하도록 트리거하는 명령이지, 실행하지 않으면 업데이트되지 않는 것은 아닙니다.\n\n핵심 개념: 멀티테넌트 환경에서 PDB 상태에 따라 리스너 등록 상태가 자동으로 변경됩니다. OPEN → READY(접속 가능), MOUNTED → BLOCKED(제한적 접속), CLOSED → 등록 해제(접속 불가)입니다."
   },
   {
     "chapter": "Oracle Net Servicesの構成",
     "number": "C_04_009",
-    "title": "sqlnet.oraにおけるOracle Net暗号化のネゴシエーション・パラメータに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "listener.oraファイルの構成について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SQLNET.ENCRYPTION_SERVERのデフォルト値はREQUIREDであり、暗号化されていない接続は拒否される。",
-      "B) クライアント側がREQUESTED、サーバー側がACCEPTEDの場合、接続は暗号化されて確立される。",
-      "C) クライアント側がREQUIRED、サーバー側がREJECTEDの場合、暗号化なしの非暗号化接続として確立される。",
-      "D) SQLNET.ENCRYPTION_CLIENTとSQLNET.ENCRYPTION_SERVERの両方をACCEPTEDに設定すると、接続は常に暗号化される。",
-      "E) SQLNET.ENCRYPTION_TYPES_CLIENTパラメータで使用する暗号化アルゴリズム(AES256など)を指定できる。"
+      "A) listener.oraのデフォルトの場所は$ORACLE_HOME/network/adminディレクトリである。",
+      "B) 1つのサーバーで複数のリスナーを構成する場合、すべてのリスナーは同一のポートを使用する必要がある。",
+      "C) リスナー名がデフォルトのLISTENERではない場合、インスタンスのLOCAL_LISTENERパラメータを設定して動的登録先を指定する必要がある。",
+      "D) listener.oraのSID_LISTセクションはリスナーが受信するプロトコル・アドレスを定義する。",
+      "E) listener.oraファイルはデータベース・インスタンスの起動時に自動生成されるため、手動で作成や編集を行う必要はない。"
     ],
-    "answer": ["B", "E"],
-    "explanation": "정답 분석:\nB) 정답 — 클라이언트가 REQUESTED(암호화 요청), 서버가 ACCEPTED(암호화 수용)인 경우, 클라이언트가 암호화를 요청하고 서버가 이를 수용하므로 암호화된 접속이 성립됩니다. 네고시에이션 매트릭스에 따라 REQUESTED와 ACCEPTED의 조합은 암호화가 적용됩니다.\nE) 정답 — SQLNET.ENCRYPTION_TYPES_CLIENT 파라미터는 클라이언트에서 허용하는 암호화 알고리즘 목록을 지정합니다. AES256, AES192, AES128 등의 알고리즘을 지정할 수 있습니다.\n\n오답 분석:\nA) 오류 — SQLNET.ENCRYPTION_SERVER의 기본값은 REQUIRED가 아니라 ACCEPTED입니다. ACCEPTED는 상대방이 암호화를 요청하면 수용하고, 요청하지 않으면 비암호화로 접속하는 설정입니다.\nC) 오류 — 클라이언트가 REQUIRED(암호화 필수), 서버가 REJECTED(암호화 거부)인 경우, 양쪽의 요구가 충돌하므로 접속 자체가 실패합니다. 비암호화로 대체되지 않습니다.\nD) 오류 — 양쪽 모두 ACCEPTED인 경우, 어느 쪽도 적극적으로 암호화를 요청하지 않으므로 비암호화 접속이 성립됩니다. ACCEPTED는 '상대가 요청하면 수용'이라는 수동적 설정이므로, 양쪽 모두 ACCEPTED이면 암호화가 적용되지 않습니다.\n\n핵심 개념: Oracle Net 암호화는 클라이언트와 서버 간 네고시에이션으로 결정됩니다. ACCEPTED는 수동적 수용, REQUESTED는 적극적 요청, REQUIRED는 필수 요구, REJECTED는 거부이며, REQUIRED와 REJECTED가 만나면 접속이 실패합니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — listener.ora 파일의 기본 위치는 $ORACLE_HOME/network/admin 디렉토리입니다. TNS_ADMIN 환경변수가 설정되어 있으면 해당 디렉토리에서 listener.ora를 읽습니다.\n\nC) 정답 — 동적 서비스 등록에서 LREG 프로세스는 기본적으로 이름이 LISTENER이고 포트 1521인 기본 리스너에만 자동 등록합니다. 리스너 이름이 LISTENER가 아니거나 다른 포트를 사용하는 경우, LOCAL_LISTENER 초기화 파라미터를 설정하여 동적 등록 대상을 명시적으로 지정해야 합니다.\n\nB) 오답 — 1개의 서버에서 여러 리스너를 구성할 때, 각 리스너는 고유한 이름과 포트를 가져야 합니다. 동일한 포트를 사용하면 포트 충돌이 발생합니다.\n\nD) 오답 — SID_LIST 섹션은 정적 서비스 등록 목록을 정의하는 부분입니다. 리스너가 수신할 프로토콜 주소(프로토콜, 호스트, 포트)를 정의하는 것은 DESCRIPTION_LIST(또는 ADDRESS) 섹션입니다.\n\nE) 오답 — listener.ora 파일은 인스턴스 기동 시 자동 생성되는 것이 아니라, DBA가 NETCA, NETMGR 등의 도구 또는 수동 편집을 통해 작성하는 구성 파일입니다. 기본 리스너(LISTENER, 포트 1521)를 사용하고 동적 서비스 등록만 활용하는 경우에는 listener.ora 없이도 리스너를 기동할 수 있지만, 정적 서비스 등록이나 비기본 리스너 구성에는 listener.ora의 수동 편집이 필요합니다.\n\n핵심 개념: listener.ora는 $ORACLE_HOME/network/admin에 위치하는 서버 측 리스너 구성 파일입니다. SID_LIST 섹션은 정적 서비스 등록, DESCRIPTION_LIST는 수신 주소를 정의합니다. 비기본 리스너 사용 시 LOCAL_LISTENER 파라미터로 동적 등록 대상을 지정해야 합니다."
   },
   {
     "chapter": "Oracle Net Servicesの構成",
     "number": "C_04_010",
-    "title": "データベース・リンクの接続方式に関して正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "TNS_ADMIN環境変数について正しく述べているものを選択してください。",
     "options": [
-      "A) 固定ユーザー接続方式では、CONNECT TO句とIDENTIFIED BY句でリンクに固定の認証情報を埋め込み、リンクを使用するすべてのセッションが同じリモート・アカウントで接続される。",
-      "B) 連結ユーザー(Connected User)接続方式では、ローカル・セッションの現在のユーザー名とパスワードでリモート・データベースに接続するため、リモート側に同一アカウントが存在する必要がある。",
-      "C) 現在ユーザー(Current User)接続方式は、CONNECT TO CURRENT_USERを指定し、Oracle Net暗号化が有効でない環境でも使用できる汎用的な方式である。",
-      "D) 連結ユーザー方式のデータベース・リンクを作成するには、CREATE PUBLIC DATABASE LINK権限が必要である。",
-      "E) 固定ユーザー接続方式ではUSING句を省略でき、リスナーが自動的にリモート・データベースを検出する。"
+      "A) TNS_ADMINはOracle Netの構成ファイル(tnsnames.ora, sqlnet.ora, listener.ora)を検索するディレクトリを指定する。",
+      "B) TNS_ADMINを変更すると、すでに接続されているクライアント・セッションの構成ファイルも即座に再読み込みされる。",
+      "C) TNS_ADMINが設定されている場合でも、Oracle Netは常に$ORACLE_HOME/network/adminディレクトリを優先して参照する。",
+      "D) TNS_ADMINには構成ファイルのフルパス(ファイル名を含む)を指定する必要がある。"
     ],
-    "answer": ["A", "B"],
-    "explanation": "정답 분석:\nA) 정답 — 고정 사용자(Fixed User) 방식은 CREATE DATABASE LINK 문에서 CONNECT TO user IDENTIFIED BY password로 원격 접속 계정과 비밀번호를 링크에 직접 지정합니다. 이 링크를 사용하는 모든 세션은 지정된 동일한 원격 계정으로 접속합니다.\nB) 정답 — 연결 사용자(Connected User) 방식은 인증 절(CONNECT TO ... IDENTIFIED BY)을 생략하여 생성하며, 현재 로컬 세션의 사용자 이름과 비밀번호로 원격 데이터베이스에 접속합니다. 따라서 원격 데이터베이스에도 동일한 사용자 계정과 비밀번호가 존재해야 합니다.\n\n오답 분석:\nC) 오류 — 현재 사용자(Current User) 방식은 CONNECT TO CURRENT_USER를 지정하며, Enterprise User Security(EUS) 환경에서 글로벌 사용자 인증을 기반으로 동작합니다. 일반적인 비암호화 환경에서 범용적으로 사용할 수 있는 방식이 아닙니다.\nD) 오류 — 연결 사용자 방식의 Private 데이터베이스 링크 생성에는 CREATE DATABASE LINK 권한이 필요합니다. CREATE PUBLIC DATABASE LINK는 Public 링크 생성 시에만 필요한 별도의 권한입니다.\nE) 오류 — 고정 사용자 방식이라도 USING 절은 원격 데이터베이스의 TNS 접속 문자열을 지정하기 위해 필수입니다. 리스너가 자동으로 원격 데이터베이스를 검출하는 기능은 없으며, 접속 대상 정보는 반드시 명시해야 합니다.\n\n핵심 개념: 데이터베이스 링크의 접속 방식은 고정 사용자(CONNECT TO user IDENTIFIED BY pwd), 연결 사용자(인증 절 생략), 현재 사용자(CONNECT TO CURRENT_USER, EUS 환경)의 세 가지이며, 각각 인증 메커니즘과 필요 조건이 다릅니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — TNS_ADMIN 환경변수는 Oracle Net 구성 파일(tnsnames.ora, sqlnet.ora, listener.ora 등)을 검색할 디렉토리 경로를 지정합니다. TNS_ADMIN이 설정되면 $ORACLE_HOME/network/admin 대신 해당 디렉토리에서 구성 파일을 읽습니다.\n\nB) 오답 — TNS_ADMIN을 변경해도 이미 연결된 세션에는 영향이 없습니다. 변경된 TNS_ADMIN 설정은 새로운 접속부터 적용됩니다.\n\nC) 오답 — TNS_ADMIN이 설정되어 있으면 $ORACLE_HOME/network/admin보다 TNS_ADMIN이 가리키는 디렉토리가 우선적으로 참조됩니다. $ORACLE_HOME/network/admin은 TNS_ADMIN이 설정되지 않은 경우의 기본 위치입니다.\n\nD) 오답 — TNS_ADMIN은 디렉토리 경로를 지정하며, 파일명을 포함하지 않습니다. Oracle Net은 지정된 디렉토리에서 tnsnames.ora, sqlnet.ora, listener.ora 등의 파일을 자동으로 검색합니다.\n\n핵심 개념: TNS_ADMIN 환경변수는 Oracle Net 구성 파일의 검색 디렉토리를 지정하며, 설정 시 $ORACLE_HOME/network/admin보다 우선합니다. 디렉토리 경로만 지정하고 파일명은 포함하지 않으며, 변경 시 기존 세션에는 영향 없이 새로운 접속부터 적용됩니다."
   }
 ]

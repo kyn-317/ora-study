@@ -2,71 +2,68 @@
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_001",
-    "title": "マルチテナント環境においてPDBの自動起動に関する内容について正しいものを選択してください。",
+    "title": "PDB$SEEDからCREATE PLUGGABLE DATABASE文を使用して新しいPDBを作成する際の動作について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ALTER PLUGGABLE DATABASE pdb_name SAVE STATE文はPDBがMOUNTED状態でも実行可能である。",
-      "B) SAVE STATEを実行すると、CDB再起動時に該当PDBが保存された状態で自動的にオープンされる。",
-      "C) SAVE STATEの設定はCDB再起動のたびに再実行する必要がある。",
-      "D) SAVE STATEの代替手段としてAFTER STARTUP ON DATABASEトリガーが使用できるが、Oracleはトリガー方式を推奨している。",
-      "E) DISCARD STATEを実行するとPDBは即座にMOUNTED状態に変更される。"
+      "A) 新しいPDBはREAD WRITE状態で作成されるため、作成直後からユーザーが接続してデータ操作を実行できる。",
+      "B) ADMIN USER句で指定されたローカル管理者アカウントにはPDB_DBAロールが自動的に付与される。",
+      "C) PDB$SEEDのデータ・ファイルが新しい場所にコピーされ、新しいPDB用のSYSTEMおよびSYSAUX表領域が作成される。",
+      "D) CREATE PLUGGABLE DATABASE文を実行するには、対象PDBに直接接続している必要がある。",
+      "E) PDB$SEEDは新しいPDB作成後、必要がなくなれば任意に削除することが可能である。"
     ],
-    "answer": ["B"],
-    "explanation": "정답: B\nSAVE STATE를 실행하면 PDB의 현재 오픈 모드가 CDB$ROOT 데이터 딕셔너리에 영구적으로 저장되며, CDB 재시작 시 해당 PDB가 저장된 상태로 자동 오픈됩니다.\n\n오답 해설:\nA) SAVE STATE는 PDB가 OPEN 상태일 때만 실행할 수 있습니다. MOUNTED 상태에서는 실행할 수 없습니다.\nC) SAVE STATE 설정은 DISCARD STATE를 명시적으로 실행하기 전까지 영구적으로 유지됩니다. 재실행할 필요가 없습니다.\nD) AFTER STARTUP ON DATABASE 트리거는 대체 수단이지만, Oracle은 SAVE STATE 방식을 공식적으로 권장합니다. 트리거 방식은 단일 실패 시 전체 트리거가 중단될 위험이 있습니다.\nE) DISCARD STATE는 데이터 딕셔너리에서 SAVE STATE 항목을 삭제하는 것이며, PDB의 현재 상태를 변경하지 않습니다. CDB 다음 재시작 시 해당 PDB가 MOUNTED 상태로 남게 됩니다.\n\n핵심 개념: SAVE STATE는 CDB 재시작 시 PDB 자동 오픈을 위한 Oracle 공식 권장 메커니즘이며, DBA_PDB_SAVED_STATES 뷰로 설정 상태를 확인할 수 있습니다."
+    "answer": ["B", "C"],
+    "explanation": "정답: B, C\nB) 정답 — CREATE PLUGGABLE DATABASE 문에서 ADMIN USER 절을 지정하면, 해당 PDB의 로컬 관리자 계정이 생성되며 PDB_DBA 역할이 자동으로 부여됩니다. PDB_DBA에는 CREATE SESSION, CREATE TABLE 등 기본 관리 권한과 UNLIMITED TABLESPACE가 포함됩니다.\n\nC) 정답 — PDB$SEED에서 PDB를 생성하면, PDB$SEED의 데이터 파일(SYSTEM, SYSAUX 등)이 새 위치로 복사되어 새 PDB의 기반이 됩니다. 이를 통해 각 PDB는 독립적인 SYSTEM 및 SYSAUX 테이블스페이스를 가지게 됩니다.\n\nA) 오답 — 새 PDB는 MOUNTED 상태로 생성됩니다. 사용하려면 ALTER PLUGGABLE DATABASE ... OPEN을 수동으로 실행하여 READ WRITE 상태로 전환해야 합니다.\n\nD) 오답 — CREATE PLUGGABLE DATABASE 문은 CDB$ROOT에 공통 사용자(Common User)로 접속하여 실행해야 합니다. 대상 PDB에 직접 접속하는 것이 아닙니다.\n\nE) 오답 — PDB$SEED는 CDB의 필수 구성요소(CON_ID=2)로, 임의로 삭제할 수 없습니다. 항상 READ ONLY 상태로 유지되며 새 PDB 생성 시 반복적으로 템플릿으로 사용됩니다.\n\n핵심 개념: PDB$SEED는 CDB의 필수 시드 컨테이너로 항상 READ ONLY 상태를 유지하며, 새 PDB 생성 시 데이터 파일이 복사되어 MOUNTED 상태의 새 PDB가 생성됩니다. ADMIN USER로 생성된 로컬 관리자에게는 PDB_DBA 역할이 자동 부여됩니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_002",
-    "title": "別のCDBから切断されたPDBをプラグインする際のプロセスについて正しい内容を述べているものを2つ選択してください。(2つ選択してください)",
+    "title": "PDBのUnplug操作を実行する前提条件および動作について正しく述べているものを選択してください。",
     "options": [
-      "A) DBMS_PDB.CHECK_PLUG_COMPATIBILITYファンクションを使用してプラグインの互換性を事前に確認することが推奨される。",
-      "B) PDB_PLUG_IN_VIOLATIONSビューのTYPEがWARNINGの場合、プラグイン操作はブロックされる。",
-      "C) プラグイン操作にはCREATE PLUGGABLE DATABASE文のUSING句を使用し、XMLメタデータファイルまたは.pdbアーカイブ・ファイルを指定する。",
-      "D) プラグインされたPDBのデータ・ファイルの処理方法としてCOPYオプションのみが使用できる。",
-      "E) ソースCDBとターゲットCDBのデータベース・キャラクタ・セットが異なっていてもプラグイン操作は可能である。"
+      "A) Unplugを実行するにはPDBがREAD ONLYモードでオープンされている必要がある。",
+      "B) Unplug時に.xml拡張子を指定するとXMLメタデータのみが生成され、データ・ファイルは元の場所に保持される。",
+      "C) Unplug操作はPDBに直接接続した状態で実行する必要がある。",
+      "D) Unplug後もPDBは通常通りOPEN操作でオープンすることができる。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수를 사용하여 플러그인 호환성을 사전에 확인하는 것이 필수적으로 권장됩니다. 이 함수는 캐릭터셋, 엔디안, DB 버전, 컴포넌트, 패치 레벨 등을 검증합니다.\nC) 플러그인 시 CREATE PLUGGABLE DATABASE 문의 USING 구에 XML 메타데이터 파일(.xml) 또는 .pdb 아카이브 파일을 지정합니다.\n\n오답 해설:\nB) PDB_PLUG_IN_VIOLATIONS 뷰의 TYPE이 WARNING인 경우 플러그인은 허용됩니다. ERROR인 경우에만 플러그인이 차단됩니다. WARNING은 OPEN 후 자동 해결되는 경우가 많습니다.\nD) 데이터 파일 처리 옵션으로 COPY(복제), NOCOPY(참조), MOVE(이동) 세 가지가 사용 가능합니다. COPY만 가능한 것은 아닙니다.\nE) 소스 CDB와 타겟 CDB의 데이터베이스 캐릭터셋은 동일하거나 호환 가능해야 합니다. 캐릭터셋이 다르면 호환성 검사에서 실패합니다.\n\n핵심 개념: PDB 플러그인 시 DBMS_PDB.CHECK_PLUG_COMPATIBILITY로 사전 호환성 검사를 수행하고, PDB_PLUG_IN_VIOLATIONS 뷰에서 ERROR/WARNING 결과를 확인해야 합니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — UNPLUG INTO 절에 .xml 확장자를 지정하면 XML 메타데이터 파일만 생성되고, 데이터 파일은 원래 경로에 그대로 유지됩니다. 반면 .pdb 확장자를 지정하면 메타데이터와 데이터 파일이 하나의 압축 아카이브 파일로 통합됩니다.\n\nA) 오답 — Unplug를 실행하려면 PDB가 반드시 CLOSE(MOUNTED) 상태여야 합니다. READ ONLY가 아니라 MOUNTED 상태가 전제 조건입니다.\n\nC) 오답 — Unplug 작업은 CDB$ROOT에 접속한 상태에서 실행해야 합니다. PDB에 직접 접속하는 것이 아닙니다.\n\nD) 오답 — UNPLUGGED 상태가 된 PDB는 더 이상 오픈할 수 없으며, DROP PLUGGABLE DATABASE로 딕셔너리에서 제거하는 것만 가능합니다.\n\n핵심 개념: PDB Unplug는 PDB를 CLOSE(MOUNTED) 상태로 만든 후 CDB$ROOT에서 실행하며, 파일 확장자(.xml 또는 .pdb)에 따라 출력 형식이 결정됩니다. UNPLUGGED 상태의 PDB는 오픈 불가하며 DROP만 가능합니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_003",
-    "title": "PDBのホット・クローニングに関する内容について正しいものを選択してください。",
+    "title": "マルチテナント環境における初期化パラメータの管理について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ホット・クローニングではソースPDBをREAD ONLYモードに変更する必要がある。",
-      "B) ホット・クローニングを実行するにはARCHIVELOGモードとローカルUNDOモードの両方が有効になっている必要がある。",
-      "C) ホット・クローニングはローカル・クローンのみに対応しており、リモート・クローンには使用できない。",
-      "D) ホット・クローニングではソースPDBのデータ・ファイルがロックされるため、クローニング中はDML操作が制限される。",
-      "E) ホット・クローニング機能はOracle Database 19c以降で使用可能になった。"
+      "A) V$PARAMETERビューのISPDB_MODIFIABLE列がTRUEのパラメータは、PDBレベルで独立して変更可能である。",
+      "B) PDBでISPDB_MODIFIABLE=FALSEのパラメータを変更しようとするとORA-65040エラーが発生する。",
+      "C) PDBで設定されたパラメータ値はCDB$ROOTからALTER SYSTEM SET ... CONTAINER=ALLで変更すると上書きされる。",
+      "D) SGA_TARGETやDB_BLOCK_SIZEなどのパラメータはPDBレベルで個別に設定可能である。",
+      "E) PDBで明示的にパラメータを設定していない場合、そのPDBは自動的にPDB$SEEDのパラメータ値を継承する。"
     ],
-    "answer": ["B"],
-    "explanation": "정답: B\nHot Clone을 실행하려면 ARCHIVELOG 모드와 Local Undo 모드(LOCAL_UNDO_ENABLED=TRUE)가 모두 활성화되어 있어야 합니다. 이 두 조건이 충족되어야 소스 PDB가 READ WRITE 상태를 유지하면서 클론이 가능합니다.\n\n오답 해설:\nA) Hot Clone의 핵심 장점은 소스 PDB가 READ WRITE 상태를 유지하며 클론이 가능하다는 것입니다. READ ONLY로 변경할 필요가 없습니다.\nC) Remote Hot Clone도 지원됩니다. DB Link를 사용하여 원격 CDB의 PDB에 대해서도 Hot Clone이 가능합니다.\nD) Hot Clone 중에도 소스 PDB에서 DML 작업이 정상적으로 수행됩니다. 데이터 파일이 잠기지 않습니다.\nE) Hot Clone 기능은 Oracle Database 12c Release 2(12.2)부터 도입되었습니다.\n\n핵심 개념: Hot Clone은 소스 PDB의 다운타임 없이 클론을 수행하는 기능으로, ARCHIVELOG 모드와 Local Undo 모드가 전제조건입니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — V$PARAMETER 또는 V$SYSTEM_PARAMETER 뷰의 ISPDB_MODIFIABLE 컬럼이 TRUE인 파라미터만 PDB 수준에서 독립적으로 변경할 수 있습니다. OPEN_CURSORS, CURSOR_SHARING 등이 대표적인 예입니다.\n\nB) 정답 — ISPDB_MODIFIABLE=FALSE인 파라미터는 CDB 루트에서만 변경 가능하며, PDB에서 변경을 시도하면 ORA-65040 오류가 발생합니다.\n\nC) 오답 — CDB 루트에서 CONTAINER=ALL로 파라미터를 변경해도, PDB에 이미 명시적으로 설정된 값이 있는 경우 해당 PDB의 값은 변경되지 않습니다. PDB의 독립성을 보장하기 위한 설계입니다.\n\nD) 오답 — SGA_TARGET, DB_BLOCK_SIZE 등 인스턴스 전체에 영향을 미치는 파라미터는 ISPDB_MODIFIABLE=FALSE이므로 CDB 루트에서만 변경 가능합니다.\n\nE) 오답 — PDB에 명시적 설정이 없는 경우 CDB$ROOT의 파라미터 값을 상속받습니다. PDB$SEED의 값이 아니라 CDB$ROOT의 값을 기준으로 합니다.\n\n핵심 개념: 멀티테넌트 환경에서 ISPDB_MODIFIABLE=TRUE인 파라미터만 PDB 수준에서 독립 설정이 가능하며, PDB에 명시적 설정이 없으면 CDB$ROOT의 값을 상속받습니다. CONTAINER=ALL로 변경해도 PDB의 기존 명시적 설정은 보존됩니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_004",
-    "title": "DROP PLUGGABLE DATABASE文に関する内容について正しいものを2つ選択してください。(2つ選択してください)",
+    "title": "PDBのクローニング操作について正しく述べているものを選択してください。",
     "options": [
-      "A) PDBがREAD WRITE状態であってもDROP PLUGGABLE DATABASE文を実行できる。",
-      "B) INCLUDING DATAFILESオプションを指定すると、PDBのデータ・ファイルが物理的に削除される。",
-      "C) Oracle Managed Files（OMF）環境では、デフォルトでKEEP DATAFILESが適用される。",
-      "D) UNPLUGGED状態のPDBに対してもDROP PLUGGABLE DATABASE文を実行できる。",
-      "E) DROP PLUGGABLE DATABASE文の実行後、CDB全体の再起動が必要である。"
+      "A) ローカル・クローンを実行する際、ソースPDBは必ずMOUNTED状態にする必要がある。",
+      "B) リフレッシュ可能なクローンPDBはREAD WRITEモードでオープンすることが可能であり、データの変更操作もできる。",
+      "C) ホット・クローンを使用するには、CDBがARCHIVELOGモードかつローカルUNDOモードで運用されている必要がある。",
+      "D) リモート・クローンを実行するには、ソースPDBのデータ・ファイルを事前にターゲットサーバへ手動でコピーする必要がある。"
     ],
-    "answer": ["B", "D"],
-    "explanation": "정답: B, D\nB) INCLUDING DATAFILES 옵션을 지정하면 PDB의 데이터 파일이 물리적으로 삭제됩니다.\nD) DROP PLUGGABLE DATABASE는 MOUNTED 상태 또는 UNPLUGGED 상태의 PDB에 대해 실행할 수 있습니다. Unplug 후 DROP하는 것은 PDB 이전의 표준 패턴입니다.\n\n오답 해설:\nA) DROP PLUGGABLE DATABASE는 MOUNTED 또는 UNPLUGGED 상태에서만 실행할 수 있습니다. READ WRITE 상태에서는 먼저 CLOSE해야 합니다.\nC) OMF 환경에서는 INCLUDING DATAFILES가 기본값입니다. 데이터 파일을 보존하려면 명시적으로 KEEP DATAFILES를 지정해야 합니다.\nE) DROP PLUGGABLE DATABASE 실행 후 CDB 전체를 재시작할 필요는 없습니다.\n\n핵심 개념: DROP PLUGGABLE DATABASE는 MOUNTED 또는 UNPLUGGED 상태에서만 실행 가능하며, OMF 환경에서는 INCLUDING DATAFILES가 기본값이므로 데이터 파일 보존이 필요한 경우 KEEP DATAFILES를 명시해야 합니다."
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — 핫 클론(Hot Clone)은 소스 PDB가 READ WRITE 상태에서도 클론을 수행할 수 있는 기능이며, CDB가 ARCHIVELOG 모드이고 로컬 UNDO 모드(LOCAL_UNDO_ENABLED=TRUE)로 운영되는 것이 전제 조건입니다. 내부적으로 데이터 파일 복사 후 Redo를 적용하여 일관성을 확보합니다.\n\nA) 오답 — 로컬 클론 시 소스 PDB는 READ ONLY 모드로 변경하거나, 핫 클론을 사용하여 READ WRITE 상태에서도 수행할 수 있습니다. MOUNTED 상태가 필요한 것은 Unplug 작업입니다.\n\nB) 오답 — Refreshable Clone PDB는 READ ONLY로만 열 수 있으며, READ WRITE 모드로 오픈할 수 없습니다. 소스 PDB와 주기적으로 동기화하는 특성상 데이터 변경이 허용되지 않습니다.\n\nD) 오답 — 리모트 클론은 DB Link를 통해 Oracle Net 네트워크를 거쳐 자동으로 데이터 파일을 전송합니다. 수동으로 데이터 파일을 복사할 필요가 없습니다.\n\n핵심 개념: PDB 클론에는 로컬 클론, 리모트 클론, Refreshable Clone 등 다양한 방법이 있습니다. 핫 클론은 ARCHIVELOG 모드 + 로컬 UNDO 모드가 전제 조건이며, Refreshable Clone PDB는 READ ONLY로만 열 수 있습니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_005",
-    "title": "マルチテナント環境におけるロックダウン・プロファイルに関する内容について正しく述べているものを選択してください。",
+    "title": "CDB再起動時のPDBの状態管理に関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) ロックダウン・プロファイルは各PDB内のローカル管理ユーザーが作成および変更できる。",
-      "B) ロックダウン・プロファイルを使用すると、PDBで使用可能な文、機能、またはオプションを制限できる。",
-      "C) ロックダウン・プロファイルはPDB_LOCKDOWN初期化パラメータではなく、ALTER SYSTEM文で直接適用する。",
-      "D) ロックダウン・プロファイルに違反した操作を実行すると、PDBが自動的にMOUNTED状態に変更される。",
-      "E) ロックダウン・プロファイルはCDB$ROOTコンテナにのみ適用でき、個別のPDBには適用できない。"
+      "A) CDBを再起動するとすべてのPDBは自動的にREAD WRITEモードでオープンされる。",
+      "B) SAVE STATEを実行すると、PDBの現在のオープン・モード情報がCDB$ROOTのデータ・ディクショナリに永続的に保存される。",
+      "C) SAVE STATEはPDBがMOUNTED状態であっても実行することが可能である。",
+      "D) DISCARD STATEを実行すると、PDBは即座にMOUNTED状態に変更される。"
     ],
     "answer": ["B"],
-    "explanation": "정답: B\nLockdown Profile을 사용하면 PDB에서 사용 가능한 SQL문(DISABLE STATEMENT), 기능(DISABLE FEATURE), 또는 옵션(DISABLE OPTION)을 제한할 수 있습니다.\n\n오답 해설:\nA) Lockdown Profile은 CDB$ROOT에서만 생성할 수 있습니다. PDB의 로컬 관리자는 Lockdown Profile을 생성하거나 변경할 수 없습니다.\nC) Lockdown Profile은 PDB_LOCKDOWN 초기화 파라미터를 통해 PDB에 할당됩니다. ALTER SYSTEM으로 직접 적용하는 것이 아닙니다.\nD) Lockdown Profile에 위반하는 작업을 실행하면 ORA-01031 또는 ORA-65203 에러가 발생하며, PDB 상태가 변경되지는 않습니다.\nE) Lockdown Profile은 CDB$ROOT에서 생성하지만, PDB_LOCKDOWN 파라미터를 통해 개별 PDB에 할당하여 적용합니다.\n\n핵심 개념: Lockdown Profile은 CDB$ROOT에서만 생성 가능하며, PDB_LOCKDOWN 파라미터로 개별 PDB에 할당하여 기능 제한을 적용하는 보안 메커니즘입니다."
+    "explanation": "정답: B\nB) 정답 — SAVE STATE를 실행하면 PDB의 현재 오픈 모드 정보가 CDB$ROOT의 데이터 딕셔너리(PDB_SAVED_STATES$ 내부 테이블)에 영구적으로 저장됩니다. CDB 재시작 시 Oracle은 이 저장된 정보를 읽어 해당 PDB를 이전 오픈 모드로 자동 복원합니다. DBA_PDB_SAVED_STATES 뷰로 저장 상태를 확인할 수 있습니다.\n\nA) 오답 — CDB를 재시작하면 모든 PDB는 기본적으로 MOUNTED 상태로 유지됩니다. PDB를 자동으로 오픈하려면 SAVE STATE를 사전에 설정하거나 AFTER STARTUP 트리거를 구성해야 합니다.\n\nC) 오답 — SAVE STATE는 PDB가 OPEN 상태(READ WRITE 또는 READ ONLY)에서만 실행 가능합니다. MOUNTED 상태에서는 실행할 수 없습니다.\n\nD) 오답 — DISCARD STATE는 이전에 SAVE STATE로 저장된 상태 정보를 딕셔너리에서 삭제하는 명령입니다. PDB의 현재 오픈 모드를 즉시 변경하는 것이 아니라, 다음 CDB 재시작 시 해당 PDB가 자동 오픈되지 않도록 설정하는 것입니다.\n\n핵심 개념: CDB 재시작 시 모든 PDB는 기본적으로 MOUNTED 상태가 됩니다. SAVE STATE는 PDB가 OPEN된 상태에서 실행하여 오픈 모드를 딕셔너리에 영구 저장하며, CDB 재시작 후 자동 복원을 가능하게 합니다. DISCARD STATE는 저장된 정보만 삭제합니다."
   }
 ]

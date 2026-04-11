@@ -2,16 +2,25 @@
   "chapter": "07",
   "chapter_name": "ストレージの管理",
   "original_topic_ratio": {
-    "セグメント管理とHWM": 2,
+    "再開可能領域割当て": 1,
     "データ圧縮": 1,
-    "領域割当てとエクステント管理": 1,
-    "データブロックと索引管理": 1
+    "セグメント縮小": 1,
+    "遅延セグメント作成": 1,
+    "索引UNUSABLE状態": 1
   },
   "custom_topic_counts": {
-    "セグメント管理とHWM": 5,
-    "データ圧縮": 3,
-    "領域割当てとエクステント管理": 4,
-    "データブロックと索引管理": 3
+    "HWM(最高水位標)": 2,
+    "セグメント縮小": 2,
+    "Direct-Path Insert": 1,
+    "遅延セグメント作成": 1,
+    "再開可能領域割当て": 2,
+    "行移行・行連鎖": 1,
+    "PCTFREE": 1,
+    "索引UNUSABLE/INVISIBLE状態": 1,
+    "Segment Advisor": 1,
+    "エクステント管理(AUTOALLOCATE/UNIFORM)": 1,
+    "索引REBUILD": 1,
+    "データ圧縮": 1
   },
   "total_custom": 15,
   "last_number": "C_07_015"

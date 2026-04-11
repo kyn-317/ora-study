@@ -3,17 +3,18 @@
   "chapter_name": "Oracle提供のデータベース・ツールの採用",
   "original_topic_ratio": {
     "DBCA": 1,
-    "SQL*PlusとSQL Developer": 2,
-    "Enterprise Manager": 1,
-    "RMAN": 0,
-    "Oracle Netツール": 0
+    "SQL*Plus": 2,
+    "RMAN": 1,
+    "Enterprise Manager Cloud Control": 1,
+    "SQL Developer": 1
   },
   "custom_topic_counts": {
-    "DBCA": 3,
-    "SQL*PlusとSQL Developer": 5,
-    "Enterprise Manager": 3,
+    "DBCA": 2,
+    "SQL*Plus": 4,
     "RMAN": 3,
-    "Oracle Netツール": 1
+    "Enterprise Manager Cloud Control": 3,
+    "SQL Developer": 2,
+    "ツール横断比較": 1
   },
   "total_custom": 15,
   "last_number": "C_02_015"

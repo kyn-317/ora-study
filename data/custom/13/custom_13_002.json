@@ -2,69 +2,69 @@
   {
     "chapter": "パフォーマンスの概要",
     "number": "C_13_006",
-    "title": "ADDMが生成するRecommendation(勧告事項)の構造と特性について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "オプティマイザ統計の収集と管理について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ADDMのRecommendationは、Hardware Changes、Database Configuration、Schema Changes、Application Changesの4つの主要な勧告事項タイプに分類される。",
-      "B) 1つのFindingに対して、ADDMは必ず1つのRecommendationのみを生成する。",
-      "C) 各Recommendationには、予想効果(Benefit)がDB Time節約量として含まれており、Benefitが大きい順にリストが優先順位付けされる。",
-      "D) RecommendationのAction(具体的な実行措置)は、DBA_ADVISOR_FINDINGS ビューのみで確認できる。",
-      "E) ADDMのRecommendationは実行計画の固定のみを提案し、パラメータ変更の提案は行わない。"
+      "A) オプティマイザ統計の収集にはDBMS_STATSパッケージを使用することがOracleにより推奨されており、GATHER_DATABASE_STATSやGATHER_TABLE_STATSなどのプロシージャが提供される。",
+      "B) 自動オプティマイザ統計収集ジョブは、メンテナンス・ウィンドウ中に統計が欠落しているか、またはノーフ化(Stale)した統計を持つオブジェクトを対象に統計を自動的に再収集する。",
+      "C) オプティマイザ統計が古くなった(Stale)かどうかの判定基準は、テーブルのデータが50%以上変更された場合である。",
+      "D) DBMS_STATSパッケージによる統計収集は手動でのみ実行可能であり、自動メンテナンス・タスクとしては提供されていない。",
+      "E) オプティマイザ統計はV$ビューと同様にSGAメモリにのみ保持されるため、インスタンス再起動時に消失する。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "해설:\n\n정답:\nA) ADDM의 Recommendation은 Hardware Changes(하드웨어 변경), Database Configuration(데이터베이스 구성 변경), Schema Changes(스키마 변경), Application Changes(애플리케이션 변경)의 4가지 주요 유형으로 분류됩니다.\nC) 각 Recommendation에는 예상 효과(Benefit)가 DB Time 절약량으로 포함되며, Benefit이 큰 순서대로 우선순위가 정렬됩니다. DBA는 이를 기준으로 가장 효과가 큰 권고부터 적용할 수 있습니다.\n\n오답:\nB) 하나의 Finding에 대해 ADDM은 여러 개의 대안적 Recommendation을 생성할 수 있습니다. DBA는 상황에 맞게 적절한 대안을 선택할 수 있습니다.\nD) Recommendation의 Action(구체적 실행 조치)은 DBA_ADVISOR_FINDINGS가 아니라 DBA_ADVISOR_ACTIONS 뷰에서 확인합니다. DBA_ADVISOR_FINDINGS는 Finding(발견 사항) 정보를 저장합니다.\nE) ADDM의 Recommendation은 실행 계획 고정만이 아니라, SGA/PGA 크기 조정, 파라미터 변경, 인덱스 생성, SQL Tuning Advisor 실행 권고 등 다양한 유형의 조치를 제안합니다.\n\n핵심 개념: ADDM Recommendation은 Finding → Recommendation → Action → Rationale의 계층 구조를 가지며, Benefit(DB Time 절약량) 기준으로 우선순위가 결정됩니다. 하나의 Finding에 여러 대안적 Recommendation이 제시될 수 있습니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — 옵티마이저 통계 수집에는 DBMS_STATS 패키지를 사용하는 것이 Oracle에서 공식적으로 권장하는 방법입니다. GATHER_DATABASE_STATS(데이터베이스 전체), GATHER_SCHEMA_STATS(스키마 단위), GATHER_TABLE_STATS(테이블 단위) 등의 프로시저가 제공되며, ANALYZE 명령어보다 정확하고 기능이 풍부합니다.\n\nB) 정답 — 자동 옵티마이저 통계 수집 작업(auto optimizer stats collection)은 Oracle의 자동 유지 관리 태스크로, 유지 관리 윈도우(기본: 야간/주말) 동안 통계가 없거나 노후화된(Stale) 객체를 대상으로 통계를 자동으로 재수집합니다. DBA_AUTOTASK_CLIENT 뷰에서 상태를 확인할 수 있습니다.\n\nC) 오답 — 통계 노후화(Stale) 판정 기준은 50%가 아닌 10%입니다. 테이블 전체 행 수의 10% 이상이 변경(INSERT, UPDATE, DELETE)되면 해당 테이블의 통계가 Stale 상태로 표시됩니다. 이 임계값은 STALE_PERCENT 기본 설정으로 변경할 수 있습니다.\n\nD) 오답 — DBMS_STATS를 통한 통계 수집은 수동 실행뿐만 아니라, 자동 유지 관리 태스크(auto optimizer stats collection)로도 제공됩니다. 이 자동 태스크는 기본적으로 활성화되어 있으며, 유지 관리 윈도우에서 자동으로 실행됩니다.\n\nE) 오답 — 옵티마이저 통계는 데이터 딕셔너리(SYSTEM/SYSAUX 테이블스페이스)에 영구적으로 저장됩니다. V$ 뷰처럼 SGA 메모리에만 존재하는 것이 아니므로, 인스턴스 재시작 후에도 통계가 유지됩니다.\n\n핵심 개념: 옵티마이저 통계는 비용 기반 옵티마이저(CBO)가 최적의 실행 계획을 생성하기 위해 참조하는 핵심 정보입니다. DBMS_STATS 패키지로 수동 수집하거나, 자동 유지 관리 태스크를 통해 노후화된 통계를 자동으로 재수집합니다. 통계 노후화 기준은 데이터 변경량 10% 이상입니다."
   },
   {
     "chapter": "パフォーマンスの概要",
     "number": "C_13_007",
-    "title": "ADDMの分析で使用されるDB Timeの構成要素について正しく述べているものを選択してください。",
+    "title": "自動診断リポジトリ(ADR)のアラート・ログに関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) DB Timeはデータベースのアイドル・セッションを含むすべてのセッションの経過時間の合計である。",
-      "B) DB TimeはCPU TimeとWait Timeに大別でき、Wait Timeはさらに User I/O Wait、Concurrency Wait、Application Waitなどの待機クラスに分解される。",
-      "C) DB Timeの分解分析において、ADDMはボトムアップ方式で個別の待機イベントから全体像へ分析する。",
-      "D) DB Timeの値はV$SYS_TIME_MODELビューでは確認できず、AWRレポートでのみ確認できる。"
+      "A) アラート・ログにはデータベースの起動・停止、Redoログの切替え、ORAエラーなどの主要なイベントが時系列で記録される。",
+      "B) アラート・ログはデータベースがOPEN状態のときのみ記録が行われ、MOUNT状態では記録されない。",
+      "C) V$DIAG_ALERT_EXTビューを使用して、アラート・ログの内容をSQLで直接照会できる。",
+      "D) アラート・ログは自動的にローテーション(分割保存)されるため、DBAによる容量管理は不要である。",
+      "E) アラート・ログにはSQLの実行計画や個別SQLの実行時間などのSQL詳細情報も記録される。"
     ],
-    "answer": ["B"],
-    "explanation": "해설:\n\n정답:\nB) DB Time은 크게 CPU Time과 Wait Time으로 1차 분해됩니다. Wait Time은 다시 User I/O Wait(데이터 파일 I/O 대기), Concurrency Wait(락/래치 대기), Application Wait(Row Lock 등), Commit Wait(log file sync), Network Wait, Configuration Wait 등의 대기 클래스로 세분화됩니다.\n\n오답:\nA) DB Time은 모든 세션이 아니라 비유휴(Non-Idle) 세션의 경과 시간 합산입니다. 유휴(Idle) 세션의 대기 시간은 DB Time에 포함되지 않습니다.\nC) ADDM은 보텀업(Bottom-Up)이 아니라 하향식(Top-Down) 분석 방법론을 사용합니다. 전체 DB Time에서 시작하여 CPU Time vs Wait Time으로 분해한 후, 대기 클래스, 개별 대기 이벤트, SQL 레벨, 세그먼트 레벨 순으로 점점 세부적으로 좁혀갑니다.\nD) DB Time은 V$SYS_TIME_MODEL 뷰에서 확인할 수 있으며, AWR 보고서에서도 확인 가능합니다. V$SYS_TIME_MODEL은 DB Time, CPU Time 등 시간 모델 통계를 제공하는 동적 성능 뷰입니다.\n\n핵심 개념: DB Time = CPU Time + Wait Time이며, ADDM은 이를 하향식(Top-Down)으로 분해하여 가장 큰 영향을 미치는 성능 문제를 식별합니다. DB Time은 비유휴 세션만을 대상으로 합니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — Alert Log에는 데이터베이스의 기동/종료, Redo Log 전환(Log Switch), 체크포인트, 테이블스페이스 변경, ORA-에러 등의 주요 운영 이벤트가 시간순으로 기록됩니다. DBA가 데이터베이스의 운영 이력을 파악하는 1차적인 진단 도구입니다.\n\nC) 정답 — Oracle 12c 이후, V$DIAG_ALERT_EXT 뷰를 사용하여 Alert Log의 내용을 SQL로 직접 조회할 수 있습니다. Alert Log의 XML 형식을 파싱하여 컬럼 기반으로 접근할 수 있습니다.\n\nB) 오답 — Alert Log는 인스턴스가 시작된 시점부터 기록됩니다. NOMOUNT 단계에서의 파라미터 로딩, MOUNT 단계에서의 Control File 읽기 등도 모두 기록되며, OPEN 상태에만 한정되지 않습니다.\n\nD) 오답 — Alert Log는 자동 로테이션되지 않으므로, 크기가 매우 커질 수 있습니다. DBA가 OS 레벨에서 주기적으로 아카이빙하거나 관리해야 합니다.\n\nE) 오답 — Alert Log에는 SQL의 실행 계획이나 개별 SQL의 실행 시간 등의 상세 정보는 기록되지 않습니다. SQL 관련 상세 정보는 V$SQL, AWR 스냅샷, SQL Trace(Trace 파일) 등에서 확인합니다.\n\n핵심 개념: Alert Log는 ADR(자동 진단 리포지토리) 내에 XML 형식과 텍스트 형식으로 유지되며, 데이터베이스의 주요 운영 이벤트를 시간순으로 기록합니다. 자동 로테이션은 지원되지 않으므로 DBA의 관리가 필요합니다."
   },
   {
     "chapter": "パフォーマンスの概要",
     "number": "C_13_008",
-    "title": "DBMS_STATSパッケージを使用したオプティマイザ統計の管理について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "STATISTICS_LEVEL初期化パラメータの設定とその影響について正しく述べているものを選択してください。",
     "options": [
-      "A) LOCK_TABLE_STATSプロシージャでテーブルの統計をロックすると、自動統計収集タスクを含むすべての統計変更がブロックされる。",
-      "B) GATHER_TABLE_STATSのestimate_percentパラメータのデフォルトは100(全件スキャン)である。",
-      "C) RESTORE_TABLE_STATSプロシージャを使用して、特定の時点のオプティマイザ統計に復元することができる。",
-      "D) 統計が古い(Stale)と判定される基準は、デフォルトでテーブル全体の行の1%以上が変更された場合である。",
-      "E) オプティマイザ統計の収集にはANALYZEコマンドの使用がOracleによって公式に推奨されている。"
+      "A) STATISTICS_LEVELをALLに設定すると、AWRスナップショットの収集は無効化されるが、ADDMは引き続き動作する。",
+      "B) STATISTICS_LEVELのデフォルト値はTYPICALであり、AWR、ADDM、ASHなどの自動管理機能が有効化される。",
+      "C) STATISTICS_LEVELをBASICに変更すると、既に収集済みのAWRスナップショットも自動的に削除される。",
+      "D) STATISTICS_LEVELはALTER SYSTEM文で動的に変更できず、変更にはインスタンスの再起動が必要である。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "해설:\n\n정답:\nA) LOCK_TABLE_STATS 프로시저로 테이블 통계를 잠그면, 자동 통계 수집 작업(auto optimizer stats collection)을 포함한 모든 통계 변경이 차단됩니다. 잠금을 해제하려면 UNLOCK_TABLE_STATS를 사용합니다.\nC) RESTORE_TABLE_STATS 프로시저를 사용하여 as_of_timestamp 파라미터로 특정 시점의 통계로 복원할 수 있습니다. 통계 변경 후 성능이 저하된 경우, 이전 통계로 롤백하는 데 유용합니다.\n\n오답:\nB) GATHER_TABLE_STATS의 estimate_percent 파라미터의 기본값은 100(전체 스캔)이 아니라 DBMS_STATS.AUTO_SAMPLE_SIZE입니다. 이는 옵티마이저가 자동으로 최적의 샘플링 비율을 결정하도록 합니다.\nD) 통계가 노후화(Stale)로 판정되는 기본 임계값은 1%가 아니라 10%(STALE_PERCENT의 기본값)입니다. 테이블 전체 행의 10% 이상이 변경되면 통계가 Stale 상태로 표시됩니다.\nE) ANALYZE 명령어가 아니라 DBMS_STATS 패키지의 사용이 Oracle에서 공식적으로 권장하는 통계 수집 방법입니다. DBMS_STATS는 ANALYZE보다 기능이 풍부하고 정확합니다.\n\n핵심 개념: DBMS_STATS는 Oracle 공식 권장 통계 수집 도구이며, LOCK/UNLOCK으로 통계 보호, RESTORE로 이전 시점 복원이 가능합니다. 노후화 판정 기준은 기본 10%(STALE_PERCENT)입니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — STATISTICS_LEVEL의 기본값은 TYPICAL이며, 이 설정에서 AWR 스냅샷 수집, ADDM 자동 분석, ASH(Active Session History) 등의 자동 관리 기능이 활성화됩니다. Oracle은 TYPICAL 설정을 권장합니다.\n\nA) 오답 — STATISTICS_LEVEL=ALL로 설정하면 AWR 스냅샷과 ADDM이 모두 활성화되며, 추가로 OS 통계, Plan 통계 등의 부가 통계가 수집됩니다. AWR이 비활성화되는 것은 BASIC 설정입니다.\n\nC) 오답 — STATISTICS_LEVEL을 BASIC으로 변경하면 이후의 AWR 자동 스냅샷 수집이 비활성화되지만, 이미 수집된 AWR 데이터와 ADDM 결과는 삭제되지 않고 그대로 보존됩니다.\n\nD) 오답 — STATISTICS_LEVEL은 ALTER SYSTEM 문 또는 ALTER SESSION 문으로 동적으로 변경할 수 있으며, 인스턴스 재시작 없이 즉시 적용됩니다.\n\n핵심 개념: STATISTICS_LEVEL 파라미터는 Oracle의 자동 관리 기능(AWR, ADDM, ASH 등)의 활성화 수준을 제어합니다. 기본값 TYPICAL에서 표준 자동 관리가 활성화되고, BASIC으로 설정하면 대부분의 자동 관리 기능이 비활성화되므로 BASIC 설정은 피해야 합니다."
   },
   {
     "chapter": "パフォーマンスの概要",
     "number": "C_13_009",
-    "title": "ADDMレポートの生成方法について正しく述べているものを選択してください。",
+    "title": "Oracle Databaseのパフォーマンス監視インフラストラクチャの構成要素について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) addmrpt.sqlスクリプトはSQL*Plusで実行し、対話形式で分析するスナップショット範囲を選択して、テキスト形式のレポートを生成する。",
-      "B) DBMS_ADVISOR.GET_TASK_REPORTは、TEXT形式のみに対応しておりHTML形式やXML形式には対応していない。",
-      "C) DBMS_ADDM パッケージのANALYZE_DBプロシージャは、特定のPDBのみを対象にした分析には使用できない。",
-      "D) Enterprise Managerでは、ADDMの分析結果はテキスト形式でのみ表示される。"
+      "A) データ・ディクショナリ・ビューは通常のテーブルと同様にトランザクション・レベルの読取り一貫性が保証される。",
+      "B) AWRスナップショットのデータはSYSTEMテーブルスペースに格納され、DBA_HIST_ビューで照会できる。",
+      "C) ADR(自動診断リポジトリ)はファイル・システム上の統合された診断データの格納場所であり、アラート・ログやトレース・ファイルを管理する。",
+      "D) 動的パフォーマンス・ビュー(V$ビュー)のデータはディスクに永続化されるため、インスタンス再起動後もデータが保持される。",
+      "E) データ・ディクショナリ・ビューはデータベースがNOMOUNT状態からすべてアクセス可能である。"
     ],
-    "answer": ["A"],
-    "explanation": "해설:\n\n정답:\nA) addmrpt.sql 스크립트는 $ORACLE_HOME/rdbms/admin/addmrpt.sql 경로에 있으며, SQL*Plus에서 대화형으로 실행합니다. 분석할 인스턴스, 시작 스냅샷 ID, 종료 스냅샷 ID, 보고서 파일명을 선택하여 텍스트 형식의 ADDM 보고서를 생성합니다.\n\n오답:\nB) DBMS_ADVISOR.GET_TASK_REPORT는 TEXT 형식뿐만 아니라 HTML 형식과 XML 형식도 지원합니다. 파라미터로 'TEXT', 'HTML', 'XML' 중 원하는 출력 형식을 지정할 수 있습니다.\nC) DBMS_ADDM 패키지의 ANALYZE_DB는 전체 데이터베이스 분석에 사용되며, ANALYZE_INST는 특정 인스턴스 분석에 사용됩니다. PDB 컨텍스트에서 실행하면 해당 PDB에 대한 분석이 가능합니다.\nD) Enterprise Manager에서는 ADDM 결과를 텍스트 형식이 아니라 그래픽(GUI) 형식으로 표시합니다. Performance Hub를 통해 DB Time 그래프에서 특정 시간대를 클릭하고, Finding → Recommendation → Action 순으로 드릴다운 분석이 가능합니다.\n\n핵심 개념: ADDM 보고서는 addmrpt.sql(텍스트), DBMS_ADDM(프로그래밍 방식), DBMS_ADVISOR.GET_TASK_REPORT(TEXT/HTML/XML), Enterprise Manager(그래픽) 등 다양한 방법으로 생성 및 조회할 수 있습니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 데이터 딕셔너리 뷰(DBA_/ALL_/USER_ 뷰)는 일반 테이블과 동일하게 UNDO 기반의 읽기 일관성이 보장됩니다. 이는 SGA 메모리를 직접 읽어 읽기 일관성이 보장되지 않는 V$ 뷰와의 주요 차이점입니다.\n\nC) 정답 — ADR(Automatic Diagnostic Repository)은 파일 시스템 기반의 통합 진단 데이터 저장소입니다. DIAGNOSTIC_DEST 파라미터가 지정하는 경로 하위에 Alert Log, Trace 파일, 인시던트 덤프 등의 진단 데이터를 일원화된 디렉터리 구조로 관리합니다.\n\nB) 오답 — AWR 스냅샷 데이터는 SYSTEM 테이블스페이스가 아닌 SYSAUX 테이블스페이스에 저장됩니다. WRM$(메타데이터) 및 WRH$(이력 데이터) 테이블에 저장되며, DBA_HIST_ 뷰로 조회 가능합니다.\n\nD) 오답 — V$ 뷰(동적 성능 뷰)는 SGA 메모리에 기반하므로, 인스턴스가 종료되면 데이터가 소멸됩니다. 과거 성능 이력을 보존하려면 AWR 스냅샷을 활용해야 합니다.\n\nE) 오답 — 데이터 딕셔너리 뷰는 데이터베이스가 OPEN 상태에서만 접근 가능합니다. NOMOUNT 상태에서 접근 가능한 것은 V$ 뷰(동적 성능 뷰)의 일부입니다.\n\n핵심 개념: Oracle의 성능 모니터링 인프라는 V$ 뷰(실시간/메모리), 데이터 딕셔너리(메타데이터/디스크), ADR(진단 로그/파일 시스템), AWR(이력 통계/SYSAUX)의 4가지 구성요소로 이루어져 있으며, 각각 데이터의 저장 위치, 영속성, 접근 시점이 다릅니다."
   },
   {
     "chapter": "パフォーマンスの概要",
     "number": "C_13_010",
-    "title": "Real-Time ADDMと通常のADDMの比較について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "ADDMの分析結果を確認する方法について正しく述べているものを選択してください。",
     "options": [
-      "A) Real-Time ADDMは、AWRスナップショットのデータに基づいて過去の性能問題を分析する。",
-      "B) 通常のADDMは、連続した2つのAWRスナップショット間のデータの差分(Delta)を分析する。",
-      "C) Real-Time ADDMは、AWRスナップショットなしでSGAメモリ内の性能データを直接分析でき、データベースが行(Hang)状態にある場合にも診断分析が可能な場合がある。",
-      "D) 通常のADDMの手動分析を行うには、必ずデータベースの再起動が必要である。",
-      "E) Real-Time ADDMの分析結果はDBA_ADVISOR_FINDINGSビューにのみ保存される。"
+      "A) ADDM分析結果の確認にはDBA_ADVISOR_FINDINGS、DBA_ADVISOR_RECOMMENDATIONSなどのディクショナリ・ビューを使用できる。",
+      "B) ADDMの分析結果レポートはAWRスナップショットとは独立して生成されるため、AWRスナップショットが存在しなくてもADDM分析を実行できる。",
+      "C) ADDMレポートはテキスト形式のみ生成でき、HTMLやXML形式は対応していない。",
+      "D) ADDMの分析結果はSGAメモリ内にのみ保持されるため、インスタンス再起動後に過去の分析結果を確認することはできない。"
     ],
-    "answer": ["B", "C"],
-    "explanation": "해설:\n\n정답:\nB) 통상적인 ADDM은 연속된 2개의 AWR 스냅샷 간의 차이값(Delta)을 계산하여 분석합니다. MMON 프로세스가 AWR 스냅샷 수집 후 자동으로 직전 2개 스냅샷 간의 데이터를 분석합니다.\nC) Real-Time ADDM은 AWR 스냅샷 없이 현재 SGA 메모리의 성능 데이터를 직접 분석하는 기능입니다. 데이터베이스가 행(Hang) 상태에서도 진단 분석을 수행할 수 있어, 긴급한 성능 문제 대응에 유용합니다.\n\n오답:\nA) Real-Time ADDM은 과거의 AWR 스냅샷이 아니라 현재 SGA 메모리의 실시간 성능 데이터를 직접 분석합니다. 과거 분석은 통상적인 ADDM의 역할입니다.\nD) 통상적인 ADDM의 수동 분석은 데이터베이스 재시작이 필요하지 않습니다. DBMS_ADVISOR.CREATE_TASK('ADDM', task_name)로 태스크를 생성하고 START_SNAPSHOT/END_SNAPSHOT 파라미터를 설정한 후 EXECUTE_TASK로 실행하면 됩니다.\nE) Real-Time ADDM의 분석 결과는 DBA_ADVISOR_FINDINGS 뷰에만 저장되는 것이 아니라, Enterprise Manager 인터페이스 또는 DBMS_ADDM 패키지를 통해서도 조회할 수 있습니다. 또한 Real-Time ADDM은 SGA 데이터를 사용하므로 범위가 제한적입니다.\n\n핵심 개념: 통상적인 ADDM은 AWR 스냅샷(디스크) 기반의 사후 분석이고, Real-Time ADDM은 SGA 메모리 기반의 실시간 분석입니다. Real-Time ADDM은 DB Hang 상태에서도 진단이 가능한 것이 핵심 차별점입니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — ADDM 분석 결과는 DBA_ADVISOR_TASKS(태스크 목록), DBA_ADVISOR_FINDINGS(발견 사항), DBA_ADVISOR_RECOMMENDATIONS(권고 사항), DBA_ADVISOR_ACTIONS(구체적 조치) 등의 딕셔너리 뷰를 통해 조회할 수 있습니다. 또한 addmrpt.sql 스크립트나 Enterprise Manager에서도 결과를 확인할 수 있습니다.\n\nB) 오답 — ADDM은 연속된 두 AWR 스냅샷 간의 차이를 분석하여 성능 문제를 진단하므로, AWR 스냅샷이 반드시 존재해야 합니다. AWR 스냅샷이 ADDM의 핵심 입력 데이터 소스입니다.\n\nC) 오답 — ADDM 레포트는 DBMS_ADVISOR.GET_TASK_REPORT 함수를 통해 TEXT, HTML, XML의 3가지 형식으로 생성할 수 있습니다. Enterprise Manager에서는 그래픽 형식으로도 확인 가능합니다.\n\nD) 오답 — ADDM 분석 결과는 AWR 리포지토리(SYSAUX 테이블스페이스)에 저장되므로, 인스턴스 재시작 후에도 보존 기간 내의 과거 분석 결과를 조회할 수 있습니다.\n\n핵심 개념: ADDM 분석 결과는 SYSAUX 테이블스페이스의 AWR 리포지토리에 영구 저장되며, DBA_ADVISOR_* 딕셔너리 뷰, addmrpt.sql 스크립트, DBMS_ADVISOR.GET_TASK_REPORT(TEXT/HTML/XML), Enterprise Manager 등 다양한 방법으로 확인할 수 있습니다."
   }
 ]

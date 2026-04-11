@@ -2,84 +2,68 @@
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_006",
-    "title": "Oracle AI Databaseの起動オプションであるSTARTUP RESTRICTおよびSTARTUP FORCEについて正しい内容を述べているものを選択してください。(2つ選択してください)",
+    "title": "Oracleデータベースの各種STARTUPオプションに関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) STARTUP RESTRICTで起動すると、CREATE SESSION権限を持つすべてのユーザーがデータベースに接続できる。",
-      "B) STARTUP FORCEは、内部的にSHUTDOWN ABORTを実行してからSTARTUPを実行する。",
-      "C) STARTUP RESTRICTで起動した後に制限モードを解除するには、データベースの再起動が必要である。",
-      "D) すでにOPEN状態のデータベースに対して、ALTER SYSTEM ENABLE RESTRICTED SESSIONを実行すると、既存の接続中のセッションも即座に切断される。",
-      "E) STARTUP RESTRICTで起動した場合、RESTRICTED SESSION権限を持つユーザーのみが接続可能となる。"
+      "A) STARTUP RESTRICTを実行すると、RESTRICTED SESSION権限を持つユーザーのみがデータベースに接続できる状態でオープンされる。",
+      "B) STARTUP FORCEは内部的にSHUTDOWN IMMEDIATEを実行した後にSTARTUPを実行する。",
+      "C) STARTUP MOUNT後にALTER DATABASE OPEN READ ONLYを実行すると、データベースは読取り専用でオープンされ、一時表領域への書込みも不可となる。",
+      "D) ALTER SYSTEM ENABLE RESTRICTED SESSIONを実行しても、既に接続中のセッションは切断されない。",
+      "E) STARTUP UPGRADEは通常の運用時に使用するコマンドであり、一般ユーザーの接続を許可する。"
     ],
-    "answer": [
-      "B",
-      "E"
-    ],
-    "explanation": "정답:\nB) STARTUP FORCE는 내부적으로 SHUTDOWN ABORT를 수행한 후 STARTUP을 실행합니다. 비정상 종료 상태에서 재기동할 때 사용됩니다.\nE) STARTUP RESTRICT로 기동하면 CREATE SESSION + RESTRICTED SESSION 시스템 권한을 가진 사용자만 접속할 수 있습니다.\n\n오답 분석:\nA) STARTUP RESTRICT 모드에서는 CREATE SESSION 권한만으로는 접속할 수 없습니다. 반드시 RESTRICTED SESSION 권한도 함께 필요합니다.\nC) 제한 모드는 재기동 없이 ALTER SYSTEM DISABLE RESTRICTED SESSION 명령으로 해제할 수 있습니다.\nD) ALTER SYSTEM ENABLE RESTRICTED SESSION을 실행해도 기존 접속 중인 세션은 유지됩니다. 새로운 접속만 제한됩니다.\n\n핵심 개념: STARTUP RESTRICT는 유지보수 시 일반 사용자 접속을 차단하기 위한 모드이며, STARTUP FORCE는 비정상 종료 상태에서 SHUTDOWN ABORT + STARTUP을 한 번에 수행하는 편의 기능입니다."
+    "answer": ["A", "D"],
+    "explanation": "정답: A, D\nA) 정답 — STARTUP RESTRICT는 데이터베이스를 OPEN하되, RESTRICTED SESSION 시스템 권한을 가진 사용자만 접속 가능한 상태로 시작합니다. 유지보수, 마이그레이션, 대규모 데이터 로드 시 일반 사용자 접속을 차단할 때 사용합니다.\n\nD) 정답 — ALTER SYSTEM ENABLE RESTRICTED SESSION 명령으로 OPEN 상태에서 제한 모드로 전환할 수 있지만, 이미 접속 중인 세션은 끊기지 않습니다. 새로운 접속만 RESTRICTED SESSION 권한이 있는 사용자로 제한됩니다.\n\nB) 오답 — STARTUP FORCE는 내부적으로 SHUTDOWN ABORT + STARTUP을 수행합니다. SHUTDOWN IMMEDIATE가 아닙니다. 인스턴스가 비정상 상태(Hang)에서 재기동이 필요할 때 사용하며, 다음 기동 시 인스턴스 복구가 수행됩니다.\n\nC) 오답 — READ ONLY 모드에서는 데이터 파일에 대한 쓰기가 불가하지만, 임시 테이블스페이스에는 쓰기가 가능합니다. 소트 작업 등에 필요한 임시 영역 사용은 허용됩니다.\n\nE) 오답 — STARTUP UPGRADE는 데이터베이스 업그레이드 스크립트 실행 시에 사용되는 특수 모드이며, 일반 사용자의 접속을 허가하지 않습니다. 통상 운용에서는 사용하지 않습니다.\n\n핵심 개념: STARTUP에는 RESTRICT, FORCE, MOUNT, NOMOUNT, UPGRADE, READ ONLY 등 다양한 옵션이 있으며, RESTRICTED 모드는 OPEN 후에도 ALTER SYSTEM으로 동적 전환이 가능합니다. 기존 세션에는 영향을 주지 않고 새로운 접속만 제한합니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_007",
-    "title": "Oracle AI DatabaseのCKPT(チェックポイント)プロセスとチェックポイントの仕組みについて正しい内容を述べているものを選択してください。",
+    "title": "OracleデータベースがMOUNT状態のときに実行可能な操作として正しい内容を述べているものを選択してください。",
     "options": [
-      "A) CKPTプロセスは、ダーティ・バッファを直接データ・ファイルに書き込む役割を担っている。",
-      "B) フル・チェックポイントは、ログ・スイッチが発生するたびに自動的に実行される。",
-      "C) FAST_START_MTTR_TARGETパラメータを設定すると、インスタンス・リカバリの目標時間(秒)に応じてインクリメンタル・チェックポイントの頻度が自動的に調整される。",
-      "D) CKPTプロセスはデータ・ファイル・ヘッダーを更新するが、制御ファイルは更新しない。",
-      "E) チェックポイントはデータベースの停止時にのみ実行される処理であり、データベースの稼働中には発生しない。"
+      "A) データ・ディクショナリを参照して表のメタデータを確認する。",
+      "B) ARCHIVELOGモードからNOARCHIVELOGモードへの変更を行う。",
+      "C) 一般ユーザーがSELECT文を使用してデータを照会する。",
+      "D) オンラインREDOログ・ファイルをオープンして内容を検証する。"
     ],
-    "answer": [
-      "C"
-    ],
-    "explanation": "정답: C) FAST_START_MTTR_TARGET 파라미터는 인스턴스 리커버리에 걸리는 목표 시간(초)을 지정하며, Oracle은 이 목표를 달성하기 위해 Incremental Checkpoint의 빈도를 자동으로 조정합니다. V$INSTANCE_RECOVERY 뷰에서 예상 복구 시간을 확인할 수 있습니다.\n\n오답 분석:\nA) CKPT 프로세스는 직접 데이터 블록을 디스크에 기록하지 않습니다. 더티 버퍼를 데이터 파일에 기록하는 것은 DBWn(Database Writer) 프로세스의 역할입니다. CKPT는 DBWn에 기록을 요청하고, 완료 후 데이터 파일 헤더와 컨트롤 파일을 갱신합니다.\nB) 로그 스위치 시 발생하는 것은 Thread Checkpoint이며, Full Checkpoint가 아닙니다. Full Checkpoint는 ALTER SYSTEM CHECKPOINT 명령이나 정상 SHUTDOWN(NORMAL/TRANSACTIONAL/IMMEDIATE) 시 수행됩니다.\nD) CKPT 프로세스는 데이터 파일 헤더뿐만 아니라 컨트롤 파일도 갱신합니다. 마지막 체크포인트 SCN과 체크포인트 시간을 양쪽 모두에 기록합니다.\nE) 체크포인트는 데이터베이스 가동 중에도 Incremental Checkpoint, Thread Checkpoint 등이 지속적으로 발생합니다.\n\n핵심 개념: CKPT 프로세스는 데이터 파일 헤더와 컨트롤 파일을 갱신하는 역할이며, 실제 더티 버퍼 기록은 DBWn이 수행합니다. Full/Incremental/Thread/Tablespace 4가지 체크포인트 유형이 있습니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — ALTER DATABASE ARCHIVELOG / NOARCHIVELOG 명령에 의한 아카이브 로그 모드 변경은 MOUNT 상태에서만 수행할 수 있습니다. 이 외에도 MOUNT 상태에서는 데이터 파일 이름/위치 변경(ALTER DATABASE RENAME FILE), Redo 로그 그룹 추가/삭제, 미디어 복구 수행 등의 관리 작업이 가능합니다.\n\nA) 오답 — 데이터 딕셔너리는 SYSTEM 테이블스페이스의 데이터 파일에 저장되어 있으며, MOUNT 상태에서는 데이터 파일이 열리지 않으므로 접근할 수 없습니다. 데이터 딕셔너리 참조는 OPEN 상태에서만 가능합니다.\n\nC) 오답 — 일반 사용자의 접속과 데이터 조회는 OPEN 상태에서만 가능합니다. MOUNT 상태에서는 데이터 파일이 열리지 않으므로 SELECT문을 실행할 수 없습니다.\n\nD) 오답 — MOUNT 상태에서 컨트롤 파일은 열리지만, 온라인 Redo 로그 파일은 열리지 않습니다. 컨트롤 파일에서 Redo 로그의 경로 정보만 인식할 뿐이며, 실제 Redo 로그 파일의 오픈은 OPEN 단계에서 수행됩니다.\n\n핵심 개념: MOUNT 상태는 컨트롤 파일만 열린 상태로, 아카이브 로그 모드 변경, 데이터 파일 이름 변경, 미디어 복구 등 데이터 파일이 열리기 전에 수행해야 하는 관리 작업을 처리하는 단계입니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_008",
-    "title": "Oracle AI Databaseの自動ワークロード・リポジトリ(AWR)に関して正しい内容を述べているものを選択してください。(2つ選択してください)",
+    "title": "初期化パラメータの動的パラメータと静的パラメータに関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) AWRスナップショットはMMONバックグラウンド・プロセスによって自動的に生成され、デフォルトで60分間隔で収集される。",
-      "B) AWRスナップショットのデータはSYSTEM表領域に格納される。",
-      "C) 初期化パラメータSTATISTICS_LEVELをBASICに設定しても、AWRの自動スナップショット収集は停止しない。",
-      "D) AWRスナップショットのデフォルトの保持期間は30日である。",
-      "E) AWRはV$ビューの実行時統計をスナップショットとしてディスクに永続的に保存するため、インスタンス再起動後も過去のパフォーマンス・データを分析できる。"
+      "A) V$PARAMETERビューのISSYS_MODIFIABLE列がDEFERREDのパラメータは、ALTER SYSTEMで変更すると新しく作成されるセッションから適用される。",
+      "B) 動的パラメータはすべてALTER SESSION文でセッション・レベルの変更が可能である。",
+      "C) PROCESSES、DB_BLOCK_SIZE、CONTROL_FILESは代表的な静的パラメータであり、変更にはSCOPE=SPFILEの指定とインスタンスの再起動が必要である。",
+      "D) V$PARAMETERビューのISSYS_MODIFIABLE列がFALSEのパラメータは、ALTER SYSTEMでSCOPE=BOTHを指定して変更できる。",
+      "E) 動的パラメータのうちISSYS_MODIFIABLE列がIMMEDIATEのパラメータはALTER SYSTEMで変更しても再起動後に元の値に戻る。"
     ],
-    "answer": [
-      "A",
-      "E"
-    ],
-    "explanation": "정답:\nA) AWR 스냅샷은 MMON(Manageability Monitor) 백그라운드 프로세스가 자동으로 생성하며, 기본 수집 간격은 60분입니다.\nE) AWR은 V$ 뷰의 실시간 통계를 주기적으로 스냅샷하여 SYSAUX 테이블스페이스에 영구 저장합니다. 따라서 인스턴스 재시작 후에도 과거 성능 데이터를 분석할 수 있습니다.\n\n오답 분석:\nB) AWR 스냅샷 데이터는 SYSTEM 테이블스페이스가 아닌 SYSAUX 테이블스페이스에 저장됩니다. WRM$_(메타데이터)와 WRH$_(이력 데이터) 테이블에 저장되며, DBA_HIST_ 뷰를 통해 조회할 수 있습니다.\nC) STATISTICS_LEVEL을 BASIC으로 설정하면 AWR 자동 스냅샷 수집이 비활성화됩니다. ADDM, ASH 등 관련 기능도 모두 비활성화되므로 TYPICAL(기본값)을 유지하는 것이 권장됩니다.\nD) AWR 스냅샷의 기본 보존 기간은 30일이 아닌 8일입니다. DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS 프로시저로 보존 기간을 변경할 수 있습니다.\n\n핵심 개념: AWR은 MMON 프로세스가 기본 60분 간격으로 V$ 뷰 통계를 SYSAUX 테이블스페이스에 스냅샷으로 저장하며, 기본 보존 기간은 8일입니다. STATISTICS_LEVEL=TYPICAL 이상에서만 동작합니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — V$PARAMETER의 ISSYS_MODIFIABLE 컬럼이 DEFERRED인 파라미터는 ALTER SYSTEM으로 변경할 수 있지만, 기존 세션에는 적용되지 않고 변경 후 새로 생성되는 세션부터 적용됩니다.\n\nC) 정답 — PROCESSES, DB_BLOCK_SIZE, CONTROL_FILES는 대표적인 정적 파라미터로, 인스턴스 기동 시에만 설정됩니다. 변경하려면 ALTER SYSTEM SET ... SCOPE=SPFILE로 SPFILE에 기록한 후 인스턴스를 재기동해야 합니다.\n\nB) 오답 — 동적 파라미터 중에서도 시스템 레벨에서만 변경 가능한 것(ISSES_MODIFIABLE = FALSE)이 있습니다. ALTER SESSION으로 세션 레벨 변경이 가능한지는 V$PARAMETER의 ISSES_MODIFIABLE 컬럼으로 확인합니다.\n\nD) 오답 — ISSYS_MODIFIABLE = FALSE인 파라미터는 정적 파라미터로, 실행 중 메모리를 변경할 수 없습니다. 따라서 SCOPE=BOTH를 지정하면 ORA-02095 오류가 발생하며, SCOPE=SPFILE만 사용할 수 있습니다.\n\nE) 오답 — ISSYS_MODIFIABLE = IMMEDIATE인 파라미터의 동작은 SCOPE 옵션에 따라 달라집니다. SPFILE 환경에서 기본값인 SCOPE=BOTH로 변경하면 메모리와 SPFILE 모두에 반영되므로 재기동 후에도 유지됩니다.\n\n핵심 개념: 초기화 파라미터는 동적(IMMEDIATE/DEFERRED)과 정적(FALSE)으로 구분되며, V$PARAMETER의 ISSYS_MODIFIABLE 컬럼으로 확인합니다. 정적 파라미터는 SCOPE=SPFILE만 가능하고, DEFERRED 파라미터는 새 세션부터 적용됩니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_009",
-    "title": "Oracle AI Databaseの自動診断リポジトリ(ADR)およびADRCI(ADR Command Interpreter)に関して正しい内容を述べているものを選択してください。",
+    "title": "Oracleデータベースのインスタンス・リカバリに関して正しく述べているものを選択してください。",
     "options": [
-      "A) ADRCIはデータベースが起動していない状態では使用することができない。",
-      "B) ADRのディレクトリ構造は、DIAGNOSTIC_DESTパラメータで指定されたベース・ディレクトリの配下にdiag/rdbms/<db_name>/<instance_name>/の階層で構成される。",
-      "C) ADR内のProblemとIncidentは同じ概念であり、1つのエラーに対して1つのProblemと1つのIncidentが生成される。",
-      "D) ADR内の診断データは手動で削除する以外に方法がなく、自動的にパージされることはない。",
-      "E) ADRCIのSHOW ALERTコマンドではアラート・ログの最新情報のみ表示され、全体のアラート・ログ内容は確認できない。"
+      "A) インスタンス・リカバリはDBAがRECOVER DATABASEコマンドを手動で実行して開始する。",
+      "B) ロール・フォワード(Roll Forward)フェーズではコミット済みトランザクションのみがオンラインREDOログから再適用される。",
+      "C) ロール・バック(Roll Back)フェーズはデータベースがOPEN状態に遷移した後にバックグラウンドで実行され、ユーザーは復旧完了前でもアクセスが可能である。",
+      "D) FAST_START_MTTR_TARGETパラメータの値を大きくするとチェックポイントの頻度が増加し、インスタンス・リカバリ時間が短縮される。"
     ],
-    "answer": [
-      "B"
-    ],
-    "explanation": "정답: B) ADR은 DIAGNOSTIC_DEST 파라미터(기본 $ORACLE_BASE)로 지정된 베이스 디렉터리 하위에 diag/rdbms/<db_name>/<instance_name>/ 구조로 구성됩니다. 이 ADR Home 내에 alert/(XML Alert Log), trace/(텍스트 Alert Log 및 Trace 파일), incident/(인시던트 덤프) 등의 서브 디렉터리가 존재합니다.\n\n오답 분석:\nA) ADRCI는 파일 시스템 기반의 ADR 데이터를 직접 접근하는 CLI 도구이므로, 데이터베이스가 기동되지 않은 상태에서도 사용할 수 있습니다. SQL*Plus 없이도 진단 데이터에 접근 가능합니다.\nC) Problem과 Incident는 다른 개념입니다. Problem은 반복 가능한 오류 유형(예: ORA-600 [kdsgrp1])이고, Incident는 해당 Problem의 개별 발생 건으로 고유 Incident ID가 부여됩니다. 하나의 Problem에 여러 Incident가 매핑될 수 있습니다.\nD) ADR의 진단 데이터는 MMON 프로세스에 의해 자동으로 퍼지됩니다. 기본적으로 Incident와 Trace 파일은 30일 후 자동 삭제됩니다. ADRCI의 PURGE 명령으로 수동 정리도 가능합니다.\nE) ADRCI의 SHOW ALERT 명령으로 전체 Alert Log를 확인할 수 있으며, SHOW ALERT -tail -f 옵션으로 실시간 모니터링(tail -f와 동일 효과)도 가능합니다.\n\n핵심 개념: ADR은 파일 시스템 기반의 통합 진단 데이터 저장소이며, ADRCI를 통해 DB 미기동 상태에서도 Alert Log, Trace 파일, Incident 정보에 접근할 수 있습니다."
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — 인스턴스 복구의 Roll Back(트랜잭션 복구) 단계는 데이터베이스가 OPEN 상태로 전환된 후 백그라운드에서 수행됩니다. 따라서 사용자는 복구가 완전히 완료되기 전에도 데이터베이스에 접속할 수 있으며, 아직 롤백되지 않은 데이터에 접근하면 해당 블록이 즉시(on-demand) 롤백 처리됩니다.\n\nA) 오답 — 인스턴스 복구는 SMON 백그라운드 프로세스가 자동으로 수행하며, DBA의 수동 개입은 필요 없습니다. RECOVER DATABASE 명령은 미디어 복구에 사용되는 것으로, 인스턴스 복구와는 다릅니다.\n\nB) 오답 — Roll Forward 단계에서는 커밋 여부와 관계없이 모든 변경 사항을 온라인 Redo 로그로부터 재적용합니다. 커밋되지 않은 트랜잭션의 변경도 함께 적용된 후, 이후 Roll Back 단계에서 UNDO를 이용하여 되돌립니다.\n\nD) 오답 — FAST_START_MTTR_TARGET 값을 크게 설정하면 허용 복구 시간이 길어지므로 체크포인트 빈도가 감소합니다. 반대로 값을 작게 설정하면 체크포인트 빈도가 증가하여 복구 시간이 단축되지만, 일상 운영 시 I/O 부하가 증가합니다.\n\n핵심 개념: 인스턴스 복구는 SMON이 자동으로 수행하며, Roll Forward(모든 Redo 적용) → Roll Back(미커밋 UNDO 적용) 두 단계로 진행됩니다. Roll Back은 OPEN 후 백그라운드로 실행되어 빠른 서비스 재개가 가능합니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_010",
-    "title": "Oracle AI DatabaseのDBWn(Database Writer)プロセスがダーティ・バッファをデータ・ファイルに書き込むトリガー条件として正しいものを選択してください。(2つ選択してください)",
+    "title": "Oracleインスタンスの起動時に読み込まれる初期化パラメータ・ファイルの検索順序と管理について正しく述べているものを選択してください。",
     "options": [
-      "A) ユーザーがCOMMIT文を実行したとき、該当トランザクションのダーティ・バッファが即座にデータ・ファイルに書き込まれる。",
-      "B) サーバー・プロセスがバッファ・キャッシュ内でフリー・バッファを見つけられないとき、DBWnに書き込みを要求する。",
-      "C) LGWRプロセスがREDOログ・バッファをオンラインREDOログ・ファイルに書き込む前に、DBWnが先にダーティ・バッファを書き込む。",
-      "D) CKPTプロセスによるチェックポイント・イベントが発生したとき、DBWnはダーティ・バッファをデータ・ファイルに書き込む。",
-      "E) サーバー・プロセスが直接ダーティ・バッファをデータ・ファイルに書き込み、DBWnはその結果を管理するのみである。"
+      "A) インスタンス起動時のパラメータ・ファイル検索順序は、spfile<SID>.ora → spfile.ora → init<SID>.ora の順である。",
+      "B) STARTUPコマンドのオプションでSPFILEの場所を直接指定して起動することができる。",
+      "C) SPFILEとPFILEの両方がデフォルトの場所に存在する場合、PFILEが優先して使用される。",
+      "D) 現在使用中のパラメータ・ファイルの種類はV$DATABASE ビューで確認する。"
     ],
-    "answer": [
-      "B",
-      "D"
-    ],
-    "explanation": "정답:\nB) 서버 프로세스가 Buffer Cache에서 Free Buffer를 찾지 못하면 DBWn에 기록을 요청합니다. DBWn이 더티 버퍼를 기록하여 Free Buffer를 확보합니다.\nD) CKPT 프로세스가 체크포인트 이벤트를 요청하면 DBWn은 더티 버퍼를 데이터 파일에 기록합니다. 그 후 CKPT가 데이터 파일 헤더와 컨트롤 파일을 갱신합니다.\n\n오답 분석:\nA) COMMIT 실행 시 LGWR이 Redo Log Buffer를 온라인 Redo Log 파일에 기록하지만, DBWn이 즉시 더티 버퍼를 데이터 파일에 기록하지는 않습니다. DBWn의 기록은 체크포인트, Free Buffer 부족, 3초 타임아웃 등의 조건에 의해 비동기적으로 수행됩니다.\nC) Write-Ahead Logging 원칙에 따라 LGWR이 Redo를 먼저 기록한 후에 DBWn이 데이터 블록을 기록합니다. 순서가 반대로 설명되어 있습니다.\nE) 서버 프로세스는 데이터 파일에 직접 쓰기를 수행하지 않습니다. 더티 버퍼를 데이터 파일에 기록하는 것은 오직 DBWn의 역할이며, 서버 프로세스가 직접 기록하지 않는 이유는 I/O 대기에 의한 사용자 응답 시간 저하를 방지하기 위함입니다.\n\n핵심 개념: DBWn은 체크포인트 발생, Dirty Buffer 임계값 초과, Free Buffer 부족, 3초 타임아웃 등의 조건에서 더티 버퍼를 데이터 파일에 비동기적으로 기록합니다. COMMIT 시에는 LGWR만 Redo를 기록하며, DBWn의 기록과는 별개입니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — Oracle 인스턴스 기동 시, 파라미터 파일은 spfile<SID>.ora → spfile.ora → init<SID>.ora 순서로 검색됩니다. 가장 먼저 발견된 파일을 사용하므로, SID 특정 SPFILE이 최우선입니다.\n\nB) 오답 — STARTUP 명령에서 직접 경로를 지정할 수 있는 것은 PFILE뿐입니다(STARTUP PFILE='경로'). SPFILE의 위치를 변경하려면 PFILE 내에 SPFILE 파라미터로 경로를 지정해야 합니다.\n\nC) 오답 — SPFILE과 PFILE이 모두 기본 위치에 존재하면 SPFILE이 우선합니다. 검색 순서에서 spfile<SID>.ora가 init<SID>.ora보다 먼저 탐색되므로, SPFILE이 사용됩니다.\n\nD) 오답 — 현재 사용 중인 파라미터 파일 종류는 V$PARAMETER 뷰에서 spfile 파라미터의 값으로 확인합니다(SHOW PARAMETER spfile). 값이 있으면 SPFILE, 비어있으면 PFILE로 기동된 것입니다. V$DATABASE는 데이터베이스 이름, OPEN_MODE, LOG_MODE 등의 정보를 제공합니다.\n\n핵심 개념: Oracle은 기동 시 SPFILE을 우선 검색하며(spfile<SID>.ora → spfile.ora → init<SID>.ora), STARTUP PFILE='경로'로 PFILE만 직접 지정 가능합니다. SPFILE 사용 여부는 SHOW PARAMETER spfile로 확인합니다."
   }
 ]

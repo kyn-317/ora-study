@@ -2,83 +2,68 @@
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_001",
-    "title": "Oracle Databaseのリドゥ・ログ・バッファに関して正しい内容を述べているものを選択してください。",
+    "title": "Oracle Databaseの共有プール(Shared Pool)の構成要素について正しく述べているものを選択してください。",
     "options": [
-      "A) リドゥ・ログ・バッファは循環バッファ(Circular Buffer)として動作し、LGWRがディスクに書き込んだ領域は再利用される。",
-      "B) リドゥ・ログ・バッファには、ディスクから読み込まれたデータ・ブロックのコピーが一時的に格納される。",
-      "C) LGWRがリドゥ・ログ・バッファの内容をディスクに書き込むのはCOMMIT発生時のみである。",
-      "D) リドゥ・ログ・バッファのサイズはSHARED_POOL_SIZEパラメータで制御される。",
-      "E) Write-Ahead Loggingの原則により、データ・ブロックがディスクに書き込まれた後にリドゥ・エントリが記録される。"
+      "A) ライブラリ・キャッシュには、SQL文のパース結果と実行計画がキャッシュされる。",
+      "B) データ・ディクショナリ・キャッシュは、データ・ブロック単位でメタデータをキャッシュする。",
+      "C) 共有プールのサイズはLARGE_POOL_SIZEパラメータで制御される。",
+      "D) リザルト・キャッシュに格納された結果は、基礎テーブルのデータが変更されても手動で無効化する必要がある。"
     ],
-    "answer": [
-      "A"
-    ],
-    "explanation": "정답: A\nA) 정답 — Redo Log Buffer는 순환 버퍼(Circular Buffer) 구조로 동작하며, LGWR이 디스크에 기록한 영역은 재사용됩니다.\n\nB) 오답 — 디스크에서 읽어온 데이터 블록의 복사본을 저장하는 것은 데이터베이스 버퍼 캐시(Database Buffer Cache)입니다. Redo Log Buffer는 변경 사항(Redo Entry)을 임시 저장합니다.\n\nC) 오답 — LGWR은 COMMIT 발생 시뿐만 아니라, 버퍼 1/3 이상 사용, 3초 타임아웃, DBWn 기록 전, 1MB 이상 축적 등 여러 조건에서 디스크에 기록합니다.\n\nD) 오답 — Redo Log Buffer의 크기는 LOG_BUFFER 파라미터로 제어됩니다. SHARED_POOL_SIZE는 공유 풀의 크기를 제어하는 파라미터입니다.\n\nE) 오답 — Write-Ahead Logging 원칙은 데이터 블록이 디스크에 기록되기 '전에' Redo Entry가 먼저 기록되어야 한다는 원칙입니다. 순서가 반대로 기술되어 있습니다.\n\n핵심 개념: Redo Log Buffer는 순환 버퍼 구조로, 모든 변경 사항을 임시 저장하며 Write-Ahead Logging 원칙에 따라 데이터 파일 기록 전에 반드시 Redo가 먼저 기록됩니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 라이브러리 캐시는 SQL 및 PL/SQL 문장의 파싱 결과(Parse Tree)와 실행 계획(Execution Plan)을 캐싱하는 공유 풀 내의 영역입니다. 동일한 SQL이 재실행될 때 Soft Parse를 통해 기존 실행 계획을 재사용할 수 있어 성능을 향상시킵니다.\n\nB) 오답 — 데이터 딕셔너리 캐시는 블록 단위가 아닌 행(Row) 단위로 메타데이터를 캐싱합니다. 그래서 Row Cache라고도 불립니다.\n\nC) 오답 — 공유 풀의 크기는 SHARED_POOL_SIZE 파라미터로 제어됩니다. LARGE_POOL_SIZE는 Large Pool의 크기를 제어하는 파라미터입니다.\n\nD) 오답 — 리절트 캐시에 저장된 결과는 기반 테이블의 데이터가 변경(DML)되면 자동으로 무효화(Auto-Invalidation)됩니다. 수동 무효화가 필요하지 않습니다.\n\n핵심 개념: 공유 풀은 라이브러리 캐시(SQL 파싱 결과/실행 계획), 데이터 딕셔너리 캐시(행 단위 메타데이터), 리절트 캐시(쿼리 결과 자동 무효화) 등으로 구성되며, SHARED_POOL_SIZE 파라미터로 크기를 제어합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_002",
-    "title": "Oracleデータベースの共有プール(Shared Pool)について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle DatabaseのLarge Poolについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ライブラリ・キャッシュには、SQLおよびPL/SQL文のパース結果と実行計画がキャッシュされる。",
-      "B) データ・ディクショナリ・キャッシュはブロック単位でメタデータをキャッシュする領域である。",
-      "C) ハード・パースを減らすためには、リテラル値の代わりにバインド変数を使用することが推奨される。",
-      "D) 共有プールのサイズはLARGE_POOL_SIZEパラメータで制御される。",
-      "E) リザルト・キャッシュは基盤テーブルのデータが変更されても自動的に無効化されない。"
+      "A) Large PoolはLRUリストで管理されており、使用頻度の低いメモリが自動的に解放される。",
+      "B) Large Poolが構成されていない場合、RMANのI/Oバッファは共有プールから割り当てられる。",
+      "C) Large Poolの主な用途にはRMANバックアップ、共有サーバー・モードのUGA、パラレル実行のメッセージ・バッファがある。",
+      "D) Large PoolのサイズはSHARED_POOL_SIZEパラメータで共有プールと一括で制御される。",
+      "E) Large PoolはSQL文の解析結果をキャッシュするために使用される。"
     ],
-    "answer": [
-      "A",
-      "C"
-    ],
-    "explanation": "정답: A, C\nA) 정답 — 라이브러리 캐시(Library Cache)는 SQL 및 PL/SQL 문장의 파싱된 표현(Parse Tree)과 실행 계획(Execution Plan)을 저장하는 영역입니다.\n\nC) 정답 — Hard Parse를 줄이기 위해 리터럴 값 대신 바인드 변수(Bind Variable)를 사용하면 동일한 SQL로 인식되어 Soft Parse를 유도할 수 있습니다.\n\nB) 오답 — 데이터 딕셔너리 캐시는 블록 단위가 아닌 '행(Row) 단위'로 메타데이터를 캐싱합니다. 그래서 Row Cache라고도 불립니다.\n\nD) 오답 — 공유 풀의 크기는 SHARED_POOL_SIZE 파라미터로 제어됩니다. LARGE_POOL_SIZE는 Large Pool의 크기를 제어하는 파라미터입니다.\n\nE) 오답 — Result Cache는 기반 테이블의 데이터가 변경(DML)되면 관련 캐시 결과가 자동 무효화(Auto-Invalidation)됩니다.\n\n핵심 개념: 공유 풀은 라이브러리 캐시, 데이터 딕셔너리 캐시, Result Cache 등을 포함하며, Hard Parse를 줄여 성능을 향상시키는 것이 중요합니다."
+    "answer": ["B", "C"],
+    "explanation": "정답: B, C\nB) 정답 — Large Pool이 구성되지 않은 경우, RMAN의 I/O 버퍼 등 대형 메모리 요청은 공유 풀(Shared Pool)에서 처리됩니다. 이 경우 SQL 파싱 캐시와 경쟁하게 되어 성능 저하가 발생할 수 있습니다.\n\nC) 정답 — Large Pool의 주요 용도는 RMAN 백업/복구의 I/O 버퍼, Shared Server 모드에서의 UGA 할당, 병렬 실행(Parallel Execution)의 프로세스 간 메시지 버퍼입니다.\n\nA) 오답 — Large Pool은 LRU 리스트로 관리되지 않습니다. 할당된 메모리는 사용이 끝날 때까지 유지되며 다른 용도로 교체되지 않습니다.\n\nD) 오답 — Large Pool의 크기는 LARGE_POOL_SIZE 파라미터로 개별적으로 제어됩니다. SHARED_POOL_SIZE와는 별도의 파라미터입니다.\n\nE) 오답 — SQL 문의 파싱 결과를 캐싱하는 것은 공유 풀 내의 라이브러리 캐시(Library Cache)의 역할입니다. Large Pool은 SQL 캐싱과 관련이 없습니다.\n\n핵심 개념: Large Pool은 공유 풀의 부담을 줄이기 위한 선택적 SGA 구성요소로, LRU로 관리되지 않으며 RMAN, Shared Server, 병렬 실행 등 대형 메모리 할당을 전담합니다. LARGE_POOL_SIZE 파라미터로 크기를 제어합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_003",
-    "title": "DBWn(Database Writer)プロセスがダーティ・バッファをデータ・ファイルに書き込む条件として正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle Databaseのバックグラウンド・プロセスであるCKPT(チェックポイント・プロセス)について正しく述べているものを選択してください。",
     "options": [
-      "A) トランザクションがCOMMITされた直後に、当該トランザクションで変更されたダーティ・バッファを即座にデータ・ファイルに書き込む。",
-      "B) サーバー・プロセスがフリー・バッファを見つけられない場合、DBWnに書き込みを要求する。",
-      "C) チェックポイント発生時に、CKPTプロセスからの要求に応じてダーティ・バッファをデータ・ファイルに書き込む。",
-      "D) サーバー・プロセスがDMLを実行するたびに、DBWnが同期的にデータ・ファイルへの書き込みを行う。",
-      "E) LGWRプロセスがリドゥ・ログを書き込んだ後に、DBWnがすべてのダーティ・バッファを一括してデータ・ファイルに書き込む。"
+      "A) CKPTは変更されたバッファをデータ・ファイルに直接書き込む役割を持つ。",
+      "B) CKPTはチェックポイント発生時にデータ・ファイル・ヘッダーと制御ファイルを更新する。",
+      "C) CKPTはREDOログ・バッファの内容をオンラインREDOログ・ファイルに書き込む。",
+      "D) CKPTはFAST_START_MTTR_TARGETパラメータの値に関係なく、一定の間隔でフル・チェックポイントを実行する。"
     ],
-    "answer": [
-      "B",
-      "C"
-    ],
-    "explanation": "정답: B, C\nB) 정답 — 서버 프로세스가 Buffer Cache에서 Free Buffer를 찾지 못하면 DBWn에 기록을 요청합니다. 이는 DBWn이 Dirty Buffer를 데이터 파일에 기록하는 주요 조건 중 하나입니다.\n\nC) 정답 — 체크포인트가 발생하면 CKPT 프로세스가 DBWn에 기록을 요청하고, DBWn은 Dirty Buffer를 데이터 파일에 기록합니다.\n\nA) 오답 — COMMIT 시에는 LGWR이 Redo Log Buffer를 온라인 Redo Log 파일에 기록합니다. DBWn은 COMMIT과 직접적으로 동기화되지 않으며, 별도의 조건(체크포인트, Free Buffer 부족 등)에 의해 비동기적으로 기록합니다.\n\nD) 오답 — DBWn은 DML 실행마다 동기적으로 기록하지 않습니다. 서버 프로세스가 Buffer Cache에서 직접 변경하고, DBWn은 비동기적으로 일괄 기록하여 I/O 효율성을 극대화합니다.\n\nE) 오답 — LGWR이 Redo를 기록한 후 DBWn이 '모든' Dirty Buffer를 일괄 기록하는 것은 아닙니다. Write-Ahead Logging 원칙에 따라 DBWn 기록 전에 관련 Redo가 먼저 기록되어야 하지만, 이것이 모든 버퍼를 한 번에 기록한다는 의미는 아닙니다.\n\n핵심 개념: DBWn은 체크포인트 발생, Dirty Buffer 임계값 초과, Free Buffer 부족, 3초 타임아웃 등의 조건에서 비동기적으로 Dirty Buffer를 데이터 파일에 기록합니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — CKPT(Checkpoint) 프로세스는 체크포인트 이벤트 발생 시 데이터 파일 헤더와 컨트롤 파일을 갱신합니다. 여기에는 마지막 체크포인트 SCN, 체크포인트 시간 등의 정보가 기록됩니다.\n\nA) 오답 — 변경된 버퍼(Dirty Buffer)를 데이터 파일에 직접 기록하는 것은 DBWn(Database Writer) 프로세스의 역할입니다. CKPT는 직접 데이터 블록을 기록하지 않고 DBWn에 기록을 요청한 후 그 결과를 파일 헤더에 반영합니다.\n\nC) 오답 — Redo Log Buffer의 내용을 온라인 Redo Log 파일에 기록하는 것은 LGWR(Log Writer) 프로세스의 역할입니다.\n\nD) 오답 — FAST_START_MTTR_TARGET 파라미터는 인스턴스 복구 목표 시간(초)을 지정하며, Oracle은 이 값에 따라 Incremental Checkpoint의 빈도를 자동으로 조정합니다. 일정 간격의 풀 체크포인트만 실행하는 것이 아닙니다.\n\n핵심 개념: CKPT 프로세스는 체크포인트 이벤트 발생 시 데이터 파일 헤더와 컨트롤 파일을 갱신하는 역할을 하며, 데이터 블록을 직접 기록하지 않습니다. FAST_START_MTTR_TARGET 파라미터로 Incremental Checkpoint 빈도를 자동 조정하여 인스턴스 복구 시간을 제어합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_004",
-    "title": "Dedicated ServerモードとShared Serverモードにおけるメモリー構成の違いについて正しい内容を述べているのはどれになりますか(2つ選択してください)。",
+    "title": "CDB(コンテナ・データベース)の構造に関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) Dedicated Serverモードでは、UGA(User Global Area)はPGA内に配置される。",
-      "B) Shared Serverモードでは、UGAはPGA内に配置され、サーバー・プロセス間で共有される。",
-      "C) Shared Serverモードでは、ディスパッチャが直接SQL文を実行してユーザーに結果を返す。",
-      "D) Dedicated Serverモードでは、ユーザーがアイドル状態になるとサーバー・プロセスは自動的に解放される。",
-      "E) Shared Serverモードでは、UGAはSGA内(Large Poolまたは共有プール)に移動する。"
+      "A) PDB$SEEDは新規PDB作成時のテンプレートとして使用される読取り専用コンテナであり、CDBから削除することが可能である。",
+      "B) CDB$ROOTはCON_IDが常に1である最上位コンテナであり、共通ユーザーの管理やマスター・データ・ディクショナリの保持を行う。",
+      "C) CDB内のすべてのPDBは独自のオンラインREDOログ・ファイルと制御ファイルを保持する。",
+      "D) ユーザーPDBのCON_IDは必ず2から割り当てられる。"
     ],
-    "answer": [
-      "A",
-      "E"
-    ],
-    "explanation": "정답: A, E\nA) 정답 — Dedicated Server 모드에서는 사용자 프로세스와 서버 프로세스가 1:1로 매핑되므로, UGA(User Global Area)는 PGA 내부에 위치합니다.\n\nE) 정답 — Shared Server 모드에서는 서버 프로세스가 공유되므로 세션 정보를 PGA에 저장할 수 없습니다. 대신 UGA가 SGA 내의 Large Pool(우선) 또는 Shared Pool로 이동합니다.\n\nB) 오답 — Shared Server 모드에서 UGA는 PGA가 아닌 SGA(Large Pool 또는 Shared Pool)에 위치합니다. 이것이 Dedicated Server와의 가장 핵심적인 메모리 구조 차이입니다.\n\nC) 오답 — 디스패처는 SQL을 직접 실행하지 않습니다. 디스패처는 사용자 요청을 공유 요청 큐(Request Queue)에 배치하고, 공유 서버 프로세스가 큐에서 요청을 가져와 실행합니다.\n\nD) 오답 — Dedicated Server 모드에서는 사용자가 유휴(Idle) 상태여도 서버 프로세스가 해제되지 않고 계속 유지됩니다. 이것이 대규모 동시 접속 시 리소스 낭비의 원인이 됩니다.\n\n핵심 개념: Dedicated Server와 Shared Server의 핵심 차이는 UGA의 위치입니다. Dedicated에서는 PGA 내, Shared에서는 SGA 내(Large Pool 우선)에 배치됩니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — CDB$ROOT는 CON_ID가 항상 1인 CDB의 최상위 컨테이너입니다. 공통 사용자(Common User, C## 접두사)의 관리와 Oracle 제공 메타데이터의 원본(마스터 데이터 딕셔너리)을 보유하며, CDB 단위 관리 작업의 진입점 역할을 합니다.\n\nA) 오답 — PDB$SEED는 새 PDB 생성 시 템플릿으로 사용되는 읽기 전용 컨테이너이지만, CDB의 필수 구성요소이므로 삭제할 수 없습니다.\n\nC) 오답 — 온라인 Redo Log 파일과 컨트롤 파일은 CDB 전체에서 공유하는 자원입니다. 각 PDB가 독자적으로 보유하지 않습니다.\n\nD) 오답 — CON_ID 2는 PDB$SEED에 할당됩니다. 사용자 PDB의 CON_ID는 3 이상의 값이 부여됩니다.\n\n핵심 개념: CDB는 CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2, 읽기 전용 템플릿), 사용자 PDB(CON_ID=3 이상)로 구성됩니다. 컨트롤 파일과 온라인 Redo Log는 CDB 전체에서 공유되며, 각 PDB는 독립된 데이터 딕셔너리와 테이블스페이스를 보유합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_005",
-    "title": "CKPTプロセスに関して正しい内容を述べているものを選択してください。",
+    "title": "Oracle Databaseの制御ファイルについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) CKPTプロセスはチェックポイント発生時に、ダーティ・バッファを直接データ・ファイルに書き込む。",
-      "B) CKPTプロセスはチェックポイント発生時に、データ・ファイル・ヘッダーと制御ファイルを更新する。",
-      "C) インクリメンタル・チェックポイントはALTER SYSTEM CHECKPOINT文によってのみ発生する。",
-      "D) FAST_START_MTTR_TARGETパラメータはアーカイブ・ログの書き込み間隔を制御する。"
+      "A) 制御ファイルはデータベースの物理構造情報を記録するバイナリ・ファイルであり、インスタンスがMOUNT段階で読み込む。",
+      "B) 制御ファイルの多重化を行う場合、Oracle側で手動で各コピーの内容を同期する必要がある。",
+      "C) 制御ファイルには、データベース名、データ・ファイルの位置、チェックポイント情報などが含まれる。",
+      "D) 制御ファイルの追加や移動は、データベースが稼働中にオンラインで実行可能である。",
+      "E) 制御ファイルはテキスト形式であり、テキスト・エディタで直接編集することができる。"
     ],
-    "answer": [
-      "B"
-    ],
-    "explanation": "정답: B\nB) 정답 — CKPT 프로세스는 체크포인트 이벤트 발생 시 데이터 파일 헤더와 컨트롤 파일을 갱신하는 역할을 합니다. 마지막 체크포인트 SCN, 체크포인트 시간 등의 정보를 기록합니다.\n\nA) 오답 — CKPT는 직접 데이터 블록(Dirty Buffer)을 디스크에 기록하지 않습니다. Dirty Buffer를 데이터 파일에 기록하는 것은 DBWn 프로세스의 역할이며, CKPT는 DBWn에 기록을 요청한 후 그 결과를 파일 헤더에 반영합니다.\n\nC) 오답 — Incremental Checkpoint는 ALTER SYSTEM CHECKPOINT로 발생하는 Full Checkpoint와는 다릅니다. Incremental Checkpoint는 Oracle 내부 알고리즘에 의해 자동으로 수행되며, DBWn이 지속적으로 Dirty Buffer를 조금씩 기록합니다.\n\nD) 오답 — FAST_START_MTTR_TARGET 파라미터는 인스턴스 복구에 걸리는 목표 시간(초)을 지정하는 파라미터입니다. 이 값에 따라 Incremental Checkpoint의 빈도가 자동 조정됩니다. 아카이브 로그 기록 간격과는 관련이 없습니다.\n\n핵심 개념: CKPT는 체크포인트 발생 시 파일 헤더를 갱신하는 프로세스이며, 실제 데이터 블록 기록은 DBWn이 담당합니다. FAST_START_MTTR_TARGET으로 복구 목표 시간을 설정하여 Incremental Checkpoint 빈도를 제어할 수 있습니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 컨트롤 파일은 데이터베이스의 물리적 구조 정보를 기록하는 바이너리 파일입니다. 인스턴스가 MOUNT 단계에서 가장 먼저 읽어들이는 파일이며, 컨트롤 파일이 손상되면 데이터베이스를 열 수 없습니다.\n\nC) 정답 — 컨트롤 파일에는 데이터베이스 이름(DB_NAME), 데이터베이스 고유 식별자(DBID), 모든 데이터 파일의 위치와 상태, 온라인 Redo Log 파일 정보, 체크포인트 SCN 등 데이터베이스의 물리적 구조와 상태 정보가 저장됩니다.\n\nB) 오답 — 컨트롤 파일을 다중화하면 Oracle이 모든 복사본을 동기적으로 동시에 갱신합니다. 수동으로 동기화할 필요가 없습니다.\n\nD) 오답 — 컨트롤 파일의 추가나 이동은 데이터베이스를 SHUTDOWN한 후, OS 레벨에서 파일을 복사하고, SPFILE의 CONTROL_FILES 파라미터를 수정한 다음 STARTUP하는 절차가 필요합니다. 온라인 상태에서는 수행할 수 없습니다.\n\nE) 오답 — 컨트롤 파일은 바이너리 파일이므로 텍스트 에디터로 직접 편집할 수 없습니다.\n\n핵심 개념: 컨트롤 파일은 데이터베이스의 물리적 구조 메타데이터를 저장하는 바이너리 파일로, MOUNT 단계에서 읽어들입니다. 최소 2개를 서로 다른 디스크에 다중화하는 것이 권장되며, Oracle이 모든 복사본을 동기적으로 갱신합니다."
   }
 ]

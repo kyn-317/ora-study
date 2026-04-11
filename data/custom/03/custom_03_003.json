@@ -2,68 +2,69 @@
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_011",
-    "title": "Oracle AI DatabaseのMOUNT状態で実行可能な操作について正しく述べているものを選択してください。",
+    "title": "Oracleデータベースのトレース・ファイルに関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ALTER DATABASE ARCHIVELOGコマンドを実行して、アーカイブ・ログ・モードに変更することができる。",
-      "B) 一般ユーザーがSELECT文を使用してデータ・ディクショナリのDBA_ビューを参照できる。",
-      "C) CREATE DATABASE文を実行して新しいデータベースを作成することができる。",
-      "D) ALTER SYSTEM SET文を使用して動的パラメータを変更することはできない。"
+      "A) トレース・ファイルはサーバー・プロセスおよびバックグラウンド・プロセスによって生成され、ADRのtraceディレクトリに格納される。",
+      "B) バックグラウンド・プロセスのトレース・ファイルの命名形式は<SID>_ora_<PID>.trcである。",
+      "C) MAX_DUMP_FILE_SIZEパラメータで個別のトレース・ファイルの最大サイズを制限でき、デフォルト値はUNLIMITEDである。",
+      "D) トレース・ファイルはOracle Databaseにより定期的に自動ローテーションされるため、手動でのサイズ管理は不要である。",
+      "E) トレース・ファイルはSYSAUX表領域に格納されるため、SQL文でのみ内容を確認できる。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — MOUNT 상태에서는 컨트롤 파일이 열려 있으므로 ALTER DATABASE ARCHIVELOG/NOARCHIVELOG 명령을 실행하여 아카이브 로그 모드를 변경할 수 있습니다. 아카이브 로그 모드 변경은 반드시 MOUNT 상태에서만 수행 가능합니다.\n\nB) 오답 — 데이터 딕셔너리의 DBA_ 뷰는 SYSTEM/SYSAUX 테이블스페이스에 저장되어 있으며, 데이터 파일이 열려야 접근 가능합니다. 따라서 OPEN 상태에서만 참조할 수 있으며 MOUNT 상태에서는 참조할 수 없습니다.\n\nC) 오답 — CREATE DATABASE 문은 컨트롤 파일이 아직 존재하지 않는 NOMOUNT 상태에서만 실행 가능합니다. MOUNT 상태에서는 이미 컨트롤 파일이 열려 있으므로 새로운 데이터베이스를 생성할 수 없습니다.\n\nD) 오답 — MOUNT 상태에서도 ALTER SYSTEM SET 문으로 동적 파라미터를 변경할 수 있습니다. 인스턴스가 기동되어 SGA가 할당된 NOMOUNT 이후의 모든 상태에서 ALTER SYSTEM SET은 사용 가능합니다.\n\n핵심 개념: MOUNT 상태에서는 컨트롤 파일이 열리고 데이터베이스 구조 정보를 인식하지만, 데이터 파일과 Redo Log 파일은 아직 열리지 않습니다. ARCHIVELOG 모드 변경, 데이터 파일 이름/위치 변경(RENAME FILE), 미디어 복구 등이 MOUNT 상태에서 수행 가능한 주요 작업입니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 트레이스 파일은 서버 프로세스 및 백그라운드 프로세스(PMON, SMON, DBWn, LGWR 등)에 의해 생성되며, ADR Home 내의 trace/ 디렉터리에 저장됩니다. 오류 발생 시 자동 생성되거나, SQL Trace 등으로 수동으로 생성할 수 있습니다.\n\nC) 정답 — MAX_DUMP_FILE_SIZE 초기화 파라미터로 개별 트레이스 파일의 최대 크기를 제한할 수 있으며, 기본값은 UNLIMITED입니다. 디스크 공간 보호를 위해 적절한 크기를 설정하는 것이 권장됩니다.\n\nB) 오답 — <SID>_ora_<PID>.trc는 서버 프로세스의 트레이스 파일 명명 형식입니다. 백그라운드 프로세스의 트레이스 파일은 <SID>_<process>_<PID>.trc 형식입니다(예: orcl_smon_12345.trc).\n\nD) 오답 — 트레이스 파일은 자동 로테이션되지 않습니다. MMON 프로세스가 오래된 진단 데이터를 자동 퍼지(기본 30일)하지만, 활성 트레이스 파일의 로테이션은 수행되지 않으므로 디스크 공간 모니터링이 필요합니다.\n\nE) 오답 — 트레이스 파일은 SYSAUX 표영역이 아닌 파일 시스템(ADR의 trace/ 디렉터리)에 저장됩니다. OS 레벨에서 직접 확인하거나, ADRCI 도구, V$DIAG_TRACE_FILE_CONTENTS 뷰로도 조회할 수 있습니다.\n\n핵심 개념: 트레이스 파일은 서버/백그라운드 프로세스가 ADR의 trace/ 디렉터리에 생성하는 진단 파일로, MAX_DUMP_FILE_SIZE(기본 UNLIMITED)로 크기를 제한할 수 있으며, 자동 로테이션은 되지 않으므로 디스크 공간 관리가 필요합니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_012",
-    "title": "マルチテナント環境においてPDBのオープンおよびクローズに関して正しく述べているものを選択してください。",
+    "title": "ADRCI(ADR Command Interpreter)に関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) CDBをSTARTUPすると、CDB$ROOTとすべてのユーザーPDBが自動的にOPEN状態になる。",
-      "B) PDBコンテキストでSTARTUPコマンドを実行すると、ALTER PLUGGABLE DATABASE OPENと同じ動作をする。",
-      "C) ALTER PLUGGABLE DATABASE ALL CLOSEを実行すると、CDB$ROOTも含めてすべてのコンテナが閉じられる。",
-      "D) SAVE STATEを設定していないPDBは、CDB再起動後にNOMOUNT状態となる。"
+      "A) ADRCIはデータベースが起動していない状態でも使用でき、アラート・ログやインシデント情報を確認できる。",
+      "B) ADRCIはSQL*Plusの中からのみ実行可能であり、OSのコマンドラインから直接起動することはできない。",
+      "C) ADRCIのSHOW ALERTコマンドはアラート・ログの最新10行のみ表示でき、リアルタイム・モニタリングはサポートしていない。",
+      "D) ADRCIはアラート・ログの確認のみに使用され、インシデント・パッケージの作成はEnterprise Managerでのみ可能である。"
     ],
-    "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — PDB 컨텍스트(ALTER SESSION SET CONTAINER = pdb_name)에서 STARTUP 명령을 실행하면 ALTER PLUGGABLE DATABASE OPEN과 동일하게 동작합니다. CDB 레벨이 아닌 해당 PDB만 OPEN됩니다.\n\nA) 오답 — CDB를 STARTUP하면 CDB$ROOT는 자동으로 OPEN되고 PDB$SEED는 READ ONLY로 자동 OPEN되지만, 사용자 PDB는 기본적으로 MOUNTED 상태가 됩니다. 사용자 PDB를 사용하려면 별도로 OPEN해야 합니다.\n\nC) 오답 — ALTER PLUGGABLE DATABASE ALL CLOSE는 사용자 PDB만 닫습니다. CDB$ROOT는 CDB 자체의 SHUTDOWN 명령으로만 종료할 수 있으며, 이 명령의 대상이 되지 않습니다.\n\nD) 오답 — SAVE STATE를 설정하지 않은 PDB는 CDB 재기동 후 NOMOUNT가 아닌 MOUNTED 상태가 됩니다. PDB에는 NOMOUNT라는 상태가 존재하지 않으며, MOUNTED, READ WRITE, READ ONLY, MIGRATE 등의 상태를 가집니다.\n\n핵심 개념: CDB STARTUP 시 사용자 PDB는 기본적으로 MOUNTED 상태이며, ALTER PLUGGABLE DATABASE ... SAVE STATE로 상태를 저장해 두면 CDB 재기동 시 이전 OPEN 상태가 자동으로 복원됩니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — ADRCI(ADR Command Interpreter)는 ADR의 진단 데이터를 조회/관리하는 전용 CLI 도구로, 파일 시스템 기반의 ADR에 직접 접근하므로 데이터베이스가 기동되지 않은 상태에서도 사용할 수 있습니다. Alert Log, 인시던트, Problem 정보 등을 확인할 수 있어 장애 진단에 유용합니다.\n\nB) 오답 — ADRCI는 OS 커맨드라인에서 직접 'adrci' 명령으로 기동하는 독립 도구입니다. SQL*Plus와는 별개의 프로그램이며, SQL*Plus 없이도 독립적으로 실행 가능합니다.\n\nC) 오답 — SHOW ALERT 명령은 행 수 제한 없이 Alert Log 내용을 표시할 수 있으며, SHOW ALERT -tail -f 옵션으로 tail -f와 동일한 실시간 모니터링이 가능합니다.\n\nD) 오답 — ADRCI는 Alert Log 확인뿐 아니라, IPS CREATE PACKAGE, IPS ADD INCIDENT, IPS GENERATE PACKAGE 등의 IPS(Incident Packaging Service) 명령으로 진단 데이터 패키지를 직접 생성할 수 있습니다. Oracle 지원에 제출할 패키지를 CLI에서 생성 가능합니다.\n\n핵심 개념: ADRCI는 OS 커맨드라인에서 독립적으로 실행되는 ADR 전용 진단 도구로, DB 미기동 시에도 Alert Log 조회(SHOW ALERT), 실시간 모니터링(-tail -f), 인시던트 확인(SHOW INCIDENT), 진단 패키지 생성(IPS) 등의 기능을 제공합니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_013",
-    "title": "Oracle AI Databaseの初期化パラメータ・ファイルの管理について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracleデータベースのデータ・ディクショナリ・ビューに関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) インスタンス起動時のパラメータ・ファイル検索順序は、spfile<SID>.ora → spfile.ora → init<SID>.ora の順である。",
-      "B) STARTUPコマンドのオプションでSPFILEの場所を直接指定することができる。",
-      "C) CREATE PFILE FROM SPFILEコマンドは、SPFILEの内容をテキスト形式で抽出し、SPFILEのバックアップとして使用できる。",
-      "D) PFILE環境でALTER SYSTEM SET文にSCOPE=SPFILEを指定して、パラメータをファイルに永続的に反映できる。",
-      "E) SPFILEが存在しない場合、OracleはデフォルトのPFILEも検索せずにエラーを返す。"
+      "A) DBA_ビューはデータベース全体のオブジェクト情報を表示し、参照にはSELECT_CATALOG_ROLEまたはSELECT ANY DICTIONARY権限が必要である。",
+      "B) USER_ビューは現在のユーザーが所有するオブジェクトのみを表示し、OWNER列が含まれていない。",
+      "C) データ・ディクショナリ・ビューはSGA内に格納されているため、インスタンスの再起動時にメタデータが初期化される。",
+      "D) ALL_ビューはデータベース内のすべてのオブジェクトをDBA_ビューと同じ範囲で表示する。",
+      "E) データ・ディクショナリ・ビューはNOMOUNT状態から参照可能である。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — Oracle 인스턴스 기동 시 파라미터 파일 검색 순서는 spfile<SID>.ora → spfile.ora → init<SID>.ora입니다. SPFILE이 우선순위가 높으며, SPFILE이 존재하지 않을 때 PFILE을 검색합니다.\n\nC) 정답 — CREATE PFILE FROM SPFILE 명령은 바이너리 형식의 SPFILE 내용을 사람이 읽을 수 있는 텍스트 형식(PFILE)으로 추출합니다. SPFILE 손상 시 복구를 위한 백업 수단으로 활용할 수 있습니다.\n\nB) 오답 — STARTUP 명령의 PFILE 옵션으로는 PFILE의 위치만 지정할 수 있습니다(STARTUP PFILE='경로'). SPFILE의 위치를 직접 지정하는 STARTUP 옵션은 존재하지 않습니다. SPFILE의 위치를 변경하려면 PFILE 내에 SPFILE 파라미터로 경로를 지정해야 합니다.\n\nD) 오답 — PFILE 환경에서는 SCOPE=SPFILE 및 SCOPE=BOTH를 사용할 수 없습니다. PFILE 환경에서는 SCOPE=MEMORY만 사용 가능하며, 파라미터를 영구적으로 변경하려면 텍스트 에디터로 PFILE을 직접 편집해야 합니다.\n\nE) 오답 — SPFILE이 존재하지 않으면 Oracle은 기본 PFILE(init<SID>.ora)을 자동으로 검색합니다. SPFILE과 PFILE 모두 존재하지 않는 경우에만 ORA-01078 오류가 발생합니다.\n\n핵심 개념: Oracle은 기동 시 spfile<SID>.ora → spfile.ora → init<SID>.ora 순서로 파라미터 파일을 검색하며, SPFILE을 Oracle이 공식 권장합니다. CREATE PFILE FROM SPFILE로 텍스트 백업을 생성하여 SPFILE 손상에 대비할 수 있습니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — DBA_ 뷰는 데이터베이스 전체의 모든 객체 정보를 표시하며, 참조하려면 SELECT_CATALOG_ROLE 또는 SELECT ANY DICTIONARY 시스템 권한이 필요합니다. 예: DBA_TABLES, DBA_USERS, DBA_TABLESPACES 등.\n\nB) 정답 — USER_ 뷰는 현재 접속한 사용자가 소유한 객체만 표시하므로, 소유자가 항상 자기 자신이기 때문에 OWNER 컬럼이 포함되어 있지 않습니다. DBA_와 ALL_ 뷰에는 OWNER 컬럼이 있습니다.\n\nC) 오답 — 데이터 딕셔너리 뷰는 SGA가 아닌 SYSTEM 테이블스페이스(디스크)에 저장된 기본 테이블을 기반으로 합니다. DDL 실행 시 자동 갱신되며, 인스턴스 재기동과 관계없이 영구적으로 보존됩니다. 인스턴스 재기동 시 초기화되는 것은 V$ 뷰(SGA 기반)입니다.\n\nD) 오답 — ALL_ 뷰는 현재 사용자가 소유하거나 접근 권한이 부여된 객체만 표시합니다. DBA_ 뷰처럼 데이터베이스 내 모든 객체를 표시하는 것이 아닙니다.\n\nE) 오답 — 데이터 딕셔너리 뷰는 SYSTEM 테이블스페이스의 데이터 파일에 저장되어 있으므로, 데이터 파일이 열리는 OPEN 상태에서만 참조 가능합니다. NOMOUNT 상태에서 참조 가능한 것은 SGA 기반의 V$ 뷰입니다.\n\n핵심 개념: 데이터 딕셔너리 뷰는 SYSTEM 테이블스페이스에 저장된 메타데이터를 조회하는 읽기 전용 뷰로, DBA_(전체), ALL_(접근 가능), USER_(소유) 세 가지 접두어로 제공되며, OPEN 상태에서만 참조 가능합니다. V$ 뷰(SGA 기반)와 달리 디스크 기반으로 영구 보존되고 읽기 일관성이 보장됩니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_014",
-    "title": "Oracle AI Databaseのアラート・ログに記録されるイベントについて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "ALTER SYSTEM SET文を使用した初期化パラメータの変更に関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) ALTER SYSTEM SET文によって変更された初期化パラメータの情報が記録される。",
-      "B) すべてのDDL文はデフォルトでアラート・ログに記録される。",
-      "C) アラート・ログはXML形式とテキスト形式の2種類で保持される。",
-      "D) アラート・ログは一定のサイズに達すると自動的にローテーションされる。",
-      "E) アプリケーションが発行した個々のSELECT文やDML文の実行情報が記録される。"
+      "A) PFILE環境では、ALTER SYSTEM SET文でSCOPE=MEMORYを指定してメモリ上のパラメータ値のみを変更できる。",
+      "B) PFILE環境では、ALTER SYSTEM SET文でSCOPE=BOTHを指定してメモリとPFILEの両方にパラメータを反映できる。",
+      "C) SPFILE環境でALTER SYSTEM RESET文を実行すると、指定したパラメータがメモリから即座に削除されインスタンスが停止する。",
+      "D) PFILE環境でもSPFILE環境でも、ALTER SYSTEM SET文のSCOPEオプションのデフォルト値は同じくBOTHである。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — ALTER SYSTEM SET으로 변경된 파라미터 정보는 Alert Log에 기록됩니다. Alert Log에는 기동/종료, Redo Log 전환, 체크포인트, 파라미터 변경, ORA- 에러 등 주요 운영 이벤트가 시간순으로 기록됩니다.\n\nC) 정답 — Alert Log는 ADR Home 내에 XML 형식(alert/log.xml)과 텍스트 형식(trace/alert_<SID>.log) 두 가지로 동시에 유지됩니다. XML 형식은 V$DIAG_ALERT_EXT 뷰로 SQL 조회가 가능하고, 텍스트 형식은 OS 명령(tail, grep 등)으로 직접 조회할 수 있습니다.\n\nB) 오답 — DDL 문장은 기본적으로 Alert Log에 기록되지 않습니다. DDL 문장을 Alert Log에 기록하려면 초기화 파라미터 ENABLE_DDL_LOGGING을 TRUE로 설정해야 합니다. 기본값은 FALSE입니다.\n\nD) 오답 — Alert Log는 자동 로테이션되지 않습니다. 시간이 지나면 파일 크기가 매우 커질 수 있으므로, OS 레벨에서 주기적으로 아카이빙하거나 관리해야 합니다.\n\nE) 오답 — 개별 SELECT 문이나 DML 문의 실행 정보는 Alert Log에 기록되지 않습니다. 개별 SQL의 실행 정보를 기록하려면 SQL Trace(ALTER SESSION SET SQL_TRACE=TRUE 등)를 활성화하여 Trace 파일에 기록해야 합니다.\n\n핵심 개념: Alert Log는 데이터베이스의 주요 운영 이벤트(기동/종료, 에러, 파라미터 변경, Redo 전환 등)를 시간순으로 기록하는 핵심 진단 파일이며, XML과 텍스트 두 가지 형식으로 ADR 내에 보관됩니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — PFILE 환경에서는 ALTER SYSTEM SET 문의 SCOPE 옵션으로 MEMORY만 사용 가능합니다. 이 경우 실행 중인 인스턴스의 메모리 값만 변경되며, PFILE 자체에는 반영되지 않습니다. PFILE을 영구적으로 변경하려면 텍스트 에디터로 직접 편집 후 인스턴스를 재기동해야 합니다.\n\nB) 오답 — PFILE 환경에서는 SCOPE=BOTH 및 SCOPE=SPFILE을 사용할 수 없습니다. 이 옵션들은 SPFILE이 존재하는 환경에서만 사용 가능하며, PFILE 환경에서 지정하면 오류가 발생합니다.\n\nC) 오답 — ALTER SYSTEM RESET 문은 SPFILE에서 해당 파라미터 항목을 제거하여 Oracle 기본값으로 되돌리는 명령입니다. 인스턴스를 정지시키는 것이 아니며, SCOPE=SPFILE로 실행하면 다음 기동 시에 기본값이 적용됩니다.\n\nD) 오답 — SCOPE의 기본값은 환경에 따라 다릅니다. SPFILE 환경에서는 기본값이 BOTH(메모리 + SPFILE 동시 반영)이지만, PFILE 환경에서는 SCOPE=BOTH 자체를 사용할 수 없으므로 기본값은 MEMORY입니다. 두 환경에서 동일한 기본값을 가진다는 것은 잘못된 설명입니다.\n\n핵심 개념: PFILE 환경에서는 ALTER SYSTEM SET의 SCOPE으로 MEMORY만 사용 가능하며(기본값 MEMORY), SPFILE 환경에서는 MEMORY/SPFILE/BOTH 모두 사용 가능하고 기본값은 BOTH입니다. ALTER SYSTEM RESET은 SPFILE에서 파라미터를 제거하여 기본값으로 복원하는 명령입니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_015",
-    "title": "Oracle AI DatabaseをREAD ONLYモードでオープンした場合の動作について正しく述べているものを選択してください。",
+    "title": "アラート・ログに記録されるイベントに関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) READ ONLYモードではオンラインREDOログへの書き込みが発生しないため、一時表領域への書き込みも不可である。",
-      "B) ALTER DATABASE OPEN READ ONLYコマンドはNOMOUNT状態から直接実行できる。",
-      "C) READ ONLYモードではDML文は実行できないが、一時表領域への書き込みは可能である。",
-      "D) READ ONLYモードでデータベースをオープンするには、STARTUP RESTRICTコマンドを使用する。"
+      "A) ALTER SYSTEM SET文で初期化パラメータが変更された場合、その変更内容がアラート・ログに記録される。",
+      "B) ユーザーが実行した個々のSELECT文やDML文の実行結果がアラート・ログに記録される。",
+      "C) ENABLE_DDL_LOGGINGパラメータをTRUEに設定すると、DDL文もアラート・ログに記録される。",
+      "D) リスナーの起動および停止に関する情報がアラート・ログに記録される。",
+      "E) アラート・ログはテキスト形式のみで出力され、SQL文による直接参照はサポートされていない。"
     ],
-    "answer": ["C"],
-    "explanation": "정답: C\nC) 정답 — READ ONLY 모드에서는 데이터 파일에 대한 쓰기가 불가능하므로 DML 문을 실행할 수 없습니다. 그러나 임시 테이블스페이스에 대한 쓰기는 가능합니다. 이를 통해 정렬(Sort)이나 해시 조인 등 임시 공간이 필요한 읽기 쿼리를 수행할 수 있습니다.\n\nA) 오답 — READ ONLY 모드에서는 온라인 Redo Log에 대한 쓰기가 발생하지 않지만, 임시 테이블스페이스에 대한 쓰기는 가능합니다. 임시 테이블스페이스의 쓰기는 Redo Log와 무관합니다.\n\nB) 오답 — ALTER DATABASE OPEN READ ONLY 명령은 MOUNT 상태에서만 실행할 수 있습니다. NOMOUNT 상태에서는 컨트롤 파일이 아직 열리지 않았으므로 데이터베이스를 OPEN할 수 없습니다. 먼저 ALTER DATABASE MOUNT로 MOUNT 상태로 전환한 후에 실행해야 합니다.\n\nD) 오답 — READ ONLY 모드로 오픈하려면 ALTER DATABASE OPEN READ ONLY 명령을 사용합니다. STARTUP RESTRICT는 RESTRICTED SESSION 권한을 가진 사용자만 접속 가능한 제한 모드로 오픈하는 명령이며, READ ONLY와는 다른 기능입니다.\n\n핵심 개념: READ ONLY 모드는 데이터 파일에 대한 쓰기를 차단하여 DML을 불가능하게 하지만, 임시 테이블스페이스에 대한 쓰기는 허용하여 정렬 등의 읽기 쿼리 처리를 가능하게 합니다. 주로 리포팅, 분석 또는 Standby 데이터베이스 용도로 사용됩니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — ALTER SYSTEM SET으로 초기화 파라미터가 변경되면, 변경된 파라미터명과 값이 Alert Log에 기록됩니다. 이를 통해 DBA는 파라미터 변경 이력을 추적할 수 있습니다.\n\nC) 정답 — ENABLE_DDL_LOGGING 초기화 파라미터를 TRUE로 설정하면, CREATE, ALTER, DROP 등의 DDL 문장도 Alert Log에 기록됩니다. 기본값은 FALSE이므로, 별도 설정이 필요합니다.\n\nB) 오답 — Alert Log에는 개별 사용자의 SELECT문이나 DML문 실행 이력은 기록되지 않습니다. Alert Log에 기록되는 것은 기동/종료, Redo Log 전환, 체크포인트, ORA-에러 등 주요 운영 이벤트입니다.\n\nD) 오답 — 리스너의 기동/종료 정보는 리스너 자체의 로그 파일(listener.log)에 기록되며, 데이터베이스의 Alert Log에는 기록되지 않습니다. Alert Log는 데이터베이스 인스턴스의 이벤트를 기록합니다.\n\nE) 오답 — Alert Log는 텍스트 형식(trace/alert_<SID>.log)뿐 아니라 XML 형식(alert/log.xml)으로도 유지됩니다. V$DIAG_ALERT_EXT 뷰를 통해 XML 형식의 Alert Log를 SQL로 직접 조회할 수 있으며, OS에 로그인하지 않고도 Alert Log를 분석할 수 있습니다.\n\n핵심 개념: Alert Log에는 기동/종료, Redo Log 전환, 체크포인트, ORA-에러, 파라미터 변경(ALTER SYSTEM SET) 등 주요 운영 이벤트가 기록됩니다. ENABLE_DDL_LOGGING=TRUE 설정으로 DDL 문장도 추가 기록이 가능하며, 개별 DML/SELECT는 기록 대상이 아닙니다."
   }
 ]

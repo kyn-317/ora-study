@@ -2,69 +2,70 @@
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_011",
-    "title": "Oracle AI Databaseの表領域におけるエクステント管理方式に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle AI DatabaseのBIGFILE表領域について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ローカル管理表領域でAUTOALLOCATE方式を使用すると、Oracleがエクステント・サイズを自動的に決定し、64KB、1MB、8MB、64MBと段階的に増加する。",
-      "B) ローカル管理表領域でUNIFORM方式を使用する場合、エクステント・サイズのデフォルトは8MBである。",
-      "C) ローカル管理表領域はビットマップを使用してエクステントの使用状況を管理するため、ディクショナリ管理方式よりも空間管理のパフォーマンスが優れている。",
-      "D) EXTENT MANAGEMENT LOCALとEXTENT MANAGEMENT DICTIONARYの両方がデフォルトとして使用されるが、環境に応じて自動的に切り替わる。",
-      "E) UNIFORM方式では各エクステント・サイズを個別に異なるサイズで指定することができる。"
+      "A) BIGFILE表領域はROWIDのファイル番号ビット(10ビット)をブロック番号に再割当てすることで、単一データ・ファイルで最大約42億ブロックまで使用できる。",
+      "B) BIGFILE表領域ではALTER TABLESPACE ... RESIZEコマンドを使用して表領域レベルでサイズを直接変更することが可能である。",
+      "C) BIGFILE表領域はデータ・ファイルが1つに限定されるため、ALTER TABLESPACE ... ADD DATAFILEコマンドでデータ・ファイルを追加してからRESIZEする必要がある。",
+      "D) BIGFILE表領域を作成した場合、SMALLFILE表領域に後から変更することが可能である。",
+      "E) BIGFILE表領域はNon-ASM環境でのみ使用可能であり、ASM環境では使用できない。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — 로컬 관리 테이블스페이스에서 AUTOALLOCATE 방식을 사용하면, Oracle이 익스텐트 크기를 자동으로 결정합니다. 익스텐트 크기는 64KB, 1MB, 8MB, 64MB로 단계적으로 증가하며, 대부분의 환경에 적합한 기본 방식입니다.\n\nC) 정답 — 로컬 관리 테이블스페이스는 비트맵(Bitmap)을 사용하여 익스텐트의 할당/해제 상태를 관리합니다. 딕셔너리 관리 방식은 데이터 딕셔너리 테이블에 대한 경합이 발생할 수 있어 성능이 저하되므로, 로컬 관리 방식이 권장됩니다.\n\nB) 오답 — UNIFORM 방식의 익스텐트 크기 기본값은 8MB가 아닌 1MB입니다. UNIFORM SIZE 절로 원하는 크기를 지정할 수 있으며, 미지정 시 1MB가 적용됩니다.\n\nD) 오답 — CREATE TABLESPACE 문의 기본값은 EXTENT MANAGEMENT LOCAL(로컬 관리)입니다. DICTIONARY 관리 방식은 구버전 호환용이며 비권장(deprecated)입니다. 환경에 따라 자동으로 전환되는 것이 아닙니다.\n\nE) 오답 — UNIFORM 방식은 모든 익스텐트를 동일한 크기로 할당합니다. 개별 익스텐트마다 다른 크기를 지정하는 것은 UNIFORM의 정의에 반합니다.\n\n핵심 개념: 로컬 관리 테이블스페이스의 익스텐트 관리 방식에는 AUTOALLOCATE(자동, 64KB~64MB 단계적 증가)와 UNIFORM(균등, 기본 1MB)이 있으며, 비트맵 기반으로 관리되어 딕셔너리 방식보다 성능이 우수합니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — BIGFILE 테이블스페이스는 ROWID에서 파일 번호에 할당되던 10비트를 블록 번호에 재할당하여, 블록 번호가 32비트로 확장됩니다. 이를 통해 단일 데이터 파일에서 최대 약 42억(2^32)개의 블록을 사용할 수 있으며, 8KB 블록 기준 약 32TB까지 지원합니다.\n\nB) 정답 — BIGFILE 테이블스페이스는 데이터 파일이 정확히 1개이므로, ALTER TABLESPACE ... RESIZE 명령으로 테이블스페이스 레벨에서 직접 크기를 변경할 수 있습니다. SMALLFILE에서는 이 명령을 사용할 수 없고 ALTER DATABASE DATAFILE ... RESIZE로 파일 단위 관리가 필요합니다.\n\nC) 오답 — BIGFILE 테이블스페이스에서는 ADD DATAFILE 명령을 사용할 수 없습니다. 데이터 파일은 정확히 1개만 허용되며, 크기 변경은 ALTER TABLESPACE ... RESIZE로 직접 수행합니다.\n\nD) 오답 — 테이블스페이스 생성 후 BIGFILE에서 SMALLFILE로, 또는 SMALLFILE에서 BIGFILE로 유형을 변경하는 것은 불가능합니다. 테이블스페이스 유형은 생성 시 결정되며 변경할 수 없습니다.\n\nE) 오답 — BIGFILE 테이블스페이스는 ASM 환경에서 사용할 수 있으며, 오히려 ASM + OMF 환경에서 가장 효과적으로 사용됩니다. ASM이 AU 단위로 스트라이핑하여 단일 파일이라도 다중 디스크에 I/O를 분산시킵니다.\n\n핵심 개념: BIGFILE 테이블스페이스는 ROWID의 파일 번호 비트를 블록 번호에 재할당하여 단일 데이터 파일로 대용량 저장을 지원하며, ALTER TABLESPACE 레벨에서 RESIZE와 AUTOEXTEND 설정이 가능합니다. ASM + OMF 환경에서의 사용이 권장됩니다."
   },
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_012",
-    "title": "BIGFILE表領域の管理操作に関して正しい内容を述べているものを選択してください。",
+    "title": "Oracle AI Databaseの論理的ストレージ構造における表領域とデータ・ファイルの関係について正しく述べているものを選択してください。",
     "options": [
-      "A) BIGFILE表領域に対してALTER TABLESPACE ... ADD DATAFILEを実行すると、既存のデータ・ファイルに加えて新しいデータ・ファイルを追加できる。",
-      "B) BIGFILE表領域に対してALTER TABLESPACE ... RESIZEを実行すると、テーブルスペース・レベルで直接サイズを変更できる。",
-      "C) BIGFILE表領域の自動拡張を設定する場合、SMALLFILE表領域と同様にALTER DATABASE DATAFILE文のみ使用可能である。",
-      "D) BIGFILE表領域はRMANでバックアップする際、自動的に複数のデータ・ファイルに分割されてバックアップされる。"
+      "A) 1つのデータ・ファイルは複数の表領域に属することができるため、表領域間でデータ・ファイルを共有できる。",
+      "B) SMALLFILE表領域では1つの表領域に最大1,022個のデータ・ファイルを含めることが可能であり、データ・ファイルの追加や削除ができる。",
+      "C) SYSTEM表領域のデータ・ファイルはオフラインに設定可能であるが、すべてのユーザーに影響が出る可能性がある。",
+      "D) 1つのセグメントのエクステントは同一データ・ファイル内にのみ存在でき、複数のデータ・ファイルに跨ることはできない。"
     ],
     "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — BIGFILE 테이블스페이스는 단일 데이터 파일로 구성되므로, ALTER TABLESPACE ... RESIZE 명령으로 테이블스페이스 레벨에서 직접 크기를 변경할 수 있습니다. 이는 SMALLFILE에서는 사용할 수 없는 BIGFILE 전용 관리 기능입니다.\n\nA) 오답 — BIGFILE 테이블스페이스는 정확히 하나의 데이터 파일만 포함할 수 있으므로, ALTER TABLESPACE ... ADD DATAFILE 명령은 사용할 수 없습니다. 데이터 파일 추가 및 삭제(DROP DATAFILE)도 불가합니다.\n\nC) 오답 — BIGFILE 테이블스페이스는 ALTER TABLESPACE ... AUTOEXTEND 명령으로 테이블스페이스 레벨에서 자동 확장을 설정할 수 있습니다. ALTER DATABASE DATAFILE 방식도 사용 가능하지만, BIGFILE 전용으로 ALTER TABLESPACE 레벨의 설정이 추가로 지원됩니다.\n\nD) 오답 — BIGFILE 테이블스페이스는 RMAN 백업 시 자동으로 복수의 파일로 분할되지 않습니다. 대용량 단일 파일의 병렬 백업이 필요한 경우, DBA가 멀티섹션 백업(Multisection Backup)을 명시적으로 설정해야 합니다.\n\n핵심 개념: BIGFILE 테이블스페이스는 단일 데이터 파일 구조로, ALTER TABLESPACE ... RESIZE와 ALTER TABLESPACE ... AUTOEXTEND를 통해 테이블스페이스 레벨에서 직접 관리가 가능하며, ADD DATAFILE/DROP DATAFILE은 사용할 수 없습니다."
+    "explanation": "정답: B\nB) 정답 — SMALLFILE 테이블스페이스는 하나의 테이블스페이스에 최대 1,022개의 데이터 파일을 포함할 수 있습니다. ALTER TABLESPACE ... ADD DATAFILE로 데이터 파일을 추가하고, 빈 데이터 파일은 DROP DATAFILE로 삭제할 수 있습니다.\n\nA) 오답 — 하나의 데이터 파일은 정확히 하나의 테이블스페이스에만 속합니다. 테이블스페이스와 데이터 파일은 1:N 관계이며, 데이터 파일을 여러 테이블스페이스 간에 공유하는 것은 불가능합니다.\n\nC) 오답 — SYSTEM 테이블스페이스는 데이터 딕셔너리를 저장하는 필수 테이블스페이스로, 항상 ONLINE 상태를 유지해야 합니다. SYSTEM 테이블스페이스의 데이터 파일은 오프라인으로 전환할 수 없습니다.\n\nD) 오답 — 개별 익스텐트(Extent)는 단일 데이터 파일 내에 존재해야 하지만, 하나의 세그먼트(Segment)는 동일 테이블스페이스 내의 여러 데이터 파일에 걸쳐 익스텐트를 가질 수 있습니다. 선택지의 설명은 세그먼트와 익스텐트를 혼동하고 있습니다.\n\n핵심 개념: 테이블스페이스와 데이터 파일은 1:N 관계로, 하나의 데이터 파일은 정확히 하나의 테이블스페이스에만 속합니다. SMALLFILE 테이블스페이스는 최대 1,022개의 데이터 파일을 포함할 수 있으며, 익스텐트는 단일 파일 내에 존재하지만 세그먼트는 여러 파일에 걸칠 수 있습니다."
   },
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_013",
-    "title": "Oracle AI Databaseのデータ・ブロック内のPCTFREEパラメータと行マイグレーションの関連性について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle AI Databaseの一時表領域(TEMP表領域)の管理について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) PCTFREEはデータ・ブロック内でUPDATE操作による行サイズの増加に備えて予約する空き領域の割合を指定し、デフォルト値は10%である。",
-      "B) PCTFREEの値を大きくすると、行マイグレーションの発生頻度は増加するが、ブロック内の空き領域の使用効率は向上する。",
-      "C) 行マイグレーションが発生した場合、行データは別のブロックに移動するが、元のブロックに新しいブロックへのポインタが残るため、SELECT時に追加のI/Oが発生する。",
-      "D) ASSM(自動セグメント領域管理)環境ではPCTFREEパラメータとPCTUSEDパラメータの両方が有効に機能する。",
-      "E) 行マイグレーションが発生すると、該当行のROWIDが変更され、インデックスの再構築が必要になる。"
+      "A) 一時表領域はDATAFILEではなくTEMPFILEを使用し、ソート処理やハッシュ結合などの一時データの格納に使用される。",
+      "B) TEMPFILEはRMANのデフォルトのバックアップ対象に含まれるため、一時表領域も定期的にバックアップする必要がある。",
+      "C) 一時セグメントはセッション終了時に自動的に解放されるため、一時表領域の空間はセッション終了後に再利用可能になる。",
+      "D) SYSTEM表領域を一時表領域として使用することがOracleの推奨構成であり、デフォルトの動作である。",
+      "E) 一時表領域はPERMANENT表領域と同様にALTER TABLESPACE ... ADD DATAFILEコマンドでデータ・ファイルを追加する。"
     ],
     "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — PCTFREE는 데이터 블록 내에서 UPDATE 작업으로 인한 행 크기 증가에 대비하여 예약하는 빈 공간의 비율을 지정합니다. 기본값은 10%이며, 블록 사용률이 (100 - PCTFREE)%에 도달하면 해당 블록에 대한 새로운 INSERT가 불가능해집니다.\n\nC) 정답 — 행 마이그레이션(Row Migration)이 발생하면, 행 데이터는 다른 블록으로 이동하지만 원래 블록의 행 디렉토리에 새 블록을 가리키는 포인터가 남습니다. 이로 인해 SELECT 시 원래 블록과 이동된 블록 양쪽을 읽어야 하므로 추가 I/O가 발생합니다.\n\nB) 오답 — PCTFREE 값을 크게 설정하면 UPDATE용 예약 공간이 증가하여 행 마이그레이션 발생 빈도가 감소합니다. 반면 공간 낭비가 증가하므로 공간 효율은 저하됩니다. 설명의 인과관계가 반대입니다.\n\nD) 오답 — ASSM(Automatic Segment Space Management) 환경에서는 비트맵으로 블록의 가용 공간을 관리하기 때문에 PCTUSED 파라미터는 무시됩니다. PCTFREE만 유효하게 기능합니다.\n\nE) 오답 — 행 마이그레이션이 발생해도 원래 블록에 포인터가 남아 있으므로, 해당 행의 ROWID는 변경되지 않습니다. 따라서 인덱스의 ROWID 참조는 유효하게 유지되며, 인덱스 재구축은 필요하지 않습니다.\n\n핵심 개념: PCTFREE(기본 10%)는 UPDATE에 대비한 블록 내 예약 공간이며, 적절한 설정으로 행 마이그레이션을 방지합니다. 행 마이그레이션 시 ROWID는 변경되지 않지만, 원래 블록의 포인터를 통해 접근하므로 추가 I/O가 발생합니다."
+    "explanation": "정답: A, C\nA) 정답 — 일시 테이블스페이스는 DATAFILE이 아닌 TEMPFILE 키워드를 사용하여 생성합니다. 정렬(Sort), 해시 조인(Hash Join), Global Temporary Table 데이터 등 세션 중 발생하는 임시 데이터를 저장하는 데 사용됩니다.\n\nC) 정답 — 임시 세그먼트는 해당 세션이 종료되면 자동으로 해제됩니다. 따라서 세션 종료 후 해당 공간은 다른 세션이 재사용할 수 있게 됩니다. 이러한 자동 정리 메커니즘이 임시 테이블스페이스의 핵심 특성입니다.\n\nB) 오답 — TEMPFILE은 RMAN의 기본 백업 대상에 포함되지 않습니다. 임시 테이블스페이스는 영구 데이터를 저장하지 않으므로 백업이 불필요하며, 복구 시 TEMPFILE은 자동으로 재생성됩니다.\n\nD) 오답 — SYSTEM 테이블스페이스를 임시 테이블스페이스로 사용하는 것은 Oracle의 권장 사항이 아닙니다. SYSTEM 테이블스페이스는 데이터 딕셔너리 전용이며, 별도의 TEMPORARY 유형 테이블스페이스를 기본 임시 테이블스페이스로 설정하는 것이 권장됩니다.\n\nE) 오답 — 일시 테이블스페이스에 파일을 추가할 때는 ADD DATAFILE이 아니라 ALTER TABLESPACE ... ADD TEMPFILE 명령을 사용합니다. TEMPFILE과 DATAFILE은 관리 명령이 구분되어 있습니다.\n\n핵심 개념: 임시 테이블스페이스(TEMP)는 TEMPFILE을 사용하여 정렬, 해시 조인 등의 임시 데이터를 저장하며, 세션 종료 시 임시 세그먼트가 자동 해제됩니다. TEMPFILE은 RMAN 기본 백업 대상이 아니며, 파일 추가 시 ADD TEMPFILE 명령을 사용합니다."
   },
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_014",
-    "title": "Oracle AI Databaseの再開可能領域割当て(Resumable Space Allocation)に関して正しい内容を述べているものを選択してください。",
+    "title": "Oracle AI Databaseの表領域のオフライン/オンライン操作について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) RESUMABLE_TIMEOUTパラメータの値を0より大きく設定すると、すべてのセッションでデフォルトで再開可能領域割当てが有効化される。",
-      "B) 再開可能領域割当てが有効な状態で領域不足が発生した場合、操作は一時停止されるが、TIMEOUTに達しなくてもDBAが手動で再開しなければ自動再開はされない。",
-      "C) ALTER SESSION ENABLE RESUMABLE文を使用してセッション・レベルで有効化する場合、デフォルトのTIMEOUTは600秒(10分)である。",
-      "D) 再開可能領域割当てはDML操作のみに適用され、CREATE TABLE AS SELECT(CTAS)やCREATE INDEXなどのDDL操作には適用されない。"
+      "A) SYSTEM表領域はデータベースの運用中にALTER TABLESPACE ... OFFLINE文でオフラインに設定することが可能である。",
+      "B) ALTER TABLESPACE ... OFFLINE NORMALを実行すると、該当表領域のすべてのデータ・ファイルに対してチェックポイントが実行され、リカバリなしでオンラインに戻すことができる。",
+      "C) ALTER TABLESPACE ... OFFLINE IMMEDIATEを実行するとチェックポイントは実行されないため、オンラインに戻す際にメディア・リカバリが必要となる。",
+      "D) 表領域をREAD ONLY(読取り専用)に設定すると、データの参照(SELECT)だけでなく、DML操作(INSERT、UPDATE、DELETE)も引き続き実行できる。",
+      "E) ALTER TABLESPACE ... OFFLINE TEMPORARYは、オフライン中のデータ・ファイルに対してのみチェックポイントをスキップする方式であり、NOMALと動作は完全に同じである。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — RESUMABLE_TIMEOUT 파라미터의 값을 0보다 크게 설정하면, 모든 세션에서 기본적으로 재개 가능 영역 할당이 활성화됩니다. 값이 0(기본값)이면 시스템 레벨에서 비활성화 상태이며, 세션 레벨에서 ALTER SESSION ENABLE RESUMABLE로 개별 활성화가 가능합니다.\n\nB) 오답 — 재개 가능 영역 할당이 활성화된 상태에서 영역 부족이 발생하면, 작업은 일시 중지(Suspend) 상태가 됩니다. 이때 DBA가 수동으로 재개할 필요 없이, Oracle이 내부적으로 주기적으로 공간 확보 여부를 폴링하여 공간이 확보되면 자동으로 재개(Resume)됩니다. TIMEOUT 내에 공간이 확보되지 않으면 ORA-30032 오류가 발생합니다.\n\nC) 오답 — ALTER SESSION ENABLE RESUMABLE 문의 기본 TIMEOUT은 600초(10분)가 아닌 3600초(1시간)입니다. TIMEOUT 절을 사용하여 원하는 값을 지정할 수 있습니다.\n\nD) 오답 — 재개 가능 영역 할당은 DML 작업뿐만 아니라, CREATE TABLE AS SELECT(CTAS), CREATE INDEX 등의 DDL 작업, Data Pump Import(impdp), 임시 세그먼트를 사용하는 SELECT(ORDER BY, GROUP BY 등)에도 적용됩니다.\n\n핵심 개념: 재개 가능 영역 할당(Resumable Space Allocation)은 공간 부족 시 작업을 일시 중지하고, DBA가 공간을 확보하면 자동으로 재개하는 메커니즘으로, RESUMABLE_TIMEOUT 파라미터(0보다 큰 값) 또는 ALTER SESSION ENABLE RESUMABLE(기본 3600초)로 활성화합니다."
+    "answer": ["B", "C"],
+    "explanation": "정답: B, C\nB) 정답 — ALTER TABLESPACE ... OFFLINE NORMAL은 해당 테이블스페이스의 모든 데이터 파일에 대해 체크포인트를 수행한 후 오프라인으로 전환합니다. 체크포인트가 완료되었으므로 다시 온라인으로 전환할 때 리커버리(Recovery)가 필요하지 않습니다. 이것이 기본 오프라인 모드입니다.\n\nC) 정답 — ALTER TABLESPACE ... OFFLINE IMMEDIATE는 체크포인트를 수행하지 않고 즉시 오프라인으로 전환합니다. 따라서 더티 버퍼(Dirty Buffer)가 디스크에 기록되지 않은 상태이므로, 다시 온라인으로 전환할 때 미디어 리커버리(Media Recovery)가 필요합니다. 긴급 상황에서 사용됩니다.\n\nA) 오답 — SYSTEM 테이블스페이스는 데이터 딕셔너리의 물리적 저장소로, 항상 ONLINE 상태를 유지해야 합니다. SYSTEM 테이블스페이스를 오프라인으로 전환하면 데이터베이스가 정상적으로 동작할 수 없으므로 오프라인 전환이 허용되지 않습니다.\n\nD) 오답 — 테이블스페이스를 READ ONLY로 설정하면 데이터 참조(SELECT)는 가능하지만, DML(INSERT, UPDATE, DELETE) 작업은 허용되지 않습니다. READ ONLY 모드는 데이터 보호 및 아카이브 목적으로 사용됩니다.\n\nE) 오답 — ALTER TABLESPACE ... OFFLINE TEMPORARY는 NORMAL과 IMMEDIATE의 중간 방식입니다. 온라인 상태의 데이터 파일에 대해서는 체크포인트를 수행하지만, 이미 오프라인인 데이터 파일에 대해서는 체크포인트를 수행하지 않습니다. NORMAL과 완전히 동일한 것은 아닙니다.\n\n핵심 개념: 테이블스페이스 오프라인에는 NORMAL(체크포인트 수행, 리커버리 불필요), TEMPORARY(온라인 파일만 체크포인트), IMMEDIATE(체크포인트 미수행, 리커버리 필요)의 3가지 모드가 있습니다. SYSTEM 테이블스페이스는 오프라인 전환이 불가하며, READ ONLY 모드에서는 SELECT만 허용됩니다."
   },
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_015",
-    "title": "Oracle AI Databaseの遅延セグメント作成(Deferred Segment Creation)に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle Managed Files (OMF)の機能について正しく述べているものを選択してください。",
     "options": [
-      "A) DEFERRED_SEGMENT_CREATIONパラメータのデフォルト値はTRUEであり、テーブル作成時にセグメントの割当ては最初のデータ挿入まで遅延される。",
-      "B) 遅延セグメント状態のテーブル(SEGMENT_CREATED = 'NO')はDBA_SEGMENTSビューに表示されるが、サイズは0バイトとして表示される。",
-      "C) CREATE TABLE文にSEGMENT CREATION IMMEDIATE句を指定すると、DEFERRED_SEGMENT_CREATIONパラメータの設定に関わらず即座にセグメントが割り当てられる。",
-      "D) グローバル一時表(GTT)はDEFERRED_SEGMENT_CREATIONパラメータの設定に従い、最初のINSERTまでセグメント作成が遅延される。",
-      "E) 遅延セグメント状態のテーブルに対してALTER TABLE ... MOVE TABLESPACEを実行すると、移動先テーブルスペースにセグメントが自動的に作成される。"
+      "A) OMFを使用するにはDB_CREATE_FILE_DESTパラメータでファイルの作成先ディレクトリまたはASMディスク・グループを指定する必要がある。",
+      "B) OMF環境で作成されたデータ・ファイルは、表領域の削除時に手動でOSレベルのファイル削除を行う必要がある。",
+      "C) OMFはOracle Managed Files専用の環境であるため、OMF環境ではユーザーが手動でファイル・パスを指定したデータ・ファイルと共存することはできない。",
+      "D) OMF環境ではCREATE TABLESPACE文でファイル・パスを指定せずSIZEのみを指定してデータ・ファイルを自動作成することが可能である。",
+      "E) DB_CREATE_FILE_DESTパラメータはデータベース作成時のみ設定可能であり、運用中に変更することはできない。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — DEFERRED_SEGMENT_CREATION 파라미터의 기본값은 TRUE입니다. 이 설정이 활성화된 상태에서 테이블을 생성하면 데이터 딕셔너리에 메타데이터만 등록되고, 실제 세그먼트(익스텐트, 데이터 블록)는 첫 번째 INSERT가 발생할 때까지 할당이 지연됩니다.\n\nC) 정답 — CREATE TABLE 문에서 SEGMENT CREATION IMMEDIATE 절을 지정하면, 시스템/세션 레벨의 DEFERRED_SEGMENT_CREATION 설정과 관계없이 테이블 생성 시 즉시 세그먼트가 할당됩니다. DDL 구문의 SEGMENT CREATION 절이 최우선으로 적용됩니다.\n\nB) 오답 — 지연 세그먼트 상태(SEGMENT_CREATED = 'NO')의 테이블은 DBA_SEGMENTS 뷰에 나타나지 않습니다. 세그먼트가 아직 할당되지 않았으므로 DBA_EXTENTS에도 정보가 없습니다. DBA_TABLES의 SEGMENT_CREATED 컬럼으로 상태를 확인해야 합니다.\n\nD) 오답 — 글로벌 임시 테이블(GTT)은 DEFERRED_SEGMENT_CREATION 파라미터의 영향을 받지 않습니다. GTT의 세그먼트는 데이터 삽입 시 임시 테이블스페이스에 세션/트랜잭션 단위로 동적 생성되며, 이 동작 자체가 이미 지연 방식이므로 별도의 지연 세그먼트 설정이 불필요합니다.\n\nE) 오답 — 지연 세그먼트 상태(SEGMENT_CREATED = 'NO')의 테이블은 ALTER TABLE ... MOVE TABLESPACE 명령으로 이동할 수 없습니다. 먼저 DBMS_SPACE_ADMIN.MATERIALIZE_DEFERRED_SEGMENTS 등을 사용하여 세그먼트를 강제 할당한 후에야 이동이 가능합니다.\n\n핵심 개념: 지연 세그먼트 생성(DEFERRED_SEGMENT_CREATION=TRUE)은 첫 INSERT까지 세그먼트 할당을 지연하여 디스크 공간을 절약하는 기능입니다. GTT, 클러스터드 테이블, SYS/SYSTEM 소유 테이블에는 적용되지 않으며, DDL의 SEGMENT CREATION 절이 최우선으로 적용됩니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — OMF(Oracle Managed Files)를 사용하려면 DB_CREATE_FILE_DEST 파라미터로 파일 생성 경로(디렉토리 또는 ASM 디스크 그룹)를 지정해야 합니다. 이 파라미터가 설정되면 CREATE TABLESPACE 문에서 파일 경로를 생략할 수 있으며, Oracle이 자동으로 고유한 파일 이름과 경로를 생성합니다.\n\nB) 오답 — OMF 환경에서 생성된 데이터 파일은 테이블스페이스를 삭제(DROP TABLESPACE)할 때 Oracle이 자동으로 OS 레벨의 파일도 함께 삭제합니다. 수동 파일 삭제가 불필요한 것이 OMF의 주요 이점 중 하나입니다.\n\nC) 오답 — OMF 환경에서도 사용자가 수동으로 파일 경로를 지정한 데이터 파일과 OMF가 자동 생성한 데이터 파일이 공존할 수 있습니다. OMF는 파일 경로를 생략했을 때만 자동 생성 기능을 사용하며, 명시적 경로 지정도 허용합니다.\n\nD) 오답에 가깝지만, 이 선택지는 부분적으로 맞는 내용을 포함합니다. 그러나 OMF 환경에서 CREATE TABLESPACE 시 SIZE도 생략 가능한 경우가 있으며(Oracle이 기본 크기를 적용), 핵심은 DB_CREATE_FILE_DEST 설정이 OMF 사용의 전제 조건이라는 점입니다. 보기 A가 OMF의 필수 요건을 더 정확하게 기술하고 있습니다.\n\nE) 오답 — DB_CREATE_FILE_DEST 파라미터는 ALTER SYSTEM SET DB_CREATE_FILE_DEST 명령으로 운영 중에도 동적으로 변경할 수 있습니다. 데이터베이스 생성 시에만 설정 가능한 것이 아니며, 필요에 따라 파일 생성 경로를 변경할 수 있습니다.\n\n핵심 개념: OMF(Oracle Managed Files)는 DB_CREATE_FILE_DEST 파라미터를 설정하면 데이터 파일의 이름과 경로를 Oracle이 자동으로 관리하는 기능입니다. 테이블스페이스 삭제 시 파일도 자동 삭제되며, 사용자 지정 파일과의 공존이 가능합니다. DB_CREATE_FILE_DEST는 운영 중 동적 변경이 가능합니다."
   }
 ]

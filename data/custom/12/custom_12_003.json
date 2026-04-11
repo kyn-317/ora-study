@@ -2,69 +2,67 @@
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_011",
-    "title": "自動化メンテナンス・タスクとして事前に登録されている3つのクライアントについて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "メンテナンス・ウィンドウが閉じた際の自動化メンテナンス・タスクの動作について正しく述べているものを選択してください。",
     "options": [
-      "A) auto optimizer stats collectionは、統計が存在しないか失効した(Stale)テーブルやインデックスの統計をDBMS_STATSを使用して自動的に収集する。",
-      "B) sql tuning advisorは、AWRに記録された高負荷SQLを識別し、DBMS_SQLTUNEを使用してチューニング推奨事項を自動的に生成する。",
-      "C) auto space advisorは、セグメントの領域使用状況を分析し、不要なデータファイルを自動的に削除する。",
-      "D) auto optimizer stats collectionは、すべてのスキーマ・オブジェクトの統計を毎回フルスキャンで収集する。",
-      "E) sql tuning advisorは、V$SQLビューから直接SQL文を取得し、実行計画の比較分析のみを行う。"
+      "A) ウィンドウが閉じた時点で実行中の自動化メンテナンス・タスクには中断要求が送られ、未完了の作業は次のウィンドウで優先順位に従って再スケジュールされる。",
+      "B) ウィンドウが閉じても、実行中の自動化メンテナンス・タスクはすべて完了するまで継続して実行される。",
+      "C) ウィンドウが閉じると、実行中の自動化メンテナンス・タスクは即座に強制終了され、実行途中のデータはすべてロールバックされる。",
+      "D) ウィンドウが閉じた際の自動化メンテナンス・タスクの動作は、DBMS_AUTO_TASK_ADMIN.SET_CLOSE_POLICYプロシージャで制御する。"
     ],
-    "answer": ["A", "B"],
-    "explanation": "정답: A, B\nA) 정답 — auto optimizer stats collection은 통계가 없거나 오래된(Stale) 테이블/인덱스의 통계를 DBMS_STATS를 사용하여 자동으로 수집합니다.\n\nB) 정답 — sql tuning advisor는 AWR에 기록된 고부하 SQL을 식별하고 DBMS_SQLTUNE을 사용하여 SQL Profile 권고 등 튜닝 추천을 자동으로 생성합니다.\n\nC) 오답 — auto space advisor(자동 세그먼트 어드바이저)는 세그먼트의 공간 사용 현황을 분석하고 공간 회수(Shrink/Compress) 권고를 생성하지만, 데이터 파일을 자동으로 삭제하지는 않습니다.\n\nD) 오답 — auto optimizer stats collection은 모든 오브젝트를 매번 풀 스캔하는 것이 아니라, 통계가 없거나 오래된(Stale) 오브젝트만 대상으로 수집합니다.\n\nE) 오답 — sql tuning advisor는 V$SQL이 아닌 AWR의 Top SQL을 분석 대상으로 사용하며, 실행 계획 비교만이 아니라 SQL Profile 생성 및 적용 권고까지 수행합니다.\n\n핵심 개념: Oracle Database에는 3개의 사전 정의 자동 유지관리 태스크가 있습니다. auto optimizer stats collection(DBMS_STATS), sql tuning advisor(DBMS_SQLTUNE), auto space advisor(DBMS_SPACE)가 각각의 실행 엔진을 통해 Maintenance Window 내에서 자동 실행됩니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 메인터넌스 윈도우가 닫히면 실행 중인 자동 유지관리 태스크에 중단 요청(Stop signal)이 전송됩니다. 미완료된 작업은 다음에 열리는 윈도우에서 클라이언트 우선순위(auto optimizer stats collection: HIGH, sql tuning advisor/auto space advisor: MEDIUM)에 따라 재스케줄됩니다.\n\nB) 오답 — 윈도우가 닫힌 후에도 태스크가 완료될 때까지 계속 실행되는 것이 아닙니다. 윈도우가 닫히면 실행 중인 태스크에 중단 요청이 전송되며, 이때 해당 태스크의 JOB_STATUS는 STOPPED로 기록됩니다.\n\nC) 오답 — 윈도우가 닫힐 때 태스크가 강제 종료되고 데이터가 롤백되는 것이 아닙니다. 중단 요청을 통해 태스크가 정상적으로 중지되며, 미완료 작업은 다음 윈도우에서 이어서 처리됩니다.\n\nD) 오답 — DBMS_AUTO_TASK_ADMIN.SET_CLOSE_POLICY라는 프로시저는 존재하지 않습니다. 윈도우 닫힘 시의 동작은 AutoTask 프레임워크가 자동으로 처리하며, DBA가 별도로 정책을 설정할 필요가 없습니다.\n\n핵심 개념: 메인터넌스 윈도우가 닫히면 실행 중인 자동 유지관리 태스크는 중단 요청을 받고 정상적으로 중지됩니다. 미완료 태스크는 다음 윈도우에서 우선순위에 따라 재스케줄되며, DBA_AUTOTASK_CLIENT_HISTORY에서 JOB_STATUS가 STOPPED로 기록되어 윈도우 종료에 의한 중단임을 확인할 수 있습니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_012",
-    "title": "自動SQLチューニング・アドバイザのSQLプロファイル自動適用の制御について正しく述べているものを選択してください。",
+    "title": "複数のメンテナンス・ウィンドウが同時に開こうとした場合の動作について正しく述べているものを選択してください。",
     "options": [
-      "A) SQLプロファイルの自動適用は、DBMS_AUTO_SQLTUNE.SET_AUTO_TUNING_TASK_PARAMETERプロシージャのACCEPT_SQL_PROFILESパラメータで制御する。",
-      "B) SQLプロファイルの自動適用は、DBMS_AUTO_TASK_ADMIN.DISABLEプロシージャのoperation パラメータで直接制御する。",
-      "C) SQLプロファイルの自動適用は、初期化パラメータのみで制御し、PL/SQLパッケージでは制御できない。",
-      "D) SQLプロファイルの自動適用は、sql tuning advisorクライアント自体を無効化しなければ制御できない。"
+      "A) window_priority属性に基づいて優先順位が判定され、HIGH優先順位のウィンドウが現在開いているLOW優先順位のウィンドウを閉じて代わりに開かれる。",
+      "B) 複数のウィンドウが同時に開くことは許可されており、すべてのウィンドウのResource Planが同時に適用される。",
+      "C) 後から開こうとしたウィンドウは優先順位に関係なくすべて破棄され、最初に開いたウィンドウのみが有効となる。",
+      "D) ウィンドウの中重複が検出されると、データベースはORA-27491エラーを発生させて両方のウィンドウを閉じる。"
     ],
     "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — SQL Profile의 자동 적용은 DBMS_AUTO_SQLTUNE.SET_AUTO_TUNING_TASK_PARAMETER 프로시저에서 ACCEPT_SQL_PROFILES 파라미터를 'FALSE'로 설정하여 비활성화할 수 있습니다. 이를 통해 sql tuning advisor 자체는 활성 상태를 유지하면서 SQL Profile 자동 적용만 개별 제어할 수 있습니다.\n\nB) 오답 — DBMS_AUTO_TASK_ADMIN.DISABLE은 AutoTask 클라이언트 레벨의 활성화/비활성화를 담당하며, SQL Profile 자동 적용이라는 세부 기능을 직접 제어하지 않습니다.\n\nC) 오답 — SQL Profile 자동 적용은 초기화 파라미터(AUTO_SQL_TUNING_AUTO_IMPLEMENT)만으로 제어되는 것이 아니라, DBMS_AUTO_SQLTUNE.SET_AUTO_TUNING_TASK_PARAMETER 프로시저를 통해서도 제어할 수 있습니다. PL/SQL 패키지를 사용할 수 없다는 진술은 잘못되었습니다.\n\nD) 오답 — sql tuning advisor 클라이언트를 완전히 비활성화하지 않아도 SQL Profile 자동 적용만 별도로 제어할 수 있습니다. DBMS_AUTO_SQLTUNE 패키지를 통해 독립적으로 관리됩니다.\n\n핵심 개념: SQL Tuning Advisor의 SQL Profile 자동 적용은 DBMS_AUTO_SQLTUNE.SET_AUTO_TUNING_TASK_PARAMETER로 별도 제어됩니다. 이를 통해 튜닝 분석은 계속하면서 SQL Profile 자동 적용만 비활성화하는 세밀한 운영이 가능합니다."
+    "explanation": "정답: A\nA) 정답 — 여러 메인터넌스 윈도우가 동시에 열리려고 할 때, window_priority 속성에 따라 우선순위가 판정됩니다. HIGH 우선순위의 윈도우가 도착하면 현재 열려 있는 LOW 우선순위 윈도우를 닫고 대신 열립니다. 같은 우선순위인 경우에는 먼저 열린 윈도우가 유지됩니다.\n\nB) 오답 — 동시에 여러 윈도우가 열리는 것은 허용되지 않습니다. Oracle Scheduler는 한 번에 하나의 윈도우만 활성화하며, 중첩 시 우선순위 규칙에 따라 처리합니다.\n\nC) 오답 — 후에 열리려는 윈도우가 무조건 파기되는 것이 아닙니다. 후에 도착한 윈도우가 더 높은 우선순위(HIGH)를 가진 경우, 현재 열려 있는 낮은 우선순위 윈도우를 닫고 대신 열립니다.\n\nD) 오답 — 윈도우 중첩이 감지되어도 ORA-27491 에러가 발생하여 양쪽 윈도우를 닫는 것이 아닙니다. Oracle Scheduler가 우선순위 규칙에 따라 하나의 윈도우만 활성화하도록 자동으로 처리합니다.\n\n핵심 개념: 메인터넌스 윈도우의 중첩(Overlap) 시 window_priority 속성(LOW/HIGH)에 따라 처리됩니다. 같은 우선순위이면 먼저 열린 윈도우가 유지되고, 높은 우선순위 윈도우가 도착하면 낮은 우선순위 윈도우를 선점합니다. 높은 우선순위 윈도우가 종료되면 중단된 낮은 우선순위 윈도우가 남은 시간 동안 재개될 수 있습니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_013",
-    "title": "Resource Managerの構成要素と設定手順について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "AutoTaskフレームワーク全体の無効化について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) Resource Planの設定変更はPending Areaという一時作業領域で行い、DBMS_RESOURCE_MANAGER.SUBMIT_PENDING_AREAで変更を適用する。",
-      "B) すべてのResource Planは、必ずOTHER_GROUPSに対するPlan Directiveを含まなければならない。",
-      "C) 1つのデータベース・インスタンスで複数のResource Planを同時にアクティブにすることが可能である。",
-      "D) Plan Directiveの作成にはPending Areaの使用は不要であり、直接的にデータ・ディクショナリに反映される。",
-      "E) Resource PlanではCPUリソースの制御のみが可能であり、I/OやPGAの制御はサポートされていない。"
+      "A) DBMS_AUTO_TASK_ADMIN.DISABLEをパラメータなしで実行すると、AutoTaskフレームワーク全体が無効化され、すべての自動化メンテナンス・タスクの実行が停止される。",
+      "B) AutoTaskフレームワーク全体を無効化するには、3つの事前定義済みタスクをそれぞれ個別にDISABLEする必要がある。",
+      "C) AutoTaskフレームワーク全体を無効化した場合でも、DBMS_AUTO_TASK_ADMIN.ENABLEをパラメータなしで実行することで再度有効化できる。",
+      "D) AutoTaskフレームワーク全体の無効化はALTER SYSTEM SET AUTO_TASK_DISABLED = TRUEで行う。",
+      "E) AutoTaskフレームワーク全体を無効化すると、メンテナンス・ウィンドウ自体も自動的に削除される。"
     ],
-    "answer": ["A", "B"],
-    "explanation": "정답: A, B\nA) 정답 — Resource Plan의 모든 설정 변경은 Pending Area라는 임시 작업 영역에서 수행됩니다. CREATE_PENDING_AREA로 시작하여, 설정을 정의한 후 VALIDATE_PENDING_AREA로 검증하고 SUBMIT_PENDING_AREA로 변경 사항을 적용합니다.\n\nB) 정답 — 모든 Resource Plan은 반드시 OTHER_GROUPS에 대한 Plan Directive를 포함해야 합니다. OTHER_GROUPS는 매핑 규칙에 의해 분류되지 않은 모든 세션의 기본 그룹입니다.\n\nC) 오답 — 하나의 데이터베이스 인스턴스에서 동시에 하나의 Resource Plan만 활성화될 수 있습니다. RESOURCE_MANAGER_PLAN 파라미터로 활성 플랜을 설정합니다.\n\nD) 오답 — Plan Directive의 생성도 Pending Area 내에서 수행해야 합니다. CREATE_PENDING_AREA → CREATE_PLAN_DIRECTIVE → SUBMIT_PENDING_AREA의 절차를 따릅니다.\n\nE) 오답 — Resource Manager는 CPU뿐만 아니라 I/O(MAX_IOPS, MAX_MBPS), PGA(SESSION_PGA_LIMIT), 병렬 처리(PARALLEL_DEGREE_LIMIT_P1), 활성 세션 수(ACTIVE_SESS_POOL_P1) 등 다양한 리소스를 제어할 수 있습니다.\n\n핵심 개념: Resource Manager의 설정 변경은 Pending Area 메커니즘을 통해 트랜잭션처럼 관리됩니다. 모든 Resource Plan에는 OTHER_GROUPS에 대한 Plan Directive가 필수이며, 인스턴스당 하나의 플랜만 활성화 가능합니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — DBMS_AUTO_TASK_ADMIN.DISABLE을 파라미터 없이 실행하면 AutoTask 프레임워크 전체가 비활성화되어, 3개의 사전 정의된 자동 유지관리 태스크(auto optimizer stats collection, sql tuning advisor, auto space advisor)의 실행이 모두 중단됩니다.\n\nC) 정답 — AutoTask 프레임워크 전체를 비활성화한 후에도, DBMS_AUTO_TASK_ADMIN.ENABLE을 파라미터 없이 실행하면 데이터베이스 재시작 없이 프레임워크 전체를 다시 활성화할 수 있습니다.\n\nB) 오답 — AutoTask 프레임워크 전체를 비활성화하기 위해 3개 태스크를 각각 개별적으로 DISABLE할 필요가 없습니다. DBMS_AUTO_TASK_ADMIN.DISABLE을 파라미터 없이 한 번 실행하면 전체가 비활성화됩니다.\n\nD) 오답 — AUTO_TASK_DISABLED라는 초기화 파라미터는 존재하지 않습니다. AutoTask 전체 비활성화는 DBMS_AUTO_TASK_ADMIN.DISABLE 프로시저를 사용합니다.\n\nE) 오답 — AutoTask 프레임워크 전체를 비활성화해도 메인터넌스 윈도우 자체는 삭제되지 않습니다. 윈도우는 Oracle Scheduler의 객체로 독립적으로 존재하며, AutoTask가 비활성화되더라도 윈도우의 Resource Plan 전환 등 다른 기능은 계속 동작합니다.\n\n핵심 개념: DBMS_AUTO_TASK_ADMIN 패키지는 파라미터 없이 DISABLE/ENABLE을 실행하면 AutoTask 프레임워크 전체를 제어하고, client_name 등의 파라미터를 지정하면 개별 태스크를 제어합니다. 프레임워크 전체 비활성화는 메인터넌스 윈도우의 존재나 동작에 영향을 주지 않으며, 자동 유지관리 태스크의 실행만 중단합니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_014",
-    "title": "メンテナンス・ウィンドウのrepeat_interval属性で使用されるScheduler Calendar Expressionについて正しく述べているものを選択してください。",
+    "title": "各メンテナンス・ウィンドウにおける自動化メンテナンス・タスクのクライアント活性化状態を確認する方法について正しく述べているものを選択してください。",
     "options": [
-      "A) repeat_intervalにはFREQ、BYDAY、BYHOUR、BYMINUTEなどのキーワードを使用してスケジュールを定義する。",
-      "B) repeat_intervalにはUNIX crontabと同じ形式(例: 0 22 * * 1-5)を使用してスケジュールを定義する。",
-      "C) repeat_intervalはメンテナンス・ウィンドウ作成時にのみ設定可能であり、作成後に変更することはできない。",
-      "D) repeat_intervalの設定にはBYDAYの代わりに数値(1=月曜日、7=日曜日)を使用する必要がある。"
+      "A) DBA_AUTOTASK_WINDOW_CLIENTSビューを使用すると、各ウィンドウで各クライアントが有効か無効かの活性化状態を確認できる。",
+      "B) V$AUTOTASK_WINDOW_STATUSビューを使用して、各ウィンドウのクライアント活性化状態をリアルタイムで確認できる。",
+      "C) 各ウィンドウでのクライアント活性化状態はDBA_AUTOTASK_CLIENTビューのみで確認でき、ウィンドウ単位の情報は提供されない。",
+      "D) ウィンドウ単位のクライアント活性化状態を確認するには、DBMS_AUTO_TASK_ADMIN.GET_STATUSファンクションを使用する。"
     ],
     "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — Maintenance Window의 repeat_interval은 Scheduler Calendar Expression 문법을 사용하며, FREQ(반복 빈도), BYDAY(실행 요일), BYHOUR(실행 시간), BYMINUTE(실행 분), BYSECOND(실행 초) 등의 키워드로 스케줄을 정의합니다. 예: FREQ=WEEKLY;BYDAY=MON;BYHOUR=22;BYMINUTE=0;BYSECOND=0\n\nB) 오답 — Oracle Scheduler는 UNIX crontab 형식이 아닌 독자적인 Calendar Expression 문법을 사용합니다. crontab의 \"0 22 * * 1-5\"와 같은 형식은 지원되지 않습니다.\n\nC) 오답 — repeat_interval은 DBMS_SCHEDULER.SET_ATTRIBUTE를 사용하여 윈도우 생성 후에도 변경할 수 있습니다.\n\nD) 오답 — BYDAY에는 숫자가 아닌 영문 약어(MON, TUE, WED, THU, FRI, SAT, SUN)를 사용합니다.\n\n핵심 개념: Maintenance Window의 repeat_interval은 Scheduler Calendar Expression 문법(FREQ, BYDAY, BYHOUR 등)을 사용하여 반복 스케줄을 정의합니다. 이 문법은 UNIX crontab과 다르며, DBMS_SCHEDULER.SET_ATTRIBUTE로 언제든 변경 가능합니다."
+    "explanation": "정답: A\nA) 정답 — DBA_AUTOTASK_WINDOW_CLIENTS 뷰를 사용하면 각 메인터넌스 윈도우별로 각 클라이언트(auto optimizer stats collection, sql tuning advisor, auto space advisor)의 활성화/비활성화 상태를 확인할 수 있습니다. 이를 통해 특정 윈도우에서 어떤 태스크가 실행되도록 설정되어 있는지 파악할 수 있습니다.\n\nB) 오답 — V$AUTOTASK_WINDOW_STATUS라는 동적 성능 뷰는 존재하지 않습니다. AutoTask 관련 정보는 V$ 뷰가 아닌 DBA_AUTOTASK_* 계열의 데이터 딕셔너리 뷰로 확인합니다.\n\nC) 오답 — DBA_AUTOTASK_CLIENT 뷰는 클라이언트의 전체 상태 정보를 제공하지만, 윈도우 단위의 활성화 상태는 DBA_AUTOTASK_WINDOW_CLIENTS 뷰에서 별도로 확인할 수 있습니다.\n\nD) 오답 — DBMS_AUTO_TASK_ADMIN.GET_STATUS라는 함수는 존재하지 않습니다. 윈도우별 클라이언트 활성화 상태는 DBA_AUTOTASK_WINDOW_CLIENTS 뷰를 조회하여 확인합니다.\n\n핵심 개념: AutoTask 프레임워크의 모니터링에는 여러 데이터 딕셔너리 뷰가 사용됩니다. DBA_AUTOTASK_CLIENT는 클라이언트 등록 정보, DBA_AUTOTASK_WINDOW_CLIENTS는 윈도우별 클라이언트 활성화 상태, DBA_AUTOTASK_CLIENT_HISTORY는 실행 이력, DBA_AUTOTASK_OPERATION은 세부 작업 목록을 제공합니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_015",
-    "title": "Resource ManagerのConsumer Groupとセッション割り当てについて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "DEFAULT_MAINTENANCE_PLANのリソース割当て構造について正しく述べているものを選択してください。",
     "options": [
-      "A) セッションが接続するとマッピング・ルールの属性(ORACLE_USER、SERVICE_NAME、CLIENT_PROGRAMなど)に基づいてConsumer Groupが自動的に決定される。",
-      "B) MAINTENANCE_CONSUMER_GROUPは自動メンテナンス・タスクが使用するために事前定義されたConsumer Groupである。",
-      "C) マッピング・ルールに一致しないセッションはエラーとなり接続が拒否される。",
-      "D) Consumer Groupの割り当ては接続時に固定され、セッション中に別のConsumer Groupに変更することはできない。",
-      "E) セッションのConsumer Groupを変更するにはDBMS_RESOURCE_MANAGER.CREATE_PENDING_AREAを使用してPending Area内で行う必要がある。"
+      "A) DEFAULT_MAINTENANCE_PLANでは、MAINTENANCE_CONSUMER_GROUPに自動化メンテナンス・タスクのためのリソースが割り当てられ、SYS_GROUPには最も高いリソース優先度が設定されている。",
+      "B) DEFAULT_MAINTENANCE_PLANでは、すべてのコンシューマ・グループに均等にリソースが配分され、自動化メンテナンス・タスクに特別な優先度は設定されていない。",
+      "C) DEFAULT_MAINTENANCE_PLANでは、MAINTENANCE_CONSUMER_GROUPに最も高いリソース優先度が設定されており、SYS_GROUPとOTHER_GROUPSには残りのリソースのみが配分される。",
+      "D) DEFAULT_MAINTENANCE_PLANはDBAが手動で作成する必要があるプランであり、データベース作成時には存在しない。"
     ],
-    "answer": ["A", "B"],
-    "explanation": "정답: A, B\nA) 정답 — 세션이 접속하면 매핑 규칙의 속성(ORACLE_USER, SERVICE_NAME, CLIENT_PROGRAM, CLIENT_MACHINE 등)과 우선순위에 따라 Consumer Group이 자동으로 결정됩니다.\n\nB) 정답 — MAINTENANCE_CONSUMER_GROUP은 자동 유지관리 태스크가 사용하도록 사전 정의된 Consumer Group입니다. DEFAULT_MAINTENANCE_PLAN에서 이 그룹에 유지관리 작업을 위한 리소스가 할당됩니다.\n\nC) 오답 — 매핑 규칙에 일치하지 않는 세션은 접속이 거부되는 것이 아니라 DEFAULT_CONSUMER_GROUP에 자동 할당됩니다.\n\nD) 오답 — Consumer Group은 접속 시에만 결정되는 것이 아닙니다. SWITCH_TIME 조건에 의한 자동 전환이나 DBMS_RESOURCE_MANAGER.SWITCH_CONSUMER_GROUP_FOR_SESS를 통한 수동 전환으로 세션 중에도 변경 가능합니다.\n\nE) 오답 — 세션의 Consumer Group 전환은 Pending Area를 사용하지 않습니다. SWITCH_TIME 조건에 의한 자동 전환이나 DBMS_RESOURCE_MANAGER.SWITCH_CONSUMER_GROUP_FOR_SESS를 통한 수동 전환으로 즉시 변경 가능합니다. Pending Area는 Resource Plan이나 Plan Directive의 정의/변경 시에만 사용됩니다.\n\n핵심 개념: Consumer Group은 동일한 리소스 정책을 적용받는 세션들의 논리적 그룹입니다. 매핑 규칙으로 초기 그룹이 결정되며, SWITCH_TIME에 의한 자동 전환이나 수동 전환으로 세션 중에도 변경 가능합니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — DEFAULT_MAINTENANCE_PLAN은 다중 레벨 CPU 배분(MGMT_P1)에서 SYS_GROUP에 가장 높은 리소스 우선도를 부여하고, MAINTENANCE_CONSUMER_GROUP에 자동 유지관리 태스크를 위한 중간 수준의 리소스를 할당하며, OTHER_GROUPS에 나머지 리소스를 배분하는 구조입니다.\n\nB) 오답 — DEFAULT_MAINTENANCE_PLAN은 모든 소비자 그룹에 균등하게 리소스를 배분하지 않습니다. SYS_GROUP, MAINTENANCE_CONSUMER_GROUP, OTHER_GROUPS에 각각 다른 비율로 리소스를 할당하여, 유지관리 태스크에 적절한 리소스를 보장합니다.\n\nC) 오답 — DEFAULT_MAINTENANCE_PLAN에서 최고 리소스 우선도가 부여되는 것은 MAINTENANCE_CONSUMER_GROUP이 아니라 SYS_GROUP입니다. MGMT_P1 레벨에서 SYS_GROUP이 최고 우선순위, MAINTENANCE_CONSUMER_GROUP이 중간 수준, OTHER_GROUPS가 나머지를 할당받는 구조입니다.\n\nD) 오답 — DEFAULT_MAINTENANCE_PLAN은 DBA가 수동으로 생성하는 것이 아니라, 데이터베이스 생성 시 사전 정의된 Resource Plan으로 자동 생성됩니다. 모든 메인터넌스 윈도우의 기본 resource_plan 속성으로 설정되어 있습니다.\n\n핵심 개념: DEFAULT_MAINTENANCE_PLAN은 데이터베이스 생성 시 자동으로 생성되는 사전 정의된 Resource Plan입니다. MGMT_P1 레벨에서 SYS_GROUP에 최고 우선순위, MAINTENANCE_CONSUMER_GROUP에 중간 수준의 유지관리 태스크용 리소스, OTHER_GROUPS에 나머지를 할당합니다. 이 플랜은 메인터넌스 윈도우가 열릴 때 자동으로 활성화되어 유지관리 작업에 적절한 리소스가 보장됩니다."
   }
 ]

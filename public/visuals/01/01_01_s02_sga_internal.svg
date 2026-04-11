@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 595">
   <style>
     text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
     .title { font-size: 18px; font-weight: 700; }
@@ -20,7 +20,7 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">각 구성요소의 역할과 Granule 기반 메모리 할당 구조</text>
 
   <!-- SGA Boundary -->
-  <rect x="30" y="65" width="740" height="490" class="box" fill="rgba(111,107,234,0.05)" stroke="#6F6BEA" stroke-width="2" />
+  <rect x="30" y="65" width="740" height="515" class="box" fill="rgba(111,107,234,0.05)" stroke="#6F6BEA" stroke-width="2" />
   <text x="50" y="88" class="label" fill="#6F6BEA">SGA (System Global Area)</text>
   <text x="680" y="88" text-anchor="end" class="code">SGA_TARGET / SGA_MAX_SIZE</text>
 
@@ -118,10 +118,10 @@
   <text x="460" y="520" class="small">에서 Granule 크기 확인 가능</text>
 
   <!-- Legend -->
-  <rect x="40" y="545" width="12" height="12" rx="2" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1" />
-  <text x="58" y="556" class="small">필수 (Core)</text>
-  <rect x="140" y="545" width="12" height="12" rx="2" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1" />
-  <text x="158" y="556" class="small">선택 (Optional)</text>
-  <rect x="260" y="545" width="12" height="12" rx="2" fill="rgba(255,255,255,0.03)" stroke="#475569" stroke-width="1" />
-  <text x="278" y="556" class="small">고정 (Fixed)</text>
+  <rect x="40" y="560" width="12" height="12" rx="2" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1" />
+  <text x="58" y="571" class="small">필수 (Core)</text>
+  <rect x="140" y="560" width="12" height="12" rx="2" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1" />
+  <text x="158" y="571" class="small">선택 (Optional)</text>
+  <rect x="260" y="560" width="12" height="12" rx="2" fill="rgba(255,255,255,0.03)" stroke="#475569" stroke-width="1" />
+  <text x="278" y="571" class="small">고정 (Fixed)</text>
 </svg>

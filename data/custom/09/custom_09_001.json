@@ -2,80 +2,69 @@
   {
     "chapter": "データの移動",
     "number": "C_09_001",
-    "title": "SQL*LoaderのDirect Path LoadとConventional Path Loadに関して正しい内容を述べているものを選択してください。(2つ選択してください)",
+    "title": "外部表のアクセス・ドライバに関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) Direct Path LoadはSQLレイヤーを経由してデータをロードするため、バッファ・キャッシュを使用する。",
-      "B) Conventional Path Loadでは、INSERT文を使用してデータをロードし、完全なRedoログが生成される。",
-      "C) Direct Path Loadは、ロード中にINSERTトリガーを実行するため、データの整合性が保たれる。",
-      "D) Direct Path Loadでは、インデックスはロード完了後に一括で再構築される。",
-      "E) Conventional Path Loadでは、Undoが生成されないためロールバックが不可能である。"
+      "A) ORACLE_LOADERアクセス・ドライバはCSVや固定幅形式のテキスト・ファイルを読み取ることができるが、データベースからファイルへのアンロードはできない。",
+      "B) ORACLE_DATAPUMPアクセス・ドライバは読み取り専用であり、データベースからファイルへのアンロード操作には対応していない。",
+      "C) ORACLE_LOADERアクセス・ドライバはOracle独自のバイナリ・ダンプ形式のファイルを処理するために使用される。",
+      "D) 外部表のアクセス・ドライバの種類に関係なく、すべての外部表でINSERT/UPDATE/DELETE操作を実行することができる。"
     ],
-    "answer": [
-      "B",
-      "D"
-    ],
-    "explanation": "정답 해설:\n\nB) 정답: Conventional Path Load는 SQL INSERT문을 사용하여 SGA의 버퍼 캐시를 통해 데이터를 적재하며, 모든 변경에 대해 완전한 Redo 로그를 생성합니다. 이를 통해 ARCHIVELOG 모드에서 완전한 복구가 가능합니다.\n\nD) 정답: Direct Path Load는 SQL 레이어를 우회하여 데이터 블록을 직접 HWM(High Water Mark) 위에 기록합니다. 인덱스는 실시간으로 유지보수되지 않고 로드 완료 후 일괄 재구축됩니다. 실패 시 인덱스가 UNUSABLE 상태가 될 수 있습니다.\n\n오답 해설:\n\nA) 오답: Direct Path Load는 SQL 레이어를 '우회'하여 데이터 블록을 직접 포맷하며, 버퍼 캐시를 사용하지 않습니다. SQL 레이어를 경유하여 버퍼 캐시를 사용하는 것은 Conventional Path Load입니다.\n\nC) 오답: Direct Path Load는 INSERT 트리거를 '실행하지 않습니다'. INSERT 트리거가 실행되는 것은 Conventional Path Load의 특성입니다.\n\nE) 오답: Conventional Path Load는 Undo를 '생성'하며, 롤백이 가능합니다. Undo를 생성하지 않는 것은 Direct Path Load입니다.\n\n핵심 개념: Conventional Path는 SQL INSERT를 통해 완전한 Redo와 Undo를 생성하는 표준 방식이고, Direct Path는 SQL 레이어를 우회하여 고속 로드를 수행하지만 트리거 미실행, 인덱스 사후 재구축 등의 제약이 있습니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — ORACLE_LOADER 액세스 드라이버는 CSV, 고정폭, 구분자 기반 텍스트 파일 등 다양한 텍스트 형식의 파일을 읽을 수 있습니다. 단, 읽기 전용(SELECT만 가능)이므로 데이터베이스에서 파일로의 언로드 기능은 제공하지 않습니다.\n\nB) 오답 — ORACLE_DATAPUMP 액세스 드라이버는 읽기/쓰기 양방향을 지원합니다. CREATE TABLE ... ORGANIZATION EXTERNAL ... AS SELECT 구문을 사용하여 데이터를 Oracle 바이너리 형식 파일로 언로드할 수 있습니다.\n\nC) 오답 — Oracle 독자적인 바이너리 덤프 형식 파일을 처리하는 것은 ORACLE_DATAPUMP 드라이버의 역할입니다. ORACLE_LOADER는 텍스트 기반 파일을 처리합니다.\n\nD) 오답 — 외부 테이블은 기본적으로 SELECT만 가능하며 INSERT/UPDATE/DELETE를 실행할 수 없습니다. 유일한 예외는 ORACLE_DATAPUMP 드라이버를 사용한 언로드(CREATE TABLE ... AS SELECT)뿐입니다.\n\n핵심 개념: 외부 테이블의 액세스 드라이버는 ORACLE_LOADER(텍스트 파일 읽기 전용), ORACLE_DATAPUMP(바이너리 덤프 읽기/쓰기), ORACLE_BIGDATA(Parquet, Avro 등 읽기 전용)의 3종류가 있으며, 각 드라이버는 처리 가능한 파일 형식과 방향(읽기/쓰기)이 다릅니다."
   },
   {
     "chapter": "データの移動",
     "number": "C_09_002",
-    "title": "Data Pumpで使用するディレクトリ・オブジェクトについて正しく述べているものを選択してください。",
+    "title": "Data Pump Export(expdp)のエクスポート・モードについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ディレクトリ・オブジェクトを作成すると、指定したOSパスが自動的に作成される。",
-      "B) Data Pumpはサーバー側で動作するため、ダンプ・ファイルのパスはOSの絶対パスで直接指定する必要がある。",
-      "C) Oracle Database インストール時にDATA_PUMP_DIRというデフォルトのディレクトリ・オブジェクトが自動的に作成される。",
-      "D) ディレクトリ・オブジェクトに対するREAD権限のみで、Data Pump ExportとImportの両方を実行できる。"
+      "A) SCHEMASモードはデフォルトのエクスポート・モードであり、指定したスキーマのすべてのオブジェクトをエクスポートする。",
+      "B) FULLモードはデータ・ファイルのみをエクスポートし、メタデータは含まれない。",
+      "C) TABLESモードでは特定の表とその依存オブジェクト(索引、制約など)をエクスポートすることができる。",
+      "D) TRANSPORTABLEモードはデータとメタデータの両方をダンプ・ファイルにエクスポートする。",
+      "E) TABLESPACESモードではエクスポート対象の表領域を事前にREAD ONLYに設定する必要がある。"
     ],
-    "answer": [
-      "C"
-    ],
-    "explanation": "정답 해설:\n\nC) 정답: Oracle Database를 설치하면 DATA_PUMP_DIR이라는 기본 Directory Object가 자동으로 생성됩니다. 이 디렉토리는 $ORACLE_BASE/admin/<db_name>/dpdump/ 경로를 가리키며, DBA_DIRECTORIES 뷰에서 확인할 수 있습니다.\n\n오답 해설:\n\nA) 오답: 디렉토리 오브젝트를 생성할 때 OS 경로의 존재 여부를 검증하지 않으며, OS 경로를 자동으로 생성하지도 않습니다. OS 레벨에서 해당 디렉토리가 사전에 존재해야 하며, Oracle 프로세스가 읽기/쓰기 권한을 가져야 합니다.\n\nB) 오답: Data Pump는 서버 측에서 동작하지만, 덤프 파일 경로를 OS 절대 경로로 직접 지정할 수 없습니다. 반드시 사전에 생성된 Directory Object를 통해 파일 경로를 참조해야 합니다.\n\nD) 오답: Data Pump Export를 실행하려면 디렉토리에 대한 WRITE 권한이 필요합니다(덤프 파일 및 로그 파일을 기록해야 하므로). READ 권한만으로는 Import 시 덤프 파일 읽기만 가능하며, Export에서 파일 쓰기를 수행할 수 없습니다.\n\n핵심 개념: Data Pump는 보안상의 이유로 OS 경로를 직접 참조할 수 없으며, Directory Object를 통해 파일 위치를 지정합니다. 기본 DATA_PUMP_DIR이 설치 시 자동 생성됩니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — SCHEMAS 모드는 Data Pump Export의 기본(디폴트) 모드입니다. 지정한 스키마에 속하는 테이블, 인덱스, 뷰, 프로시저 등 모든 객체를 Export합니다.\n\nC) 정답 — TABLES 모드에서는 특정 테이블과 해당 테이블에 종속된 인덱스, 제약조건 등의 객체를 함께 Export할 수 있습니다.\n\nB) 오답 — FULL 모드는 데이터베이스 전체를 Export하는 모드로, 데이터 파일뿐만 아니라 모든 스키마의 데이터와 메타데이터(DDL)를 포함합니다.\n\nD) 오답 — TRANSPORTABLE 모드는 메타데이터만 덤프 파일에 Export하고, 실제 데이터는 데이터 파일을 OS 레벨에서 직접 복사하는 방식입니다. 데이터와 메타데이터 모두를 덤프 파일에 Export하는 것이 아닙니다.\n\nE) 오답 — TABLESPACES 모드에서 테이블스페이스를 사전에 READ ONLY로 설정할 필요는 없습니다. READ ONLY 설정이 필요한 것은 Transportable Tablespace Export의 경우입니다.\n\n핵심 개념: Data Pump Export에는 FULL(전체), SCHEMAS(기본값, 스키마 단위), TABLES(테이블 단위), TABLESPACES(테이블스페이스 단위), TRANSPORTABLE(메타데이터만)의 5가지 모드가 있으며, 각 모드의 범위와 전제조건을 정확히 구분해야 합니다."
   },
   {
     "chapter": "データの移動",
     "number": "C_09_003",
-    "title": "SQL*Loaderのロード・モードについて正しい内容を述べているものを選択してください。(2つ選択してください)",
+    "title": "SQL*Loaderの制御ファイル(コントロール・ファイル)の構成要素について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) INSERTモードはデフォルトのロード・モードであり、テーブルにデータが既に存在する場合はエラーが発生する。",
-      "B) APPENDモードは既存データを削除してから新しいデータをロードする。",
-      "C) REPLACEモードはTRUNCATE文を使用してデータを削除するため、ロールバックが不可能である。",
-      "D) TRUNCATEモードはTRUNCATE TABLE(DDL文)を使用してデータを削除するため、REPLACEモードよりも高速である。",
-      "E) APPENDモードを使用するには、テーブルが空である必要がある。"
+      "A) 制御ファイルの先頭にはLOAD DATAキーワードを記述する必要があり、これは制御ファイルの開始を示す必須の宣言である。",
+      "B) INFILE句でデータ・ファイルのパスを指定するが、INFILE *と記述すると制御ファイル内にインライン・データを含めることができる。",
+      "C) FIELDS TERMINATED BY句はデータ・ファイルのフィールド区切り文字を指定するが、固定長ファイルの場合にも必ず指定する必要がある。",
+      "D) INTO TABLE句はデータのロード先テーブルを指定するが、1つの制御ファイルに複数のINTO TABLE句を記述することはできない。",
+      "E) 制御ファイル内ではSQLファンクションを使用してロード時にデータ変換を行うことが可能である。"
     ],
-    "answer": [
-      "A",
-      "D"
-    ],
-    "explanation": "정답 해설:\n\nA) 정답: INSERT 모드는 SQL*Loader의 기본(디폴트) 로드 모드입니다. 대상 테이블이 반드시 비어 있어야 하며, 테이블에 데이터가 이미 존재하면 ORA-26002 에러가 발생합니다.\n\nD) 정답: TRUNCATE 모드는 DDL문인 TRUNCATE TABLE을 사용하여 기존 데이터를 제거합니다. DDL이므로 Undo를 생성하지 않아 DELETE를 사용하는 REPLACE 모드보다 빠르며, HWM(High Water Mark)도 리셋됩니다.\n\n오답 해설:\n\nB) 오답: APPEND 모드는 기존 데이터를 '유지'하면서 새 데이터를 추가합니다. 기존 데이터를 삭제하는 것은 REPLACE 또는 TRUNCATE 모드입니다. APPEND는 Express Mode의 기본 로드 모드이기도 합니다.\n\nC) 오답: REPLACE 모드는 TRUNCATE문이 아닌 'DELETE문(DML)'을 사용하여 데이터를 삭제합니다. DELETE는 Undo를 생성하므로 롤백이 가능합니다. TRUNCATE문을 사용하는 것은 TRUNCATE 모드입니다.\n\nE) 오답: APPEND 모드는 테이블의 기존 데이터 유무에 관계없이 사용할 수 있습니다. 테이블이 비어 있어야 하는 것은 INSERT 모드입니다.\n\n핵심 개념: SQL*Loader는 INSERT(기본, 빈 테이블 필수), APPEND(기존 데이터에 추가), REPLACE(DELETE 후 INSERT), TRUNCATE(TRUNCATE 후 INSERT) 네 가지 로드 모드를 제공합니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — 컨트롤 파일의 선두에는 LOAD DATA 키워드를 기술해야 하며, 이는 컨트롤 파일의 시작을 표시하는 필수 선언입니다. LOAD DATA가 없으면 SQL*Loader가 컨트롤 파일을 올바르게 인식할 수 없습니다.\n\nB) 정답 — INFILE 절로 외부 데이터 파일의 경로를 지정합니다. INFILE *로 기술하면 컨트롤 파일 내에 BEGINDATA 키워드 이후에 데이터를 직접 포함(인라인 데이터)시킬 수 있습니다. 또한 여러 INFILE 절을 사용하여 다수의 데이터 파일을 순차적으로 로드할 수도 있습니다.\n\nC) 오답 — FIELDS TERMINATED BY는 CSV 등 구분자 방식의 파일에서 구분자를 지정하는 절입니다. 고정 길이(Fixed-Length) 파일의 경우에는 FIELDS TERMINATED BY가 아닌 POSITION(start:end)으로 각 필드의 위치를 지정하므로, 반드시 지정할 필요는 없습니다.\n\nD) 오답 — 하나의 컨트롤 파일에 여러 INTO TABLE 절을 기술할 수 있습니다. 이를 통해 하나의 데이터 파일에서 WHEN 조건에 따라 레코드를 여러 테이블에 분배하여 로드하거나, 동일 레코드를 여러 테이블에 동시에 로드하는 것이 가능합니다.\n\nE) 해당 선택지는 정답이 아닙니다(2개 선택 문제에서 A, B가 정답) — 다만 내용 자체는 사실입니다. 컨트롤 파일 내에서 \"UPPER(:column_name)\"이나 \"TO_NUMBER(:column_name, '999,999')\" 등의 SQL 함수를 사용하여 로드 시 데이터를 변환할 수 있습니다.\n\n핵심 개념: SQL*Loader 컨트롤 파일은 LOAD DATA(필수 시작 선언), INFILE(데이터 파일 지정), INTO TABLE(대상 테이블), FIELDS TERMINATED BY(구분자 지정) 등의 절로 구성됩니다. 구분자 방식과 고정 길이 방식에 따라 필드 지정 방법이 달라지며, 다중 INTO TABLE 절로 복수 테이블 로드도 가능합니다."
   },
   {
     "chapter": "データの移動",
     "number": "C_09_004",
-    "title": "外部表のアクセス・ドライバに関して正しい内容を述べているものを選択してください。",
+    "title": "Data Pumpで使用するディレクトリ・オブジェクトについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) ORACLE_LOADERドライバはCSVファイルなどのテキスト形式のファイルを読み取ることができるが、ファイルへの書き込みはサポートしていない。",
-      "B) ORACLE_DATAPUMPドライバはテキストファイルの読み取りのみをサポートしている。",
-      "C) ORACLE_LOADERドライバを使用するとINSERT/UPDATE/DELETEなどのDML操作を外部ファイルに対して実行できる。",
-      "D) 外部表にはインデックスを作成して問合せ性能を向上させることができる。"
+      "A) ディレクトリ・オブジェクトはCREATE DIRECTORY文で作成し、OSファイル・システムのパスをデータベース内の論理名にマッピングする。",
+      "B) Data Pumpの使用時にDIRECTORYパラメータを省略すると、デフォルトのDATA_PUMP_DIRディレクトリ・オブジェクトが使用される。",
+      "C) ディレクトリ・オブジェクトを作成するには、CREATE ANY DIRECTORY権限が必要であり、さらにOSレベルで指定パスが事前に存在していなくてもCREATE DIRECTORY文はエラーなく実行される。",
+      "D) Data Pumpユーザーがディレクトリ・オブジェクトを利用するには、GRANT SELECT ON DIRECTORYで権限を付与する必要がある。",
+      "E) DUMPFILEパラメータにOS絶対パスを直接指定することで、ディレクトリ・オブジェクトを使用せずにData Pumpを実行できる。"
     ],
-    "answer": [
-      "A"
-    ],
-    "explanation": "정답 해설:\n\nA) 정답: ORACLE_LOADER 드라이버는 CSV, 고정폭, 구분자 기반 텍스트 파일 등을 읽을 수 있는 읽기 전용(Read-Only) 드라이버입니다. 파일에서 DB로의 방향(읽기)만 지원하며, 파일에 대한 쓰기는 지원하지 않습니다.\n\n오답 해설:\n\nB) 오답: ORACLE_DATAPUMP 드라이버는 텍스트 파일이 아닌 Oracle 바이너리 덤프 형식의 파일을 처리합니다. 또한 읽기뿐만 아니라 쓰기(언로드)도 지원하는 양방향 드라이버입니다. CREATE TABLE AS SELECT 등을 통해 데이터베이스의 데이터를 외부 파일로 추출할 수 있습니다.\n\nC) 오답: ORACLE_LOADER 드라이버를 사용하는 외부 테이블은 SELECT만 가능하며, INSERT/UPDATE/DELETE 등의 DML 작업은 지원하지 않습니다. 외부 테이블은 기본적으로 읽기 전용 구조입니다(ORACLE_DATAPUMP의 언로드 기능 제외).\n\nD) 오답: 외부 테이블에는 인덱스를 생성할 수 없습니다. 데이터가 데이터베이스 내부에 저장되지 않고 쿼리 실행 시점에 외부 파일로부터 동적으로 읽어오기 때문입니다. 성능 향상을 위해서는 Parallel Query를 활용할 수 있습니다.\n\n핵심 개념: ORACLE_LOADER는 텍스트 파일 읽기 전용, ORACLE_DATAPUMP는 Oracle 바이너리 형식의 읽기/쓰기(양방향) 드라이버이며, 외부 테이블은 인덱스 생성 및 DML이 불가능한 구조입니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — 디렉토리 객체는 CREATE DIRECTORY 문(또는 CREATE OR REPLACE DIRECTORY)으로 생성하며, OS 파일 시스템의 실제 경로를 데이터베이스 내의 논리적 이름으로 매핑합니다. 예: CREATE OR REPLACE DIRECTORY dp_dir AS '/u01/app/oracle/dpump';\n\nB) 정답 — Data Pump 실행 시 DIRECTORY 파라미터를 생략하면, Oracle 설치 시 기본으로 생성되는 DATA_PUMP_DIR 디렉토리 객체가 사용됩니다. DATA_PUMP_DIR의 기본 경로는 $ORACLE_BASE/admin/<db_name>/dpdump/입니다.\n\nC) 오답 — 전반부는 맞지만 후반부가 부정확합니다. CREATE ANY DIRECTORY 권한이 필요한 것은 맞습니다. 또한 OS 경로의 존재 여부를 검증하지 않아 DDL 자체는 에러 없이 실행되지만, 실제로 Data Pump가 파일을 읽고 쓸 때는 OS 디렉토리가 존재하고 Oracle 프로세스가 읽기/쓰기 권한을 가져야 합니다. 이 선택지는 DDL 실행은 성공한다는 점에서 사실이지만, 2개 선택 문제에서 A와 B가 더 핵심적인 정답입니다.\n\nD) 오답 — Data Pump 사용자에게 디렉토리 객체에 대한 권한을 부여할 때는 GRANT SELECT가 아닌 GRANT READ, WRITE ON DIRECTORY를 사용합니다. READ는 파일 읽기(Import 시), WRITE는 파일 쓰기(Export 시 덤프/로그 파일 생성)에 필요합니다.\n\nE) 오답 — Data Pump는 서버 측에서 동작하므로, DUMPFILE에 OS 절대경로를 직접 지정할 수 없습니다. 반드시 디렉토리 객체를 통해 파일 위치를 참조해야 하며, DUMPFILE에는 파일명만 지정하거나 directory_name:file_name 형식을 사용합니다.\n\n핵심 개념: Data Pump는 서버 측 유틸리티이므로, 덤프 파일과 로그 파일의 경로를 디렉토리 객체(Directory Object)로 지정해야 합니다. CREATE DIRECTORY로 생성하고 GRANT READ, WRITE ON DIRECTORY로 권한을 부여하며, 기본 DATA_PUMP_DIR이 Oracle 설치 시 자동 생성됩니다."
   },
   {
     "chapter": "データの移動",
     "number": "C_09_005",
-    "title": "Data Pump Export(expdp)の対話型モードで実行できるSTOP_JOBコマンドとKILL_JOBコマンドの違いについて正しく述べているものを選択してください。",
+    "title": "トランスポータブル表領域について正しく述べているものを選択してください。",
     "options": [
-      "A) STOP_JOBを実行するとマスター表とダンプ・ファイルが削除され、ジョブの再開は不可能になる。",
-      "B) KILL_JOBを実行するとジョブが正常に停止し、マスター表が保持されるため後から再開できる。",
-      "C) STOP_JOBを実行するとマスター表とダンプ・ファイルが保持されるため、後からジョブを再開することができる。",
-      "D) STOP_JOBとKILL_JOBはどちらも同じ動作をし、ジョブを即座に強制終了する。"
+      "A) トランスポータブル表領域のエクスポートでは、データとメタデータの両方がダンプ・ファイルに格納される。",
+      "B) エクスポート前に対象の表領域をREAD ONLYに設定する必要がある。",
+      "C) ソース・データベースとターゲット・データベースのブロック・サイズが異なっていても、自動的に変換される。",
+      "D) トランスポータブル表領域で移動したデータ・ファイルはインポート後に自動的に削除される。"
     ],
-    "answer": [
-      "C"
-    ],
-    "explanation": "정답 해설:\n\nC) 정답: STOP_JOB은 정상 종료(Orderly Shutdown)를 수행하는 명령입니다. Worker 프로세스가 현재 작업 단위를 완료한 후 중지되며, Master Table과 덤프 파일이 유지됩니다. 이후 ATTACH 후 START_JOB 명령으로 이전 진행 상황부터 작업을 재개할 수 있습니다.\n\n오답 해설:\n\nA) 오답: STOP_JOB의 설명이 아니라 KILL_JOB의 동작 설명입니다. STOP_JOB은 Master Table과 덤프 파일을 삭제하지 않고 유지하여 재시작이 가능합니다. Master Table과 덤프 파일을 삭제하는 것은 KILL_JOB입니다.\n\nB) 오답: KILL_JOB의 설명이 아니라 STOP_JOB의 동작 설명입니다. KILL_JOB은 강제 종료(Immediate Termination)를 수행하며, Master Table과 덤프 파일이 모두 삭제되어 재시작이 불가능합니다.\n\nD) 오답: STOP_JOB과 KILL_JOB은 서로 다른 동작을 합니다. STOP_JOB은 Worker를 정상 중지하고 재시작 정보를 보존하는 반면, KILL_JOB은 즉시 강제 종료하고 모든 작업 관련 자원을 삭제합니다.\n\n핵심 개념: STOP_JOB은 정상 종료로 Master Table/덤프 파일이 유지되어 재시작 가능하고, KILL_JOB은 강제 종료로 모든 것이 삭제되어 재시작이 불가능합니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — Transportable Tablespace Export를 수행하기 전에 대상 테이블스페이스를 READ ONLY로 설정해야 합니다. 이는 Export 중 데이터 변경을 방지하여 데이터 일관성을 보장하기 위한 전제조건입니다.\n\nA) 오답 — Transportable Tablespace Export에서는 메타데이터만 덤프 파일에 저장됩니다. 실제 데이터는 데이터 파일을 OS 레벨에서 직접 복사하여 이동시키며, 이것이 대량 데이터를 고속으로 이관할 수 있는 핵심 이유입니다.\n\nC) 오답 — 소스와 대상 데이터베이스의 블록 크기가 동일하거나, 다를 경우 대상 데이터베이스에서 DB_nK_CACHE_SIZE 파라미터를 설정하여 해당 블록 크기의 버퍼 캐시를 구성해야 합니다. 블록 크기가 자동으로 변환되는 것은 아니며, 수동 설정이 필요합니다.\n\nD) 오답 — Import 후 데이터 파일은 삭제되지 않고 대상 데이터베이스의 테이블스페이스에 포함됩니다. 데이터 파일은 Import 시 TRANSPORT_DATAFILES 파라미터로 경로를 지정하며, 대상 데이터베이스에서 계속 사용됩니다.\n\n핵심 개념: Transportable Tablespace는 메타데이터만 Export하고 데이터 파일은 OS 레벨에서 복사하여 대량 데이터를 고속으로 이관하는 방법입니다. 전제조건으로 Self-Contained 확인, READ ONLY 설정, 플랫폼 호환성, 블록 크기 일치가 필요합니다."
   }
 ]

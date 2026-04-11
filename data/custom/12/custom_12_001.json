@@ -2,70 +2,67 @@
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_001",
-    "title": "自動化メンテナンス・タスクが正常に動作するために必要な前提条件について正しく述べているものを選択してください。",
+    "title": "事前定義済みの自動化メンテナンス・タスクについて正しく述べているものを選択してください。",
     "options": [
-      "A) 初期化パラメータSTATISTICS_LEVELがTYPICAL以上に設定されている必要がある。",
-      "B) 初期化パラメータSTATISTICS_LEVELがALL以上に設定されている必要がある。",
-      "C) 初期化パラメータSTATISTICS_LEVELがBASIC以上に設定されている必要がある。",
-      "D) 初期化パラメータJOB_QUEUE_PROCESSESが0より大きい値に設定され、かつSTATISTICS_LEVELの設定は影響しない。"
+      "A) auto optimizer stats collectionタスクは、統計が取得されていないか失効したテーブルやインデックスの統計を自動的に収集する。",
+      "B) auto space advisorタスクは、データベースの空き領域が不足した場合にデータファイルを自動的に拡張する。",
+      "C) sql tuning advisorタスクは、高負荷SQLを検出し自動的にSQL文を書き換えて実行計画を変更する。",
+      "D) auto optimizer stats collectionタスクは、すべてのスキーマ・オブジェクトの統計を毎回フルスキャンで収集する。"
     ],
     "answer": ["A"],
-    "explanation": "정답 해설:\n\nA) 정답입니다. 자동 유지관리 태스크가 정상 작동하려면 STATISTICS_LEVEL이 TYPICAL 이상이어야 합니다. TYPICAL은 기본값이며, ALL도 TYPICAL 이상이므로 정상 작동합니다.\n\nB) 오답입니다. ALL이 아닌 TYPICAL 이상이면 충분합니다. ALL로 설정하면 추가적인 통계가 수집되지만, 자동 유지관리 태스크의 동작에 ALL이 필수 요건은 아닙니다.\n\nC) 오답입니다. BASIC으로 설정하면 자동 유지관리 태스크에 필요한 통계 수집이 비활성화되어 정상 작동하지 않습니다.\n\nD) 오답입니다. STATISTICS_LEVEL 설정은 자동 유지관리 태스크의 동작에 직접적인 영향을 미칩니다.\n\n핵심 개념: STATISTICS_LEVEL 파라미터가 TYPICAL(기본값) 이상이어야 AutoTask 프레임워크의 자동 유지관리 태스크가 정상적으로 작동합니다."
+    "explanation": "정답: A\nA) 정답 — auto optimizer stats collection 태스크는 옵티마이저 통계가 없거나 오래된(Stale) 테이블 및 인덱스의 통계를 자동으로 수집합니다. DBMS_STATS가 실행 주체이며, 모든 SQL 성능의 기반이 되는 태스크입니다.\n\nB) 오답 — auto space advisor 태스크는 데이터파일을 자동 확장하는 것이 아니라, 세그먼트의 공간 사용 현황을 분석하고 공간 회수(Shrink/Compress) 권고를 생성하는 태스크입니다.\n\nC) 오답 — sql tuning advisor 태스크는 SQL문을 자동으로 리라이트하는 것이 아니라, AWR에서 고부하 SQL을 식별하여 SQL Profile 권고 및 적용을 수행합니다. SQL문 자체를 변경하는 것이 아니라, 실행 계획 개선을 제안합니다.\n\nD) 오답 — auto optimizer stats collection은 모든 오브젝트를 매번 풀 스캔하는 것이 아니라, 통계가 없거나 오래된(Stale) 오브젝트만을 대상으로 합니다. AUTO_SAMPLE_SIZE를 사용하여 옵티마이저가 최적의 샘플링 비율을 자동으로 결정합니다.\n\n핵심 개념: Oracle Database는 3개의 사전 정의된 자동 유지관리 태스크를 제공합니다 — auto optimizer stats collection(통계 자동 수집), sql tuning advisor(SQL 튜닝 권고), auto space advisor(공간 분석 권고). 각 태스크는 메인터넌스 윈도우 내에서 자동으로 실행됩니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_002",
-    "title": "メンテナンス・ウィンドウのカスタマイズについて正しい内容を述べているのはどれになりますか(2つ選択してください)。",
+    "title": "事前定義済みの自動化メンテナンス・タスクの優先順位について正しく述べているものを選択してください。",
     "options": [
-      "A) 新しいメンテナンス・ウィンドウを作成した後、DBMS_SCHEDULER.ADD_WINDOW_GROUP_MEMBERを使用してMAINTENANCE_WINDOW_GROUPに追加しなければAutoTaskの対象にならない。",
-      "B) メンテナンス・ウィンドウのresource_plan属性を空文字列('')に設定すると、ウィンドウが開いてもResource Planの切り替えが行われない。",
-      "C) メンテナンス・ウィンドウを削除する際は、先にウィンドウを削除してからMAINTENANCE_WINDOW_GROUPから除外する。",
-      "D) メンテナンス・ウィンドウのrepeat_intervalは、CRON式のフォーマットで指定する必要がある。",
-      "E) 事前定義されたメンテナンス・ウィンドウのDURATION属性は変更することができない。"
+      "A) sql tuning advisorが最も高い優先順位(HIGH)を持ち、高負荷SQLのチューニングが最優先で実行される。",
+      "B) auto optimizer stats collectionが最も高い優先順位(HIGH)を持ち、オプティマイザ統計収集が最優先で実行される。",
+      "C) auto space advisorが最も高い優先順位(HIGH)を持ち、セグメントの空間分析が最優先で実行される。",
+      "D) 3つの事前定義済みタスクはすべて同じ優先順位(MEDIUM)を持ち、均等にリソースが割り当てられる。"
     ],
-    "answer": ["A", "B"],
-    "explanation": "정답 해설:\n\nA) 정답입니다. 새 윈도우를 생성한 후 DBMS_SCHEDULER.ADD_WINDOW_GROUP_MEMBER로 MAINTENANCE_WINDOW_GROUP에 추가해야 AutoTask 프레임워크의 유지관리 실행 대상으로 인식됩니다.\n\nB) 정답입니다. resource_plan을 빈 문자열('')로 설정하면 윈도우가 열려도 Resource Plan이 전환되지 않고 현재 플랜이 유지됩니다.\n\nC) 오답입니다. 순서가 반대입니다. 윈도우를 삭제하려면 먼저 MAINTENANCE_WINDOW_GROUP에서 제거한 후 삭제해야 합니다.\n\nD) 오답입니다. repeat_interval은 CRON식이 아닌 Scheduler Calendar Expression 문법(FREQ, BYDAY, BYHOUR 등)을 사용합니다.\n\nE) 오답입니다. DBMS_SCHEDULER.SET_ATTRIBUTE를 사용하여 DURATION 속성을 변경할 수 있습니다.\n\n핵심 개념: 메인터넌스 윈도우는 DBMS_SCHEDULER 패키지를 통해 생성, 수정, 삭제가 가능하며, MAINTENANCE_WINDOW_GROUP 멤버십이 AutoTask 실행의 핵심 조건입니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — auto optimizer stats collection 태스크가 가장 높은 우선순위(HIGH)를 갖습니다. 옵티마이저 통계는 모든 SQL 성능의 기반이 되므로 최우선으로 실행됩니다.\n\nA) 오답 — sql tuning advisor의 우선순위는 MEDIUM입니다. HIGH 우선순위를 가지는 것은 auto optimizer stats collection입니다.\n\nC) 오답 — auto space advisor의 우선순위는 MEDIUM입니다. 세그먼트 공간 분석은 중요하지만 통계 수집보다 우선순위가 낮습니다.\n\nD) 오답 — 3개 태스크가 모두 동일한 우선순위를 갖는 것이 아닙니다. auto optimizer stats collection은 HIGH, sql tuning advisor와 auto space advisor는 MEDIUM 우선순위를 가집니다.\n\n핵심 개념: 자동 유지관리 태스크의 우선순위는 auto optimizer stats collection이 HIGH, sql tuning advisor와 auto space advisor가 MEDIUM입니다. 메인터넌스 윈도우 시간이 부족할 경우 우선순위에 따라 태스크가 실행되며, 미완료 태스크는 다음 윈도우에서 재스케줄됩니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_003",
-    "title": "DBA_AUTOTASK_CLIENT_HISTORYビューで確認できるJOB_STATUSの状態値とその意味について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "メンテナンス・ウィンドウの事前定義済みのデフォルト設定について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SUCCEEDEDは、タスクが正常に完了したことを示す。",
-      "B) STOPPEDは、DBAが手動でタスクを停止したことのみを示す。",
-      "C) FAILEDは、メンテナンス・ウィンドウの終了によりタスクが中断されたことを示す。",
-      "D) NOT STARTEDは、タスクの実行がスケジュールされたが実行されなかったことを示す。",
-      "E) WAITINGは、タスクがリソースの割り当てを待機している状態を示す。"
+      "A) 平日(月曜日～金曜日)のメンテナンス・ウィンドウは22:00に開始し、4時間の継続時間が設定されている。",
+      "B) 土曜日と日曜日のメンテナンス・ウィンドウは00:00に開始し、8時間の継続時間が設定されている。",
+      "C) すべてのメンテナンス・ウィンドウにはDEFAULT_MAINTENANCE_PLANがResource Planとして設定されている。",
+      "D) メンテナンス・ウィンドウは月曜日から金曜日の5つのみが事前定義されている。",
+      "E) 平日のメンテナンス・ウィンドウは02:00に開始し、6時間の継続時間が設定されている。"
     ],
-    "answer": ["A", "D"],
-    "explanation": "정답 해설:\n\nA) 정답입니다. SUCCEEDED는 태스크가 정상적으로 완료되었음을 나타냅니다.\n\nD) 정답입니다. NOT STARTED는 태스크가 스케줄되었으나 실행되지 않은 상태(미실행)를 나타냅니다.\n\nB) 오답입니다. STOPPED는 DBA의 수동 중지뿐만 아니라 메인터넌스 윈도우 종료로 인한 중단도 포함합니다.\n\nC) 오답입니다. 메인터넌스 윈도우 종료로 인한 중단은 FAILED가 아닌 STOPPED 상태로 기록됩니다. FAILED는 태스크 실행 중 오류가 발생한 경우를 나타냅니다.\n\nE) 오답입니다. WAITING은 JOB_STATUS의 유효한 상태값이 아닙니다. 유효한 상태값은 SUCCEEDED, FAILED, STOPPED, NOT STARTED 4가지입니다.\n\n핵심 개념: DBA_AUTOTASK_CLIENT_HISTORY 뷰는 최근 30일간의 AutoTask 실행 이력을 제공하며, JOB_STATUS에는 SUCCEEDED(성공), FAILED(실패), STOPPED(중단), NOT STARTED(미실행)의 4가지 상태가 있습니다."
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 평일(월~금)의 메인터넌스 윈도우는 22:00에 시작하여 4시간(02:00까지) 동안 지속되는 것이 기본 설정입니다.\n\nC) 정답 — 모든 사전 정의된 메인터넌스 윈도우에는 DEFAULT_MAINTENANCE_PLAN이 Resource Plan으로 설정되어 있습니다. 윈도우가 열리면 이 플랜이 자동으로 활성화됩니다.\n\nB) 오답 — 토요일과 일요일의 메인터넌스 윈도우는 00:00 시작이 아니라 06:00에 시작하며, 8시간이 아니라 20시간의 지속 시간이 설정되어 있습니다.\n\nD) 오답 — 메인터넌스 윈도우는 평일 5개만이 아니라, 토요일(SATURDAY_WINDOW)과 일요일(SUNDAY_WINDOW)을 포함하여 총 7개가 사전 정의되어 있습니다.\n\nE) 오답 — 평일 메인터넌스 윈도우의 시작 시간은 02:00이 아니라 22:00이며, 지속 시간은 6시간이 아니라 4시간입니다.\n\n핵심 개념: Oracle Database는 7개의 요일별 메인터넌스 윈도우를 사전 정의하고 있으며, 평일은 22:00~02:00(4시간), 주말은 06:00~다음날 02:00(20시간)이 기본 설정입니다. 모든 윈도우에는 DEFAULT_MAINTENANCE_PLAN이 Resource Plan으로 연결되어 있습니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_004",
-    "title": "DBMS_AUTO_TASK_ADMINパッケージを使用した自動化メンテナンス・タスクの制御について正しい内容を述べているのはどれになりますか(2つ選択してください)。",
+    "title": "新しいメンテナンス・ウィンドウを作成した後、自動化メンテナンス・タスクの実行対象とするために必要な操作について正しく述べているものを選択してください。",
     "options": [
-      "A) client_nameとwindow_nameの組み合わせにより、特定のクライアントを特定のウィンドウでのみ無効化できる。",
-      "B) CDB Root環境で特定のクライアントを無効化すると、そのCDB Root内のみに影響し、各PDBには影響しない。",
-      "C) AutoTask全体を無効化した場合でも、優先度がHIGHに設定されたタスクは引き続き実行される。",
-      "D) SQL Tuning AdvisorのSQL Profileの自動適用は、DBMS_AUTO_TASK_ADMIN.ENABLEで直接制御する。",
-      "E) DBMS_AUTO_TASK_ADMIN.DISABLEのwindow_nameパラメータにNULLを指定すると、すべてのウィンドウで対象クライアントが無効化される。"
+      "A) DBMS_SCHEDULER.CREATE_WINDOWで作成すれば自動的にAutoTask実行対象となるため、追加操作は不要である。",
+      "B) DBMS_SCHEDULER.ADD_WINDOW_GROUP_MEMBERを使用して、作成したウィンドウをMAINTENANCE_WINDOW_GROUPに追加する必要がある。",
+      "C) DBMS_AUTO_TASK_ADMIN.REGISTERプロシージャを使用して、新しいウィンドウをAutoTaskフレームワークに登録する必要がある。",
+      "D) ALTER SYSTEM SET MAINTENANCE_WINDOW_LISTパラメータに新しいウィンドウ名を追加する必要がある。"
     ],
-    "answer": ["A", "E"],
-    "explanation": "정답 해설:\n\nA) 정답입니다. client_name과 window_name 조합으로 특정 클라이언트를 특정 윈도우에서만 비활성화할 수 있습니다. 이를 통해 세밀한 태스크 제어가 가능합니다.\n\nE) 정답입니다. DBMS_AUTO_TASK_ADMIN.DISABLE에서 window_name에 NULL을 지정하면 모든 윈도우에서 해당 클라이언트가 비활성화됩니다.\n\nB) 오답입니다. CDB Root에서의 제어는 모든 PDB에 영향을 미칩니다. PDB에서의 제어만 해당 PDB에만 영향을 줍니다.\n\nC) 오답입니다. AutoTask 전체를 비활성화하면 우선순위에 관계없이 모든 자동 유지관리 태스크가 중단됩니다.\n\nD) 오답입니다. SQL Tuning Advisor의 SQL Profile 자동 적용은 DBMS_AUTO_TASK_ADMIN이 아닌 DBMS_AUTO_SQLTUNE.SET_AUTO_TUNING_TASK_PARAMETER로 별도 제어합니다.\n\n핵심 개념: DBMS_AUTO_TASK_ADMIN 패키지는 클라이언트, Operation, 윈도우 단위의 3단계 세밀 제어가 가능하며, CDB/PDB 환경에서의 영향 범위를 이해하는 것이 중요합니다."
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 새로 생성한 메인터넌스 윈도우를 AutoTask 프레임워크의 유지관리 실행 대상으로 만들려면, DBMS_SCHEDULER.ADD_WINDOW_GROUP_MEMBER를 사용하여 해당 윈도우를 MAINTENANCE_WINDOW_GROUP에 추가해야 합니다.\n\nA) 오답 — DBMS_SCHEDULER.CREATE_WINDOW로 윈도우를 생성하는 것만으로는 AutoTask 실행 대상이 되지 않습니다. MAINTENANCE_WINDOW_GROUP에 속한 윈도우만 AutoTask 프레임워크가 유지관리 실행 대상으로 인식합니다.\n\nC) 오답 — DBMS_AUTO_TASK_ADMIN.REGISTER라는 프로시저는 존재하지 않습니다. 윈도우를 AutoTask 대상으로 만드는 것은 DBMS_SCHEDULER.ADD_WINDOW_GROUP_MEMBER를 통해 수행합니다.\n\nD) 오답 — MAINTENANCE_WINDOW_LIST라는 초기화 파라미터는 존재하지 않습니다. 메인터넌스 윈도우 관리는 DBMS_SCHEDULER 패키지를 통해 수행됩니다.\n\n핵심 개념: AutoTask 프레임워크는 MAINTENANCE_WINDOW_GROUP에 속한 윈도우에서만 자동 유지관리 태스크를 실행합니다. 새 윈도우를 생성한 후 반드시 DBMS_SCHEDULER.ADD_WINDOW_GROUP_MEMBER로 이 그룹에 추가해야 하며, 삭제 시에는 그룹에서 먼저 제거한 후 삭제해야 합니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_005",
-    "title": "メンテナンス・ウィンドウとResource Managerの連携について正しい内容を述べているのはどれになりますか(2つ選択してください)。",
+    "title": "DBMS_AUTO_TASK_ADMINパッケージを使用した自動化メンテナンス・タスクの制御について正しく述べているものを選択してください。",
     "options": [
-      "A) メンテナンス・ウィンドウが開くと、resource_plan属性に指定されたResource Planに自動的に切り替わる。",
-      "B) メンテナンス・ウィンドウが閉じると、Resource Planは自動的にデフォルトのDEFAULT_PLANに戻る。",
-      "C) ALTER SYSTEM SET RESOURCE_MANAGER_PLAN = '' FORCEを使用した場合でも、ウィンドウによるResource Planの自動切り替えは正常に行われる。",
-      "D) メンテナンス・ウィンドウが重複する場合、両方のウィンドウのResource Planが同時に適用される。",
-      "E) メンテナンス・ウィンドウが閉じると、ウィンドウが開く前に保存された以前のResource Planに自動的に復元される。"
+      "A) DBMS_AUTO_TASK_ADMIN.DISABLEを使用すると、指定した自動化メンテナンス・タスクのクライアントを特定のウィンドウまたはすべてのウィンドウで無効にすることができる。",
+      "B) DBMS_AUTO_TASK_ADMIN.DISABLEを使用して無効にしたタスクは、データベースを再起動しない限り再度有効にすることができない。",
+      "C) DBMS_AUTO_TASK_ADMINパッケージでは個別のクライアント単位の制御のみ可能であり、特定のウィンドウ単位での制御はできない。",
+      "D) 事前定義済みの3つの自動化メンテナンス・タスクは、データベースの安定性に不可欠であるため無効にすることができない。"
     ],
-    "answer": ["A", "E"],
-    "explanation": "정답 해설:\n\nA) 정답입니다. 메인터넌스 윈도우가 열리면 resource_plan 속성에 지정된 Resource Plan이 자동으로 활성화됩니다.\n\nE) 정답입니다. 윈도우가 닫히면 윈도우가 열리기 전에 저장된 이전 Resource Plan으로 자동 복원됩니다. V$RSRC_PLAN_HISTORY에 전환 이력이 기록됩니다.\n\nB) 오답입니다. 윈도우가 닫히면 DEFAULT_PLAN이 아닌 윈도우가 열리기 전에 저장된 이전 Resource Plan으로 복원됩니다. 이전 플랜이 DEFAULT_PLAN이 아닐 수도 있습니다.\n\nC) 오답입니다. ALTER SYSTEM SET RESOURCE_MANAGER_PLAN = '' FORCE를 사용하면 윈도우에 의한 자동 전환까지 무시됩니다. 정상적으로 행해지지 않습니다.\n\nD) 오답입니다. 윈도우가 중첩될 경우 두 플랜이 동시에 적용되는 것이 아니라, window_priority(우선순위)에 따라 높은 우선순위의 윈도우가 낮은 우선순위를 선점합니다.\n\n핵심 개념: 메인터넌스 윈도우와 Resource Manager는 긴밀하게 연계되어 있으며, 윈도우의 resource_plan 속성을 통해 유지관리 기간 동안의 리소스 배분을 자동으로 관리합니다. DBRM 백그라운드 프로세스가 Resource Manager의 실제 집행 엔진 역할을 수행합니다."
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — DBMS_AUTO_TASK_ADMIN.DISABLE 프로시저를 사용하면, client_name 파라미터로 특정 태스크를 지정하고 window_name 파라미터로 특정 윈도우 또는 NULL(모든 윈도우)을 지정하여 세밀하게 제어할 수 있습니다.\n\nB) 오답 — DISABLE로 비활성화한 태스크는 데이터베이스 재시작 없이 DBMS_AUTO_TASK_ADMIN.ENABLE 프로시저를 사용하여 즉시 다시 활성화할 수 있습니다.\n\nC) 오답 — DBMS_AUTO_TASK_ADMIN 패키지는 클라이언트 단위뿐만 아니라, 특정 윈도우 단위로도 제어가 가능합니다. 예를 들어, sql tuning advisor를 SATURDAY_WINDOW에서만 비활성화하는 것이 가능합니다.\n\nD) 오답 — 사전 정의된 3개의 자동 유지관리 태스크는 모두 DBMS_AUTO_TASK_ADMIN.DISABLE을 사용하여 비활성화할 수 있습니다. 운영 환경에 따라 필요 시 특정 태스크를 비활성화하는 것이 허용됩니다.\n\n핵심 개념: DBMS_AUTO_TASK_ADMIN 패키지는 자동 유지관리 태스크의 활성화/비활성화를 클라이언트 단위, Operation 단위, 윈도우 단위의 3단계로 세밀하게 제어할 수 있습니다. ENABLE/DISABLE 프로시저를 사용하며, 데이터베이스 재시작 없이 동적으로 변경할 수 있습니다."
   }
 ]
