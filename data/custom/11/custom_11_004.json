@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_016",
+    "title": "統合監査ポリシーの作成と有効化の手順について正しく述べているものを選択してください。",
+    "options": [
+      "A) CREATE AUDIT POLICY文でACTIONSとPRIVILEGESを組み合わせてポリシーを作成した後、AUDIT POLICY文にBY句を指定して特定ユーザーに対して有効化する。",
+      "B) AUDIT POLICY文だけでポリシーの作成と有効化が同時に行われるため、CREATE AUDIT POLICY文は不要である。",
+      "C) CREATE AUDIT POLICY文を実行すると、ポリシーは自動的にすべてのユーザーに対して有効化される。",
+      "D) CREATE AUDIT POLICY文の実行にはAUDIT_VIEWERロールのみで十分であり、AUDIT_ADMINロールは不要である。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — CREATE AUDIT POLICY 문으로 ACTIONS, PRIVILEGES, ROLES 등을 조합한 감사 정책을 먼저 생성하고, 이후 AUDIT POLICY 문에 BY 절을 지정하여 특정 사용자에게 적용합니다. 예를 들어, CREATE AUDIT POLICY emp_audit ACTIONS DELETE ON hr.employees PRIVILEGES CREATE TABLE; 으로 정책을 생성한 후, AUDIT POLICY emp_audit BY scott; 으로 활성화합니다. 이 두 단계를 모두 수행해야 실제 감사가 수행됩니다.\n\nB) 오답 — AUDIT POLICY 문은 이미 생성된 정책을 활성화하는 명령이며, 정책을 생성하는 기능은 없습니다. 먼저 CREATE AUDIT POLICY로 정책을 생성해야 합니다.\n\nC) 오답 — CREATE AUDIT POLICY 문은 감사 정책의 정의만 수행하며, 자동으로 활성화되지 않습니다. 반드시 AUDIT POLICY 문으로 별도로 활성화해야 감사가 시작됩니다.\n\nD) 오답 — CREATE AUDIT POLICY 문 실행에는 AUDIT_ADMIN 롤이 필요합니다. AUDIT_VIEWER 롤은 감사 트레일 조회 전용이며, 정책의 생성/수정/삭제 권한이 없습니다.\n\n핵심 개념: 통합 감사의 구현은 CREATE AUDIT POLICY(정책 정의) → AUDIT POLICY(정책 활성화)의 2단계 프로세스이며, 정책 관리에는 AUDIT_ADMIN 롤이, 감사 데이터 조회에는 AUDIT_VIEWER 롤이 필요합니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_017",
+    "title": "以下のUNIFIED_AUDIT_TRAILビューの問合せ結果を確認してください。\n\nSELECT event_timestamp, dbusername, action_name, object_schema, object_name, sql_text, return_code\nFROM unified_audit_trail\nWHERE event_timestamp > SYSDATE - 1;\n\nEVENT_TIMESTAMP    DBUSERNAME  ACTION_NAME  OBJECT_SCHEMA  OBJECT_NAME  SQL_TEXT                           RETURN_CODE\n2026-04-10 14:30   SCOTT       DELETE       HR             EMPLOYEES    DELETE FROM hr.employees WHERE..  0\n2026-04-10 14:35   SCOTT       SELECT       HR             DEPARTMENTS  SELECT * FROM hr.departments     0\n2026-04-10 15:00   JAMES       LOGON        NULL           NULL         NULL                              1017\n\nこの監査データの内容について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SCOTTユーザーがhr.employees表に対して実行したDELETE操作はRETURN_CODEが0であるため正常に実行された操作が監査されている。",
+      "B) SCOTTユーザーのSELECT操作は統合監査ポリシーでは監査できないため、このレコードはファイングレイン監査(FGA)によって記録されたものである。",
+      "C) JAMESユーザーのLOGONイベントはRETURN_CODEが1017であるため、パスワード不一致によるログイン失敗が監査されている。",
+      "D) RETURN_CODEが0以外のレコードは監査エラーを示しており、監査レコード自体が不完全であることを意味する。",
+      "E) OBJECT_SCHEMAとOBJECT_NAMEがNULLの行は監査データの破損を示しており、監査トレイルの修復が必要である。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — RETURN_CODE가 0이면 해당 SQL 문이 성공적으로 실행되었음을 나타냅니다. SCOTT 사용자의 hr.employees 테이블에 대한 DELETE 작업이 정상적으로 실행되었고, 해당 작업이 감사 정책에 의해 기록된 것입니다.\n\nC) 정답 — RETURN_CODE 1017은 ORA-01017(invalid username/password) 에러를 나타냅니다. JAMES 사용자의 LOGON 이벤트에서 이 값이 기록되었으므로, 잘못된 비밀번호로 인한 로그인 실패가 감사된 것입니다. 통합 감사는 성공뿐 아니라 실패한 작업도 감사 기록합니다.\n\nB) 오답 — 통합 감사 정책에서도 ACTIONS 절에 SELECT를 지정하면 SELECT 문을 감사할 수 있습니다. UNIFIED_AUDIT_TRAIL 뷰에 SELECT 레코드가 있다고 해서 반드시 FGA에 의한 것은 아닙니다. 통합 감사 정책과 FGA 감사 레코드가 모두 이 뷰에 통합 표시됩니다.\n\nD) 오답 — RETURN_CODE는 감사 레코드 자체의 에러가 아니라, 감사 대상이 된 SQL 문의 실행 결과를 나타냅니다. 0이 아닌 값은 해당 SQL 문이 에러와 함께 실패했음을 의미하며, 감사 레코드 자체는 정상적으로 기록된 것입니다.\n\nE) 오답 — LOGON 이벤트의 경우 특정 객체에 대한 작업이 아니므로 OBJECT_SCHEMA와 OBJECT_NAME이 NULL인 것이 정상입니다. 이는 데이터 파손이 아니라 이벤트 유형에 따른 정상적인 기록입니다.\n\n핵심 개념: UNIFIED_AUDIT_TRAIL 뷰의 RETURN_CODE는 감사된 SQL 문의 실행 결과(0=성공, 그 외=Oracle 에러 코드)를 나타내며, 로그인 실패(ORA-01017)도 감사 대상입니다. LOGON 이벤트 등 객체와 무관한 이벤트에서는 OBJECT_SCHEMA/OBJECT_NAME이 NULL로 기록됩니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_018",
+    "title": "NOAUDIT POLICY文で統合監査ポリシーを無効化した場合の動作について正しく述べているものを選択してください。",
+    "options": [
+      "A) NOAUDIT POLICY文で監査ポリシーを無効化すると、以降の新しい監査レコードは生成されなくなるが、無効化前に記録された既存の監査レコードはUNIFIED_AUDIT_TRAILビューに残り引き続き参照できる。",
+      "B) NOAUDIT POLICY文で監査ポリシーを無効化すると、そのポリシーによって生成された既存の監査レコードもすべて自動的に削除される。",
+      "C) NOAUDIT POLICY文を実行するとポリシー定義自体も削除されるため、再度有効化するにはCREATE AUDIT POLICY文でポリシーを再作成する必要がある。",
+      "D) NOAUDIT POLICY文は現在アクティブなセッションの監査を即座に停止するが、新規セッションには影響を与えない。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — NOAUDIT POLICY 문으로 감사 정책을 비활성화하면 이후 새로운 감사 레코드가 생성되지 않습니다. 그러나 비활성화 이전에 이미 기록된 감사 레코드는 UNIFIED_AUDIT_TRAIL 뷰에 그대로 유지되며, 언제든지 조회할 수 있습니다. 기존 감사 데이터를 삭제하려면 DBMS_AUDIT_MGMT.CLEAN_AUDIT_TRAIL 프로시저를 별도로 실행해야 합니다.\n\nB) 오답 — NOAUDIT POLICY 문은 감사 레코드의 수집을 중단하는 명령이며, 기존에 기록된 감사 레코드를 삭제하지 않습니다. 감사 트레일 데이터의 삭제는 DBMS_AUDIT_MGMT 패키지를 통해 별도로 수행해야 합니다.\n\nC) 오답 — NOAUDIT POLICY 문은 정책의 활성화 상태만 변경(비활성화)하며, 정책 정의 자체를 삭제하지 않습니다. 정책 정의를 삭제하려면 DROP AUDIT POLICY 문을 사용해야 합니다. 비활성화된 정책은 AUDIT POLICY 문으로 언제든지 다시 활성화할 수 있습니다.\n\nD) 오답 — NOAUDIT POLICY 문의 효과는 기존 세션과 새 세션 모두에 적용됩니다. 단, 이미 실행 중인 세션에서의 적용 시점은 해당 세션이 감사 정책 캐시를 갱신하는 시점에 따라 달라질 수 있습니다.\n\n핵심 개념: NOAUDIT POLICY는 감사 정책의 활성화 상태만 변경하며, 정책 정의(CREATE AUDIT POLICY로 생성된 것)와 기존 감사 레코드(UNIFIED_AUDIT_TRAIL)에는 영향을 주지 않습니다. 정책 삭제는 DROP AUDIT POLICY, 감사 데이터 삭제는 DBMS_AUDIT_MGMT가 담당합니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_019",
+    "title": "事前定義監査ポリシーについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) ORA_SECURECONFIGポリシーはデータベース作成時に自動的に有効化され、ALTER USERやGRANT文などセキュリティ上重要なアクションを監査する。",
+      "B) ORA_LOGON_FAILURESポリシーはデータベース作成時に自動的に有効化され、ログイン失敗イベントを監査する。",
+      "C) 事前定義監査ポリシーはALTER AUDIT POLICY文を使用してカスタマイズすることができる。",
+      "D) ORA_CIS_RECOMMENDATIONSポリシーはCISベンチマークに基づくポリシーであり、ORA_SECURECONFIGと同様にデータベース作成時に自動的に有効化される。",
+      "E) 事前定義監査ポリシーはNOAUDIT POLICY文で無効化することができない。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — ORA_SECURECONFIG 정책은 데이터베이스 생성 시 자동으로 활성화되며, ALTER USER, CREATE USER, DROP USER, GRANT, REVOKE, CREATE ROLE 등 보안상 중요한 작업을 감사합니다.\n\nB) 정답 — ORA_LOGON_FAILURES 정책은 데이터베이스 생성 시 자동으로 활성화되며, 로그인 실패 이벤트를 감사합니다. 이 정책은 비인가 접근 시도를 탐지하는 데 핵심적인 역할을 합니다.\n\nC) 오답 — 사전 정의 감사 정책(ORA_SECURECONFIG, ORA_LOGON_FAILURES, ORA_CIS_RECOMMENDATIONS 등)은 ALTER AUDIT POLICY 문으로 수정할 수 없습니다. 수정이 필요한 경우 별도의 사용자 정의 감사 정책을 생성해야 합니다.\n\nD) 오답 — ORA_CIS_RECOMMENDATIONS 정책은 CIS 벤치마크 기반의 정책이지만, 데이터베이스 생성 시 자동으로 활성화되지 않습니다. 자동 활성화되는 사전 정의 정책은 ORA_SECURECONFIG와 ORA_LOGON_FAILURES뿐입니다. ORA_CIS_RECOMMENDATIONS를 사용하려면 DBA가 AUDIT POLICY 문으로 명시적으로 활성화해야 합니다.\n\nE) 오답 — 사전 정의 감사 정책도 NOAUDIT POLICY 문으로 비활성화할 수 있습니다. 단, ORA_SECURECONFIG와 같은 정책을 비활성화하면 보안 감사가 중단되므로 권장되지 않습니다.\n\n핵심 개념: Oracle은 ORA_SECURECONFIG와 ORA_LOGON_FAILURES를 데이터베이스 생성 시 자동으로 활성화하여 기본적인 보안 감사를 보장합니다. 사전 정의 정책은 ALTER AUDIT POLICY로 수정할 수 없지만, NOAUDIT POLICY로 비활성화하거나 AUDIT POLICY로 재활성화할 수 있습니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_020",
+    "title": "AUDSYSスキーマと監査トレイルの格納先について正しく述べているものを選択してください。",
+    "options": [
+      "A) AUDSYSスキーマの監査データはデフォルトでSYSAUXテーブルスペースに格納されるが、DBMS_AUDIT_MGMTパッケージを使用して別のテーブルスペースに変更できる。",
+      "B) AUDSYSスキーマにはデータベース管理者が直接ログインしてSQL文で監査データを操作することができる。",
+      "C) AUDSYSスキーマの監査データはSYSTEMテーブルスペースに格納されており、変更することはできない。",
+      "D) AUDSYSスキーマはDROP USER文を使用して削除することが可能である。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — AUDSYS 스키마의 통합 감사 데이터(AUD$UNIFIED 테이블)는 기본적으로 SYSAUX 테이블스페이스에 저장됩니다. DBMS_AUDIT_MGMT.SET_AUDIT_TRAIL_LOCATION 프로시저를 사용하면 감사 데이터의 저장 위치를 다른 테이블스페이스로 변경할 수 있어, SYSAUX 공간 관리가 용이해집니다.\n\nB) 오답 — AUDSYS 스키마는 Oracle 내부 보호 스키마로, 직접 로그인이 불가능합니다. 감사 데이터는 UNIFIED_AUDIT_TRAIL 뷰를 통해서만 조회할 수 있으며, AUDIT_VIEWER 또는 AUDIT_ADMIN 롤이 필요합니다.\n\nC) 오답 — AUDSYS 감사 데이터는 SYSTEM이 아닌 SYSAUX 테이블스페이스에 기본 저장됩니다. 또한 DBMS_AUDIT_MGMT를 통해 다른 테이블스페이스로 변경할 수 있으므로 '변경 불가'라는 설명도 틀립니다.\n\nD) 오답 — AUDSYS 스키마는 Oracle이 내부적으로 보호하는 스키마이므로 DROP USER 문으로 삭제할 수 없습니다. ALTER도 불가능하며, 이러한 보호를 통해 감사 데이터의 무결성이 보장됩니다.\n\n핵심 개념: AUDSYS는 통합 감사 트레일 전용의 내부 보호 스키마로 직접 로그인, DROP, ALTER가 불가능합니다. 감사 데이터는 기본적으로 SYSAUX 테이블스페이스에 저장되며, DBMS_AUDIT_MGMT.SET_AUDIT_TRAIL_LOCATION으로 저장 위치를 변경할 수 있습니다."
+  }
+]

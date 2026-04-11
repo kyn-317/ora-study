@@ -1,0 +1,68 @@
+[
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_016",
+    "title": "Oracle Databaseの自動共有メモリー管理(ASMM)においてSGA_TARGETパラメータを使用している環境で、DBAがALTER SYSTEM SET SHARED_POOL_SIZE = 800M SCOPE=BOTH を実行しました。この操作の結果について正しく述べているものを選択してください。",
+    "options": [
+      "A) SHARED_POOL_SIZEの設定値はASMMが管理するSGA全体サイズの上限を超えることができないため、SGA_TARGETを超える値を指定するとエラーが発生する。",
+      "B) SHARED_POOL_SIZEの設定値は共有プールの最小保証サイズとして機能し、ASMMはこの値を下回るサイズに共有プールを縮小しない。",
+      "C) SHARED_POOL_SIZEの設定値はASMMによって無視され、共有プールのサイズは常にASMMが自動的に決定する。",
+      "D) SHARED_POOL_SIZEの設定値は共有プールの固定サイズとなり、ASMMによる動的調整が無効になる。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 자동 공유 메모리 관리(ASMM) 환경에서 SHARED_POOL_SIZE 등 개별 SGA 구성요소 파라미터를 설정하면, 해당 값은 최소 보장 크기(Minimum Size)로 기능합니다. ASMM은 이 값 이하로 공유 풀을 축소하지 않으며, 워크로드에 따라 이 값 이상으로는 동적 확장할 수 있습니다.\n\nA) 오답 — SGA_TARGET을 초과하는 개별 구성요소 크기를 설정할 수는 없지만, 문제의 시나리오에서는 특정 크기(800M)만 지정한 것이므로 SGA_TARGET 초과 여부와 상관없이 이 설명은 최소 보장 크기 개념을 설명하고 있지 않아 부정확합니다.\n\nC) 오답 — ASMM 환경에서도 개별 SGA 구성요소 파라미터의 설정값은 무시되지 않습니다. 최소 보장 크기로 반영되므로 ASMM이 이를 완전히 무시하는 것은 아닙니다.\n\nD) 오답 — 설정값은 고정 크기가 아닌 최소 보장 크기입니다. ASMM은 이 값을 하한선으로 하여 워크로드에 따라 동적으로 조정합니다. ASMM의 동적 조정 기능이 무효화되는 것이 아닙니다.\n\n핵심 개념: ASMM(SGA_TARGET 기반) 환경에서 SHARED_POOL_SIZE, DB_CACHE_SIZE 등 개별 SGA 구성요소 파라미터를 설정하면 최소 보장 크기(Minimum Guaranteed Size)로 동작하며, ASMM은 이 값 이상에서 워크로드에 따라 동적으로 크기를 조정합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_017",
+    "title": "DBAが以下のSQL文を実行してSGAの構成情報を確認しました。\n\nSQL> SELECT name, value FROM V$SGA;\n\nNAME                      VALUE\n------------------------ ----------\nFixed Size                 9137384\nVariable Size            1577058304\nDatabase Buffers          503316480\nRedo Buffers               7012352\n\nこの出力結果から読み取れる内容として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Variable Sizeには共有プール、Large Pool、Java Poolなどの可変サイズ・コンポーネントが含まれている。",
+      "B) Database Buffersの値はDB_BLOCK_SIZEパラメータの値を表している。",
+      "C) Fixed Sizeの値はDBAがALTER SYSTEM文で変更可能な領域のサイズである。",
+      "D) Redo Buffersの値はオンラインREDOログ・ファイルの合計サイズを表している。",
+      "E) Database Buffersの値はデータベース・バッファ・キャッシュに割り当てられたメモリー・サイズを表している。"
+    ],
+    "answer": ["A", "E"],
+    "explanation": "정답: A, E\nA) 정답 — V$SGA의 Variable Size에는 공유 풀(Shared Pool), Large Pool, Java Pool, Streams Pool 등 SGA 내 가변 크기 구성요소가 포함됩니다. 이들은 Granule 단위로 동적으로 크기가 조정될 수 있습니다.\n\nE) 정답 — Database Buffers는 데이터베이스 버퍼 캐시(Database Buffer Cache)에 할당된 메모리 크기를 나타냅니다. 여기에는 Default Pool, Keep Pool, Recycle Pool, 비표준 블록 크기 캐시가 모두 포함됩니다.\n\nB) 오답 — Database Buffers의 값은 DB_BLOCK_SIZE 파라미터 값이 아니라 버퍼 캐시에 할당된 전체 메모리 크기입니다. DB_BLOCK_SIZE는 데이터 블록의 크기(기본 8KB)를 나타내는 별개의 파라미터입니다.\n\nC) 오답 — Fixed Size는 Oracle 내부 하우스키핑 정보(래치, 락 구조 등)를 저장하는 고정 SGA 영역으로, DBA가 ALTER SYSTEM 문으로 변경할 수 없습니다. Oracle이 자동으로 결정하고 관리합니다.\n\nD) 오답 — Redo Buffers는 SGA 내의 Redo Log Buffer 크기를 나타내며, 디스크의 온라인 Redo Log 파일 합계 크기가 아닙니다. Redo Log Buffer는 변경 사항을 일시적으로 저장하는 메모리 영역이고, 온라인 Redo Log 파일은 디스크 파일입니다.\n\n핵심 개념: V$SGA 뷰는 Fixed Size(내부 고정 영역), Variable Size(공유 풀/Large Pool 등 가변 영역), Database Buffers(버퍼 캐시), Redo Buffers(Redo Log Buffer)의 4가지 항목으로 SGA 구성을 요약합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_018",
+    "title": "Oracle Databaseのオンライン REDOログのグループ3に2つのメンバー・ファイルが多重化されている構成で、一方のメンバーが格納されているディスクに障害が発生しました。この状況における動作として正しく述べているものを選択してください。",
+    "options": [
+      "A) LGWRは残りの正常なメンバーへの書き込みを継続し、データベースの運用は継続される。",
+      "B) LGWRは障害のあるディスクが復旧するまでREDO書き込みを一時停止し、データベースがハングする。",
+      "C) LGWRはグループ3を使用不可とし、直ちにログ・スイッチを実行して次のグループへ移行する。",
+      "D) メンバーの1つが損失したため、インスタンスが即座にABORTモードで停止される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — Redo Log 그룹 내에 여러 멤버가 다중화되어 있는 경우, 하나의 멤버가 손실되어도 LGWR은 나머지 정상적인 멤버에 계속 기록하며 데이터베이스 운영은 중단되지 않습니다. Alert Log에 오류 메시지가 기록되지만 데이터베이스는 정상 동작합니다. 이것이 Redo Log 멤버 다중화의 핵심 목적입니다.\n\nB) 오답 — LGWR은 그룹 내 최소 하나의 멤버가 정상이면 기록을 계속합니다. 장애 디스크의 복구를 기다리며 기록을 일시 중지하지 않습니다.\n\nC) 오답 — 그룹 내 최소 하나의 멤버가 정상이면 해당 그룹은 계속 사용 가능합니다. 모든 멤버가 손실된 경우에만 그룹이 사용 불가능해지며, CURRENT 그룹의 모든 멤버가 손실되면 인스턴스가 중지됩니다.\n\nD) 오답 — 멤버 하나의 손실로 인스턴스가 즉시 중지되지는 않습니다. 그룹의 모든 멤버가 손실된 CURRENT 그룹의 경우에만 인스턴스 중지가 발생합니다.\n\n핵심 개념: Redo Log 멤버 다중화의 목적은 디스크 장애에 대한 보호이며, 같은 그룹 내 멤버 중 하나 이상이 정상이면 LGWR은 기록을 계속하여 데이터베이스 운영이 중단되지 않습니다. 그룹의 모든 멤버가 손실되면 해당 그룹은 사용 불가능해지고, CURRENT 그룹인 경우 인스턴스가 중지됩니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_019",
+    "title": "CDB環境においてPDBをREAD ONLYモードからREAD WRITEモードに変更するための正しいコマンドを選択してください。",
+    "options": [
+      "A) ALTER PLUGGABLE DATABASE pdb_name OPEN READ WRITE FORCE;",
+      "B) ALTER DATABASE pdb_name OPEN READ WRITE;",
+      "C) ALTER SESSION SET CONTAINER = pdb_name READ WRITE;",
+      "D) ALTER SYSTEM SET PDB_OPEN_MODE = READ WRITE SCOPE=MEMORY;"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 이미 READ ONLY로 오픈된 PDB를 READ WRITE로 전환하려면 ALTER PLUGGABLE DATABASE ... OPEN READ WRITE FORCE 명령을 사용합니다. FORCE 옵션을 사용하면 PDB를 먼저 CLOSE하지 않고 직접 모드를 전환할 수 있으며, 내부적으로 PDB를 닫았다가 새 모드로 다시 오픈하는 작업이 자동 수행됩니다.\n\nB) 오답 — ALTER DATABASE는 CDB 전체를 대상으로 하는 명령이며, PDB 개별 오픈 모드를 변경할 때는 ALTER PLUGGABLE DATABASE를 사용해야 합니다.\n\nC) 오답 — ALTER SESSION SET CONTAINER는 현재 세션의 작업 컨테이너를 전환하는 명령이며, PDB의 오픈 모드를 변경하는 기능이 아닙니다.\n\nD) 오답 — PDB_OPEN_MODE라는 초기화 파라미터는 존재하지 않습니다. PDB의 오픈 모드는 ALTER PLUGGABLE DATABASE 명령으로 제어합니다.\n\n핵심 개념: PDB의 오픈 모드 변경은 ALTER PLUGGABLE DATABASE ... OPEN [READ WRITE | READ ONLY] 명령으로 수행하며, 이미 오픈된 PDB의 모드를 변경할 때는 FORCE 옵션을 사용하여 CLOSE 없이 직접 전환할 수 있습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_020",
+    "title": "Oracle DatabaseのREDOログ・バッファに関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) REDOログ・バッファは循環バッファ構造であり、LGWRがディスクに書き込んだ領域は再利用される。",
+      "B) REDOログ・バッファのサイズはDB_CACHE_SIZEパラメータで制御される。",
+      "C) REDOログ・バッファにはCOMMIT済みのトランザクションの変更情報のみが記録される。",
+      "D) REDOログ・バッファの内容はDBWnプロセスによってオンラインREDOログ・ファイルに書き込まれる。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — Redo Log Buffer는 순환 버퍼(Circular Buffer) 구조로 동작합니다. 서버 프로세스가 Redo Entry를 버퍼에 기록하고, LGWR 프로세스가 해당 내용을 디스크의 온라인 Redo Log 파일에 기록하면 그 공간은 다시 사용할 수 있게 됩니다.\n\nB) 오답 — Redo Log Buffer의 크기는 LOG_BUFFER 파라미터로 제어됩니다. DB_CACHE_SIZE는 Database Buffer Cache(Default Pool)의 크기를 제어하는 파라미터입니다.\n\nC) 오답 — Redo Log Buffer에는 COMMIT 여부와 관계없이 모든 변경 사항(Redo Entry)이 기록됩니다. 커밋되지 않은 트랜잭션의 변경도 기록되며, 인스턴스 복구 시 Roll Forward 단계에서 모든 Redo가 재적용됩니다.\n\nD) 오답 — Redo Log Buffer의 내용을 온라인 Redo Log 파일에 기록하는 것은 LGWR(Log Writer) 프로세스의 역할입니다. DBWn(Database Writer)은 Database Buffer Cache의 Dirty Buffer를 데이터 파일에 기록하는 프로세스입니다.\n\n핵심 개념: Redo Log Buffer는 LOG_BUFFER 파라미터로 크기를 제어하는 순환 버퍼로, COMMIT 여부와 관계없이 모든 변경 사항을 기록합니다. LGWR 프로세스가 디스크에 기록하면 해당 공간이 재사용됩니다."
+  }
+]

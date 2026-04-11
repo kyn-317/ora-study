@@ -101,7 +101,6 @@
   <text x="170" y="418" class="code" text-anchor="middle">SERVICE_NAMES</text>
 
   <!-- Arrow from DB to LREG -->
-  <line x1="170" y1="350" x2="170" y2="300" x2="290" y2="300" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="5,3"/>
   <path d="M 170 350 L 170 300 L 290 300" fill="none" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="5,3"/>
 
   <!-- Arrow from Server Process to DB -->

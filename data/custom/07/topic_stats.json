@@ -9,8 +9,8 @@
     "索引UNUSABLE状態": 1
   },
   "custom_topic_counts": {
-    "HWM(最高水位標)": 2,
-    "セグメント縮小": 2,
+    "HWM(最高水位標)": 3,
+    "セグメント縮小": 3,
     "Direct-Path Insert": 1,
     "遅延セグメント作成": 1,
     "再開可能領域割当て": 2,
@@ -20,8 +20,10 @@
     "Segment Advisor": 1,
     "エクステント管理(AUTOALLOCATE/UNIFORM)": 1,
     "索引REBUILD": 1,
-    "データ圧縮": 1
+    "データ圧縮": 2,
+    "ALTER TABLE MOVE": 1,
+    "DBA_SEGMENTS領域分析": 1
   },
-  "total_custom": 15,
-  "last_number": "C_07_015"
+  "total_custom": 20,
+  "last_number": "C_07_020"
 }

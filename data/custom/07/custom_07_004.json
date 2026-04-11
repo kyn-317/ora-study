@@ -1,0 +1,68 @@
+[
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_016",
+    "title": "Oracle Databaseのデータ圧縮の種類とAdvanced Compression Optionライセンスについて正しく述べているものを選択してください。",
+    "options": [
+      "A) ROW STORE COMPRESS BASICは全てのDML操作（INSERT、UPDATE、DELETE）でデータ圧縮が行われるため、OLTP環境に適している。",
+      "B) ROW STORE COMPRESS ADVANCEDはAdvanced Compression Optionライセンスが必要であり、ブロック内のデータが一定レベルに達するとバッチ方式で自動圧縮が実行される。",
+      "C) Hybrid Columnar Compression（HCC）はすべてのストレージ環境で使用可能であり、50倍以上の圧縮率を実現できる。",
+      "D) ROW STORE COMPRESS BASICが設定されたテーブルに対して通常のINSERT文を実行するとAdvanced Compressionと同等の圧縮率が適用される。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — ROW STORE COMPRESS ADVANCED는 Advanced Compression Option 라이선스가 필요하며, 모든 DML(INSERT, UPDATE, DELETE)에서 압축을 유지합니다. 블록 내 데이터가 일정 수준 채워지면 배치(Batch) 방식으로 자동 압축을 수행하여 DML 성능에 대한 영향을 최소화합니다.\n\nA) 오답 — ROW STORE COMPRESS BASIC은 모든 DML에서 압축하는 것이 아니라, Direct-Path Insert(INSERT /*+ APPEND */, CTAS, SQL*Loader Direct Path 등)에서만 압축이 적용됩니다. 일반 INSERT/UPDATE로 변경된 행은 비압축 상태로 저장됩니다.\n\nC) 오답 — HCC(Hybrid Columnar Compression)는 Oracle Exadata, ZFS Storage Appliance 등 특정 스토리지 환경에서만 지원됩니다. 모든 스토리지에서 사용할 수 있는 것이 아닙니다.\n\nD) 오답 — ROW STORE COMPRESS BASIC이 설정된 테이블이라도 일반 INSERT 문으로 삽입된 행은 비압축 상태로 저장됩니다. 압축이 적용되려면 Direct-Path Insert를 사용해야 합니다.\n\n핵심 개념: Basic Compression은 Enterprise Edition에 포함되며 Direct-Path Insert에서만 압축이 적용됩니다. Advanced Row Compression은 별도 라이선스가 필요하지만 모든 DML에서 압축을 유지하며, 블록 단위 배치 압축을 통해 OLTP 환경에서도 효율적으로 동작합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_017",
+    "title": "Oracle Databaseで以下の操作の前提条件を確認しています。\n\nALTER TABLE hr.employees SHRINK SPACE;\n\nこの操作を成功させるために必要な条件として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) hr.employees表が存在する表領域がMSSM（手動セグメント領域管理）で管理されていること。",
+      "B) hr.employees表に対してALTER TABLE hr.employees ENABLE ROW MOVEMENT;が事前に実行されていること。",
+      "C) hr.employees表に定義されているすべての索引を事前にUNUSABLE状態にすること。",
+      "D) hr.employees表が存在する表領域がASSM（自動セグメント領域管理）で管理されていること。",
+      "E) hr.employees表に対して既にROW STORE COMPRESS BASICが設定されていること。"
+    ],
+    "answer": ["B", "D"],
+    "explanation": "정답: B, D\nB) 정답 — SHRINK SPACE는 세그먼트 끝쪽의 행을 앞쪽 빈 블록으로 재배치하며, 이 과정에서 행의 ROWID가 변경됩니다. 이를 허용하기 위해 사전에 ALTER TABLE ... ENABLE ROW MOVEMENT를 반드시 실행해야 합니다.\n\nD) 정답 — SHRINK SPACE는 ASSM(Automatic Segment Space Management) 테이블스페이스에서만 지원됩니다. ASSM의 비트맵 블록 관리 구조를 활용하여 데이터 재배치를 수행하므로, MSSM 환경에서는 사용할 수 없습니다.\n\nA) 오답 — MSSM(Manual Segment Space Management) 환경에서는 SHRINK SPACE를 사용할 수 없습니다. MSSM 환경에서 공간을 회수하려면 ALTER TABLE MOVE를 사용해야 합니다.\n\nC) 오답 — SHRINK SPACE 실행 시 인덱스를 사전에 UNUSABLE로 만들 필요가 없습니다. SHRINK SPACE는 행의 ROWID가 변경될 때 인덱스의 ROWID 참조를 자동으로 업데이트하여 유효 상태를 유지합니다.\n\nE) 오답 — 이미 압축(COMPRESS)이 설정된 테이블에는 SHRINK SPACE를 실행할 수 없습니다. 이는 SHRINK SPACE의 제약사항 중 하나입니다.\n\n핵심 개념: SHRINK SPACE의 2가지 필수 전제조건은 ROW MOVEMENT ENABLE과 ASSM 테이블스페이스입니다. SHRINK SPACE는 인덱스를 자동으로 유지관리하므로 사전에 UNUSABLE로 만들 필요가 없으며, 압축된 테이블에는 적용할 수 없습니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_018",
+    "title": "ある表に対して大量のDELETE操作を実行し、COMMITを完了しました。しかし、この表に対するFULL TABLE SCANのパフォーマンスが改善されていません。この現象の原因として正しいものを選択してください。",
+    "options": [
+      "A) DELETE操作ではCOMMIT後もREDOログが保持されており、REDO情報がFULL TABLE SCAN時に読み込まれるためである。",
+      "B) DELETE操作ではHWM（最高水位標）が下がらないため、FULL TABLE SCAN時にHWM以下の空ブロックも読み込まれるためである。",
+      "C) DELETE操作後にUNDOデータが保持されており、FULL TABLE SCAN時にUNDO表領域も読み込まれるためである。",
+      "D) DELETE操作で発生した行連鎖（Row Chaining）により、追加のI/Oが発生しているためである。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — DELETE 문은 행 데이터를 삭제하지만 HWM(High Water Mark, 최고수위표)를 하향시키지 않습니다. Oracle이 Full Table Scan을 수행할 때 HWM 아래의 모든 블록을 읽으므로, 대량 DELETE 후에도 빈 블록까지 스캔하게 되어 성능이 개선되지 않습니다. 이를 해결하려면 SHRINK SPACE, ALTER TABLE MOVE, 또는 TRUNCATE(전체 삭제 시)를 사용하여 HWM을 하향시켜야 합니다.\n\nA) 오답 — Redo 로그는 Full Table Scan 시 읽히지 않습니다. Redo 로그는 장애 복구를 위한 변경 이력을 기록하는 것이며, 테이블 데이터 스캔과는 관련이 없습니다.\n\nC) 오답 — Full Table Scan은 테이블의 데이터 블록만 읽으며 UNDO 테이블스페이스를 직접 읽지 않습니다. UNDO 데이터는 읽기 일관성(CR 블록 생성)을 위해 간접적으로 사용되지만, DELETE 후 Full Scan 성능 저하의 직접적 원인은 아닙니다.\n\nD) 오답 — Row Chaining은 행 크기가 블록 크기보다 큰 경우 발생하는 현상이며, DELETE 작업으로 인해 발생하지 않습니다. DELETE 후 Full Scan 성능 저하는 HWM 미하향이 원인입니다.\n\n핵심 개념: DELETE 문은 HWM을 하향시키지 않으므로, 대량 삭제 후에도 Full Table Scan 시 빈 블록까지 읽어 성능이 개선되지 않습니다. SHRINK SPACE(온라인, HWM 하향), ALTER TABLE MOVE(새 세그먼트 생성), TRUNCATE(HWM 초기화) 등으로 HWM을 조정해야 Full Scan 성능이 개선됩니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_019",
+    "title": "Oracle Databaseのテーブルに対してALTER TABLE MOVE（非Online）を実行した後に必要な操作について正しく述べているものを選択してください。",
+    "options": [
+      "A) ALTER TABLE MOVE実行後、テーブルに定義されたすべての索引はINVISIBLE状態になるため、ALTER INDEX ... VISIBLE文で復元する。",
+      "B) ALTER TABLE MOVE実行後、テーブルに定義されたすべての索引はUNUSABLE状態になるため、ALTER INDEX ... REBUILD文で再構築する。",
+      "C) ALTER TABLE MOVE実行後、テーブルの索引は自動的に再構築されるため、追加操作は不要である。",
+      "D) ALTER TABLE MOVE実行後、テーブルの索引を一度DROPしてからCREATE INDEXで再作成する必要がある。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — ALTER TABLE MOVE(비Online)를 실행하면 테이블의 모든 행이 새로운 세그먼트로 이동되어 각 행의 ROWID가 변경됩니다. 기존 인덱스는 변경 전의 ROWID를 참조하고 있으므로 모두 UNUSABLE 상태가 됩니다. 따라서 ALTER INDEX ... REBUILD 문으로 각 인덱스를 재구축해야 합니다.\n\nA) 오답 — ALTER TABLE MOVE 후 인덱스는 INVISIBLE이 아닌 UNUSABLE 상태가 됩니다. INVISIBLE은 옵티마이저에게만 보이지 않는 상태이며 세그먼트는 유지됩니다. UNUSABLE은 인덱스 세그먼트가 삭제된 상태입니다.\n\nC) 오답 — ALTER TABLE MOVE(비Online)에서는 인덱스가 자동으로 재구축되지 않습니다. DBA가 수동으로 ALTER INDEX ... REBUILD를 수행해야 합니다. 참고로 ALTER TABLE MOVE ONLINE(12c R2 이상)의 경우에는 인덱스가 자동 유지됩니다.\n\nD) 오답 — 인덱스를 DROP 후 재작성할 필요는 없습니다. ALTER INDEX ... REBUILD는 기존 인덱스 메타데이터를 활용하여 인덱스를 재구축하므로, DROP+CREATE보다 간편하고 효율적입니다.\n\n핵심 개념: ALTER TABLE MOVE(비Online) 실행 후에는 행의 ROWID 변경으로 인해 모든 인덱스가 UNUSABLE 상태가 되므로 ALTER INDEX ... REBUILD로 재구축해야 합니다. ALTER TABLE MOVE ONLINE(12c R2+)을 사용하면 DML 동시 수행이 가능하고 인덱스가 자동 유지되어 별도의 REBUILD가 불필요합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_020",
+    "title": "DBA_SEGMENTS、DBA_TABLESビューを使用して特定テーブルの領域使用状況を分析しています。以下のSQL文の実行結果を確認してください。\n\nSELECT segment_name, bytes/1024/1024 AS size_mb FROM dba_segments WHERE segment_name='ORDERS';\n\nSEGMENT_NAME  SIZE_MB\n------------- -------\nORDERS            500\n\nSELECT num_rows, avg_row_len FROM dba_tables WHERE table_name='ORDERS';\n\n  NUM_ROWS AVG_ROW_LEN\n---------- -----------\n     50000         200\n\nこの結果から判断できる内容として正しいものを選択してください。",
+    "options": [
+      "A) ORDERS表の実データサイズは約10MBであり、セグメントサイズ500MBと大きな差があるため、セグメント縮小の実施を検討すべきである。",
+      "B) ORDERS表のセグメントサイズが500MBであることは50,000行に対して適切なサイズであり、特別な対応は不要である。",
+      "C) NUM_ROWSとAVG_ROW_LENの値は推定値であるため、DBA_SEGMENTSのBYTESのみを基準に領域管理を行うべきである。",
+      "D) セグメントサイズとデータサイズの差は常にPCTFREEの設定値に起因するものであり、PCTFREE=0に設定すれば差は解消される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 실제 데이터 크기를 추정하면 NUM_ROWS(50,000) × AVG_ROW_LEN(200 bytes) = 약 10MB입니다. 세그먼트 크기가 500MB인데 실제 데이터는 약 10MB이므로, 약 490MB의 공간이 낭비되고 있습니다. 이는 대량 DELETE 후 HWM이 하향되지 않았거나, 과도한 단편화가 발생한 경우에 나타나는 전형적인 패턴입니다. SHRINK SPACE 또는 ALTER TABLE MOVE를 통해 공간을 회수해야 합니다.\n\nB) 오답 — 50,000행 × 200바이트 = 약 10MB의 데이터에 500MB 세그먼트는 명백히 과도합니다. 블록 오버헤드, PCTFREE 등을 고려하더라도 이러한 차이는 정상이 아닙니다.\n\nC) 오답 — NUM_ROWS와 AVG_ROW_LEN은 DBMS_STATS.GATHER_TABLE_STATS 또는 ANALYZE TABLE 후의 통계값으로, 추정이긴 하지만 공간 분석의 중요한 기초 자료입니다. DBA_SEGMENTS의 BYTES만으로는 실제 데이터 대비 낭비율을 판단할 수 없으므로, 두 정보를 함께 분석해야 합니다.\n\nD) 오답 — 세그먼트 크기와 데이터 크기의 차이가 항상 PCTFREE 때문인 것은 아닙니다. 대량 DELETE 후 HWM 미하향, 반복적 INSERT/DELETE로 인한 단편화, Row Migration 등 다양한 원인이 있습니다. PCTFREE=0으로 설정하면 UPDATE 시 Row Migration이 빈번해지는 부작용이 발생합니다.\n\n핵심 개념: DBA_SEGMENTS의 BYTES(세그먼트 크기)와 DBA_TABLES의 NUM_ROWS × AVG_ROW_LEN(실제 데이터 추정 크기)을 비교하여 공간 낭비율을 산정할 수 있습니다. 두 값의 차이가 크면 대량 DELETE 후 HWM 미하향이나 단편화가 원인일 가능성이 높으며, SHRINK SPACE 또는 ALTER TABLE MOVE로 공간을 회수해야 합니다."
+  }
+]

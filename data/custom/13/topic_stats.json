@@ -9,20 +9,23 @@
   },
   "custom_topic_counts": {
     "V$ビュー": 2,
-    "パフォーマンス計画・チューニング": 1,
+    "パフォーマンス計画・チューニング": 2,
     "各種アドバイザ": 1,
     "AWR": 1,
     "オプティマイザ統計": 1,
     "ADR・アラートログ": 1,
-    "STATISTICS_LEVELパラメータ": 1,
+    "STATISTICS_LEVELパラメータ": 2,
     "監視インフラストラクチャ構成要素": 1,
     "ADDM": 1,
     "ASH": 1,
     "PDBレベルADDM": 1,
     "MMONプロセス": 1,
     "AWRレポート活用": 1,
-    "SQL Tuning Advisor": 1
+    "SQL Tuning Advisor": 1,
+    "AWRスナップショット管理コマンド": 1,
+    "AWRレポートTop5解釈": 1,
+    "AWRスナップショットデータ種類": 1
   },
-  "total_custom": 15,
-  "last_number": "C_13_015"
+  "total_custom": 20,
+  "last_number": "C_13_020"
 }

@@ -9,18 +9,19 @@
   },
   "custom_topic_counts": {
     "PDB生成": 1,
-    "PDBの切断と状態": 3,
+    "PDBの切断と状態": 5,
     "PDB初期化パラメータ": 1,
-    "PDBクローンおよび管理": 2,
-    "PDB状態管理（SAVE STATE）": 1,
+    "PDBクローンおよび管理": 3,
+    "PDB状態管理（SAVE STATE）": 2,
     "PDBオープンモード管理": 1,
     "PDB Lockdown Profile": 1,
     "CDB構造とコンテナ体系": 1,
     "共通ユーザーとローカルユーザー": 1,
     "Refreshable Clone PDB": 1,
     "PDB関連ビューとモニタリング": 1,
-    "PDBストレージ制限": 1
+    "PDBストレージ制限": 1,
+    "PDB$SEED": 1
   },
-  "total_custom": 15,
-  "last_number": "C_10_015"
+  "total_custom": 20,
+  "last_number": "C_10_020"
 }

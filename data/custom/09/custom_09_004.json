@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "データの移動",
+    "number": "C_09_016",
+    "title": "Data Pump Exportのスキーマ・モードでエクスポートを行うために以下のコマンドを実行しました。\n\nexpdp system/oracle DIRECTORY=dp_dir DUMPFILE=hr_export.dmp SCHEMAS=HR LOGFILE=hr_export.log\n\nこのコマンドに関する内容について正しく述べているものを選択してください。",
+    "options": [
+      "A) SCHEMASパラメータを指定しているため、HRスキーマのテーブル・データのみがエクスポートされ、索引やビューなどのオブジェクトは含まれない。",
+      "B) HRスキーマに属するすべてのオブジェクト（テーブル、索引、ビュー、プロシージャ等）とデータがhr_export.dmpファイルにエクスポートされる。",
+      "C) SCHEMASモードはFULLモードと同様にEXP_FULL_DATABASEロールが必須であり、一般ユーザーでは実行できない。",
+      "D) LOGFILEパラメータで指定したhr_export.logファイルはクライアント側のローカル・ディレクトリに作成される。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — SCHEMAS=HR을 지정한 스키마 모드 Export에서는 HR 스키마에 속한 모든 객체(테이블, 인덱스, 뷰, 프로시저, 시퀀스, 트리거, 제약조건 등)와 데이터가 덤프 파일(hr_export.dmp)에 Export됩니다. 스키마 모드는 지정 스키마의 전체 객체 세트를 대상으로 합니다.\n\nA) 오답 — SCHEMAS 모드는 테이블 데이터만 Export하는 것이 아니라, 스키마에 속한 모든 객체(인덱스, 뷰, 프로시저 등)와 데이터를 모두 포함합니다. 데이터만 Export하려면 CONTENT=DATA_ONLY 파라미터를 추가해야 합니다.\n\nC) 오답 — SCHEMAS 모드에서 자기 자신의 스키마를 Export할 때는 특별한 권한이 필요하지 않습니다. 다른 사용자의 스키마를 Export할 때는 EXP_FULL_DATABASE 롤 또는 DATAPUMP_EXP_FULL_DATABASE 롤이 필요합니다. 이 예시에서는 SYSTEM 사용자로 실행하므로 권한 문제가 없습니다.\n\nD) 오답 — Data Pump는 서버 측에서 동작하는 유틸리티이므로, LOGFILE로 지정한 로그 파일은 DIRECTORY 파라미터(dp_dir)가 가리키는 데이터베이스 서버의 OS 경로에 생성됩니다. 클라이언트 측 로컬 디렉토리에 생성되는 것이 아닙니다.\n\n핵심 개념: Data Pump의 SCHEMAS 모드는 지정 스키마의 모든 객체와 데이터를 Export합니다. 자기 스키마 Export는 특별 권한 불필요하고, 타 스키마 Export는 EXP_FULL_DATABASE 롤이 필요합니다. 덤프 파일과 로그 파일은 모두 서버 측 Directory Object 경로에 생성됩니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_017",
+    "title": "Data Pump Importでスキーマの移行を行うために以下のコマンドを実行しました。\n\nimpdp system/oracle DIRECTORY=dp_dir DUMPFILE=hr_export.dmp REMAP_SCHEMA=HR:DEV_HR REMAP_TABLESPACE=USERS:DEV_USERS\n\nこのコマンドに関する内容について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) REMAP_SCHEMAパラメータにより、エクスポート元のHRスキーマのすべてのオブジェクト（テーブル、索引、制約等）がDEV_HRスキーマにインポートされる。",
+      "B) REMAP_TABLESPACEパラメータにより、USERS表領域に格納されていたオブジェクトがDEV_USERS表領域に格納される。",
+      "C) REMAP_SCHEMAとREMAP_TABLESPACEは同時に指定することができないため、このコマンドはエラーになる。",
+      "D) REMAP_SCHEMAを使用するために必要な権限はCREATE SESSION権限のみである。",
+      "E) REMAP_SCHEMAを使用するとテーブルのデータのみが移行され、索引や制約などの依存オブジェクトは手動で再作成する必要がある。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — REMAP_SCHEMA=HR:DEV_HR을 지정하면, 덤프 파일 내 HR 스키마에 속한 모든 객체(테이블, 인덱스, 제약조건, 프로시저, 뷰 등)가 DEV_HR 스키마로 이관됩니다. DDL 내의 스키마 참조도 자동으로 변환됩니다.\n\nB) 정답 — REMAP_TABLESPACE=USERS:DEV_USERS를 지정하면, 원본 환경에서 USERS 테이블스페이스에 저장되어 있던 객체가 대상 환경의 DEV_USERS 테이블스페이스에 저장됩니다. 테이블과 인덱스의 TABLESPACE 절이 자동으로 변환됩니다.\n\nC) 오답 — REMAP_SCHEMA와 REMAP_TABLESPACE는 동시에 사용할 수 있으며, 함께 조합하여 스키마와 테이블스페이스를 모두 변환하는 완전한 환경 이관이 가능합니다.\n\nD) 오답 — REMAP_SCHEMA를 사용하여 다른 스키마로 리매핑하려면 IMP_FULL_DATABASE 롤 또는 DATAPUMP_IMP_FULL_DATABASE 롤이 필요합니다. CREATE SESSION 권한만으로는 타 스키마로의 리매핑을 수행할 수 없습니다.\n\nE) 오답 — REMAP_SCHEMA를 사용하면 테이블 데이터뿐만 아니라 인덱스, 제약조건, 트리거, 시퀀스 등 스키마 내의 모든 종속 객체가 함께 대상 스키마로 이관됩니다. 수동 재작성이 필요하지 않습니다.\n\n핵심 개념: Data Pump Import의 REMAP_SCHEMA와 REMAP_TABLESPACE는 동시 사용이 가능하며, 스키마 내 모든 객체(데이터, 인덱스, 제약조건 등)를 대상 스키마와 테이블스페이스로 자동 변환하여 이관합니다. REMAP_SCHEMA 사용에는 IMP_FULL_DATABASE 롤이 필요합니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_018",
+    "title": "Data Pump ExportのPARALLELパラメータを使用した並列エクスポートについて正しく述べているものを選択してください。",
+    "options": [
+      "A) PARALLEL=4を指定すると最大4つのワーカー・プロセスが並行してデータをエクスポートし、複数のダンプ・ファイルに分散して書き込むことで処理速度が向上する。",
+      "B) PARALLELパラメータを使用する場合、DUMPFILEパラメータで複数のファイル名を指定する必要はなく、1つのダンプ・ファイルに並列で書き込まれる。",
+      "C) PARALLELパラメータはData Pump Export(expdp)でのみ使用可能であり、Data Pump Import(impdp)では使用できない。",
+      "D) PARALLELパラメータの値はCPUコア数を超えることができず、指定した値は自動的にCPUコア数に制限される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — PARALLEL 파라미터를 지정하면 해당 수만큼의 Worker 프로세스가 병렬로 데이터를 Export합니다. 효과적인 병렬 처리를 위해 DUMPFILE 파라미터에서 %U 치환 변수를 사용하여 복수의 덤프 파일에 분산 기록해야 합니다(예: DUMPFILE=exp_%U.dmp). 이를 통해 대량 데이터의 Export 처리 속도가 크게 향상됩니다.\n\nB) 오답 — PARALLEL을 사용할 때는 복수의 덤프 파일에 분산 기록하는 것이 필수적입니다. 1개의 파일에 여러 Worker가 동시에 쓰면 I/O 직렬화가 발생하여 병렬 효과가 없습니다. DUMPFILE에 %U 치환 변수를 사용하거나 여러 파일명을 지정해야 합니다.\n\nC) 오답 — PARALLEL 파라미터는 Data Pump Export(expdp)와 Data Pump Import(impdp) 모두에서 사용할 수 있습니다. Import에서도 병렬 Worker를 사용하여 데이터 로딩 속도를 향상시킬 수 있습니다.\n\nD) 오답 — PARALLEL 파라미터의 값은 CPU 코어 수에 자동으로 제한되지 않습니다. 다만 효율적인 병렬 처리를 위해 코어 수와 I/O 대역폭을 고려하여 적절한 값을 설정하는 것이 권장됩니다.\n\n핵심 개념: Data Pump의 PARALLEL 파라미터는 Export/Import 모두에서 사용 가능하며, Worker 프로세스를 병렬로 실행하여 대량 데이터 처리를 가속합니다. 효과적인 병렬화를 위해 DUMPFILE에 %U 치환 변수를 사용하여 복수 파일에 분산 기록해야 합니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_019",
+    "title": "Data Pump Export（expdp）を実行した後にログ・ファイルを確認したところ、以下のエラーが記録されていました。\n\nORA-39002: invalid operation\nORA-39070: Unable to open the log file.\nORA-29283: invalid file operation\nORA-06512: at \"SYS.UTL_FILE\", line 536\n\nこのエラーの原因として最も可能性が高いものを選択してください。",
+    "options": [
+      "A) エクスポート対象のスキーマに対するEXP_FULL_DATABASEロールが付与されていないため。",
+      "B) DIRECTORYパラメータで指定したディレクトリ・オブジェクトが参照するOS上のディレクトリが存在しないか、Oracleプロセスに書き込み権限がないため。",
+      "C) DUMPFILEパラメータで指定したダンプ・ファイルが既に存在しており、上書きが拒否されたため。",
+      "D) UNDO表領域の空き領域が不足しているため、エクスポート処理が中断されたため。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — ORA-39070(Unable to open the log file)과 ORA-29283(invalid file operation)은 Data Pump가 로그 파일을 생성/열기 할 수 없을 때 발생합니다. 가장 일반적인 원인은 DIRECTORY 파라미터로 지정한 디렉토리 객체가 참조하는 OS 경로가 존재하지 않거나, Oracle 프로세스(oracle 사용자)가 해당 디렉토리에 대한 읽기/쓰기 OS 권한을 갖지 않은 경우입니다. UTL_FILE 에러가 함께 나타나는 것이 이를 확인해 줍니다.\n\nA) 오답 — EXP_FULL_DATABASE 롤 부족 시에는 ORA-31631/ORA-39006과 같은 권한 관련 에러가 발생합니다. 파일 열기 실패와는 관련이 없습니다.\n\nC) 오답 — 덤프 파일이 이미 존재하여 상충하는 경우에는 ORA-39001(invalid argument) 또는 ORA-27038(created file already exists) 에러가 발생합니다. 이 경우 REUSE_DUMPFILES=Y 옵션으로 해결합니다. 로그 파일 열기 실패와는 다른 에러입니다.\n\nD) 오답 — UNDO 테이블스페이스 부족은 ORA-30036 에러를 유발하며, Data Pump의 파일 작업 에러와는 관련이 없습니다.\n\n핵심 개념: Data Pump에서 ORA-39070 + ORA-29283 조합은 디렉토리 객체가 참조하는 OS 경로의 문제를 나타냅니다. 디렉토리가 존재하지 않거나 Oracle 프로세스의 OS 권한이 부족한 경우에 발생하며, OS 레벨에서 디렉토리 존재 여부와 oracle 사용자의 읽기/쓰기 권한을 확인해야 합니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_020",
+    "title": "Data Pump Export(expdp)の各エクスポート・モードとその説明の組み合わせについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) FULL=Yを指定するとデータベース全体をエクスポートでき、EXP_FULL_DATABASEロールまたはDATAPUMP_EXP_FULL_DATABASEロールが必要である。",
+      "B) SCHEMASパラメータを使用するとFULLモードと同等の権限が常に必要となり、自分自身のスキーマのエクスポートにもEXP_FULL_DATABASEロールが必須である。",
+      "C) TABLESパラメータを使用すると、指定したテーブルとその依存オブジェクト（索引、制約等）もエクスポートされる。",
+      "D) TABLESPACESパラメータを使用すると、指定した表領域のデータ・ファイルがそのままダンプ・ファイルに格納される。",
+      "E) すべてのエクスポート・モードにおいて、CONTENT=DATA_ONLYがデフォルト設定である。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — FULL=Y를 지정한 Full Export 모드에서는 데이터베이스 전체의 모든 객체와 데이터가 Export됩니다. 이 모드를 실행하려면 EXP_FULL_DATABASE 롤 또는 DATAPUMP_EXP_FULL_DATABASE 롤이 필요합니다.\n\nC) 정답 — TABLES 파라미터를 사용한 Table 모드에서는 지정된 테이블뿐만 아니라 해당 테이블에 종속된 인덱스, 제약조건, 트리거, 그랜트 등의 관련 객체도 함께 Export됩니다.\n\nB) 오답 — SCHEMAS 모드에서 자기 자신의 스키마를 Export할 때는 특별한 권한이 필요하지 않습니다. EXP_FULL_DATABASE 롤은 다른 사용자의 스키마를 Export할 때만 필요합니다. SCHEMAS는 파라미터를 생략하면 현재 사용자의 스키마가 기본값으로 적용됩니다.\n\nD) 오답 — TABLESPACES 모드는 지정된 테이블스페이스에 속한 객체의 데이터와 메타데이터를 Export하는 것이며, 데이터 파일 자체를 덤프 파일에 복사하는 것이 아닙니다. 데이터 파일 자체를 포함하는 것은 TRANSPORT_TABLESPACES(트랜스포터블 테이블스페이스) 모드의 특성입니다.\n\nE) 오답 — 모든 Export 모드에서 CONTENT 파라미터의 기본값은 ALL(데이터 + 메타데이터)입니다. DATA_ONLY는 데이터만, METADATA_ONLY는 메타데이터(DDL)만 Export할 때 명시적으로 지정해야 합니다.\n\n핵심 개념: Data Pump Export의 5가지 모드(FULL, SCHEMAS, TABLES, TABLESPACES, TRANSPORTABLE)는 각각 다른 범위와 권한 요구사항을 가집니다. FULL 모드는 EXP_FULL_DATABASE 롤 필수, SCHEMAS 모드는 자기 스키마에는 특별 권한 불필요, CONTENT 기본값은 ALL(데이터+메타데이터)입니다."
+  }
+]

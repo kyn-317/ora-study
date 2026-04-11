@@ -8,14 +8,18 @@
   "custom_topic_counts": {
     "事前定義済みタスク": 2,
     "メンテナンス・ウィンドウとリソース管理": 5,
-    "DBMS_AUTO_TASK_ADMIN制御": 2,
+    "DBMS_AUTO_TASK_ADMIN制御": 3,
     "AutoTask実行履歴モニタリング": 1,
     "ウィンドウ終了時タスク動作": 1,
     "ウィンドウ中重複処理": 1,
     "AutoTask全体無効化": 1,
     "DBA_AUTOTASK_WINDOW_CLIENTSビュー": 1,
-    "DEFAULT_MAINTENANCE_PLANリソース構造": 1
+    "DEFAULT_MAINTENANCE_PLANリソース構造": 1,
+    "ウィンドウ属性変更コマンド": 1,
+    "統計未収集原因診断": 1,
+    "Resource Plan自動切替": 1,
+    "ウィンドウ作成手順": 1
   },
-  "total_custom": 15,
-  "last_number": "C_12_015"
+  "total_custom": 20,
+  "last_number": "C_12_020"
 }

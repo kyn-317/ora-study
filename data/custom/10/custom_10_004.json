@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_016",
+    "title": "PDBのスナップショット・コピー・クローンを作成する際のソースPDBの状態要件について正しく述べているものを選択してください。",
+    "options": [
+      "A) ソースPDBはREAD WRITEモードでオープンされている状態でスナップショット・コピー・クローンを作成できる。",
+      "B) ソースPDBはREAD ONLYモードでオープンされている状態にする必要があり、READ WRITEモードではクローン作成ができない。",
+      "C) ソースPDBはMOUNTED（クローズ）状態にする必要があり、オープン中はクローン作成が実行できない。",
+      "D) ソースPDBの状態に関わらず、CDB$ROOTがOPEN状態であればスナップショット・コピー・クローンを常に作成できる。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — PDB의 스냅샷 복사(Snapshot Copy) 클론은 소스 PDB가 READ WRITE 모드로 열려 있는 상태에서 생성할 수 있습니다. 스냅샷 복사는 스토리지 레벨의 스냅샷 기능(Copy-on-Write)을 활용하여 소스 PDB의 데이터 파일에 대한 스냅샷을 생성하므로, 소스 PDB를 READ ONLY로 전환하거나 CLOSE할 필요가 없습니다. CREATE PLUGGABLE DATABASE ... FROM ... SNAPSHOT COPY 구문을 사용합니다.\n\nB) 오답 — 일반적인 PDB 클론(Hot Clone이 아닌 경우)은 소스 PDB를 READ ONLY로 전환해야 할 수 있지만, 스냅샷 복사 클론은 스토리지 레벨 스냅샷을 사용하므로 READ ONLY 전환이 필수가 아닙니다.\n\nC) 오답 — 스냅샷 복사 클론은 소스 PDB가 OPEN 상태에서도 생성 가능합니다. MOUNTED 상태로 전환할 필요가 없습니다.\n\nD) 오답 — CDB$ROOT가 OPEN 상태이고 소스 PDB가 OPEN이어야 하지만, 추가로 스냅샷 복사를 지원하는 스토리지(ACFS, Direct NFS 등) 환경이어야 합니다. 스토리지 환경 요건이 충족되지 않으면 스냅샷 복사 클론을 생성할 수 없습니다.\n\n핵심 개념: PDB 스냅샷 복사(Snapshot Copy) 클론은 스토리지 레벨의 Copy-on-Write 기능을 활용하여 소스 PDB가 READ WRITE 상태에서도 빠르게 생성할 수 있습니다. 단, ACFS나 Direct NFS 등 스냅샷을 지원하는 스토리지 환경이 필요하며, 클론 PDB는 소스 PDB와 동일한 스토리지에서 데이터를 공유합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_017",
+    "title": "PDBをあるCDBから別のCDBに移行する全体の手順について正しく述べているものを選択してください。",
+    "options": [
+      "A) ソースCDBでPDBをCLOSEしてUnplug → 対象CDBでDBMS_PDB.CHECK_PLUG_COMPATIBILITYで互換性確認 → CREATE PLUGGABLE DATABASE ... USING文でPlug In → 新規PDBをOPEN → ソースCDBでDROP PLUGGABLE DATABASEで削除",
+      "B) ソースCDBでPDBをREAD ONLYに変更してUnplug → 対象CDBでCREATE PLUGGABLE DATABASE ... USING文でPlug In → 互換性確認はPlug In後に自動的に行われるため不要",
+      "C) ソースCDBでDROP PLUGGABLE DATABASEで削除 → 削除されたPDBのデータ・ファイルを対象CDBに移動 → CREATE PLUGGABLE DATABASE文で作成",
+      "D) ソースCDBと対象CDBの両方を同時にSHUTDOWNし、データ・ファイルを手動で移動してからSTARTUPすることでPDBが自動的に移行される"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — PDB를 다른 CDB로 이전하는 올바른 전체 절차입니다:\n1. 소스 CDB에서 PDB를 CLOSE(MOUNTED) 상태로 전환합니다.\n2. ALTER PLUGGABLE DATABASE ... UNPLUG INTO로 Unplug합니다(.xml 또는 .pdb 파일 생성).\n3. 대상 CDB에서 DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수로 호환성을 사전 검사합니다.\n4. CREATE PLUGGABLE DATABASE ... USING 문으로 대상 CDB에 Plug In합니다.\n5. 새 PDB를 OPEN하여 사용 가능 상태로 만듭니다.\n6. 소스 CDB에서 UNPLUGGED 상태의 PDB를 DROP PLUGGABLE DATABASE로 데이터 딕셔너리에서 제거합니다.\n\nB) 오답 — Unplug 전에 PDB는 READ ONLY가 아닌 CLOSE(MOUNTED) 상태여야 합니다. 또한 호환성 검사는 자동이 아니라 Plug In 전에 DBA가 DBMS_PDB.CHECK_PLUG_COMPATIBILITY를 실행하여 사전에 확인해야 합니다. 호환성 문제가 있으면 Plug In이 실패하거나 위반 사항이 PDB_PLUG_IN_VIOLATIONS 뷰에 기록됩니다.\n\nC) 오답 — PDB를 먼저 DROP하면 메타데이터가 삭제되어 다른 CDB로 이전할 수 없습니다. 반드시 Unplug를 먼저 수행하여 메타데이터를 XML 또는 .pdb 파일로 내보낸 후에, 소스 CDB에서 DROP해야 합니다.\n\nD) 오답 — PDB 이전은 Unplug/Plug In 메커니즘으로 수행하며, CDB를 동시에 SHUTDOWN하거나 데이터 파일을 수동으로 이동하는 방법은 지원되지 않습니다.\n\n핵심 개념: PDB를 다른 CDB로 이전하는 절차는 CLOSE → Unplug → 호환성 검사 → Plug In → OPEN → (소스에서) DROP 순서입니다. Unplug 전 PDB는 반드시 CLOSE 상태여야 하며, Plug In 전에 DBMS_PDB.CHECK_PLUG_COMPATIBILITY로 호환성을 사전 검증해야 합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_018",
+    "title": "PDB$SEEDコンテナの特性と制約事項について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) PDB$SEEDはCON_ID=2の特殊なコンテナであり、常にREAD ONLYモードで維持される。",
+      "B) PDB$SEEDはCDB内から削除可能であり、削除後はPDBのクローニングのみでPDBを作成できる。",
+      "C) PDB$SEEDのSYSTEM表領域やSYSAUX表領域のデータ・ファイルは新規PDB作成時にコピーされてPDB専用のデータ・ファイルとなる。",
+      "D) PDB$SEEDに対して通常のDDL/DML操作を実行して、新規PDB作成時のデフォルト・スキーマやオブジェクトを追加することが推奨されている。",
+      "E) PDB$SEEDのCON_IDはPDBの生成順によって動的に変更される。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — PDB$SEED는 항상 CON_ID=2인 CDB의 필수 구성요소이며, 새로운 PDB 생성 시 템플릿(골든 이미지)으로 사용됩니다. PDB$SEED는 항상 READ ONLY 모드로 유지되어 데이터 변경이 차단됩니다.\n\nC) 정답 — 새로운 PDB를 PDB$SEED에서 생성할 때, PDB$SEED의 데이터 파일(SYSTEM 테이블스페이스, SYSAUX 테이블스페이스 등)이 복사되어 새 PDB 전용의 데이터 파일이 생성됩니다. 각 PDB는 독립적인 SYSTEM 및 SYSAUX 테이블스페이스를 보유합니다.\n\nB) 오답 — PDB$SEED는 CDB의 필수 구성요소이므로 삭제할 수 없습니다. CDB가 존재하는 한 PDB$SEED는 항상 유지됩니다.\n\nD) 오답 — PDB$SEED에 대해 DDL/DML을 수행하는 것은 일반적으로 권장되지 않으며, 잘못된 수정은 이후 PDB 생성에 영향을 미칠 수 있습니다. 특수한 경우에만 READ WRITE FORCE로 열어 수정하고 반드시 READ ONLY로 복원해야 합니다.\n\nE) 오답 — PDB$SEED의 CON_ID는 항상 2로 고정되어 있습니다. PDB 생성 순서에 의해 변경되지 않습니다. 사용자 PDB는 CON_ID=3 이상의 값이 할당됩니다.\n\n핵심 개념: PDB$SEED는 CON_ID=2의 삭제 불가능한 시드 컨테이너로, 항상 READ ONLY 모드를 유지합니다. 새 PDB 생성 시 PDB$SEED의 데이터 파일이 복사되어 새 PDB의 SYSTEM, SYSAUX 테이블스페이스가 독립적으로 생성됩니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_019",
+    "title": "マルチテナント環境でのSAVE STATE機能について正しく述べているものを選択してください。",
+    "options": [
+      "A) ALTER PLUGGABLE DATABASE ... SAVE STATEを実行するとPDBの現在のオープン・モードがCDB$ROOTのデータ・ディクショナリに永続的に保存され、CDB再起動時に自動的に復元される。",
+      "B) SAVE STATEはPDBがMOUNTED状態のときに実行し、次回CDB起動時にそのPDBをMOUNTEDのまま維持する機能である。",
+      "C) SAVE STATEで保存した情報はCDB$ROOTの制御ファイルに記録されるため、制御ファイルの障害時にはSAVE STATE情報も失われる。",
+      "D) SAVE STATEを実行した後にDISCARD STATEを実行しない限り、該当PDBはALTER PLUGGABLE DATABASE ... CLOSE文でクローズすることができない。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — ALTER PLUGGABLE DATABASE ... SAVE STATE를 실행하면 PDB의 현재 오픈 모드(READ WRITE, READ ONLY 등)가 CDB$ROOT의 데이터 딕셔너리(PDB_SAVED_STATES$ 내부 테이블)에 영구적으로 저장됩니다. CDB를 재시작(SHUTDOWN → STARTUP)하면 Oracle이 저장된 상태를 읽어 해당 PDB를 자동으로 이전 오픈 모드로 복원합니다.\n\nB) 오답 — SAVE STATE는 PDB가 OPEN(READ WRITE 또는 READ ONLY) 상태에서만 실행할 수 있으며, MOUNTED 상태에서는 실행할 수 없습니다. SAVE STATE의 목적은 CDB 재시작 시 PDB를 저장된 오픈 모드로 자동 복원하는 것입니다.\n\nC) 오답 — SAVE STATE 정보는 제어 파일이 아닌 CDB$ROOT의 데이터 딕셔너리(데이터 파일 내)에 저장됩니다. 따라서 제어 파일 장애와는 직접적인 관련이 없습니다.\n\nD) 오답 — SAVE STATE와 PDB의 CLOSE 작업은 독립적인 기능입니다. SAVE STATE를 실행했더라도 ALTER PLUGGABLE DATABASE ... CLOSE로 PDB를 정상적으로 닫을 수 있습니다. SAVE STATE는 CDB 재시작 시의 자동 오픈 동작만 제어합니다.\n\n핵심 개념: SAVE STATE는 PDB가 OPEN 상태일 때 실행하여 오픈 모드를 데이터 딕셔너리에 영구 저장합니다. CDB 재시작 시 저장된 상태에 따라 PDB가 자동 오픈되며, DISCARD STATE로 저장된 상태를 삭제할 수 있습니다. DBA_PDB_SAVED_STATES 뷰로 저장 상태를 확인합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_020",
+    "title": "マルチテナント環境でPDBに対してUnplug操作を実行する際の前提条件について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Unplug対象のPDBはCLOSE（MOUNTED）状態にしておく必要がある。",
+      "B) Unplug対象のPDBはREAD ONLYモードでオープンされた状態でUnplug操作を実行する必要がある。",
+      "C) Unplug操作はCDB$ROOTに接続した状態で、SYSDBAまたはSYSOPER権限を持つユーザーが実行する。",
+      "D) Unplug操作を実行する前に、対象PDB内のすべてのユーザー・データを手動でバックアップし削除する必要がある。",
+      "E) Unplug操作を実行するとPDBは自動的にDROPされるため、明示的なDROP操作は不要である。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — PDB를 Unplug하기 전에 반드시 CLOSE(MOUNTED) 상태로 전환해야 합니다. ALTER PLUGGABLE DATABASE ... CLOSE IMMEDIATE로 PDB를 닫은 후 Unplug를 수행합니다. OPEN 상태에서는 Unplug를 실행할 수 없습니다.\n\nC) 정답 — Unplug 작업은 CDB$ROOT에 접속한 상태에서 SYSDBA 또는 SYSOPER 권한을 가진 사용자가 수행해야 합니다. ALTER PLUGGABLE DATABASE ... UNPLUG INTO 문은 CDB 레벨의 관리 작업이므로 CDB$ROOT에서 실행합니다.\n\nB) 오답 — Unplug 대상 PDB는 READ ONLY가 아닌 CLOSE(MOUNTED) 상태여야 합니다. OPEN 상태(READ WRITE든 READ ONLY든)에서는 Unplug를 실행할 수 없습니다.\n\nD) 오답 — Unplug 시 PDB 내의 사용자 데이터를 수동으로 백업하고 삭제할 필요가 없습니다. Unplug는 PDB의 메타데이터를 XML 또는 .pdb 파일로 내보내며, 데이터 파일은 원래 위치에 유지됩니다(XML 방식) 또는 아카이브 내에 포함됩니다(.pdb 방식).\n\nE) 오답 — Unplug 후 PDB는 CDB 데이터 딕셔너리에 UNPLUGGED 상태로 남아 있습니다. 데이터 딕셔너리에서 완전히 제거하려면 별도로 DROP PLUGGABLE DATABASE 문을 실행해야 합니다. Unplug만으로는 자동 DROP되지 않습니다.\n\n핵심 개념: PDB Unplug의 전제조건은 PDB가 CLOSE(MOUNTED) 상태이고, CDB$ROOT에 SYSDBA/SYSOPER 권한으로 접속한 상태에서 실행하는 것입니다. Unplug 후 PDB는 UNPLUGGED 상태로 남으며, 데이터 딕셔너리에서 제거하려면 별도 DROP이 필요합니다."
+  }
+]

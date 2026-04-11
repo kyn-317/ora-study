@@ -23,8 +23,13 @@
     "接続ディスクリプタ(CONNECT_DATA)": 1,
     "SERVICE_NAMESパラメータ": 1,
     "データベース・リンク接続方式": 1,
-    "GLOBAL_NAMESパラメータ": 1
+    "GLOBAL_NAMESパラメータ": 1,
+    "lsnrctl status出力解釈": 1,
+    "リスナー停止時の接続エラー": 1,
+    "データベース・リンク参照構文": 1,
+    "データベース・リンク作成構文": 1,
+    "接続処理のフロー": 1
   },
-  "total_custom": 15,
-  "last_number": "C_04_015"
+  "total_custom": 20,
+  "last_number": "C_04_020"
 }

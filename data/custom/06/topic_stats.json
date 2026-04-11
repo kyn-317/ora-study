@@ -16,8 +16,13 @@
     "表領域とデータ・ファイルの関係": 1,
     "一時表領域の管理": 1,
     "表領域のオフライン/オンライン操作": 1,
-    "Oracle Managed Files (OMF)": 1
+    "Oracle Managed Files (OMF)": 1,
+    "BIGFILE表領域の作成とAUTOEXTEND": 1,
+    "データ・ファイル満杯時のエラー対応": 1,
+    "表領域の削除(DROP TABLESPACE)": 1,
+    "表領域の状態管理": 1,
+    "AUTOEXTEND構文と制約": 1
   },
-  "total_custom": 15,
-  "last_number": "C_06_015"
+  "total_custom": 20,
+  "last_number": "C_06_020"
 }
