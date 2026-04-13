@@ -33,9 +33,9 @@
 
 ## Phase 3 — Advanced Features (고도화)
 - [ ] 약점 기반 맞춤 재시험 (틀린 문제 위주)
-- [ ] 시계열 성장 그래프
-- [ ] 오답 선택지 패턴 분석
-- [ ] 오답노트 기능
+- [x] 시계열 성장 그래프 (Trends 탭 상단 SVG 라인 차트, 세트별 색상, 3회 이동평균)
+- [x] 오답 선택지 패턴 분석 (Weak Points 탭 expandable 상세, 오답 선택지 빈도, same-wrong 감지)
+- [x] 오답노트 기능 (`/mock-exam/wrong-notes` 별도 페이지, 메모 CRUD, 필터/정렬)
 
 ## Data Structure
 

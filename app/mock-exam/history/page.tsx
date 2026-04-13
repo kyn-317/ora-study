@@ -22,6 +22,16 @@ export interface WeakQuestion {
   wrongCount: number;
   totalAttempts: number;
   wrongRate: number;
+  selectedPattern: Record<string, number>;
+  correctAnswer: string[];
+  alwaysSameWrong: boolean;
+}
+
+export interface TimelinePoint {
+  completedAt: string;
+  scoreRate: number;
+  examSet: number;
+  movingAvg: number | null;
 }
 
 export interface AnalyticsData {
@@ -29,6 +39,7 @@ export interface AnalyticsData {
   chapterStats: ChapterStat[];
   setStats: SetStat[];
   weakQuestions: WeakQuestion[];
+  timeline: TimelinePoint[];
   totalExams: number;
   averageScore: number;
   bestScore: number;
@@ -44,6 +55,7 @@ function computeAnalytics(results: { fileName: string; result: ExamResult }[]): 
       chapterStats: [],
       setStats: [],
       weakQuestions: [],
+      timeline: [],
       totalExams: 0,
       averageScore: 0,
       bestScore: 0,
@@ -107,32 +119,83 @@ function computeAnalytics(results: { fileName: string; result: ExamResult }[]): 
   }
   const setStats = [...setMap.values()].sort((a, b) => a.examSet - b.examSet);
 
-  // Weak questions (wrong 2+ times)
-  const questionMap = new Map<string, { chapter: string; wrongCount: number; totalAttempts: number }>();
+  // Weak questions (wrong 2+ times) with selection pattern
+  const questionMap = new Map<string, {
+    chapter: string;
+    wrongCount: number;
+    totalAttempts: number;
+    selectedPattern: Record<string, number>;
+    correctAnswer: string[];
+    wrongSelections: string[][];
+  }>();
   for (const { result } of results) {
     for (const ans of result.answers) {
-      const existing = questionMap.get(ans.questionId) || { chapter: ans.chapter, wrongCount: 0, totalAttempts: 0 };
+      const existing = questionMap.get(ans.questionId) || {
+        chapter: ans.chapter,
+        wrongCount: 0,
+        totalAttempts: 0,
+        selectedPattern: {},
+        correctAnswer: ans.correct,
+        wrongSelections: [],
+      };
       existing.totalAttempts++;
-      if (!ans.isCorrect) existing.wrongCount++;
+      if (!ans.isCorrect) {
+        existing.wrongCount++;
+        // Track selected options when wrong
+        for (const sel of ans.selected) {
+          existing.selectedPattern[sel] = (existing.selectedPattern[sel] || 0) + 1;
+        }
+        existing.wrongSelections.push([...ans.selected].sort());
+      }
       questionMap.set(ans.questionId, existing);
     }
   }
   const weakQuestions: WeakQuestion[] = [...questionMap.entries()]
     .filter(([, stat]) => stat.wrongCount >= 2)
-    .map(([questionId, stat]) => ({
-      questionId,
-      chapter: stat.chapter,
-      wrongCount: stat.wrongCount,
-      totalAttempts: stat.totalAttempts,
-      wrongRate: Math.round((stat.wrongCount / stat.totalAttempts) * 1000) / 10,
-    }))
+    .map(([questionId, stat]) => {
+      // Check if always same wrong answer
+      const alwaysSameWrong = stat.wrongSelections.length >= 2 &&
+        stat.wrongSelections.every((sel) => sel.join(',') === stat.wrongSelections[0].join(','));
+
+      return {
+        questionId,
+        chapter: stat.chapter,
+        wrongCount: stat.wrongCount,
+        totalAttempts: stat.totalAttempts,
+        wrongRate: Math.round((stat.wrongCount / stat.totalAttempts) * 1000) / 10,
+        selectedPattern: stat.selectedPattern,
+        correctAnswer: stat.correctAnswer,
+        alwaysSameWrong,
+      };
+    })
     .sort((a, b) => b.wrongCount - a.wrongCount || b.wrongRate - a.wrongRate);
+
+  // Timeline (all exams sorted chronologically with moving average)
+  const sorted = [...results].sort((a, b) =>
+    a.result.completedAt.localeCompare(b.result.completedAt)
+  );
+  const timeline: TimelinePoint[] = sorted.map((r, i) => {
+    let movingAvg: number | null = null;
+    if (i >= 2) {
+      const window = sorted.slice(i - 2, i + 1);
+      movingAvg = Math.round(
+        (window.reduce((sum, w) => sum + w.result.scoreRate, 0) / window.length) * 10
+      ) / 10;
+    }
+    return {
+      completedAt: r.result.completedAt,
+      scoreRate: r.result.scoreRate,
+      examSet: r.result.examSet,
+      movingAvg,
+    };
+  });
 
   return {
     results,
     chapterStats,
     setStats,
     weakQuestions,
+    timeline,
     totalExams,
     averageScore,
     bestScore,

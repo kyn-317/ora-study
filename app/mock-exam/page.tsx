@@ -28,7 +28,7 @@ export default async function MockExamHome() {
         </p>
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
         <Link href="/mock-exam/history" style={{
           display: 'inline-block',
           padding: '0.75rem 2rem',
@@ -40,6 +40,18 @@ export default async function MockExamHome() {
           fontSize: '0.95rem',
         }}>
           Analytics Dashboard &rarr;
+        </Link>
+        <Link href="/mock-exam/wrong-notes" style={{
+          display: 'inline-block',
+          padding: '0.75rem 2rem',
+          borderRadius: '12px',
+          border: '1px solid rgba(248, 113, 113, 0.2)',
+          background: 'rgba(30, 31, 41, 0.6)',
+          color: '#fca5a5',
+          fontWeight: 600,
+          fontSize: '0.95rem',
+        }}>
+          Wrong Notes &rarr;
         </Link>
       </div>
 

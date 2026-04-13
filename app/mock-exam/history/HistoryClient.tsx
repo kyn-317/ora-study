@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useRef } from 'react';
-import type { AnalyticsData, ChapterStat, SetStat, WeakQuestion } from './page';
+import type { AnalyticsData, ChapterStat, SetStat, WeakQuestion, TimelinePoint } from './page';
 import type { ExamResult } from '../../../lib/data';
 
 type Tab = 'history' | 'chapters' | 'trends' | 'weak';
@@ -152,15 +152,224 @@ function ChaptersTab({ chapterStats }: { chapterStats: ChapterStat[] }) {
   );
 }
 
+// ── Timeline Chart (SVG) ──
+
+const SET_COLORS: Record<number, string> = {
+  1: '#43abf0', // color-4 blue
+  2: '#cb7af0', // color-5 purple
+  3: '#34d399', // green
+  4: '#fbbf24', // amber
+  5: '#f87171', // red
+};
+
+function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
+  const [hovered, setHovered] = useState<number | null>(null);
+
+  if (timeline.length < 2) return null;
+
+  const W = 700;
+  const H = 250;
+  const PAD = { top: 30, right: 30, bottom: 50, left: 45 };
+  const plotW = W - PAD.left - PAD.right;
+  const plotH = H - PAD.top - PAD.bottom;
+
+  // X: index-based (equal spacing)
+  const xScale = (i: number) => PAD.left + (i / (timeline.length - 1)) * plotW;
+  // Y: 0–100%
+  const yScale = (v: number) => PAD.top + plotH - (v / 100) * plotH;
+
+  // Data points
+  const points = timeline.map((p, i) => ({ x: xScale(i), y: yScale(p.scoreRate), ...p, idx: i }));
+
+  // Moving average line
+  const maPoints = timeline
+    .map((p, i) => (p.movingAvg !== null ? { x: xScale(i), y: yScale(p.movingAvg) } : null))
+    .filter(Boolean) as { x: number; y: number }[];
+  const maPath = maPoints.length >= 2
+    ? maPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ')
+    : '';
+
+  // Y-axis ticks
+  const yTicks = [0, 25, 50, 70, 100];
+
+  // X-axis labels (show a few dates)
+  const labelCount = Math.min(timeline.length, 6);
+  const labelIndices: number[] = [];
+  for (let i = 0; i < labelCount; i++) {
+    labelIndices.push(Math.round((i / (labelCount - 1)) * (timeline.length - 1)));
+  }
+
+  return (
+    <div className="glass" style={{ padding: '1.5rem', borderRadius: '14px', marginBottom: '1.5rem', overflowX: 'auto' }}>
+      <h3 style={{ color: 'var(--color-4)', fontSize: '0.95rem', fontWeight: 600, marginBottom: '1rem' }}>
+        Score Timeline
+      </h3>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxWidth: W, height: 'auto' }}>
+        {/* Grid lines */}
+        {yTicks.map((v) => (
+          <line
+            key={v}
+            x1={PAD.left}
+            y1={yScale(v)}
+            x2={W - PAD.right}
+            y2={yScale(v)}
+            stroke={v === 70 ? 'rgba(52, 211, 153, 0.4)' : 'rgba(255,255,255,0.06)'}
+            strokeDasharray={v === 70 ? '6 4' : 'none'}
+          />
+        ))}
+
+        {/* Y-axis labels */}
+        {yTicks.map((v) => (
+          <text
+            key={v}
+            x={PAD.left - 8}
+            y={yScale(v) + 4}
+            textAnchor="end"
+            fill={v === 70 ? '#34d399' : 'rgba(255,255,255,0.4)'}
+            fontSize="11"
+          >
+            {v}%
+          </text>
+        ))}
+
+        {/* X-axis labels */}
+        {labelIndices.map((i) => {
+          const d = new Date(timeline[i].completedAt);
+          const label = `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
+          return (
+            <text
+              key={i}
+              x={xScale(i)}
+              y={H - PAD.bottom + 20}
+              textAnchor="middle"
+              fill="rgba(255,255,255,0.4)"
+              fontSize="11"
+            >
+              {label}
+            </text>
+          );
+        })}
+
+        {/* Connecting lines between points (by exam set color) */}
+        {points.map((p, i) => {
+          if (i === 0) return null;
+          const prev = points[i - 1];
+          return (
+            <line
+              key={`line-${i}`}
+              x1={prev.x}
+              y1={prev.y}
+              x2={p.x}
+              y2={p.y}
+              stroke="rgba(255,255,255,0.1)"
+              strokeWidth="1"
+            />
+          );
+        })}
+
+        {/* Moving average line */}
+        {maPath && (
+          <path
+            d={maPath}
+            fill="none"
+            stroke="rgba(251, 191, 36, 0.6)"
+            strokeWidth="2"
+            strokeDasharray="4 3"
+          />
+        )}
+
+        {/* Data points */}
+        {points.map((p) => (
+          <circle
+            key={p.idx}
+            cx={p.x}
+            cy={p.y}
+            r={hovered === p.idx ? 7 : 5}
+            fill={SET_COLORS[p.examSet] || '#43abf0'}
+            stroke="rgba(0,0,0,0.3)"
+            strokeWidth="1.5"
+            style={{ cursor: 'pointer', transition: 'r 0.15s ease' }}
+            onMouseEnter={() => setHovered(p.idx)}
+            onMouseLeave={() => setHovered(null)}
+          />
+        ))}
+
+        {/* Tooltip */}
+        {hovered !== null && (() => {
+          const p = points[hovered];
+          const d = new Date(p.completedAt);
+          const dateStr = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+          const lines = [`Set ${p.examSet}`, `${p.scoreRate}%`, dateStr];
+          const tipW = 130;
+          const tipH = 56;
+          const tipX = Math.min(p.x - tipW / 2, W - PAD.right - tipW);
+          const tipY = p.y - tipH - 12;
+
+          return (
+            <g>
+              <rect
+                x={Math.max(PAD.left, tipX)}
+                y={tipY}
+                width={tipW}
+                height={tipH}
+                rx="8"
+                fill="rgba(20, 21, 30, 0.95)"
+                stroke="rgba(255,255,255,0.15)"
+              />
+              {lines.map((line, i) => (
+                <text
+                  key={i}
+                  x={Math.max(PAD.left, tipX) + tipW / 2}
+                  y={tipY + 16 + i * 16}
+                  textAnchor="middle"
+                  fill={i === 0 ? SET_COLORS[p.examSet] || '#43abf0' : i === 1 ? '#fff' : 'rgba(255,255,255,0.5)'}
+                  fontSize={i === 1 ? '13' : '11'}
+                  fontWeight={i <= 1 ? '600' : '400'}
+                >
+                  {line}
+                </text>
+              ))}
+            </g>
+          );
+        })()}
+      </svg>
+
+      {/* Legend */}
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+        {[...new Set(timeline.map((p) => p.examSet))].sort().map((setId) => (
+          <div key={setId} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <div style={{
+              width: '10px', height: '10px', borderRadius: '50%',
+              background: SET_COLORS[setId] || '#43abf0',
+            }} />
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Set {setId}</span>
+          </div>
+        ))}
+        {maPath && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <div style={{
+              width: '16px', height: '2px',
+              background: 'rgba(251, 191, 36, 0.6)',
+              borderTop: '1px dashed rgba(251, 191, 36, 0.6)',
+            }} />
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>3-exam avg</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Tab: Score Trends ──
 
-function TrendsTab({ setStats }: { setStats: SetStat[] }) {
+function TrendsTab({ setStats, timeline }: { setStats: SetStat[]; timeline: TimelinePoint[] }) {
   if (setStats.length === 0) {
     return <EmptyState />;
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <TimelineChart timeline={timeline} />
       {setStats.map((stat) => (
         <div key={stat.examSet} className="glass" style={{
           padding: '1.5rem 2rem',
@@ -240,6 +449,108 @@ function TrendsTab({ setStats }: { setStats: SetStat[] }) {
 
 // ── Tab: Weak Questions ──
 
+function WeakQuestionCard({ q }: { q: WeakQuestion }) {
+  const [expanded, setExpanded] = useState(false);
+  const patternEntries = Object.entries(q.selectedPattern).sort(([, a], [, b]) => b - a);
+  const maxCount = patternEntries.length > 0 ? patternEntries[0][1] : 1;
+
+  return (
+    <div className="glass" style={{
+      borderRadius: '10px',
+      overflow: 'hidden',
+      borderColor: q.alwaysSameWrong ? 'rgba(248, 113, 113, 0.25)' : undefined,
+    }}>
+      <div
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          padding: '1rem 1.25rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          cursor: 'pointer',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <span style={{ fontWeight: 500, fontSize: '0.9rem' }}>{q.questionId}</span>
+          {q.alwaysSameWrong && (
+            <span style={{
+              padding: '0.1rem 0.45rem', borderRadius: '999px', fontSize: '0.65rem',
+              fontWeight: 600, background: 'rgba(248, 113, 113, 0.15)', color: '#f87171',
+            }}>
+              same wrong
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            {q.wrongCount} / {q.totalAttempts} wrong
+          </span>
+          <span style={{
+            padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600,
+            background: q.wrongRate === 100 ? 'rgba(248, 113, 113, 0.2)' : 'rgba(251, 191, 36, 0.2)',
+            color: q.wrongRate === 100 ? '#f87171' : '#fbbf24',
+          }}>
+            {q.wrongRate}%
+          </span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', transition: 'transform 0.2s', transform: expanded ? 'rotate(180deg)' : 'rotate(0)' }}>
+            &#9660;
+          </span>
+        </div>
+      </div>
+
+      {expanded && (
+        <div style={{
+          padding: '0 1.25rem 1.25rem',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          paddingTop: '1rem',
+        }}>
+          {/* Correct answer */}
+          <div style={{ marginBottom: '0.75rem', fontSize: '0.85rem' }}>
+            <span style={{ color: 'var(--text-muted)' }}>Correct: </span>
+            <span style={{ color: '#34d399', fontWeight: 600 }}>{q.correctAnswer.join(', ')}</span>
+          </div>
+
+          {/* Wrong selection frequency */}
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+            Wrong selections (when incorrect):
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            {patternEntries.map(([letter, count]) => {
+              const isCorrect = q.correctAnswer.includes(letter);
+              const barPct = (count / maxCount) * 100;
+              return (
+                <div key={letter} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <span style={{
+                    width: '20px', fontWeight: 600, fontSize: '0.85rem', textAlign: 'center',
+                    color: isCorrect ? '#34d399' : '#f87171',
+                  }}>
+                    {letter}
+                  </span>
+                  <div style={{
+                    flex: 1, height: '6px', borderRadius: '3px',
+                    background: 'rgba(255,255,255,0.06)', overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      width: `${barPct}%`, height: '100%', borderRadius: '3px',
+                      background: isCorrect
+                        ? 'linear-gradient(90deg, #34d399, #6ee7b7)'
+                        : 'linear-gradient(90deg, #f87171, #fca5a5)',
+                      transition: 'width 0.3s ease',
+                    }} />
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', minWidth: '30px', textAlign: 'right' }}>
+                    {count}x
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function WeakTab({ weakQuestions }: { weakQuestions: WeakQuestion[] }) {
   if (weakQuestions.length === 0) {
     return (
@@ -258,16 +569,25 @@ function WeakTab({ weakQuestions }: { weakQuestions: WeakQuestion[] }) {
     byChapter.set(q.chapter, list);
   }
 
+  // Summary: count questions with always-same-wrong pattern
+  const sameWrongCount = weakQuestions.filter((q) => q.alwaysSameWrong).length;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div className="glass" style={{
         padding: '1rem 1.5rem', borderRadius: '12px',
         background: 'rgba(248, 113, 113, 0.06)',
         borderColor: 'rgba(248, 113, 113, 0.15)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem',
       }}>
         <span style={{ color: '#fca5a5', fontSize: '0.9rem' }}>
           {weakQuestions.length} question{weakQuestions.length > 1 ? 's' : ''} wrong 2+ times
         </span>
+        {sameWrongCount > 0 && (
+          <span style={{ color: '#f87171', fontSize: '0.8rem' }}>
+            {sameWrongCount} always same wrong answer
+          </span>
+        )}
       </div>
 
       {[...byChapter.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([chapter, questions]) => (
@@ -280,32 +600,7 @@ function WeakTab({ weakQuestions }: { weakQuestions: WeakQuestion[] }) {
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {questions.map((q) => (
-              <div key={q.questionId} className="glass" style={{
-                padding: '1rem 1.25rem',
-                borderRadius: '10px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}>
-                <span style={{ fontWeight: 500, fontSize: '0.9rem' }}>{q.questionId}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    {q.wrongCount} / {q.totalAttempts} wrong
-                  </span>
-                  <span style={{
-                    padding: '0.15rem 0.5rem',
-                    borderRadius: '999px',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    background: q.wrongRate === 100
-                      ? 'rgba(248, 113, 113, 0.2)'
-                      : 'rgba(251, 191, 36, 0.2)',
-                    color: q.wrongRate === 100 ? '#f87171' : '#fbbf24',
-                  }}>
-                    {q.wrongRate}%
-                  </span>
-                </div>
-              </div>
+              <WeakQuestionCard key={q.questionId} q={q} />
             ))}
           </div>
         </div>
@@ -395,6 +690,22 @@ export default function HistoryClient({ analytics }: { analytics: AnalyticsData 
         <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
           Track your progress and identify weak areas
         </p>
+      </div>
+
+      {/* Wrong Notes link */}
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <Link href="/mock-exam/wrong-notes" style={{
+          display: 'inline-block',
+          padding: '0.6rem 1.5rem',
+          borderRadius: '10px',
+          border: '1px solid rgba(248, 113, 113, 0.2)',
+          background: 'rgba(30, 31, 41, 0.6)',
+          color: '#fca5a5',
+          fontWeight: 600,
+          fontSize: '0.85rem',
+        }}>
+          Wrong Notes &rarr;
+        </Link>
       </div>
 
       {/* Download / Upload */}
@@ -506,7 +817,7 @@ export default function HistoryClient({ analytics }: { analytics: AnalyticsData 
       {/* Tab Content */}
       {activeTab === 'history' && <HistoryTab results={analytics.results} />}
       {activeTab === 'chapters' && <ChaptersTab chapterStats={analytics.chapterStats} />}
-      {activeTab === 'trends' && <TrendsTab setStats={analytics.setStats} />}
+      {activeTab === 'trends' && <TrendsTab setStats={analytics.setStats} timeline={analytics.timeline} />}
       {activeTab === 'weak' && <WeakTab weakQuestions={analytics.weakQuestions} />}
     </main>
   );

@@ -472,3 +472,114 @@ export async function refreshExamSummary(): Promise<void> {
   await fs.mkdir(EXAM_RESULTS_DIR, { recursive: true });
   await fs.writeFile(SUMMARY_PATH, JSON.stringify(summary, null, 2), 'utf-8');
 }
+
+// ── Resolve Question IDs to QuizQuestion ──
+
+export async function resolveQuestions(questionIds: string[]): Promise<Map<string, QuizQuestion>> {
+  const byChapter = new Map<string, string[]>();
+  for (const qid of questionIds) {
+    const match = qid.match(/^C_(\d+)_(\d+)$/);
+    if (!match) continue;
+    const chapterId = match[1];
+    if (!byChapter.has(chapterId)) byChapter.set(chapterId, []);
+    byChapter.get(chapterId)!.push(qid);
+  }
+
+  const questionMap = new Map<string, QuizQuestion>();
+  const neededIds = new Set(questionIds);
+
+  const fileReads: Promise<void>[] = [];
+  for (const [chapterId] of byChapter) {
+    const chapterFiles = (manifest.custom as Record<string, string[]>)[chapterId];
+    if (!chapterFiles) continue;
+    for (const file of chapterFiles) {
+      fileReads.push(
+        readJson<QuizQuestion[]>(path.join(CUSTOM_DIR, chapterId, `${file}.json`)).then(arr => {
+          if (!Array.isArray(arr)) return;
+          for (const q of arr) {
+            if (neededIds.has(q.number)) {
+              questionMap.set(q.number, q);
+            }
+          }
+        }),
+      );
+    }
+  }
+  await Promise.all(fileReads);
+  return questionMap;
+}
+
+// ── Wrong Notes ──
+
+const WRONG_NOTES_PATH = path.join(EXAM_RESULTS_DIR, 'wrong-notes.json');
+
+export interface WrongNoteEntry {
+  memo: string;
+  updatedAt: string;
+}
+
+export interface WrongNotesData {
+  notes: Record<string, WrongNoteEntry>;
+}
+
+export async function getWrongNotes(): Promise<WrongNotesData> {
+  try {
+    const raw = await fs.readFile(WRONG_NOTES_PATH, 'utf-8');
+    return JSON.parse(raw) as WrongNotesData;
+  } catch {
+    return { notes: {} };
+  }
+}
+
+export async function saveWrongNote(questionId: string, memo: string): Promise<void> {
+  const data = await getWrongNotes();
+  if (memo.trim() === '') {
+    delete data.notes[questionId];
+  } else {
+    data.notes[questionId] = { memo: memo.trim(), updatedAt: new Date().toISOString() };
+  }
+  await fs.mkdir(EXAM_RESULTS_DIR, { recursive: true });
+  await fs.writeFile(WRONG_NOTES_PATH, JSON.stringify(data, null, 2), 'utf-8');
+}
+
+// ── Wrong Questions (all questions ever answered incorrectly) ──
+
+export interface WrongQuestionDetail {
+  questionId: string;
+  chapter: string;
+  wrongCount: number;
+  totalAttempts: number;
+  lastWrongAt: string;
+}
+
+export async function getWrongQuestions(): Promise<WrongQuestionDetail[]> {
+  const results = await getExamResults();
+  const map = new Map<string, WrongQuestionDetail>();
+
+  for (const { result } of results) {
+    for (const ans of result.answers) {
+      const existing = map.get(ans.questionId);
+      if (existing) {
+        existing.totalAttempts++;
+        if (!ans.isCorrect) {
+          existing.wrongCount++;
+          if (result.completedAt > existing.lastWrongAt) {
+            existing.lastWrongAt = result.completedAt;
+          }
+        }
+      } else {
+        map.set(ans.questionId, {
+          questionId: ans.questionId,
+          chapter: ans.chapter,
+          wrongCount: ans.isCorrect ? 0 : 1,
+          totalAttempts: 1,
+          lastWrongAt: ans.isCorrect ? '' : result.completedAt,
+        });
+      }
+    }
+  }
+
+  return [...map.values()]
+    .filter((q) => q.wrongCount > 0)
+    .sort((a, b) => b.wrongCount - a.wrongCount);
+}
