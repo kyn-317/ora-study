@@ -9,14 +9,16 @@ oracle-dba/                    ← 상위 디렉토리 (원본 데이터)
 ├── study/                     ← 학습 개념 JSON
 ├── customquestions_json/      ← 커스텀 문제 JSON
 ├── questions_json/            ← 시험 문제 JSON
+├── mock_exams/                ← 모의시험 세트 JSON
 │
 └── ora-study/                 ← Next.js 프로젝트
     ├── data/                  ← 동기화된 데이터 (git에 포함)
     │   ├── study/
     │   ├── custom/
     │   ├── questions/
+    │   ├── mock-exams/        ← 모의시험 (exam_set, allocation, reserve_pool)
     │   ├── keyword-study/     ← 키워드별 전용 학습자료
-    │   └── manifest.json      ← 자동 생성 파일 목록 + keywordIndex
+    │   └── manifest.json      ← 자동 생성 파일 목록 + keywordIndex + mockExams
     ├── scripts/
     │   ├── sync-data.js       ← 동기화 스크립트
     │   ├── audit-keyword-study.js  ← keyword-study 전체 감사
@@ -35,8 +37,8 @@ npm run sync-data
 ```
 
 이 명령은:
-1. `study/`, `customquestions_json/`, `questions_json/` 3개 폴더를 `data/`로 복사
-2. `data/manifest.json` 자동 생성 (파일 목록 + keywordIndex + hasKeywordStudy 플래그)
+1. `study/`, `customquestions_json/`, `questions_json/`, `mock_exams/` 4개 폴더를 `data/`로 복사
+2. `data/manifest.json` 자동 생성 (파일 목록 + keywordIndex + hasKeywordStudy 플래그 + mockExams)
 
 ## Vercel 배포
 

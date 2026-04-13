@@ -1,0 +1,68 @@
+[
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_021",
+    "title": "マルチテナント環境でPDB$SEEDから新しいPDBを作成するため、以下のSQL文をCDB$ROOTから実行しました。\n\nSQL> CREATE PLUGGABLE DATABASE PDB_SALES\n     ADMIN USER salesadm IDENTIFIED BY password1\n     FILE_NAME_CONVERT = ('/u01/oradata/CDB1/pdbseed/', '/u01/oradata/CDB1/pdb_sales/');\n\nPluggable database created.\n\nSQL> SELECT pdb_name, status FROM cdb_pdbs WHERE pdb_name='PDB_SALES';\n\nPDB_NAME                  STATUS\n------------------------- ----------\nPDB_SALES                 NEW\n\nこの実行結果に基づいて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) STATUS列がNEWであるためPDB_SALESは初回OPEN時にデータ・ディクショナリの完成処理が実行され、OPEN後にSTATUSがNORMALに変更される。",
+      "B) PDB_SALESの現在のオープン・モードはREAD ONLYであるため、V$PDBSビューのOPEN_MODE列はREAD ONLYと表示される。",
+      "C) PDB_SALESにsalesadmユーザーとしてログインしてデータ操作を実行するには、PDBをOPENしてからADMIN USERを再作成する必要がある。",
+      "D) PDB_SALESのSYSTEMおよびSYSAUX表領域のデータ・ファイルは/u01/oradata/CDB1/pdb_sales/ディレクトリに作成されている。",
+      "E) PDB_SALESのデータ・ファイルはPDB$SEEDと共有されるため、ディスク容量の追加消費は発生しない。"
+    ],
+    "answer": ["A", "D"],
+    "explanation": "정답: A, D\nA) 정답 — CDB_PDBS 뷰의 STATUS가 NEW인 PDB는 아직 한 번도 OPEN된 적이 없는 상태입니다. 최초 OPEN 시 Oracle이 내부 스크립트를 실행하여 데이터 딕셔너리를 완성하며, 이 과정이 완료되면 STATUS가 NORMAL로 변경됩니다.\n\nD) 정답 — FILE_NAME_CONVERT 절에서 PDB$SEED의 데이터 파일 경로('/u01/oradata/CDB1/pdbseed/')를 새 경로('/u01/oradata/CDB1/pdb_sales/')로 변환하도록 지정했으므로, PDB$SEED의 SYSTEM 및 SYSAUX 테이블스페이스 데이터 파일이 해당 디렉토리에 복사되어 생성됩니다.\n\nB) 오답 — 새로 생성된 PDB는 MOUNTED 상태입니다. READ ONLY가 아닙니다. V$PDBS의 OPEN_MODE 열에는 MOUNTED로 표시됩니다. PDB를 사용하려면 ALTER PLUGGABLE DATABASE PDB_SALES OPEN을 실행해야 합니다.\n\nC) 오답 — ADMIN USER 절로 생성된 salesadm 사용자는 PDB 생성 시 자동으로 생성되며 PDB_DBA 역할이 부여됩니다. PDB를 OPEN한 후 별도의 사용자 재생성 없이 바로 접속하여 사용할 수 있습니다.\n\nE) 오답 — PDB$SEED에서 PDB를 생성하면 데이터 파일이 물리적으로 복사됩니다. 데이터 파일을 공유하는 것이 아니므로 복사된 파일 크기만큼 추가 디스크 공간이 소비됩니다.\n\n핵심 개념: PDB$SEED에서 PDB를 생성하면 데이터 파일이 FILE_NAME_CONVERT에 지정된 경로로 물리적으로 복사되며, PDB는 MOUNTED 상태로 생성됩니다. CDB_PDBS의 STATUS=NEW인 PDB는 최초 OPEN 시 딕셔너리 완성 처리가 실행되어 NORMAL로 전환됩니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_022",
+    "title": "マルチテナント環境で以下の2つのクエリを実行しました。\n\nSQL> SELECT pdb_name, status FROM cdb_pdbs;\n\nPDB_NAME                  STATUS\n------------------------- ----------\nPDB$SEED                  NORMAL\nPDBORCL                   NORMAL\nPDBTEST                   NORMAL\nPDBDEV                    UNPLUGGED\n\nSQL> SELECT name, open_mode FROM v$pdbs;\n\nNAME                      OPEN_MODE\n------------------------- ----------\nPDB$SEED                  READ ONLY\nPDBORCL                   READ WRITE\nPDBTEST                   MOUNTED\n\nこの実行結果に基づいて正しく述べているものを選択してください。",
+    "options": [
+      "A) PDBDEVはV$PDBSに表示されていないため、データ・ファイルが既に削除された状態である。",
+      "B) PDBDEVに対してALTER PLUGGABLE DATABASE PDBDEV OPENを実行するとREAD WRITEモードでオープンすることができる。",
+      "C) PDBTESTはCDB_PDBSのSTATUSがNORMALでありV$PDBSのOPEN_MODEがMOUNTEDであるため、ALTER PLUGGABLE DATABASE PDBTEST OPENを実行すれば使用可能な状態になる。",
+      "D) PDB$SEEDのCDB_PDBSのSTATUSがNORMALであるため、PDB$SEEDのオープン・モードをREAD WRITEに変更して通常のデータ操作を行うことが推奨される。"
+    ],
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — CDB_PDBS에서 STATUS가 NORMAL이면 PDB가 CDB에 정상적으로 등록된 상태임을 의미합니다. V$PDBS에서 OPEN_MODE가 MOUNTED인 PDBTEST는 정상 등록되었지만 아직 열리지 않은 상태이므로, ALTER PLUGGABLE DATABASE PDBTEST OPEN을 실행하면 READ WRITE 모드로 오픈되어 사용 가능합니다.\n\nA) 오답 — PDBDEV가 V$PDBS에 표시되지 않는 이유는 UNPLUGGED 상태이기 때문입니다. V$PDBS는 OPEN 또는 MOUNTED 상태의 PDB 정보만 표시합니다. UNPLUGGED 상태라고 해서 데이터 파일이 삭제된 것은 아니며, 데이터 파일은 원래 위치에 존재합니다.\n\nB) 오답 — CDB_PDBS에서 STATUS가 UNPLUGGED인 PDB는 CDB에서 이미 분리된 상태이므로 OPEN 명령을 실행할 수 없습니다. UNPLUGGED 상태의 PDB에 대해서는 DROP PLUGGABLE DATABASE만 실행 가능합니다.\n\nD) 오답 — PDB$SEED는 CDB의 필수 시드 컨테이너로서 항상 READ ONLY 상태로 유지되어야 합니다. PDB$SEED를 READ WRITE로 변경하여 데이터 조작을 수행하는 것은 권장되지 않으며, 특수한 경우(사전 설치 스키마 추가 등)에만 제한적으로 허용됩니다.\n\n핵심 개념: CDB_PDBS의 STATUS는 딕셔너리 수준의 상태(NORMAL, UNPLUGGED 등)를, V$PDBS의 OPEN_MODE는 실시간 오픈 모드(READ WRITE, READ ONLY, MOUNTED)를 나타냅니다. UNPLUGGED 상태의 PDB는 V$PDBS에 표시되지 않으며 OPEN할 수 없고 DROP만 가능합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_023",
+    "title": "PDB1をソースCDBからターゲットCDBに移行するために、以下の操作を順番に実行しようとしています。正しい実行順序として適切なものを選択してください。\n\na) ターゲットCDBでCREATE PLUGGABLE DATABASE PDB1 USING '/tmp/pdb1.xml'を実行する\nb) ソースCDBでALTER PLUGGABLE DATABASE PDB1 CLOSE IMMEDIATEを実行する\nc) ターゲットCDBでDBMS_PDB.CHECK_PLUG_COMPATIBILITYを実行し、PDB_PLUG_IN_VIOLATIONSビューを確認する\nd) ソースCDBでALTER PLUGGABLE DATABASE PDB1 UNPLUG INTO '/tmp/pdb1.xml'を実行する\ne) ターゲットCDBでALTER PLUGGABLE DATABASE PDB1 OPENを実行する\nf) ソースCDBでDROP PLUGGABLE DATABASE PDB1 KEEP DATAFILESを実行する\n\n正しい順序として適切なものを選択してください。",
+    "options": [
+      "A) b → d → c → a → e → f",
+      "B) d → b → c → a → f → e",
+      "C) b → d → a → c → e → f",
+      "D) c → b → d → a → e → f"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — PDB를 다른 CDB로 이전하는 올바른 순서는 다음과 같습니다:\nb) 소스 CDB에서 PDB를 CLOSE(MOUNTED) 상태로 전환 → d) Unplug를 실행하여 XML 메타데이터 파일 생성 → c) 대상 CDB에서 호환성 검사 실행 → a) 대상 CDB에서 Plug In 실행 → e) 새 PDB를 OPEN → f) 소스 CDB에서 UNPLUGGED 상태의 PDB를 DROP합니다.\n\nB) 오답 — Unplug(d)를 실행하기 전에 반드시 CLOSE(b)를 먼저 수행해야 합니다. PDB가 OPEN 상태에서는 Unplug를 실행할 수 없습니다. 또한 소스에서 DROP(f)을 대상 PDB OPEN(e) 전에 수행하는 것은 절차상 부적절합니다.\n\nC) 오답 — 호환성 검사(c)를 Plug In(a) 이후에 수행하는 것은 부적절합니다. 호환성 검사는 Plug In 전에 실행하여 문제가 있으면 사전에 대응해야 합니다. Plug In 후에 검사하면 이미 비호환 상태의 PDB가 등록될 수 있습니다.\n\nD) 오답 — 호환성 검사(c)는 XML 파일이 생성된 후에 실행해야 합니다. Unplug 전에는 XML 메타데이터 파일이 존재하지 않으므로 DBMS_PDB.CHECK_PLUG_COMPATIBILITY를 실행할 수 없습니다.\n\n핵심 개념: PDB 이전 절차는 CLOSE → Unplug(메타데이터 생성) → 호환성 검사(DBMS_PDB.CHECK_PLUG_COMPATIBILITY) → Plug In(CREATE PLUGGABLE DATABASE ... USING) → OPEN → (소스에서) DROP 순서입니다. 호환성 검사는 반드시 Plug In 전에 수행하며, Unplug 전에 PDB는 CLOSE 상태여야 합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_024",
+    "title": "マルチテナント環境のCDB$ROOTでOPEN_CURSORSパラメータが300に設定されています。PDB1に接続した状態で以下の操作を実行しました。\n\nSQL> ALTER SYSTEM SET open_cursors=500 SCOPE=BOTH;\n\nSystem altered.\n\nその後、CDB$ROOTに接続した状態で以下の操作を実行しました。\n\nSQL> ALTER SYSTEM SET open_cursors=400 CONTAINER=ALL SCOPE=BOTH;\n\nSystem altered.\n\nこの時点でPDB1に接続してOPEN_CURSORSパラメータの値を確認した場合、表示される値について正しく述べているものを選択してください。",
+    "options": [
+      "A) PDB1のOPEN_CURSORSは400である。CONTAINER=ALLで実行した変更はCDB$ROOTとすべてのPDBに適用されるため、PDB1の設定は上書きされる。",
+      "B) PDB1のOPEN_CURSORSは500である。PDB1で明示的に設定した値は、CONTAINER=ALLで実行したCDB$ROOTからの変更によって上書きされない。",
+      "C) PDB1のOPEN_CURSORSは300である。CONTAINER=ALLで実行するとすべてのPDB設定がリセットされ、CDB$ROOTの変更前の値に戻される。",
+      "D) PDB1のOPEN_CURSORSは500であるが、次回CDB再起動時に400に変更される。CONTAINER=ALLの変更はSPFILEにのみ反映される。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — PDB1에서 OPEN_CURSORS를 500으로 명시적으로 설정한 후, CDB$ROOT에서 CONTAINER=ALL로 400으로 변경해도 PDB1의 값은 500으로 유지됩니다. 멀티테넌트 아키텍처에서 PDB에 이미 명시적으로 설정된 파라미터 값은 CONTAINER=ALL로 실행한 변경에 의해 덮어쓰이지 않습니다. 이는 PDB의 독립성을 보장하기 위한 설계입니다.\n\nA) 오답 — CONTAINER=ALL로 파라미터를 변경하면 CDB$ROOT의 값은 400으로 변경되고, 명시적 설정이 없는 PDB는 400을 상속받습니다. 그러나 PDB1처럼 이미 명시적으로 설정된 PDB의 값은 변경되지 않습니다.\n\nC) 오답 — CONTAINER=ALL은 파라미터 설정을 리셋하는 명령이 아닙니다. CDB$ROOT와 명시적 설정이 없는 PDB에 새 값을 적용하는 명령입니다. PDB의 기존 명시적 설정을 리셋하려면 해당 PDB에서 ALTER SYSTEM RESET을 실행해야 합니다.\n\nD) 오답 — PDB에서 SCOPE=BOTH로 설정한 값은 MEMORY와 SPFILE 모두에 적용되어 즉시 반영되고 영구적으로 유지됩니다. CDB 재시작 시에도 PDB의 SPFILE 설정(500)이 우선 적용됩니다.\n\n핵심 개념: 멀티테넌트 환경에서 PDB 수준의 명시적 파라미터 설정은 CDB$ROOT에서 CONTAINER=ALL로 변경해도 덮어쓰이지 않습니다. PDB의 파라미터를 CDB 기본값으로 되돌리려면 해당 PDB에서 ALTER SYSTEM RESET 명령을 실행해야 합니다. 이 설계는 PDB의 독립적인 운영을 보장합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_025",
+    "title": "ARCHIVELOGモードかつローカルUNDOモードで運用されているCDBで、PDBORCL（READ WRITE状態）からホット・クローンで新しいPDB_CLONEを作成するため、以下のSQL文を実行しました。\n\nSQL> CREATE PLUGGABLE DATABASE PDB_CLONE FROM PDBORCL\n     FILE_NAME_CONVERT = ('/u01/oradata/CDB1/pdborcl/', '/u01/oradata/CDB1/pdb_clone/');\n\nPluggable database created.\n\nこのクローン操作完了後のPDBORCLおよびPDB_CLONEの状態について正しく述べているものを選択してください。",
+    "options": [
+      "A) PDBORCLはクローン完了後もREAD WRITE状態を維持しており、PDB_CLONEはMOUNTED状態で作成される。",
+      "B) PDBORCLはクローン完了後に自動的にREAD ONLYモードに変更されるため、READ WRITEに戻すには手動でモードを変更する必要がある。",
+      "C) PDB_CLONEはクローン完了後にREAD WRITE状態で作成されるため、直ちにデータ操作が可能である。",
+      "D) PDBORCLとPDB_CLONEは同一のデータ・ファイルを共有するため、片方のPDBで変更を行うともう片方にも反映される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 핫 클론(Hot Clone)은 소스 PDB가 READ WRITE 상태를 유지한 채로 클론을 수행하는 기능입니다. ARCHIVELOG 모드 + 로컬 UNDO 모드가 전제 조건이며, 내부적으로 데이터 파일을 복사한 후 클론 시작 이후 발생한 Redo를 적용하여 일관성을 확보합니다. 클론 완료 후 소스 PDB(PDBORCL)는 READ WRITE 상태를 그대로 유지하고, 새 PDB(PDB_CLONE)는 다른 PDB 생성과 동일하게 MOUNTED 상태로 생성됩니다.\n\nB) 오답 — 핫 클론의 핵심 장점은 소스 PDB를 READ ONLY로 전환할 필요 없이 READ WRITE 상태에서 클론할 수 있다는 것입니다. 클론 완료 후에도 소스 PDB의 오픈 모드는 변경되지 않으므로, READ WRITE를 수동으로 복원할 필요가 없습니다.\n\nC) 오답 — PDB 클론(핫 클론 포함)으로 생성된 새 PDB는 항상 MOUNTED 상태로 생성됩니다. 데이터 조작을 수행하려면 ALTER PLUGGABLE DATABASE PDB_CLONE OPEN을 실행하여 READ WRITE 모드로 오픈해야 합니다.\n\nD) 오답 — PDB 클론은 소스 PDB의 데이터 파일을 새 위치에 물리적으로 복사합니다. 클론 완료 후 두 PDB는 완전히 독립적인 데이터 파일을 보유하며, 한쪽의 변경이 다른 쪽에 영향을 미치지 않습니다. 데이터 파일을 공유하는 것은 Snapshot Copy 방식입니다.\n\n핵심 개념: 핫 클론은 ARCHIVELOG + 로컬 UNDO 모드 환경에서 소스 PDB가 READ WRITE 상태를 유지한 채 클론을 수행합니다. 클론된 PDB는 MOUNTED 상태로 생성되며, 소스와 독립적인 데이터 파일을 보유합니다. 소스 PDB의 서비스 중단 없이 복제할 수 있다는 것이 핫 클론의 핵심 장점입니다."
+  }
+]

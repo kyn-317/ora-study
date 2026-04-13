@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_036",
+    "title": "Oracle Databaseのインスタンス起動時に使用されるSTARTUP MOUNTコマンドの実行について正しく述べているものを選択してください。",
+    "options": [
+      "A) STARTUP MOUNTを実行すると、制御ファイルが読み込まれ、データ・ファイルとREDOログ・ファイルの場所が認識されるが、これらのファイルはまだオープンされない。",
+      "B) STARTUP MOUNTを実行すると、データ・ファイルのヘッダーが検証され、データベースの整合性チェックが完了する。",
+      "C) MOUNT状態ではV$パフォーマンス・ビューを含むデータ・ディクショナリへのアクセスが可能になり、一般ユーザーの接続も許可される。",
+      "D) MOUNT状態ではALTER DATABASE ARCHIVELOGコマンドを実行できないため、アーカイブ・ログ・モードの変更にはOPEN状態が必要である。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — STARTUP MOUNT를 실행하면 인스턴스가 컨트롤 파일을 열어 데이터 파일과 Redo Log 파일의 이름과 위치를 인식합니다. 그러나 이 단계에서는 경로만 확인할 뿐 실제로 데이터 파일과 Redo Log 파일을 열거나 검증하지는 않습니다. 파일의 실제 열기와 일관성 검증은 OPEN 단계에서 수행됩니다.\n\nB) 오답 — 데이터 파일 헤더의 검증과 데이터베이스 일관성 체크는 MOUNT가 아닌 OPEN 단계에서 수행됩니다. MOUNT 단계에서는 컨트롤 파일에 기록된 경로 정보만 읽습니다.\n\nC) 오답 — MOUNT 상태에서는 데이터 딕셔너리에 접근할 수 없으며, 일반 사용자의 접속도 허용되지 않습니다. V$ 동적 성능 뷰 중 인스턴스 관련 뷰(V$INSTANCE, V$PARAMETER 등)는 NOMOUNT부터 조회 가능하지만, 데이터 딕셔너리 기반 뷰는 OPEN 상태에서만 사용 가능합니다.\n\nD) 오답 — ALTER DATABASE ARCHIVELOG 명령은 MOUNT 상태에서만 실행할 수 있습니다. 아카이브 로그 모드 변경은 데이터 파일이 열리기 전인 MOUNT 상태에서 수행하는 대표적인 관리 작업입니다.\n\n핵심 개념: MOUNT 상태에서는 컨트롤 파일을 읽어 데이터베이스 구조 정보(파일 경로, 체크포인트 SCN 등)를 인식하지만, 데이터 파일/Redo Log 파일을 실제로 열지는 않습니다. ARCHIVELOG 모드 변경, 미디어 복구, 데이터 파일 이름 변경 등이 이 단계에서 가능합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_037",
+    "title": "DBAがALTER SYSTEM SET文を使用してパラメータを変更する際のSCOPEオプションについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SPFILE環境でSCOPE=BOTHを指定すると、パラメータ変更が実行中のインスタンスのメモリーとSPFILEの両方に反映される。",
+      "B) 静的パラメータ(DB_BLOCK_SIZEなど)に対してSCOPE=BOTHを指定した場合、メモリーとSPFILEの両方に正常に反映される。",
+      "C) PFILE環境でSCOPE=MEMORYを指定すると、変更はインスタンス・メモリーに反映されるが、インスタンスの再起動後は元の値に戻る。",
+      "D) SCOPE=SPFILEを指定した場合、変更は即座にインスタンスのメモリーに反映されるとともに、次回起動時にも有効である。",
+      "E) SPFILE環境でSCOPEを省略した場合、デフォルトはSCOPE=MEMORYとなる。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — SPFILE 환경에서 SCOPE=BOTH를 지정하면, 파라미터 변경이 현재 실행 중인 인스턴스의 메모리와 SPFILE 양쪽에 반영됩니다. 따라서 변경 사항이 즉시 적용되는 동시에 인스턴스 재기동 후에도 유지됩니다.\n\nC) 정답 — PFILE 환경에서 SCOPE=MEMORY를 지정하면 변경이 인스턴스 메모리에만 반영됩니다. PFILE은 ALTER SYSTEM으로 파일에 직접 반영할 수 없으므로, 인스턴스를 재기동하면 PFILE에 기록된 원래 값으로 되돌아갑니다.\n\nB) 오답 — DB_BLOCK_SIZE 등 정적(Static) 파라미터는 인스턴스 기동 시에만 설정되므로 SCOPE=BOTH나 SCOPE=MEMORY를 사용할 수 없습니다. 정적 파라미터는 SCOPE=SPFILE만 가능하며, 변경 사항은 다음 기동 시에 적용됩니다. SCOPE=BOTH를 지정하면 ORA-02095 오류가 발생합니다.\n\nD) 오답 — SCOPE=SPFILE은 SPFILE에만 기록하고 현재 인스턴스의 메모리에는 반영하지 않습니다. 변경 사항은 다음 인스턴스 기동 시에 적용됩니다.\n\nE) 오답 — SPFILE 환경에서 SCOPE를 생략하면 기본값은 SCOPE=BOTH입니다. SCOPE=MEMORY가 아닙니다.\n\n핵심 개념: SCOPE 옵션은 MEMORY(메모리만, 재기동 시 소실), SPFILE(파일만, 다음 기동 시 적용), BOTH(메모리+파일 동시 반영)의 3가지입니다. SPFILE 환경의 기본값은 BOTH이고, 정적 파라미터는 SPFILE만 가능합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_038",
+    "title": "DBAが以下のSQL文を実行してSGAの動的コンポーネントの状態を確認しました。\n\nSQL> SELECT component, current_size/1024/1024 AS size_mb,\n     last_oper_type, last_oper_mode\n     FROM V$SGA_DYNAMIC_COMPONENTS\n     WHERE current_size > 0;\n\nCOMPONENT                  SIZE_MB  LAST_OPER_TYPE  LAST_OPER_MODE\n-------------------------- -------- --------------- ---------------\nshared pool                  768    GROW            IMMEDIATE\nlarge pool                   128    SHRINK          IMMEDIATE\nDEFAULT buffer cache        2048    GROW            IMMEDIATE\njava pool                    128    STATIC          \nstreams pool                  64    STATIC          \n\nこの出力結果から読み取れる内容として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) このインスタンスではASMMまたはAMMが有効であり、SGAの構成要素がワークロードに応じて動的に調整されている。",
+      "B) Large Poolは最後の操作で縮小(SHRINK)されており、そのメモリーは他の動的コンポーネントに再配分された可能性がある。",
+      "C) Java Poolのlast_oper_typeがSTATICであるため、Java PoolはASMMの自動調整対象から除外されている。",
+      "D) DEFAULT buffer cacheが最後にGROWされたことから、現在のワークロードではI/Oバウンドの処理が増加していると推測できる。",
+      "E) すべてのコンポーネントのlast_oper_modeがIMMEDIATEであるため、DBAが手動でALTER SYSTEMコマンドを使用してサイズを変更した。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — V$SGA_DYNAMIC_COMPONENTS에서 GROW, SHRINK 등의 동적 조정 이력이 확인되므로 ASMM(SGA_TARGET 기반) 또는 AMM(MEMORY_TARGET 기반)이 활성화되어 SGA 구성요소가 워크로드에 따라 자동 조정되고 있음을 알 수 있습니다.\n\nB) 정답 — Large Pool의 LAST_OPER_TYPE이 SHRINK인 것은 마지막 조정에서 Large Pool이 축소되었음을 나타냅니다. ASMM/AMM에서는 SGA_TARGET 내에서 구성요소 간 메모리를 재분배하므로, 축소된 메모리가 다른 구성요소(이 경우 Shared Pool이나 Buffer Cache)에 재분배되었을 가능성이 높습니다.\n\nC) 오답 — Java Pool은 ASMM의 자동 조정 대상에 포함됩니다. LAST_OPER_TYPE이 STATIC인 것은 인스턴스 기동 이후 아직 동적 조정이 발생하지 않았음을 의미하며, 자동 조정 대상에서 제외된 것이 아닙니다.\n\nD) 오답 — Buffer Cache의 GROW가 반드시 I/O 바운드 처리 증가를 의미하지는 않습니다. ASMM이 워크로드 전반을 분석하여 버퍼 캐시에 더 많은 메모리가 유익하다고 판단한 결과일 수 있으며, 단순히 한 가지 원인으로 단정할 수 없습니다.\n\nE) 오답 — LAST_OPER_MODE가 IMMEDIATE인 것은 조정이 즉시(지연 없이) 적용되었음을 의미하며, DBA의 수동 명령인지 ASMM의 자동 조정인지를 구분하는 기준이 되지 않습니다. ASMM의 자동 조정도 IMMEDIATE 모드로 실행됩니다.\n\n핵심 개념: V$SGA_DYNAMIC_COMPONENTS 뷰는 SGA 구성요소의 현재 크기와 마지막 동적 조정 이력(GROW/SHRINK/STATIC)을 보여줍니다. GROW/SHRINK 이력이 있으면 ASMM 또는 AMM에 의한 자동 메모리 재분배가 동작 중임을 확인할 수 있습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_039",
+    "title": "Oracle Databaseのインスタンス起動段階(NOMOUNT、MOUNT、OPEN)において、NOMOUNT段階で実行可能な操作として正しいものを選択してください。",
+    "options": [
+      "A) ALTER DATABASE ARCHIVELOGコマンドによるアーカイブ・ログ・モードの変更",
+      "B) CREATE DATABASEコマンドによる新規データベースの作成",
+      "C) ALTER DATABASE RENAME FILEコマンドによるデータ・ファイルの移動",
+      "D) ALTER TABLESPACE ... ADD DATAFILEコマンドによるデータ・ファイルの追加"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — CREATE DATABASE 명령은 NOMOUNT 상태에서만 실행할 수 있습니다. NOMOUNT 단계에서는 SGA가 할당되고 백그라운드 프로세스가 기동된 상태이지만 컨트롤 파일이 아직 존재하지 않으므로, 새 데이터베이스 생성(컨트롤 파일, 데이터 파일, Redo Log 파일 생성 포함)이 이 단계에서 수행됩니다.\n\nA) 오답 — ALTER DATABASE ARCHIVELOG 명령은 MOUNT 상태에서 실행해야 합니다. 컨트롤 파일이 열려 있어야 아카이브 로그 모드를 변경할 수 있습니다.\n\nC) 오답 — ALTER DATABASE RENAME FILE 명령은 MOUNT 상태에서 실행합니다. 컨트롤 파일에 기록된 파일 경로를 변경하는 작업이므로, 컨트롤 파일이 열려 있는 MOUNT 단계가 필요합니다.\n\nD) 오답 — ALTER TABLESPACE ... ADD DATAFILE 명령은 데이터베이스가 OPEN 상태일 때 실행합니다. 테이블스페이스 관련 작업은 데이터 딕셔너리에 접근해야 하므로 OPEN 상태가 필요합니다.\n\n핵심 개념: NOMOUNT에서는 CREATE DATABASE, CREATE CONTROLFILE 등 데이터베이스 생성/재생성 작업이 가능하고, MOUNT에서는 ARCHIVELOG 변경, 미디어 복구, 파일 이름 변경 등이 가능하며, OPEN에서는 테이블스페이스 관리 등 일반 운영 작업이 가능합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_040",
+    "title": "Oracle DatabaseのPGA(Program Global Area)の構成要素について正しく述べているものを選択してください。",
+    "options": [
+      "A) PGAのSQL作業領域(SQL Work Area)は、ソート、ハッシュ結合、ビットマップ・マージなどのメモリー集約的な操作に使用される。",
+      "B) PGAはSGAの一部であり、すべてのサーバー・プロセス間で共有されるメモリー領域である。",
+      "C) PGA_AGGREGATE_TARGETを設定すると、各サーバー・プロセスのPGAサイズが均等に固定される。",
+      "D) Dedicated Server構成の場合、UGA(User Global Area)はSGA内のLarge Poolに配置される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — PGA의 SQL Work Area는 Sort Area, Hash Area, Bitmap Merge Area 등으로 구성되며, 정렬(ORDER BY, GROUP BY), 해시 조인, 비트맵 인덱스 병합 등 메모리 집약적인 SQL 작업을 수행하기 위한 영역입니다.\n\nB) 오답 — PGA는 SGA의 일부가 아닌 각 서버 프로세스(및 백그라운드 프로세스)에 독립적으로 할당되는 비공유(Private) 메모리 영역입니다. 다른 프로세스와 공유되지 않으며, 해당 프로세스만 읽고 쓸 수 있습니다.\n\nC) 오답 — PGA_AGGREGATE_TARGET은 인스턴스 전체 PGA의 목표 크기를 지정하는 파라미터이며, 각 서버 프로세스의 PGA 크기를 균등하게 고정하는 것이 아닙니다. Oracle이 워크로드에 따라 각 프로세스의 SQL Work Area 크기를 자동으로 조정합니다.\n\nD) 오답 — Dedicated Server 구성에서는 서버 프로세스와 세션이 1:1 대응이므로 UGA는 PGA 내부에 위치합니다. UGA가 SGA(Large Pool 또는 Shared Pool)에 배치되는 것은 Shared Server 구성일 때입니다.\n\n핵심 개념: PGA는 각 서버 프로세스에 전용으로 할당되는 비공유 메모리로, SQL Work Area(정렬/해시/비트맵), Private SQL Area(바인드 변수/실행 상태), Session Memory로 구성됩니다. UGA의 위치는 Dedicated Server에서는 PGA 내부, Shared Server에서는 SGA(Large Pool) 내부입니다."
+  }
+]

@@ -21,8 +21,18 @@
     "データ・ファイル満杯時のエラー対応": 1,
     "表領域の削除(DROP TABLESPACE)": 1,
     "表領域の状態管理": 1,
-    "AUTOEXTEND構文と制約": 1
+    "AUTOEXTEND構文と制約": 1,
+    "DBA_DATA_FILESビューの解釈": 1,
+    "OMF環境でのDROP TABLESPACE動作": 1,
+    "オンライン・データファイル移動の内部動作": 1,
+    "エクステント管理の内部メカニズム": 1,
+    "空間不足エラーとResumable Space Allocation": 1,
+    "EXTENT MANAGEMENT LOCALとASSM": 1,
+    "DBA_TEMP_FILESとTEMPFILE管理": 1,
+    "HWMとFull Table Scan性能": 1,
+    "READ ONLY表領域の運用": 1,
+    "データ・ファイル障害時の内部動作": 1
   },
-  "total_custom": 20,
-  "last_number": "C_06_020"
+  "total_custom": 30,
+  "last_number": "C_06_030"
 }

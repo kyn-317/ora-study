@@ -1,0 +1,101 @@
+{
+  "chapter": "08",
+  "chapter_name": "UNDOの管理",
+  "questions_per_set": 3,
+  "total_questions": 20,
+  "type_summary": {
+    "運営-概念": 7,
+    "運営-応用": 6,
+    "内部-概念": 7,
+    "内部-応用": 0
+  },
+  "allocated_type_summary": {
+    "運営-概念": 6,
+    "運営-応用": 6,
+    "内部-概念": 3,
+    "内部-応用": 0
+  },
+  "allocation": {
+    "set_1": {
+      "question_ids": ["C_08_001", "C_08_011", "C_08_002"],
+      "type_breakdown": {"運営-概念": 1, "運営-応用": 1, "内部-概念": 1, "内部-応用": 0},
+      "topic_breakdown": {
+        "UNDO_RETENTIONパラメータ": 1,
+        "ORA-30036対処": 1,
+        "UNDOデータの基礎": 1
+      }
+    },
+    "set_2": {
+      "question_ids": ["C_08_005", "C_08_014", "C_08_003"],
+      "type_breakdown": {"運営-概念": 1, "運営-応用": 1, "内部-概念": 1, "内部-応用": 0},
+      "topic_breakdown": {
+        "UNDO表領域の運用管理": 1,
+        "マルチテナントUNDO管理": 1,
+        "UNDOデータの状態管理": 1
+      }
+    },
+    "set_3": {
+      "question_ids": ["C_08_008", "C_08_016", "C_08_004"],
+      "type_breakdown": {"運営-概念": 1, "運営-応用": 1, "内部-概念": 1, "内部-応用": 0},
+      "topic_breakdown": {
+        "一時UNDO": 1,
+        "UNDO表領域のサイジング": 1,
+        "UNDOデータの基礎": 1
+      }
+    },
+    "set_4": {
+      "question_ids": ["C_08_009", "C_08_018", "C_08_019"],
+      "type_breakdown": {"運営-概念": 1, "運営-応用": 2, "内部-概念": 0, "内部-応用": 0},
+      "topic_breakdown": {
+        "マルチテナントUNDO管理": 1,
+        "ORA-01555(Snapshot Too Old)": 1,
+        "UNDO表領域の作成と切替": 1
+      }
+    },
+    "set_5": {
+      "question_ids": ["C_08_010", "C_08_017", "C_08_020"],
+      "type_breakdown": {"運営-概念": 2, "運営-応用": 1, "内部-概念": 0, "内部-応用": 0},
+      "topic_breakdown": {
+        "UNDOデータの状態管理": 1,
+        "UNDOデータの基礎": 1,
+        "UNDOデータの状態管理(出力解析)": 1
+      }
+    }
+  },
+  "reserve": ["C_08_006", "C_08_007", "C_08_012", "C_08_013", "C_08_015"],
+  "reserve_reasons": {
+    "C_08_006": "C_08_001과 UNDO_RETENTION 기본 개념이 중복 (동일 토픽, 유사 내용)",
+    "C_08_007": "C_08_003과 UNDO Extent 상태 전이/공간 확보 순서가 중복",
+    "C_08_012": "C_08_002/017과 UNDO 데이터 기초 개념이 중복 (DML별 UNDO 내용)",
+    "C_08_013": "C_08_008과 一時UNDO 토픽이 중복 (기능 vs 제한사항)",
+    "C_08_015": "C_08_003과 UNEXPIRED 상태 설명이 중복"
+  },
+  "similar_pair_separation": [
+    {"pair": ["C_08_001", "C_08_005"], "reason": "UNDO_RETENTION vs UNDO表領域運用 (両方パラメータ設定)", "sets": [1, 2]},
+    {"pair": ["C_08_009", "C_08_014"], "reason": "マルチテナントUNDO (特徴 vs 切替手順)", "sets": [4, 2]},
+    {"pair": ["C_08_011", "C_08_018"], "reason": "ORA-30036 vs ORA-01555 (UNDOエラー対処)", "sets": [1, 4]},
+    {"pair": ["C_08_002", "C_08_004"], "reason": "UNDOデータの基礎 (セグメント管理 vs 読取り一貫性)", "sets": [1, 3]}
+  ],
+  "question_detail": [
+    {"id": "C_08_001", "topic": "UNDO_RETENTIONパラメータ", "type": "運営-概念", "set": 1},
+    {"id": "C_08_002", "topic": "UNDOデータの基礎", "type": "内部-概念", "set": 1},
+    {"id": "C_08_003", "topic": "UNDOデータの状態管理", "type": "内部-概念", "set": 2},
+    {"id": "C_08_004", "topic": "UNDOデータの基礎", "type": "内部-概念", "set": 3},
+    {"id": "C_08_005", "topic": "UNDO表領域の運用管理", "type": "運営-概念", "set": 2},
+    {"id": "C_08_006", "topic": "UNDO_RETENTIONパラメータ", "type": "運営-概念", "set": "reserve"},
+    {"id": "C_08_007", "topic": "UNDOデータの状態管理", "type": "内部-概念", "set": "reserve"},
+    {"id": "C_08_008", "topic": "一時UNDO", "type": "運営-概念", "set": 3},
+    {"id": "C_08_009", "topic": "マルチテナントUNDO管理", "type": "運営-概念", "set": 4},
+    {"id": "C_08_010", "topic": "UNDOデータの状態管理", "type": "運営-概念", "set": 5},
+    {"id": "C_08_011", "topic": "ORA-30036対処", "type": "運営-応用", "set": 1},
+    {"id": "C_08_012", "topic": "UNDOデータの基礎", "type": "内部-概念", "set": "reserve"},
+    {"id": "C_08_013", "topic": "一時UNDO", "type": "内部-概念", "set": "reserve"},
+    {"id": "C_08_014", "topic": "マルチテナントUNDO管理", "type": "運営-応用", "set": 2},
+    {"id": "C_08_015", "topic": "UNDOデータの状態管理", "type": "内部-概念", "set": "reserve"},
+    {"id": "C_08_016", "topic": "UNDO表領域のサイジング", "type": "運営-応用", "set": 3},
+    {"id": "C_08_017", "topic": "UNDOデータの基礎", "type": "運営-概念", "set": 5},
+    {"id": "C_08_018", "topic": "ORA-01555(Snapshot Too Old)", "type": "運営-応用", "set": 4},
+    {"id": "C_08_019", "topic": "UNDO表領域の作成と切替", "type": "運営-応用", "set": 4},
+    {"id": "C_08_020", "topic": "UNDOデータの状態管理", "type": "運営-応用", "set": 5}
+  ]
+}

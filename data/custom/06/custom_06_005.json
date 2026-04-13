@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_021",
+    "title": "以下のSQL文を実行してDBA_DATA_FILESビューを確認しました。\n\nSQL> SELECT tablespace_name, file_name, bytes/1024/1024 AS size_mb,\n            autoextensible, maxbytes/1024/1024 AS maxsize_mb\n     FROM dba_data_files\n     WHERE tablespace_name = 'APP_DATA';\n\nTABLESPACE_NAME  FILE_NAME                          SIZE_MB  AUTOEXTENSIBLE  MAXSIZE_MB\n---------------  ---------------------------------  -------  --------------  ----------\nAPP_DATA         /u01/oradata/app_data01.dbf            500  YES                 10240\nAPP_DATA         /u01/oradata/app_data02.dbf           1000  NO                      0\n\nこの結果について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) app_data01.dbfは空き領域が不足した場合に自動的に拡張され、最大10GBまで拡張可能である。",
+      "B) app_data02.dbfはAUTOEXTENSIBLEがNOのため、データ・ファイルのサイズを変更することは一切できない。",
+      "C) APP_DATA表領域の現在の合計サイズは1500MBであり、SMALLFILE表領域として複数のデータ・ファイルで構成されている。",
+      "D) app_data02.dbfの空き領域が不足した場合、app_data01.dbfの自動拡張によってAPP_DATA表領域全体の空間不足が必ず回避される。",
+      "E) app_data01.dbfのAUTOEXTENDをOFFに変更するにはALTER TABLESPACE APP_DATA AUTOEXTEND OFF文を使用する必要がある。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — app_data01.dbf는 AUTOEXTENSIBLE이 YES이므로, 공간 부족 시 자동으로 확장됩니다. MAXSIZE_MB가 10240(= 10GB)이므로 최대 10GB까지 확장 가능합니다.\n\nC) 정답 — 두 개의 데이터 파일(500MB + 1000MB = 1500MB)로 구성되어 있으므로 현재 합계 크기는 1500MB입니다. 데이터 파일이 2개이므로 SMALLFILE 테이블스페이스입니다(BIGFILE은 단일 데이터 파일만 허용).\n\nB) 오답 — AUTOEXTENSIBLE이 NO라는 것은 자동 확장이 비활성화된 것일 뿐, 수동 크기 변경이 불가능한 것은 아닙니다. ALTER DATABASE DATAFILE ... RESIZE 명령으로 수동으로 크기를 변경하거나, ALTER DATABASE DATAFILE ... AUTOEXTEND ON으로 자동 확장을 활성화할 수 있습니다.\n\nD) 오답 — Oracle은 세그먼트에 새로운 익��텐트를 할당할 때 테이블스페이스 내 여유 공간이 있는 데이터 파일을 선택하지만, 특정 데이터 파일에 대한 자동 확장이 다른 데이터 파일의 공간 부족을 항상 보완하는 것은 아닙니다. 익스텐트 할당은 데이터 파일 전체에 분산되므로, app_data02.dbf에서 확장이 필요하지만 해당 파일에 공간이 없으면 ORA-01653 오류가 발생할 수 있습니다.\n\nE) 오답 — SMALLFILE 테이블스페이스의 데이터 파일에 대한 AUTOEXTEND 설정 변경은 ALTER DATABASE DATAFILE '/u01/oradata/app_data01.dbf' AUTOEXTEND OFF 명령을 사용합니다. ALTER TABLESPACE ... AUTOEXTEND는 BIGFILE 테이블스페이스에서만 사용 가능합니다.\n\n핵심 개념: DBA_DATA_FILES 뷰의 AUTOEXTENSIBLE, MAXBYTES 컬럼으로 데이터 파일의 자동 확장 상태를 확인할 수 있으며, 복수 데이터 파일이 존재하면 SMALLFILE 테이블스페이스입니다. SMALLFILE의 AUTOEXTEND 변경은 ALTER DATABASE DATAFILE 문을 사용합니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_022",
+    "title": "Oracle Managed Files(OMF)が有効な環境で以下のSQL文を順番に実行しました。\n\nSQL> CREATE TABLESPACE sales_data SIZE 200M;\nTablespace created.\n\nSQL> CREATE TABLE hr.orders (order_id NUMBER, order_date DATE)\n     TABLESPACE sales_data;\nTable created.\n\nSQL> DROP TABLESPACE sales_data INCLUDING CONTENTS;\nTablespace dropped.\n\nDROP TABLESPACE実行後のデータ・ファイルの状態について正しく述べているものを選択してください。",
+    "options": [
+      "A) INCLUDING CONTENTS AND DATAFILES句を指定していないため、OS上のデータ・ファイルは残存しており、手動で削除する必要がある。",
+      "B) OMF環境ではAND DATAFILES句を指定しなくても、DROP TABLESPACE時にOS上のデータ・ファイルが自動的に削除される。",
+      "C) DROP TABLESPACE実行時にINCLUDING CONTENTS句を指定しているため、データ・ファイルの自動削除も同時に行われる。INCLUDING CONTENTSにはAND DATAFILES��機能が常に含まれている。",
+      "D) OMF環境であっても、OS上のデータ・ファイルを自動削除するにはDB_CREATE_FILE_DESTパラメータを事前に解除する必要がある。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — OMF(Oracle Managed Files) 환경에서 생성된 데이터 파일은 DROP TABLESPACE 시 AND DATAFILES 절을 명시적으로 지정하지 않아도 OS 파일이 자동으로 삭제됩니다. 이것이 OMF의 핵심 편의 기능 중 하나입니다.\n\nA) 오답 — 비OMF 환경에서는 AND DATAFILES를 지정하지 않으면 OS 파일이 남지만, OMF 환경에서는 자동 삭제됩니다. 이 시나리오는 OMF가 유효한 환경이므로 OS 파일도 자동 삭제됩니다.\n\nC) 오답 — INCLUDING CONTENTS는 테이블스페이스 내의 세그먼트(테이블, 인덱스 등)를 삭제하는 기능이며, AND DATAFILES의 기능을 항상 포함하는 것은 아닙니다. 비OMF 환경에서 INCLUDING CONTENTS만 지정하면 Oracle 내부의 테이블스페이스 정의는 제거되지만 OS 파일은 남습니다. OMF 환경에서 자동 삭제되는 것은 OMF의 특성이지, INCLUDING CONTENTS의 기능이 아닙니다.\n\nD) 오답 — OMF 환경에서 데이터 파일을 자동 삭제하기 위해 DB_CREATE_FILE_DEST 파라미터를 해제할 필요는 없���니다. OMF로 생성된 파일은 파라미터 설정 여부와 관계없이 DROP 시 자동 삭제됩니다.\n\n핵심 개념: OMF 환경에서는 DROP TABLESPACE 시 AND DATAFILES 절 없이도 OS 파일이 자동 삭제됩니다. 비OMF 환경에서는 AND DATAFILES를 명시적으로 지정해야 OS 파일이 삭제되며, INCLUDING CONTENTS 자체는 세그먼트 삭제 기능만 담당합니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_023",
+    "title": "以下のSQL文を実行してデータ・ファイルをオンラインで移動しました。\n\nSQL> ALTER DATABASE MOVE DATAFILE\n     '/u01/oradata/users01.dbf' TO '+DATA/orcl/datafile/users01.dbf'\n     KEEP;\n\nDatabase altered.\n\nこの操作の実行結果について正しく述べているものを選択してください。",
+    "options": [
+      "A) KEEPオプションを指定しているため、移動完了後も元のデータ・ファイル(/u01/oradata/users01.dbf)は削除されずに保持される。",
+      "B) ファイル・システム記憶域からASM記憶域へのデータ・ファイル移動はサポートされていないため、このSQL文はエラーとなる。",
+      "C) 移動中はDML操作(INSERT、UPDATE、DELETE)がすべてブロックされるため、サービスの停止が必要である。",
+      "D) 移動完了後、コントロール・ファイルのデータ・ファイル経路情報はDBAが手動でALTER DATABASE RENAME FILE文を実行して更新する必要がある。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — KEEP 옵션을 지정하면 데이터 파일 이동 완료 후에도 원본 파일이 삭제되지 않고 유지됩니다. 기본 동작(KEEP 미사용)에서는 이동 완료 시 원본 파일이 자동으로 삭제됩니다. KEEP 옵션은 백업 목적이나 롤백 대비를 위해 사용됩니다.\n\nB) 오답 — ALTER DATABASE MOVE DATAFILE 명령은 파일 시스템(File System)에서 ASM(Automatic Storage Management)으로, 또는 ASM에서 파일 시스템으로의 온라인 이동을 지원합니다. Oracle 12c 이상에서 도입된 이 기능은 서비스 중단 없이 저장 방식을 변경할 수 있는 핵심 기능입니다.\n\nC) 오답 — ALTER DATABASE MOVE DATAFILE은 온라인 이동을 지원하는 명령으로, 이동 중에도 DML(INSERT, UPDATE, DELETE) 작업이 계속 가능합니다. 서비스 중단 없이 데이터 파일의 물리적 위치를 변경할 수 있습니다.\n\nD) 오답 — ALTER DATABASE MOVE DATAFILE 명령은 이동 완료 시 컨트롤 파일의 데이터 파일 경로 정보를 자동으로 갱신합니다. DBA가 별도로 ALTER DATABASE RENAME FILE을 실행할 필요가 없습니다. ALTER DATABASE RENAME FILE은 오프라인 이동 방식(수동 복사 후)에서 사용하는 명령입니다.\n\n핵심 개념: ALTER DATABASE MOVE DATAFILE은 온라인 상태에서 데이터 파일을 이동하는 명령으로, DML 중단 없이 수행됩니다. KEEP 옵션으로 원본 파일 유지, REUSE 옵션으로 대상 경로 덮어쓰기가 가능하며, 파일 시스템과 ASM 간의 이동도 지원합니다. 이동 완료 시 컨트롤 파일이 자동 갱신됩니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_024",
+    "title": "Oracle AI Databaseの論理的ストレージ構造において、エクステント(Extent)の内部動作について正しく述べているものを選択してください。",
+    "options": [
+      "A) AUTOALLOCATEの管理方式では、エクステント・サイズは64KB、1MB、8MB、64MBの段階で自動的に増加し、セグメントの成長に応じてOracleがサイズを決定する。",
+      "B) 1つのエクステントは複数のデータ・ファイルにまたがって配置することが可能であり、テーブルスペース内で自由に分散される。",
+      "C) UNIFORM管理方式ではエクステント・サイズが自動的に増加するため、大規模なセグメントほど効率的な空間管理が行われる。",
+      "D) セグメントに新しいエクステントを割り当てる際は、必ずHigh Water Mark(HWM)を超えた領域から割り当てられるため、HWM以下の空き領域は再利用されない。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — AUTOALLOCATE 익스텐트 관리 방식에서는 Oracle이 세그먼트의 성장에 따라 익스텐트 크기를 64KB → 1MB → 8MB → 64MB 단계로 자동 증가시킵니다. 초기에는 작은 익스텐트를 할당하여 공간 낭비를 줄이고, 세그먼트가 커질수록 큰 익스텐트를 할당하여 관리 오버헤드를 줄입니다.\n\nB) 오답 — 하나의 익스텐트는 반드시 단일 데이터 파일 내에 연속된 블록으로 존재해야 합니다. 익스텐트가 여러 데이터 파일에 걸쳐 배치되는 것은 불가능합니다. 다만, 하나의 세그먼트는 동일 테이블스페이스 내 여러 데이터 파일에 걸쳐 익스텐트를 가질 수 있습니다.\n\nC) 오답 — UNIFORM 관리 방식에서는 모든 익스텐트가 동일한 크기(기본 1MB)로 할당됩니다. 자동으로 크기가 증가하는 것은 AUTOALLOCATE 방식의 특성이며, UNIFORM은 크기가 고정되어 예측 가능한 공간 관리에 적합합니다.\n\nD) 오답 — 새로운 익스텐트 할당과 HWM은 서로 다른 개념입니다. 익스텐트 할당은 테이블스페이스의 여유 공간(DBA_FREE_SPACE에 기록됨)에서 이루어지며, HWM 이하의 블록 내 여유 공간은 INSERT/UPDATE 작업에서 재사용될 수 있습니다. HWM은 세그먼트 레벨의 표식이며, 익스텐트 할당은 테이블스페이스 레벨의 공간 관리입니다.\n\n핵심 개념: 익스텐트는 논리적으로 연속된 데이터 블록의 집합으로 공간 할당의 기본 단위입니다. AUTOALLOCATE는 64KB→1MB→8MB→64MB로 자동 증가하며, UNIFORM은 고정 크기입니다. 익스텐트는 반드시 단일 데이터 파일 내에 존재하지만, 세그먼트는 여러 데이터 파일에 걸쳐 익스텐트를 가질 수 있습니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_025",
+    "title": "AUTOEXTEND OFFに設定された表領域APP_DATAで大量のINSERT処理を実行中に、以下のエラーが発生しました。\n\nORA-01653: unable to extend table HR.SALES in tablespace APP_DATA\n\nこのエラーの発生原因および対処方法について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) このエラーは表領域APP_DATA内でSALES表のセグメントに新しいエクステントを割り当てるための連続した空き領域が不足した場合に発生する。",
+      "B) RESUMABLE_TIMEOUTパラメータが0より大きい値に設定されている場合、このエラーが発生してもINSERT処理は即座に失敗せず、一時的に中断されてDBAが空間を確保するまで待機する。",
+      "C) このエラーが発生した���合、Oracle内部でDBWnプロセスが自動的にデータ・ファイルのサイズを拡張して処理を継続する。",
+      "D) このエラーの対処としてALTER DATABASE DATAFILE ... AUTOEXTEND ON文を実行した場合、エラーが発生した時点のINSERT��理は自動的に再開される。",
+      "E) RESUMABLE_TIMEOUTが0(デフォルト)の場合、ORA-01653エラーが発生するとINSERT文は即座に失敗し、そのINSERT文を含むトランザクション全体が自動的にロールバックされる。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — ORA-01653은 테이블의 세그먼트에 새로운 익스텐트를 할당하려 할 때 테이블스페이스�� 충분한 연속 여유 공간이 없는 경우 발생합니다. 오류 메시지의 '8192ずつ'는 할당하려는 익스텐트의 블록 수를 나타냅니다.\n\nB) 정답 — RESUMABLE_TIMEOUT이 0보다 큰 값으로 설정되어 있으면, 공간 부족 오류(ORA-01653 등) 발생 시 ���업이 즉시 실패하지 않고 일시 중지(Suspend) 상태가 됩���다. DBA가 타임아웃 시간 내에 공간을 확보(데이터 파일 추가, RESIZE, AUTOEXTEND ON 등)하면 작업이 자동으로 재개됩니다.\n\nC) 오답 — DBWn(Database Writer)은 더티 버퍼를 데이터 파일에 기록하는 프로세스이며, 데이터 파일의 크기를 자동으로 확장하는 기능은 없습니다. AUTOEXTEND ON이 설정되어 있으면 Oracle 서버 프로세스가 공간 부족 시 데이터 파일을 자동 확장하지만, AUTOEXTEND OFF 상태에서는 자동 확장이 발생하지 않습니다.\n\nD) 오답 — AUTOEXTEND ON을 설정한 것만으로는 이미 실패한 INSERT 처리가 자동으로 재개되지 않습니다. Resumable Space Allocation이 활성화되어 있지 않은 경우, 오류가 발생한 INSERT 문은 이미 실패 상태이므로 DBA가 공간을 확보한 후 INSERT를 다시 실행해야 합니다.\n\nE) 오답 — ORA-01653 오류가 발생하면 해당 INSERT 문은 실패하지만, 트랜잭션 전체가 자동으로 롤백되는 것은 아닙니다. 실패한 문(Statement)만 롤백되며, 트랜잭션 내의 다른 성공한 DML은 유지됩니다. 사용자가 명시적으로 ROLLBACK을 실행해야 트랜잭션 전체가 롤백됩니다.\n\n핵심 개념: ORA-01653은 테이블스페이스 공간 부족 시 발생하며, Resumable Space Allocation(RESUMABLE_TIMEOUT > 0)이 활성화되어 있으면 작업이 일시 중지되어 DBA 개입 시간을 확보할 수 있습니다. 기본값(RESUMABLE_TIMEOUT=0)에서는 ��시 실패하지만, 트랜잭션 전체가 아닌 해당 문(Statement)만 롤백됩니다."
+  }
+]

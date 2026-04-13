@@ -1,0 +1,49 @@
+{
+  "chapter": "04",
+  "chapter_name": "Oracle Net Servicesの構成",
+  "total_questions": 20,
+  "allocated": 15,
+  "reserved": 5,
+  "per_set_quota": 3,
+  "type_summary": {
+    "전체": {"운영-개념": 10, "운영-응용": 6, "내부-개념": 4, "내부-응용": 0},
+    "배분대상": {"운영-개념": 6, "운영-응용": 6, "내부-개념": 3, "내부-응용": 0}
+  },
+  "allocation": {
+    "set_1": {
+      "question_ids": ["C_04_001", "C_04_006", "C_04_013"],
+      "type_breakdown": {"운영-개념": 1, "운영-응용": 1, "내부-개념": 1},
+      "topic_notes": "서비스등록(동적/정적), tnsping진단, SERVICE_NAMES파라미터"
+    },
+    "set_2": {
+      "question_ids": ["C_04_003", "C_04_016", "C_04_012"],
+      "type_breakdown": {"운영-개념": 1, "운영-응용": 1, "내부-개념": 1},
+      "topic_notes": "DBLink종류(Private/Public), lsnrctl status해석, CONNECT_DATA(SERVICE_NAME vs SID)"
+    },
+    "set_3": {
+      "question_ids": ["C_04_005", "C_04_002", "C_04_008"],
+      "type_breakdown": {"운영-개념": 1, "운영-응용": 1, "내부-개념": 1},
+      "topic_notes": "lsnrctl reload vs stop/start, tnsnames.ora설정, PDB상태와리스너등록"
+    },
+    "set_4": {
+      "question_ids": ["C_04_007", "C_04_004", "C_04_014"],
+      "type_breakdown": {"운영-개념": 1, "운영-응용": 2},
+      "topic_notes": "Net Services도구범위, 간편접속(Easy Connect), DBLink접속방식(Fixed/Connected/Current User)"
+    },
+    "set_5": {
+      "question_ids": ["C_04_009", "C_04_019", "C_04_020"],
+      "type_breakdown": {"운영-개념": 2, "운영-응용": 1},
+      "topic_notes": "listener.ora구성, CREATE DATABASE LINK구문, 접속처리흐름"
+    }
+  },
+  "reserve": {
+    "question_ids": ["C_04_010", "C_04_011", "C_04_015", "C_04_017", "C_04_018"],
+    "selection_rationale": [
+      "C_04_010 (운영-개념): TNS_ADMIN — 단일 파라미터 주제로 범위가 좁음, 운영-개념 초과분 조정",
+      "C_04_011 (운영-개념): ネーミング・メソッド — C_04_017(NAMES.DIRECTORY_PATH)과 토픽 중복도 높음",
+      "C_04_015 (내부-개념): GLOBAL_NAMES — DB Link 관련 파라미터로 범위가 좁음, C_04_003/C_04_014/C_04_019와 DB Link 토픽 과밀 조정",
+      "C_04_017 (운영-개념): NAMES.DIRECTORY_PATH — C_04_011(ネーミング・メソッド)과 토픽 중복도 높음",
+      "C_04_018 (운영-개념): Public/Private DB Link 권한 — C_04_003과 Private/Public 구분 주제가 거의 동일"
+    ]
+  }
+}

@@ -12,16 +12,16 @@
   },
   "custom_topic_counts": {
     "テーブルスペース割当て制限(QUOTA)": 1,
-    "共通ユーザーとローカル・ユーザー": 2,
-    "ユーザー認証": 3,
-    "システム権限とオブジェクト権限(ADMIN/GRANT OPTION)": 4,
-    "ロール管理": 3,
-    "プロファイル(リソース/パスワード)": 3,
+    "共通ユーザーとローカル・ユーザー": 4,
+    "ユーザー認証": 5,
+    "システム権限とオブジェクト権限(ADMIN/GRANT OPTION)": 8,
+    "ロール管理": 4,
+    "プロファイル(リソース/パスワード)": 4,
     "権限分析(DBMS_PRIVILEGE_CAPTURE)": 1,
     "CREATE SESSION権限とログイン": 1,
     "CREATE USER構文(QUOTA/TABLESPACE)": 1,
     "Schema-Onlyアカウント": 1
   },
-  "total_custom": 20,
-  "last_number": "C_05_020"
+  "total_custom": 30,
+  "last_number": "C_05_030"
 }

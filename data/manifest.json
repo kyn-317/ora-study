@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-11T03:31:18.377Z",
+  "generatedAt": "2026-04-13T03:03:26.102Z",
   "study": {
     "00": [
       "00_00_전체흐름총정리"
@@ -82,6 +82,8 @@
       "custom_10_002",
       "custom_10_003",
       "custom_10_004",
+      "custom_10_005",
+      "custom_10_006",
       "topic_stats"
     ],
     "11": [
@@ -110,6 +112,11 @@
       "custom_01_002",
       "custom_01_003",
       "custom_01_004",
+      "custom_01_005",
+      "custom_01_006",
+      "custom_01_007",
+      "custom_01_008",
+      "custom_01_009",
       "topic_stats"
     ],
     "02": [
@@ -124,6 +131,8 @@
       "custom_03_002",
       "custom_03_003",
       "custom_03_004",
+      "custom_03_005",
+      "custom_03_006",
       "topic_stats"
     ],
     "04": [
@@ -138,6 +147,8 @@
       "custom_05_002",
       "custom_05_003",
       "custom_05_004",
+      "custom_05_005",
+      "custom_05_006",
       "topic_stats"
     ],
     "06": [
@@ -145,6 +156,8 @@
       "custom_06_002",
       "custom_06_003",
       "custom_06_004",
+      "custom_06_005",
+      "custom_06_006",
       "topic_stats"
     ],
     "07": [
@@ -152,6 +165,8 @@
       "custom_07_002",
       "custom_07_003",
       "custom_07_004",
+      "custom_07_005",
+      "custom_07_006",
       "topic_stats"
     ],
     "08": [
@@ -168,6 +183,31 @@
       "custom_09_004",
       "topic_stats"
     ]
+  },
+  "mockExams": {
+    "examSets": [
+      "exam_set_1",
+      "exam_set_2",
+      "exam_set_3",
+      "exam_set_4",
+      "exam_set_5"
+    ],
+    "allocations": [
+      "allocation_ch01",
+      "allocation_ch02",
+      "allocation_ch03",
+      "allocation_ch04",
+      "allocation_ch05",
+      "allocation_ch06",
+      "allocation_ch07",
+      "allocation_ch08",
+      "allocation_ch09",
+      "allocation_ch10",
+      "allocation_ch11",
+      "allocation_ch12",
+      "allocation_ch13"
+    ],
+    "hasReservePool": true
   },
   "keywordIndex": {
     "1Z0-182": [

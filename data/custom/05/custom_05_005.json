@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_021",
+    "title": "CDBルートに接続した管理者が以下の操作を順番に実行しました。\n\nCREATE USER C##APP_ADMIN IDENTIFIED BY SecurePass1\n  DEFAULT TABLESPACE users\n  CONTAINER = ALL;\n\nGRANT CREATE SESSION TO C##APP_ADMIN CONTAINER = ALL;\nGRANT CREATE TABLE TO C##APP_ADMIN CONTAINER = CURRENT;\n\nその後、C##APP_ADMINユーザーがPDB1に接続してテーブルを作成しようとしました。この操作の結果について正しく述べているものを選択してください。",
+    "options": [
+      "A) PDB1に正常にログインでき、テーブルの作成も成功する。",
+      "B) PDB1にはログインできるが、CREATE TABLE権限はCDBルートにのみ付与されているためテーブル作成は失敗する。",
+      "C) CONTAINER=ALLでユーザーを作成しているため、すべての権限が自動的にすべてのPDBに伝播される。",
+      "D) C##APP_ADMINはCDBルートにしか接続できず、PDB1への接続自体が失敗する。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — CREATE SESSION 권한은 CONTAINER=ALL로 부여되었으므로 PDB1에 정상적으로 로그인할 수 있습니다. 그러나 CREATE TABLE 권한은 CONTAINER=CURRENT로 부여되었기 때문에 실행 시점의 현재 컨테이너(CDB 루트)에서만 유효합니다. PDB1에서는 CREATE TABLE 권한이 없으므로 테이블 생성이 실패합니다.\n\nA) 오답 — CREATE TABLE 권한은 CONTAINER=CURRENT(CDB 루트)에서만 유효하므로, PDB1에서는 테이블을 생성할 수 없습니다.\n\nC) 오답 — CONTAINER=ALL로 사용자를 생성하면 모든 컨테이너에 사용자가 존재하지만, 각 권한의 적용 범위는 해당 권한의 GRANT 문에서 지정한 CONTAINER 절에 따라 결정됩니다. 사용자 생성 시 CONTAINER=ALL이라고 해서 모든 권한이 자동으로 모든 PDB에 전파되지는 않습니다.\n\nD) 오답 — 공통 사용자는 CDB 루트뿐만 아니라 개별 PDB에도 접속할 수 있습니다. CREATE SESSION이 CONTAINER=ALL로 부여되었으므로 모든 컨테이너에서 접속이 가능합니다.\n\n핵심 개념: 공통 사용자의 권한 범위는 각 GRANT 문의 CONTAINER 절에 의해 개별적으로 결정됩니다. CONTAINER=ALL은 모든 컨테이너에, CONTAINER=CURRENT는 현재 컨테이너에서만 유효하며, CONTAINER 절을 생략하면 CDB 루트에서는 기본값이 CONTAINER=CURRENT입니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_022",
+    "title": "管理者が以下のプロファイルを作成し、ユーザーに割り当てました。\n\nCREATE PROFILE strict_profile LIMIT\n  FAILED_LOGIN_ATTEMPTS 3\n  PASSWORD_LOCK_TIME 1/24\n  CPU_PER_SESSION 60000\n  CONNECT_TIME 480;\n\nALTER USER test_user PROFILE strict_profile;\n\nこの状態でtest_userがデータベースにログインを4回連続で失敗した後、正しいパスワードで5回目のログインを試みました。また、RESOURCE_LIMIT初期化パラメータはFALSEに設定されています。この状況について正しく述べているものを選択してください。",
+    "options": [
+      "A) RESOURCE_LIMITがFALSEであるためプロファイルの設定はすべて無効であり、test_userは正常にログインできる。",
+      "B) アカウントはロックされているためログインは失敗するが、PASSWORD_LOCK_TIME(1時間)経過後に自動でアンロックされる。",
+      "C) FAILED_LOGIN_ATTEMPTSはリソース制限パラメータであるため、RESOURCE_LIMIT=FALSEの場合はアカウントロックが発生しない。",
+      "D) アカウントはロックされ、DBA権限を持つ管理者がALTER USER文で手動アンロックするまでログインできない。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — FAILED_LOGIN_ATTEMPTS와 PASSWORD_LOCK_TIME은 비밀번호 관리 파라미터입니다. 비밀번호 관리 파라미터는 RESOURCE_LIMIT 초기화 파라미터의 설정과 무관하게 항상 적용됩니다. 3회 연속 로그인 실패로 계정이 잠기며(LOCKED(TIMED) 상태), PASSWORD_LOCK_TIME이 1/24일(=1시간)로 설정되어 있으므로 1시간 경과 후 자동으로 잠금이 해제됩니다.\n\nA) 오답 — RESOURCE_LIMIT=FALSE는 CPU_PER_SESSION, CONNECT_TIME 등 자원 제한 파라미터에만 영향을 미칩니다. 비밀번호 관리 파라미터(FAILED_LOGIN_ATTEMPTS, PASSWORD_LOCK_TIME 등)는 RESOURCE_LIMIT 설정과 무관하게 항상 적용됩니다.\n\nC) 오답 — FAILED_LOGIN_ATTEMPTS는 비밀번호 관리 파라미터이지 자원 제한 파라미터가 아닙니다. 따라서 RESOURCE_LIMIT=FALSE여도 계정 잠금은 정상적으로 발생합니다.\n\nD) 오답 — PASSWORD_LOCK_TIME이 설정되어 있으면 지정된 기간(이 경우 1시간) 경과 후 자동으로 잠금이 해제됩니다. 관리자가 수동으로 ALTER USER test_user ACCOUNT UNLOCK을 실행할 필요 없이 자동 해제됩니다.\n\n핵심 개념: 프로파일의 비밀번호 관리 파라미터(FAILED_LOGIN_ATTEMPTS, PASSWORD_LOCK_TIME, PASSWORD_LIFE_TIME 등)는 RESOURCE_LIMIT 파라미터와 무관하게 항상 적용됩니다. RESOURCE_LIMIT=TRUE가 필요한 것은 CPU_PER_SESSION, CONNECT_TIME, IDLE_TIME 등의 자원 제한 파라미터뿐입니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_023",
+    "title": "管理者が以下のSQL文を実行して権限の付与状況を確認しました。\n\nSELECT grantee, privilege, admin_option\nFROM dba_sys_privs\nWHERE grantee = 'DEV_USER';\n\n結果:\nGRANTEE    PRIVILEGE         ADMIN_OPTION\n---------- ----------------- ------------\nDEV_USER   CREATE SESSION    NO\nDEV_USER   CREATE TABLE      YES\nDEV_USER   CREATE VIEW       NO\n\nこの結果に基づいて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) DEV_USERはCREATE TABLE権限を他のユーザーに付与することができる。",
+      "B) DEV_USERがCREATE TABLE権限を他のユーザーに付与した後、DEV_USERからCREATE TABLE権限を取り消すと、付与先ユーザーのCREATE TABLE権限も連鎖的に取り消される。",
+      "C) DEV_USERはCREATE VIEW権限をADMIN OPTIONなしで保持しているため、自身のスキーマでもビューを作成できない。",
+      "D) DEV_USERはCREATE SESSION権限をADMIN OPTIONなしで保持しているため、データベースに接続することは可能だが、他のユーザーにCREATE SESSION権限を付与することはできない。",
+      "E) DEV_USERからCREATE VIEW権限を取り消す場合、CREATE TABLEのADMIN OPTIONも同時に取り消される。"
+    ],
+    "answer": ["A", "D"],
+    "explanation": "정답: A, D\nA) 정답 — DEV_USER는 CREATE TABLE 권한을 ADMIN_OPTION=YES로 보유하고 있으므로, 이 권한을 다른 사용자에게 GRANT할 수 있습니다. WITH ADMIN OPTION으로 부여된 시스템 권한은 피부여자가 해당 권한을 재부여할 수 있게 합니다.\n\nD) 정답 — DEV_USER는 CREATE SESSION 권한을 보유하고 있으므로 데이터베이스에 접속할 수 있습니다. 그러나 ADMIN_OPTION=NO이므로 CREATE SESSION 권한을 다른 사용자에게 부여할 수는 없습니다.\n\nB) 오답 — WITH ADMIN OPTION으로 부여된 시스템 권한은 REVOKE 시 연쇄 취소(Cascade Revoke)가 발생하지 않습니다. DEV_USER의 CREATE TABLE 권한을 취소해도, DEV_USER가 다른 사용자에게 부여한 CREATE TABLE 권한은 그대로 유지됩니다.\n\nC) 오답 — ADMIN OPTION은 해당 권한을 다른 사용자에게 재부여할 수 있는지 여부를 결정하는 것이며, 자신이 그 권한을 사용할 수 있는지와는 관련이 없습니다. DEV_USER는 CREATE VIEW 권한을 보유하고 있으므로 자신의 스키마에서 뷰를 생성할 수 있습니다.\n\nE) 오답 — 각 시스템 권한은 독립적으로 부여되고 취소됩니다. CREATE VIEW를 취소해도 CREATE TABLE의 ADMIN OPTION에는 영향이 없습니다.\n\n핵심 개념: DBA_SYS_PRIVS 뷰에서 ADMIN_OPTION 컬럼이 YES이면 해당 시스템 권한을 다른 사용자에게 재부여할 수 있습니다. ADMIN OPTION의 유무는 권한의 사용 자체와는 무관하며, 시스템 권한의 REVOKE 시에는 연쇄 취소가 발생하지 않습니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_024",
+    "title": "マルチテナント環境における共通ユーザーのメタデータ管理の内部動作について正しく述べているものを選択してください。",
+    "options": [
+      "A) 共通ユーザーの認証情報はCDBルートのデータ・ディクショナリにのみ格納され、各PDBにはメタデータ・リンクを通じてユーザー情報が参照される。",
+      "B) 共通ユーザーを作成すると、各PDBに物理的にユーザー情報のコピーが作成され、以降はPDB間で独立して管理される。",
+      "C) 共通ユーザーのメタデータは各PDBのデータ・ディクショナリに個別に格納されるが、CDBルートからの変更はすべてのPDBに即座にレプリケートされる。",
+      "D) 共通ユーザーのパスワードを変更した場合、変更はCDBルートにのみ適用され、各PDBには次回のPDBオープン時に伝播される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 공통 사용자의 인증 정보(메타데이터)는 CDB 루트의 데이터 딕셔너리에 저장됩니다. 각 PDB에서는 메타데이터 링크(Metadata Link)를 통해 CDB 루트의 사용자 정보를 참조합니다. 이 메커니즘을 통해 데이터 중복 없이 모든 컨테이너에서 공통 사용자를 인식할 수 있습니다.\n\nB) 오답 — 공통 사용자의 메타데이터는 각 PDB에 물리적으로 복사되는 것이 아니라, 메타데이터 링크를 통해 CDB 루트의 정보를 참조하는 방식입니다. PDB마다 독립적으로 관리되는 것이 아닙니다.\n\nC) 오답 — 공통 사용자의 메타데이터는 각 PDB의 데이터 딕셔너리에 개별적으로 저장되지 않습니다. CDB 루트에 중앙 집중적으로 저장되며, PDB에서는 링크를 통해 참조합니다.\n\nD) 오답 — 공통 사용자의 패스워드를 CDB 루트에서 변경하면 메타데이터 링크 구조에 의해 모든 컨테이너에서 즉시 반영됩니다. PDB의 재기동(CLOSE/OPEN)을 기다릴 필요가 없습니다.\n\n핵심 개념: 멀티테넌트 아키텍처에서 공통 사용자의 메타데이터는 CDB 루트에 중앙 집중적으로 저장되며, 각 PDB에서는 메타데이터 링크를 통해 해당 정보를 참조합니다. 이 설계를 통해 데이터 중복을 방지하면서도 모든 컨테이너에서 일관된 사용자 인식이 가능합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_025",
+    "title": "WITH GRANT OPTIONを使用した権限付与チェーンにおけるREVOKEの連鎖取消し(Cascade Revoke)の内部動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 連鎖取消しはOBJAUTH$ディクショナリ・テーブルに記録された付与者(GRANTOR)情報に基づいて、付与チェーンを再帰的にたどって実行される。",
+      "B) WITH GRANT OPTIONで付与された権限に基づいてビューが作成されている場合、権限の連鎖取消し後もビューは有効(VALID)な状態を維持する。",
+      "C) 連鎖取消しの深さには制限があり、付与チェーンが5段階を超える場合は最初の5段階までのみ取り消される。",
+      "D) 連鎖取消しにより権限を失ったユーザーが作成済みのテーブルデータは削除されず、そのまま保持される。",
+      "E) 連鎖取消しは非同期で実行されるため、REVOKE文の実行直後は付与チェーンの下位ユーザーがまだ権限を保持している場合がある。"
+    ],
+    "answer": ["A", "D"],
+    "explanation": "정답: A, D\nA) 정답 — Oracle은 객체 권한을 OBJAUTH$ 딕셔너리 테이블에 저장하며, 이 테이블에는 GRANTOR#(부여자 번호) 컬럼이 포함됩니다. REVOKE 실행 시 Oracle은 이 부여자 정보를 기반으로 부여 체인을 재귀적으로 추적하여, 해당 부여자에서 파생된 모든 권한을 삭제합니다. 이것이 시스템 권한(SYSAUTH$ 테이블, 부여자 미추적)과의 핵심적인 내부 구조 차이입니다.\n\nD) 정답 — 연쇄 취소로 인해 사용자가 객체 권한(SELECT, INSERT 등)을 잃더라도, 해당 사용자가 이미 생성한 테이블의 데이터는 삭제되지 않습니다. 연쇄 취소는 권한만 취소하는 것이며, 이미 생성된 데이터에는 영향을 미치지 않습니다.\n\nB) 오답 — WITH GRANT OPTION으로 받은 권한에 기반하여 뷰를 생성한 경우, 해당 권한이 연쇄 취소되면 뷰는 INVALID 상태로 변경됩니다. 뷰의 기반 객체에 대한 권한이 없어졌기 때문입니다.\n\nC) 오답 — 연쇄 취소에는 깊이 제한이 없습니다. 부여 체인이 몇 단계든 상관없이 해당 부여자에서 파생된 모든 하위 권한이 재귀적으로 취소됩니다.\n\nE) 오답 — 연쇄 취소는 REVOKE 문 실행 시 동기적으로 즉시 수행됩니다. REVOKE 문이 성공적으로 완료되면 부여 체인의 모든 하위 사용자의 권한이 이미 취소된 상태입니다.\n\n핵심 개념: WITH GRANT OPTION의 연쇄 취소는 OBJAUTH$ 테이블의 GRANTOR 정보를 기반으로 재귀적으로 수행되며, 깊이 제한 없이 동기적으로 실행됩니다. 연쇄 취소 시 관련 뷰는 INVALID 상태가 되지만, 이미 생성된 데이터는 영향을 받지 않습니다."
+  }
+]

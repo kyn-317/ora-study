@@ -1,0 +1,68 @@
+[
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_021",
+    "title": "DBAがSPFILE環境で以下のコマンドを実行しました。\n\nSQL> ALTER SYSTEM SET PROCESSES = 500 SCOPE=BOTH;\n\nこの操作の結果について正しく述べているものを選択してください。",
+    "options": [
+      "A) PROCESSESパラメータはSPFILEとメモリーの両方に即座に反映され、既存のセッションにも適用される。",
+      "B) PROCESSESは静的パラメータであるため、SCOPE=BOTHを指定するとORA-02095エラーが発生する。",
+      "C) PROCESSESパラメータの変更はSPFILEにのみ記録され、次回の起動時にメモリーに反映され���。",
+      "D) PROCESSESパラメータの値が変更されると、SESSIONSパラメータの値も自動的に再計算されて即座に適用される。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — PROCESSES는 정적(Static) 파라미터입니다. 정적 파라미터는 인스턴스 실행 중에 메모리 값을 변경할 수 없으므로, SCOPE=BOTH(메모리+SPFILE 동시 반영)를 지정하면 ORA-02095 오류가 발생합니다. 정적 파라미터는 SCOPE=SPFILE만 사용 가능하며, 변경 사항은 다음 기동 시에 적용됩니다.\n\nA) 오답 — PROCESSES는 정적 파라미터이므로 SCOPE=BOTH로 즉시 메모리에 반영할 수 없습니다. 정적 파라미터는 인스턴스 재기동 후에만 적용됩니다.\n\nC) 오답 — 이 설명은 SCOPE=SPFILE을 지정한 경우의 동작입니다. 문제에서는 SCOPE=BOTH를 지정했으므로 오류가 발생하여 변경 자체가 실행되지 않습니다.\n\nD) 오답 — SESSIONS는 PROCESSES를 기반으로 자동 계산((1.5×PROCESSES)+22)되지만, PROCESSES 자체가 정적 파라미터이므로 SCOPE=BOTH 지정 시 오류가 발생하여 어떤 변경도 적용되지 않습니다.\n\n핵심 개념: 정적 파라미터(PROCESSES, DB_BLOCK_SIZE, COMPATIBLE 등)는 인스턴스 실행 중에 메모리 값을 변경할 수 없어 SCOPE=SPFILE만 사용 가능합니다. SCOPE=MEMORY 또는 SCOPE=BOTH를 지정하면 ORA-02095 오류가 발생합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテ��チャの説明",
+    "number": "C_01_022",
+    "title": "DBAが以下のSQL文を実行してインスタンスの状態を確認しました。\n\nSQL> SELECT INSTANCE_NAME, STATUS, DATABASE_STATUS, ACTIVE_STATE\n     FROM V$INSTANCE;\n\nINSTANCE_NAME  STATUS    DATABASE_STATUS  ACTIVE_STATE\n-------------- --------- ---------------- ------------\nORCL           MOUNTED   ACTIVE           NORMAL\n\nこの出力結果から判断できる内容として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 制御ファイルは正常にオープンされており、データ・ファイルとREDOログ・ファイルの位置情報が認識されている。",
+      "B) 一般ユーザーはこの状態でデータの参照および変更を実行することができる。",
+      "C) この状態ではARCHIVELOGモードへの変更やデータ・ファイルの名前変更が可能である。",
+      "D) SGAメモリーの割当てとバックグラウンド・プロセスの起動はまだ完了していない。",
+      "E) MOUNTED状態ではDBA_DATA_FILESビューを参照してデータ・ファイルの構成情報を確認できるが、DBA_TABLESなどのオブジェクト情報は参照できない。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — V$INSTANCE의 STATUS가 MOUNTED인 것은 인스턴스가 MOUNT 단계에 있음을 의미합니다. MOUNT 단계에서는 컨트롤 파일이 정상적으로 오픈되어 데이터 파일과 Redo Log 파일의 위치 정보가 인식된 상태입니다.\n\nC) 정답 — MOUNT 단계에서는 ARCHIVELOG 모드 변경(ALTER DATABASE ARCHIVELOG/NOARCHIVELOG), 데이터 파일 이름 변경(ALTER DATABASE RENAME FILE), 미디어 복구 수행 등의 관리 작업이 가능합니다. 특히 ARCHIVELOG 모드 변경은 MOUNT 단계에서만 가능합니다.\n\nB) 오답 — MOUNT 상태에서는 데이터 파일이 아직 열리지 않았으므로 일반 사용자가 데이터를 참조하거나 변경할 수 없습니다. 일반 사용자 접속은 OPEN 단계에서만 가능합니다.\n\nD) 오��� — MOUNT 단계는 NOMOUNT 단계를 거친 후에 도달하는 상태입니다. NOMOUNT 단계에서 이미 SGA 메모리 할당과 백그라운드 프로세스 기동이 완료됩니다.\n\nE) 오답 — MOUNTED 상태에서는 데이터 파일이 아직 열리지 않았으므로 DBA_DATA_FILES, DBA_TABLES 등 데이터 딕셔너리 뷰(DBA_/ALL_/USER_ 뷰)는 일체 참조할 수 없습니다. 이러한 뷰들은 데이터 파일이 열린 OPEN 상태에서만 접근 가능합니다. MOUNTED 상태에서는 V$DATAFILE 등의 동적 성능 뷰(V$ 뷰)를 통해 데이터 파일 정보를 확인할 수 있습니다.\n\n핵심 개념: V$INSTANCE의 STATUS 컬럼은 인스턴스의 현재 기동 단계(STARTED=NOMOUNT, MOUNTED, OPEN 등)를 보여줍니다. MOUNT 단계에서는 컨트롤 파일이 열려 DB 구조 정보를 인식하며, ARCHIVELOG 모드 변경과 미디어 복구 등의 관리 작업이 가능합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテク���ャの説��",
+    "number": "C_01_023",
+    "title": "Oracle Databaseの停止モードについて、DBAが以下の順序で操作を実行しました。\n\n1. 大量データのDELETE文を実行（未コミット状態）\n2. SHUTDOWN IMMEDIATEを実行\n3. STARTUPを実行\n\nこの操作の結果について正しく述べているものを選択し���ください。",
+    "options": [
+      "A) SHUTDOWN IMMEDIATE実行時にDELETE文の未コミット・トランザクションはロールバックされ、次回のSTARTUP時にインスタンス復旧は不要である。",
+      "B) SHUTDOWN IMMEDIATE実行時に未コミット・トランザクションはロールバックされずに保持され、次回のSTARTUP時にSMONがロールバックを実行する。",
+      "C) SHUTDOWN IMMEDIATEは大量トランザクションのロールバックを実行するため完了に時間がかかる場合があり、その場合SHUTDOWN ABORTに自動的に切り替わる。",
+      "D) SHUTDOWN IMMEDIATE実行時に未コミットのDELETE文はCOMMITされてから停止処理が進行する。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — SHUTDOWN IMMEDIATE는 실행 중인 SQL을 즉시 중단하고, 미완료(미커밋) 트랜잭션을 자동으로 ROLLBACK합니다. 그 후 체크포인트를 수행하여 모든 Dirty Buffer를 디스크에 기록합니다. 이는 Clean Shutdown이므로 다음 STARTUP 시 인스턴스 복구(Instance Recovery)가 필요하지 않습���다.\n\nB) 오답 — 미커밋 트랜잭션을 롤백하지 않고 보존하는 것은 SHUTDOWN ABORT의 동작입니다. SHUTDOWN ABORT 후에는 다음 기동 시 SMON이 인스턴스 복구(Roll Forward → Roll Back)를 자동 수행합니다. SHUTDOWN IMMEDIATE는 종료 과정에서 먼저 롤백을 수행합니다.\n\nC) 오답 — SHUTDOWN IMMEDIATE는 대량 트랜잭션의 롤백에 시간이 걸릴 수 있지만, 자동으로 SHUTDOWN ABORT로 전환되지는 않습니다. DBA가 롤백이 너무 오래 걸린다고 판단하면 수동으로 SHUTDOWN ABORT를 실행할 수 있습니다.\n\nD) 오답 — SHUTDOWN IMMEDIATE는 미커밋 트랜잭션을 COMMIT하지 않고 ROLLBACK합니다. 미커밋 상태의 변경 사항이 자동으로 커밋되는 종료 모드는 없습니다.\n\n핵심 개념: SHUTDOWN IMMEDIATE는 미커밋 트랜잭션을 자동 롤백하고 체크포인트를 수행하는 Clean Shutdown입니다. 실무에서 가장 많이 사용되며, 롤백할 트랜잭션 양이 많으면 종료 시간이 길어질 수 있습니다. 이때 빠른 종료가 필요하면 DBA가 수동으로 SHUTDOWN ABORT를 실행할 수 있습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_024",
+    "title": "DBAがAMM(Automatic Memory Management)からASMM(Automatic Shared Memory Management)に切り替えるため、以下のコマンドを順番に実行しました。\n\nSQL> ALTER SYSTEM SET MEMORY_TARGET = 0 SCOPE=SPFILE;\nSQL> ALTER SYSTEM SET SGA_TARGET = 6G SCOPE=SPFILE;\nSQL> ALTER SYSTEM SET PGA_AGGREGATE_TARGET = 2G SCOPE=SPFILE;\nSQL> SHUTDOWN IMMEDIATE;\nSQL> STARTUP;\n\n再起動後のメモリー管理動作として正しく述べているものを選択してください。",
+    "options": [
+      "A) SGA内部のShared Pool、Buffer Cache、Large Poolなどのサイズはすべて手動で個別に設定する必要がある。",
+      "B) MEMORY_TARGETが0に設定されたことにより、SGA_TARGETとPGA_AGGREGATE_TARGETは無視され、すべてのメモリーが手動管理となる。",
+      "C) OracleはSGA_TARGET(6G)の範囲内でShared Pool、Buffer Cacheなどの内部コンポーネントのサイズを自動的に調整する。",
+      "D) SGA_TARGETを設定しても、PGA_AGGREGATE_TARGETが0でないためAMM動作が継続される。"
+    ],
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — ASMM(Automatic Shared Memory Management)에서는 SGA_TARGET을 0이 아닌 값으로 설정하면 Oracle이 SGA_TARGET 범위 내에서 Shared Pool, Buffer Cache, Large Pool, Java Pool 등 내부 구성요소의 크기를 워크로드에 따라 자동으로 조정합니다. PGA_AGGREGATE_TARGET은 PGA 메모리를 자동으로 관리합니다. MEMORY_TARGET=0으로 AMM을 비활성화하고 이 두 파라미터를 설정하면 ASMM 모드로 전환됩니다.\n\nA) 오답 — ASMM에서는 SGA 내부 구성요소의 크기를 Oracle이 자동 조정합니다. 개별 SGA 구성요소 파라미터(DB_CACHE_SIZE, SHARED_POOL_SIZE 등)를 수동으로 설정할 필요가 없습니다. 다만, 이들을 명시적으로 설정하면 최소 보장 크기(Floor)로 동작합니다.\n\nB) 오답 — MEMORY_TARGET=0은 AMM을 비활성화하는 것이지 모든 자동 관리를 비활성화하는 것이 아닙니다. SGA_TARGET과 PGA_AGGREGATE_TARGET이 설정되어 있으면 ASMM 모드로 동작합니다.\n\nD) 오답 — AMM은 MEMORY_TARGET이 0이 아닌 값으로 설정된 경우에만 활성화됩니다. MEMORY_TARGET=0이면 PGA_AGGREGATE_TARGET 값과 관계없이 AMM은 비활성 상태이며, SGA_TARGET과 PGA_AGGREGATE_TARGET에 의한 ASMM이 동작합니다.\n\n핵심 개념: Oracle의 메모리 관리 모드는 AMM(MEMORY_TARGET), ASMM(SGA_TARGET+PGA_AGGREGATE_TARGET), 수동 관리의 3단계입니다. AMM에서 ASMM으로 전환하려면 MEMORY_TARGET=0으로 설정하고 SGA_TARGET과 PGA_AGGREGATE_TARGET을 지정합니다. ASMM에서는 SGA 내부 구성요소가 자동 조정됩���다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説���",
+    "number": "C_01_025",
+    "title": "Oracle Databaseのインスタンス復旧(Instance Recovery)のプロセスについて正しく述べているものを選択してください。",
+    "options": [
+      "A) インスタンス復旧のRoll Forward(キャッシュ・リカバリ)段階では、コミット済みトランザクションの変更のみがオンラインREDOログから再適用される。",
+      "B) インスタンス復旧はデータベースのOPEN段階への移行中にSMONプロセスが自動的に実行し、Roll Forward完了後にデータベースがオープンされ、Roll Backはバックグラウンドで継続される。",
+      "C) SHUTDOWN IMMEDIATEの後にSTARTUPを実行した場合、インスタンス復旧が必要となる。",
+      "D) インスタンス復旧中にRoll Backが完了するまで、すべてのユーザーはデータベースに接続できない。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 인스턴스 복구는 MOUNT에서 OPEN으로 전환하는 과정에서 SMON 프로세스가 자동으로 수행합니다. Roll Forward(Cache Recovery) 단계에서 온라인 Redo Log의 변경 사항을 데이터 파일에 재적용한 후, 데이터베이스가 OPEN됩니다. 그 후 Roll Back(Transaction Recovery) 단계는 백그라운드에서 계속 수행됩니다. 이를 통해 빠른 서비스 재개가 가능합니다.\n\nA) 오답 — Roll Forward 단계에서는 커밋 여부와 관계없이 체크포인트 이후의 모든 변경 사항이 Redo Log로부터 재적용됩니다. 커밋되지 않은 트랜잭션의 변경도 함께 적용되며, 이후 Roll Back 단계에서 UNDO 데이터를 이용하여 미커밋 트랜잭션만 되돌립��다.\n\nC) 오답 — SHUTDOWN IMMEDIATE는 미커밋 트랜잭션을 롤백하고 체크포인트를 수행하는 Clean Shutdown입니다. 따라서 다음 기동 시 인스턴스 복구가 필요하지 않습니다. 인스턴스 복구가 필요한 것은 SHUTDOWN ABORT나 정전 등 비정상 종료 후입니다.\n\nD) 오답 — Roll Forward 완료 후 데이터베이스가 OPEN되면 사용자가 접속할 수 있습니다. Roll Back은 백그라운드에서 수행되며, 사용자가 아직 롤백되지 않은 데이터에 접근하면 해당 블록에 대해 on-demand 방식으로 즉시 롤백이 처리됩니다.\n\n핵심 개념: 인스턴스 복구는 SMON이 자동으로 수행하며, Roll Forward(모든 Redo 재적용) → DB OPEN → Roll Back(미커밋 트랜잭션 되돌리기, 백그라운드)의 순서로 진행됩니다. Roll Back이 완료되기 전에도 사용자는 데이터베이스에 접속할 수 있어 서비스 재개 시간이 단축됩니다."
+  }
+]

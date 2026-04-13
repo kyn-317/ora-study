@@ -1,0 +1,96 @@
+{
+  "chapter": "07",
+  "chapter_name": "ストレージの管理",
+  "questions_per_set": 6,
+  "total_questions": 30,
+  "type_totals": {
+    "운영-개념": 16,
+    "운영-응용": 8,
+    "내부-개념": 4,
+    "내부-응용": 2
+  },
+  "question_metadata": [
+    {"id": "C_07_001", "topic": "HWM(最高水位標)", "type": "운영-개념"},
+    {"id": "C_07_002", "topic": "データ圧縮", "type": "운영-개념"},
+    {"id": "C_07_003", "topic": "セグメント縮小", "type": "운영-개념"},
+    {"id": "C_07_004", "topic": "Direct-Path Insert", "type": "운영-개념"},
+    {"id": "C_07_005", "topic": "再開可能領域割当て", "type": "운영-개념"},
+    {"id": "C_07_006", "topic": "HWM(TRUNCATE/DELETE)", "type": "운영-개념"},
+    {"id": "C_07_007", "topic": "Segment Advisor", "type": "운영-개념"},
+    {"id": "C_07_008", "topic": "再開可能領域割当て", "type": "운영-개념"},
+    {"id": "C_07_009", "topic": "エクステント管理(AUTOALLOCATE/UNIFORM)", "type": "운영-개념"},
+    {"id": "C_07_010", "topic": "遅延セグメント作成", "type": "운영-개념"},
+    {"id": "C_07_011", "topic": "行移行・行連鎖", "type": "내부-개념"},
+    {"id": "C_07_012", "topic": "PCTFREE", "type": "운영-개념"},
+    {"id": "C_07_013", "topic": "索引UNUSABLE/INVISIBLE状態", "type": "운영-개념"},
+    {"id": "C_07_014", "topic": "セグメント縮小(SHRINK前提条件)", "type": "운영-개념"},
+    {"id": "C_07_015", "topic": "索引REBUILD/COALESCE", "type": "운영-개념"},
+    {"id": "C_07_016", "topic": "データ圧縮(ACOライセンス)", "type": "운영-개념"},
+    {"id": "C_07_017", "topic": "SHRINK SPACE(SQL実行)", "type": "운영-응용"},
+    {"id": "C_07_018", "topic": "HWM(DELETE後性能分析)", "type": "운영-응용"},
+    {"id": "C_07_019", "topic": "ALTER TABLE MOVE後操作", "type": "운영-응용"},
+    {"id": "C_07_020", "topic": "DBA_SEGMENTS領域分析", "type": "운영-응용"},
+    {"id": "C_07_021", "topic": "ASSM空間管理", "type": "내부-개념"},
+    {"id": "C_07_022", "topic": "Segment Advisor結果解釈", "type": "운영-응용"},
+    {"id": "C_07_023", "topic": "ALTER TABLE MOVE ONLINE", "type": "운영-개념"},
+    {"id": "C_07_024", "topic": "NOLOGGING/FORCE LOGGING", "type": "내부-응용"},
+    {"id": "C_07_025", "topic": "SHRINK SPACE COMPACT", "type": "운영-응용"},
+    {"id": "C_07_026", "topic": "V$SYSSTAT(行移行モニタリング)", "type": "운영-응용"},
+    {"id": "C_07_027", "topic": "ASSM/MSSM(SHRINKエラー)", "type": "운영-응용"},
+    {"id": "C_07_028", "topic": "Low HWM/High HWM(ASSM)", "type": "내부-개념"},
+    {"id": "C_07_029", "topic": "INDEX COALESCE vs REBUILD内部動作", "type": "내부-개념"},
+    {"id": "C_07_030", "topic": "大量ロード戦略(UNUSABLE→REBUILD)", "type": "내부-응용"}
+  ],
+  "allocation": {
+    "set_1": {
+      "question_ids": ["C_07_002", "C_07_005", "C_07_012", "C_07_017", "C_07_020", "C_07_011"],
+      "type_breakdown": {"운영-개념": 3, "운영-응용": 2, "내부-개념": 1, "내부-응용": 0},
+      "topics": ["データ圧縮", "再開可能領域割当て", "PCTFREE", "SHRINK SPACE(SQL)", "DBA_SEGMENTS分析", "行移行・行連鎖"]
+    },
+    "set_2": {
+      "question_ids": ["C_07_004", "C_07_009", "C_07_014", "C_07_019", "C_07_022", "C_07_030"],
+      "type_breakdown": {"운영-개념": 3, "운영-응용": 2, "내부-개념": 0, "내부-응용": 1},
+      "topics": ["Direct-Path Insert", "エクステント管理", "SHRINK前提条件", "ALTER TABLE MOVE後", "Segment Advisor結果", "大量ロード戦略"]
+    },
+    "set_3": {
+      "question_ids": ["C_07_001", "C_07_008", "C_07_013", "C_07_023", "C_07_027", "C_07_029"],
+      "type_breakdown": {"운영-개념": 4, "운영-응용": 1, "내부-개념": 1, "내부-응용": 0},
+      "topics": ["HWM", "再開可能領域割当て", "索引UNUSABLE/INVISIBLE", "MOVE ONLINE", "MSSM/SHRINKエラー", "COALESCE vs REBUILD"]
+    },
+    "set_4": {
+      "question_ids": ["C_07_003", "C_07_010", "C_07_016", "C_07_018", "C_07_026", "C_07_028"],
+      "type_breakdown": {"운영-개념": 3, "운영-응용": 2, "내부-개념": 1, "내부-응용": 0},
+      "topics": ["セグメント縮小", "遅延セグメント作成", "データ圧縮/ACO", "HWM(DELETE後性能)", "V$SYSSTAT(行移行)", "Low/High HWM(ASSM)"]
+    },
+    "set_5": {
+      "question_ids": ["C_07_006", "C_07_007", "C_07_015", "C_07_025", "C_07_021", "C_07_024"],
+      "type_breakdown": {"운영-개념": 3, "운영-응용": 1, "내부-개념": 1, "내부-응용": 1},
+      "topics": ["HWM(TRUNCATE/DELETE)", "Segment Advisor", "索引REBUILD", "SHRINK COMPACT", "ASSM空間管理", "NOLOGGING"]
+    }
+  },
+  "reserve": [],
+  "avoidance_pairs": [
+    {"pair": ["C_07_001", "C_07_006"], "reason": "HWM関連(HWM基本 vs TRUNCATE/DELETE)", "sets": ["set_3", "set_5"]},
+    {"pair": ["C_07_001", "C_07_018"], "reason": "HWM関連(HWM基本 vs DELETE後性能)", "sets": ["set_3", "set_4"]},
+    {"pair": ["C_07_006", "C_07_018"], "reason": "HWM/DELETE関連", "sets": ["set_5", "set_4"]},
+    {"pair": ["C_07_003", "C_07_014"], "reason": "SHRINK SPACE(比較 vs 前提条件)", "sets": ["set_4", "set_2"]},
+    {"pair": ["C_07_003", "C_07_017"], "reason": "SHRINK SPACE(比較 vs SQL実行)", "sets": ["set_4", "set_1"]},
+    {"pair": ["C_07_014", "C_07_017"], "reason": "SHRINK SPACE(前提条件 vs SQL実行)", "sets": ["set_2", "set_1"]},
+    {"pair": ["C_07_005", "C_07_008"], "reason": "再開可能領域割当て", "sets": ["set_1", "set_3"]},
+    {"pair": ["C_07_002", "C_07_016"], "reason": "データ圧縮", "sets": ["set_1", "set_4"]},
+    {"pair": ["C_07_007", "C_07_022"], "reason": "Segment Advisor", "sets": ["set_5", "set_2"]},
+    {"pair": ["C_07_019", "C_07_023"], "reason": "ALTER TABLE MOVE", "sets": ["set_2", "set_3"]},
+    {"pair": ["C_07_015", "C_07_029"], "reason": "索引REBUILD/COALESCE", "sets": ["set_5", "set_3"]},
+    {"pair": ["C_07_011", "C_07_026"], "reason": "行移行・行連鎖", "sets": ["set_1", "set_4"]},
+    {"pair": ["C_07_021", "C_07_027"], "reason": "ASSM/MSSM", "sets": ["set_5", "set_3"]},
+    {"pair": ["C_07_021", "C_07_028"], "reason": "ASSM内部動作", "sets": ["set_5", "set_4"]}
+  ],
+  "validation": {
+    "total_allocated": 30,
+    "per_set_count": [6, 6, 6, 6, 6],
+    "duplicate_check": "PASS — all 30 question_ids unique across sets",
+    "type_balance": "PASS — no set is exclusively 운영-개념; all sets have at least 1 non-운영-개념 question",
+    "topic_cluster_check": "PASS — no topic appears 3+ times in any single set",
+    "avoidance_pair_check": "PASS — all similar pairs placed in different sets"
+  }
+}

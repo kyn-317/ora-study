@@ -1,0 +1,80 @@
+{
+  "chapter": "02",
+  "chapter_name": "データベース管理ツール",
+  "weight": "5%",
+  "questions_per_set": 3,
+  "total_questions": 20,
+  "allocated": 15,
+  "reserved": 5,
+  "question_analysis": [
+    {"question_id": "C_02_001", "topic": "DBCA サイレントモード", "type": "운영-응용"},
+    {"question_id": "C_02_002", "topic": "SQL*Plus CDB接続", "type": "운영-개념"},
+    {"question_id": "C_02_003", "topic": "RMAN 機能概要", "type": "운영-개념"},
+    {"question_id": "C_02_004", "topic": "EM Cloud Control アーキテクチャ", "type": "내부-개념"},
+    {"question_id": "C_02_005", "topic": "SQL Developer 概要", "type": "운영-개념"},
+    {"question_id": "C_02_006", "topic": "SQL*Plus SET コマンド", "type": "운영-응용"},
+    {"question_id": "C_02_007", "topic": "DBCA 対話型モード", "type": "운영-개념"},
+    {"question_id": "C_02_008", "topic": "RMAN バックアップ機能", "type": "운영-개념"},
+    {"question_id": "C_02_009", "topic": "EM Cloud Control vs EM Express", "type": "운영-개념"},
+    {"question_id": "C_02_010", "topic": "SQL*Plus スクリプト実行", "type": "운영-응용"},
+    {"question_id": "C_02_011", "topic": "SQL Developer 接続方式", "type": "운영-응용"},
+    {"question_id": "C_02_012", "topic": "SQL*Plus 接続方法", "type": "운영-개념"},
+    {"question_id": "C_02_013", "topic": "RMAN メタデータ管理", "type": "내부-개념"},
+    {"question_id": "C_02_014", "topic": "EM Cloud Control 起動停止", "type": "운영-응용"},
+    {"question_id": "C_02_015", "topic": "DB管理ツール機能比較", "type": "운영-개념"},
+    {"question_id": "C_02_016", "topic": "EM Cloud Control 監視機能", "type": "운영-개념"},
+    {"question_id": "C_02_017", "topic": "SQL*Plus PDB接続", "type": "운영-응용"},
+    {"question_id": "C_02_018", "topic": "DBCA テンプレート", "type": "내부-개념"},
+    {"question_id": "C_02_019", "topic": "RMAN オンラインバックアップ", "type": "운영-응용"},
+    {"question_id": "C_02_020", "topic": "DBCA 応答ファイル", "type": "운영-응용"}
+  ],
+  "allocation": {
+    "set_1": {
+      "question_ids": ["C_02_002", "C_02_001", "C_02_013"],
+      "type_breakdown": {"운영-개념": 1, "운영-응용": 1, "내부-개념": 1, "내부-응용": 0},
+      "topics": ["SQL*Plus CDB接続", "DBCA サイレントモード", "RMAN メタデータ管理"]
+    },
+    "set_2": {
+      "question_ids": ["C_02_003", "C_02_006", "C_02_018"],
+      "type_breakdown": {"운영-개념": 1, "운영-응용": 1, "내부-개념": 1, "내부-응용": 0},
+      "topics": ["RMAN 機能概要", "SQL*Plus SET コマンド", "DBCA テンプレート"]
+    },
+    "set_3": {
+      "question_ids": ["C_02_005", "C_02_020", "C_02_004"],
+      "type_breakdown": {"운영-개념": 1, "운영-응용": 1, "내부-개념": 1, "내부-응용": 0},
+      "topics": ["SQL Developer 概要", "DBCA 応答ファイル", "EM Cloud Control アーキテクチャ"]
+    },
+    "set_4": {
+      "question_ids": ["C_02_007", "C_02_010", "C_02_019"],
+      "type_breakdown": {"운영-개념": 1, "운영-응용": 2, "내부-개념": 0, "내부-응용": 0},
+      "topics": ["DBCA 対話型モード", "SQL*Plus スクリプト実行", "RMAN オンラインバックアップ"]
+    },
+    "set_5": {
+      "question_ids": ["C_02_011", "C_02_014", "C_02_017"],
+      "type_breakdown": {"운영-개념": 0, "운영-응용": 3, "내부-개념": 0, "내부-응용": 0},
+      "topics": ["SQL Developer 接続方式", "EM Cloud Control 起動停止", "SQL*Plus PDB接続"]
+    }
+  },
+  "reserve": {
+    "question_ids": ["C_02_008", "C_02_009", "C_02_012", "C_02_015", "C_02_016"],
+    "selection_rationale": {
+      "C_02_008": "운영-개념 과다 조정; RMAN 백업 기능은 C_02_003(기능개요), C_02_013(메타데이터), C_02_019(명령)와 토픽 중복",
+      "C_02_009": "운영-개념 과다 조정; EM Express vs Cloud Control 비교는 C_02_004(아키텍처), C_02_014(기동정지)와 EM 토픽 중복",
+      "C_02_012": "운영-개념 과다 조정; SQL*Plus 접속방법은 C_02_002, C_02_017과 SQL*Plus 접속 토픽 중복(5문제 중 가장 일반적인 내용)",
+      "C_02_015": "운영-개념 과다 조정; 도구 기능 비교 총정리 문제로 개별 도구 문제와 내용 중복도 높음",
+      "C_02_016": "운영-개념 과다 조정; EM 감시기능은 C_02_009(EM 비교), C_02_014(기동정지)와 EM 토픽 중복"
+    }
+  },
+  "validation": {
+    "similar_pair_check": {
+      "C_02_002_C_02_017": "분리됨 (set_1 vs set_5)",
+      "C_02_003_C_02_008": "분리됨 (set_2 vs reserve)",
+      "C_02_001_C_02_020": "분리됨 (set_1 vs set_3)",
+      "C_02_007_C_02_018": "분리됨 (set_4 vs set_2)",
+      "C_02_009_C_02_016": "분리됨 (both reserve)"
+    },
+    "topic_cluster_max_per_set": 1,
+    "all_ids_unique": true,
+    "total_allocated_plus_reserved": 20
+  }
+}

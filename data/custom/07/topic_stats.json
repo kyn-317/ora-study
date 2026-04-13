@@ -14,16 +14,20 @@
     "Direct-Path Insert": 1,
     "遅延セグメント作成": 1,
     "再開可能領域割当て": 2,
-    "行移行・行連鎖": 1,
+    "行移行・行連鎖": 2,
     "PCTFREE": 1,
-    "索引UNUSABLE/INVISIBLE状態": 1,
-    "Segment Advisor": 1,
+    "索引UNUSABLE/INVISIBLE状態": 2,
+    "Segment Advisor": 2,
     "エクステント管理(AUTOALLOCATE/UNIFORM)": 1,
-    "索引REBUILD": 1,
+    "索引REBUILD/COALESCE": 2,
     "データ圧縮": 2,
-    "ALTER TABLE MOVE": 1,
-    "DBA_SEGMENTS領域分析": 1
+    "ALTER TABLE MOVE/MOVE ONLINE": 2,
+    "DBA_SEGMENTS領域分析": 1,
+    "ASSM/MSSM領域管理": 2,
+    "NOLOGGING/FORCE LOGGING": 1,
+    "Low HWM/High HWM(ASSM)": 1,
+    "SHRINK SPACE COMPACT": 1
   },
-  "total_custom": 20,
-  "last_number": "C_07_020"
+  "total_custom": 30,
+  "last_number": "C_07_030"
 }

@@ -1,0 +1,124 @@
+{
+  "chapter": "10",
+  "chapter_name": "PDB管理 (PDB Creation and Management)",
+  "total_questions": 30,
+  "questions_per_set": 6,
+  "reserve_count": 0,
+  "type_summary": {
+    "운영-개념": 18,
+    "운영-응용": 6,
+    "내부-개념": 4,
+    "내부-응용": 2
+  },
+  "allocation": {
+    "set_1": {
+      "question_ids": ["C_10_001", "C_10_002", "C_10_009", "C_10_010", "C_10_021", "C_10_024"],
+      "type_breakdown": {"운영-개념": 3, "운영-응용": 1, "내부-개념": 1, "내부-응용": 1},
+      "topic_breakdown": {
+        "PDB生成": ["C_10_001", "C_10_021"],
+        "PDBの切断と状態": ["C_10_002"],
+        "PDBクローンおよび管理": ["C_10_009"],
+        "PDB Lockdown Profile": ["C_10_010"],
+        "PDB初期化パラメータ": ["C_10_024"]
+      }
+    },
+    "set_2": {
+      "question_ids": ["C_10_004", "C_10_006", "C_10_012", "C_10_018", "C_10_022", "C_10_030"],
+      "type_breakdown": {"운영-개념": 3, "운영-응용": 1, "내부-개념": 1, "내부-응용": 1},
+      "topic_breakdown": {
+        "PDBクローンおよび管理": ["C_10_004"],
+        "PDBの切断と状態": ["C_10_006"],
+        "共通ユーザーとローカルユーザー": ["C_10_012"],
+        "PDB$SEED": ["C_10_018"],
+        "PDB関連ビューとモニタリング": ["C_10_022"],
+        "PDB初期化パラメータ": ["C_10_030"]
+      }
+    },
+    "set_3": {
+      "question_ids": ["C_10_005", "C_10_008", "C_10_011", "C_10_025", "C_10_026", "C_10_029"],
+      "type_breakdown": {"운영-개념": 4, "운영-응용": 1, "내부-개념": 1, "내부-응용": 0},
+      "topic_breakdown": {
+        "PDB状態管理（SAVE STATE）": ["C_10_005"],
+        "PDBオープンモード管理": ["C_10_008"],
+        "CDB構造とコンテナ体系": ["C_10_011"],
+        "PDBクローンおよび管理": ["C_10_025"],
+        "PDBの切断と状態": ["C_10_026", "C_10_029"]
+      }
+    },
+    "set_4": {
+      "question_ids": ["C_10_003", "C_10_013", "C_10_015", "C_10_016", "C_10_020", "C_10_023"],
+      "type_breakdown": {"운영-개념": 4, "운영-응용": 1, "내부-개념": 1, "내부-응용": 0},
+      "topic_breakdown": {
+        "PDB初期化パラメータ": ["C_10_003"],
+        "Refreshable Clone PDB": ["C_10_013"],
+        "PDBストレージ制限": ["C_10_015"],
+        "PDBクローンおよび管理": ["C_10_016"],
+        "PDBの切断と状態": ["C_10_020", "C_10_023"]
+      }
+    },
+    "set_5": {
+      "question_ids": ["C_10_007", "C_10_014", "C_10_017", "C_10_019", "C_10_027", "C_10_028"],
+      "type_breakdown": {"운영-개념": 4, "운영-응용": 2, "내부-개념": 0, "내부-응용": 0},
+      "topic_breakdown": {
+        "PDBの切断と状態": ["C_10_007", "C_10_017"],
+        "PDB関連ビューとモニタリング": ["C_10_014", "C_10_027"],
+        "PDB状態管理（SAVE STATE）": ["C_10_019"],
+        "PDBクローンおよび管理": ["C_10_028"]
+      }
+    }
+  },
+  "reserve": [],
+  "validation": {
+    "total_allocated": 30,
+    "total_reserved": 0,
+    "all_ids_unique": true,
+    "topic_cluster_max_per_set": 2,
+    "similar_pair_separation": {
+      "C_10_002_C_10_029": "set_1 vs set_3 (Unplug operation vs Unplug output format)",
+      "C_10_005_C_10_019": "set_3 vs set_5 (SAVE STATE)",
+      "C_10_017_C_10_023": "set_5 vs set_4 (PDB migration procedure)",
+      "C_10_003_C_10_024_C_10_030": "set_4 vs set_1 vs set_2 (init parameter management)",
+      "C_10_004_C_10_025": "set_2 vs set_3 (clone operations)",
+      "C_10_007_C_10_026": "set_5 vs set_3 (DROP PDB / OMF DROP)"
+    },
+    "type_balance_check": {
+      "set_1": "3+1+1+1=6 OK",
+      "set_2": "3+1+1+1=6 OK",
+      "set_3": "4+1+1+0=6 OK",
+      "set_4": "4+1+1+0=6 OK",
+      "set_5": "4+2+0+0=6 OK (no 내부 types available; 4 내부-개념 + 2 내부-응용 = 6 total distributed to sets 1-4)"
+    }
+  },
+  "question_type_details": [
+    {"id": "C_10_001", "topic": "PDB生成", "type": "운영-개념", "set": 1},
+    {"id": "C_10_002", "topic": "PDBの切断と状態", "type": "운영-개념", "set": 1},
+    {"id": "C_10_003", "topic": "PDB初期化パラメータ", "type": "내부-개념", "set": 4},
+    {"id": "C_10_004", "topic": "PDBクローンおよび管理", "type": "운영-개념", "set": 2},
+    {"id": "C_10_005", "topic": "PDB状態管理（SAVE STATE）", "type": "운영-개념", "set": 3},
+    {"id": "C_10_006", "topic": "PDBの切断と状態", "type": "운영-개념", "set": 2},
+    {"id": "C_10_007", "topic": "PDBの切断と状態", "type": "운영-개념", "set": 5},
+    {"id": "C_10_008", "topic": "PDBオープンモード管理", "type": "운영-개념", "set": 3},
+    {"id": "C_10_009", "topic": "PDBクローンおよび管理", "type": "운영-개념", "set": 1},
+    {"id": "C_10_010", "topic": "PDB Lockdown Profile", "type": "내부-개념", "set": 1},
+    {"id": "C_10_011", "topic": "CDB構造とコンテナ体系", "type": "내부-개념", "set": 3},
+    {"id": "C_10_012", "topic": "共通ユーザーとローカルユーザー", "type": "운영-개념", "set": 2},
+    {"id": "C_10_013", "topic": "Refreshable Clone PDB", "type": "운영-개념", "set": 4},
+    {"id": "C_10_014", "topic": "PDB関連ビューとモニタリング", "type": "운영-개념", "set": 5},
+    {"id": "C_10_015", "topic": "PDBストレージ制限", "type": "운영-개념", "set": 4},
+    {"id": "C_10_016", "topic": "PDBクローンおよび管理", "type": "운영-개념", "set": 4},
+    {"id": "C_10_017", "topic": "PDBの切断と状態", "type": "운영-개념", "set": 5},
+    {"id": "C_10_018", "topic": "PDB$SEED", "type": "내부-개념", "set": 2},
+    {"id": "C_10_019", "topic": "PDB状態管理（SAVE STATE）", "type": "운영-개념", "set": 5},
+    {"id": "C_10_020", "topic": "PDBの切断と状態", "type": "운영-개념", "set": 4},
+    {"id": "C_10_021", "topic": "PDB生成", "type": "운영-응용", "set": 1},
+    {"id": "C_10_022", "topic": "PDB関連ビューとモニタリング", "type": "운영-응용", "set": 2},
+    {"id": "C_10_023", "topic": "PDBの切断と状態", "type": "운영-응용", "set": 4},
+    {"id": "C_10_024", "topic": "PDB初期化パラメータ", "type": "내부-응용", "set": 1},
+    {"id": "C_10_025", "topic": "PDBクローンおよび管理", "type": "운영-응용", "set": 3},
+    {"id": "C_10_026", "topic": "PDBの切断と状態", "type": "운영-개념", "set": 3},
+    {"id": "C_10_027", "topic": "PDB関連ビューとモニタリング", "type": "운영-응용", "set": 5},
+    {"id": "C_10_028", "topic": "PDBクローンおよび管理", "type": "운영-응용", "set": 5},
+    {"id": "C_10_029", "topic": "PDBの切断と状態", "type": "운영-개념", "set": 3},
+    {"id": "C_10_030", "topic": "PDB初期化パラメータ", "type": "내부-응용", "set": 2}
+  ]
+}

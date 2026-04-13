@@ -1,0 +1,75 @@
+[
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_026",
+    "question_type": "運営-概念",
+    "title": "V$PARAMETERビューとV$SPPARAMETERビューに関して正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) V$PARAMETERビューは現在のインスタンスのメモリ上で有効なパラメータ値を表示し、V$SPPARAMETERビューはSPFILEに記録されたパラメータ値を表示する。",
+      "B) ALTER SYSTEM SET ... SCOPE=MEMORYで変更したパラメータ値は、V$PARAMETERとV$SPPARAMETERの両方に即座に反映される。",
+      "C) V$SPPARAMETERビューのISSPECIFIED列がFALSEのパラメータは、SPFILEに明示的に設定されておらずOracleのデフォルト値が使用されていることを示す。",
+      "D) PFILE環境では、V$SPPARAMETERビューにPFILEに設定されたパラメータ値が表示される。",
+      "E) V$PARAMETERビューとV$SPPARAMETERビューは常に同じ値を表示する。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — V$PARAMETER 뷰는 현재 인스턴스 메모리에서 유효한 파라미터 값을 표시하며, V$SPPARAMETER 뷰는 SPFILE에 기록된 파라미터 값을 표시합니다. 두 뷰는 서로 다른 소스를 참조하므로, SCOPE 설정에 따라 값이 다를 수 있습니다.\n\nC) 정답 — V$SPPARAMETER의 ISSPECIFIED 컬럼이 'FALSE'인 파라미터는 SPFILE에 명시적으로 설정되지 않은 것을 의미합니다. 이 경우 Oracle 기본값이 사용되며, VALUE 컬럼에는 NULL이 표시됩니다.\n\nB) 오답 — SCOPE=MEMORY로 변경한 값은 V$PARAMETER(메모리)에만 반영되고, V$SPPARAMETER(SPFILE)에는 반영되지 않습니다. SPFILE에도 반영하려면 SCOPE=BOTH 또는 SCOPE=SPFILE을 사용해야 합니다.\n\nD) 오답 — PFILE 환경에서는 SPFILE이 존재하지 않으므로, V$SPPARAMETER 뷰의 ISSPECIFIED 컬럼이 모두 'FALSE'로 표시됩니다. PFILE의 내용이 표시되는 것이 아닙니다.\n\nE) 오답 — SCOPE=MEMORY로 변경하면 V$PARAMETER에만, SCOPE=SPFILE로 변경하면 V$SPPARAMETER에만 반영되므로, 두 뷰의 ���이 다를 수 있습니다. 예를 들어, SCOPE=MEMORY로 SGA_TARGET을 변경하면 V$PARAMETER에는 새 값이, V$SPPARAMETER에는 이전 값이 표시됩니다.\n\n핵심 개념: V$PARAMETER(메모리 유효값)와 V$SPPARAMETER(SPFILE 기록값)는 별도의 소스를 참조합니다. SCOPE=MEMORY는 V$PARAMETER에만, SCOPE=SPFILE은 V$SPPARAMETER에만, SCOPE=BOTH는 양쪽 모두에 반영됩니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_027",
+    "question_type": "運営-応用",
+    "title": "DBAが以下の操作を順番に実行しました。\n\nSQL> SHOW PARAMETER spfile;\n\nNAME       TYPE   VALUE\n---------- ------ --------------------------------\nspfile     string /u01/app/oracle/dbs/spfileORCL.ora\n\nSQL> ALTER SYSTEM SET OPEN_CURSORS = 500 SCOPE=MEMORY;\n\nSystem altered.\n\nSQL> SELECT value FROM V$PARAMETER WHERE name = 'open_cursors';\n\nVALUE\n----------\n500\n\nSQL> SELECT value FROM V$SPPARAMETER WHERE name = 'open_cursors';\n\nVALUE\n----------\n300\n\nこの実行結果から読み取れる内容として正しいものを選択してください。",
+    "options": [
+      "A) OPEN_CURSORSの変更はメモリにのみ反��されたため、インスタンスを再起動するとSPFILEに記録されている値300に戻る。",
+      "B) OPEN_CURSORSの変更はメモリとSPFILEの両方に反映��れているが、V$SPPARAMETERの表示更新にタイムラグがある。",
+      "C) このデータベースはPFILE環境で運用されているため、SCOPE=MEMORYしか使用できなかった。",
+      "D) OPEN_CURSORSは静的パラメータであるため��SCOPE=MEMORYは本来使用できないが、特殊な条件で許可された。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — SCOPE=MEMORY를 명시적으로 지정했으므로, OPEN_CURSORS의 변경은 현재 인스턴스의 메모리에만 반영됩니다. V$PARAMETER(메모리)에서는 500으로 표시되지만, V$SPPARAMETER(SPFILE)에서는 이전 값인 300이 유지됩니다. 인스턴스를 재기동하면 SPFILE에서 값을 읽으므로 300으로 돌아갑니다.\n\nB) 오답 — V$SPPARAMETER의 표시에는 타임 래그가 없습니다. SCOPE=MEMORY는 메모리에만 반영하는 옵션이므로, SPFILE에는 기록되지 않습니다. V$SPPARAMETER의 값이 300인 것은 정상적인 동작입니다.\n\nC) 오답 — SHOW PARAMETER spfile의 결과에서 VALUE에 SPFILE 경로(/u01/app/oracle/dbs/spfileORCL.ora)가 표시되어 있으���로, 이 데이터베이스는 SPFILE 환경입니다. PFILE 환경이라면 VALUE가 비어있게 됩니다.\n\nD) 오답 — OPEN_CURSORS는 동적(Dynamic) 파라미터이므로 SCOPE=MEMORY, SCOPE=SPFILE, SCOPE=BOTH 모두 사용 가능합니다. 정적 파라미터가 아닙니다.\n\n핵심 개념: SHOW PARAMETER spfile로 SPFILE 사용 여부를 확인할 수 있습니다(값이 있으면 SPFILE, 비어있으면 PFILE). SCOPE=MEMORY로 변경한 값은 V$PARAMETER에만 반영되고 V$SPPARAMETER에는 반영되지 않으므로, 재기동 시 SPFILE의 값으로 복원됩니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_028",
+    "question_type": "運営-応用",
+    "title": "DBAがSTARTUP FORCEコマンドを実行しました。このコマンドの動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) STARTUP FORCEの内部SHUTDOWN処理ではトランザクションのロールバックやチェックポイントが行われず、SHUTDOWN ABORTと同等の処理が実行される。",
+      "B) STARTUP FORCEによるSHUTDOWN処理ではチェックポイントが実行されるため、次回のインスタンス・リカバリは不要である。",
+      "C) STARTUP FORCE��実行後、SMONプロセスがインスタンス・リカバリを自動的に実行する。",
+      "D) STARTUP FORCEはインスタンスが停止している状態でのみ使用可能であり、現在起動中のインスタンスには使用できない。",
+      "E) STARTUP FORCEの内部SHUTDOWN処理はSHUTDOWN IMMEDIATEと同等であり、未コミットのト��ンザクションは自動的にロールバックされてからインスタンスが停止する。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — STARTUP FORCE의 내부 SHUTDOWN 처리는 SHUTDOWN ABORT와 동일합니다. 즉, 미커밋 트랜잭션의 롤백을 수행하지 않으며, 체크포인트(Dirty Buffer의 디스크 기록)도 실행하지 않고 즉시 인스턴스를 종료합니다. 이후 자동으로 STARTUP이 수행됩니다.\n\nC) 정답 — SHUTDOWN ABORT를 수행하므로 체크포인트가 실행되지 않으며, 다음 기동 시 SMON 프로세스가 자동으로 인스턴스 복구(Roll Forward → Roll Back)를 수행합니다. 이를 통해 커밋된 트랜잭션의 데이터는 복구되고, 미커밋 트랜잭션은 롤백됩니다.\n\nB) 오답 — STARTUP FORCE의 내부 SHUTDOWN 처리는 SHUTDOWN ABORT이므로 체크포인트가 수행되지 않습니다. 따라서 다음 기동 시 인스턴스 복구가 반드시 필요합니다.\n\nD) 오답 — STARTUP FORCE는 인스턴스가 현재 기동 중인 상태에서도 사용할 수 있습니다. 기동 중인 인스턴스를 SHUTDOWN ABORT로 강제 종료한 후 재기동합니다. 인스턴스가 이미 정지된 상태에서도 사용 가능합니다(이 경우 단순히 STARTUP만 수행).\n\nE) 오답 — STARTUP FORCE의 내부 SHUTDOWN 처리는 SHUTDOWN IMMEDIATE가 아니라 SHUTDOWN ABORT입니다. SHUTDOWN ABORT는 미커밋 트랜잭션의 롤백을 수행하지 않으며, 체크포인트도 실행하지 않고 즉시 ��료합니다.\n\n핵심 개념: STARTUP FORCE = SHUTDOWN ABORT + STARTUP입니다. 인스턴스가 Hang 상태이거나 SHUTDOWN IMMEDIATE가 응답하지 않을 때 유용합니다. ABORT에 의해 체크포인트가 수행되지 않으므로 재���동 시 SMON에 의한 인스턴스 복구가 자동 수행됩니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_029",
+    "question_type": "運営-応用",
+    "title": "DBAがSPFILE環境のデータベースをPFILE環境に変更するために以下のコマンドを実行しました。\n\nSQL> CREATE PFILE = '/tmp/initORCL.ora' FROM SPFILE;\n\nFile created.\n\nSQL> SHUTDOWN IMMEDIATE;\n\nDatabase closed.\nDatabase dismounted.\nORACLE instance shut down.\n\nSQL> STARTUP PFILE='/tmp/initORCL.ora';\n\nORACLE instance started.\n...\nDatabase opened.\n\nSQL> SHOW PARAMETER spfile;\n\nNAME       TYPE   VALUE\n---------- ------ -----\nspfile     string\n\n上記のSHOW PARAMETER spfileの出力結果のVALUE列が空であることの意味として正しいものを選択してください。",
+    "options": [
+      "A) SPFILEが破損して読み取れなくなったことを示しており、早急にSPFILEを再作成する必要がある。",
+      "B) 現在のインスタ��スがPFILEを使用して起動されたことを示しており、SPFILEは使用されていない。",
+      "C) SPFILEとPFILEの両方が使用されているが、SPFILEの内容がPFILEで上書きされた状態を示している。",
+      "D) データベースがOPEN状態ではないため、spfileパラメータの値が表示されていない。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — SHOW PARAMETER spfile의 VALUE가 비어 있는 것은 현재 인스턴스가 PFILE을 사용하여 기동되었음을 나타냅니다. SPFILE로 기동된 경우에는 VALUE에 SPFILE 파일의 경로가 표시됩니다. STARTUP PFILE='경로'로 명시적으로 PFILE을 지정하여 기동했으므로 SPFILE은 사��되지 않은 것입니다.\n\nA) 오답 �� VALUE가 비어 있는 것은 SPFILE 손상이 아니라, 단순히 PFILE로 기동되어 SPFILE이 사용되지 않은 것을 의미합니다. SPFILE 파일 자체는 디스크에 여전히 존재할 수 있습니다.\n\nC) 오답 — SPFILE과 PFILE이 동시에 사용되는 것은 아닙니다. 인스턴스는 기동 시 하나의 파라미터 파일만 사용하며, STARTUP PFILE='경로'로 지정하면 PFILE만 사용합니다.\n\nD) 오답 — 출력에서 'Database opened.'가 표시되었으므로 데이터베이스는 OPEN 상태입니다. 또한 spfile 파라미터는 V$PARAMETER 기반이므로 NOMOUNT 상태부터 조회 가능합니다.\n\n핵심 개념: SHOW PARAMETER spfile(또는 V$PARAMETER에서 name='spfile' 조회)의 VALUE로 현재 파라미터 파일 유형을 판별합니다. 값이 있으면 SPFILE, 비��� 있으면 PFILE로 기동된 것입니다. CREATE PFILE FROM SPFILE로 SPFILE의 내용을 텍스트로 추출한 후, STARTUP PFILE='경로'로 PFILE 기반으로 기동하면 PFILE 환경으로 전환됩니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_030",
+    "question_type": "内部-概念",
+    "title": "Oracleデータベースのチェックポイント(Checkpoint)の役割と動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) チェックポイントはDBWnプロセスにデータベース・バッファ・キャッシュ内のDirty Bufferをデータ・ファイルに書き込むよう通知するイベントであり、CKPTプロセスがチェックポイント情報を制御ファイルとデータ・ファイル・ヘッダーに記録する。",
+      "B) チェックポイントが発生するとすべてのユーザー・セッションが一時��止され、書込みが完了するまでデータベースの操作が中断される。",
+      "C) チェックポイントにより記録されるチェックポイントSCNは、インスタンス・リカバリ時のロール・フォワー���開始地点を決定するために使用される。",
+      "D) チェックポイントはSHUTDOWN ABORTの実行時にも必ず実行され、データの整合性を保証する。",
+      "E) チェックポイントはログ・スイッチ時にのみ発生し、それ以外の契機では実行されない。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — 체크포인트가 발생하면, CKPT(Checkpoint) 프로세스가 DBWn(Database Writer)에 신호를 보내 버퍼 캐시 내의 Dirty Buffer를 데이터 파일에 기록하도록 합니다. 동시에 CKPT 프로세스는 최신 체크포인트 SCN을 컨트롤 파일과 데이터 파일 헤더에 기록하여, 복구 시 어디서부터 Redo를 적용해야 하는지의 기준점을 갱신합니다.\n\nC) 정답 — 체��포인트 SCN은 인스턴스 복구 시 Roll Forward의 시작 지점을 결정합니다. SMON은 컨트롤 파일에 기록된 체크포인트 SCN 이후의 Redo 레코드를 온라인 Redo Log에서 읽어 데이터 파일에 재적용합니다. 체크포인트가 더 자주 수행될수록 Roll Forward에서 적용해야 할 Redo 양이 ��어들어 복구 시간이 단축됩니다.\n\nB) 오답 — 체크포인트 발생 시 사용자 세션이 일시 중지되지 않습니다. 체크포인트는 백그라운드에서 수행되며, DBWn이 Dirty Buffer를 기록하는 동안에도 사용자는 정상적으로 데이터베이스를 사용할 수 있습니다.\n\nD) 오답 — SHUTDOWN ABORT는 체크포인트를 수행하지 않습니다. 그래서 ABORT 종료 후에는 인스턴스 복구가 필요합니다. 체크포인트를 수행하는 종료 모드는 NORMAL, TRANSACTIONAL, IMMEDIATE입니다.\n\nE) 오답 — 체크포인트는 로그 스위치 시에만 발생하는 것�� 아닙니다. Oracle은 Incremental Checkpoint를 통해 지속적으로 체크포인트를 수행하며, FAST_START_MTTR_TARGET 파라미터에 의해 빈도가 조정됩니다. 그 외에도 ALTER SYSTEM CHECKPOINT 명령, SHUTDOWN(ABORT 제외), 테이블스페이스 오프라인/읽기 전용 전환 시에도 체크포인트가 발생합니다.\n\n핵심 개념: 체크포인트는 CKPT가 DBWn에 Dirty Buffer 기록을 지시하고, 컨트롤 파일과 데이터 파일 헤더에 체크포인트 SCN을 기록하는 이벤트입니다. 이 SCN은 인스턴스 복구 시 Roll Forward 시작점이 되며, FAST_START_MTTR_TARGET으로 체크포인트 빈도를 제어하여 복구 시간과 일상 I/O 부하 간의 균형을 조정합니다."
+  }
+]

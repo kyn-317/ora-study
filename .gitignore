@@ -12,7 +12,7 @@
 
 # testing
 /coverage
-
+/data/exam-results/*
 # next.js
 /.next/
 /out/

@@ -20,6 +20,7 @@ const SOURCES = {
   study: path.join(PARENT_DIR, 'study'),
   custom: path.join(PARENT_DIR, 'customquestions_json'),
   questions: path.join(PARENT_DIR, 'questions_json'),
+  'mock-exams': path.join(PARENT_DIR, 'mock_exams'),
 };
 
 // ── helpers ──
@@ -81,6 +82,11 @@ const manifest = {
   study: {},
   questions: [],
   custom: {},
+  mockExams: {
+    examSets: [],
+    allocations: [],
+    hasReservePool: false,
+  },
 };
 
 // study: { "01": ["01_01_메모리구조", ...], ... }
@@ -119,6 +125,24 @@ if (fs.existsSync(customDir)) {
       .map(f => f.replace('.json', ''))
       .sort();
   }
+}
+
+// mock-exams: examSets, allocations, reservePool
+const mockExamsDir = path.join(DATA_DIR, 'mock-exams');
+if (fs.existsSync(mockExamsDir)) {
+  const mockFiles = fs.readdirSync(mockExamsDir).filter(f => f.endsWith('.json'));
+  for (const f of mockFiles) {
+    const name = f.replace('.json', '');
+    if (name.startsWith('exam_set_')) {
+      manifest.mockExams.examSets.push(name);
+    } else if (name.startsWith('allocation_')) {
+      manifest.mockExams.allocations.push(name);
+    } else if (name === 'reserve_pool') {
+      manifest.mockExams.hasReservePool = true;
+    }
+  }
+  manifest.mockExams.examSets.sort();
+  manifest.mockExams.allocations.sort();
 }
 
 // keywordIndex: keyword → [{ studyId, chapterId, title, fileName, hasKeywordStudy }]
@@ -189,8 +213,11 @@ console.log(`  written: ${manifestPath}\n`);
 const studyCount = Object.values(manifest.study).flat().length;
 const questionsCount = manifest.questions.length;
 const customCount = Object.values(manifest.custom).flat().length;
+const mockExamSetsCount = manifest.mockExams.examSets.length;
+const mockAllocationsCount = manifest.mockExams.allocations.length;
 console.log('=== Summary ===');
 console.log(`  Study files:    ${studyCount}`);
 console.log(`  Exam questions: ${questionsCount} chapters`);
 console.log(`  Custom quizzes: ${customCount} sets`);
+console.log(`  Mock exams:     ${mockExamSetsCount} sets, ${mockAllocationsCount} allocations`);
 console.log('\nSync complete! Ready for build & deploy.');
