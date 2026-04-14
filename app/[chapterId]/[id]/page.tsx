@@ -8,14 +8,14 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
   const data = await getStudyData(chapterId, id);
 
   if (!data) {
-    return <main style={{ padding: '4rem 2rem', color: 'white' }}>Study material not found.</main>;
+    return <main style={{ padding: '4rem 2rem', color: 'var(--foreground)' }}>Study material not found.</main>;
   }
 
   // Helper to find SQL examples safely
   const renderSqlExamples = (exampleIds: string[] = []) => {
     if (!exampleIds || exampleIds.length === 0) return null;
     return (
-      <details style={{ marginTop: '1.5rem', background: 'rgba(30,31,41,0.4)', borderRadius: '12px', border: '1px solid var(--glass-border)', overflow: 'hidden' }}>
+      <details style={{ marginTop: '1.5rem', background: 'rgba(0, 0, 0, 0.03)', borderRadius: '12px', border: '1px solid var(--glass-border)', overflow: 'hidden' }}>
         <summary style={{ padding: '1rem', cursor: 'pointer', fontWeight: 600, color: 'var(--color-4)', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>💻 SQL 실습 예제 ({exampleIds.length}개)</span>
           <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>클릭하여 펼치기</span>
@@ -26,7 +26,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
             if (!ex) return null;
             return (
               <div key={ex.sqlExamplesId} style={{
-                background: '#0D0E12',
+                background: '#F8F9FA',
                 border: '1px solid var(--glass-border)',
                 borderRadius: '8px',
                 overflow: 'hidden'
@@ -35,11 +35,11 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
                   <span style={{ color: 'var(--color-1)', fontWeight: 600, fontSize: '0.9rem' }}>{ex.title}</span>
                 </div>
                 <div style={{ padding: '1rem', overflowX: 'auto' }}>
-                  <pre style={{ margin: 0, color: '#e2e8f0', fontFamily: "var(--font-geist-mono), 'Courier New', monospace", fontSize: '0.9rem' }}>
+                  <pre style={{ margin: 0, color: 'var(--foreground)', fontFamily: "var(--font-geist-mono), 'Courier New', monospace", fontSize: '0.9rem' }}>
                     <code>{ex.sql}</code>
                   </pre>
                 </div>
-                <div style={{ padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                <div style={{ padding: '0.75rem 1rem', background: 'rgba(0, 0, 0, 0.02)', borderTop: '1px solid rgba(0, 0, 0, 0.04)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                   {ex.description}
                 </div>
               </div>
@@ -66,7 +66,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
                   maxWidth: '100%',
                   borderRadius: '12px',
                   border: '1px solid var(--glass-border)',
-                  background: 'rgba(0,0,0,0.3)',
+                  background: 'rgba(0, 0, 0, 0.03)',
                   padding: '1rem',
                 }}
               />
@@ -87,7 +87,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
             {v.type === 'mermaid' && v.mermaidCode && (
               <pre style={{
                 textAlign: 'left',
-                background: 'rgba(0,0,0,0.3)',
+                background: 'rgba(0, 0, 0, 0.03)',
                 padding: '1rem',
                 borderRadius: '12px',
                 border: '1px solid var(--glass-border)',
@@ -123,10 +123,10 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
           padding: isTopLevel ? '2.5rem' : '1.5rem',
           border: isTopLevel ? '1px solid var(--color-4)' : '1px solid var(--glass-border)',
           borderRadius: '20px',
-          background: isTopLevel ? 'var(--glass-bg)' : 'rgba(0, 0, 0, 0.2)',
+          background: isTopLevel ? 'var(--glass-bg)' : 'rgba(0, 0, 0, 0.04)',
           position: 'relative',
           overflow: 'hidden',
-          boxShadow: isTopLevel ? '0 10px 30px rgba(0,0,0,0.2)' : 'none'
+          boxShadow: isTopLevel ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
         }}
       >
         <div style={{
@@ -142,7 +142,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
           color: isTopLevel ? 'var(--color-2)' : 'var(--color-1)',
           marginBottom: '1.5rem',
           paddingLeft: '0.5rem',
-          borderBottom: isTopLevel ? '1px solid rgba(255,255,255,0.1)' : 'none',
+          borderBottom: isTopLevel ? '1px solid rgba(0, 0, 0, 0.08)' : 'none',
           paddingBottom: isTopLevel ? '1rem' : '0'
         }}>
           {sec.title}
@@ -159,7 +159,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
         {renderVisuals(sec.visuals, 'after-content')}
 
         {sec.key_points && sec.key_points.length > 0 && (
-          <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(111, 107, 234, 0.1)', borderRadius: '12px', borderLeft: '4px solid var(--color-3)' }}>
+          <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(44, 62, 80, 0.06)', borderRadius: '12px', borderLeft: '4px solid var(--color-3)' }}>
             <h4 style={{ color: 'var(--color-3)', marginBottom: '0.5rem' }}>🔥 핵심 정리</h4>
             <ul style={{ margin: 0, paddingLeft: '1.5rem', color: 'var(--foreground)' }}>
               {sec.key_points.map((kp, i) => <li key={i} style={{ marginBottom: '0.25rem' }}>{kp}</li>)}
@@ -171,7 +171,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
 
         {/* Subsections first, then SQL */}
         {sec.subsections && sec.subsections.length > 0 && (
-          <details style={{ marginTop: '2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+          <details style={{ marginTop: '2rem', background: 'rgba(0, 0, 0, 0.02)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
              <summary style={{ padding: '1rem', cursor: 'pointer', fontWeight: 600, color: 'var(--color-5)', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>📚 세부 내용 ({sec.subsections.length}개)</span>
               <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>클릭하여 펼치기</span>
@@ -192,7 +192,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
       {/* Header Banner */}
       <div className="bg-gradient-primary study-header-banner" style={{ padding: '4rem 2rem', borderRadius: '0 0 30px 30px' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <Link href={chapterId === '00' ? '/' : `/${chapterId}`} style={{ color: 'white', opacity: 0.8, textDecoration: 'none', marginBottom: '1rem', display: 'inline-block', fontSize: '0.9rem' }}>
+          <Link href={chapterId === '00' ? '/' : `/${chapterId}`} style={{ color: 'white', opacity: 0.9, textDecoration: 'none', marginBottom: '1rem', display: 'inline-block', fontSize: '0.9rem' }}>
             &larr; {chapterId === '00' ? 'Back to Home' : `Back to ${chapterId}`}
           </Link>
           <div style={{ color: 'var(--color-6)', fontWeight: 600, fontSize: '1rem', marginBottom: '0.5rem' }}>
@@ -201,7 +201,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
           <h1 style={{ fontSize: '3rem', color: 'white', marginBottom: '1rem', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
             {data.title}
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.1rem', maxWidth: '800px', lineHeight: 1.6 }}>
+          <p style={{ color: 'rgba(0, 0, 0, 0.7)', fontSize: '1.1rem', maxWidth: '800px', lineHeight: 1.6 }}>
             {data.description}
           </p>
         </div>

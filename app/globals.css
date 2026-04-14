@@ -1,20 +1,28 @@
 :root {
-  --color-1: #8CA7ED;
-  --color-2: #8448F0;
-  --color-3: #6F6BEA;
-  --color-4: #43ABF0;
-  --color-5: #CB7AF0;
-  --color-6: #BDBBF0;
+  --color-1: #4A6FA5;
+  --color-2: #C0392B;
+  --color-3: #2C3E50;
+  --color-4: #2980B9;
+  --color-5: #8E44AD;
+  --color-6: #7F8C8D;
 
-  --background: #111218;
-  /* Deep premium dark mode */
-  --surface: #1E1F29;
-  --surface-hover: #262733;
-  --foreground: #F2F4FB;
-  --text-muted: #A3A7C1;
-  --border: rgba(255, 255, 255, 0.1);
-  --glass-bg: rgba(30, 31, 41, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --background: #FFFFFF;
+  --surface: #F5F6FA;
+  --surface-hover: #ECEDF2;
+  --foreground: #1A1A2E;
+  --text-muted: #6B7280;
+  --border: rgba(0, 0, 0, 0.12);
+  --glass-bg: rgba(245, 246, 250, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+
+  --correct: #059669;
+  --correct-bg: rgba(5, 150, 105, 0.08);
+  --correct-light: #10B981;
+  --incorrect: #DC2626;
+  --incorrect-bg: rgba(220, 38, 38, 0.08);
+  --incorrect-light: #EF4444;
+  --warning: #D97706;
+  --exam-highlight: #FFF0F0;
 }
 
 
@@ -48,53 +56,45 @@ a {
   text-decoration: none;
 }
 
-/* Base utility classes for gradients */
+/* Base utility classes — solid colors for exam-like clean look */
 .text-gradient {
-  background: linear-gradient(135deg, var(--color-1), var(--color-5));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-3);
 }
 
 .text-gradient-alt {
-  background: linear-gradient(135deg, var(--color-4), var(--color-2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-4);
 }
 
 .bg-gradient-primary {
-  background: linear-gradient(135deg, var(--color-2), var(--color-3));
+  background: var(--color-3);
 }
 
-/* Glassmorphism utility */
+/* Clean card surface */
 .glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--surface);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* Card Hover Animations */
 .card-hover {
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card-hover:hover {
-  transform: translateY(-5px);
-  border-color: var(--color-2) !important;
+  transform: translateY(-3px);
+  border-color: var(--color-4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .card-hover-alt {
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card-hover-alt:hover {
-  transform: translateY(-5px);
-  border-color: var(--color-4) !important;
+  transform: translateY(-3px);
+  border-color: var(--color-4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Markdown Content Styles */
@@ -108,7 +108,7 @@ a {
 .markdown-content table {
   width: 100%;
   border-collapse: collapse;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--surface);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -121,8 +121,9 @@ a {
 }
 
 .markdown-content th {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.03);
   color: var(--color-4);
+  font-weight: 600;
 }
 
 .markdown-content ul,
@@ -136,16 +137,16 @@ a {
 }
 
 .markdown-content code {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.05);
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-family: var(--font-geist-mono), 'Courier New', monospace;
   font-size: 0.9em;
-  color: var(--color-5);
+  color: var(--color-2);
 }
 
 .markdown-content pre {
-  background: rgba(0, 0, 0, 0.35);
+  background: #F8F9FA;
   border: 1px solid var(--glass-border);
   border-radius: 10px;
   padding: 1.25rem 1.5rem;
@@ -160,14 +161,14 @@ a {
   font-family: var(--font-geist-mono), 'Courier New', monospace;
   font-size: 0.85em;
   line-height: 1.6;
-  color: #E2E8F0;
+  color: var(--foreground);
 }
 
 /* Quiz Option Cards */
 .option-card {
-  background: var(--glass-bg);
+  background: var(--background);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 1rem 1.25rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -176,24 +177,24 @@ a {
 
 .option-card:hover:not(.option-correct):not(.option-incorrect) {
   border-color: var(--color-4);
-  background: rgba(67, 171, 240, 0.08);
+  background: rgba(41, 128, 185, 0.04);
 }
 
 .option-selected {
   border-color: var(--color-4) !important;
-  background: rgba(67, 171, 240, 0.12) !important;
-  box-shadow: 0 0 12px rgba(67, 171, 240, 0.15);
+  background: rgba(41, 128, 185, 0.08) !important;
+  box-shadow: 0 0 0 1px var(--color-4);
 }
 
 .option-correct {
-  border-color: #34d399 !important;
-  background: rgba(52, 211, 153, 0.12) !important;
+  border-color: var(--correct) !important;
+  background: var(--exam-highlight) !important;
   cursor: default;
 }
 
 .option-incorrect {
-  border-color: #f87171 !important;
-  background: rgba(248, 113, 113, 0.12) !important;
+  border-color: var(--incorrect) !important;
+  background: rgba(220, 38, 38, 0.06) !important;
   cursor: default;
 }
 
@@ -207,13 +208,11 @@ a {
   padding: 0 1rem;
 }
 
-/* 왼쪽: 문제 영역 — 우선 확보 */
 .quiz-layout-with-panel > div:first-child {
   flex: 1 1 0%;
   min-width: 0;
 }
 
-/* 오른쪽: 학습 패널 — 드래그 리사이즈 가능 */
 .quiz-layout-with-panel > div:last-child {
   flex: 0 0 auto;
   min-width: 0;
@@ -223,7 +222,6 @@ a {
   overflow-y: auto;
 }
 
-/* 모바일: 세로 배치, 아래 누적 */
 @media (max-width: 767px) {
   .quiz-layout-with-panel {
     flex-direction: column;
@@ -242,7 +240,6 @@ a {
   }
 }
 
-/* Responsive: 좁은 화면에서 좌우 여백 축소 */
 @media (max-width: 600px) {
   .study-header-banner {
     padding: 2rem 1rem !important;
@@ -267,13 +264,13 @@ a {
 .quiz-progress-bar {
   height: 4px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 
 .quiz-progress-bar-fill {
   height: 100%;
   border-radius: 2px;
-  background: linear-gradient(90deg, var(--color-4), var(--color-2));
+  background: var(--color-4);
   transition: width 0.3s ease;
 }

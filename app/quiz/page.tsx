@@ -44,7 +44,7 @@ export default async function QuizHome() {
                 <p style={{ color: 'var(--foreground)', fontSize: '0.95rem', lineHeight: 1.5 }}>{chapterName}</p>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto' }}>
                   <span style={{
-                    background: 'rgba(67, 171, 240, 0.1)',
+                    background: 'rgba(41, 128, 185, 0.08)',
                     color: 'var(--color-4)',
                     padding: '0.25rem 0.75rem',
                     borderRadius: '999px',
@@ -54,7 +54,7 @@ export default async function QuizHome() {
                     {sets.length} set{sets.length > 1 ? 's' : ''}
                   </span>
                   <span style={{
-                    background: 'rgba(132, 72, 240, 0.1)',
+                    background: 'rgba(142, 68, 173, 0.08)',
                     color: 'var(--color-2)',
                     padding: '0.25rem 0.75rem',
                     borderRadius: '999px',

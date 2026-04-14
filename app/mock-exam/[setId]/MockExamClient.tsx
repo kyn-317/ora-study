@@ -326,7 +326,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
             padding: '1rem 3rem',
             borderRadius: '12px',
             border: 'none',
-            background: 'linear-gradient(135deg, var(--color-2), var(--color-3))',
+            background: 'var(--color-4)',
             color: 'white',
             fontWeight: 700,
             fontSize: '1.1rem',
@@ -370,10 +370,10 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
           borderRadius: '20px',
           textAlign: 'center',
           marginBottom: '2rem',
-          borderColor: passed ? '#34d399' : '#f87171',
+          borderColor: passed ? '#059669' : '#DC2626',
         }}>
           <div style={{ fontSize: '4rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            <span style={{ color: passed ? '#34d399' : '#f87171' }}>{score}</span>
+            <span style={{ color: passed ? '#059669' : '#DC2626' }}>{score}</span>
             <span style={{ color: 'var(--text-muted)', fontSize: '2rem' }}> / {shuffled.length}</span>
           </div>
           <div style={{ fontSize: '1.5rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
@@ -384,8 +384,8 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
             padding: '0.5rem 1.5rem',
             borderRadius: '999px',
             fontWeight: 600,
-            background: passed ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)',
-            color: passed ? '#34d399' : '#f87171',
+            background: passed ? 'rgba(5, 150, 105, 0.08)' : 'rgba(220, 38, 38, 0.08)',
+            color: passed ? '#059669' : '#DC2626',
             marginBottom: '1rem',
           }}>
             {passed ? 'PASS' : 'FAIL'}
@@ -396,7 +396,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
           <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
             <button onClick={handleStart} style={{
               padding: '0.75rem 2rem', borderRadius: '10px', border: 'none',
-              background: 'linear-gradient(135deg, var(--color-2), var(--color-3))',
+              background: 'var(--color-4)',
               color: 'white', fontWeight: 600, cursor: 'pointer',
             }}>
               Retry
@@ -414,14 +414,14 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
                 <div key={ch} style={{
                   padding: '0.75rem',
                   borderRadius: '10px',
-                  background: rate >= 70 ? 'rgba(52, 211, 153, 0.08)' : 'rgba(248, 113, 113, 0.08)',
-                  border: `1px solid ${rate >= 70 ? 'rgba(52, 211, 153, 0.2)' : 'rgba(248, 113, 113, 0.2)'}`,
+                  background: rate >= 70 ? 'rgba(5, 150, 105, 0.06)' : 'rgba(220, 38, 38, 0.06)',
+                  border: `1px solid ${rate >= 70 ? 'rgba(5, 150, 105, 0.15)' : 'rgba(220, 38, 38, 0.15)'}`,
                   textAlign: 'center',
                 }}>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Ch.{ch}</div>
                   <div style={{
                     fontSize: '1.1rem', fontWeight: 700,
-                    color: rate >= 70 ? '#34d399' : '#f87171',
+                    color: rate >= 70 ? '#059669' : '#DC2626',
                   }}>
                     {stat.correct}/{stat.total}
                   </div>
@@ -444,7 +444,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
               <div key={idx} className="glass" style={{
                 padding: '2rem',
                 borderRadius: '16px',
-                borderColor: isCorrect ? '#34d399' : '#f87171',
+                borderColor: isCorrect ? '#059669' : '#DC2626',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                   <span style={{ fontWeight: 600, color: 'var(--color-4)', fontSize: '0.9rem' }}>
@@ -458,8 +458,8 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
                     )}
                     <span style={{
                       padding: '0.2rem 0.75rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600,
-                      background: isCorrect ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)',
-                      color: isCorrect ? '#34d399' : '#f87171',
+                      background: isCorrect ? 'rgba(5, 150, 105, 0.08)' : 'rgba(220, 38, 38, 0.08)',
+                      color: isCorrect ? '#059669' : '#DC2626',
                     }}>
                       {isCorrect ? 'Correct' : 'Incorrect'}
                     </span>
@@ -480,8 +480,8 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
                     return (
                       <div key={letter} className={className} style={{ cursor: 'default' }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          {wasSelected && !isAnswer && <span style={{ color: '#f87171' }}>&#10007;</span>}
-                          {isAnswer && <span style={{ color: '#34d399' }}>&#10003;</span>}
+                          {wasSelected && !isAnswer && <span style={{ color: '#DC2626' }}>&#10007;</span>}
+                          {isAnswer && <span style={{ color: '#059669' }}>&#10003;</span>}
                           {opt}
                         </span>
                       </div>
@@ -496,7 +496,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
                     </summary>
                     <div style={{
                       marginTop: '0.75rem', padding: '1.25rem',
-                      background: 'rgba(111, 107, 234, 0.08)',
+                      background: 'rgba(44, 62, 80, 0.06)',
                       borderRadius: '12px', borderLeft: '4px solid var(--color-3)',
                       color: 'var(--foreground)', fontSize: '0.9rem', lineHeight: 1.7,
                       whiteSpace: 'pre-wrap',
@@ -524,7 +524,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
     return match ? parseInt(match[1]) : (isMultiSelect ? question?.answer.length : 1);
   })();
 
-  const timerColor = timeLeft <= 300 ? '#f87171' : timeLeft <= 600 ? '#fbbf24' : 'var(--foreground)';
+  const timerColor = timeLeft <= 300 ? '#DC2626' : timeLeft <= 600 ? '#D97706' : 'var(--foreground)';
 
   return (
     <main style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
@@ -570,7 +570,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
                 width: '34px', height: '34px',
                 borderRadius: '8px',
                 border: isCurrent ? '2px solid var(--color-4)' : '1px solid var(--glass-border)',
-                background: hasAnswer ? 'rgba(67, 171, 240, 0.15)' : 'var(--glass-bg)',
+                background: hasAnswer ? 'rgba(41, 128, 185, 0.1)' : 'var(--glass-bg)',
                 color: isCurrent ? 'var(--color-4)' : hasAnswer ? 'var(--color-4)' : 'var(--text-muted)',
                 cursor: 'pointer',
                 fontWeight: isCurrent ? 700 : 400,
@@ -591,7 +591,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
           </span>
           {isMultiSelect && (
             <span style={{
-              background: 'rgba(203, 122, 240, 0.15)',
+              background: 'rgba(142, 68, 173, 0.1)',
               color: 'var(--color-5)',
               padding: '0.25rem 0.75rem',
               borderRadius: '999px',
@@ -631,7 +631,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
                     borderRadius: isMultiSelect ? '4px' : '50%',
                     border: isSelected ? '2px solid var(--color-4)' : '2px solid var(--glass-border)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: isSelected ? 'rgba(67, 171, 240, 0.3)' : 'transparent',
+                    background: isSelected ? 'rgba(41, 128, 185, 0.2)' : 'transparent',
                     transition: 'all 0.2s ease',
                     fontSize: '0.7rem', color: 'white', fontWeight: 700,
                   }}>
@@ -666,8 +666,8 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
           style={{
             padding: '0.75rem 2rem', borderRadius: '10px', border: 'none',
             background: answeredCount === shuffled.length
-              ? 'linear-gradient(135deg, #34d399, var(--color-4))'
-              : 'rgba(255,255,255,0.1)',
+              ? 'var(--correct)'
+              : 'rgba(0,0,0,0.06)',
             color: 'white', cursor: 'pointer', fontWeight: 600,
           }}
         >

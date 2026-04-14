@@ -281,7 +281,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     <div style={{
       marginTop: '1rem',
       padding: '1.5rem',
-      background: 'rgba(111, 107, 234, 0.08)',
+      background: 'rgba(44, 62, 80, 0.06)',
       borderRadius: '12px',
       borderLeft: '4px solid var(--color-3)',
       color: 'var(--foreground)',
@@ -316,7 +316,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
             justifyContent: 'center',
             transition: 'background 0.15s',
           }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(67, 171, 240, 0.2)')}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(41, 128, 185, 0.15)')}
           onMouseLeave={e => { if (!isDragging.current) e.currentTarget.style.background = 'transparent'; }}
         >
           <div style={{
@@ -353,10 +353,10 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
           borderRadius: '20px',
           textAlign: 'center',
           marginBottom: '3rem',
-          borderColor: percentage >= 70 ? '#34d399' : '#f87171',
+          borderColor: percentage >= 70 ? '#059669' : '#DC2626',
         }}>
           <div style={{ fontSize: '4rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            <span style={{ color: percentage >= 70 ? '#34d399' : '#f87171' }}>{score}</span>
+            <span style={{ color: percentage >= 70 ? '#059669' : '#DC2626' }}>{score}</span>
             <span style={{ color: 'var(--text-muted)', fontSize: '2rem' }}> / {questions.length}</span>
           </div>
           <div style={{ fontSize: '1.5rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
@@ -367,8 +367,8 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
             padding: '0.5rem 1.5rem',
             borderRadius: '999px',
             fontWeight: 600,
-            background: percentage >= 70 ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)',
-            color: percentage >= 70 ? '#34d399' : '#f87171',
+            background: percentage >= 70 ? 'rgba(5, 150, 105, 0.08)' : 'rgba(220, 38, 38, 0.08)',
+            color: percentage >= 70 ? '#059669' : '#DC2626',
           }}>
             {percentage >= 70 ? 'PASS' : 'FAIL'}
           </div>
@@ -377,7 +377,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
               padding: '0.75rem 2rem',
               borderRadius: '10px',
               border: 'none',
-              background: 'linear-gradient(135deg, var(--color-2), var(--color-3))',
+              background: 'var(--color-4)',
               color: 'white',
               fontWeight: 600,
               cursor: 'pointer',
@@ -400,7 +400,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
               <div key={idx} className="glass" style={{
                 padding: '2rem',
                 borderRadius: '16px',
-                borderColor: isCorrect ? '#34d399' : '#f87171',
+                borderColor: isCorrect ? '#059669' : '#DC2626',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                   <span style={{ fontWeight: 600, color: 'var(--color-4)' }}>{q.number}</span>
@@ -412,8 +412,8 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
                         padding: '0.2rem 0.5rem',
                         borderRadius: '6px',
                         border: '1px solid var(--glass-border)',
-                        background: copiedIndex === idx ? 'rgba(52, 211, 153, 0.15)' : 'var(--glass-bg)',
-                        color: copiedIndex === idx ? '#34d399' : 'var(--text-muted)',
+                        background: copiedIndex === idx ? 'rgba(5, 150, 105, 0.08)' : 'var(--glass-bg)',
+                        color: copiedIndex === idx ? '#059669' : 'var(--text-muted)',
                         cursor: 'pointer',
                         fontSize: '0.7rem',
                         fontWeight: 600,
@@ -427,8 +427,8 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
                       borderRadius: '999px',
                       fontSize: '0.8rem',
                       fontWeight: 600,
-                      background: isCorrect ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)',
-                      color: isCorrect ? '#34d399' : '#f87171',
+                      background: isCorrect ? 'rgba(5, 150, 105, 0.08)' : 'rgba(220, 38, 38, 0.08)',
+                      color: isCorrect ? '#059669' : '#DC2626',
                     }}>
                       {isCorrect ? 'Correct' : 'Incorrect'}
                     </span>
@@ -448,8 +448,8 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
                     return (
                       <div key={letter} className={className} style={{ cursor: 'default' }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          {wasSelected && !isAnswer && <span style={{ color: '#f87171' }}>✗</span>}
-                          {isAnswer && <span style={{ color: '#34d399' }}>✓</span>}
+                          {wasSelected && !isAnswer && <span style={{ color: '#DC2626' }}>✗</span>}
+                          {isAnswer && <span style={{ color: '#059669' }}>✓</span>}
                           {opt}
                         </span>
                       </div>
@@ -495,7 +495,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Score: <span style={{ color: '#34d399', fontWeight: 700 }}>{score}</span> / {questions.length}
+            Score: <span style={{ color: '#059669', fontWeight: 700 }}>{score}</span> / {questions.length}
           </span>
         </div>
       </div>
@@ -529,7 +529,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
                 borderRadius: '8px',
                 border: isCurrent ? '2px solid var(--color-4)' : '1px solid var(--glass-border)',
                 background: isDone
-                  ? (isCorrect ? 'rgba(52, 211, 153, 0.2)' : 'rgba(248, 113, 113, 0.2)')
+                  ? (isCorrect ? 'rgba(5, 150, 105, 0.15)' : 'rgba(220, 38, 38, 0.15)')
                   : 'var(--glass-bg)',
                 color: isCurrent ? 'var(--color-4)' : 'var(--foreground)',
                 cursor: 'pointer',
@@ -552,7 +552,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {isMultiSelect && (
               <span style={{
-                background: 'rgba(203, 122, 240, 0.15)',
+                background: 'rgba(142, 68, 173, 0.1)',
                 color: 'var(--color-5)',
                 padding: '0.25rem 0.75rem',
                 borderRadius: '999px',
@@ -569,8 +569,8 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
                 padding: '0.3rem 0.6rem',
                 borderRadius: '6px',
                 border: '1px solid var(--glass-border)',
-                background: copiedIndex === currentIndex ? 'rgba(52, 211, 153, 0.15)' : 'var(--glass-bg)',
-                color: copiedIndex === currentIndex ? '#34d399' : 'var(--text-muted)',
+                background: copiedIndex === currentIndex ? 'rgba(5, 150, 105, 0.08)' : 'var(--glass-bg)',
+                color: copiedIndex === currentIndex ? '#059669' : 'var(--text-muted)',
                 cursor: 'pointer',
                 fontSize: '0.75rem',
                 fontWeight: 600,
@@ -625,14 +625,14 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
                     minWidth: '22px',
                     borderRadius: isMultiSelect ? '4px' : '50%',
                     border: isSubmitted
-                      ? (isAnswer ? '2px solid #34d399' : isSelected ? '2px solid #f87171' : '2px solid var(--glass-border)')
+                      ? (isAnswer ? '2px solid #059669' : isSelected ? '2px solid #DC2626' : '2px solid var(--glass-border)')
                       : isSelected ? '2px solid var(--color-4)' : '2px solid var(--glass-border)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     background: isSubmitted
-                      ? (isAnswer ? 'rgba(52, 211, 153, 0.3)' : isSelected ? 'rgba(248, 113, 113, 0.3)' : 'transparent')
-                      : isSelected ? 'rgba(67, 171, 240, 0.3)' : 'transparent',
+                      ? (isAnswer ? 'rgba(5, 150, 105, 0.2)' : isSelected ? 'rgba(220, 38, 38, 0.2)' : 'transparent')
+                      : isSelected ? 'rgba(41, 128, 185, 0.2)' : 'transparent',
                     transition: 'all 0.2s ease',
                     fontSize: '0.7rem',
                     color: 'white',
@@ -682,8 +682,8 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
                 borderRadius: '10px',
                 border: 'none',
                 background: selectedAnswers.length === 0
-                  ? 'rgba(255,255,255,0.1)'
-                  : 'linear-gradient(135deg, var(--color-2), var(--color-3))',
+                  ? 'rgba(0,0,0,0.06)'
+                  : 'var(--color-4)',
                 color: 'white',
                 cursor: selectedAnswers.length === 0 ? 'not-allowed' : 'pointer',
                 fontWeight: 600,
@@ -701,7 +701,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
                 padding: '0.75rem 2rem',
                 borderRadius: '10px',
                 border: 'none',
-                background: 'linear-gradient(135deg, var(--color-4), var(--color-2))',
+                background: 'var(--color-4)',
                 color: 'white',
                 cursor: 'pointer',
                 fontWeight: 600,
@@ -718,7 +718,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
                 padding: '0.75rem 2rem',
                 borderRadius: '10px',
                 border: 'none',
-                background: 'linear-gradient(135deg, #34d399, var(--color-4))',
+                background: '#059669',
                 color: 'white',
                 cursor: 'pointer',
                 fontWeight: 600,

@@ -47,15 +47,15 @@ function NoteCard({ item, onSaveMemo }: { item: WrongNoteItem; onSaveMemo: (id: 
           <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.questionId}</span>
           <span style={{
             padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 600,
-            background: wrongRate === 100 ? 'rgba(248, 113, 113, 0.2)' : 'rgba(251, 191, 36, 0.2)',
-            color: wrongRate === 100 ? '#f87171' : '#fbbf24',
+            background: wrongRate === 100 ? 'rgba(220, 38, 38, 0.15)' : 'rgba(217, 119, 6, 0.15)',
+            color: wrongRate === 100 ? '#DC2626' : '#D97706',
           }}>
             {item.wrongCount}/{item.totalAttempts} wrong
           </span>
           {item.memo && (
             <span style={{
               padding: '0.1rem 0.4rem', borderRadius: '999px', fontSize: '0.65rem',
-              fontWeight: 600, background: 'rgba(67, 171, 240, 0.15)', color: 'var(--color-4)',
+              fontWeight: 600, background: 'rgba(41, 128, 185, 0.1)', color: 'var(--color-4)',
             }}>
               memo
             </span>
@@ -81,7 +81,7 @@ function NoteCard({ item, onSaveMemo }: { item: WrongNoteItem; onSaveMemo: (id: 
       {expanded && item.question && (
         <div style={{
           padding: '0 1.5rem 1.5rem',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          borderTop: '1px solid rgba(0, 0, 0, 0.06)',
           paddingTop: '1.25rem',
         }}>
           {/* Question text */}
@@ -99,11 +99,11 @@ function NoteCard({ item, onSaveMemo }: { item: WrongNoteItem; onSaveMemo: (id: 
                   padding: '0.6rem 1rem',
                   borderRadius: '8px',
                   fontSize: '0.9rem',
-                  background: isAnswer ? 'rgba(52, 211, 153, 0.08)' : 'rgba(255,255,255,0.03)',
-                  border: isAnswer ? '1px solid rgba(52, 211, 153, 0.25)' : '1px solid rgba(255,255,255,0.06)',
-                  color: isAnswer ? '#6ee7b7' : 'var(--foreground)',
+                  background: isAnswer ? 'rgba(5, 150, 105, 0.06)' : 'rgba(0, 0, 0, 0.02)',
+                  border: isAnswer ? '1px solid rgba(5, 150, 105, 0.15)' : '1px solid rgba(0, 0, 0, 0.06)',
+                  color: isAnswer ? '#10B981' : 'var(--foreground)',
                 }}>
-                  {isAnswer && <span style={{ color: '#34d399', marginRight: '0.5rem' }}>&#10003;</span>}
+                  {isAnswer && <span style={{ color: '#059669', marginRight: '0.5rem' }}>&#10003;</span>}
                   {opt}
                 </div>
               );
@@ -118,7 +118,7 @@ function NoteCard({ item, onSaveMemo }: { item: WrongNoteItem; onSaveMemo: (id: 
               </summary>
               <div style={{
                 marginTop: '0.75rem', padding: '1rem',
-                background: 'rgba(111, 107, 234, 0.08)',
+                background: 'rgba(44, 62, 80, 0.06)',
                 borderRadius: '10px', borderLeft: '4px solid var(--color-3)',
                 fontSize: '0.85rem', lineHeight: 1.7, whiteSpace: 'pre-wrap',
               }}>
@@ -131,8 +131,8 @@ function NoteCard({ item, onSaveMemo }: { item: WrongNoteItem; onSaveMemo: (id: 
           <div style={{
             padding: '1rem',
             borderRadius: '10px',
-            background: 'rgba(67, 171, 240, 0.06)',
-            border: '1px solid rgba(67, 171, 240, 0.15)',
+            background: 'rgba(41, 128, 185, 0.05)',
+            border: '1px solid rgba(41, 128, 185, 0.1)',
           }}>
             <div style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -145,7 +145,7 @@ function NoteCard({ item, onSaveMemo }: { item: WrongNoteItem; onSaveMemo: (id: 
                 <button
                   onClick={(e) => { e.stopPropagation(); setEditing(true); }}
                   style={{
-                    padding: '0.3rem 0.75rem', borderRadius: '6px', border: '1px solid rgba(67, 171, 240, 0.3)',
+                    padding: '0.3rem 0.75rem', borderRadius: '6px', border: '1px solid rgba(41, 128, 185, 0.2)',
                     background: 'transparent', color: 'var(--color-4)', fontSize: '0.75rem',
                     cursor: 'pointer', fontWeight: 600,
                   }}
@@ -163,8 +163,8 @@ function NoteCard({ item, onSaveMemo }: { item: WrongNoteItem; onSaveMemo: (id: 
                   placeholder="Write your note here..."
                   style={{
                     width: '100%', minHeight: '80px', padding: '0.75rem',
-                    borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)',
-                    background: 'rgba(0,0,0,0.2)', color: 'var(--foreground)',
+                    borderRadius: '8px', border: '1px solid rgba(0, 0, 0, 0.08)',
+                    background: 'var(--surface)', color: 'var(--foreground)',
                     fontSize: '0.85rem', lineHeight: 1.6, resize: 'vertical',
                     fontFamily: 'inherit',
                   }}
@@ -175,7 +175,7 @@ function NoteCard({ item, onSaveMemo }: { item: WrongNoteItem; onSaveMemo: (id: 
                     onClick={() => { setEditing(false); setMemo(item.memo); }}
                     style={{
                       padding: '0.35rem 1rem', borderRadius: '6px',
-                      border: '1px solid rgba(255,255,255,0.1)', background: 'transparent',
+                      border: '1px solid rgba(0, 0, 0, 0.08)', background: 'transparent',
                       color: 'var(--text-muted)', fontSize: '0.8rem', cursor: 'pointer',
                     }}
                   >
@@ -186,7 +186,7 @@ function NoteCard({ item, onSaveMemo }: { item: WrongNoteItem; onSaveMemo: (id: 
                     disabled={saving}
                     style={{
                       padding: '0.35rem 1rem', borderRadius: '6px', border: 'none',
-                      background: 'linear-gradient(135deg, var(--color-2), var(--color-3))',
+                      background: 'var(--color-4)',
                       color: 'white', fontSize: '0.8rem', cursor: saving ? 'wait' : 'pointer',
                       fontWeight: 600, opacity: saving ? 0.7 : 1,
                     }}
@@ -280,7 +280,7 @@ export default function WrongNotesClient({ items }: { items: WrongNoteItem[] }) 
         gap: '1rem', marginBottom: '2rem',
       }}>
         <div className="glass" style={{ padding: '1rem', borderRadius: '12px', textAlign: 'center' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f87171' }}>{items.length}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#DC2626' }}>{items.length}</div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Wrong Questions</div>
         </div>
         <div className="glass" style={{ padding: '1rem', borderRadius: '12px', textAlign: 'center' }}>
@@ -306,8 +306,8 @@ export default function WrongNotesClient({ items }: { items: WrongNoteItem[] }) 
           onChange={(e) => setSortMode(e.target.value as SortMode)}
           style={{
             padding: '0.5rem 1rem', borderRadius: '8px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(30, 31, 41, 0.6)', color: 'var(--foreground)',
+            border: '1px solid rgba(0, 0, 0, 0.08)',
+            background: 'var(--surface)', color: 'var(--foreground)',
             fontSize: '0.85rem', cursor: 'pointer',
           }}
         >
@@ -321,8 +321,8 @@ export default function WrongNotesClient({ items }: { items: WrongNoteItem[] }) 
           onChange={(e) => setFilterChapter(e.target.value)}
           style={{
             padding: '0.5rem 1rem', borderRadius: '8px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(30, 31, 41, 0.6)', color: 'var(--foreground)',
+            border: '1px solid rgba(0, 0, 0, 0.08)',
+            background: 'var(--surface)', color: 'var(--foreground)',
             fontSize: '0.85rem', cursor: 'pointer',
           }}
         >
@@ -337,8 +337,8 @@ export default function WrongNotesClient({ items }: { items: WrongNoteItem[] }) 
           onClick={() => setFilterMemoOnly(!filterMemoOnly)}
           style={{
             padding: '0.5rem 1rem', borderRadius: '8px',
-            border: filterMemoOnly ? '1px solid rgba(67, 171, 240, 0.4)' : '1px solid rgba(255,255,255,0.1)',
-            background: filterMemoOnly ? 'rgba(67, 171, 240, 0.15)' : 'rgba(30, 31, 41, 0.6)',
+            border: filterMemoOnly ? '1px solid rgba(41, 128, 185, 0.3)' : '1px solid rgba(0, 0, 0, 0.08)',
+            background: filterMemoOnly ? 'rgba(41, 128, 185, 0.1)' : 'var(--surface)',
             color: filterMemoOnly ? 'var(--color-4)' : 'var(--foreground)',
             fontSize: '0.85rem', cursor: 'pointer', fontWeight: filterMemoOnly ? 600 : 400,
           }}

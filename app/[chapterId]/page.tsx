@@ -26,7 +26,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ chapte
               display: 'flex',
               flexDirection: 'column'
             }}>
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'white' }}>{sub.title}</h2>
+              <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--foreground)' }}>{sub.title}</h2>
               <p style={{ color: 'var(--text-muted)', flex: 1, marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: 1.5 }}>
                 {sub.description}
               </p>
@@ -34,7 +34,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ chapte
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                 {sub.keywords.slice(0, 3).map(kw => (
                   <span key={kw} style={{
-                    background: 'rgba(67, 171, 240, 0.1)',
+                    background: 'rgba(41, 128, 185, 0.08)',
                     color: 'var(--color-4)',
                     padding: '0.25rem 0.75rem',
                     borderRadius: '999px',

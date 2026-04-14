@@ -34,7 +34,7 @@ export default async function ExamHome() {
                 {ch.chapterName}
               </p>
               <span style={{
-                background: 'rgba(132, 72, 240, 0.1)',
+                background: 'rgba(142, 68, 173, 0.08)',
                 color: 'var(--color-2)',
                 padding: '0.25rem 0.75rem',
                 borderRadius: '999px',

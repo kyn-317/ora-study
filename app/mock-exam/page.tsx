@@ -33,8 +33,8 @@ export default async function MockExamHome() {
           display: 'inline-block',
           padding: '0.75rem 2rem',
           borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          background: 'rgba(30, 31, 41, 0.6)',
+          border: '1px solid rgba(0, 0, 0, 0.06)',
+          background: 'var(--surface)',
           color: 'var(--color-5)',
           fontWeight: 600,
           fontSize: '0.95rem',
@@ -45,9 +45,9 @@ export default async function MockExamHome() {
           display: 'inline-block',
           padding: '0.75rem 2rem',
           borderRadius: '12px',
-          border: '1px solid rgba(248, 113, 113, 0.2)',
-          background: 'rgba(30, 31, 41, 0.6)',
-          color: '#fca5a5',
+          border: '1px solid rgba(220, 38, 38, 0.15)',
+          background: 'var(--surface)',
+          color: '#EF4444',
           fontWeight: 600,
           fontSize: '0.95rem',
         }}>
@@ -72,7 +72,7 @@ export default async function MockExamHome() {
                 Set {s.exam_set}
               </h2>
               <span style={{
-                background: 'rgba(132, 72, 240, 0.1)',
+                background: 'rgba(142, 68, 173, 0.08)',
                 color: 'var(--color-2)',
                 padding: '0.25rem 0.75rem',
                 borderRadius: '999px',

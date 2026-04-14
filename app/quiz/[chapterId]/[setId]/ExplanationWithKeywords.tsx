@@ -122,7 +122,7 @@ function KeywordPopup({
         padding: '0.5rem',
         minWidth: '250px',
         maxWidth: 'min(400px, calc(100vw - 16px))',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
       }}
     >
       <div style={{
@@ -148,7 +148,7 @@ function KeywordPopup({
             color: 'var(--foreground)',
             transition: 'background 0.15s',
           }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(67, 171, 240, 0.12)')}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(41, 128, 185, 0.08)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
         >
           <div style={{ fontWeight: 500 }}>{entry.title}</div>
@@ -212,7 +212,7 @@ export default function ExplanationWithKeywords({ text, keywordIndex, onStudySel
               borderBottom: '1px dashed var(--color-4)',
               cursor: 'pointer',
               transition: 'color 0.15s',
-              WebkitTapHighlightColor: 'rgba(67, 171, 240, 0.3)',
+              WebkitTapHighlightColor: 'rgba(41, 128, 185, 0.2)',
             }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-5)')}
             onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-4)')}

@@ -50,7 +50,7 @@ function KeywordStudyRenderer({ data, keyword }: { data: KeywordStudyData; keywo
       {/* Definition */}
       <div style={{
         padding: '0.75rem 1rem',
-        background: 'rgba(67, 171, 240, 0.08)',
+        background: 'rgba(41, 128, 185, 0.06)',
         borderRadius: '10px',
         marginBottom: '0.75rem',
         borderLeft: '3px solid var(--color-4)',
@@ -62,7 +62,7 @@ function KeywordStudyRenderer({ data, keyword }: { data: KeywordStudyData; keywo
       {/* Key Points */}
       <div style={{
         padding: '0.75rem 1rem',
-        background: 'rgba(111, 107, 234, 0.08)',
+        background: 'rgba(44, 62, 80, 0.06)',
         borderRadius: '10px',
         marginBottom: '0.75rem',
         borderLeft: '3px solid var(--color-3)',
@@ -85,9 +85,9 @@ function KeywordStudyRenderer({ data, keyword }: { data: KeywordStudyData; keywo
               padding: '0.1rem 0.5rem',
               borderRadius: '6px',
               fontSize: '0.73rem',
-              background: 'rgba(67, 171, 240, 0.1)',
+              background: 'rgba(41, 128, 185, 0.08)',
               color: 'var(--color-4)',
-              border: '1px solid rgba(67, 171, 240, 0.2)',
+              border: '1px solid rgba(41, 128, 185, 0.15)',
             }}>
               {rk}
             </span>
@@ -117,7 +117,7 @@ function SectionRenderer({ section, level = 0 }: { section: StudySectionData; le
         <div style={{
           marginTop: '0.75rem',
           padding: '0.75rem',
-          background: 'rgba(111, 107, 234, 0.1)',
+          background: 'rgba(44, 62, 80, 0.08)',
           borderRadius: '8px',
           borderLeft: '3px solid var(--color-3)',
           fontSize: '0.8rem',
@@ -221,7 +221,7 @@ export default function StudyPanel({ items, onRemove, onClose }: StudyPanelProps
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  background: isExpanded ? 'rgba(67, 171, 240, 0.08)' : 'transparent',
+                  background: isExpanded ? 'rgba(41, 128, 185, 0.06)' : 'transparent',
                 }}
               >
                 <div>
@@ -231,7 +231,7 @@ export default function StudyPanel({ items, onRemove, onClose }: StudyPanelProps
                     borderRadius: '6px',
                     fontSize: '0.75rem',
                     fontWeight: 600,
-                    background: 'rgba(67, 171, 240, 0.15)',
+                    background: 'rgba(41, 128, 185, 0.1)',
                     color: 'var(--color-4)',
                     marginRight: '0.5rem',
                   }}>

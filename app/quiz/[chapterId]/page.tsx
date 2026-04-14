@@ -32,14 +32,14 @@ export default async function QuizChapterPage({ params }: { params: Promise<{ ch
               gap: '1rem',
               height: '100%',
             }}>
-              <h2 style={{ fontSize: '1.5rem', color: 'white' }}>Set {set.setId}</h2>
+              <h2 style={{ fontSize: '1.5rem', color: 'var(--foreground)' }}>Set {set.setId}</h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
                 {set.questionCount} questions
               </p>
               <div style={{
                 marginTop: 'auto',
                 padding: '0.5rem 1rem',
-                background: 'linear-gradient(135deg, var(--color-2), var(--color-3))',
+                background: 'var(--color-4)',
                 borderRadius: '8px',
                 textAlign: 'center',
                 fontWeight: 600,

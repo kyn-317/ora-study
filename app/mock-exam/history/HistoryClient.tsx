@@ -45,7 +45,7 @@ function HistoryTab({ results }: { results: { fileName: string; result: ExamResu
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: '1rem',
-            borderColor: passed ? 'rgba(52, 211, 153, 0.3)' : 'rgba(248, 113, 113, 0.3)',
+            borderColor: passed ? 'rgba(5, 150, 105, 0.2)' : 'rgba(220, 38, 38, 0.2)',
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -57,8 +57,8 @@ function HistoryTab({ results }: { results: { fileName: string; result: ExamResu
                   borderRadius: '999px',
                   fontSize: '0.75rem',
                   fontWeight: 600,
-                  background: passed ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)',
-                  color: passed ? '#34d399' : '#f87171',
+                  background: passed ? 'rgba(5, 150, 105, 0.08)' : 'rgba(220, 38, 38, 0.08)',
+                  color: passed ? '#059669' : '#DC2626',
                 }}>
                   {passed ? 'PASS' : 'FAIL'}
                 </span>
@@ -71,7 +71,7 @@ function HistoryTab({ results }: { results: { fileName: string; result: ExamResu
               <div style={{ textAlign: 'center' }}>
                 <div style={{
                   fontSize: '1.5rem', fontWeight: 700,
-                  color: passed ? '#34d399' : '#f87171',
+                  color: passed ? '#059669' : '#DC2626',
                 }}>
                   {result.score}/{result.totalQuestions}
                 </div>
@@ -121,7 +121,7 @@ function ChaptersTab({ chapterStats }: { chapterStats: ChapterStat[] }) {
                 </span>
                 <span style={{
                   fontWeight: 700, fontSize: '0.9rem',
-                  color: passed ? '#34d399' : '#f87171',
+                  color: passed ? '#059669' : '#DC2626',
                   minWidth: '45px', textAlign: 'right',
                 }}>
                   {stat.rate}%
@@ -132,7 +132,7 @@ function ChaptersTab({ chapterStats }: { chapterStats: ChapterStat[] }) {
               width: `${barWidth}%`,
               height: '8px',
               borderRadius: '4px',
-              background: 'rgba(255, 255, 255, 0.06)',
+              background: 'rgba(0, 0, 0, 0.06)',
               overflow: 'hidden',
             }}>
               <div style={{
@@ -140,8 +140,8 @@ function ChaptersTab({ chapterStats }: { chapterStats: ChapterStat[] }) {
                 height: '100%',
                 borderRadius: '4px',
                 background: passed
-                  ? 'linear-gradient(90deg, #34d399, #6ee7b7)'
-                  : 'linear-gradient(90deg, #f87171, #fca5a5)',
+                  ? 'linear-gradient(90deg, #059669, #10B981)'
+                  : 'linear-gradient(90deg, #DC2626, #EF4444)',
                 transition: 'width 0.5s ease',
               }} />
             </div>
@@ -155,11 +155,11 @@ function ChaptersTab({ chapterStats }: { chapterStats: ChapterStat[] }) {
 // ── Timeline Chart (SVG) ──
 
 const SET_COLORS: Record<number, string> = {
-  1: '#43abf0', // color-4 blue
-  2: '#cb7af0', // color-5 purple
-  3: '#34d399', // green
-  4: '#fbbf24', // amber
-  5: '#f87171', // red
+  1: '#2980B9', // color-4 blue
+  2: '#8E44AD', // color-5 purple
+  3: '#059669', // green
+  4: '#D97706', // amber
+  5: '#DC2626', // red
 };
 
 function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
@@ -213,7 +213,7 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
             y1={yScale(v)}
             x2={W - PAD.right}
             y2={yScale(v)}
-            stroke={v === 70 ? 'rgba(52, 211, 153, 0.4)' : 'rgba(255,255,255,0.06)'}
+            stroke={v === 70 ? 'rgba(5, 150, 105, 0.3)' : 'rgba(0, 0, 0, 0.06)'}
             strokeDasharray={v === 70 ? '6 4' : 'none'}
           />
         ))}
@@ -225,7 +225,7 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
             x={PAD.left - 8}
             y={yScale(v) + 4}
             textAnchor="end"
-            fill={v === 70 ? '#34d399' : 'rgba(255,255,255,0.4)'}
+            fill={v === 70 ? '#059669' : 'rgba(0, 0, 0, 0.4)'}
             fontSize="11"
           >
             {v}%
@@ -242,7 +242,7 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
               x={xScale(i)}
               y={H - PAD.bottom + 20}
               textAnchor="middle"
-              fill="rgba(255,255,255,0.4)"
+              fill="rgba(0, 0, 0, 0.4)"
               fontSize="11"
             >
               {label}
@@ -261,7 +261,7 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
               y1={prev.y}
               x2={p.x}
               y2={p.y}
-              stroke="rgba(255,255,255,0.1)"
+              stroke="rgba(0, 0, 0, 0.08)"
               strokeWidth="1"
             />
           );
@@ -272,7 +272,7 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
           <path
             d={maPath}
             fill="none"
-            stroke="rgba(251, 191, 36, 0.6)"
+            stroke="rgba(217, 119, 6, 0.5)"
             strokeWidth="2"
             strokeDasharray="4 3"
           />
@@ -285,7 +285,7 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
             cx={p.x}
             cy={p.y}
             r={hovered === p.idx ? 7 : 5}
-            fill={SET_COLORS[p.examSet] || '#43abf0'}
+            fill={SET_COLORS[p.examSet] || '#2980B9'}
             stroke="rgba(0,0,0,0.3)"
             strokeWidth="1.5"
             style={{ cursor: 'pointer', transition: 'r 0.15s ease' }}
@@ -313,8 +313,8 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
                 width={tipW}
                 height={tipH}
                 rx="8"
-                fill="rgba(20, 21, 30, 0.95)"
-                stroke="rgba(255,255,255,0.15)"
+                fill="rgba(255, 255, 255, 0.95)"
+                stroke="rgba(0, 0, 0, 0.1)"
               />
               {lines.map((line, i) => (
                 <text
@@ -322,7 +322,7 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
                   x={Math.max(PAD.left, tipX) + tipW / 2}
                   y={tipY + 16 + i * 16}
                   textAnchor="middle"
-                  fill={i === 0 ? SET_COLORS[p.examSet] || '#43abf0' : i === 1 ? '#fff' : 'rgba(255,255,255,0.5)'}
+                  fill={i === 0 ? SET_COLORS[p.examSet] || '#2980B9' : i === 1 ? '#1A1A2E' : 'rgba(0, 0, 0, 0.4)'}
                   fontSize={i === 1 ? '13' : '11'}
                   fontWeight={i <= 1 ? '600' : '400'}
                 >
@@ -340,7 +340,7 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
           <div key={setId} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             <div style={{
               width: '10px', height: '10px', borderRadius: '50%',
-              background: SET_COLORS[setId] || '#43abf0',
+              background: SET_COLORS[setId] || '#2980B9',
             }} />
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Set {setId}</span>
           </div>
@@ -349,8 +349,8 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             <div style={{
               width: '16px', height: '2px',
-              background: 'rgba(251, 191, 36, 0.6)',
-              borderTop: '1px dashed rgba(251, 191, 36, 0.6)',
+              background: 'rgba(217, 119, 6, 0.5)',
+              borderTop: '1px dashed rgba(217, 119, 6, 0.5)',
             }} />
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>3-exam avg</span>
           </div>
@@ -387,7 +387,7 @@ function TrendsTab({ setStats, timeline }: { setStats: SetStat[]; timeline: Time
                 {stat.attempts.length} attempt{stat.attempts.length > 1 ? 's' : ''}
               </span>
               <span style={{
-                fontWeight: 700, color: stat.bestRate >= 70 ? '#34d399' : '#f87171',
+                fontWeight: 700, color: stat.bestRate >= 70 ? '#059669' : '#DC2626',
               }}>
                 Best: {stat.bestRate}%
               </span>
@@ -419,8 +419,8 @@ function TrendsTab({ setStats, timeline }: { setStats: SetStat[]; timeline: Time
                     height: `${height}%`,
                     borderRadius: '4px 4px 0 0',
                     background: passed
-                      ? 'linear-gradient(180deg, #34d399, rgba(52, 211, 153, 0.4))'
-                      : 'linear-gradient(180deg, #f87171, rgba(248, 113, 113, 0.4))',
+                      ? 'linear-gradient(180deg, #059669, rgba(5, 150, 105, 0.3))'
+                      : 'linear-gradient(180deg, #DC2626, rgba(220, 38, 38, 0.3))',
                     minHeight: '4px',
                   }} />
                   <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>
@@ -435,7 +435,7 @@ function TrendsTab({ setStats, timeline }: { setStats: SetStat[]; timeline: Time
           {stat.attempts.length > 1 && (
             <div style={{
               marginTop: '0.5rem', fontSize: '0.7rem', color: 'var(--text-muted)',
-              borderTop: '1px dashed rgba(52, 211, 153, 0.3)', paddingTop: '0.3rem',
+              borderTop: '1px dashed rgba(5, 150, 105, 0.2)', paddingTop: '0.3rem',
               textAlign: 'right',
             }}>
               Pass line: 70%
@@ -458,7 +458,7 @@ function WeakQuestionCard({ q }: { q: WeakQuestion }) {
     <div className="glass" style={{
       borderRadius: '10px',
       overflow: 'hidden',
-      borderColor: q.alwaysSameWrong ? 'rgba(248, 113, 113, 0.25)' : undefined,
+      borderColor: q.alwaysSameWrong ? 'rgba(220, 38, 38, 0.15)' : undefined,
     }}>
       <div
         onClick={() => setExpanded(!expanded)}
@@ -475,7 +475,7 @@ function WeakQuestionCard({ q }: { q: WeakQuestion }) {
           {q.alwaysSameWrong && (
             <span style={{
               padding: '0.1rem 0.45rem', borderRadius: '999px', fontSize: '0.65rem',
-              fontWeight: 600, background: 'rgba(248, 113, 113, 0.15)', color: '#f87171',
+              fontWeight: 600, background: 'rgba(220, 38, 38, 0.08)', color: '#DC2626',
             }}>
               same wrong
             </span>
@@ -487,8 +487,8 @@ function WeakQuestionCard({ q }: { q: WeakQuestion }) {
           </span>
           <span style={{
             padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600,
-            background: q.wrongRate === 100 ? 'rgba(248, 113, 113, 0.2)' : 'rgba(251, 191, 36, 0.2)',
-            color: q.wrongRate === 100 ? '#f87171' : '#fbbf24',
+            background: q.wrongRate === 100 ? 'rgba(220, 38, 38, 0.15)' : 'rgba(217, 119, 6, 0.15)',
+            color: q.wrongRate === 100 ? '#DC2626' : '#D97706',
           }}>
             {q.wrongRate}%
           </span>
@@ -501,13 +501,13 @@ function WeakQuestionCard({ q }: { q: WeakQuestion }) {
       {expanded && (
         <div style={{
           padding: '0 1.25rem 1.25rem',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          borderTop: '1px solid rgba(0, 0, 0, 0.06)',
           paddingTop: '1rem',
         }}>
           {/* Correct answer */}
           <div style={{ marginBottom: '0.75rem', fontSize: '0.85rem' }}>
             <span style={{ color: 'var(--text-muted)' }}>Correct: </span>
-            <span style={{ color: '#34d399', fontWeight: 600 }}>{q.correctAnswer.join(', ')}</span>
+            <span style={{ color: '#059669', fontWeight: 600 }}>{q.correctAnswer.join(', ')}</span>
           </div>
 
           {/* Wrong selection frequency */}
@@ -522,19 +522,19 @@ function WeakQuestionCard({ q }: { q: WeakQuestion }) {
                 <div key={letter} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                   <span style={{
                     width: '20px', fontWeight: 600, fontSize: '0.85rem', textAlign: 'center',
-                    color: isCorrect ? '#34d399' : '#f87171',
+                    color: isCorrect ? '#059669' : '#DC2626',
                   }}>
                     {letter}
                   </span>
                   <div style={{
                     flex: 1, height: '6px', borderRadius: '3px',
-                    background: 'rgba(255,255,255,0.06)', overflow: 'hidden',
+                    background: 'rgba(0, 0, 0, 0.06)', overflow: 'hidden',
                   }}>
                     <div style={{
                       width: `${barPct}%`, height: '100%', borderRadius: '3px',
                       background: isCorrect
-                        ? 'linear-gradient(90deg, #34d399, #6ee7b7)'
-                        : 'linear-gradient(90deg, #f87171, #fca5a5)',
+                        ? 'linear-gradient(90deg, #059669, #10B981)'
+                        : 'linear-gradient(90deg, #DC2626, #EF4444)',
                       transition: 'width 0.3s ease',
                     }} />
                   </div>
@@ -576,15 +576,15 @@ function WeakTab({ weakQuestions }: { weakQuestions: WeakQuestion[] }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div className="glass" style={{
         padding: '1rem 1.5rem', borderRadius: '12px',
-        background: 'rgba(248, 113, 113, 0.06)',
-        borderColor: 'rgba(248, 113, 113, 0.15)',
+        background: 'rgba(220, 38, 38, 0.04)',
+        borderColor: 'rgba(220, 38, 38, 0.08)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem',
       }}>
-        <span style={{ color: '#fca5a5', fontSize: '0.9rem' }}>
+        <span style={{ color: '#EF4444', fontSize: '0.9rem' }}>
           {weakQuestions.length} question{weakQuestions.length > 1 ? 's' : ''} wrong 2+ times
         </span>
         {sameWrongCount > 0 && (
-          <span style={{ color: '#f87171', fontSize: '0.8rem' }}>
+          <span style={{ color: '#DC2626', fontSize: '0.8rem' }}>
             {sameWrongCount} always same wrong answer
           </span>
         )}
@@ -698,9 +698,9 @@ export default function HistoryClient({ analytics }: { analytics: AnalyticsData 
           display: 'inline-block',
           padding: '0.6rem 1.5rem',
           borderRadius: '10px',
-          border: '1px solid rgba(248, 113, 113, 0.2)',
-          background: 'rgba(30, 31, 41, 0.6)',
-          color: '#fca5a5',
+          border: '1px solid rgba(220, 38, 38, 0.15)',
+          background: 'rgba(245, 246, 250, 0.9)',
+          color: '#EF4444',
           fontWeight: 600,
           fontSize: '0.85rem',
         }}>
@@ -719,8 +719,8 @@ export default function HistoryClient({ analytics }: { analytics: AnalyticsData 
           style={{
             padding: '0.6rem 1.5rem',
             borderRadius: '10px',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            background: 'rgba(30, 31, 41, 0.6)',
+            border: '1px solid rgba(0, 0, 0, 0.06)',
+            background: 'rgba(245, 246, 250, 0.9)',
             color: analytics.totalExams === 0 ? 'var(--text-muted)' : 'var(--color-4)',
             fontWeight: 600,
             fontSize: '0.85rem',
@@ -734,8 +734,8 @@ export default function HistoryClient({ analytics }: { analytics: AnalyticsData 
         <label style={{
           padding: '0.6rem 1.5rem',
           borderRadius: '10px',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          background: 'rgba(30, 31, 41, 0.6)',
+          border: '1px solid rgba(0, 0, 0, 0.06)',
+          background: 'rgba(245, 246, 250, 0.9)',
           color: uploading ? 'var(--text-muted)' : 'var(--color-5)',
           fontWeight: 600,
           fontSize: '0.85rem',
@@ -756,7 +756,7 @@ export default function HistoryClient({ analytics }: { analytics: AnalyticsData 
         {uploadMsg && (
           <span style={{
             fontSize: '0.8rem',
-            color: uploadMsg.type === 'ok' ? '#34d399' : '#f87171',
+            color: uploadMsg.type === 'ok' ? '#059669' : '#DC2626',
           }}>
             {uploadMsg.text}
           </span>
@@ -773,7 +773,7 @@ export default function HistoryClient({ analytics }: { analytics: AnalyticsData 
         }}>
           <SummaryCard label="Total Exams" value={analytics.totalExams.toString()} color="var(--color-4)" />
           <SummaryCard label="Average Score" value={`${analytics.averageScore}%`} color="var(--color-5)" />
-          <SummaryCard label="Best Score" value={`${analytics.bestScore}%`} color="#34d399" />
+          <SummaryCard label="Best Score" value={`${analytics.bestScore}%`} color="#059669" />
           <SummaryCard
             label="Pass Rate"
             value={`${Math.round((analytics.passCount / analytics.totalExams) * 100)}%`}
@@ -786,7 +786,7 @@ export default function HistoryClient({ analytics }: { analytics: AnalyticsData 
       <div style={{
         display: 'flex', gap: '0.25rem',
         marginBottom: '2rem',
-        background: 'rgba(30, 31, 41, 0.4)',
+        background: 'rgba(0, 0, 0, 0.04)',
         borderRadius: '12px',
         padding: '0.25rem',
       }}>
@@ -804,7 +804,7 @@ export default function HistoryClient({ analytics }: { analytics: AnalyticsData 
               fontSize: '0.85rem',
               transition: 'all 0.2s ease',
               background: activeTab === tab.key
-                ? 'linear-gradient(135deg, var(--color-2), var(--color-3))'
+                ? 'var(--color-4)'
                 : 'transparent',
               color: activeTab === tab.key ? 'white' : 'var(--text-muted)',
             }}
