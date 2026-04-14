@@ -65,8 +65,8 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
                   width: v.width || '100%',
                   maxWidth: '100%',
                   borderRadius: '12px',
-                  border: '1px solid var(--glass-border)',
-                  background: 'rgba(0, 0, 0, 0.03)',
+                  border: '1px solid rgba(0, 0, 0, 0.12)',
+                  background: '#1A1B2E',
                   padding: '1rem',
                 }}
               />
@@ -78,9 +78,9 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
                 style={{
                   width: v.width || '100%',
                   minHeight: '300px',
-                  border: '1px solid var(--glass-border)',
+                  border: '1px solid rgba(0, 0, 0, 0.12)',
                   borderRadius: '12px',
-                  background: 'transparent',
+                  background: '#1A1B2E',
                 }}
               />
             )}
@@ -201,7 +201,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
           <h1 style={{ fontSize: '3rem', color: 'white', marginBottom: '1rem', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
             {data.title}
           </h1>
-          <p style={{ color: 'rgba(0, 0, 0, 0.7)', fontSize: '1.1rem', maxWidth: '800px', lineHeight: 1.6 }}>
+          <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '1.1rem', maxWidth: '800px', lineHeight: 1.6 }}>
             {data.description}
           </p>
         </div>
