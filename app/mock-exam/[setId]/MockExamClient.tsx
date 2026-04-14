@@ -466,7 +466,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
                   </div>
                 </div>
 
-                <p style={{ marginBottom: '1rem', lineHeight: 1.6, fontSize: '0.95rem' }}>{q.title}</p>
+                <p style={{ marginBottom: '1rem', lineHeight: 1.6, fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>{q.title}</p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
                   {q.options.map((opt) => {
@@ -603,7 +603,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
           )}
         </div>
 
-        <p style={{ fontSize: '1.1rem', lineHeight: 1.7, marginBottom: '2rem' }}>
+        <p style={{ fontSize: '1.1rem', lineHeight: 1.7, marginBottom: '2rem', whiteSpace: 'pre-wrap' }}>
           {question.title}
         </p>
 
