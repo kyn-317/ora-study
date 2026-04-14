@@ -3,6 +3,11 @@
 import Link from 'next/link';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { QuizQuestion } from '../../../../lib/data';
+
+function formatQuestionText(q: QuizQuestion): string {
+  const lines = [q.number, q.title, '', ...q.options];
+  return lines.join('\n');
+}
 import ExplanationWithKeywords from './ExplanationWithKeywords';
 import type { KeywordEntry } from './ExplanationWithKeywords';
 import StudyPanel from './StudyPanel';
@@ -29,6 +34,19 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
   const [score, setScore] = useState(0);
   const [mode, setMode] = useState<'taking' | 'review'>('taking');
   const [restored, setRestored] = useState(false);
+
+  // Copy feedback state
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleCopyQuestion = useCallback((q: QuizQuestion, idx: number) => {
+    const text = formatQuestionText(q);
+    navigator.clipboard.writeText(text).then(() => {
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+      setCopiedIndex(idx);
+      copyTimeoutRef.current = setTimeout(() => setCopiedIndex(null), 2000);
+    }).catch(() => { /* clipboard permission denied */ });
+  }, []);
 
   // Study Panel state
   const [studyItems, setStudyItems] = useState<StudyPanelItem[]>([]);
@@ -386,16 +404,35 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                   <span style={{ fontWeight: 600, color: 'var(--color-4)' }}>{q.number}</span>
-                  <span style={{
-                    padding: '0.2rem 0.75rem',
-                    borderRadius: '999px',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    background: isCorrect ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)',
-                    color: isCorrect ? '#34d399' : '#f87171',
-                  }}>
-                    {isCorrect ? 'Correct' : 'Incorrect'}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleCopyQuestion(q, idx); }}
+                      title="Copy question"
+                      style={{
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: '6px',
+                        border: '1px solid var(--glass-border)',
+                        background: copiedIndex === idx ? 'rgba(52, 211, 153, 0.15)' : 'var(--glass-bg)',
+                        color: copiedIndex === idx ? '#34d399' : 'var(--text-muted)',
+                        cursor: 'pointer',
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      {copiedIndex === idx ? '✓ Copied' : 'Copy'}
+                    </button>
+                    <span style={{
+                      padding: '0.2rem 0.75rem',
+                      borderRadius: '999px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      background: isCorrect ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)',
+                      color: isCorrect ? '#34d399' : '#f87171',
+                    }}>
+                      {isCorrect ? 'Correct' : 'Incorrect'}
+                    </span>
+                  </div>
                 </div>
                 <p style={{ marginBottom: '1rem', lineHeight: 1.6 }}>{q.title}</p>
 
@@ -512,18 +549,40 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
           <span style={{ color: 'var(--color-4)', fontWeight: 600, fontSize: '0.9rem' }}>
             {question.number}
           </span>
-          {isMultiSelect && (
-            <span style={{
-              background: 'rgba(203, 122, 240, 0.15)',
-              color: 'var(--color-5)',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '999px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-            }}>
-              Select {requiredCount}
-            </span>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {isMultiSelect && (
+              <span style={{
+                background: 'rgba(203, 122, 240, 0.15)',
+                color: 'var(--color-5)',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '999px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+              }}>
+                Select {requiredCount}
+              </span>
+            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); handleCopyQuestion(question, currentIndex); }}
+              title="Copy question"
+              style={{
+                padding: '0.3rem 0.6rem',
+                borderRadius: '6px',
+                border: '1px solid var(--glass-border)',
+                background: copiedIndex === currentIndex ? 'rgba(52, 211, 153, 0.15)' : 'var(--glass-bg)',
+                color: copiedIndex === currentIndex ? '#34d399' : 'var(--text-muted)',
+                cursor: 'pointer',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+              }}
+            >
+              {copiedIndex === currentIndex ? '✓ Copied' : 'Copy'}
+            </button>
+          </div>
         </div>
 
         <p style={{ fontSize: '1.1rem', lineHeight: 1.7, marginBottom: '2rem' }}>
