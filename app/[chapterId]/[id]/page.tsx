@@ -135,11 +135,11 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
           left: 0,
           width: isTopLevel ? '6px' : '4px',
           height: '100%',
-          background: isTopLevel ? 'var(--color-2)' : 'var(--color-1)',
+          background: isTopLevel ? 'var(--color-4)' : 'var(--color-1)',
         }} />
         <h2 style={{
           fontSize: isTopLevel ? '1.8rem' : '1.4rem',
-          color: isTopLevel ? 'var(--color-2)' : 'var(--color-1)',
+          color: isTopLevel ? 'var(--color-3)' : 'var(--color-1)',
           marginBottom: '1.5rem',
           paddingLeft: '0.5rem',
           borderBottom: isTopLevel ? '1px solid rgba(0, 0, 0, 0.08)' : 'none',
