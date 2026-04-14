@@ -15,7 +15,7 @@
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_027",
-    "title": "ユーザーHRが所有するemployees表に対して以下の操作が順番に実行されました。\n\n-- HRユーザーが実行\nGRANT SELECT ON hr.employees TO user_a WITH GRANT OPTION;\n\n-- USER_Aが実行\nCREATE VIEW user_a.emp_view AS SELECT employee_id, first_name FROM hr.employees;\nGRANT SELECT ON hr.employees TO user_b;\n\n-- HRユーザーが実行\nREVOKE SELECT ON hr.employees FROM user_a;\n\nこのREVOKE文の実行後の状態について正しく述べているものを選択してください。",
+    "title": "ユーザーHRが所有するemployees表に対して以下の操作が順番に実行されました。\n\n-- HRユーザーが実行\nSQL> GRANT SELECT ON hr.employees TO user_a WITH GRANT OPTION;\n\n-- USER_Aが実行\nSQL> CREATE VIEW user_a.emp_view AS\n     SELECT employee_id, first_name FROM hr.employees;\n\nSQL> GRANT SELECT ON hr.employees TO user_b;\n\n-- HRユーザーが実行\nSQL> REVOKE SELECT ON hr.employees FROM user_a;\n\nこのREVOKE文の実行後の状態について正しく述べているものを選択してください。",
     "options": [
       "A) USER_AとUSER_Bのhr.employees表に対するSELECT権限が取り消され、USER_A.EMP_VIEWはINVALID状態になる。",
       "B) USER_AのSELECT権限のみが取り消され、USER_Bの権限とUSER_A.EMP_VIEWは影響を受けない。",
@@ -28,7 +28,7 @@
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_028",
-    "title": "管理者が以下の操作を順番に実行しました。\n\nGRANT app_role, report_role, admin_role TO dev_user;\nALTER USER dev_user DEFAULT ROLE app_role, report_role;\n\ndev_userがデータベースにログインした直後に以下のSQLを実行しました。\n\nSELECT role FROM session_roles;\n\nこのクエリの結果について正しく述べているものを選択してください。",
+    "title": "管理者が以下の操作を順番に実行しました。\n\nSQL> GRANT app_role, report_role, admin_role TO dev_user;\n\nSQL> ALTER USER dev_user DEFAULT ROLE app_role, report_role;\n\ndev_userがデータベースにログインした直後に以下のSQLを実行しました。\n\nSQL> SELECT role FROM session_roles;\n\nこのクエリの結果について正しく述べているものを選択してください。",
     "options": [
       "A) app_role、report_role、admin_roleの3つのロールがすべて表示される。",
       "B) app_roleとreport_roleの2つのロールのみが表示される。",
@@ -41,7 +41,7 @@
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_029",
-    "title": "管理者が以下のSQL文を実行しました。\n\nGRANT UPDATE (salary, commission_pct) ON hr.employees TO analyst_user;\n\nこの操作と、その後の権限管理について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "管理者が以下のSQL文を実行しました。\n\nSQL> GRANT UPDATE (salary, commission_pct) ON hr.employees TO analyst_user;\n\nこの操作と、その後の権限管理について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) analyst_userはhr.employees表のsalaryとcommission_pct列のみUPDATEが可能であり、他の列のUPDATEはできない。",
       "B) analyst_userに付与されたカラム・レベルのUPDATE権限を取り消す場合、REVOKE UPDATE (salary) ON hr.employees FROM analyst_user のようにカラムを個別に取り消すことができる。",
@@ -63,6 +63,6 @@
       "D) Oracle 26aiではパスワード認証時にデータ・ディクショナリではなくリスナーが直接認証を行い、認証結果のみをデータベース・インスタンスに返す。"
     ],
     "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — Oracle의 비밀번호 인증 프로세스에서는 사용자가 입력한 비밀번호를 직접 저장된 값과 비교하는 것이 아니라, 해시 기반 비교를 수행합니다. 사용자가 비밀번호를 입력하면 Oracle은 해당 비밀번호를 동일한 해시 알고리즘(Oracle 12c 이상에서�� SHA-512 + Salt 기반 PBKDF2)으로 해싱한 후, 데이터 딕셔너리의 USER$ 테이블에 저장된 해시값과 비교합니다. 두 해시값이 일치하면 인증 성공, 불일치하면 ORA-01017 오류가 발생합니다.\n\nB) 오답 — Oracle은 보안을 위해 비밀번호를 평문(Plain Text)으로 저장하거나 비교하지 않습니다. 비밀번호는 항상 해시된 형태로 저장되며, 해시값 비교를 통해 인증합니다. 이를 통해 데이터 딕셔너리가 유출되더라도 원래 비밀번호를 알 수 없도록 보호합니다.\n\nC) 오답 — 일반 사용자의 비밀번호 해시값은 데이터 딕셔너리(USER$ 테이블)에 저장되므로, 데이터베이스가 기동되어 데이터 딕셔너리에 접근할 수 있는 상태에서만 비밀번호 인증이 가능합니다. SPFILE에는 비밀번호 정보가 저장되지 않습니다. 데이터베이스 미기동 상태에서의 관리자 인증은 별도의 패스워드 파일(orapwd) 또는 OS 인증을 사용합니다.\n\nD) 오답 — 리스너(Listener)는 클라이언트의 접속 요청을 데이터베이스 인스턴스로 전달하는 네트워크 구성 요소이며, 비밀번호 인증 자체를 수행하지는 않습니다. 인증은 데이터베이스 인스턴스 내에서 데이터 딕셔너리의 해시값과 비교하는 방식으로 수행됩니다.\n\n핵심 개념: Oracle의 비밀번호 인증은 데이터 딕셔너리(USER$ 테이블)에 저장된 해시값과 입력 비밀번호의 해시값을 비교하는 방식으로 수행됩니다. 비밀번호는 평문으로 저장되지 않으며, Oracle 12c 이상에서는 SHA-512 + Salt 기반의 PBKDF2 알고리즘을 사용합니다."
+    "explanation": "정답: A\nA) 정답 — Oracle의 비밀번호 인증 프로세스에서는 사용자가 입력한 비밀번호를 직접 저장된 값과 비교하는 것이 아니라, 해시 기반 비교를 수행합니다. 사용자가 비밀번호를 입력하면 Oracle은 해당 비밀번호를 동일한 해시 알고리즘(Oracle 12c 이상에서는 SHA-512 + Salt 기반 PBKDF2)으로 해싱한 후, 데이터 딕셔너리의 USER$ 테이블에 저장된 해시값과 비교합니다. 두 해시값이 일치하면 인증 성공, 불일치하면 ORA-01017 오류가 발생합니다.\n\nB) 오답 — Oracle은 보안을 위해 비밀번호를 평문(Plain Text)으로 저장하거나 비교하지 않습니다. 비밀번호는 항상 해시된 형태로 저장되며, 해시값 비교를 통해 인증합니다. 이를 통해 데이터 딕셔너리가 유출되더라도 원래 비밀번호를 알 수 없도록 보호합니다.\n\nC) 오답 — 일반 사용자의 비밀번호 해시값은 데이터 딕셔너리(USER$ 테이블)에 저장되므로, 데이터베이스가 기동되어 데이터 딕셔너리에 접근할 수 있는 상태에서만 비밀번호 인증이 가능합니다. SPFILE에는 비밀번호 정보가 저장되지 않습니다. 데이터베이스 미기동 상태에서의 관리자 인증은 별도의 패스워드 파일(orapwd) 또는 OS 인증을 사용합니다.\n\nD) 오답 — 리스너(Listener)는 클라이언트의 접속 요청을 데이터베이스 인스턴스로 전달하는 네트워크 구성 요소이며, 비밀번호 인증 자체를 수행하지는 않습니다. 인증은 데이터베이스 인스턴스 내에서 데이터 딕셔너리의 해시값과 비교하는 방식으로 수행됩니다.\n\n핵심 개념: Oracle의 비밀번호 인증은 데이터 딕셔너리(USER$ 테이블)에 저장된 해시값과 입력 비밀번호의 해시값을 비교하는 방식으로 수행됩니다. 비밀번호는 평문으로 저장되지 않으며, Oracle 12c 이상에서는 SHA-512 + Salt 기반의 PBKDF2 알고리즘을 사용합니다."
   }
 ]

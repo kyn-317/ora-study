@@ -2,21 +2,21 @@
   {
     "chapter": "ストレージの管理",
     "number": "C_07_026",
-    "title": "DBAがV$SYSSTATビューを使用してシステム統計を確認したところ、以下の結果が得られました。\n\nSELECT name, value FROM v$sysstat WHERE name = 'table fetch continued row';\n\nNAME                            VALUE\n------------------------------- ----------\ntable fetch continued row          385000\n\nこの統計値が継続的に増加している場合の分析と対応として正しいものを選択してください(2つ選択してください)。",
+    "title": "DBAがV$SYSSTATビューを使用してシステム統計を確認したところ、以下の結果が得られました。\n\nSQL> SELECT name, value\n     FROM v$sysstat\n     WHERE name = 'table fetch continued row';\n\nNAME                             VALUE\n-------------------------------  ----------\ntable fetch continued row           385000\n\nこの統計値が継続的に増加している場合の分析と対応として正しいものを選択してください(2つ選択してください)。",
     "options": [
-      "A) 'table fetch continued row'の値が��続的に増加していることは、行移行（Row Migration）または行連鎖（Row Chaining）が発生していることを示唆しており、追加のI/Oによりパフォーマンスが低下している可能性がある。",
+      "A) 'table fetch continued row'の値が継続的に増加していることは、行移行（Row Migration）または行連鎖（Row Chaining）が発生していることを示唆しており、追加のI/Oによりパフォーマンスが低下している可能性がある。",
       "B) 'table fetch continued row'はFull Table Scanの実行回数を示す統計であるため、索引の作成によって解決すべきである。",
       "C) 行移行が原因である場合、対象テーブルに対してALTER TABLE MOVEまたはSHRINK SPACEを実行してデータを再配置し、行移行を解消することが有効な対策である。",
       "D) この統計値が高い場合、テーブルのPCTFREEを0%に設定することで行移行の発生を防止できる。",
       "E) 行連鎖が原因である場合、SHRINK SPACEを実行すれば行連鎖は完全に解消される。"
     ],
     "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — V$SYSSTAT의 'table fetch continued row' 통계는 행 접근 시 다른 블록으로의 추가 접근(continued fetch)이 발생한 횟수를 나타냅니다. 이 값이 지속적으로 증가하면 Row Migration(행 이동) 또는 Row Chaining(행 연쇄)이 심각한 상태이며, 단일 행 접근 시 추가 I/O가 발생하여 성능이 저하됩니다.\n\nC) 정답 — Row Migration이 원인인 경우, ALTER TABLE MOVE(새 세그먼트에 데이터 재구성) 또는 SHRINK SPACE(기존 세그먼트 내 재배치)를 실행하면 이동된 행이 원래 위치에 재배치되어 포인터 추적이 불필요해집니다. 동시에 PCTFREE를 적절히 증가시켜 향후 Row Migration 재발을 방지하는 것이 권장됩니다.\n\nB) 오답 — 'table fetch continued row'는 Full Table Scan 실행 횟수가 아니라, 행 접근 시 다른 블록으로의 추가 접근 횟수를 나타내는 통계입니다. 인덱스 생성은 이 문제의 해결 방법이 아닙니다.\n\nD) 오답 — PCTFREE를 0%로 설정하면 블록 내에 UPDATE를 위한 여유 공간이 전혀 없으므로, UPDATE로 행 크기가 조금이라도 증가하면 Row Migration이 오히려 더 빈번하게 발생합니다. Row Migration을 방지하려면 PCTFREE를 적절히 증가시켜야 합니다.\n\nE) 오답 — Row Chaining은 행의 전체 크기가 블록 크기보다 큰 구조적 원인으로 발생하므로, SHRINK SPACE로는 해소되지 않습니다. Row Chaining을 해결하려면 더 큰 블록 크기를 ���용하는 테이블스페이스로 이동하거나 테이블을 재설계해야 합니다.\n\n핵심 개념: V$SYSSTAT의 'table fetch continued row'는 Row Migration/Chaining 발생 빈도를 모니터링하는 핵심 통계입니다. Row Migration은 PCTFREE 증가와 ALTER TABLE MOVE/SHRINK SPACE로 해결 가능하지만, Row Chaining은 블록 크기 변경이나 테이블 재설계가 필요한 구조적 문제입니다."
+    "explanation": "정답: A, C\nA) 정답 — V$SYSSTAT의 'table fetch continued row' 통계는 행 접근 시 다른 블록으로의 추가 접근(continued fetch)이 발생한 횟수를 나타냅니다. 이 값이 지속적으로 증가하면 Row Migration(행 이동) 또는 Row Chaining(행 연쇄)이 심각한 상태이며, 단일 행 접근 시 추가 I/O가 발생하여 성능이 저하됩니다.\n\nC) 정답 — Row Migration이 원인인 경우, ALTER TABLE MOVE(새 세그먼트에 데이터 재구성) 또는 SHRINK SPACE(기존 세그먼트 내 재배치)를 실행하면 이동된 행이 원래 위치에 재배치되어 포인터 추적이 불필요해집니다. 동시에 PCTFREE를 적절히 증가시켜 향후 Row Migration 재발을 방지하는 것이 권장됩니다.\n\nB) 오답 — 'table fetch continued row'는 Full Table Scan 실행 횟수가 아니라, 행 접근 시 다른 블록으로의 추가 접근 횟수를 나타내는 통계입니다. 인덱스 생성은 이 문제의 해결 방법이 아닙니다.\n\nD) 오답 — PCTFREE를 0%로 설정하면 블록 내에 UPDATE를 위한 여유 공간이 전혀 없으므로, UPDATE로 행 크기가 조금이라도 증가하면 Row Migration이 오히려 더 빈번하게 발생합니다. Row Migration을 방지하려면 PCTFREE를 적절히 증가시켜야 합니다.\n\nE) 오답 — Row Chaining은 행의 전체 크기가 블록 크기보다 큰 구조적 원인으로 발생하므로, SHRINK SPACE로는 해소되지 않습니다. Row Chaining을 해결하려면 더 큰 블록 크기를 사용하는 테이블스페이스로 이동하거나 테이블을 재설계해야 합니다.\n\n핵심 개념: V$SYSSTAT의 'table fetch continued row'는 Row Migration/Chaining 발생 빈도를 모니터링하는 핵심 통계입니다. Row Migration은 PCTFREE 증가와 ALTER TABLE MOVE/SHRINK SPACE로 해결 가능하지만, Row Chaining은 블록 크기 변경이나 테이블 재설계가 필요한 구조적 문제입니다."
   },
   {
     "chapter": "ストレージの管理",
     "number": "C_07_027",
-    "title": "DBAがMSSM（手動セグメント領域管理）環境のテーブルの空間を回収する必要があります。以下の操作を実行しようとしましたがエラーが発生しました。\n\nSQL> ALTER TABLE hr.orders SHRINK SPACE;\nORA-10636: ROW MOVEMENT is not enabled\n\nSQL> ALTER TABLE hr.orders ENABLE ROW MOVEMENT;\nSQL> ALTER TABLE hr.orders SHRINK SPACE;\nORA-10635: Invalid segment or tablespace type\n\nこのエラーの原因と適切な対応策として正しいものを選択してください。",
+    "title": "DBAがMSSM（手動セグメント領域管理）環境のテーブルの空間を回収する必要があります。以下の操作を実行しようとしましたがエラーが発生しました。\n\nSQL> ALTER TABLE hr.orders SHRINK SPACE;\nORA-10636: ROW MOVEMENT is not enabled\n\nSQL> ALTER TABLE hr.orders ENABLE ROW MOVEMENT;\n\nSQL> ALTER TABLE hr.orders SHRINK SPACE;\nORA-10635: Invalid segment or tablespace type\n\nこのエラーの原因と適切な対応策として正しいものを選択してください。",
     "options": [
       "A) SHRINK SPACEはASSM（自動セグメント領域管理）環境でのみサポートされるため、MSSM環境ではALTER TABLE MOVEを使用して空間を回収する必要がある。",
       "B) MSSM環境では先にPCTUSEDの値を0に設定してからSHRINK SPACEを実行する必要がある。",
@@ -24,7 +24,7 @@
       "D) MSSM環境ではSEGMENT CREATION IMMEDIATEを指定してテーブルを再作成する必要がある。"
     ],
     "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — SHRINK SPACE는 ASSM(Automatic Segment Space Management) 테이블스페이스에서만 지원됩니다. MSSM(Manual Segment Space Management) 환경에서는 비트맵 기반 공간 ���리가 아닌 Freelist 방식을 사용하므로 SHRINK SPACE를 실행할 수 없으며, ORA-10635 오류가 발생합니다. 대안으로 ALTER TABLE MOVE를 사용하여 테이블을 새 세그먼트로 재구성함으로써 공간을 회수해야 합니다.\n\nB) 오답 — PCTUSED 값 설정은 SHRINK SPACE의 전제조건과 관련이 없습니다. SHRINK SPACE가 MSSM에서 지원되지 않는 것은 세그먼트 관리 방식(비트맵 vs Freelist)의 차이 때문이며, PCTUSED를 변경해도 해결되지 않습니다.\n\nC) 오답 — ROW MOVEMENT의 설정 시점(테이블 생성 시 vs 이후)은 SHRINK SPACE 동작에 영향을 주지 않습니다. 첫 번째 ORA-10636 오류는 ROW MOVEMENT가 비활성 상태였기 때문이고, ROW MOVEMENT를 활성화한 후에도 발생한 ORA-10635 오류는 MSSM 테이블스페이스에서 SHRINK가 지원되지 않기 때문입니다.\n\nD) 오답 — SEGMENT CREATION IMMEDIATE는 지연 세그먼트 생성과 관련된 설정으로, SHRINK SPACE의 실행 가능 여부와는 무관합니다. MSSM 환경에서 공간을 회수하려면 ALTER TABLE MOVE를 사용해야 합니다.\n\n핵심 개념: SHRINK SPACE의 전제조건은 ROW MOVEMENT ENABLE과 ASSM 테이블스페이스��니다. MSSM 환경에서는 ALTER TABLE MOVE가 공간 회수의 대안이며, MOVE 후에는 인덱스가 UNUSABLE 상태가 되므로 ALTER INDEX REBUILD가 필요합니다."
+    "explanation": "정답: A\nA) 정답 — SHRINK SPACE는 ASSM(Automatic Segment Space Management) 테이블스페이스에서만 지원됩니다. MSSM(Manual Segment Space Management) 환경에서는 비트맵 기반 공간 관리가 아닌 Freelist 방식을 사용하므로 SHRINK SPACE를 실행할 수 없으며, ORA-10635 오류가 발생합니다. 대안으로 ALTER TABLE MOVE를 사용하여 테이블을 새 세그먼트로 재구성함으로써 공간을 회수해야 합니다.\n\nB) 오답 — PCTUSED 값 설정은 SHRINK SPACE의 전제조건과 관련이 없습니다. SHRINK SPACE가 MSSM에서 지원되지 않는 것은 세그먼트 관리 방식(비트맵 vs Freelist)의 차이 때문이며, PCTUSED를 변경해도 해결되지 않습니다.\n\nC) 오답 — ROW MOVEMENT의 설정 시점(테이블 생성 시 vs 이후)은 SHRINK SPACE 동작에 영향을 주지 않습니다. 첫 번째 ORA-10636 오류는 ROW MOVEMENT가 비활성 상태였기 때문이고, ROW MOVEMENT를 활성화한 후에도 발생한 ORA-10635 오류는 MSSM 테이블스페이스에서 SHRINK가 지원되지 않기 때문입니다.\n\nD) 오답 — SEGMENT CREATION IMMEDIATE는 지연 세그먼트 생성과 관련된 설정으로, SHRINK SPACE의 실행 가능 여부와는 무관합니다. MSSM 환경에서 공간을 회수하려면 ALTER TABLE MOVE를 사용해야 합니다.\n\n핵심 개념: SHRINK SPACE의 전제조건은 ROW MOVEMENT ENABLE과 ASSM 테이블스페이스입니다. MSSM 환경에서는 ALTER TABLE MOVE가 공간 회수의 대안이며, MOVE 후에는 인덱스가 UNUSABLE 상태가 되므로 ALTER INDEX REBUILD가 필요합니다."
   },
   {
     "chapter": "ストレージの管理",
@@ -59,7 +59,7 @@
     "title": "大量のデータ・ロード処理の性能向上のため、DBAが以下の手順を計画しています。\n\n手順1: 対象テーブルの索引をUNUSABLE状態に設定\n手順2: INSERT /*+ APPEND */ ... SELECT文でデータをロード\n手順3: 索引をREBUILD\n\nこの手順に関して正しく述べているものを選択してください。",
     "options": [
       "A) 手順1で索引をUNUSABLEにすると索引セグメントが削除されるため、手順2のデータ・ロード時に索引メンテナンスのオーバーヘッドが排除され、ロード速度が向上する。",
-      "B) SKIP_UNUSABLE_INDEXESがFALSE（デフォルト値）の場合、手順2のINSERT実行時にORA-01502エ���ーが発生してロードが失敗する。",
+      "B) SKIP_UNUSABLE_INDEXESがFALSE（デフォルト値）の場合、手順2のINSERT実行時にORA-01502エラーが発生してロードが失敗する。",
       "C) 手順2のDirect-Path InsertはHWM以下の空きブロックを再利用するため、索引がUNUSABLEでなくても同等のロード速度が得られる。",
       "D) 手順3でALTER INDEX REBUILD ONLINEを使用すれば、手順2のデータ・ロードと手順3のREBUILDを並行して同時に実行することができる。"
     ],

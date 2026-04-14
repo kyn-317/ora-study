@@ -28,7 +28,7 @@
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_018",
-    "title": "DBAが以下のSQL文を実行してインスタンスとデータベースの状態を確認しました。\n\nSQL> SELECT instance_name, status FROM V$INSTANCE;\n\nINSTANCE_NAME    STATUS\n---------------- ----------\norcl26ai         MOUNTED\n\nSQL> SELECT name, open_mode FROM V$DATABASE;\n\nNAME      OPEN_MODE\n--------- ----------\nORCL26AI  MOUNTED\n\nこの出力結果から読み取れる内容として正しいものを選択してください(2つ選択してください)。",
+    "title": "DBAが以下のSQL文を実行してインスタンスとデータベースの状態を確認しました。\n\nSQL> SELECT instance_name, status\n     FROM V$INSTANCE;\n\nINSTANCE_NAME    STATUS\n---------------- ----------\norcl26ai         MOUNTED\n\nSQL> SELECT name, open_mode\n     FROM V$DATABASE;\n\nNAME      OPEN_MODE\n--------- ----------\nORCL26AI  MOUNTED\n\nこの出力結果から読み取れる内容として正しいものを選択してください(2つ選択してください)。",
     "options": [
       "A) インスタンスが起動しており、制御ファイルがオープンされている状態である。",
       "B) この状態ではARCHIVELOGモードへの変更が可能である。",

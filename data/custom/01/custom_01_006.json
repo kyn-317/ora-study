@@ -10,7 +10,10 @@
       "D) PGAにはライブラリ・キャッシュの情報が格納され、SQL文の解析結果を各セッション間で共有する。",
       "E) Dedicated Server構成ではPGAはサーバー側に存在するが、Shared Server構成ではPGAはクライアント側に移動する。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — PGA(Program Global Area)는 각 서버 프로세스에 개별적으로 할당되는 비공유 메모리 영역입니다. PGA에는 정렬(Sort), 해시 조인(Hash Join), 비트맵 병합 등에 사용되는 SQL Work Area, 세션 변수를 저장하는 Session Memory, SQL 실행 상태 정보를 저장하는 Private SQL Area가 포함됩니다.\n\nC) 정답 — PGA_AGGREGATE_TARGET 파라미터를 설정하면 Oracle이 모든 서버 프로세스의 PGA 합계가 이 목표값 범위 내에 유지되도록 각 프로세스의 Work Area 할당을 자동으로 조정합니다. 이를 통해 DBA가 개별 프로세스의 메모리를 수동으로 관리할 필요가 없습니다.\n\nB) 오답 — PGA는 SGA와 별도의 메모리 영역이며, SGA_TARGET이 아닌 PGA_AGGREGATE_TARGET 파라미터로 제어됩니다. SGA는 공유 메모리, PGA는 프로세스 전용 비공유 메모리로 서로 독립적입니다.\n\nD) 오답 — 라이브러리 캐시는 SGA 내의 공유 풀(Shared Pool)에 존재하며, SQL 파싱 결과를 모든 세션이 공유합니다. PGA에는 개별 세션의 Private SQL Area(바인드 변수 값, 실행 상태 정보)가 저장되지만, 이는 세션 간에 공유되지 않습니다.\n\nE) 오답 — PGA는 Dedicated Server, Shared Server 구성 모두에서 서버 측에 존재합니다. Shared Server 구성에서는 세션 관련 정보(UGA)가 PGA가 아닌 SGA(Large Pool 또는 Shared Pool)로 이동하지만, PGA 자체가 클라이언트로 이동하는 것은 아닙니다.\n\n핵심 개념: PGA는 서버 프로세스당 하나씩 할당되는 비공유 메모리로, SQL Work Area, Session Memory, Private SQL Area를 포함합니다. PGA_AGGREGATE_TARGET으로 전체 PGA의 목표 크기를 설정하면 Oracle이 자동으로 Work Area 할당을 조정합니다."
   },
   {
@@ -23,13 +26,15 @@
       "C) インスタンス起動時にSPFILEとPFILEの両方が存在する場合、PFILEが優先的に読み込まれる。",
       "D) SPFILEが破損した場合、新規にSPFILEを作成するにはデータベースをOPEN状態にする必要がある。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — SPFILE은 바이너리 형식의 파일로, Oracle이 내부적으로 관리합니다. 텍스트 에디터로 직접 편집하면 바이너리 헤더가 손상되어 인스턴스 기동 시 ORA-01078 오류가 발생할 수 있습니다. 파라미터 변경은 반드시 ALTER SYSTEM 명령을 통해 수행해야 합니다.\n\nB) 오답 — PFILE 환경에서는 SCOPE=SPFILE과 SCOPE=BOTH를 사용할 수 없습니다. PFILE 환경의 기본 SCOPE는 MEMORY이며, 파일에 영구 반영하려면 텍스트 에디터로 PFILE을 직접 편집한 후 인스턴스를 재기동해야 합니다.\n\nC) 오답 — 인스턴스 기동 시 파라미터 파일 검색 순서는 spfile<SID>.ora → spfile.ora → init<SID>.ora 순입니다. SPFILE이 PFILE보다 우선합니다.\n\nD) 오답 — SPFILE이 손상된 경우, PFILE(init<SID>.ora)을 수동으로 작성하여 STARTUP PFILE='경로'로 기동한 후 CREATE SPFILE FROM PFILE 명령으로 새 SPFILE을 생성할 수 있습니다. 또는 RMAN의 RESTORE SPFILE FROM AUTOBACKUP으로 복원할 수도 있습니다. OPEN 상태가 필수는 아닙니다.\n\n핵심 개념: SPFILE(바이너리, ALTER SYSTEM으로 변경)은 PFILE(텍스트, 수동 편집)보다 기동 시 우선 검색됩니다. SPFILE 환경에서는 SCOPE=BOTH로 메모리와 파일에 동시 반영이 가능하지만, PFILE 환경에서는 SCOPE=MEMORY만 사용 가능합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_028",
-    "title": "DBAが現在NOMOUNT状態のインスタンスで以下のSQL文を実行しました。\n\nSQL> SELECT name, value FROM V$PARAMETER\n     WHERE name IN ('control_files', 'db_block_size', 'sga_target');\n\nNAME             VALUE\n---------------- ----------------------------------------\ncontrol_files    /u01/oradata/ORCL/control01.ctl, ...\ndb_block_size    8192\nsga_target       4294967296\n\nこの状況と出力結果について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "DBAが現在NOMOUNT状態のインスタンスで以下のSQL文を実行しました。\n\nSQL> SELECT name, value\n     FROM V$PARAMETER\n     WHERE name IN ('control_files', 'db_block_size', 'sga_target');\n\nNAME              VALUE\n----------------  ----------------------------------------\ncontrol_files     /u01/oradata/ORCL/control01.ctl, ...\ndb_block_size     8192\nsga_target        4294967296\n\nこの状況と出力結果について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) NOMOUNT状態ではV$PARAMETERビューを参照でき、初期化パラメータ・ファイルから読み込まれたパラメータ値が確認できる。",
       "B) CONTROL_FILESに表示されたパスのファイルは、この時点で既にオープンされ読み込みが完了している。",
@@ -37,7 +42,10 @@
       "D) DB_BLOCK_SIZEの値を変更するために、ALTER SYSTEM SET DB_BLOCK_SIZE=16384 SCOPE=MEMORY を実行することができる。",
       "E) SGA_TARGETに表示された値は、DBA_TABLESビューから読み込まれたメタデータ情報である。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — NOMOUNT 상태에서는 초기화 파라미터 파일(SPFILE 또는 PFILE)이 읽혀 SGA가 할당되고 백그라운드 프로세스가 기동된 상태입니다. V$PARAMETER, V$INSTANCE, V$SGA 등 인스턴스 관련 동적 성능 뷰를 참조할 수 있으며, 파라미터 파일에서 읽어들인 값을 확인할 수 있습니다.\n\nC) 정답 — NOMOUNT 상태에서는 아직 컨트롤 파일이 열리지 않은 상태이므로 새 데이터베이스를 생성하는 CREATE DATABASE 명령을 실행할 수 있습니다. 또한 CREATE CONTROLFILE로 컨트롤 파일을 재생성하거나, RMAN으로 컨트롤 파일을 복원하는 작업도 가능합니다.\n\nB) 오답 — NOMOUNT 상태에서는 파라미터 파일에서 CONTROL_FILES 경로를 읽어들이지만, 실제 컨트롤 파일을 오픈하지는 않습니다. 컨트롤 파일은 MOUNT 단계에서 열립니다.\n\nD) 오답 — DB_BLOCK_SIZE는 정적(Static) 파라미터이며, 데이터베이스 생성 후에는 변경할 수 없습니다. ALTER SYSTEM으로 메모리 값을 변경하는 것이 불가능하므로 ORA-02095 오류가 발생합니다.\n\nE) 오답 — DBA_TABLES는 데이터 딕셔너리 뷰로, 데이터 파일이 열린 OPEN 상태에서만 참조할 수 있습니다. SGA_TARGET의 값은 초기화 파라미터 파일에서 읽어온 것이며, V$PARAMETER는 동적 성능 뷰(V$ 뷰)입니다.\n\n핵심 개념: NOMOUNT 단계에서는 파라미터 파일 읽기, SGA 할당, 백그라운드 프로세스 기동이 완료된 상태입니다. V$PARAMETER, V$SGA 등 인스턴스 관련 V$ 뷰는 조회 가능하지만, 컨트롤 파일은 아직 열리지 않았고, 데이터 딕셔너리(DBA_ 뷰)는 접근할 수 없습니다."
   },
   {
@@ -50,7 +58,9 @@
       "C) SHUTDOWN IMMEDIATE — 実行中のSQL文を中止し、未コミット・トランザクションをロールバックしてから停止する。",
       "D) SHUTDOWN ABORT — インスタンスを即座に強制終了し、次回起動時にSMONがインスタンス復旧を自動実行する。"
     ],
-    "answer": ["C"],
+    "answer": [
+      "C"
+    ],
     "explanation": "정답: C\nC) 정답 — DBA의 요구 사항은 (1) 빠른 종료, (2) 데이터 정합성 확보, (3) 다음 기동 시 인스턴스 복구 회피입니다. SHUTDOWN IMMEDIATE는 실행 중인 SQL을 즉시 중단하고 미커밋 트랜잭션을 자동 롤백한 후 체크포인트를 수행합니다. Clean Shutdown이므로 다음 기동 시 인스턴스 복구가 필요 없으며, 세션 종료를 기다릴 필요도 없어 빠른 종료가 가능합니다.\n\nA) 오답 — SHUTDOWN NORMAL은 모든 사용자가 자발적으로 로그아웃할 때까지 무한정 대기합니다. 50개의 활성 세션이 있는 상황에서 빠른 종료가 불가능합니다.\n\nB) 오답 — SHUTDOWN TRANSACTIONAL은 활성 트랜잭션이 완료될 때까지 대기합니다. 장시간 실행 중인 배치 처리(미커밋)가 있으므로 해당 배치가 완료될 때까지 종료가 지연될 수 있습니다. 빠른 종료라는 요구 사항에 부합하지 않습니다.\n\nD) 오답 — SHUTDOWN ABORT는 가장 빠르게 종료되지만, 체크포인트를 수행하지 않아 다음 기동 시 인스턴스 복구가 필요합니다. DBA의 요구 사항에서 인스턴스 복구를 회피하고 싶다고 했으므로 적합하지 않습니다.\n\n핵심 개념: 4가지 종료 모드 중 SHUTDOWN IMMEDIATE는 안전성과 속도의 균형이 가장 좋아 실무에서 가장 많이 사용됩니다. 미커밋 트랜잭션을 롤백하고 체크포인트를 수행하여 Clean Shutdown을 보장하며, 세션이나 트랜잭션 완료를 기다리지 않습니다."
   },
   {
@@ -63,7 +73,9 @@
       "C) 1: SMON  2: (起動処理)  3: SMON  4: PMON",
       "D) 1: DBWn  2: (起動処理)  3: PMON  4: DBWn"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — 각 처리를 담당하는 백그라운드 프로세스는 다음과 같습니다:\n1. SMON(System Monitor): 인스턴스 비정상 종료 후 재기동 시, SMON이 자동으로 인스턴스 복구를 수행합니다. Roll Forward(Redo 재적용)로 체크포인트 이후의 모든 변경을 복원한 후, 데이터베이스를 OPEN하고, Roll Back(미커밋 트랜잭션 되돌리기)을 백그라운드에서 계속합니다.\n2. 기동 처리: 데이터베이스 OPEN은 Roll Forward 완료 후 자동으로 진행됩니다.\n3. PMON(Process Monitor): 장애로 비정상 종료된 사용자 세션이 보유하던 락(Lock)을 해제하고, 해당 세션의 미커밋 트랜잭션을 롤백하며, SGA 메모리를 정리합니다.\n4. SMON: 사용되지 않는 임시 세그먼트의 정리(Cleanup)도 SMON이 주기적으로 수행합니다. 인스턴스 복구와 공간 유지관리가 모두 SMON의 역할입니다.\n\nB) 오답 — 인스턴스 복구는 PMON이 아닌 SMON이 수행합니다. PMON은 개별 사용자 프로세스의 장애 정리를 담당하며, 인스턴스 전체의 복구는 SMON의 고유 역할입니다.\n\nC) 오답 — 세션의 락 해제와 트랜잭션 롤백(처리 3)은 SMON이 아닌 PMON이 담당합니다. SMON은 인스턴스 수준의 복구를, PMON은 프로세스 수준의 정리를 담당하는 것으로 역할이 구분됩니다.\n\nD) 오답 — DBWn(Database Writer)은 Buffer Cache의 Dirty Buffer를 데이터 파일에 기록하는 프로세스이며, 인스턴스 복구나 임시 세그먼트 정리와는 무관합니다.\n\n핵심 개념: 인스턴스 비정상 종료 후 복구 과정에서 SMON은 인스턴스 복구(Roll Forward → Open → Roll Back)와 임시 세그먼트 정리를 담당하고, PMON은 장애 세션의 리소스 정리(락 해제, 트랜잭션 롤백, 메모리 반환)를 담당합니다. 두 프로세스의 역할은 시스템 수준(SMON) vs 프로세스 수준(PMON)으로 구분됩니다."
   }
 ]

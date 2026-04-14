@@ -56,7 +56,7 @@
   {
     "chapter": "UNDOの管理",
     "number": "C_08_020",
-    "title": "V$UNDOSTATビューとDBA_UNDO_EXTENTSビューの以下の結果を確認しています。\n\nSQL> SELECT SUM(BYTES)/1024/1024 MB, STATUS FROM dba_undo_extents\n     GROUP BY STATUS;\n\n        MB STATUS\n---------- ---------\n       200 ACTIVE\n       800 UNEXPIRED\n       100 EXPIRED\n\nこの結果から読み取れる情報として正しいものを選択してください。",
+    "title": "V$UNDOSTATビューとDBA_UNDO_EXTENTSビューの以下の結果を確認しています。\n\nSQL> SELECT SUM(BYTES)/1024/1024 MB, STATUS\n     FROM dba_undo_extents\n     GROUP BY STATUS;\n\n        MB STATUS\n---------- ---------\n       200 ACTIVE\n       800 UNEXPIRED\n       100 EXPIRED\n\nこの結果から読み取れる情報として正しいものを選択してください。",
     "options": [
       "A) ACTIVE状態のエクステントが200MBあるため、現在200MBのUNDOデータを使用するトランザクションが実行中である。",
       "B) EXPIRED状態のエクステントが100MBしかないため、新しいトランザクションのUNDO領域として利用可能なのは100MBのみである。",

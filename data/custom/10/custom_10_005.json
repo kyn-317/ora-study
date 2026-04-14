@@ -2,7 +2,7 @@
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_021",
-    "title": "マルチテナント環境でPDB$SEEDから新しいPDBを作成するため、以下のSQL文をCDB$ROOTから実行しました。\n\nSQL> CREATE PLUGGABLE DATABASE PDB_SALES\n     ADMIN USER salesadm IDENTIFIED BY password1\n     FILE_NAME_CONVERT = ('/u01/oradata/CDB1/pdbseed/', '/u01/oradata/CDB1/pdb_sales/');\n\nPluggable database created.\n\nSQL> SELECT pdb_name, status FROM cdb_pdbs WHERE pdb_name='PDB_SALES';\n\nPDB_NAME                  STATUS\n------------------------- ----------\nPDB_SALES                 NEW\n\nこの実行結果に基づいて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "マルチテナント環境でPDB$SEEDから新しいPDBを作成するため、以下のSQL文をCDB$ROOTから実行しました。\n\nSQL> CREATE PLUGGABLE DATABASE PDB_SALES\n     ADMIN USER salesadm IDENTIFIED BY password1\n     FILE_NAME_CONVERT = ('/u01/oradata/CDB1/pdbseed/', '/u01/oradata/CDB1/pdb_sales/');\n\nPluggable database created.\n\nSQL> SELECT pdb_name, status\n     FROM cdb_pdbs\n     WHERE pdb_name='PDB_SALES';\n\nPDB_NAME                  STATUS\n------------------------- ----------\nPDB_SALES                 NEW\n\nこの実行結果に基づいて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) STATUS列がNEWであるためPDB_SALESは初回OPEN時にデータ・ディクショナリの完成処理が実行され、OPEN後にSTATUSがNORMALに変更される。",
       "B) PDB_SALESの現在のオープン・モードはREAD ONLYであるため、V$PDBSビューのOPEN_MODE列はREAD ONLYと表示される。",
@@ -16,7 +16,7 @@
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_022",
-    "title": "マルチテナント環境で以下の2つのクエリを実行しました。\n\nSQL> SELECT pdb_name, status FROM cdb_pdbs;\n\nPDB_NAME                  STATUS\n------------------------- ----------\nPDB$SEED                  NORMAL\nPDBORCL                   NORMAL\nPDBTEST                   NORMAL\nPDBDEV                    UNPLUGGED\n\nSQL> SELECT name, open_mode FROM v$pdbs;\n\nNAME                      OPEN_MODE\n------------------------- ----------\nPDB$SEED                  READ ONLY\nPDBORCL                   READ WRITE\nPDBTEST                   MOUNTED\n\nこの実行結果に基づいて正しく述べているものを選択してください。",
+    "title": "マルチテナント環境で以下の2つのクエリを実行しました。\n\nSQL> SELECT pdb_name, status\n     FROM cdb_pdbs;\n\nPDB_NAME                  STATUS\n------------------------- ----------\nPDB$SEED                  NORMAL\nPDBORCL                   NORMAL\nPDBTEST                   NORMAL\nPDBDEV                    UNPLUGGED\n\nSQL> SELECT name, open_mode\n     FROM v$pdbs;\n\nNAME                      OPEN_MODE\n------------------------- ----------\nPDB$SEED                  READ ONLY\nPDBORCL                   READ WRITE\nPDBTEST                   MOUNTED\n\nこの実行結果に基づいて正しく述べているものを選択してください。",
     "options": [
       "A) PDBDEVはV$PDBSに表示されていないため、データ・ファイルが既に削除された状態である。",
       "B) PDBDEVに対してALTER PLUGGABLE DATABASE PDBDEV OPENを実行するとREAD WRITEモードでオープンすることができる。",

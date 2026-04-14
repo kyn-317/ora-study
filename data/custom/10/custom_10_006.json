@@ -15,7 +15,7 @@
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_027",
-    "title": "マルチテナント環境のCDB$ROOTに接続し、以下のクエリを実行しました。\n\nSQL> SELECT name, open_mode, restricted, total_size\n     FROM v$containers ORDER BY con_id;\n\nNAME                 OPEN_MODE      RES  TOTAL_SIZE\n-------------------- -------------- ---- ----------\nCDB$ROOT             READ WRITE     NO   1073741824\nPDB$SEED             READ ONLY      NO    314572800\nPDB_HR               READ WRITE     NO    524288000\nPDB_FIN              READ ONLY      NO    419430400\nPDB_DEV              MOUNTED        NO            0\n\nこの実行結果に基づいて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "マルチテナント環境のCDB$ROOTに接続し、以下のクエリを実行しました。\n\nSQL> SELECT name, open_mode, restricted, total_size\n     FROM v$containers\n     ORDER BY con_id;\n\nNAME                 OPEN_MODE      RES  TOTAL_SIZE\n-------------------- -------------- ---- ----------\nCDB$ROOT             READ WRITE     NO   1073741824\nPDB$SEED             READ ONLY      NO    314572800\nPDB_HR               READ WRITE     NO    524288000\nPDB_FIN              READ ONLY      NO    419430400\nPDB_DEV              MOUNTED        NO            0\n\nこの実行結果に基づいて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) PDB_DEVのTOTAL_SIZEが0であるのはPDBが空であることを意味しており、データ・ファイルが存在しない。",
       "B) PDB_FINはREAD ONLYモードでオープンされているため、SELECT操作は可能であるがDML操作は実行できない。",
@@ -56,7 +56,7 @@
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_030",
-    "title": "マルチテナント環境でPDB1に接続し、以下の操作を順番に実行しました。\n\nSQL> SHOW PARAMETER open_cursors\n\nNAME                 TYPE    VALUE\n-------------------- ------- -----\nopen_cursors         integer 500\n\nSQL> ALTER SYSTEM RESET open_cursors SCOPE=BOTH;\n\nSystem altered.\n\nSQL> SHOW PARAMETER open_cursors\n\nNAME                 TYPE    VALUE\n-------------------- ------- -----\nopen_cursors         integer 300\n\nなお、CDB$ROOTのopen_cursorsパラメータは300に設定されています。\n\nこの実行結果について正しく述べているものを選択してください。",
+    "title": "マルチテナント環境でPDB1に接続し、以下の操作を順番に実行しました。\n\nSQL> SHOW PARAMETER open_cursors\n\nNAME                 TYPE    VALUE\n-------------------- ------- -----\nopen_cursors         integer   500\n\nSQL> ALTER SYSTEM RESET open_cursors SCOPE=BOTH;\n\nSystem altered.\n\nSQL> SHOW PARAMETER open_cursors\n\nNAME                 TYPE    VALUE\n-------------------- ------- -----\nopen_cursors         integer   300\n\nなお、CDB$ROOTのopen_cursorsパラメータは300に設定されています。\n\nこの実行結果について正しく述べているものを選択してください。",
     "options": [
       "A) ALTER SYSTEM RESETによりPDB1のopen_cursors値がデフォルト値の300にリセットされた。この300はOracleの初期デフォルト値である。",
       "B) ALTER SYSTEM RESETによりPDB1で明示的に設定されていたopen_cursors値がSPFILEから削除され、CDB$ROOTの値300を継承するようになった。",

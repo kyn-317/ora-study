@@ -18,7 +18,7 @@
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_022",
     "question_type": "運営-応用",
-    "title": "DBAが以下のSQL文を実行してインスタンスの状態を確認しました。\n\nSQL> SELECT instance_name, status, logins FROM V$INSTANCE;\n\nINSTANCE_NAME    STATUS       LOGINS\n---------------- ------------ ----------\norcl26ai         OPEN         RESTRICTED\n\nSQL> ALTER SYSTEM DISABLE RESTRICTED SESSION;\n\nSystem altered.\n\nこの操作に関する説明として正しいものを選択してください。",
+    "title": "DBAが以下のSQL文を実行してインスタンスの状態を確認しました。\n\nSQL> SELECT instance_name, status, logins\n     FROM V$INSTANCE;\n\nINSTANCE_NAME    STATUS       LOGINS\n---------------- ------------ ----------\norcl26ai         OPEN         RESTRICTED\n\nSQL> ALTER SYSTEM DISABLE RESTRICTED SESSION;\n\nSystem altered.\n\nこの操作に関する説明として正しいものを選択してください。",
     "options": [
       "A) ALTER SYSTEM DISABLE RESTRICTED SESSIONの実行後、既存のRESTRICTED SESSION権限を持つユーザーのセッションが即座に切断される。",
       "B) ALTER SYSTEM DISABLE RESTRICTED SESSIONの実行後、RESTRICTED SESSION権限を持たない一般ユーザーも新規接続が可能となるが、既存のセッションには影響しない。",

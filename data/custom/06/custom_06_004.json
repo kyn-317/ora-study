@@ -2,7 +2,7 @@
   {
     "chapter": "表領域およびデータファイルの管理",
     "number": "C_06_016",
-    "title": "以下のSQL文を使用してBIGFILE表領域を作成しました。\n\nCREATE BIGFILE TABLESPACE big_data\n  DATAFILE '/u01/oradata/big_data01.dbf' SIZE 10G\n  AUTOEXTEND ON NEXT 1G MAXSIZE 100G;\n\nこの表領域について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "以下のSQL文を使用してBIGFILE表領域を作成しました。\n\nSQL> CREATE BIGFILE TABLESPACE big_data\n     DATAFILE '/u01/oradata/big_data01.dbf' SIZE 10G\n     AUTOEXTEND ON NEXT 1G MAXSIZE 100G;\n\nこの表領域について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) この表領域は単一のデータ・ファイルで構成され、空き領域が不足した場合は1GBずつ自動拡張し、最大100GBまで拡張される。",
       "B) この表領域にALTER TABLESPACE big_data ADD DATAFILEコマンドを使用してデータ・ファイルを追加することが可能である。",

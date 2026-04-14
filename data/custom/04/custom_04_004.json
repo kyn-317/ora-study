@@ -43,7 +43,7 @@
   {
     "chapter": "Oracle Net Servicesの構成",
     "number": "C_04_019",
-    "title": "以下のコマンドを使用してデータベース・リンクを作成しました。\n\nCREATE DATABASE LINK remote_hr\n  CONNECT TO hr_user IDENTIFIED BY hr_pass\n  USING 'HRDB';\n\nこのデータベース・リンクについて正しく述べているものを選択してください。",
+    "title": "以下のコマンドを使用してデータベース・リンクを作成しました。\n\nSQL> CREATE DATABASE LINK remote_hr\n     CONNECT TO hr_user IDENTIFIED BY hr_pass\n     USING 'HRDB';\n\nこのデータベース・リンクについて正しく述べているものを選択してください。",
     "options": [
       "A) このリンクはPublicデータベース・リンクであり、データベース内のすべてのユーザーが使用できる。",
       "B) USING句で指定されているHRDBはtnsnames.oraに定義されたネット・サービス名または簡易接続文字列である必要がある。",

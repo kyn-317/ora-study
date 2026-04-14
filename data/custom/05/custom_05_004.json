@@ -2,7 +2,7 @@
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_016",
-    "title": "管理者ユーザーが以下の操作でユーザーを作成しました。\n\nCREATE USER app_user IDENTIFIED BY password123\n  DEFAULT TABLESPACE users\n  TEMPORARY TABLESPACE temp;\n\nこの時点でapp_userがデータベースにログインを試みた場合の結果について正しく述べているものを選択してください。",
+    "title": "管理者ユーザーが以下の操作でユーザーを作成しました。\n\nSQL> CREATE USER app_user IDENTIFIED BY password123\n     DEFAULT TABLESPACE users\n     TEMPORARY TABLESPACE temp;\n\nこの時点でapp_userがデータベースにログインを試みた場合の結果について正しく述べているものを選択してください。",
     "options": [
       "A) デフォルト表領域としてUSERSが設定されているため、ログインしてテーブルの作成が可能である。",
       "B) ORA-01045: user APP_USER lacks CREATE SESSION privilege; logon denied エラーが発生し、ログインに失敗する。",
@@ -15,7 +15,7 @@
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_017",
-    "title": "以下のSQL文を使用してユーザーを作成する場合の構文について正しく述べているものを選択してください。\n\nCREATE USER sales_user IDENTIFIED BY SalesPass123\n  DEFAULT TABLESPACE sales_data\n  TEMPORARY TABLESPACE temp\n  QUOTA 500M ON sales_data;\n\nこの操作に関する説明として正しいものを選択してください(2つ選択してください)。",
+    "title": "以下のSQL文を使用してユーザーを作成する場合の構文について正しく述べているものを選択してください。\n\nSQL> CREATE USER sales_user IDENTIFIED BY SalesPass123\n     DEFAULT TABLESPACE sales_data\n     TEMPORARY TABLESPACE temp\n     QUOTA 500M ON sales_data;\n\nこの操作に関する説明として正しいものを選択してください(2つ選択してください)。",
     "options": [
       "A) このCREATE USER文により、sales_userはsales_dataテーブルスペースに最大500MBまでのオブジェクトを作成できる領域割当てが設定される。",
       "B) QUOTA句で指定された500Mは、sales_userが使用できるメモリー(SGA)のサイズを制限している。",
@@ -29,7 +29,7 @@
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_018",
-    "title": "ユーザーAがユーザーBに対して以下のようにシステム権限を付与しました。\n\nGRANT CREATE TABLE TO user_b WITH ADMIN OPTION;\n\nその後、ユーザーBはこのCREATE TABLE権限をユーザーCに付与しました。管理者がユーザーBからCREATE TABLE権限を取り消した場合の結果について正しく述べているものを選択してください。",
+    "title": "ユーザーAがユーザーBに対して以下のようにシステム権限を付与しました。\n\nSQL> GRANT CREATE TABLE TO user_b WITH ADMIN OPTION;\n\nその後、ユーザーBはこのCREATE TABLE権限をユーザーCに付与しました。管理者がユーザーBからCREATE TABLE権限を取り消した場合の結果について正しく述べているものを選択してください。",
     "options": [
       "A) ユーザーBとユーザーCの両方からCREATE TABLE権限が自動的に取り消される。",
       "B) ユーザーBのCREATE TABLE権限のみが取り消され、ユーザーCのCREATE TABLE権限は維持される。",

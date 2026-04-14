@@ -2,7 +2,7 @@
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_041",
-    "title": "DBAがSPFILE環境で以下の操作を順番に実行しました。\n\nSQL> ALTER SYSTEM SET OPEN_CURSORS = 500 SCOPE=SPFILE;\nSQL> SELECT value FROM V$PARAMETER WHERE name = 'open_cursors';\n\nVALUE\n----------\n300\n\nSQL> SELECT value FROM V$SPPARAMETER WHERE name = 'open_cursors';\n\nVALUE\n----------\n500\n\nこの結果から読み取れる内容として正しいものを選択してください(2つ選択してください)。",
+    "title": "DBAがSPFILE環境で以下の操作を順番に実行しました。\n\nSQL> ALTER SYSTEM SET OPEN_CURSORS = 500 SCOPE=SPFILE;\n\nSQL> SELECT value\n     FROM V$PARAMETER\n     WHERE name = 'open_cursors';\n\nVALUE\n----------\n300\n\nSQL> SELECT value\n     FROM V$SPPARAMETER\n     WHERE name = 'open_cursors';\n\nVALUE\n----------\n500\n\nこの結果から読み取れる内容として正しいものを選択してください(2つ選択してください)。",
     "options": [
       "A) V$PARAMETERは現在のインスタンス・メモリー上のパラメータ値を表示し、V$SPPARAMETERはSPFILEに記録されたパラメータ値を表示するため、SCOPE=SPFILEで変更した場合は両ビューの値が異なることがある。",
       "B) V$PARAMETERとV$SPPARAMETERの値が異なっているため、SPFILEの変更に失敗しておりORA-02095エラーが発生している。",
@@ -10,7 +10,10 @@
       "D) V$SPPARAMETERに表示される値はSPFILEの内容ではなく、次回起動時に適用される予定値をOracleが自動計算したものである。",
       "E) SCOPE=SPFILEで変更されたパラメータは、SHOW PARAMETERコマンドで確認した場合にSPFILEの値(500)が表示される。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — V$PARAMETER는 현재 인스턴스 메모리에서 사용 중인 파라미터 값을 표시하고, V$SPPARAMETER는 SPFILE에 기록된 파라미터 값을 표시합니다. SCOPE=SPFILE로 변경하면 SPFILE에만 기록되고 현재 메모리에는 반영되지 않으므로, 재기동 전까지 두 뷰의 값이 다를 수 있습니다.\n\nC) 정답 — V$PARAMETER(300)와 V$SPPARAMETER(500)의 불일치를 해소하려면 두 가지 방법이 있습니다. (1) 인스턴스를 재기동하여 SPFILE의 값(500)을 메모리에 반영하거나, (2) ALTER SYSTEM SET OPEN_CURSORS = 500 SCOPE=MEMORY를 실행하여 현재 메모리의 값도 500으로 변경할 수 있습니다. OPEN_CURSORS는 동적 파라미터이므로 SCOPE=MEMORY가 가능합니다.\n\nB) 오답 — V$PARAMETER와 V$SPPARAMETER의 값이 다른 것은 에러가 아닙니다. SCOPE=SPFILE 변경은 정상적으로 성공했으며, 메모리에는 반영하지 않고 SPFILE에만 기록한 것이므로 의도된 불일치입니다. ORA-02095는 정적 파라미터에 SCOPE=MEMORY 또는 SCOPE=BOTH를 지정할 때 발생하는 오류입니다.\n\nD) 오답 — V$SPPARAMETER는 SPFILE에 실제로 기록된 값을 그대로 표시합니다. Oracle이 자동 계산한 예정값이 아니라, ALTER SYSTEM SET ... SCOPE=SPFILE 또는 SCOPE=BOTH로 실제 기록된 값입니다.\n\nE) 오답 — SHOW PARAMETER 명령은 V$PARAMETER와 동일하게 현재 인스턴스 메모리의 파라미터 값을 표시합니다. SCOPE=SPFILE로만 변경한 경우, SHOW PARAMETER는 메모리의 값(300)을 표시하며 SPFILE의 값(500)은 표시하지 않습니다. SPFILE에 기록된 값을 확인하려면 V$SPPARAMETER 뷰를 조회해야 합니다.\n\n핵심 개념: V$PARAMETER(메모리 값)와 V$SPPARAMETER(SPFILE 값)의 비교를 통해 SCOPE=SPFILE로 변경했지만 아직 재기동하지 않은 파라미터를 식별할 수 있습니다. SHOW PARAMETER는 V$PARAMETER와 동일하게 메모리 값을 표시하므로, SPFILE 값 확인에는 V$SPPARAMETER를 사용해야 합니다."
   },
   {
@@ -23,20 +26,24 @@
       "C) OPEN段階でのみARCHIVELOGモードの変更が実行可能であり、MOUNT段階ではこの操作は許可されない。",
       "D) MOUNT段階では、CREATE DATABASEコマンドを使用して新しいデータベースを作成することが可能である。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — NOMOUNT 단계에서는 초기화 파라미터 파일(SPFILE 또는 PFILE)을 읽고, 그 설정에 따라 SGA 메모리를 할당하며, SMON, PMON, DBWn, LGWR 등 백그라운드 프로세스를 기동합니다. 이 단계에서는 컨트롤 파일도 아직 열리지 않았으므로 데이터 딕셔너리에 접근할 수 없으며, V$INSTANCE, V$PARAMETER, V$SGA 등 인스턴스 관련 동적 성능 뷰만 조회 가능합니다.\n\nB) 오답 — MOUNT 단계에서는 컨트롤 파일을 열어 데이터 파일과 Redo Log 파일의 경로 정보를 인식하지만, 실제로 데이터 파일을 열거나 내용을 검증하지는 않습니다. 데이터 파일의 검증과 사용자 데이터 접근은 OPEN 단계에서 수행됩니다.\n\nC) 오답 — ARCHIVELOG 모드의 변경(ALTER DATABASE ARCHIVELOG / NOARCHIVELOG)은 MOUNT 단계에서만 가능합니다. OPEN 단계에서는 이 명령을 실행할 수 없습니다.\n\nD) 오답 — CREATE DATABASE 명령은 컨트롤 파일이 아직 존재하지 않는 NOMOUNT 단계에서만 실행 가능합니다. MOUNT 단계에서는 이미 컨트롤 파일이 열려있으므로 새 데이터베이스를 생성할 수 없습니다.\n\n핵심 개념: Oracle 기동 3단계에서 NOMOUNT는 인스턴스만 시작(SGA+프로세스), MOUNT는 컨트롤 파일을 열어 구조 정보 인식, OPEN은 데이터 파일/Redo Log를 열어 사용자 접속을 허용합니다. ARCHIVELOG 변경은 MOUNT에서만, CREATE DATABASE는 NOMOUNT에서만 가능합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_043",
-    "title": "DBAがAMM(自動メモリー管理)を使用している環境で以下のパラメータを確認しました。\n\nSQL> SHOW PARAMETER memory_target\n\nNAME            VALUE\n-------------- ----------\nmemory_target   8G\n\nSQL> SHOW PARAMETER sga_target\n\nNAME            VALUE\n-------------- ----------\nsga_target      3G\n\nSQL> SHOW PARAMETER pga_aggregate_target\n\nNAME                   VALUE\n--------------------- ----------\npga_aggregate_target   1G\n\nこの環境の動作について正しく述べているものを選択してください。",
+    "title": "DBAがAMM(自動メモリー管理)を使用している環境で以下のパラメータを確認しました。\n\nSQL> SHOW PARAMETER memory_target\n\nNAME            VALUE\n--------------  ----------\nmemory_target   8G\n\nSQL> SHOW PARAMETER sga_target\n\nNAME            VALUE\n--------------  ----------\nsga_target      3G\n\nSQL> SHOW PARAMETER pga_aggregate_target\n\nNAME                    VALUE\n---------------------  ----------\npga_aggregate_target    1G\n\nこの環境の動作について正しく述べているものを選択してください。",
     "options": [
       "A) SGA_TARGETが3Gに設定されているため、SGAの合計サイズは常に3Gに固定され、MEMORY_TARGETの値に関係なくSGAとPGA間のメモリー再分配は行われない。",
       "B) MEMORY_TARGETが8Gに設定されているため、Oracle はSGA + PGAの合計が最大8Gとなる範囲内でワークロードに応じてSGAとPGA間のメモリーを自動的に再分配する。SGA_TARGETの3GとPGA_AGGREGATE_TARGETの1Gはそれぞれの最小保証サイズとして機能する。",
       "C) SGA_TARGETとPGA_AGGREGATE_TARGETが明示的に設定されているため、AMMは無効となり、ASMM(自動共有メモリー管理)として動作する。",
       "D) MEMORY_TARGETが8Gでありながら、SGA_TARGET(3G)とPGA_AGGREGATE_TARGET(1G)の合計が4Gで半分以下であるため、残り4Gは未使用のまま予約される。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — AMM(자동 메모리 관리) 환경에서는 MEMORY_TARGET이 SGA + PGA의 총 메모리 크기를 지정합니다. MEMORY_TARGET이 8G로 설정되어 있으므로, Oracle은 최대 8G 범위 내에서 워크로드에 따라 SGA와 PGA 간의 메모리를 자동으로 재분배합니다. 이때 SGA_TARGET(3G)과 PGA_AGGREGATE_TARGET(1G)은 각각의 최소 보장 크기(하한선)로 기능하므로, SGA는 3G 미만으로, PGA는 1G 미만으로 축소되지 않습니다.\n\nA) 오답 — AMM 환경에서 SGA_TARGET은 고정 크기가 아닌 최소 보장 크기입니다. MEMORY_TARGET > 0이면 AMM이 활성화되어 SGA와 PGA 간 자동 재분배가 이루어지며, SGA는 워크로드에 따라 3G 이상으로 확장될 수 있습니다.\n\nC) 오답 — MEMORY_TARGET > 0이면 AMM이 활성화됩니다. SGA_TARGET과 PGA_AGGREGATE_TARGET에 0이 아닌 값을 설정하더라도 AMM이 무효화되지 않으며, 해당 값들은 최소 보장 크기로 작동합니다. ASMM이 되려면 MEMORY_TARGET = 0이면서 SGA_TARGET > 0이어야 합니다.\n\nD) 오답 — SGA_TARGET(3G)과 PGA_AGGREGATE_TARGET(1G)은 최소 보장 크기일 뿐이며, Oracle은 나머지 메모리를 워크로드에 따라 SGA 또는 PGA에 동적으로 할당합니다. 미사용 상태로 예약되는 것이 아니라 필요에 따라 활용됩니다.\n\n핵심 개념: AMM은 MEMORY_TARGET > 0일 때 활성화되며, SGA와 PGA를 통합 관리합니다. SGA_TARGET, PGA_AGGREGATE_TARGET에 명시적 값을 설정하면 최소 보장 크기(하한선)로 동작하고, Oracle은 MEMORY_TARGET 범위 내에서 SGA/PGA 간 자동 재분배를 수행합니다."
   },
   {
@@ -49,7 +56,9 @@
       "C) SAVE STATEコマンドはCDBの停止モードがSHUTDOWN NORMALの場合にのみ有効であり、SHUTDOWN IMMEDIATEでは状態が保存されない。",
       "D) SAVE STATEコマンドはPDB1のデータをディスクに永続化する操作であり、PDBのオープン・モードの保存とは関係がない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — ALTER PLUGGABLE DATABASE ... SAVE STATE 명령은 PDB의 현재 오픈 모드를 기록하여, CDB 재기동 시 해당 PDB가 자동으로 저장된 상태로 오픈되도록 합니다. PDB1이 READ WRITE 상태에서 SAVE STATE를 실행했으므로, CDB 재기동 후 PDB1은 자동으로 READ WRITE 모드로 오픈됩니다.\n\nB) 오답 — SAVE STATE를 실행하지 않은 경우에는 CDB 재기동 시 사용자 PDB가 기본적으로 MOUNTED 상태가 됩니다. 그러나 SAVE STATE를 실행했으므로 PDB1은 자동으로 이전 상태(READ WRITE)로 오픈됩니다.\n\nC) 오답 — SAVE STATE의 효과는 CDB의 종료 모드(NORMAL, IMMEDIATE, TRANSACTIONAL, ABORT)에 관계없이 유지됩니다. SAVE STATE로 저장된 정보는 데이터 딕셔너리에 영구적으로 기록되므로 종료 방식에 영향을 받지 않습니다.\n\nD) 오답 — SAVE STATE 명령은 PDB의 오픈 모드(READ WRITE, READ ONLY 등)를 저장하여 CDB 재기동 시 자동으로 해당 모드로 복원하는 기능입니다. 데이터의 디스크 영속화(체크포인트)와는 무관한 명령입니다.\n\n핵심 개념: ALTER PLUGGABLE DATABASE ... SAVE STATE는 PDB의 현재 오픈 모드를 데이터 딕셔너리에 기록하여, CDB 재기동 시 수동 개입 없이 PDB를 자동으로 이전 상태로 오픈합니다. 이 설정은 CDB 종료 모드에 관계없이 유효합니다."
   },
   {
@@ -62,7 +71,9 @@
       "C) LGWRはディスク障害が復旧するまでREDO書き込みを保留し、その間もユーザー・トランザクションは正常に処理される。",
       "D) ARCnプロセスがグループ2のアーカイブ済みコピーからREDOデータを読み取り、データベースの運用を継続する。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — CURRENT 상태의 Redo Log 그룹은 LGWR이 현재 기록 중인 그룹입니다. 이 그룹의 모든 멤버 파일이 사용 불가능해지면, LGWR은 Redo 데이터를 기록할 수 없게 됩니다. Redo 기록은 트랜잭션의 영속성(Durability)을 보장하기 위해 필수적이므로, LGWR이 기록할 수 없으면 인스턴스가 즉시 중지됩니다.\n\nA) 오답 — CURRENT 그룹에 장애가 발생해도 자동으로 로그 스위치가 수행되지 않습니다. CURRENT 그룹에는 아직 기록 중인 Redo 데이터가 있으므로, 해당 데이터를 잃지 않기 위해 단순히 다음 그룹으로 전환하는 것은 불가능합니다.\n\nC) 오답 — LGWR이 Redo를 기록할 수 없는 상태에서 사용자 트랜잭션이 정상 처리되는 것은 불가능합니다. Write-Ahead Logging 원칙에 따라 Redo 기록 없이는 어떠한 트랜잭션도 커밋할 수 없으므로, LGWR이 기록 불가능해지면 인스턴스가 중지됩니다.\n\nD) 오답 — ARCn 프로세스는 로그 스위치 발생 시 이전 Redo Log 그룹을 아카이브 로그로 복사하는 역할입니다. CURRENT 그룹의 장애 상황에서 ARCn이 LGWR의 기록을 대체할 수 없습니다.\n\n핵심 개념: Redo Log 멤버 다중화에서 그룹 내 일부 멤버가 손실되면 나머지 멤버로 운영이 계속되지만, CURRENT 그룹의 모든 멤버가 손실되면 LGWR이 Redo를 기록할 수 없어 인스턴스가 즉시 중지됩니다. 이를 방지하기 위해 Redo Log 멤버를 서로 다른 디스크에 다중화하는 것이 중요합니다."
   }
 ]

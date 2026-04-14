@@ -10,11 +10,14 @@
       "D) CREATE PFILE FROM SPFILEコマンドにより、SPFILEの内容をテキスト形式のPFILEとしてバックアップできる。",
       "E) SPFILEの場所はSTARTUP SPFILEオプションで明示的に指定できる。"
     ],
-    "answer": ["A", "D"],
+    "answer": [
+      "A",
+      "D"
+    ],
     "explanation": "정답: A, D\nA) 정답 — SPFILE은 바이너리 형식의 파일로, Oracle이 내부적으로 관리합니다. 텍스트 에디터로 직접 편집하면 바이너리 헤더가 손상되어 인스턴스 기동 시 ORA-01078 오류가 발생할 수 있습니다.\n\nD) 정답 — CREATE PFILE FROM SPFILE 명령으로 SPFILE의 내용을 텍스트 형식의 PFILE로 추출할 수 있습니다. 이는 SPFILE 백업이나, SPFILE에 문제가 발생한 경우 텍스트 편집 후 재생성하는 워크플로우에 사용됩니다.\n\nB) 오답 — 인스턴스 기동 시 파라미터 파일의 검색 순서는 spfile<SID>.ora → spfile.ora → init<SID>.ora 순입니다. SPFILE이 우선이며 PFILE은 SPFILE이 없을 때 사용됩니다.\n\nC) 오답 — PFILE 환경에서는 SCOPE=SPFILE 및 SCOPE=BOTH를 사용할 수 없습니다. PFILE은 ALTER SYSTEM 명령으로 파일에 직접 반영하는 기능을 지원하지 않으며, 파라미터를 변경하려면 텍스트 에디터로 PFILE을 직접 편집한 후 인스턴스를 재기동해야 합니다.\n\nE) 오답 — STARTUP 명령에는 SPFILE을 명시적으로 지정하는 옵션이 없습니다. SPFILE의 위치를 변경하려면 PFILE 내에 SPFILE 파라미터로 경로를 지정하는 방법을 사용합니다.\n\n핵심 개념: SPFILE은 Oracle이 관리하는 바이너리 파일로 ALTER SYSTEM으로만 변경 가능하며, CREATE PFILE FROM SPFILE로 텍스트 백업이 가능합니다. 기동 시 검색 순서는 SPFILE 우선(spfile<SID>.ora → spfile.ora → init<SID>.ora)입니다."
   },
   {
-    "chapter": "Oracle Databaseアーキテクチャの��明",
+    "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_032",
     "title": "Oracle Databaseのサーバー・プロセスの役割について正しく述べているものを選択してください。",
     "options": [
@@ -23,8 +26,10 @@
       "C) サーバー・プロセスはSGAの共有プールを直接使用するが、独自のメモリー領域は持たない。",
       "D) サーバー・プロセスはバックグラウンド・プロセスの一種であり、インスタンス起動時に自動的に開始される。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — 서버 프로세스는 사용자 프로세스의 요청을 실제로 처리하는 Oracle 프로세스로, SQL 파싱 및 실행을 수행합니다. 필요한 데이터 블록이 버퍼 캐시에 없으면(Cache Miss) 데이터 파일에서 블록을 읽어 버퍼 캐시에 적재합니다.\n\nB) 오답 — Dirty Buffer를 데이터 파일에 기록하는 것은 DBWn(Database Writer) 백그라운드 프로세스의 역할입니다. 서버 프로세스는 데이터 파일에 대해 읽기(Read)만 수행하며, 쓰기(Write)는 수행하지 않습니��.\n\nC) 오답 — 서버 프로세스는 SGA를 사용하는 것 외에 각자 고유한 PGA(Program Global Area)를 보유합니다. PGA에는 SQL Work Area, Private SQL Area, Session Memory 등이 포함됩니다.\n\nD) 오답 — 서버 프로세스는 백그라운드 프로세스가 아니라, 사용자의 접속 요청 시 리스너에 의해 생성되는 포어그라운드 프로세스입니다. 인스턴스 기동 시 자동으로 시작되는 것은 SMON, PMON, DBWn, LGWR 등의 백그라운드 프로세스입니다.\n\n핵심 개념: 서버 프로세스는 SQL 파싱/실행, 데이터 블록 읽기(디스크→버퍼 캐시), 결과 반환을 담당하는 포어그라운드 프로세스로, 고유한 PGA를 보유합니다. 데이터 파일 쓰기는 DBWn이 전담합니다."
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — 서버 프로세스는 사용자 프로세스의 요청을 실제로 처리하는 Oracle 프로세스로, SQL 파싱 및 실행을 수행합니다. 필요한 데이터 블록이 버퍼 캐시에 없으면(Cache Miss) 데이터 파일에서 블록을 읽어 버퍼 캐시에 적재합니다.\n\nB) 오답 — Dirty Buffer를 데이터 파일에 기록하는 것은 DBWn(Database Writer) 백그라운드 프로세스의 역할입니다. 서버 프로세스는 데이터 파일에 대해 읽기(Read)만 수행하며, 쓰기(Write)는 수행하지 않습니다.\n\nC) 오답 — 서버 프로세스는 SGA를 사용하는 것 외에 각자 고유한 PGA(Program Global Area)를 보유합니다. PGA에는 SQL Work Area, Private SQL Area, Session Memory 등이 포함됩니다.\n\nD) 오답 — 서버 프로세스는 백그라운드 프로세스가 아니라, 사용자의 접속 요청 시 리스너에 의해 생성되는 포어그라운드 프로세스입니다. 인스턴스 기동 시 자동으로 시작되는 것은 SMON, PMON, DBWn, LGWR 등의 백그라운드 프로세스입니다.\n\n핵심 개념: 서버 프로세스는 SQL 파싱/실행, 데이터 블록 읽기(디스크→버퍼 캐시), 결과 반환을 담당하는 포어그라운드 프로세스로, 고유한 PGA를 보유합니다. 데이터 파일 쓰기는 DBWn이 전담합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
@@ -37,24 +42,29 @@
       "D) ASMMではDB_KEEP_CACHE_SIZE、DB_RECYCLE_CACHE_SIZE、LOG_BUFFERも自動調整の対象に含まれる。",
       "E) 手動メモリー管理では各構成要素の合計がSGA_MAX_SIZEを超えないように自動的に制限される。"
     ],
-    "answer": ["A", "B"],
-    "explanation": "정���: A, B\nA) 정답 — AMM(Automatic Memory Management)은 MEMORY_TARGET 파라미터로 SGA + PGA의 총 메모리를 통합 관리하는 최상위 자동화 방식입니다. Oracle이 워크로드를 분석하여 SGA와 PGA 간의 메모리 비율을 자동으로 재분배합니다.\n\nB) 정답 — ASMM(Automatic Shared Memory Management)은 SGA_TARGET으로 SGA 내부 구성요소(Buffer Cache, Shared Pool, Large Pool, Java Pool, Streams Pool)의 크기를 자동 조정합니다. PGA는 PGA_AGGREGATE_TARGET으로 별도 관리하며, SGA↔PGA 간 재분배는 수행되지 않습니다.\n\nC) 오답 — AMM 환경에서 SGA_TARGET에 값을 설정하면 에러가 발생하는 것이 아니라, 해당 값이 SGA의 최솟값(하한선)으로 작동합니다. PGA_AGGREGATE_TARGET도 마찬가지로 최솟값으로 기능합니다.\n\nD) 오답 — ASMM의 자동 조정 대상은 DB_CACHE_SIZE, SHARED_POOL_SIZE, LARGE_POOL_SIZE, JAVA_POOL_SIZE, STREAMS_POOL_SIZE입니다. DB_KEEP_CACHE_SIZE, DB_RECYCLE_CACHE_SIZE, LOG_BUFFER는 자동 조정 대상이 아니므로 수동으로 지정해야 합니다.\n\nE) 오답 — 수동 메모리 관리 모드에서는 DBA가 각 구성요소의 크기를 개별적으로 지정합니다. SGA_MAX_SIZE는 SGA의 동적 확장 상한선이지만, 수동 관리에서 각 구성요소의 합계가 자동으로 조정되는 것은 아닙니다.\n\n핵심 개념: Oracle의 메모리 관리는 AMM(MEMORY_TARGET: SGA+PGA 통합), ASMM(SGA_TARGET: SGA 내부만), Manual(개별 파라미터) 3가지 방식이 있으며, 판단 기준은 MEMORY_TARGET > 0이면 AMM, SGA_TARGET > 0이면 ASMM, 둘 다 0이면 Manual입���다."
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — AMM(Automatic Memory Management)은 MEMORY_TARGET 파라미터로 SGA + PGA의 총 메모리를 통합 관리하는 최상위 자동화 방식입니다. Oracle이 워크로드를 분석하여 SGA와 PGA 간의 메모리 비율을 자동으로 재분배합니다.\n\nB) 정답 — ASMM(Automatic Shared Memory Management)은 SGA_TARGET으로 SGA 내부 구성요소(Buffer Cache, Shared Pool, Large Pool, Java Pool, Streams Pool)의 크기를 자동 조정합니다. PGA는 PGA_AGGREGATE_TARGET으로 별도 관리하며, SGA↔PGA 간 재분배는 수행되지 않습니다.\n\nC) 오답 — AMM 환경에서 SGA_TARGET에 값을 설정하면 에러가 발생하는 것이 아니라, 해당 값이 SGA의 최솟값(하한선)으로 작동합니다. PGA_AGGREGATE_TARGET도 마찬가지로 최솟값으로 기능합니다.\n\nD) 오답 — ASMM의 자동 조정 대상은 DB_CACHE_SIZE, SHARED_POOL_SIZE, LARGE_POOL_SIZE, JAVA_POOL_SIZE, STREAMS_POOL_SIZE입니다. DB_KEEP_CACHE_SIZE, DB_RECYCLE_CACHE_SIZE, LOG_BUFFER는 자동 조정 대상이 아니므로 수동으로 지정해야 합니다.\n\nE) 오답 — 수동 메모리 관리 모드에서는 DBA가 각 구성요소의 크기를 개별적으로 지정합니다. SGA_MAX_SIZE는 SGA의 동적 확장 상한선이지만, 수동 관리에서 각 구성요소의 합계가 자동으로 조정되는 것은 아닙니다.\n\n핵심 개념: Oracle의 메모리 관리는 AMM(MEMORY_TARGET: SGA+PGA 통합), ASMM(SGA_TARGET: SGA 내부만), Manual(개별 파라미터) 3가지 방식이 있으며, 판단 기준은 MEMORY_TARGET > 0이면 AMM, SGA_TARGET > 0이면 ASMM, 둘 다 0이면 Manual입니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_034",
-    "title": "DBAが以下のSQL文を実行してインスタンスの状態を確認しました。\n\nSQL> SELECT instance_name, status, database_status FROM V$INSTANCE;\n\nINSTANCE_NAME    STATUS       DATABASE_STATUS\n---------------- ------------ -----------------\nORCL             STARTED      ACTIVE\n\nこの出力結果から読み取れる内容として正しいものを選択してください。",
+    "title": "DBAが以下のSQL文を実行してインスタンスの状態を確認しました。\n\nSQL> SELECT instance_name, status, database_status\n     FROM V$INSTANCE;\n\nINSTANCE_NAME     STATUS        DATABASE_STATUS\n----------------  ------------  -----------------\nORCL              STARTED       ACTIVE\n\nこの出力結果から読み取れる内容として正しいものを選択してください。",
     "options": [
       "A) インスタンスはNOMOUNT状態にあり、SGAの割当てとバックグラウンド・プロセスの起動が完了しているが、制御ファイルはまだ読み込まれていない。",
       "B) インスタンスはMOUNT状態にあり、制御ファイルが読み込まれたがデータ・ファイルはまだオープンされていない。",
-      "C) インスタンスはOPEN状態にあり、データベースは通常の読み書きモードで運���されている。",
+      "C) インスタンスはOPEN状態にあり、データベースは通常の読み書きモードで運用されている。",
       "D) インスタンスは起動中にエラーが発生し、異常状態にある。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — V$INSTANCE의 STATUS가 'STARTED'인 것은 인스턴스가 NOMOUNT 상태에 있음을 나타냅니다. 이 상태에서는 초기화 파라미터 파일을 읽고 SGA를 할당하며 백그라운드 프로세스를 기동한 상태이지만, 컨트롤 파일은 아직 읽지 않았습니다. DATABASE_STATUS가 'ACTIVE'인 것은 인스턴스가 정상적으로 동작 중임을 의미합니다.\n\nB) 오답 — MOUNT 상태에서는 V$INSTANCE의 STATUS가 'MOUNTED'로 표시됩니다. 'STARTED'가 아닙���다.\n\nC) 오답 — OPEN 상태에서는 V$INSTANCE의 STATUS가 'OPEN'으로 표시됩니다. 'STARTED'는 NOMOUNT 상태를 나타냅��다.\n\nD) 오답 — DATABASE_STATUS가 'ACTIVE'이므로 인스턴스는 정상적으로 동작 중입니다. 에러 상태가 아니라 NOMOUNT 단계에서 정상 대기 중인 상태입니다.\n\n핵심 개념: V$INSTANCE의 STATUS 컬럼은 인스턴스의 기동 단계를 나타냅니다. STARTED = NOMOUNT(SGA 할당 완료, 컨트롤 파일 미읽음), MOUNTED = MOUNT(컨트롤 파일 읽음), OPEN = OPEN(데이터 파일 열림)입���다."
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — V$INSTANCE의 STATUS가 'STARTED'인 것은 인스턴스가 NOMOUNT 상태에 있음을 나타냅니다. 이 상태에서는 초기화 파라미터 파일을 읽고 SGA를 할당하며 백그라운드 프로세스를 기동한 상태이지만, 컨트롤 파일은 아직 읽지 않았습니다. DATABASE_STATUS가 'ACTIVE'인 것은 인스턴스가 정상적으로 동작 중임을 의미합니다.\n\nB) 오답 — MOUNT 상태에서는 V$INSTANCE의 STATUS가 'MOUNTED'로 표시됩니다. 'STARTED'가 아닙니다.\n\nC) 오답 — OPEN 상태에서는 V$INSTANCE의 STATUS가 'OPEN'으로 표시됩니다. 'STARTED'는 NOMOUNT 상태를 나타냅니다.\n\nD) 오답 — DATABASE_STATUS가 'ACTIVE'이므로 인스턴스는 정상적으로 동작 중입니다. 에러 상태가 아니라 NOMOUNT 단계에서 정상 대기 중인 상태입니다.\n\n핵심 개념: V$INSTANCE의 STATUS 컬럼은 인스턴스의 기동 단계를 나타냅니다. STARTED = NOMOUNT(SGA 할당 완료, 컨트롤 파일 미읽음), MOUNTED = MOUNT(컨트롤 파일 읽음), OPEN = OPEN(데이터 파일 열림)입니다."
   },
   {
-    "chapter": "Oracle Databaseアーキテクチャの説���",
+    "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_035",
     "title": "ASMM環境(SGA_TARGET = 4G)で、DBAが以下のコマンドを実行しました。\n\nSQL> ALTER SYSTEM SET DB_CACHE_SIZE = 0 SCOPE=BOTH;\n\nこの操作の結果について正しく述べているものを選択してください。",
     "options": [
@@ -63,7 +73,9 @@
       "C) DB_CACHE_SIZEに0を設定するとエラーが発生し、バッファ・キャッシュの最小保証サイズは変更されない。",
       "D) DB_CACHE_SIZEの最小保証サイズが解除され、ASMMがバッファ・キャッシュのサイズを完全に自動管理する。ただし、バッファ・キャッシュはSGAの必須コンポーネントであるため、実際に0にはならない。"
     ],
-    "answer": ["D"],
-    "explanation": "���답: D\nD) 정답 — ASMM 환경에서 DB_CACHE_SIZE를 0으로 설정하면, 최소 보장 크기의 제약이 해제됩니다. 이후 ASMM이 버퍼 캐시 크기를 워크로드에 따라 완전히 자동으로 관리합니다. 단, 버퍼 캐시는 SGA의 필수 구성요소이므로 실제로 0까지 축소되지는 않으며, ASMM이 적절한 크기를 유지합니다.\n\nA) 오답 — ASMM 환경에서 DB_CACHE_SIZE = 0은 버퍼 캐시를 물리적으로 0으로 만드는 것이 아니라 최소 보장 크기를 해제하는 것입니다. 버퍼 캐시는 데이터베이스 운영에 필수이므로 완전히 제거될 수 없습니다.\n\nB) 오답 — 0을 포함한 임의의 크기로 축소될 수 있다는 설명은 부정확합니다. 버퍼 캐시는 SGA의 필수 구성요소이므로 ASMM이 적절한 크기를 항상 유지하며, 실제로 0까지 축소되지 않습니다.\n\nC) 오답 — DB_CACHE_SIZE에 0을 설정해도 에러가 발생하지 않습니다. ASMM 환경에서 0은 '최소 보장 없음(ASMM에 전적 위임)'을 의미하는 유효한 설정입니다.\n\n핵심 개념: ASMM에서 개별 SGA 구성요소 파라미터에 0이 아닌 값을 설정하면 최소 보장 크기(하한선)로 기능하고, 0을 설정하면 ASMM이 해당 구성요소를 완전 자동 관리합니다. 단, Buffer Cache, Shared Pool 등 필수 구성요소는 ASMM이 적절한 크기를 항상 유지하므로 실제로 0이 되지 않습니다."
+    "answer": [
+      "D"
+    ],
+    "explanation": "정답: D\nD) 정답 — ASMM 환경에서 DB_CACHE_SIZE를 0으로 설정하면, 최소 보장 크기의 제약이 해제됩니다. 이후 ASMM이 버퍼 캐시 크기를 워크로드에 따라 완전히 자동으로 관리합니다. 단, 버퍼 캐시는 SGA의 필수 구성요소이므로 실제로 0까지 축소되지는 않으며, ASMM이 적절한 크기를 유지합니다.\n\nA) 오답 — ASMM 환경에서 DB_CACHE_SIZE = 0은 버퍼 캐시를 물리적으로 0으로 만드는 것이 아니라 최소 보장 크기를 해제하는 것입니다. 버퍼 캐시는 데이터베이스 운영에 필수이므로 완전히 제거될 수 없습니다.\n\nB) 오답 — 0을 포함한 임의의 크기로 축소될 수 있다는 설명은 부정확합니다. 버퍼 캐시는 SGA의 필수 구성요소이므로 ASMM이 적절한 크기를 항상 유지하며, 실제로 0까지 축소되지 않습니다.\n\nC) 오답 — DB_CACHE_SIZE에 0을 설정해도 에러가 발생하지 않습니다. ASMM 환경에서 0은 '최소 보장 없음(ASMM에 전적 위임)'을 의미하는 유효한 설정입니다.\n\n핵심 개념: ASMM에서 개별 SGA 구성요소 파라미터에 0이 아닌 값을 설정하면 최소 보장 크기(하한선)로 기능하고, 0을 설정하면 ASMM이 해당 구성요소를 완전 자동 관리합니다. 단, Buffer Cache, Shared Pool 등 필수 구성요소는 ASMM이 적절한 크기를 항상 유지하므로 실제로 0이 되지 않습니다."
   }
 ]

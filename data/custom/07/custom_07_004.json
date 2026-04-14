@@ -55,7 +55,7 @@
   {
     "chapter": "ストレージの管理",
     "number": "C_07_020",
-    "title": "DBA_SEGMENTS、DBA_TABLESビューを使用して特定テーブルの領域使用状況を分析しています。以下のSQL文の実行結果を確認してください。\n\nSELECT segment_name, bytes/1024/1024 AS size_mb FROM dba_segments WHERE segment_name='ORDERS';\n\nSEGMENT_NAME  SIZE_MB\n------------- -------\nORDERS            500\n\nSELECT num_rows, avg_row_len FROM dba_tables WHERE table_name='ORDERS';\n\n  NUM_ROWS AVG_ROW_LEN\n---------- -----------\n     50000         200\n\nこの結果から判断できる内容として正しいものを選択してください。",
+    "title": "DBA_SEGMENTS、DBA_TABLESビューを使用して特定テーブルの領域使用状況を分析しています。以下のSQL文の実行結果を確認してください。\n\nSQL> SELECT segment_name, bytes/1024/1024 AS size_mb\n     FROM dba_segments\n     WHERE segment_name = 'ORDERS';\n\nSEGMENT_NAME  SIZE_MB\n------------- -------\nORDERS            500\n\nSQL> SELECT num_rows, avg_row_len\n     FROM dba_tables\n     WHERE table_name = 'ORDERS';\n\n  NUM_ROWS  AVG_ROW_LEN\n----------  -----------\n     50000          200\n\nこの結果から判断できる内容として正しいものを選択してください。",
     "options": [
       "A) ORDERS表の実データサイズは約10MBであり、セグメントサイズ500MBと大きな差があるため、セグメント縮小の実施を検討すべきである。",
       "B) ORDERS表のセグメントサイズが500MBであることは50,000行に対して適切なサイズであり、特別な対応は不要である。",
