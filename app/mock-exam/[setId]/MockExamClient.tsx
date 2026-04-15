@@ -96,7 +96,8 @@ interface MockExamClientProps {
 
 type ExamPhase = 'ready' | 'taking' | 'review';
 
-const EXAM_DURATION = 90 * 60; // 90 minutes in seconds
+const EXAM_DURATION = 120 * 60; // 120 minutes in seconds
+const PASS_SCORE = 40; // 40 correct answers out of 60 to pass
 
 export default function MockExamClient({ questions, setId }: MockExamClientProps) {
   const [phase, setPhase] = useState<ExamPhase>('ready');
@@ -302,11 +303,11 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
               <div style={{ fontSize: '0.85rem' }}>Questions</div>
             </div>
             <div>
-              <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-5)' }}>90</div>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-5)' }}>120</div>
               <div style={{ fontSize: '0.85rem' }}>Minutes</div>
             </div>
             <div>
-              <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-3)' }}>70%</div>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-3)' }}>40/{questions.length}</div>
               <div style={{ fontSize: '0.85rem' }}>Pass Line</div>
             </div>
           </div>
@@ -342,7 +343,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
   // ===== REVIEW PHASE =====
   if (phase === 'review') {
     const percentage = Math.round((score / shuffled.length) * 100);
-    const passed = percentage >= 70;
+    const passed = score >= PASS_SCORE;
 
     // Chapter breakdown
     const chapterStats = new Map<string, { total: number; correct: number }>();

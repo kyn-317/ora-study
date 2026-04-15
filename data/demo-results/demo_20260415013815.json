@@ -1,0 +1,130 @@
+{
+  "chapters": [
+    "01"
+  ],
+  "questionCount": 10,
+  "completedAt": "2026-04-15T01:38:15.062Z",
+  "duration": 1737,
+  "score": 10,
+  "scoreRate": 100,
+  "answers": [
+    {
+      "questionId": "C_01_030",
+      "chapter": "01",
+      "selected": [
+        "B"
+      ],
+      "correct": [
+        "B"
+      ],
+      "isCorrect": true
+    },
+    {
+      "questionId": "C_01_016",
+      "chapter": "01",
+      "selected": [
+        "A"
+      ],
+      "correct": [
+        "A"
+      ],
+      "isCorrect": true
+    },
+    {
+      "questionId": "C_01_026",
+      "chapter": "01",
+      "selected": [
+        "B",
+        "C"
+      ],
+      "correct": [
+        "B",
+        "C"
+      ],
+      "isCorrect": true
+    },
+    {
+      "questionId": "C_01_021",
+      "chapter": "01",
+      "selected": [
+        "A"
+      ],
+      "correct": [
+        "A"
+      ],
+      "isCorrect": true
+    },
+    {
+      "questionId": "C_01_020",
+      "chapter": "01",
+      "selected": [
+        "A"
+      ],
+      "correct": [
+        "A"
+      ],
+      "isCorrect": true
+    },
+    {
+      "questionId": "C_01_031",
+      "chapter": "01",
+      "selected": [
+        "D",
+        "C"
+      ],
+      "correct": [
+        "C",
+        "D"
+      ],
+      "isCorrect": true
+    },
+    {
+      "questionId": "C_01_003",
+      "chapter": "01",
+      "selected": [
+        "C"
+      ],
+      "correct": [
+        "C"
+      ],
+      "isCorrect": true
+    },
+    {
+      "questionId": "C_01_006",
+      "chapter": "01",
+      "selected": [
+        "C"
+      ],
+      "correct": [
+        "C"
+      ],
+      "isCorrect": true
+    },
+    {
+      "questionId": "C_01_041",
+      "chapter": "01",
+      "selected": [
+        "B",
+        "E"
+      ],
+      "correct": [
+        "E",
+        "B"
+      ],
+      "isCorrect": true
+    },
+    {
+      "questionId": "C_01_002",
+      "chapter": "01",
+      "selected": [
+        "A",
+        "E"
+      ],
+      "correct": [
+        "E",
+        "A"
+      ],
+      "isCorrect": true
+    }
+  ]
+}

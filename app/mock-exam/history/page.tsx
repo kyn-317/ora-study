@@ -67,7 +67,7 @@ function computeAnalytics(results: { fileName: string; result: ExamResult }[]): 
   const scores = results.map((r) => r.result.scoreRate);
   const averageScore = Math.round((scores.reduce((a, b) => a + b, 0) / totalExams) * 10) / 10;
   const bestScore = Math.max(...scores);
-  const passCount = results.filter((r) => r.result.scoreRate >= 70).length;
+  const passCount = results.filter((r) => r.result.score >= 40).length;
 
   // Chapter stats (aggregate across all exams)
   const chapterMap = new Map<string, { total: number; correct: number }>();

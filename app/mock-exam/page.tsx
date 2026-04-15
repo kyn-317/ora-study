@@ -24,7 +24,7 @@ export default async function MockExamHome() {
           Mock Exam
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>
-          60 questions per set &middot; 90 min &middot; Shuffled questions &amp; options
+          60 questions per set &middot; 120 min &middot; Shuffled questions &amp; options
         </p>
       </div>
 

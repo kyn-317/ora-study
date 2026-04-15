@@ -30,6 +30,25 @@ export default async function Home() {
         ))}
       </div>
 
+      <Link href="/demo-test">
+        <div className="glass card-hover" style={{
+          padding: '1.5rem 2rem',
+          borderRadius: '16px',
+          cursor: 'pointer',
+          marginBottom: '2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderColor: 'var(--color-3)',
+        }}>
+          <div>
+            <h2 className="text-gradient" style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>Demo Test</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>Quick random practice &middot; 10/20/30 questions &middot; Pick your chapters</p>
+          </div>
+          <span style={{ fontSize: '1.5rem', color: 'var(--color-3)' }}>&rarr;</span>
+        </div>
+      </Link>
+
       <Link href="/mock-exam">
         <div className="glass card-hover" style={{
           padding: '1.5rem 2rem',

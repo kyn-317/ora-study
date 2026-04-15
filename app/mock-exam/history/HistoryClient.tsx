@@ -35,7 +35,7 @@ function HistoryTab({ results }: { results: { fileName: string; result: ExamResu
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {results.map(({ fileName, result }) => {
-        const passed = result.scoreRate >= 70;
+        const passed = result.score >= 40;
         return (
           <div key={fileName} className="glass" style={{
             padding: '1.5rem 2rem',
@@ -101,7 +101,7 @@ function ChaptersTab({ chapterStats }: { chapterStats: ChapterStat[] }) {
       {chapterStats.map((stat) => {
         const barWidth = (stat.total / maxTotal) * 100;
         const fillWidth = stat.total > 0 ? (stat.correct / stat.total) * 100 : 0;
-        const passed = stat.rate >= 70;
+        const passed = stat.rate >= 66.7;
 
         return (
           <div key={stat.chapter} className="glass" style={{
@@ -190,7 +190,7 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
     : '';
 
   // Y-axis ticks
-  const yTicks = [0, 25, 50, 70, 100];
+  const yTicks = [0, 25, 50, 67, 100];
 
   // X-axis labels (show a few dates)
   const labelCount = Math.min(timeline.length, 6);
@@ -213,8 +213,8 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
             y1={yScale(v)}
             x2={W - PAD.right}
             y2={yScale(v)}
-            stroke={v === 70 ? 'rgba(5, 150, 105, 0.3)' : 'rgba(0, 0, 0, 0.06)'}
-            strokeDasharray={v === 70 ? '6 4' : 'none'}
+            stroke={v === 67 ? 'rgba(5, 150, 105, 0.3)' : 'rgba(0, 0, 0, 0.06)'}
+            strokeDasharray={v === 67 ? '6 4' : 'none'}
           />
         ))}
 
@@ -225,7 +225,7 @@ function TimelineChart({ timeline }: { timeline: TimelinePoint[] }) {
             x={PAD.left - 8}
             y={yScale(v) + 4}
             textAnchor="end"
-            fill={v === 70 ? '#059669' : 'rgba(0, 0, 0, 0.4)'}
+            fill={v === 67 ? '#059669' : 'rgba(0, 0, 0, 0.4)'}
             fontSize="11"
           >
             {v}%
@@ -387,7 +387,7 @@ function TrendsTab({ setStats, timeline }: { setStats: SetStat[]; timeline: Time
                 {stat.attempts.length} attempt{stat.attempts.length > 1 ? 's' : ''}
               </span>
               <span style={{
-                fontWeight: 700, color: stat.bestRate >= 70 ? '#059669' : '#DC2626',
+                fontWeight: 700, color: stat.bestRate >= 66.7 ? '#059669' : '#DC2626',
               }}>
                 Best: {stat.bestRate}%
               </span>
@@ -401,7 +401,7 @@ function TrendsTab({ setStats, timeline }: { setStats: SetStat[]; timeline: Time
           }}>
             {stat.attempts.map((attempt, idx) => {
               const height = Math.max(attempt.scoreRate, 3);
-              const passed = attempt.scoreRate >= 70;
+              const passed = attempt.scoreRate >= 66.7;
               return (
                 <div key={idx} style={{
                   flex: 1,
@@ -431,14 +431,14 @@ function TrendsTab({ setStats, timeline }: { setStats: SetStat[]; timeline: Time
             })}
           </div>
 
-          {/* 70% pass line indicator */}
+          {/* 40/60 pass line indicator */}
           {stat.attempts.length > 1 && (
             <div style={{
               marginTop: '0.5rem', fontSize: '0.7rem', color: 'var(--text-muted)',
               borderTop: '1px dashed rgba(5, 150, 105, 0.2)', paddingTop: '0.3rem',
               textAlign: 'right',
             }}>
-              Pass line: 70%
+              Pass line: 40/60 (67%)
             </div>
           )}
         </div>

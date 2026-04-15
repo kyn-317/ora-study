@@ -405,7 +405,7 @@ export async function refreshExamSummary(): Promise<void> {
   const scores = results.map((r) => r.result.scoreRate);
   const averageScore = Math.round((scores.reduce((a, b) => a + b, 0) / totalExams) * 10) / 10;
   const bestScore = Math.max(...scores);
-  const passCount = results.filter((r) => r.result.scoreRate >= 70).length;
+  const passCount = results.filter((r) => r.result.score >= 40).length;
 
   // By set
   const bySet: Record<string, {
@@ -542,6 +542,39 @@ export async function saveWrongNote(questionId: string, memo: string): Promise<v
   await fs.writeFile(WRONG_NOTES_PATH, JSON.stringify(data, null, 2), 'utf-8');
 }
 
+// ── Demo Test: load all custom questions for a chapter ──
+
+export async function getAllCustomQuestionsForChapter(chapterId: string): Promise<QuizQuestion[]> {
+  const chapterFiles = (manifest.custom as Record<string, string[]>)[chapterId];
+  if (!chapterFiles) return [];
+
+  const questions: QuizQuestion[] = [];
+  for (const file of chapterFiles) {
+    if (!file.startsWith('custom_')) continue;
+    const arr = await readJson<QuizQuestion[]>(path.join(CUSTOM_DIR, chapterId, `${file}.json`));
+    if (Array.isArray(arr)) {
+      questions.push(...arr);
+    }
+  }
+  return questions;
+}
+
+export async function getCustomChapterList(): Promise<{ chapterId: string; chapterName: string; questionCount: number }[]> {
+  const result: { chapterId: string; chapterName: string; questionCount: number }[] = [];
+
+  for (const chapterId of Object.keys(manifest.custom as Record<string, string[]>).sort()) {
+    const questions = await getAllCustomQuestionsForChapter(chapterId);
+    if (questions.length > 0) {
+      result.push({
+        chapterId,
+        chapterName: questions[0].chapter,
+        questionCount: questions.length,
+      });
+    }
+  }
+  return result;
+}
+
 // ── Wrong Questions (all questions ever answered incorrectly) ──
 
 export interface WrongQuestionDetail {
@@ -582,4 +615,62 @@ export async function getWrongQuestions(): Promise<WrongQuestionDetail[]> {
   return [...map.values()]
     .filter((q) => q.wrongCount > 0)
     .sort((a, b) => b.wrongCount - a.wrongCount);
+}
+
+// ── Demo Test Results ──
+
+const DEMO_RESULTS_DIR = path.join(DATA_DIR, 'demo-results');
+
+export interface DemoTestResultAnswer {
+  questionId: string;
+  chapter: string;
+  selected: string[];
+  correct: string[];
+  isCorrect: boolean;
+}
+
+export interface DemoTestResult {
+  chapters: string[];
+  questionCount: number;
+  completedAt: string;
+  duration: number;
+  score: number;
+  scoreRate: number;
+  answers: DemoTestResultAnswer[];
+}
+
+export async function saveDemoTestResult(result: DemoTestResult): Promise<string> {
+  const timestamp = result.completedAt.replace(/[-:T]/g, '').slice(0, 14);
+  const fileName = `demo_${timestamp}.json`;
+  const filePath = path.join(DEMO_RESULTS_DIR, fileName);
+
+  await fs.mkdir(DEMO_RESULTS_DIR, { recursive: true });
+  await fs.writeFile(filePath, JSON.stringify(result, null, 2), 'utf-8');
+
+  return fileName;
+}
+
+export async function getDemoTestResults(): Promise<{ fileName: string; result: DemoTestResult }[]> {
+  try {
+    const files = await fs.readdir(DEMO_RESULTS_DIR);
+    const results: { fileName: string; result: DemoTestResult }[] = [];
+
+    for (const file of files.filter(f => f.startsWith('demo_') && f.endsWith('.json'))) {
+      const result = await readJson<DemoTestResult>(path.join(DEMO_RESULTS_DIR, file));
+      if (result) results.push({ fileName: file, result });
+    }
+
+    return results.sort((a, b) => b.result.completedAt.localeCompare(a.result.completedAt));
+  } catch {
+    return [];
+  }
+}
+
+export async function deleteDemoTestResult(fileName: string): Promise<boolean> {
+  try {
+    await fs.unlink(path.join(DEMO_RESULTS_DIR, fileName));
+    return true;
+  } catch {
+    return false;
+  }
 }
