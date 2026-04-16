@@ -1,0 +1,81 @@
+[
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_026",
+    "title": "マルチテナント環境でローカルUNDOモードを使用しています。UNDO関連ビューの照会結果について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) PDB内でV$UNDOSTATを照会すると、該当PDBのUNDO統計のみが表示される。",
+      "B) CDB$ROOTからCDB_UNDO_EXTENTSを照会すると、CON_ID列で各PDBのUNDOエクステント情報を区別して統合的に確認できる。",
+      "C) PDB内でDBA_UNDO_EXTENTSを照会すると、CDB全体のすべてのPDBのUNDOエクステント情報が表示される。",
+      "D) 共有UNDOモードでPDB内からV$UNDOSTATを照会した場合でも、該当PDBの統計のみがフィルタリングされて表示される。",
+      "E) CDB$ROOTからV$TEMPUNDOSTATを照会すると、すべてのPDBの一時UNDO統計が自動的に統合表示されるため、CONTAINERS()関数は不要である。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — Local UNDO 모드에서 PDB 내에서 V$UNDOSTAT를 조회하면, 해당 PDB의 UNDO 통계만 표시됩니다. 각 PDB가 독립적인 UNDO 테이블스페이스를 보유하므로 통계도 PDB별로 독립적으로 수집됩니다.\n\nB) 정답 — CDB$ROOT에서 CDB_UNDO_EXTENTS를 조회하면 모든 PDB의 UNDO Extent 정보를 CON_ID 컬럼으로 구분하여 통합 조회할 수 있습니다. CDB_ 접두사 뷰는 CDB$ROOT에서 전체 컨테이너의 데이터를 통합 조회하기 위한 뷰입니다.\n\nC) 오답 — PDB 내에서 DBA_UNDO_EXTENTS를 조회하면 해당 PDB의 UNDO Extent 정보만 표시됩니다. CDB 전체의 UNDO Extent를 조회하려면 CDB$ROOT에서 CDB_UNDO_EXTENTS를 사용해야 합니다.\n\nD) 오답 — Shared UNDO 모드에서는 PDB 내에서 V$UNDOSTAT를 조회해도 CDB 전체의 UNDO 통계가 표시됩니다. CDB$ROOT의 단일 UNDO 테이블스페이스를 모든 PDB가 공유하므로 PDB별 구분이 어렵습니다.\n\nE) 오답 — CDB$ROOT에서 V$TEMPUNDOSTAT를 직접 조회하면 CDB$ROOT의 통계만 표시됩니다. 모든 PDB의 Temporary UNDO 통계를 통합 조회하려면 CONTAINERS(V_$TEMPUNDOSTAT) 함수를 사용해야 합니다.\n\n핵심 개념: Local UNDO 모드에서 PDB 내 V$ 뷰 조회는 해당 PDB 통계만 반환하고, CDB$ROOT에서 CDB_ 접두사 뷰를 사용하면 CON_ID로 구분된 전체 PDB의 정보를 통합 조회할 수 있습니다. Shared UNDO 모드에서는 PDB 내에서도 CDB 전체 통계가 표시되어 PDB별 구분이 어렵습니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_027",
+    "title": "Flashback QueryとUNDOデータの関係について正しく述べているものを選択してください。",
+    "options": [
+      "A) Flashback QueryはAS OF SCN/TIMESTAMP句を使用して過去時点のデータを照会する機能であり、内部的にはUNDOデータを使用してCR（Consistent Read）ブロックを生成する仕組みと同じメカニズムで動作する。",
+      "B) Flashback QueryはUNDO_RETENTIONの設定値に関係なく、UNDO表領域にデータが物理的に存在する限り常に成功する。",
+      "C) Flashback Queryが参照する過去時点のUNDOデータが既に上書きされている場合、Oracleは自動的にREDOログからUNDOデータを再構築して照会を続行する。",
+      "D) Flashback QueryはFlashback Databaseと同様にフラッシュバック・ログを使用するため、UNDOデータには依存しない。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Flashback Query는 AS OF SCN/TIMESTAMP 절을 사용하여 과거 시점의 데이터를 SELECT로 조회하는 기능이며, 내부적으로는 읽기 일관성(Read Consistency)과 동일한 메커니즘을 사용합니다. 지정된 시점의 SCN을 기준으로 데이터 블록의 Block SCN을 비교하고, 필요시 UNDO 데이터를 역적용하여 CR 블록을 생성합니다.\n\nB) 오답 — Flashback Query는 UNDO_RETENTION 범위 내에서만 안정적으로 동작합니다. NOGUARANTEE 모드에서는 UNDO_RETENTION 기간 내라도 공간 부족으로 UNEXPIRED UNDO가 강제 재사용되면 Flashback Query가 실패할 수 있습니다. RETENTION GUARANTEE를 설정하면 보존 기간 내 UNDO가 보호되어 Flashback Query 성공 가능성이 높아집니다.\n\nC) 오답 — UNDO 데이터가 덮어쓰여진 경우, Oracle은 Redo 로그에서 UNDO 데이터를 재구축하지 않습니다. 이 경우 ORA-01555(Snapshot Too Old) 에러가 발생합니다. Redo 로그는 장애 복구(Instance/Media Recovery)에 사용되며, Flashback Query를 위한 UNDO 재구축에는 사용되지 않습니다.\n\nD) 오답 — Flashback Query는 UNDO 데이터를 기반으로 동작하며, Flashback Log를 사용하지 않습니다. Flashback Log를 사용하는 것은 Flashback Database 기능입니다. Flashback Query, Flashback Version Query, Flashback Transaction Query, Flashback Table은 모두 UNDO 데이터에 의존합니다.\n\n핵심 개념: Flashback Query(AS OF SCN/TIMESTAMP)는 읽기 일관성과 동일하게 UNDO 데이터를 사용하여 CR 블록을 생성하는 메커니즘으로 동작합니다. UNDO 데이터가 이미 덮어쓰여졌으면 ORA-01555 에러가 발생하며, Redo 로그에서 UNDO를 재구축하지는 않습니다. Flashback Database만이 Flashback Log를 사용합니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_028",
+    "title": "UNDO表領域の切り替え後の動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) ALTER SYSTEM SET UNDO_TABLESPACE文で新しいUNDO表領域に切り替えた後、旧UNDO表領域内のアクティブなトランザクションがすべて完了するまで旧表領域は引き続き使用される。",
+      "B) 旧UNDO表領域内のすべてのUNDOセグメントがPENDING OFFLINE状態になり、アクティブなトランザクションの完了後にOFFLINEに遷移する。",
+      "C) ALTER SYSTEM SET UNDO_TABLESPACE文を実行すると、旧UNDO表領域内のアクティブなトランザクションは新しいUNDO表領域に自動的に移行される。",
+      "D) 新しいUNDO表領域への切り替えにはデータベースの再起動が必須であり、ALTER SYSTEM文ではオンラインでの切り替えはできない。",
+      "E) 旧UNDO表領域は切り替え完了直後に自動的に削除されるため、手動での削除操作は不要である。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — ALTER SYSTEM SET UNDO_TABLESPACE 문으로 새 UNDO 테이블스페이스로 전환하면, 새 트랜잭션은 새 UNDO 테이블스페이스를 사용합니다. 그러나 기존 UNDO 테이블스페이스에서 활성 트랜잭션이 진행 중인 경우, 해당 트랜잭션이 모두 종료될 때까지 기존 테이블스페이스도 함께 유지됩니다.\n\nB) 정답 — UNDO 테이블스페이스 전환 시, 기존 UNDO 테이블스페이스의 UNDO 세그먼트는 PENDING OFFLINE 상태로 변경됩니다. 이 상태에서는 새로운 트랜잭션이 할당되지 않으며, 기존 활성 트랜잭션이 완료되면 OFFLINE 상태로 전환됩니다. V$ROLLSTAT의 STATUS 컬럼으로 확인할 수 있습니다.\n\nC) 오답 — UNDO 테이블스페이스 전환 시 기존 활성 트랜잭션은 새 UNDO 테이블스페이스로 자동 마이그레이션되지 않습니다. 기존 트랜잭션은 기존 UNDO 테이블스페이스에서 계속 수행되며, 정상적으로 COMMIT 또는 ROLLBACK될 때까지 기존 UNDO 테이블스페이스가 유지됩니다. 트랜잭션의 UNDO 데이터를 테이블스페이스 간에 이동하는 메커니즘은 존재하지 않습니다.\n\nD) 오답 — UNDO 테이블스페이스 전환은 ALTER SYSTEM SET UNDO_TABLESPACE 문으로 운영 중(온라인) 상태에서 동적으로 수행할 수 있습니다. 데이터베이스 재시작은 필요하지 않습니다.\n\nE) 오답 — 기존 UNDO 테이블스페이스는 전환 후에도 자동 삭제되지 않습니다. 모든 활성 트랜잭션이 완료되고 UNDO 세그먼트가 OFFLINE 상태가 된 후, DBA가 DROP TABLESPACE 명령으로 수동 삭제해야 합니다.\n\n핵심 개념: UNDO 테이블스페이스 전환은 ALTER SYSTEM으로 온라인에서 수행 가능하며, 기존 활성 트랜잭션이 완료될 때까지 기존 테이블스페이스가 유지됩니다. 기존 UNDO 세그먼트는 PENDING OFFLINE → OFFLINE 순서로 전환되며, 기존 테이블스페이스의 삭제는 수동으로 수행해야 합니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_029",
+    "title": "インスタンス・リカバリにおけるUNDOデータの役割について正しく述べているものを選択してください。",
+    "options": [
+      "A) インスタンス・リカバリのロール・フォワード段階でREDOログが適用され、続くロール・バック段階でUNDOデータを使用してコミットされていないトランザクションが取り消される。",
+      "B) インスタンス・リカバリではまずUNDOデータを使用して未コミット・トランザクションをロールバックし、その後REDOログを適用してコミット済みの変更を復元する。",
+      "C) インスタンス・リカバリのロール・バック段階はDBWnプロセスが担当し、UNDOデータをデータ・ファイルに直接書き込むことで未コミット変更を取り消す。",
+      "D) UNDOデータはインスタンス・リカバリのロール・フォワード段階でのみ使用され、ロール・バック段階ではREDOログのみが使用される。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — 인스턴스 복구(Instance Recovery)는 2단계로 수행됩니다. 1단계인 Roll Forward(Cache Recovery)에서는 Redo 로그를 적용하여 커밋된/미커밋된 모든 변경을 재적용합니다. 2단계인 Roll Back(Transaction Recovery)에서는 UNDO 데이터를 사용하여 커밋되지 않은 트랜잭션을 롤백합니다. 이 과정은 SMON 프로세스가 담당합니다.\n\nB) 오답 — 인스턴스 복구의 순서가 역전되어 있습니다. 반드시 Roll Forward(Redo 적용)가 먼저 수행된 후 Roll Back(UNDO 적용)이 수행됩니다. Roll Forward 단계에서 Redo를 적용해야 UNDO 세그먼트의 데이터도 함께 복구되어 Roll Back 단계에서 사용할 수 있게 됩니다.\n\nC) 오답 — 인스턴스 복구의 Roll Back 단계는 SMON(System Monitor) 프로세스가 담당합니다. DBWn(Database Writer)은 버퍼 캐시의 Dirty 블록을 데이터 파일에 기록하는 백그라운드 프로세스이며, 인스턴스 복구의 롤백을 수행하지 않습니다.\n\nD) 오답 — UNDO 데이터의 역할이 역전되어 있습니다. UNDO 데이터는 Roll Back 단계에서 미커밋 트랜잭션을 롤백하는 데 사용됩니다. Roll Forward 단계에서는 Redo 로그가 사용됩니다.\n\n핵심 개념: 인스턴스 복구는 Roll Forward(Redo 로그로 모든 변경 재적용) → Roll Back(UNDO 데이터로 미커밋 트랜잭션 롤백)의 2단계로 수행됩니다. Roll Forward가 선행되어야 UNDO 세그먼트도 복구되어 Roll Back에 사용할 수 있습니다. 이 전체 과정은 SMON 프로세스가 담당합니다."
+  },
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_030",
+    "title": "UNDO_RETENTIONの自動チューニング（Auto-Tuning）について正しく述べているものを選択してください。",
+    "options": [
+      "A) Auto-TuningはUNDO表領域のデータ・ファイルにAUTOEXTEND ONが設定されている場合に有効化され、OracleがV$UNDOSTATの統計を基に最適なUNDO保存期間を自動的に調整する。",
+      "B) Auto-Tuningが有効な場合、UNDO_RETENTIONパラメータの値はOracleによって自動的に変更され、V$PARAMETERビューで確認される値も随時更新される。",
+      "C) Auto-Tuningによって計算される保存期間はUNDO_RETENTIONパラメータの設定値よりも常に小さくなるため、手動で十分な値を設定する必要がある。",
+      "D) Auto-TuningはAUTOEXTEND OFFの固定サイズUNDO表領域でも有効であり、固定サイズ内で最適な保存期間を自動計算する。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — UNDO_RETENTION Auto-Tuning은 UNDO 테이블스페이스의 데이터 파일에 AUTOEXTEND ON이 설정되어 있을 때 활성화됩니다. Oracle은 V$UNDOSTAT에 기록된 UNDO 소비 통계와 최장 쿼리 실행 시간(MAXQUERYLEN)을 분석하여 최적의 UNDO 보존 기간을 자동 조정합니다. 조정된 값은 V$UNDOSTAT의 TUNED_UNDORETENTION 컬럼에서 확인할 수 있습니다.\n\nB) 오답 — Auto-Tuning은 UNDO_RETENTION 파라미터의 값 자체를 변경하지 않습니다. UNDO_RETENTION은 Auto-Tuning의 최소 하한(Floor)으로 작용하며, Oracle이 내부적으로 계산한 실제 적용 보존 기간은 V$UNDOSTAT의 TUNED_UNDORETENTION 컬럼에 별도로 기록됩니다. V$PARAMETER의 UNDO_RETENTION 값은 변경되지 않습니다.\n\nC) 오답 — Auto-Tuning에 의해 계산되는 보존 기간은 UNDO_RETENTION 파라미터 값 이상(최소 하한 이상)으로 설정됩니다. 워크로드에 따라 UNDO_RETENTION보다 더 큰 값이 적용될 수 있으며, 항상 작아지는 것은 아닙니다.\n\nD) 오답 — Auto-Tuning은 AUTOEXTEND ON이 설정된 경우에만 활성화됩니다. AUTOEXTEND OFF(고정 크기)인 경우 Auto-Tuning은 비활성화되며, UNDO_RETENTION 파라미터에 설정된 값이 그대로 사용됩니다.\n\n핵심 개념: UNDO_RETENTION Auto-Tuning은 AUTOEXTEND ON 조건에서만 활성화되며, V$UNDOSTAT의 워크로드 통계를 기반으로 최적의 보존 기간을 자동 산정합니다. UNDO_RETENTION 파라미터 값 자체는 변경되지 않고 최소 하한으로 작용하며, 실제 적용 값은 TUNED_UNDORETENTION 컬럼에서 확인할 수 있습니다."
+  }
+]

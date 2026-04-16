@@ -1,0 +1,77 @@
+[
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_031",
+    "title": "CDB環境において、CDB再起動後にPDBを自動的にオープンする方法について正しく述べているものを選択してください。",
+    "options": [
+      "A) CDBを起動するとすべてのPDBは自動的にREAD WRITE状態でオープンされる。",
+      "B) ALTER PLUGGABLE DATABASE ALL SAVE STATEを実行すると、すべてのPDBの現在のオープン状態がCDB$ROOTのデータ・ディクショナリに保存され、次回CDB起動時に自動的に復元される。",
+      "C) SAVE STATE情報が保存されたPDBのオープン状態を確認するにはV$PDBSビューを使用する。",
+      "D) SAVE STATEの設定は一度行うと解除することができず、PDBは常に自動オープンされる。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — ALTER PLUGGABLE DATABASE ALL SAVE STATE 명령으로 모든 PDB의 현재 오픈 상태를 CDB$ROOT의 데이터 딕셔너리에 저장할 수 있습니다. CDB 재기동 시 Oracle은 저장된 상태 정보를 확인하여 해당 PDB를 이전 상태(READ WRITE 등)로 자동 오픈합니다.\n\nA) 오답 — CDB를 STARTUP하면 CDB$ROOT는 자동으로 OPEN되지만, 사용자 PDB는 기본적으로 MOUNTED 상태입니다. PDB를 사용하려면 별도로 OPEN하거나 SAVE STATE를 미리 설정해야 합니다.\n\nC) 오답 — V$PDBS 뷰는 PDB의 현재 오픈 상태(OPEN_MODE)를 확인하는 용도이며, SAVE STATE로 저장된 상태 정보를 확인하려면 DBA_PDB_SAVED_STATES 뷰를 사용해야 합니다.\n\nD) 오답 — ALTER PLUGGABLE DATABASE <PDB명> DISCARD STATE 명령으로 저장된 상태를 해제할 수 있습니다. 해제 후에는 CDB 재기동 시 해당 PDB가 MOUNTED 상태로 시작됩니다.\n\n핵심 개념: CDB 재기동 시 PDB는 기본적으로 MOUNTED 상태이며, SAVE STATE를 설정하면 이전 오픈 상태가 자동 복원됩니다. DISCARD STATE로 설정을 해제할 수 있으며, DBA_PDB_SAVED_STATES 뷰로 저장 상태를 확인합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_032",
+    "title": "CDB環境でPDBの現在のオープン・モードと保存された状態を確認するために使用するビューの正しい組み合わせを選択してください。",
+    "options": [
+      "A) 現在のオープン・モードはV$PDBS、保存された状態はDBA_PDB_SAVED_STATESで確認する。",
+      "B) 現在のオープン・モードはDBA_PDB_SAVED_STATES、保存された状態はV$PDBAで確認する。",
+      "C) 現在のオープン・モードと保存された状態はいずれもV$PDBAのみで確認する。",
+      "D) 現在のオープン・モードはV$DATABASE、保存された状態はV$INSTANCEで確認する。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — PDB의 현재 오픈 모드(READ WRITE, READ ONLY, MOUNTED)는 V$PDBS 뷰의 OPEN_MODE 컬럼으로 확인합니다. ALTER PLUGGABLE DATABASE ... SAVE STATE로 저장된 상태 정보는 DBA_PDB_SAVED_STATES 뷰에서 확인할 수 있으며, 이 뷰에는 저장된 PDB 이름과 오픈 모드 등이 기록됩니다.\n\nB) 오답 — DBA_PDB_SAVED_STATES는 저장된 상태를 확인하는 뷰이며 현재 오픈 모드를 조회하는 뷰가 아닙니다. 또한 V$PDBA라는 뷰는 존재하지 않습니다.\n\nC) 오답 — V$PDBA라는 뷰는 존재하지 않습니다. 현재 오픈 모드와 저장된 상태는 각각 V$PDBS와 DBA_PDB_SAVED_STATES라는 별도의 뷰에서 확인합니다.\n\nD) 오답 — V$DATABASE는 CDB 전체의 데이터베이스 정보(이름, OPEN_MODE, LOG_MODE 등)를 확인하는 뷰이며, 개별 PDB의 오픈 모드를 확인하는 용도가 아닙니다. V$INSTANCE는 인스턴스 상태 정보를 제공하며 SAVE STATE 정보와는 관련이 없습니다.\n\n핵심 개념: PDB 관리에서 V$PDBS 뷰는 PDB의 현재 오픈 모드(OPEN_MODE 컬럼)를 확인하고, DBA_PDB_SAVED_STATES 뷰는 SAVE STATE로 저장된 PDB 상태 정보를 확인합니다. CDB 재기동 시 SAVE STATE 설정이 되어 있으면 저장된 상태로 자동 복원됩니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_033",
+    "title": "マルチテナント環境における共通ユーザーのメタデータ管理の内部動作について正しく述べているものを選択してください。",
+    "options": [
+      "A) 共通ユーザーの認証情報はCDBルートのデータ・ディクショナリにのみ格納され、各PDBにはメタデータ・リンクを通じてユーザー情報が参照される。",
+      "B) 共通ユーザーを作成すると、各PDBに物理的にユーザー情報のコピーが作成され、以降はPDB間で独立して管理される。",
+      "C) 共通ユーザーのメタデータは各PDBのデータ・ディクショナリに個別に格納されるが、CDBルートからの変更はすべてのPDBに即座にレプリケートされる。",
+      "D) 共通ユーザーのパスワードを変更した場合、変更はCDBルートにのみ適用され、各PDBには次回のPDBオープン時に伝播される。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — 공통 사용자의 인증 정보(메타데이터)는 CDB 루트의 데이터 딕셔너리에 저장됩니다. 각 PDB에서는 메타데이터 링크(Metadata Link)를 통해 CDB 루트의 사용자 정보를 참조합니다. 이 메커니즘을 통해 데이터 중복 없이 모든 컨테이너에서 공통 사용자를 인식할 수 있습니다.\n\nB) 오답 — 공통 사용자의 메타데이터는 각 PDB에 물리적으로 복사되는 것이 아니라, 메타데이터 링크를 통해 CDB 루트의 정보를 참조하는 방식입니다. PDB마다 독립적으로 관리되는 것이 아닙니다.\n\nC) 오답 — 공통 사용자의 메타데이터는 각 PDB의 데이터 딕셔너리에 개별적으로 저장되지 않습니다. CDB 루트에 중앙 집중적으로 저장되며, PDB에서는 링크를 통해 참조합니다.\n\nD) 오답 — 공통 사용자의 패스워드를 CDB 루트에서 변경하면 메타데이터 링크 구조에 의해 모든 컨테이너에서 즉시 반영됩니다. PDB의 재기동(CLOSE/OPEN)을 기다릴 필요가 없습니다.\n\n핵심 개념: 멀티테넌트 아키텍처에서 공통 사용자의 메타데이터는 CDB 루트에 중앙 집중적으로 저장되며, 각 PDB에서는 메타데이터 링크를 통해 해당 정보를 참조합니다. 이 설계를 통해 데이터 중복을 방지하면서도 모든 컨테이너에서 일관된 사용자 인식이 가능합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_034",
+    "title": "CDB(コンテナ・データベース)の構造に関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) PDB$SEEDは新規PDB作成時のテンプレートとして使用される読取り専用コンテナであり、CDBから削除することが可能である。",
+      "B) CDB$ROOTはCON_IDが常に1である最上位コンテナであり、共通ユーザーの管理やマスター・データ・ディクショナリの保持を行う。",
+      "C) CDB内のすべてのPDBは独自のオンラインREDOログ・ファイルと制御ファイルを保持する。",
+      "D) ユーザーPDBのCON_IDは必ず2から割り当てられる。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — CDB$ROOT는 CON_ID가 항상 1인 CDB의 최상위 컨테이너입니다. 공통 사용자(Common User, C## 접두사)의 관리와 Oracle 제공 메타데이터의 원본(마스터 데이터 딕셔너리)을 보유하며, CDB 단위 관리 작업의 진입점 역할을 합니다.\n\nA) 오답 — PDB$SEED는 새 PDB 생성 시 템플릿으로 사용되는 읽기 전용 컨테이너이지만, CDB의 필수 구성요소이므로 삭제할 수 없습니다.\n\nC) 오답 — 온라인 Redo Log 파일과 컨트롤 파일은 CDB 전체에서 공유하는 자원입니다. 각 PDB가 독자적으로 보유하지 않습니다.\n\nD) 오답 — CON_ID 2는 PDB$SEED에 할당됩니다. 사용자 PDB의 CON_ID는 3 이상의 값이 부여됩니다.\n\n핵심 개념: CDB는 CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2, 읽기 전용 템플릿), 사용자 PDB(CON_ID=3 이상)로 구성됩니다. 컨트롤 파일과 온라인 Redo Log는 CDB 전체에서 공유되며, 각 PDB는 독립된 데이터 딕셔너리와 테이블스페이스를 보유합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_035",
+    "title": "PDB(Pluggable Database)のオープン・モードについて正しく述べているものを選択してください。",
+    "options": [
+      "A) 新規に作成されたPDBはREAD WRITE状態で自動的にオープンされるため、手動でオープンする必要はない。",
+      "B) PDBをMOUNTED状態にすると、PDBのメタデータのみがロードされ、ユーザーはそのPDB内のデータにアクセスできない。",
+      "C) PDBのオープン・モードをREAD ONLYに変更するには、CDB全体を停止する必要がある。",
+      "D) PDBがREAD WRITEモードで稼働中の場合、他のPDBを独立してMOUNTED状態に変更することはできない。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — PDB가 MOUNTED 상태일 때는 메타데이터만 로드되며, 사용자는 해당 PDB 내의 데이터에 접근할 수 없습니다. PDB를 사용하려면 READ ONLY 또는 READ WRITE 모드로 OPEN해야 합니다.\n\nA) 오답 — 새로 생성된 PDB는 MOUNTED 상태로 생성됩니다. 사용하려면 ALTER PLUGGABLE DATABASE ... OPEN 명령으로 수동으로 오픈해야 합니다.\n\nC) 오답 — PDB의 오픈 모드 변경은 CDB 전체를 중지할 필요 없이, ALTER PLUGGABLE DATABASE ... CLOSE 후 ALTER PLUGGABLE DATABASE ... OPEN READ ONLY 명령으로 개별 PDB 단위로 수행할 수 있습니다.\n\nD) 오답 — CDB 내의 각 PDB는 독립적으로 상태를 관리할 수 있습니다. 하나의 PDB가 READ WRITE로 운영 중이더라도, 다른 PDB를 독립적으로 CLOSE하거나 MOUNTED 상태로 변경할 수 있습니다.\n\n핵심 개념: PDB는 MOUNTED, READ ONLY, READ WRITE, MIGRATE의 4가지 오픈 모드를 가지며, 각 PDB는 CDB 내에서 독립적으로 상태를 전환할 수 있습니다. 새 PDB는 MOUNTED 상태로 생성되므로 수동 OPEN이 필요합니다."
+  }
+]

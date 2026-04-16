@@ -2,78 +2,84 @@
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_041",
-    "title": "DBAがSPFILE環境で以下の操作を順番に実行しました。\n\nSQL> ALTER SYSTEM SET OPEN_CURSORS = 500 SCOPE=SPFILE;\n\nSQL> SELECT value\n     FROM V$PARAMETER\n     WHERE name = 'open_cursors';\n\nVALUE\n----------\n300\n\nSQL> SELECT value\n     FROM V$SPPARAMETER\n     WHERE name = 'open_cursors';\n\nVALUE\n----------\n500\n\nこの結果から読み取れる内容として正しいものを選択してください(2つ選択してください)。",
+    "title": "REDOログ・バッファのサイズ制御およびWrite-Ahead Loggingの原則について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) V$PARAMETERは現在のインスタンス・メモリー上のパラメータ値を表示し、V$SPPARAMETERはSPFILEに記録されたパラメータ値を表示するため、SCOPE=SPFILEで変更した場合は両ビューの値が異なることがある。",
-      "B) V$PARAMETERとV$SPPARAMETERの値が異なっているため、SPFILEの変更に失敗しておりORA-02095エラーが発生している。",
-      "C) この不一致を解消するには、インスタンスを再起動してSPFILEの値をメモリーに反映させるか、ALTER SYSTEM SET OPEN_CURSORS = 500 SCOPE=MEMORYを追加実行する必要がある。",
-      "D) V$SPPARAMETERに表示される値はSPFILEの内容ではなく、次回起動時に適用される予定値をOracleが自動計算したものである。",
-      "E) SCOPE=SPFILEで変更されたパラメータは、SHOW PARAMETERコマンドで確認した場合にSPFILEの値(500)が表示される。"
+      "A) REDOログ・バッファのサイズはLOG_BUFFERパラメータで制御され、ASMM（自動共有メモリー管理）環境においても自動調整の対象外であるためDBAが手動で設定する必要がある。",
+      "B) Write-Ahead Loggingの原則により、DBWnがDirtyバッファをデータ・ファイルに書き込む前に、該当する変更のREDOエントリがLGWRによってオンラインREDOログ・ファイルに書き込まれていなければならない。",
+      "C) REDOログ・バッファのサイズはSGA_TARGETの値に基づいてOracleが自動的に最適値を算出するため、LOG_BUFFERパラメータを設定する必要はない。",
+      "D) Write-Ahead Loggingの原則により、サーバー・プロセスはバッファ・キャッシュ内のデータ・ブロックを変更する前に、必ずREDOエントリをオンラインREDOログ・ファイルに直接書き込む。",
+      "E) LOG_BUFFERパラメータの値を大きく設定すると、LGWRのディスクへの書き込み頻度が減少し、LGWR関連のI/O負荷が軽減される可能性がある。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — Redo Log Buffer의 크기는 LOG_BUFFER 파라미터로 제어됩니다. ASMM(SGA_TARGET 기반)에서 자동 조정되는 구성요소는 Database Buffer Cache, Shared Pool, Large Pool, Java Pool, Streams Pool의 5가지이며, Redo Log Buffer(LOG_BUFFER)는 Keep Pool, Recycle Pool, 비표준 블록 크기 캐시와 함께 자동 조정 대상에서 제외되므로 DBA가 수동으로 설정해야 합니다.\n\nB) 정답 — Write-Ahead Logging 원칙의 핵심은 데이터 블록의 변경 사항이 디스크의 데이터 파일에 기록되기 전에, 해당 변경에 대한 Redo Entry가 반드시 온라인 Redo Log 파일에 먼저 기록되어야 한다는 것입니다. 이를 통해 인스턴스 장애 시 COMMIT된 트랜잭션의 데이터를 Redo Log로부터 복구할 수 있습니다.\n\nC) 오답 — Redo Log Buffer(LOG_BUFFER)는 ASMM의 자동 조정 대상이 아닙니다. SGA_TARGET을 설정하더라도 LOG_BUFFER의 크기는 자동으로 최적화되지 않으며, DBA가 직접 설정해야 합니다.\n\nD) 오답 — Write-Ahead Logging 원칙에서 Redo Entry는 먼저 Redo Log Buffer(메모리)에 기록됩니다. 온라인 Redo Log 파일(디스크)에 직접 기록되는 것이 아니라, LGWR 프로세스가 특정 조건(COMMIT, 1/3 사용 등) 충족 시 Redo Log Buffer의 내용을 디스크에 기록합니다.\n\nE) 오답 — LOG_BUFFER를 크게 설정하면 LGWR의 기록 빈도가 감소할 수 있다는 주장은 단순화된 추론입니다. LGWR은 1/3 사용 조건 외에도 COMMIT, 3초 타임아웃, DBWn 기록 전, 1MB 도달 등 여러 조건에서 기록을 수행하므로, LOG_BUFFER 크기 증가만으로 I/O 부하가 반드시 경감되지는 않습니다. 또한 지나치게 큰 LOG_BUFFER는 인스턴스 복구 시간을 증가시킬 수 있습니다.\n\n핵심 개념: Redo Log Buffer는 LOG_BUFFER 파라미터로 크기를 제어하며 ASMM의 자동 조정 대상이 아닙니다. Write-Ahead Logging 원칙에 의해 DBWn이 Dirty Buffer를 디스크에 기록하기 전에 관련 Redo가 먼저 온라인 Redo Log 파일에 기록되어야 하며, 이 원칙이 인스턴스 장애 시 데이터 복구를 보장합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_042",
+    "title": "REDOログ・バッファの内部構造と動作について正しく述べているものを選択してください。",
+    "options": [
+      "A) REDOログ・バッファに記録されるREDOエントリ(REDOレコード)は1つ以上のChange Vector(変更ベクター)で構成され、各Change Vectorはデータベース内の単一ブロックに対する1つの変更を記述する。",
+      "B) REDOログ・バッファは線形バッファ構造であり、バッファの末尾まで使用されるとLGWRがすべての内容をディスクに書き込んだ後、先頭から書き込みが再開される。",
+      "C) サーバー・プロセスがREDOエントリをREDOログ・バッファに書き込む際、LGWR以外のプロセスがバッファ内のREDOエントリを読み取ることはできない。",
+      "D) 1つのUPDATE文が実行されると、データ・ブロックの変更に対するChange Vectorのみが生成され、UNDOセグメントの変更に対するREDO情報は生成されない。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Redo Entry(Redo Record)는 하나 이상의 Change Vector(변경 벡터)로 구성됩니다. 각 Change Vector는 데이터베이스 내 단일 블록에 대한 하나의 변경을 기술하는 구조로, 변경된 블록의 주소(DBA: Data Block Address), 변경 유형(Operation Code), 변경 전/후 데이터를 포함합니다.\n\nB) 오답 — Redo Log Buffer는 선형(Linear) 버퍼가 아니라 순환(Circular) 버퍼 구조입니다. LGWR이 디스크에 기록한 영역은 즉시 재사용 가능해지며, 버퍼 끝까지 기다리지 않고 연속적으로 공간이 재활용됩니다.\n\nC) 오답 — Redo Log Buffer는 SGA의 일부로 공유 메모리 영역에 위치하므로, LGWR뿐만 아니라 ARCn(아카이버) 프로세스 등 다른 프로세스도 필요 시 버퍼 내용을 참조할 수 있습니다.\n\nD) 오답 — 하나의 UPDATE 문이 실행되면 데이터 블록 변경에 대한 Change Vector뿐만 아니라, UNDO 블록 변경(변경 전 이미지 저장)과 UNDO 세그먼트 헤더 변경(트랜잭션 테이블 갱신)에 대한 Change Vector도 생성됩니다. 즉, UNDO 관련 변경에 대한 Redo 정보도 함께 생성됩니다.\n\n핵심 개념: Redo Entry는 Change Vector의 집합이며, 각 Change Vector는 단일 블록의 변경(블록 주소, 변경 유형, 변경 데이터)을 기술합니다. UPDATE 문 실행 시 데이터 블록, UNDO 블록, UNDO 세그먼트 헤더 등 복수의 블록 변경에 대한 Change Vector가 생성되어 Redo Log Buffer에 기록됩니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_043",
+    "title": "SGAの各構成要素とその対応パラメータの組合せについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Shared PoolのサイズはSHARED_POOL_SIZEパラメータで制御され、内部のLibrary CacheとData Dictionary Cacheのサイズは個別のパラメータではなく共有プール全体の中で自動的に管理される。",
+      "B) Large PoolのサイズはLARGE_POOL_SIZEパラメータで制御され、Shared Poolと同様にLRUリストに基づいてメモリが管理されるため、未使用の領域は他の用途に自動的に再利用される。",
+      "C) Result CacheのサイズはRESULT_CACHE_MAX_SIZEパラメータで制御され、単一のクエリ結果が使用できる最大サイズはRESULT_CACHE_MAX_RESULTパラメータで制限される（デフォルトはResult Cache全体の5%）。",
+      "D) Database Buffer CacheのDEFAULTプール、KEEPプール、RECYCLEプールはすべてDB_CACHE_SIZEパラメータの値の中で内部的に配分される。",
+      "E) Java PoolはJAVA_POOL_SIZEパラメータで制御され、Streams PoolはLARGE_POOL_SIZEパラメータの一部として管理される。"
     ],
     "answer": [
       "A",
       "C"
     ],
-    "explanation": "정답: A, C\nA) 정답 — V$PARAMETER는 현재 인스턴스 메모리에서 사용 중인 파라미터 값을 표시하고, V$SPPARAMETER는 SPFILE에 기록된 파라미터 값을 표시합니다. SCOPE=SPFILE로 변경하면 SPFILE에만 기록되고 현재 메모리에는 반영되지 않으므로, 재기동 전까지 두 뷰의 값이 다를 수 있습니다.\n\nC) 정답 — V$PARAMETER(300)와 V$SPPARAMETER(500)의 불일치를 해소하려면 두 가지 방법이 있습니다. (1) 인스턴스를 재기동하여 SPFILE의 값(500)을 메모리에 반영하거나, (2) ALTER SYSTEM SET OPEN_CURSORS = 500 SCOPE=MEMORY를 실행하여 현재 메모리의 값도 500으로 변경할 수 있습니다. OPEN_CURSORS는 동적 파라미터이므로 SCOPE=MEMORY가 가능합니다.\n\nB) 오답 — V$PARAMETER와 V$SPPARAMETER의 값이 다른 것은 에러가 아닙니다. SCOPE=SPFILE 변경은 정상적으로 성공했으며, 메모리에는 반영하지 않고 SPFILE에만 기록한 것이므로 의도된 불일치입니다. ORA-02095는 정적 파라미터에 SCOPE=MEMORY 또는 SCOPE=BOTH를 지정할 때 발생하는 오류입니다.\n\nD) 오답 — V$SPPARAMETER는 SPFILE에 실제로 기록된 값을 그대로 표시합니다. Oracle이 자동 계산한 예정값이 아니라, ALTER SYSTEM SET ... SCOPE=SPFILE 또는 SCOPE=BOTH로 실제 기록된 값입니다.\n\nE) 오답 — SHOW PARAMETER 명령은 V$PARAMETER와 동일하게 현재 인스턴스 메모리의 파라미터 값을 표시합니다. SCOPE=SPFILE로만 변경한 경우, SHOW PARAMETER는 메모리의 값(300)을 표시하며 SPFILE의 값(500)은 표시하지 않습니다. SPFILE에 기록된 값을 확인하려면 V$SPPARAMETER 뷰를 조회해야 합니다.\n\n핵심 개념: V$PARAMETER(메모리 값)와 V$SPPARAMETER(SPFILE 값)의 비교를 통해 SCOPE=SPFILE로 변경했지만 아직 재기동하지 않은 파라미터를 식별할 수 있습니다. SHOW PARAMETER는 V$PARAMETER와 동일하게 메모리 값을 표시하므로, SPFILE 값 확인에는 V$SPPARAMETER를 사용해야 합니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_042",
-    "title": "Oracle Databaseの起動段階(NOMOUNT、MOUNT、OPEN)において各段階で実行可能な操作について正しく述べているものを選択してください。",
-    "options": [
-      "A) NOMOUNT段階では、初期化パラメータ・ファイルを読み込んでSGAを割り当て、バックグラウンド・プロセスを起動するが、データ・ディクショナリにはアクセスできない。",
-      "B) MOUNT段階では、制御ファイルを開いてデータ・ファイルの位置情報を読み取り、データ・ファイルの内容を検証してユーザー・データへのアクセスが可能になる。",
-      "C) OPEN段階でのみARCHIVELOGモードの変更が実行可能であり、MOUNT段階ではこの操作は許可されない。",
-      "D) MOUNT段階では、CREATE DATABASEコマンドを使用して新しいデータベースを作成することが可能である。"
-    ],
-    "answer": [
-      "A"
-    ],
-    "explanation": "정답: A\nA) 정답 — NOMOUNT 단계에서는 초기화 파라미터 파일(SPFILE 또는 PFILE)을 읽고, 그 설정에 따라 SGA 메모리를 할당하며, SMON, PMON, DBWn, LGWR 등 백그라운드 프로세스를 기동합니다. 이 단계에서는 컨트롤 파일도 아직 열리지 않았으므로 데이터 딕셔너리에 접근할 수 없으며, V$INSTANCE, V$PARAMETER, V$SGA 등 인스턴스 관련 동적 성능 뷰만 조회 가능합니다.\n\nB) 오답 — MOUNT 단계에서는 컨트롤 파일을 열어 데이터 파일과 Redo Log 파일의 경로 정보를 인식하지만, 실제로 데이터 파일을 열거나 내용을 검증하지는 않습니다. 데이터 파일의 검증과 사용자 데이터 접근은 OPEN 단계에서 수행됩니다.\n\nC) 오답 — ARCHIVELOG 모드의 변경(ALTER DATABASE ARCHIVELOG / NOARCHIVELOG)은 MOUNT 단계에서만 가능합니다. OPEN 단계에서는 이 명령을 실행할 수 없습니다.\n\nD) 오답 — CREATE DATABASE 명령은 컨트롤 파일이 아직 존재하지 않는 NOMOUNT 단계에서만 실행 가능합니다. MOUNT 단계에서는 이미 컨트롤 파일이 열려있으므로 새 데이터베이스를 생성할 수 없습니다.\n\n핵심 개념: Oracle 기동 3단계에서 NOMOUNT는 인스턴스만 시작(SGA+프로세스), MOUNT는 컨트롤 파일을 열어 구조 정보 인식, OPEN은 데이터 파일/Redo Log를 열어 사용자 접속을 허용합니다. ARCHIVELOG 변경은 MOUNT에서만, CREATE DATABASE는 NOMOUNT에서만 가능합니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_043",
-    "title": "DBAがAMM(自動メモリー管理)を使用している環境で以下のパラメータを確認しました。\n\nSQL> SHOW PARAMETER memory_target\n\nNAME            VALUE\n--------------  ----------\nmemory_target   8G\n\nSQL> SHOW PARAMETER sga_target\n\nNAME            VALUE\n--------------  ----------\nsga_target      3G\n\nSQL> SHOW PARAMETER pga_aggregate_target\n\nNAME                    VALUE\n---------------------  ----------\npga_aggregate_target    1G\n\nこの環境の動作について正しく述べているものを選択してください。",
-    "options": [
-      "A) SGA_TARGETが3Gに設定されているため、SGAの合計サイズは常に3Gに固定され、MEMORY_TARGETの値に関係なくSGAとPGA間のメモリー再分配は行われない。",
-      "B) MEMORY_TARGETが8Gに設定されているため、Oracle はSGA + PGAの合計が最大8Gとなる範囲内でワークロードに応じてSGAとPGA間のメモリーを自動的に再分配する。SGA_TARGETの3GとPGA_AGGREGATE_TARGETの1Gはそれぞれの最小保証サイズとして機能する。",
-      "C) SGA_TARGETとPGA_AGGREGATE_TARGETが明示的に設定されているため、AMMは無効となり、ASMM(自動共有メモリー管理)として動作する。",
-      "D) MEMORY_TARGETが8Gでありながら、SGA_TARGET(3G)とPGA_AGGREGATE_TARGET(1G)の合計が4Gで半分以下であるため、残り4Gは未使用のまま予約される。"
-    ],
-    "answer": [
-      "B"
-    ],
-    "explanation": "정답: B\nB) 정답 — AMM(자동 메모리 관리) 환경에서는 MEMORY_TARGET이 SGA + PGA의 총 메모리 크기를 지정합니다. MEMORY_TARGET이 8G로 설정되어 있으므로, Oracle은 최대 8G 범위 내에서 워크로드에 따라 SGA와 PGA 간의 메모리를 자동으로 재분배합니다. 이때 SGA_TARGET(3G)과 PGA_AGGREGATE_TARGET(1G)은 각각의 최소 보장 크기(하한선)로 기능하므로, SGA는 3G 미만으로, PGA는 1G 미만으로 축소되지 않습니다.\n\nA) 오답 — AMM 환경에서 SGA_TARGET은 고정 크기가 아닌 최소 보장 크기입니다. MEMORY_TARGET > 0이면 AMM이 활성화되어 SGA와 PGA 간 자동 재분배가 이루어지며, SGA는 워크로드에 따라 3G 이상으로 확장될 수 있습니다.\n\nC) 오답 — MEMORY_TARGET > 0이면 AMM이 활성화됩니다. SGA_TARGET과 PGA_AGGREGATE_TARGET에 0이 아닌 값을 설정하더라도 AMM이 무효화되지 않으며, 해당 값들은 최소 보장 크기로 작동합니다. ASMM이 되려면 MEMORY_TARGET = 0이면서 SGA_TARGET > 0이어야 합니다.\n\nD) 오답 — SGA_TARGET(3G)과 PGA_AGGREGATE_TARGET(1G)은 최소 보장 크기일 뿐이며, Oracle은 나머지 메모리를 워크로드에 따라 SGA 또는 PGA에 동적으로 할당합니다. 미사용 상태로 예약되는 것이 아니라 필요에 따라 활용됩니다.\n\n핵심 개념: AMM은 MEMORY_TARGET > 0일 때 활성화되며, SGA와 PGA를 통합 관리합니다. SGA_TARGET, PGA_AGGREGATE_TARGET에 명시적 값을 설정하면 최소 보장 크기(하한선)로 동작하고, Oracle은 MEMORY_TARGET 범위 내에서 SGA/PGA 간 자동 재분배를 수행합니다."
+    "explanation": "정답: A, C\nA) 정답 — Shared Pool의 크기는 SHARED_POOL_SIZE 파라미터로 제어됩니다. Shared Pool 내부의 Library Cache와 Data Dictionary Cache(Row Cache)는 개별 크기를 지정하는 별도의 파라미터가 없으며, Shared Pool 전체 크기 내에서 Oracle이 자동으로 관리합니다.\n\nC) 정답 — Result Cache의 전체 크기는 RESULT_CACHE_MAX_SIZE 파라미터로 제어됩니다. 단일 쿼리 결과가 사용할 수 있는 최대 크기는 RESULT_CACHE_MAX_RESULT 파라미터로 제한되며, 기본값은 Result Cache 전체의 5%입니다.\n\nB) 오답 — Large Pool은 LARGE_POOL_SIZE 파라미터로 크기가 제어되는 것은 맞지만, Shared Pool과 달리 LRU 리스트로 관리되지 않습니다. Large Pool에 할당된 메모리는 사용이 끝날 때까지 유지되며, 다른 용도로 자동 교체되지 않습니다. 이는 RMAN 백업 등의 대형 메모리 할당이 안정적으로 유지되도록 하기 위함입니다.\n\nD) 오답 — DEFAULT Pool(DB_CACHE_SIZE), KEEP Pool(DB_KEEP_CACHE_SIZE), RECYCLE Pool(DB_RECYCLE_CACHE_SIZE)은 각각 별도의 파라미터로 독립적으로 관리됩니다. DB_CACHE_SIZE 하나의 파라미터로 3개 풀이 내부 배분되는 것이 아닙니다.\n\nE) 오답 — Java Pool은 JAVA_POOL_SIZE 파라미터로 제어되는 것은 맞지만, Streams Pool은 LARGE_POOL_SIZE의 일부가 아니라 STREAMS_POOL_SIZE라는 별도의 파라미터로 독립적으로 관리됩니다.\n\n핵심 개념: SGA 주요 구성요소와 대응 파라미터는 Buffer Cache(DB_CACHE_SIZE), Shared Pool(SHARED_POOL_SIZE), Large Pool(LARGE_POOL_SIZE), Java Pool(JAVA_POOL_SIZE), Streams Pool(STREAMS_POOL_SIZE), Redo Log Buffer(LOG_BUFFER), Result Cache(RESULT_CACHE_MAX_SIZE)로 각각 독립적입니다. Library Cache와 Data Dictionary Cache는 별도 파라미터 없이 Shared Pool 내에서 자동 관리됩니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_044",
-    "title": "CDB環境において、PDB1が現在READ WRITEモードで稼働しています。DBAがCDB$ROOTに接続し、以下のコマンドを実行しました。\n\nSQL> ALTER PLUGGABLE DATABASE pdb1 SAVE STATE;\n\nその後、CDBをSHUTDOWN IMMEDIATEで停止し、再度STARTUPで起動しました。この操作後のPDB1の状態について正しく述べているものを選択してください。",
+    "title": "SGAの各構成要素の用途と特性について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SAVE STATEコマンドの効果により、CDB再起動後にPDB1は自動的にREAD WRITEモードでオープンされる。",
-      "B) SAVE STATEを実行しても、CDB再起動後にPDB1はデフォルトのMOUNTED状態になり、手動でオープンする必要がある。",
-      "C) SAVE STATEコマンドはCDBの停止モードがSHUTDOWN NORMALの場合にのみ有効であり、SHUTDOWN IMMEDIATEでは状態が保存されない。",
-      "D) SAVE STATEコマンドはPDB1のデータをディスクに永続化する操作であり、PDBのオープン・モードの保存とは関係がない。"
+      "A) Database Buffer Cacheはディスクから読み込まれたデータ・ブロックの複製を保持し、LRUリストとTouch Countメカニズムに基づいて、アクセス頻度の高いブロックがキャッシュ内に長く保持されるように管理される。",
+      "B) Large Poolは主にRMAN（Recovery Manager）のバックアップ・リストア用I/Oバッファ、Shared Serverモード時のUGA格納、および並列実行のメッセージ・バッファとして使用される。Large Poolが構成されていない場合、これらの処理はShared Poolから割り当てられる。",
+      "C) Shared Pool内のLibrary Cacheはテーブル名、カラム名、ユーザー権限などのメタデータを行(Row)単位でキャッシュする。",
+      "D) Streams PoolはOracle Streams、Advanced Queuing、Oracle GoldenGateのIntegrated Captureに加え、RMANバックアップのI/Oバッファとしても使用される。",
+      "E) Java PoolはJava Virtual Machine内のJavaコードおよびセッション状態を格納し、同時にPL/SQLのパッケージ変数やカーソル状態も管理する。"
     ],
     "answer": [
-      "A"
+      "A",
+      "B"
     ],
-    "explanation": "정답: A\nA) 정답 — ALTER PLUGGABLE DATABASE ... SAVE STATE 명령은 PDB의 현재 오픈 모드를 기록하여, CDB 재기동 시 해당 PDB가 자동으로 저장된 상태로 오픈되도록 합니다. PDB1이 READ WRITE 상태에서 SAVE STATE를 실행했으므로, CDB 재기동 후 PDB1은 자동으로 READ WRITE 모드로 오픈됩니다.\n\nB) 오답 — SAVE STATE를 실행하지 않은 경우에는 CDB 재기동 시 사용자 PDB가 기본적으로 MOUNTED 상태가 됩니다. 그러나 SAVE STATE를 실행했으므로 PDB1은 자동으로 이전 상태(READ WRITE)로 오픈됩니다.\n\nC) 오답 — SAVE STATE의 효과는 CDB의 종료 모드(NORMAL, IMMEDIATE, TRANSACTIONAL, ABORT)에 관계없이 유지됩니다. SAVE STATE로 저장된 정보는 데이터 딕셔너리에 영구적으로 기록되므로 종료 방식에 영향을 받지 않습니다.\n\nD) 오답 — SAVE STATE 명령은 PDB의 오픈 모드(READ WRITE, READ ONLY 등)를 저장하여 CDB 재기동 시 자동으로 해당 모드로 복원하는 기능입니다. 데이터의 디스크 영속화(체크포인트)와는 무관한 명령입니다.\n\n핵심 개념: ALTER PLUGGABLE DATABASE ... SAVE STATE는 PDB의 현재 오픈 모드를 데이터 딕셔너리에 기록하여, CDB 재기동 시 수동 개입 없이 PDB를 자동으로 이전 상태로 오픈합니다. 이 설정은 CDB 종료 모드에 관계없이 유효합니다."
+    "explanation": "정답: A, B\nA) 정답 — Database Buffer Cache는 데이터 파일에서 읽어온 데이터 블록의 복사본을 메모리에 보관하여 디스크 I/O를 줄이는 역할을 합니다. 내부적으로 LRU List와 Touch Count 메커니즘을 사용하여, 접근 빈도가 높은 블록(인덱스 루트 블록 등)이 캐시에 오래 유지되도록 관리합니다.\n\nB) 정답 — Large Pool은 RMAN 백업/리스토어의 I/O 버퍼, Shared Server 모드 시 UGA(User Global Area) 할당, 병렬 실행의 프로세스 간 메시지 버퍼 등 대형 메모리 할당을 전담합니다. Large Pool이 구성되지 않으면 이러한 메모리 요청이 Shared Pool에서 처리되어, SQL 파싱 캐시와 경쟁하게 되므로 성능 저하가 발생할 수 있습니다.\n\nC) 오답 — 테이블명, 컬럼명, 사용자 권한 등의 메타데이터를 행(Row) 단위로 캐싱하는 것은 Library Cache가 아니라 Data Dictionary Cache(Row Cache)입니다. Library Cache는 SQL/PL/SQL의 파싱 결과(Parse Tree)와 실행 계획(Execution Plan)을 캐싱합니다.\n\nD) 오답 — Streams Pool은 Oracle Streams, Advanced Queuing, GoldenGate Integrated Capture에 사용되는 것은 맞지만, RMAN 백업의 I/O 버퍼로는 사용되지 않습니다. RMAN 백업의 I/O 버퍼는 Large Pool이 담당합니다.\n\nE) 오답 — Java Pool은 JVM 내의 Java 코드와 세션 상태를 저장하는 것은 맞지만, PL/SQL 패키지 변수와 커서 상태를 관리하는 것은 PGA 내의 Session Memory(세션 메모리) 영역입니다.\n\n핵심 개념: SGA 각 구성요소의 용도를 정확히 구분해야 합니다. Buffer Cache는 데이터 블록 캐싱(LRU+Touch Count), Shared Pool의 Library Cache는 SQL 파싱/실행 계획, Data Dictionary Cache는 메타데이터 행 캐싱, Large Pool은 RMAN/Shared Server/병렬처리용, Java Pool은 JVM 코드/데이터, Streams Pool은 데이터 복제/스트리밍용입니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_045",
-    "title": "Oracle Databaseが3つのオンラインREDOログ・グループ(グループ1、2、3)で運用されています。現在、グループ2がCURRENT状態でLGWRが書き込みを行っています。この状態でグループ2のすべてのメンバー・ファイルが格納されているディスクに障害が発生した場合の動作について正しく述べているものを選択してください。",
+    "title": "ASMM（自動共有メモリー管理）環境においてSGA_TARGETを設定した場合のSGA構成要素の管理方法について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) LGWRは次のREDOログ・グループ(グループ3)に自動的にログ・スイッチを実行し、データベースの運用は中断されずに継続する。",
-      "B) CURRENTグループの全メンバーが使用不可能になるため、LGWRはREDO書き込みを継続できず、インスタンスが停止する。",
-      "C) LGWRはディスク障害が復旧するまでREDO書き込みを保留し、その間もユーザー・トランザクションは正常に処理される。",
-      "D) ARCnプロセスがグループ2のアーカイブ済みコピーからREDOデータを読み取り、データベースの運用を継続する。"
+      "A) Database Buffer Cache（DB_CACHE_SIZE）、Shared Pool（SHARED_POOL_SIZE）、Large Pool（LARGE_POOL_SIZE）、Java Pool（JAVA_POOL_SIZE）、Streams Pool（STREAMS_POOL_SIZE）の5つの構成要素がSGA_TARGETの範囲内で自動的にサイズ調整される。",
+      "B) 自動調整される構成要素に対して個別パラメータ（例：DB_CACHE_SIZEやSHARED_POOL_SIZE）に値を設定した場合、その値は自動調整における最小値（下限値）として機能する。",
+      "C) LOG_BUFFER（REDOログ・バッファ）、DB_KEEP_CACHE_SIZE（KEEPプール）、DB_RECYCLE_CACHE_SIZE（RECYCLEプール）もSGA_TARGETの範囲内で自動的にサイズ調整される。",
+      "D) ASMMで自動調整される構成要素のサイズは固定され、ワークロードの変化に応じた動的な再分配は行われない。",
+      "E) SGA_TARGETを設定した場合、PGA_AGGREGATE_TARGETも自動的にSGA_TARGETの値に基づいて決定されるため、個別に設定する必要はない。"
     ],
     "answer": [
+      "A",
       "B"
     ],
-    "explanation": "정답: B\nB) 정답 — CURRENT 상태의 Redo Log 그룹은 LGWR이 현재 기록 중인 그룹입니다. 이 그룹의 모든 멤버 파일이 사용 불가능해지면, LGWR은 Redo 데이터를 기록할 수 없게 됩니다. Redo 기록은 트랜잭션의 영속성(Durability)을 보장하기 위해 필수적이므로, LGWR이 기록할 수 없으면 인스턴스가 즉시 중지됩니다.\n\nA) 오답 — CURRENT 그룹에 장애가 발생해도 자동으로 로그 스위치가 수행되지 않습니다. CURRENT 그룹에는 아직 기록 중인 Redo 데이터가 있으므로, 해당 데이터를 잃지 않기 위해 단순히 다음 그룹으로 전환하는 것은 불가능합니다.\n\nC) 오답 — LGWR이 Redo를 기록할 수 없는 상태에서 사용자 트랜잭션이 정상 처리되는 것은 불가능합니다. Write-Ahead Logging 원칙에 따라 Redo 기록 없이는 어떠한 트랜잭션도 커밋할 수 없으므로, LGWR이 기록 불가능해지면 인스턴스가 중지됩니다.\n\nD) 오답 — ARCn 프로세스는 로그 스위치 발생 시 이전 Redo Log 그룹을 아카이브 로그로 복사하는 역할입니다. CURRENT 그룹의 장애 상황에서 ARCn이 LGWR의 기록을 대체할 수 없습니다.\n\n핵심 개념: Redo Log 멤버 다중화에서 그룹 내 일부 멤버가 손실되면 나머지 멤버로 운영이 계속되지만, CURRENT 그룹의 모든 멤버가 손실되면 LGWR이 Redo를 기록할 수 없어 인스턴스가 즉시 중지됩니다. 이를 방지하기 위해 Redo Log 멤버를 서로 다른 디스크에 다중화하는 것이 중요합니다."
+    "explanation": "정답: A, B\nA) 정답 — ASMM(SGA_TARGET 설정)에서 자동 조정되는 5가지 SGA 구성요소는 Database Buffer Cache(DB_CACHE_SIZE), Shared Pool(SHARED_POOL_SIZE), Large Pool(LARGE_POOL_SIZE), Java Pool(JAVA_POOL_SIZE), Streams Pool(STREAMS_POOL_SIZE)입니다. Oracle은 워크로드를 분석하여 SGA_TARGET 범위 내에서 이 5개 구성요소의 크기를 자동으로 조정합니다.\n\nB) 정답 — 자동 조정 대상 구성요소에 개별 파라미터 값을 설정하면, 해당 값은 자동 조정의 최솟값(하한선)으로 작동합니다. 예를 들어 DB_CACHE_SIZE=200M으로 설정하면, Oracle은 Buffer Cache를 200MB 미만으로 줄이지 않으면서 워크로드에 따라 200MB 이상으로 자동 확장할 수 있습니다.\n\nC) 오답 — LOG_BUFFER(Redo Log Buffer), DB_KEEP_CACHE_SIZE(Keep Pool), DB_RECYCLE_CACHE_SIZE(Recycle Pool)은 ASMM의 자동 조정 대상이 아닙니다. 이들은 DBA가 수동으로 크기를 지정해야 하며, DB_nK_CACHE_SIZE(비표준 블록 크기 캐시)도 마찬가지입니다.\n\nD) 오답 — ASMM에서 자동 조정되는 구성요소의 크기는 고정되지 않습니다. Oracle은 워크로드 변화를 분석하여 SGA_TARGET 범위 내에서 5개 구성요소 간 메모리를 동적으로 재분배합니다. V$SGA_DYNAMIC_COMPONENTS 뷰에서 현재 크기와 조정 이력을 확인할 수 있습니다.\n\nE) 오답 — ASMM에서 SGA_TARGET을 설정하더라도 PGA_AGGREGATE_TARGET은 자동으로 결정되지 않습니다. ASMM은 SGA 내부만 자동 관리하며, PGA는 PGA_AGGREGATE_TARGET 파라미터로 별도로 관리해야 합니다. SGA와 PGA를 통합 관리하려면 AMM(MEMORY_TARGET)을 사용해야 합니다.\n\n핵심 개념: ASMM(SGA_TARGET)은 Buffer Cache, Shared Pool, Large Pool, Java Pool, Streams Pool의 5가지 구성요소를 자동 조정하며, 개별 파라미터 값은 최솟값으로 작동합니다. LOG_BUFFER, Keep/Recycle Pool, 비표준 블록 캐시는 자동 조정 대상이 아니므로 수동 설정이 필요하고, PGA는 PGA_AGGREGATE_TARGET으로 별도 관리합니다."
   }
 ]

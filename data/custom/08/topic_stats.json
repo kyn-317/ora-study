@@ -8,15 +8,20 @@
     "マルチテナントUNDO管理": 1
   },
   "custom_topic_counts": {
-    "UNDOデータの状態管理": 6,
-    "UNDOデータの基礎": 3,
-    "一時UNDO": 2,
-    "マルチテナントUNDO管理": 2,
-    "UNDO_RETENTIONパラメータ": 4,
-    "RETENTION GUARANTEE/NOGUARANTEE": 1,
+    "UNDOデータの状態管理": 7,
+    "UNDOデータの基礎": 4,
+    "一時UNDO": 3,
+    "マルチテナントUNDO管理": 4,
+    "UNDO_RETENTIONパラメータ": 3,
+    "RETENTION GUARANTEE/NOGUARANTEE": 2,
     "ORA-01555(Snapshot Too Old)": 1,
-    "UNDO表領域の作成と切替": 1
+    "UNDO表領域の作成と切替": 2,
+    "ORA-01555 vs ORA-30036トラブルシューティング": 1,
+    "ロールバック内部処理": 1,
+    "V$UNDOSTAT UNDO容量算定": 1,
+    "Flashback QueryとUNDO": 1,
+    "インスタンス・リカバリとUNDO": 1
   },
-  "total_custom": 20,
-  "last_number": "C_08_020"
+  "total_custom": 31,
+  "last_number": "C_08_031"
 }

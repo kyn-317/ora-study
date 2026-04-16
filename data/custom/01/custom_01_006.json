@@ -2,80 +2,82 @@
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_026",
-    "title": "Oracle DatabaseのPGA(Program Global Area)について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "SGAの構成要素であるFixed SGAに関して正しい内容を述べているものを選択してください。",
     "options": [
-      "A) PGAはサーバー・プロセスごとに個別に割り当てられる非共有メモリー領域であり、ソート処理やハッシュ結合に使用されるSQL Work Areaを含む。",
-      "B) PGAのサイズはSGA_TARGETパラメータで制御され、SGA内の一部として管理される。",
-      "C) PGA_AGGREGATE_TARGETパラメータを設定すると、Oracleは全サーバー・プロセスのPGA合計がこの値の範囲内に収まるように各プロセスのWork Area割当てを自動調整する。",
-      "D) PGAにはライブラリ・キャッシュの情報が格納され、SQL文の解析結果を各セッション間で共有する。",
-      "E) Dedicated Server構成ではPGAはサーバー側に存在するが、Shared Server構成ではPGAはクライアント側に移動する。"
+      "A) Fixed SGAのサイズはインスタンス起動時に決定され、動的に変更することはできない。また、サイズを直接指定する初期化パラメータは存在しない。",
+      "B) Fixed SGAはSGA_TARGETの設定に応じて動的にサイズが変更されるASMMの自動調整対象コンポーネントである。",
+      "C) Fixed SGAにはデータ・ディクショナリ・キャッシュとライブラリ・キャッシュのメタデータが格納される。",
+      "D) Fixed SGAのサイズはLOG_BUFFERパラメータの値に比例して増減する。"
     ],
     "answer": [
-      "A",
-      "C"
+      "A"
     ],
-    "explanation": "정답: A, C\nA) 정답 — PGA(Program Global Area)는 각 서버 프로세스에 개별적으로 할당되는 비공유 메모리 영역입니다. PGA에는 정렬(Sort), 해시 조인(Hash Join), 비트맵 병합 등에 사용되는 SQL Work Area, 세션 변수를 저장하는 Session Memory, SQL 실행 상태 정보를 저장하는 Private SQL Area가 포함됩니다.\n\nC) 정답 — PGA_AGGREGATE_TARGET 파라미터를 설정하면 Oracle이 모든 서버 프로세스의 PGA 합계가 이 목표값 범위 내에 유지되도록 각 프로세스의 Work Area 할당을 자동으로 조정합니다. 이를 통해 DBA가 개별 프로세스의 메모리를 수동으로 관리할 필요가 없습니다.\n\nB) 오답 — PGA는 SGA와 별도의 메모리 영역이며, SGA_TARGET이 아닌 PGA_AGGREGATE_TARGET 파라미터로 제어됩니다. SGA는 공유 메모리, PGA는 프로세스 전용 비공유 메모리로 서로 독립적입니다.\n\nD) 오답 — 라이브러리 캐시는 SGA 내의 공유 풀(Shared Pool)에 존재하며, SQL 파싱 결과를 모든 세션이 공유합니다. PGA에는 개별 세션의 Private SQL Area(바인드 변수 값, 실행 상태 정보)가 저장되지만, 이는 세션 간에 공유되지 않습니다.\n\nE) 오답 — PGA는 Dedicated Server, Shared Server 구성 모두에서 서버 측에 존재합니다. Shared Server 구성에서는 세션 관련 정보(UGA)가 PGA가 아닌 SGA(Large Pool 또는 Shared Pool)로 이동하지만, PGA 자체가 클라이언트로 이동하는 것은 아닙니다.\n\n핵심 개념: PGA는 서버 프로세스당 하나씩 할당되는 비공유 메모리로, SQL Work Area, Session Memory, Private SQL Area를 포함합니다. PGA_AGGREGATE_TARGET으로 전체 PGA의 목표 크기를 설정하면 Oracle이 자동으로 Work Area 할당을 조정합니다."
+    "explanation": "정답: A\nA) 정답 — Fixed SGA는 인스턴스 시작 시 크기가 결정되며, 동적으로 변경할 수 없는 고정 크기의 SGA 구성요소입니다. 사용자가 크기를 직접 지정하는 초기화 파라미터는 없으며, Oracle 버전과 플랫폼에 따라 크기가 결정됩니다. V$SGA에서 'Fixed Size'로 확인할 수 있습니다.\n\nB) 오답 — Fixed SGA는 ASMM(자동 공유 메모리 관리)의 자동 조정 대상이 아닙니다. ASMM의 자동 조정 대상은 Database Buffer Cache, Shared Pool, Large Pool, Java Pool, Streams Pool이며, Fixed SGA는 인스턴스 시작 시 크기가 고정됩니다.\n\nC) 오답 — 데이터 딕셔너리 캐시(Row Cache)와 라이브러리 캐시는 Shared Pool의 구성요소입니다. Fixed SGA에는 래치(Latch) 및 락(Lock) 구조의 메모리 주소 정보, 백그라운드 프로세스 간 통신 내부 구조, SGA 내 다른 구성요소의 위치를 가리키는 포인터 등 내부 하우스키핑 정보가 저장됩니다.\n\nD) 오답 — Fixed SGA의 크기는 LOG_BUFFER 파라미터와 무관합니다. Fixed SGA는 Oracle 버전과 플랫폼에 따라 크기가 결정되며, 일반적으로 수 MB 수준의 소규모 영역입니다.\n\n핵심 개념: Fixed SGA는 래치, 락 구조, 내부 포인터 등 Oracle 내부 관리 정보를 저장하는 고정 크기 영역으로, 사용자가 크기를 지정할 수 없습니다. V$SGA에서 'Fixed Size'로 확인되며 일반적으로 수 MB 수준입니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_027",
-    "title": "Oracle DatabaseのSPFILE(サーバー・パラメータ・ファイル)とPFILE(テキスト・パラメータ・ファイル)について正しく述べているものを選択してください。",
+    "title": "ユーザーがSELECT文を実行した際のOracleの内部処理フローについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SPFILEはバイナリ形式のファイルであるため、テキスト・エディタで直接編集するとファイルが破損しインスタンスの起動が不可能になる場合がある。",
-      "B) PFILEを使用している環境では、ALTER SYSTEM SET ... SCOPE=BOTH コマンドでパラメータの変更をファイルに永久反映することが可能である。",
-      "C) インスタンス起動時にSPFILEとPFILEの両方が存在する場合、PFILEが優先的に読み込まれる。",
-      "D) SPFILEが破損した場合、新規にSPFILEを作成するにはデータベースをOPEN状態にする必要がある。"
-    ],
-    "answer": [
-      "A"
-    ],
-    "explanation": "정답: A\nA) 정답 — SPFILE은 바이너리 형식의 파일로, Oracle이 내부적으로 관리합니다. 텍스트 에디터로 직접 편집하면 바이너리 헤더가 손상되어 인스턴스 기동 시 ORA-01078 오류가 발생할 수 있습니다. 파라미터 변경은 반드시 ALTER SYSTEM 명령을 통해 수행해야 합니다.\n\nB) 오답 — PFILE 환경에서는 SCOPE=SPFILE과 SCOPE=BOTH를 사용할 수 없습니다. PFILE 환경의 기본 SCOPE는 MEMORY이며, 파일에 영구 반영하려면 텍스트 에디터로 PFILE을 직접 편집한 후 인스턴스를 재기동해야 합니다.\n\nC) 오답 — 인스턴스 기동 시 파라미터 파일 검색 순서는 spfile<SID>.ora → spfile.ora → init<SID>.ora 순입니다. SPFILE이 PFILE보다 우선합니다.\n\nD) 오답 — SPFILE이 손상된 경우, PFILE(init<SID>.ora)을 수동으로 작성하여 STARTUP PFILE='경로'로 기동한 후 CREATE SPFILE FROM PFILE 명령으로 새 SPFILE을 생성할 수 있습니다. 또는 RMAN의 RESTORE SPFILE FROM AUTOBACKUP으로 복원할 수도 있습니다. OPEN 상태가 필수는 아닙니다.\n\n핵심 개념: SPFILE(바이너리, ALTER SYSTEM으로 변경)은 PFILE(텍스트, 수동 편집)보다 기동 시 우선 검색됩니다. SPFILE 환경에서는 SCOPE=BOTH로 메모리와 파일에 동시 반영이 가능하지만, PFILE 환경에서는 SCOPE=MEMORY만 사용 가능합니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_028",
-    "title": "DBAが現在NOMOUNT状態のインスタンスで以下のSQL文を実行しました。\n\nSQL> SELECT name, value\n     FROM V$PARAMETER\n     WHERE name IN ('control_files', 'db_block_size', 'sga_target');\n\nNAME              VALUE\n----------------  ----------------------------------------\ncontrol_files     /u01/oradata/ORCL/control01.ctl, ...\ndb_block_size     8192\nsga_target        4294967296\n\nこの状況と出力結果について正しく述べているものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) NOMOUNT状態ではV$PARAMETERビューを参照でき、初期化パラメータ・ファイルから読み込まれたパラメータ値が確認できる。",
-      "B) CONTROL_FILESに表示されたパスのファイルは、この時点で既にオープンされ読み込みが完了している。",
-      "C) この状態でCREATE DATABASEコマンドを実行して新規データベースを作成することが可能である。",
-      "D) DB_BLOCK_SIZEの値を変更するために、ALTER SYSTEM SET DB_BLOCK_SIZE=16384 SCOPE=MEMORY を実行することができる。",
-      "E) SGA_TARGETに表示された値は、DBA_TABLESビューから読み込まれたメタデータ情報である。"
+      "A) サーバー・プロセスはまずShared Pool内のライブラリ・キャッシュで同一のSQL文を検索し、存在すれば既存の実行計画を再利用する（ソフト解析）。",
+      "B) SELECT文の実行時に必要なデータ・ブロックがバッファ・キャッシュに存在しない場合、DBWnプロセスがデータ・ファイルからブロックを読み取ってバッファ・キャッシュにロードする。",
+      "C) SELECT文の実行ではバックグラウンド・プロセスは直接関与せず、サーバー・プロセスがデータ・ファイルからのブロック読み取りを含むすべての処理を実行する。",
+      "D) SELECT文のハード解析が発生した場合、サーバー・プロセスはオプティマイザにより実行計画を生成した後、意味分析でデータ・ディクショナリ・キャッシュを参照して検証を行う。",
+      "E) SELECT文の結果データはLGWRプロセスを経由してREDOログ・バッファに一時格納された後、ユーザー・プロセスに返される。"
     ],
     "answer": [
       "A",
       "C"
     ],
-    "explanation": "정답: A, C\nA) 정답 — NOMOUNT 상태에서는 초기화 파라미터 파일(SPFILE 또는 PFILE)이 읽혀 SGA가 할당되고 백그라운드 프로세스가 기동된 상태입니다. V$PARAMETER, V$INSTANCE, V$SGA 등 인스턴스 관련 동적 성능 뷰를 참조할 수 있으며, 파라미터 파일에서 읽어들인 값을 확인할 수 있습니다.\n\nC) 정답 — NOMOUNT 상태에서는 아직 컨트롤 파일이 열리지 않은 상태이므로 새 데이터베이스를 생성하는 CREATE DATABASE 명령을 실행할 수 있습니다. 또한 CREATE CONTROLFILE로 컨트롤 파일을 재생성하거나, RMAN으로 컨트롤 파일을 복원하는 작업도 가능합니다.\n\nB) 오답 — NOMOUNT 상태에서는 파라미터 파일에서 CONTROL_FILES 경로를 읽어들이지만, 실제 컨트롤 파일을 오픈하지는 않습니다. 컨트롤 파일은 MOUNT 단계에서 열립니다.\n\nD) 오답 — DB_BLOCK_SIZE는 정적(Static) 파라미터이며, 데이터베이스 생성 후에는 변경할 수 없습니다. ALTER SYSTEM으로 메모리 값을 변경하는 것이 불가능하므로 ORA-02095 오류가 발생합니다.\n\nE) 오답 — DBA_TABLES는 데이터 딕셔너리 뷰로, 데이터 파일이 열린 OPEN 상태에서만 참조할 수 있습니다. SGA_TARGET의 값은 초기화 파라미터 파일에서 읽어온 것이며, V$PARAMETER는 동적 성능 뷰(V$ 뷰)입니다.\n\n핵심 개념: NOMOUNT 단계에서는 파라미터 파일 읽기, SGA 할당, 백그라운드 프로세스 기동이 완료된 상태입니다. V$PARAMETER, V$SGA 등 인스턴스 관련 V$ 뷰는 조회 가능하지만, 컨트롤 파일은 아직 열리지 않았고, 데이터 딕셔너리(DBA_ 뷰)는 접근할 수 없습니다."
+    "explanation": "정답: A, C\nA) 정답 — 서버 프로세스는 SQL 실행 시 먼저 Shared Pool의 라이브러리 캐시에서 동일한 SQL을 검색합니다. 이미 캐시에 존재하면 기존 실행 계획을 재사용하는 소프트 파스(Soft Parse)가 수행되어 CPU와 메모리 비용을 절약할 수 있습니다.\n\nC) 정답 — SELECT 문 실행은 서버 프로세스가 주도하며, 백그라운드 프로세스는 직접 관여하지 않습니다. 서버 프로세스가 라이브러리 캐시 확인, 버퍼 캐시 검색, 데이터 파일에서의 블록 읽기, 결과 반환까지 모든 처리를 수행합니다.\n\nB) 오답 — 데이터 파일에서 블록을 읽어 버퍼 캐시에 적재하는 것은 DBWn 프로세스가 아닌 서버 프로세스의 역할입니다. DBWn은 버퍼 캐시의 Dirty Buffer를 데이터 파일에 기록(Write)하는 프로세스이며, 읽기(Read)는 서버 프로세스가 직접 수행합니다.\n\nD) 오답 — SQL 처리 흐름은 구문 분석(Syntax Check) → 의미 분석(Semantic Check) → 공유 풀 조회(Shared Pool Check) → 최적화(Optimization) → 행 소스 생성(Row Source Generation)의 순서입니다. 하드 파스 발생 시 추가 수행되는 것은 최적화와 행 소스 생성이며, 의미 분석은 그 이전에 완료됩니다. 이 선택지는 최적화(실행 계획 생성) 후에 의미 분석을 수행한다고 하여 순서가 역전되어 있습니다.\n\nE) 오답 — SELECT 문의 결과 데이터는 LGWR이나 Redo Log Buffer를 경유하지 않습니다. SELECT는 데이터를 변경하지 않으므로 Redo Entry가 생성되지 않으며, 서버 프로세스가 Oracle Net을 통해 결과를 사용자 프로세스에 직접 반환합니다.\n\n핵심 개념: SELECT 문 실행은 서버 프로세스가 전담하며, Shared Pool(라이브러리 캐시) 확인 → 버퍼 캐시 검색 → Cache Miss 시 데이터 파일에서 직접 읽기 → 결과 반환의 흐름을 따릅니다. 백그라운드 프로세스(DBWn, LGWR 등)는 SELECT 처리에 직접 관여하지 않습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_028",
+    "title": "ユーザーがUPDATE文を実行した後にCOMMITを実行した場合のOracle内部の処理について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) COMMIT実行時、LGWRがREDOログ・バッファの内容をオンラインREDOログ・ファイルに書き込み、その書き込みが完了するまでCOMMITは成功として返されない。",
+      "B) UPDATE文の実行時、サーバー・プロセスは変更前のデータ（Before Image）をUNDOセグメントに記録し、そのUNDO変更に関するREDOもREDOログ・バッファに記録する。",
+      "C) COMMITが成功した時点で、変更されたデータ・ブロック（Dirty Buffer）はDBWnによって即座にデータ・ファイルに書き込まれる。",
+      "D) UPDATE文の実行時に生成されるREDO Entryには、変更後のデータのみが含まれ、UNDO情報は含まれない。",
+      "E) COMMIT実行後、DBWnがDirty Bufferをデータ・ファイルに書き込む前にインスタンス障害が発生した場合、COMMITされたトランザクションのデータは失われる。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — COMMIT 실행 시 LGWR은 Redo Log Buffer의 내용을 온라인 Redo Log 파일에 즉시 기록합니다(Log Force at Commit). 이 기록이 완료될 때까지 COMMIT은 성공으로 반환되지 않으며, 이를 통해 트랜잭션의 영속성(Durability)이 보장됩니다.\n\nB) 정답 — UPDATE 실행 시 서버 프로세스는 변경 전 이미지(Before Image)를 Undo 세그먼트에 기록합니다. 또한 Undo 블록의 변경 사항에 대한 Redo도 함께 Redo Log Buffer에 기록됩니다(Undo의 Redo). 이는 인스턴스 복구 시 Undo 데이터도 복원하기 위해 필요합니다.\n\nC) 오답 — COMMIT 성공 시점에 DBWn이 Dirty Buffer를 즉시 데이터 파일에 기록하는 것은 아닙니다. COMMIT은 LGWR에 의한 Redo 기록만으로 완료되며, DBWn은 체크포인트 발생, Dirty Buffer 임계값 초과, Free Buffer 부족, 타임아웃 등의 별도 조건에 의해 비동기적으로 Dirty Buffer를 데이터 파일에 기록합니다.\n\nD) 오답 — Redo Entry(Redo Record)는 하나 이상의 Change Vector로 구성되며, UPDATE의 경우 Undo 블록 변경, 데이터 블록 변경, Undo 세그먼트 헤더 변경 등 여러 Change Vector가 포함됩니다. Undo 변경 사항에 대한 Redo도 기록되므로 UNDO 정보가 포함되지 않는다는 설명은 부정확합니다.\n\nE) 오답 — COMMIT이 성공했다면 해당 트랜잭션의 Redo 데이터가 이미 온라인 Redo Log 파일에 기록되어 있습니다. DBWn이 Dirty Buffer를 데이터 파일에 기록하기 전에 인스턴스 장애가 발생하더라도, 재기동 시 SMON이 Redo Log를 사용하여 Roll Forward(캐시 복구)를 수행하므로 COMMIT된 트랜잭션의 데이터는 복구됩니다.\n\n핵심 개념: DML 실행 시 Undo 기록 → 데이터 블록 변경(Dirty Buffer) → Redo Log Buffer에 Redo Entry 기록의 순서를 따르며, COMMIT 시 LGWR이 Redo를 디스크에 즉시 기록하여 영속성을 보장합니다. COMMIT 성공과 데이터 파일 기록은 분리되어 있으며, DBWn은 비동기적으로 별도 조건에 의해 기록합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_029",
-    "title": "DBAが金曜日の夜にメンテナンス作業のためにデータベースを停止しようとしています。現在、以下の状態であることが確認されています。\n\n・アクティブなユーザーセッション: 50\n・長時間実行中のバッチ処理(未コミット): 1件\n\nDBAはできるだけ早く停止したいが、データの整合性を確保したうえで次回起動時のインスタンス復旧を回避したい。適切な停止モードを選択してください。",
+    "title": "DBAが以下のSQL文を実行してSGAの情報を確認しました。\n\nSQL> SELECT component, current_size/1024/1024 AS size_mb\n     FROM V$SGA_DYNAMIC_COMPONENTS\n     WHERE current_size > 0\n     ORDER BY current_size DESC;\n\nCOMPONENT                        SIZE_MB\n-------------------------------  --------\nDEFAULT buffer cache                 2048\nshared pool                           512\nlarge pool                            128\njava pool                              64\nstreams pool                           32\n\nSQL> SELECT name, value FROM V$SGA;\n\nNAME                      VALUE\n------------------------  -----------\nFixed Size                   9175040\nVariable Size              805306368\nDatabase Buffers          2147483648\nRedo Buffers                 7340032\n\nこの出力結果から読み取れる内容として正しいものを選択してください。",
     "options": [
-      "A) SHUTDOWN NORMAL — すべてのユーザーが自発的にログアウトするまで待機する。",
-      "B) SHUTDOWN TRANSACTIONAL — アクティブなトランザクションが完了するまで待機し、トランザクションのないセッションは即座に切断する。",
-      "C) SHUTDOWN IMMEDIATE — 実行中のSQL文を中止し、未コミット・トランザクションをロールバックしてから停止する。",
-      "D) SHUTDOWN ABORT — インスタンスを即座に強制終了し、次回起動時にSMONがインスタンス復旧を自動実行する。"
+      "A) V$SGA_DYNAMIC_COMPONENTSにFixed SGAが表示されないのは、Fixed SGAがインスタンス起動後にまだ初期化されていないためである。",
+      "B) V$SGAのVariable Sizeには、Shared Pool、Large Pool、Java Pool、Streams Pool、Fixed SGAのサイズが合算されている。",
+      "C) V$SGA_DYNAMIC_COMPONENTSにFixed SGAが含まれていないのは、Fixed SGAが動的にサイズ変更できない固定領域であるためである。",
+      "D) V$SGAのFixed Sizeは約9MBであり、これはDBAがFIXED_SGA_SIZEパラメータで指定した値である。"
     ],
     "answer": [
       "C"
     ],
-    "explanation": "정답: C\nC) 정답 — DBA의 요구 사항은 (1) 빠른 종료, (2) 데이터 정합성 확보, (3) 다음 기동 시 인스턴스 복구 회피입니다. SHUTDOWN IMMEDIATE는 실행 중인 SQL을 즉시 중단하고 미커밋 트랜잭션을 자동 롤백한 후 체크포인트를 수행합니다. Clean Shutdown이므로 다음 기동 시 인스턴스 복구가 필요 없으며, 세션 종료를 기다릴 필요도 없어 빠른 종료가 가능합니다.\n\nA) 오답 — SHUTDOWN NORMAL은 모든 사용자가 자발적으로 로그아웃할 때까지 무한정 대기합니다. 50개의 활성 세션이 있는 상황에서 빠른 종료가 불가능합니다.\n\nB) 오답 — SHUTDOWN TRANSACTIONAL은 활성 트랜잭션이 완료될 때까지 대기합니다. 장시간 실행 중인 배치 처리(미커밋)가 있으므로 해당 배치가 완료될 때까지 종료가 지연될 수 있습니다. 빠른 종료라는 요구 사항에 부합하지 않습니다.\n\nD) 오답 — SHUTDOWN ABORT는 가장 빠르게 종료되지만, 체크포인트를 수행하지 않아 다음 기동 시 인스턴스 복구가 필요합니다. DBA의 요구 사항에서 인스턴스 복구를 회피하고 싶다고 했으므로 적합하지 않습니다.\n\n핵심 개념: 4가지 종료 모드 중 SHUTDOWN IMMEDIATE는 안전성과 속도의 균형이 가장 좋아 실무에서 가장 많이 사용됩니다. 미커밋 트랜잭션을 롤백하고 체크포인트를 수행하여 Clean Shutdown을 보장하며, 세션이나 트랜잭션 완료를 기다리지 않습니다."
+    "explanation": "정답: C\nC) 정답 — V$SGA_DYNAMIC_COMPONENTS 뷰는 SGA의 동적 구성요소(동적으로 크기 조정이 가능한 구성요소)의 정보를 표시합니다. Fixed SGA는 인스턴스 시작 시 크기가 결정되며 동적으로 변경할 수 없는 고정 영역이므로, V$SGA_DYNAMIC_COMPONENTS에 포함되지 않습니다. Fixed SGA의 크기는 V$SGA에서 'Fixed Size'로 확인할 수 있습니다.\n\nA) 오답 — Fixed SGA는 인스턴스 시작 시 바로 할당되고 초기화됩니다. V$SGA_DYNAMIC_COMPONENTS에 표시되지 않는 이유는 초기화되지 않았기 때문이 아니라, 동적 크기 변경이 불가능한 고정 영역이기 때문입니다.\n\nB) 오답 — V$SGA의 Variable Size에는 Shared Pool, Large Pool, Java Pool, Streams Pool 등 SGA의 가변 크기 구성요소가 합산되지만, Fixed SGA는 별도의 'Fixed Size' 행으로 표시됩니다. Fixed SGA는 Variable Size에 포함되지 않습니다.\n\nD) 오답 — Fixed SGA의 크기를 직접 지정하는 FIXED_SGA_SIZE라는 초기화 파라미터는 존재하지 않습니다. Fixed SGA의 크기는 Oracle 버전과 플랫폼에 따라 자동으로 결정되며, 사용자가 직접 지정할 수 없습니다.\n\n핵심 개념: V$SGA는 Fixed Size, Variable Size, Database Buffers, Redo Buffers로 SGA 전체 구성을 보여주며, V$SGA_DYNAMIC_COMPONENTS는 동적으로 크기 조정 가능한 구성요소만 표시합니다. Fixed SGA는 고정 크기 영역이므로 V$SGA에서만 확인 가능하고, 크기를 지정하는 파라미터는 존재하지 않습니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_030",
-    "title": "本番環境のOracle Databaseが突然のサーバー電源障害によりインスタンスが異常停止しました。DBAがSTARTUPコマンドでインスタンスを再起動したところ、アラート・ログに以下の順序で処理が記録されていました。\n\n1. インスタンス復旧(Instance Recovery)の自動実行\n2. データベースOPEN\n3. 障害発生前に異常切断されたセッションのロック解放とトランザクション・ロールバック\n4. 不要な一時セグメントのクリーンアップ\n\n上記の処理1～4を実行するバックグラウンド・プロセスの組合せとして正しいものを選択してください。",
+    "title": "LGWRプロセスがREDOログ・バッファの内容をオンラインREDOログ・ファイルに書き込む条件について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) 1: SMON  2: (起動処理)  3: PMON  4: SMON",
-      "B) 1: PMON  2: (起動処理)  3: SMON  4: PMON",
-      "C) 1: SMON  2: (起動処理)  3: SMON  4: PMON",
-      "D) 1: DBWn  2: (起動処理)  3: PMON  4: DBWn"
+      "A) ユーザーがCOMMITを実行すると、LGWRは該当トランザクションのREDOエントリをオンラインREDOログ・ファイルに書き込み、その完了を待ってからCOMMIT成功をユーザーに返す。",
+      "B) LGWRはREDOログ・バッファの使用量が全体の約3分の1に達した場合にディスクへの書き込みを開始する。",
+      "C) LGWRはDBWnがDirty Bufferをデータ・ファイルに書き込んだ後、関連するREDOをオンラインREDOログ・ファイルに書き込む。",
+      "D) LGWRによるディスクへの書き込みはCOMMIT発生時のみ行われ、それ以外のタイミングでは書き込みは発生しない。",
+      "E) LGWRはサーバー・プロセスがREDOエントリをREDOログ・バッファに記録するたびに、即座にディスクへ書き込みを行う。"
     ],
     "answer": [
-      "A"
+      "A",
+      "B"
     ],
-    "explanation": "정답: A\nA) 정답 — 각 처리를 담당하는 백그라운드 프로세스는 다음과 같습니다:\n1. SMON(System Monitor): 인스턴스 비정상 종료 후 재기동 시, SMON이 자동으로 인스턴스 복구를 수행합니다. Roll Forward(Redo 재적용)로 체크포인트 이후의 모든 변경을 복원한 후, 데이터베이스를 OPEN하고, Roll Back(미커밋 트랜잭션 되돌리기)을 백그라운드에서 계속합니다.\n2. 기동 처리: 데이터베이스 OPEN은 Roll Forward 완료 후 자동으로 진행됩니다.\n3. PMON(Process Monitor): 장애로 비정상 종료된 사용자 세션이 보유하던 락(Lock)을 해제하고, 해당 세션의 미커밋 트랜잭션을 롤백하며, SGA 메모리를 정리합니다.\n4. SMON: 사용되지 않는 임시 세그먼트의 정리(Cleanup)도 SMON이 주기적으로 수행합니다. 인스턴스 복구와 공간 유지관리가 모두 SMON의 역할입니다.\n\nB) 오답 — 인스턴스 복구는 PMON이 아닌 SMON이 수행합니다. PMON은 개별 사용자 프로세스의 장애 정리를 담당하며, 인스턴스 전체의 복구는 SMON의 고유 역할입니다.\n\nC) 오답 — 세션의 락 해제와 트랜잭션 롤백(처리 3)은 SMON이 아닌 PMON이 담당합니다. SMON은 인스턴스 수준의 복구를, PMON은 프로세스 수준의 정리를 담당하는 것으로 역할이 구분됩니다.\n\nD) 오답 — DBWn(Database Writer)은 Buffer Cache의 Dirty Buffer를 데이터 파일에 기록하는 프로세스이며, 인스턴스 복구나 임시 세그먼트 정리와는 무관합니다.\n\n핵심 개념: 인스턴스 비정상 종료 후 복구 과정에서 SMON은 인스턴스 복구(Roll Forward → Open → Roll Back)와 임시 세그먼트 정리를 담당하고, PMON은 장애 세션의 리소스 정리(락 해제, 트랜잭션 롤백, 메모리 반환)를 담당합니다. 두 프로세스의 역할은 시스템 수준(SMON) vs 프로세스 수준(PMON)으로 구분됩니다."
+    "explanation": "정답: A, B\nA) 정답 — 사용자가 COMMIT을 실행하면, LGWR은 해당 트랜잭션의 Redo Entry를 즉시 온라인 Redo Log 파일에 기록합니다(Log Force at Commit). 이 기록이 완료될 때까지 COMMIT은 성공으로 반환되지 않으며, 이를 통해 트랜잭션의 영속성(Durability)이 보장됩니다.\n\nB) 정답 — LGWR은 Redo Log Buffer의 사용량이 전체의 약 1/3에 도달하면 디스크에 기록을 시작합니다. 이는 버퍼 공간 부족을 예방하기 위한 임계값 기반 기록 조건 중 하나입니다.\n\nC) 오답 — Write-Ahead Logging 원칙에 따라 순서가 반대입니다. LGWR이 관련 Redo를 먼저 온라인 Redo Log 파일에 기록한 후에, DBWn이 Dirty Buffer를 데이터 파일에 기록할 수 있습니다. 데이터 블록 변경 사항이 디스크에 기록되기 전에 Redo가 반드시 먼저 기록되어야 합니다.\n\nD) 오답 — LGWR의 디스크 기록은 COMMIT 시에만 발생하는 것이 아닙니다. COMMIT 외에도 버퍼 1/3 사용, 3초 타임아웃, 1MB 축적, DBWn 기록 전 등 여러 조건에서 기록이 발생합니다.\n\nE) 오답 — LGWR은 서버 프로세스가 Redo Entry를 기록할 때마다 즉시 디스크에 기록하지 않습니다. Redo Log Buffer에 일정량이 축적되거나 특정 조건(COMMIT, 1/3 사용, 3초 타임아웃, 1MB, DBWn 기록 전)이 충족될 때 일괄적으로 기록합니다.\n\n핵심 개념: LGWR은 COMMIT 발생, Redo Log Buffer 1/3 사용, 1MB 축적, 3초 타임아웃, DBWn 기록 전의 5가지 조건 중 하나가 충족되면 Redo를 온라인 Redo Log 파일에 기록합니다. Write-Ahead Logging 원칙에 따라 데이터 블록보다 Redo가 반드시 먼저 디스크에 기록되어야 합니다."
   }
 ]

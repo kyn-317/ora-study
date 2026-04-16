@@ -9,7 +9,9 @@
       "C) ウィンドウが閉じると、実行中の自動化メンテナンス・タスクは即座に強制終了され、実行途中のデータはすべてロールバックされる。",
       "D) ウィンドウが閉じた際の自動化メンテナンス・タスクの動作は、DBMS_AUTO_TASK_ADMIN.SET_CLOSE_POLICYプロシージャで制御する。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — 메인터넌스 윈도우가 닫히면 실행 중인 자동 유지관리 태스크에 중단 요청(Stop signal)이 전송됩니다. 미완료된 작업은 다음에 열리는 윈도우에서 클라이언트 우선순위(auto optimizer stats collection: HIGH, sql tuning advisor/auto space advisor: MEDIUM)에 따라 재스케줄됩니다.\n\nB) 오답 — 윈도우가 닫힌 후에도 태스크가 완료될 때까지 계속 실행되는 것이 아닙니다. 윈도우가 닫히면 실행 중인 태스크에 중단 요청이 전송되며, 이때 해당 태스크의 JOB_STATUS는 STOPPED로 기록됩니다.\n\nC) 오답 — 윈도우가 닫힐 때 태스크가 강제 종료되고 데이터가 롤백되는 것이 아닙니다. 중단 요청을 통해 태스크가 정상적으로 중지되며, 미완료 작업은 다음 윈도우에서 이어서 처리됩니다.\n\nD) 오답 — DBMS_AUTO_TASK_ADMIN.SET_CLOSE_POLICY라는 프로시저는 존재하지 않습니다. 윈도우 닫힘 시의 동작은 AutoTask 프레임워크가 자동으로 처리하며, DBA가 별도로 정책을 설정할 필요가 없습니다.\n\n핵심 개념: 메인터넌스 윈도우가 닫히면 실행 중인 자동 유지관리 태스크는 중단 요청을 받고 정상적으로 중지됩니다. 미완료 태스크는 다음 윈도우에서 우선순위에 따라 재스케줄되며, DBA_AUTOTASK_CLIENT_HISTORY에서 JOB_STATUS가 STOPPED로 기록되어 윈도우 종료에 의한 중단임을 확인할 수 있습니다."
   },
   {
@@ -22,7 +24,9 @@
       "C) 後から開こうとしたウィンドウは優先順位に関係なくすべて破棄され、最初に開いたウィンドウのみが有効となる。",
       "D) ウィンドウの中重複が検出されると、データベースはORA-27491エラーを発生させて両方のウィンドウを閉じる。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — 여러 메인터넌스 윈도우가 동시에 열리려고 할 때, window_priority 속성에 따라 우선순위가 판정됩니다. HIGH 우선순위의 윈도우가 도착하면 현재 열려 있는 LOW 우선순위 윈도우를 닫고 대신 열립니다. 같은 우선순위인 경우에는 먼저 열린 윈도우가 유지됩니다.\n\nB) 오답 — 동시에 여러 윈도우가 열리는 것은 허용되지 않습니다. Oracle Scheduler는 한 번에 하나의 윈도우만 활성화하며, 중첩 시 우선순위 규칙에 따라 처리합니다.\n\nC) 오답 — 후에 열리려는 윈도우가 무조건 파기되는 것이 아닙니다. 후에 도착한 윈도우가 더 높은 우선순위(HIGH)를 가진 경우, 현재 열려 있는 낮은 우선순위 윈도우를 닫고 대신 열립니다.\n\nD) 오답 — 윈도우 중첩이 감지되어도 ORA-27491 에러가 발생하여 양쪽 윈도우를 닫는 것이 아닙니다. Oracle Scheduler가 우선순위 규칙에 따라 하나의 윈도우만 활성화하도록 자동으로 처리합니다.\n\n핵심 개념: 메인터넌스 윈도우의 중첩(Overlap) 시 window_priority 속성(LOW/HIGH)에 따라 처리됩니다. 같은 우선순위이면 먼저 열린 윈도우가 유지되고, 높은 우선순위 윈도우가 도착하면 낮은 우선순위 윈도우를 선점합니다. 높은 우선순위 윈도우가 종료되면 중단된 낮은 우선순위 윈도우가 남은 시간 동안 재개될 수 있습니다."
   },
   {
@@ -36,7 +40,10 @@
       "D) AutoTaskフレームワーク全体の無効化はALTER SYSTEM SET AUTO_TASK_DISABLED = TRUEで行う。",
       "E) AutoTaskフレームワーク全体を無効化すると、メンテナンス・ウィンドウ自体も自動的に削除される。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — DBMS_AUTO_TASK_ADMIN.DISABLE을 파라미터 없이 실행하면 AutoTask 프레임워크 전체가 비활성화되어, 3개의 사전 정의된 자동 유지관리 태스크(auto optimizer stats collection, sql tuning advisor, auto space advisor)의 실행이 모두 중단됩니다.\n\nC) 정답 — AutoTask 프레임워크 전체를 비활성화한 후에도, DBMS_AUTO_TASK_ADMIN.ENABLE을 파라미터 없이 실행하면 데이터베이스 재시작 없이 프레임워크 전체를 다시 활성화할 수 있습니다.\n\nB) 오답 — AutoTask 프레임워크 전체를 비활성화하기 위해 3개 태스크를 각각 개별적으로 DISABLE할 필요가 없습니다. DBMS_AUTO_TASK_ADMIN.DISABLE을 파라미터 없이 한 번 실행하면 전체가 비활성화됩니다.\n\nD) 오답 — AUTO_TASK_DISABLED라는 초기화 파라미터는 존재하지 않습니다. AutoTask 전체 비활성화는 DBMS_AUTO_TASK_ADMIN.DISABLE 프로시저를 사용합니다.\n\nE) 오답 — AutoTask 프레임워크 전체를 비활성화해도 메인터넌스 윈도우 자체는 삭제되지 않습니다. 윈도우는 Oracle Scheduler의 객체로 독립적으로 존재하며, AutoTask가 비활성화되더라도 윈도우의 Resource Plan 전환 등 다른 기능은 계속 동작합니다.\n\n핵심 개념: DBMS_AUTO_TASK_ADMIN 패키지는 파라미터 없이 DISABLE/ENABLE을 실행하면 AutoTask 프레임워크 전체를 제어하고, client_name 등의 파라미터를 지정하면 개별 태스크를 제어합니다. 프레임워크 전체 비활성화는 메인터넌스 윈도우의 존재나 동작에 영향을 주지 않으며, 자동 유지관리 태스크의 실행만 중단합니다."
   },
   {
@@ -49,7 +56,9 @@
       "C) 各ウィンドウでのクライアント活性化状態はDBA_AUTOTASK_CLIENTビューのみで確認でき、ウィンドウ単位の情報は提供されない。",
       "D) ウィンドウ単位のクライアント活性化状態を確認するには、DBMS_AUTO_TASK_ADMIN.GET_STATUSファンクションを使用する。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — DBA_AUTOTASK_WINDOW_CLIENTS 뷰를 사용하면 각 메인터넌스 윈도우별로 각 클라이언트(auto optimizer stats collection, sql tuning advisor, auto space advisor)의 활성화/비활성화 상태를 확인할 수 있습니다. 이를 통해 특정 윈도우에서 어떤 태스크가 실행되도록 설정되어 있는지 파악할 수 있습니다.\n\nB) 오답 — V$AUTOTASK_WINDOW_STATUS라는 동적 성능 뷰는 존재하지 않습니다. AutoTask 관련 정보는 V$ 뷰가 아닌 DBA_AUTOTASK_* 계열의 데이터 딕셔너리 뷰로 확인합니다.\n\nC) 오답 — DBA_AUTOTASK_CLIENT 뷰는 클라이언트의 전체 상태 정보를 제공하지만, 윈도우 단위의 활성화 상태는 DBA_AUTOTASK_WINDOW_CLIENTS 뷰에서 별도로 확인할 수 있습니다.\n\nD) 오답 — DBMS_AUTO_TASK_ADMIN.GET_STATUS라는 함수는 존재하지 않습니다. 윈도우별 클라이언트 활성화 상태는 DBA_AUTOTASK_WINDOW_CLIENTS 뷰를 조회하여 확인합니다.\n\n핵심 개념: AutoTask 프레임워크의 모니터링에는 여러 데이터 딕셔너리 뷰가 사용됩니다. DBA_AUTOTASK_CLIENT는 클라이언트 등록 정보, DBA_AUTOTASK_WINDOW_CLIENTS는 윈도우별 클라이언트 활성화 상태, DBA_AUTOTASK_CLIENT_HISTORY는 실행 이력, DBA_AUTOTASK_OPERATION은 세부 작업 목록을 제공합니다."
   },
   {
@@ -62,7 +71,9 @@
       "C) DEFAULT_MAINTENANCE_PLANでは、MAINTENANCE_CONSUMER_GROUPに最も高いリソース優先度が設定されており、SYS_GROUPとOTHER_GROUPSには残りのリソースのみが配分される。",
       "D) DEFAULT_MAINTENANCE_PLANはDBAが手動で作成する必要があるプランであり、データベース作成時には存在しない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — DEFAULT_MAINTENANCE_PLAN은 다중 레벨 CPU 배분(MGMT_P1)에서 SYS_GROUP에 가장 높은 리소스 우선도를 부여하고, MAINTENANCE_CONSUMER_GROUP에 자동 유지관리 태스크를 위한 중간 수준의 리소스를 할당하며, OTHER_GROUPS에 나머지 리소스를 배분하는 구조입니다.\n\nB) 오답 — DEFAULT_MAINTENANCE_PLAN은 모든 소비자 그룹에 균등하게 리소스를 배분하지 않습니다. SYS_GROUP, MAINTENANCE_CONSUMER_GROUP, OTHER_GROUPS에 각각 다른 비율로 리소스를 할당하여, 유지관리 태스크에 적절한 리소스를 보장합니다.\n\nC) 오답 — DEFAULT_MAINTENANCE_PLAN에서 최고 리소스 우선도가 부여되는 것은 MAINTENANCE_CONSUMER_GROUP이 아니라 SYS_GROUP입니다. MGMT_P1 레벨에서 SYS_GROUP이 최고 우선순위, MAINTENANCE_CONSUMER_GROUP이 중간 수준, OTHER_GROUPS가 나머지를 할당받는 구조입니다.\n\nD) 오답 — DEFAULT_MAINTENANCE_PLAN은 DBA가 수동으로 생성하는 것이 아니라, 데이터베이스 생성 시 사전 정의된 Resource Plan으로 자동 생성됩니다. 모든 메인터넌스 윈도우의 기본 resource_plan 속성으로 설정되어 있습니다.\n\n핵심 개념: DEFAULT_MAINTENANCE_PLAN은 데이터베이스 생성 시 자동으로 생성되는 사전 정의된 Resource Plan입니다. MGMT_P1 레벨에서 SYS_GROUP에 최고 우선순위, MAINTENANCE_CONSUMER_GROUP에 중간 수준의 유지관리 태스크용 리소스, OTHER_GROUPS에 나머지를 할당합니다. 이 플랜은 메인터넌스 윈도우가 열릴 때 자동으로 활성화되어 유지관리 작업에 적절한 리소스가 보장됩니다."
   }
 ]

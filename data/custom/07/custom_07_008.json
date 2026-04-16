@@ -1,0 +1,70 @@
+[
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_035",
+    "title": "大量のデータロードを効率化するためにロード前に索引をUNUSABLE状態に設定し、データロードが完了しました。サービスを継続しながら索引を復旧する必要がある場合、適切な対応について正しく述べているものを選択してください。",
+    "options": [
+      "A) ALTER INDEX idx_name REBUILD ONLINEを実行すれば、DML操作と同時にオンラインで索引を再構築できるため、サービス中断を最小限に抑えることができる。UNUSABLE状態の索引の場合、REBUILDは表データのフルスキャンを行って索引を再構築する。",
+      "B) ALTER INDEX idx_name COALESCEを実行すれば、UNUSABLE状態の索引をオンラインで復旧でき、追加のディスク領域も不要である。",
+      "C) ALTER INDEX idx_name REBUILD ONLINEは既存の索引セグメントを読み取って再構築を行うため、UNUSABLE状態（セグメント削除済み）の索引にはREBUILD ONLINEは使用できず、通常のREBUILDのみ使用可能である。",
+      "D) UNUSABLE状態の索引を復旧する前に、まず表のROW MOVEMENTをENABLEに設定する必要がある。ROW MOVEMENTが無効の場合、REBUILDは失敗する。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — ALTER INDEX REBUILD ONLINE은 DML과 동시에 온라인으로 인덱스를 재구축할 수 있어 서비스 중단을 최소화합니다. UNUSABLE 상태의 인덱스는 세그먼트가 삭제되어 있으므로, REBUILD 시 기존 인덱스가 아닌 테이블 데이터의 풀 스캔을 수행하여 인덱스를 새로 구축합니다. REBUILD ONLINE도 동일하게 동작합니다.\n\nB) 오답 — COALESCE는 기존 인덱스 세그먼트 내의 인접한 리프 블록을 통합하는 작업입니다. UNUSABLE 상태에서는 인덱스 세그먼트가 삭제되어 있으므로 COALESCE를 실행할 수 없습니다. COALESCE는 VALID 상태의 인덱스 단편화 해소에만 사용 가능합니다.\n\nC) 오답 — REBUILD ONLINE은 UNUSABLE 상태의 인덱스에도 사용 가능합니다. 기존 인덱스 세그먼트가 아닌 테이블 데이터를 읽어 새로운 인덱스 세그먼트를 생성하므로, 세그먼트 삭제 여부와 관계없이 동작합니다.\n\nD) 오답 — ROW MOVEMENT는 SHRINK SPACE의 전제조건이며, 인덱스 REBUILD에는 필요하지 않습니다. REBUILD는 테이블 데이터를 읽어 인덱스를 재구성하는 작업으로, 행의 물리적 이동(ROWID 변경)과는 관련이 없습니다.\n\n핵심 개념: 대량 데이터 적재 후 UNUSABLE 인덱스 복구 시, REBUILD ONLINE을 사용하면 DML 동시 수행이 가능하여 서비스 중단 없이 인덱스를 복구할 수 있습니다. UNUSABLE 인덱스의 REBUILD는 테이블 풀 스캔으로 수행되며, COALESCE는 세그먼트가 삭제된 UNUSABLE 인덱스에 사용할 수 없습니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_036",
+    "title": "ROW STORE COMPRESS BASICが設定された大規模テーブルにおいて、大量のDELETE処理後に未使用領域を回収する必要があります。この状況での対応として正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 圧縮（COMPRESS）が設定されたテーブルにはALTER TABLE ... SHRINK SPACEを実行できないため、ALTER TABLE MOVEで空間を回収する必要がある。",
+      "B) Oracle 12c Release 2以降では、ALTER TABLE MOVE ONLINEを使用して圧縮テーブルの空間をDML操作と同時に回収できる。MOVE ONLINEは索引を自動的に維持するため、別途REBUILD操作は不要である。",
+      "C) 圧縮テーブルに対してSHRINK SPACEを実行するには、事前にALTER TABLE ... NOCOMPRESSで圧縮設定を解除してからSHRINK SPACEを実行し、その後再度圧縮を設定する手順が必要である。",
+      "D) ALTER TABLE MOVE ONLINE実行後も索引はUNUSABLE状態になるため、圧縮テーブルであるかどうかにかかわらずALTER INDEX ... REBUILDを各索引に対して実行する必要がある。",
+      "E) 圧縮テーブルではSHRINK SPACEもALTER TABLE MOVEも実行できないため、テーブルをDROPして再作成する以外に空間を回収する方法はない。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — 이미 압축(COMPRESS)이 설정된 테이블에는 SHRINK SPACE를 실행할 수 없습니다. SHRINK SPACE는 세그먼트 내에서 행을 재배치하는 작업인데, 압축된 블록의 구조상 행의 재배치가 불가능하기 때문입니다. 따라서 ALTER TABLE MOVE를 사용하여 공간을 회수해야 합니다.\n\nB) 정답 — Oracle 12c R2부터 ALTER TABLE MOVE ONLINE이 지원됩니다. MOVE ONLINE은 DML과 동시에 수행 가능하며, 인덱스를 자동으로 유지하므로 별도의 REBUILD가 필요하지 않습니다. 압축 테이블에 대해서도 MOVE ONLINE을 사용할 수 있습니다.\n\nC) 오답 — ALTER TABLE NOCOMPRESS로 테이블 속성을 변경하더라도, 기존 블록 내의 데이터는 여전히 압축된 형식으로 저장되어 있습니다. NOCOMPRESS 변경 후 SHRINK SPACE를 실행하는 것은 올바른 공간 회수 절차가 아닙니다.\n\nD) 오답 — ALTER TABLE MOVE ONLINE(Online MOVE)을 실행하면 인덱스가 자동으로 유지되어 UNUSABLE 상태가 되지 않습니다. 인덱스가 UNUSABLE 상태가 되는 것은 비Online MOVE(ALTER TABLE MOVE)의 경우입니다.\n\nE) 오답 — 압축 테이블에서 SHRINK SPACE는 불가하지만, ALTER TABLE MOVE는 실행 가능합니다. MOVE는 새로운 세그먼트에 데이터를 복사하여 재구성하므로 압축 설정과 관계없이 사용할 수 있습니다.\n\n핵심 개념: 압축(COMPRESS) 테이블에서는 SHRINK SPACE가 불가하므로 ALTER TABLE MOVE를 사용해야 합니다. Oracle 12c R2 이상에서는 MOVE ONLINE으로 DML 동시 수행과 인덱스 자동 유지가 가능하여, 서비스 중단 없이 압축 테이블의 공간을 회수할 수 있습니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_037",
+    "title": "MSSM（手動セグメント領域管理）テーブルスペースに存在するテーブルにはLONG型の列が含まれています。大量のDELETE処理後にこのテーブルの未使用領域を回収する方法として正しく述べているものを選択してください。",
+    "options": [
+      "A) MSSM環境ではSHRINK SPACEがサポートされず、さらにLONG型の列が含まれるテーブルでもSHRINK SPACEは使用できない。またLONG型の列が存在するテーブルではMOVE ONLINEも使用できないため、通常のALTER TABLE MOVEを実行し、その後すべての索引に対してREBUILDが必要となる。",
+      "B) LONG型の列が含まれるテーブルであっても、MSSM環境から一時的にASSM環境のテーブルスペースにALTER TABLE MOVEで移動してからSHRINK SPACEを実行することで空間を回収できる。",
+      "C) MSSM環境ではSHRINK SPACEが使用できないが、LONG型の列が含まれるテーブルでもALTER TABLE MOVE ONLINEは使用可能であるため、MOVE ONLINEで空間を回収し、索引のREBUILDは不要である。",
+      "D) LONG型の列を含むテーブルではALTER TABLE MOVEもSHRINK SPACEも実行できないため、テーブルからLONG列を削除するか、LOB型に変換してから空間回収を行う必要がある。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — MSSM 환경에서는 SHRINK SPACE가 지원되지 않습니다(ASSM 전용). 또한 LONG 타입 컬럼이 포함된 테이블에서도 SHRINK SPACE는 제약사항에 해당하여 사용할 수 없습니다. LONG 타입은 레거시 데이터 타입으로 Online 재구성을 지원하지 않으므로 ALTER TABLE MOVE ONLINE도 사용할 수 없습니다. 따라서 통상의 ALTER TABLE MOVE(비Online)만 가능하며, 비Online MOVE 실행 후에는 모든 종속 인덱스가 UNUSABLE 상태가 되므로 각 인덱스에 대해 REBUILD가 필요합니다.\n\nB) 오답 — ASSM 테이블스페이스로 이동하더라도 LONG 타입 컬럼이 있는 테이블에는 SHRINK SPACE를 실행할 수 없습니다. SHRINK SPACE의 제약사항에 LONG 타입 컬럼 포함 테이블이 명시되어 있으며, 이는 테이블스페이스의 세그먼트 관리 방식과는 별개의 제약입니다.\n\nC) 오답 — LONG 타입 컬럼이 포함된 테이블에서는 ALTER TABLE MOVE ONLINE을 사용할 수 없습니다. LONG 타입은 Online 재구성을 지원하지 않는 레거시 데이터 타입입니다.\n\nD) 오답 — LONG 타입 컬럼이 포함된 테이블에서도 ALTER TABLE MOVE(비Online)는 실행 가능합니다. SHRINK SPACE만 불가하며, MOVE를 통한 공간 회수는 정상적으로 수행됩니다.\n\n핵심 개념: MSSM + LONG 컬럼 조합에서는 SHRINK SPACE(MSSM 미지원 + LONG 제약)도, MOVE ONLINE(LONG 제약)도 사용할 수 없습니다. 통상의 ALTER TABLE MOVE(비Online)만 가능하며, 실행 후 모든 인덱스의 REBUILD가 필수입니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_038",
+    "title": "ALTER TABLE MOVE ONLINEとALTER TABLE MOVE（非Online）の特性を比較した場合、正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) MOVE ONLINEはDML操作（INSERT、UPDATE、DELETE）を同時に実行しながらテーブルの再構成が可能であるが、非Online MOVEは実行中にテーブルに対するDML操作がブロックされる。",
+      "B) MOVE ONLINEは索引を自動的に維持するため別途REBUILDが不要であるが、非Online MOVEは実行後にすべての依存索引がUNUSABLE状態になるためREBUILDが必要となる。",
+      "C) MOVE ONLINEは既存のセグメント内でデータを再配置するため追加のディスク領域が不要であるが、非Online MOVEは新しいセグメントを作成するため追加の領域が必要である。",
+      "D) MOVE ONLINEでは他のテーブルスペースへのテーブル移動はサポートされないが、非Online MOVEではTABLESPACE句で移動先を指定できる。",
+      "E) 非Online MOVEはMSSM環境でのみ使用可能であり、ASSM環境ではMOVE ONLINEを使用する必要がある。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — ALTER TABLE MOVE ONLINE은 Oracle 12c R2부터 지원되며, DML(INSERT, UPDATE, DELETE)을 동시에 수행하면서 테이블을 재구성할 수 있습니다. 반면 비Online MOVE는 실행 중 테이블에 대한 DML이 차단됩니다.\n\nB) 정답 — MOVE ONLINE은 인덱스를 자동으로 유지하므로 별도의 REBUILD가 필요하지 않습니다. 반면, 비Online MOVE는 실행 후 테이블에 종속된 모든 인덱스가 UNUSABLE 상태가 되므로 각 인덱스에 대해 REBUILD를 수행해야 합니다.\n\nC) 오답 — MOVE ONLINE도 비Online MOVE와 마찬가지로 새로운 세그먼트를 생성하여 데이터를 복사하는 방식이므로, 추가 디스크 공간이 필요합니다. 기존 세그먼트 내에서 동작하여 추가 공간이 불필요한 것은 SHRINK SPACE입니다.\n\nD) 오답 — MOVE ONLINE에서도 TABLESPACE 절을 사용하여 다른 테이블스페이스로 테이블을 이동할 수 있습니다. MOVE ONLINE과 비Online MOVE 모두 테이블스페이스 변경을 지원합니다.\n\nE) 오답 — 비Online MOVE는 ASSM과 MSSM 모두에서 사용 가능합니다. MSSM 환경 전용이 아닙니다. ASSM 환경에서도 비Online MOVE를 사용할 수 있습니다.\n\n핵심 개념: MOVE ONLINE과 비Online MOVE의 핵심 차이점은 DML 동시 수행 가능 여부와 인덱스 자동 유지 여부입니다. 두 방식 모두 새로운 세그먼트를 생성하므로 추가 공간이 필요하며, 테이블스페이스 이동도 모두 지원합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_039",
+    "title": "DBAがテーブルの行移行（Row Migration）と行連鎖（Row Chaining）の状況を調査するために以下のコマンドを実行しました。\n\nANALYZE TABLE hr.employees LIST CHAINED ROWS INTO chained_rows;\n\nこの調査結果と対応策について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) ANALYZE TABLE ... LIST CHAINED ROWSは行移行と行連鎖の両方を検出し、CHAINED_ROWSテーブルに記録する。CHAINED_ROWSテーブル自体は行移行と行連鎖を区別しないため、DBA_TABLESのAVG_ROW_LENとデータベースのブロック使用可能サイズを比較して判別する必要がある。",
+      "B) 行移行が原因であると判別された場合、PCTFREEの値を適切に増加させた上でALTER TABLE MOVEまたはSHRINK SPACEを実行すれば、既存の行移行を解消できる。一方、行連鎖が原因であると判別された場合は、より大きなブロックサイズのテーブルスペースへの移動やテーブルの再設計が必要となる。",
+      "C) CHAINED_ROWSテーブルのHEAD_ROWID列を確認すれば、各行が行移行なのか行連鎖なのかを直接識別できる。HEAD_ROWIDが元のブロックを指している場合は行移行であり、異なるブロックを指している場合は行連鎖と判断する。",
+      "D) 行連鎖が検出された場合、SHRINK SPACEを実行すれば行連鎖を完全に解消できる。行連鎖は行移行と同様に行の物理的位置を最適化すれば解決される問題である。",
+      "E) CHAINED_ROWSテーブルはOracle 12c以降ではデータベース作成時にデフォルトで自動的に作成されるため、utlchain.sqlスクリプトを別途実行する必要はない。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — ANALYZE TABLE ... LIST CHAINED ROWS는 행 이행(Row Migration)과 행 연쇄(Row Chaining) 모두를 감지하여 CHAINED_ROWS 테이블에 기록합니다. 그러나 CHAINED_ROWS 테이블 자체에는 두 현상을 구분하는 컬럼이 없습니다. 구분하려면 DBA_TABLES의 AVG_ROW_LEN과 데이터베이스 블록의 가용 크기(블록 크기 - 블록 헤더 - PCTFREE)를 비교합니다. AVG_ROW_LEN이 블록 가용 크기보다 작으면 주로 행 이행이며, 크면 행 연쇄입니다.\n\nB) 정답 — 행 이행(Row Migration)은 UPDATE로 인해 행 크기가 증가하여 원래 블록에 수용되지 않아 다른 블록으로 전체 행이 이동한 현상입니다. PCTFREE를 적절히 증가시켜 향후 행 이행 발생을 억제하고, ALTER TABLE MOVE 또는 SHRINK SPACE를 실행하여 기존 행 이행을 해소할 수 있습니다. 행 연쇄(Row Chaining)는 행 크기 자체가 블록 크기보다 커서 발생하므로, 더 큰 블록 크기의 테이블스페이스로 이동하거나 테이블을 재설계해야 합니다.\n\nC) 오답 — CHAINED_ROWS 테이블의 HEAD_ROWID 열은 체인/이행된 행의 헤드 행 조각(Head Row Piece)의 ROWID를 기록할 뿐, 행 이행과 행 연쇄를 직접 구분하는 용도가 아닙니다. HEAD_ROWID만으로는 두 현상을 판별할 수 없습니다.\n\nD) 오답 — 행 연쇄(Row Chaining)는 행 크기 자체가 블록 가용 크기보다 커서 여러 블록에 걸쳐 저장되는 구조적 현상입니다. SHRINK SPACE나 ALTER TABLE MOVE로는 해결할 수 없으며, 더 큰 블록 크기 사용이나 테이블 재설계(컬럼 분리 등)가 필요합니다.\n\nE) 오답 — CHAINED_ROWS 테이블은 데이터베이스 생성 시 자동으로 생성되지 않습니다. ANALYZE TABLE ... LIST CHAINED ROWS를 실행하기 전에 $ORACLE_HOME/rdbms/admin/utlchain.sql 스크립트를 실행하여 테이블을 사전에 생성해야 합니다.\n\n핵심 개념: ANALYZE TABLE LIST CHAINED ROWS는 행 이행과 행 연쇄 모두를 감지하지만 구분하지 않습니다. AVG_ROW_LEN과 블록 크기를 비교하여 판별하며, 행 이행은 PCTFREE 조정 + MOVE/SHRINK로 해결하고, 행 연쇄는 블록 크기 변경이나 테이블 재설계가 필요합니다."
+  }
+]

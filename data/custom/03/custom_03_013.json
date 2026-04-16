@@ -1,0 +1,29 @@
+[
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_058",
+    "title": "Oracle Databaseの制限モード(RESTRICTED MODE)に関して正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) STARTUP RESTRICTコマンドでデータベースを起動した場合、CREATE SESSION権限とRESTRICTED SESSION権限の両方を持つユーザーのみが接続できる。",
+      "B) データベースがすでにOPEN状態の場合、ALTER SYSTEM ENABLE RESTRICTED SESSION文を実行すると、現在接続中のすべてのセッションが即座に切断される。",
+      "C) RESTRICTED MODEを解除するにはデータベースを再起動する必要があり、OPEN状態のまま解除することはできない。",
+      "D) ALTER SYSTEM ENABLE RESTRICTED SESSION文を実行するには、SYSDBA権限でなければならず、SYSOPER権限では実行できない。",
+      "E) ALTER SYSTEM DISABLE RESTRICTED SESSION文を実行すると、制限モードが解除され、新規接続にRESTRICTED SESSION権限が不要となる。"
+    ],
+    "answer": ["A", "E"],
+    "explanation": "정답: A, E\nA) 정답 — STARTUP RESTRICT로 데이터베이스를 기동하면, 제한 모드(Restricted Mode)로 OPEN된다. 이 모드에서는 CREATE SESSION 권한과 RESTRICTED SESSION 시스템 권한을 모두 보유한 사용자만 접속할 수 있다. 주로 유지보수, 마이그레이션, 대규모 데이터 로드 시 일반 사용자 접속을 차단할 목적으로 사용된다.\n\nE) 정답 — ALTER SYSTEM DISABLE RESTRICTED SESSION 명령을 실행하면 제한 모드가 해제되어, 이후의 새로운 접속에는 RESTRICTED SESSION 권한이 필요하지 않게 된다. 즉, 데이터베이스를 재기동하지 않고도 OPEN 상태에서 제한 모드를 해제할 수 있다.\n\nB) 오답 — ALTER SYSTEM ENABLE RESTRICTED SESSION을 실행해도 기존에 접속 중인 세션은 끊기지 않는다. 이 명령은 새로운 접속에 대해서만 RESTRICTED SESSION 권한을 요구하도록 변경하며, 이미 접속된 세션에는 영향을 주지 않는다.\n\nC) 오답 — 제한 모드는 데이터베이스를 재기동하지 않아도 해제할 수 있다. OPEN 상태에서 ALTER SYSTEM DISABLE RESTRICTED SESSION 명령을 실행하면 바로 제한 모드가 해제된다.\n\nD) 오답 — ALTER SYSTEM ENABLE RESTRICTED SESSION은 적절한 시스템 권한(ALTER SYSTEM 권한)이 있으면 실행 가능하며, 반드시 SYSDBA로만 실행해야 하는 것은 아니다. SYSOPER 권한으로도 RESTRICTED SESSION 관련 조작이 가능하다.\n\n핵심 개념: 제한 모드(Restricted Mode)는 CREATE SESSION + RESTRICTED SESSION 권한을 가진 사용자만 접속을 허용하는 모드이다. STARTUP RESTRICT로 기동하거나, OPEN 상태에서 ALTER SYSTEM ENABLE/DISABLE RESTRICTED SESSION으로 동적으로 전환할 수 있으며, 기존 접속 중인 세션은 영향을 받지 않는다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_059",
+    "title": "Oracle Databaseの各停止モードとインスタンス・リカバリの関係について正しく述べているものを選択してください。",
+    "options": [
+      "A) SHUTDOWN IMMEDIATEでは実行中のSQL文が即座に中断され、未コミットのトランザクションがロールバックされてからチェックポイントが実行されるため、次回起動時にインスタンス・リカバリは不要である。",
+      "B) SHUTDOWN TRANSACTIONALではアクティブなトランザクションの完了を待機するが、トランザクションのないセッションも自発的に切断されるまで待機するため、SHUTDOWN NORMALと同じ動作となる。",
+      "C) SHUTDOWN ABORTでは未コミットのトランザクションが自動的にロールバックされた後にインスタンスが停止するため、次回起動時のインスタンス・リカバリではロール・フォワードのみが実行される。",
+      "D) SHUTDOWN NORMALでは新規接続を拒否した後、既存セッションのトランザクションを強制的にロールバックし、チェックポイントを実行して停止するため、次回起動時にインスタンス・リカバリは不要である。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — SHUTDOWN IMMEDIATE는 실행 중인 SQL문을 즉시 중단하고, 커밋되지 않은 모든 트랜잭션을 자동으로 롤백한 후 체크포인트를 수행하여 정상 종료(Clean Shutdown)한다. 체크포인트에 의해 모든 Dirty Buffer가 데이터 파일에 기록되고 제어 파일이 업데이트되므로, 다음 기동 시 인스턴스 복구가 필요하지 않다.\n\nB) 오답 — SHUTDOWN TRANSACTIONAL은 활성 트랜잭션이 완료될 때까지만 대기하며, 트랜잭션이 없는 세션은 즉시 종료된다. 이 점이 SHUTDOWN NORMAL과의 핵심 차이점이다. SHUTDOWN NORMAL은 모든 사용자가 자발적으로 로그아웃할 때까지 무한정 대기한다.\n\nC) 오답 — SHUTDOWN ABORT는 롤백이나 체크포인트를 수행하지 않고 인스턴스를 즉시 강제 종료한다. 미커밋 트랜잭션의 롤백이 수행되지 않으므로, 다음 기동 시 인스턴스 복구에서 Roll Forward(Redo 적용)와 Roll Back(미커밋 트랜잭션 취소)이 모두 필요하다.\n\nD) 오답 — SHUTDOWN NORMAL은 기존 세션의 트랜잭션을 강제 롤백하지 않는다. 모든 접속 중인 사용자가 자발적으로 로그아웃할 때까지 대기하며, 모든 세션이 종료된 후 체크포인트를 수행하여 정상 종료한다. 트랜잭션 강제 롤백은 SHUTDOWN IMMEDIATE의 동작이다.\n\n핵심 개념: SHUTDOWN NORMAL, TRANSACTIONAL, IMMEDIATE는 모두 종료 시 체크포인트를 수행하는 정상 종료(Clean Shutdown)이므로 다음 기동 시 인스턴스 복구가 불필요하다. SHUTDOWN ABORT만 체크포인트 없이 즉시 종료되어 인스턴스 복구가 필요하며, TRANSACTIONAL은 트랜잭션이 없는 세션을 즉시 종료하는 점에서 NORMAL과 구별된다."
+  }
+]

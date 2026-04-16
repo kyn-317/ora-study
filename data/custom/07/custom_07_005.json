@@ -2,33 +2,6 @@
   {
     "chapter": "ストレージの管理",
     "number": "C_07_021",
-    "title": "Oracle DatabaseのASSM（自動セグメント領域管理）環境におけるフリー・ブロックの管理方式について正しく述べているものを選択してください。",
-    "options": [
-      "A) ASSMではフリーリスト（Freelist）を使用してブロックの空き領域を管理する。",
-      "B) ASSMではビットマップ・ブロックを使用して各データ・ブロックの空き領域状態を追跡し、高い同時実行性を実現する。",
-      "C) ASSM環境ではPCTFREEとPCTUSEDの両方のパラメータが使用されてINSERT対象ブロックが決定される。",
-      "D) ASSM環境ではSHRINK SPACE操作がサポートされないため、空間回収にはALTER TABLE MOVEのみを使用する。"
-    ],
-    "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — ASSM(Automatic Segment Space Management)은 비트맵 블록을 사용하여 각 데이터 블록의 여유 공간 상태(full, 75-100%, 50-75%, 25-50%, 0-25%, empty)를 추적합니다. 이 비트맵 기반 관리 방식은 Freelist 방식보다 동시 실행성이 높아 다수의 세션이 동시에 INSERT를 수행하는 환경에서 경합을 줄여줍니다.\n\nA) 오답 — Freelist를 사용하여 블록의 빈 공간을 관리하는 것은 MSSM(Manual Segment Space Management) 방식입니다. ASSM에서는 Freelist 대신 비트맵 블록을 사용합니다.\n\nC) 오답 — ASSM 환경에서는 PCTFREE만 사용되며 PCTUSED는 무시됩니다. PCTUSED가 유효한 것은 MSSM 환경에서이며, 블록 사용률이 PCTUSED 이하로 내려가면 다시 Freelist에 등록됩니다.\n\nD) 오답 — ASSM 환경에서 SHRINK SPACE는 지원됩니다. 오히려 SHRINK SPACE는 ASSM 테이블스페이스에서만 사용 가능하며, MSSM에서는 지원되지 않습니다.\n\n핵심 개념: ASSM은 비트맵 블록 기반으로 공간을 관리하여 MSSM의 Freelist 방식보다 높은 동시 실행성을 제공합니다. ASSM에서는 PCTFREE만 유효하고 PCTUSED는 무시되며, SHRINK SPACE는 ASSM에서만 지원됩니다."
-  },
-  {
-    "chapter": "ストレージの管理",
-    "number": "C_07_022",
-    "title": "DBAがSegment Advisorの自動実行結果を確認するため、DBA_ADVISOR_FINDINGSビューを参照したところ、あるテーブルに対して「Enable row movement of the table HR.ORDERS and perform shrink, estimated savings is 1456MB」という推奨が表示されていました。この結果に基づく対応として正しいものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) Segment Advisorの推奨に従い、ALTER TABLE hr.orders ENABLE ROW MOVEMENTを実行した後、ALTER TABLE hr.orders SHRINK SPACEを実行して空間を回収する。",
-      "B) Segment Advisorは空間の無駄を検出するとSHRINK SPACEを自動実行するため、DBAによる手動操作は不要である。",
-      "C) Segment Advisorの推奨結果は自動メンテナンス・タスクとしてメンテナンス・ウィンドウ内で自動的に実行されたものであり、DBA_ADVISOR_RECOMMENDATIONSビューで具体的な推奨アクションの詳細を確認できる。",
-      "D) Segment Advisorが推奨した1456MBの削減量は正確な値であるため、SHRINK SPACE実行後は正確に1456MBが回収されることが保証される。",
-      "E) Segment Advisorの推奨に対応するには、推奨されたSHRINK SPACEではなくALTER TABLE MOVEのみを使用しなければならない。"
-    ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — Segment Advisor의 권고에 따라 ROW MOVEMENT를 활성화한 후 SHRINK SPACE를 실행하는 것은 공간 회수의 표준 운영 절차입니다. SHRINK SPACE의 전제조건인 ROW MOVEMENT ENABLE을 먼저 수행해야 하며, 이후 SHRINK SPACE로 데이터를 재배치하고 HWM을 하향시켜 공간을 회수합니다.\n\nC) 정답 — Auto Segment Advisor는 자동 유지보수 태스크로 유지보수 윈도우(Maintenance Window) 내에서 자동 실행됩니다. 분석 결과는 DBA_ADVISOR_FINDINGS 뷰에서 확인할 수 있으며, 구체적인 권장 조치의 상세 내용은 DBA_ADVISOR_RECOMMENDATIONS와 DBA_ADVISOR_ACTIONS 뷰에서 확인할 수 있습니다.\n\nB) 오답 — Segment Advisor는 공간 낭비를 분석하고 축소를 '권고'할 뿐, SHRINK SPACE를 자동으로 실행하지 않습니다. 실제 축소 작업은 DBA가 권고를 검토한 후 수동으로 수행해야 합니다.\n\nD) 오답 — Segment Advisor가 제시하는 삭감량(estimated savings)은 추정치이며, 실제 SHRINK SPACE 실행 후 회수되는 공간은 추정치와 다를 수 있습니다. 분석 시점과 실행 시점 사이에 DML이 발생하면 상태가 변경될 수 있기 때문입니다.\n\nE) 오답 — Segment Advisor가 SHRINK SPACE를 권고한 경우 그에 따라 SHRINK SPACE를 실행하면 됩니다. ALTER TABLE MOVE도 대안이 될 수 있지만, '반드시 MOVE만 사용해야 한다'는 것은 사실이 아닙니다. SHRINK SPACE와 ALTER TABLE MOVE는 각각 장단점이 있으며, 상황에 맞게 선택합니다.\n\n핵심 개념: Segment Advisor는 유지보수 윈도우에서 자동 실행되어 공간 낭비 세그먼트를 식별하고 SHRINK 권고를 제공합니다. 권고 확인은 DBA_ADVISOR_FINDINGS와 DBA_ADVISOR_RECOMMENDATIONS 뷰를 사용하며, 실제 축소 작업은 DBA가 수동으로 수행해야 합니다."
-  },
-  {
-    "chapter": "ストレージの管理",
-    "number": "C_07_023",
     "title": "Oracle Database 12c Release 2以降で使用可能なALTER TABLE MOVE ONLINE操作に関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) ALTER TABLE MOVE ONLINEの実行中もDML操作（INSERT、UPDATE、DELETE）を同時に実行することができる。",
@@ -37,12 +10,15 @@
       "D) ALTER TABLE MOVE ONLINEはSHRINK SPACEと同様にROW MOVEMENT ENABLEが前提条件として必要である。",
       "E) ALTER TABLE MOVE ONLINEは既存のセグメント内でデータを再配置するため、追加のディスク領域は不要である。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — ALTER TABLE MOVE ONLINE(Oracle 12c R2 이상)은 온라인 테이블 이동을 지원하며, 실행 중에도 INSERT, UPDATE, DELETE 등 DML 작업을 동시에 수행할 수 있습니다. 서비스 중단 없이 테이블을 재구성할 수 있어 가용성이 중요한 운영 환경에 적합합니다.\n\nC) 정답 — ALTER TABLE MOVE ONLINE은 MOVE 시 다른 테이블스페이스로 이동(TABLESPACE 절)하거나, 압축 옵션을 변경(ROW STORE COMPRESS BASIC/ADVANCED)하는 것이 동시에 가능합니다. 이는 SHRINK SPACE에서는 불가능한 기능으로, 대규모 재구성이나 압축 방식 변경 시 유용합니다.\n\nB) 오답 — ALTER TABLE MOVE ONLINE에서는 인덱스가 자동으로 유지관리되어 UNUSABLE 상태가 되지 않습니다. 인덱스가 UNUSABLE이 되는 것은 비Online MOVE(ALTER TABLE MOVE, ONLINE 키워드 미사용)의 경우입니다.\n\nD) 오답 — ROW MOVEMENT ENABLE이 전제조건인 것은 SHRINK SPACE입니다. ALTER TABLE MOVE(Online/비Online 모두)는 ROW MOVEMENT 설정과 관계없이 실행 가능합니다.\n\nE) 오답 — ALTER TABLE MOVE ONLINE은 새 세그먼트를 생성하여 데이터를 재구성하는 방식이므로, 작업 중에 원본 세그먼트와 새 세그먼트가 동시에 존재하여 추가 디스크 공간이 필요합니다. 기존 세그먼트 내에서 동작하여 추가 공간이 불필요한 것은 SHRINK SPACE입니다.\n\n핵심 개념: ALTER TABLE MOVE ONLINE(12c R2+)은 DML 동시 수행 가능, 인덱스 자동 유지, 테이블스페이스/압축 변경 가능이라는 장점이 있습니다. 비Online MOVE와 달리 인덱스가 UNUSABLE이 되지 않으므로 별도의 REBUILD가 불필요합니다. 단, 새 세그먼트를 생성하므로 추가 디스크 공간이 필요합니다."
   },
   {
     "chapter": "ストレージの管理",
-    "number": "C_07_024",
+    "number": "C_07_022",
     "title": "テーブルスペースのNOLOGGING属性とDirect-Path Insertの組合せに関して正しく述べているものを選択してください。",
     "options": [
       "A) NOLOGGINGが設定された表領域でDirect-Path Insertを実行すると、REDOログの生成が最小化されるため、データ・ロードの速度が向上する。",
@@ -50,12 +26,14 @@
       "C) NOLOGGINGが設定された表領域でDirect-Path Insertを実行した場合でも、Data Guard環境のスタンバイ・データベースにはデータが正常に伝播される。",
       "D) データベースまたは表領域にFORCE LOGGINGが設定されている場合でも、NOLOGGINGは優先的に適用されREDO生成が抑制される。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — NOLOGGING이 설정된 테이블스페이스에서 Direct-Path Insert를 실행하면, REDO 로그 생성이 최소화(익스텐트 무효화 정보 수준만 기록)되어 데이터 적재 속도가 향상됩니다. Buffer Cache를 우회하는 Direct-Path 방식과 REDO 최소화가 결합되어 대량 적재 시 최고의 성능을 달성합니다.\n\nB) 오답 — NOLOGGING 설정은 통상적인 INSERT에는 영향을 주지 않으며, Direct-Path Insert(INSERT /*+ APPEND */, CTAS, SQL*Loader Direct Path 등)에서만 REDO 생성이 최소화됩니다. 통상 INSERT는 항상 REDO를 생성합니다.\n\nC) 오답 — NOLOGGING 환경에서 Direct-Path Insert로 적재된 데이터는 REDO 로그에 기록되지 않으므로, Data Guard의 스탠바이 데이터베이스에 데이터가 전파되지 않습니다. 스탠바이에서 해당 데이터파일의 블록은 논리적으로 손상된(logically corrupt) 상태가 되며, 접근 시 오류가 발생합니다.\n\nD) 오답 — FORCE LOGGING이 데이터베이스 또는 테이블스페이스 레벨에서 설정되면 NOLOGGING 설정이 무시되고 강제로 REDO가 생성됩니다. FORCE LOGGING은 Data Guard 환경에서 스탠바이 데이터베이스의 데이터 무결성을 보호하기 위해 사용됩니다.\n\n핵심 개념: Direct-Path Insert와 NOLOGGING의 조합은 대량 적재 시 REDO 생성을 최소화하여 성능을 향상시키지만, Data Guard 스탠바이에 데이터가 전파되지 않는 위험이 있습니다. FORCE LOGGING을 설정하면 NOLOGGING이 무시되어 데이터 보호가 보장됩니다."
   },
   {
     "chapter": "ストレージの管理",
-    "number": "C_07_025",
+    "number": "C_07_023",
     "title": "あるテーブルに対して大量のDELETE操作を実行しCOMMITした後、DBAが当該テーブルに対してSHRINK SPACE COMPACT文を実行しました。この操作後のテーブルの状態に関して正しく述べているものを選択してください。",
     "options": [
       "A) データの再配置が完了し、HWM（最高水位標）も下方に調整されているため、Full Table Scanの性能は改善されている。",
@@ -63,7 +41,41 @@
       "C) SHRINK SPACE COMPACTはデータの再配置を行わず、HWMの下方調整のみを実行する操作である。",
       "D) SHRINK SPACE COMPACTの実行後、テーブルの索引はUNUSABLE状態になっている。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — SHRINK SPACE COMPACT는 세그먼트 끝쪽의 행을 앞쪽 빈 블록으로 재배치(Compaction Phase)만 수행하고, HWM의 하향 조정(HWM Adjustment Phase)은 수행하지 않습니다. Full Table Scan은 HWM까지의 모든 블록을 읽으므로, HWM이 하향되지 않은 상태에서는 성능이 아직 개선되지 않습니다. HWM을 하향시키려면 별도로 SHRINK SPACE를 실행해야 합니다.\n\nA) 오답 — SHRINK SPACE COMPACT는 데이터 재배치만 수행하며 HWM을 하향시키지 않습니다. HWM도 함께 하향되는 것은 COMPACT 없이 SHRINK SPACE를 실행한 경우입니다.\n\nC) 오답 — 설명이 반대입니다. SHRINK SPACE COMPACT는 데이터 재배치를 수행하지만 HWM 하향은 수행하지 않습니다. HWM 하향만 수행하는 별도의 명령은 없으며, COMPACT 후 SHRINK SPACE를 실행하면 이미 재배치가 완료된 상태이므로 HWM 하향만 빠르게 수행됩니다.\n\nD) 오답 — SHRINK SPACE COMPACT 실행 후에도 인덱스는 자동으로 유지관리되어 유효 상태를 유지합니다. 인덱스가 UNUSABLE이 되는 것은 ALTER TABLE MOVE(비Online) 실행 시입니다.\n\n핵심 개념: SHRINK SPACE COMPACT는 데이터 재배치만 수행하고 HWM 하향은 수행하지 않는 1단계 작업입니다. 실무에서는 업무 시간에 COMPACT로 재배치를 수행하고, 유지보수 윈도우에서 SHRINK SPACE로 HWM을 하향시키는 2단계 전략이 활용됩니다. 이를 통해 HWM 하향 시 필요한 짧은 Exclusive Lock의 영향을 최소화합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_024",
+    "title": "DBAがV$SYSSTATビューを使用してシステム統計を確認したところ、以下の結果が得られました。\n\nSQL> SELECT name, value\n     FROM v$sysstat\n     WHERE name = 'table fetch continued row';\n\nNAME                             VALUE\n-------------------------------  ----------\ntable fetch continued row           385000\n\nこの統計値が継続的に増加している場合の分析と対応として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 'table fetch continued row'の値が継続的に増加していることは、行移行（Row Migration）または行連鎖（Row Chaining）が発生していることを示唆しており、追加のI/Oによりパフォーマンスが低下している可能性がある。",
+      "B) 'table fetch continued row'はFull Table Scanの実行回数を示す統計であるため、索引の作成によって解決すべきである。",
+      "C) 行移行が原因である場合、対象テーブルに対してALTER TABLE MOVEまたはSHRINK SPACEを実行してデータを再配置し、行移行を解消することが有効な対策である。",
+      "D) この統計値が高い場合、テーブルのPCTFREEを0%に設定することで行移行の発生を防止できる。",
+      "E) 行連鎖が原因である場合、SHRINK SPACEを実行すれば行連鎖は完全に解消される。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — V$SYSSTAT의 'table fetch continued row' 통계는 행 접근 시 다른 블록으로의 추가 접근(continued fetch)이 발생한 횟수를 나타냅니다. 이 값이 지속적으로 증가하면 Row Migration(행 이동) 또는 Row Chaining(행 연쇄)이 심각한 상태이며, 단일 행 접근 시 추가 I/O가 발생하여 성능이 저하됩니다.\n\nC) 정답 — Row Migration이 원인인 경우, ALTER TABLE MOVE(새 세그먼트에 데이터 재구성) 또는 SHRINK SPACE(기존 세그먼트 내 재배치)를 실행하면 이동된 행이 원래 위치에 재배치되어 포인터 추적이 불필요해집니다. 동시에 PCTFREE를 적절히 증가시켜 향후 Row Migration 재발을 방지하는 것이 권장됩니다.\n\nB) 오답 — 'table fetch continued row'는 Full Table Scan 실행 횟수가 아니라, 행 접근 시 다른 블록으로의 추가 접근 횟수를 나타내는 통계입니다. 인덱스 생성은 이 문제의 해결 방법이 아닙니다.\n\nD) 오답 — PCTFREE를 0%로 설정하면 블록 내에 UPDATE를 위한 여유 공간이 전혀 없으므로, UPDATE로 행 크기가 조금이라도 증가하면 Row Migration이 오히려 더 빈번하게 발생합니다. Row Migration을 방지하려면 PCTFREE를 적절히 증가시켜야 합니다.\n\nE) 오답 — Row Chaining은 행의 전체 크기가 블록 크기보다 큰 구조적 원인으로 발생하므로, SHRINK SPACE로는 해소되지 않습니다. Row Chaining을 해결하려면 더 큰 블록 크기를 사용하는 테이블스페이스로 이동하거나 테이블을 재설계해야 합니다.\n\n핵심 개념: V$SYSSTAT의 'table fetch continued row'는 Row Migration/Chaining 발생 빈도를 모니터링하는 핵심 통계입니다. Row Migration은 PCTFREE 증가와 ALTER TABLE MOVE/SHRINK SPACE로 해결 가능하지만, Row Chaining은 블록 크기 변경이나 테이블 재설계가 필요한 구조적 문제입니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_025",
+    "title": "DBAがMSSM（手動セグメント領域管理）環境のテーブルの空間を回収する必要があります。以下の操作を実行しようとしましたがエラーが発生しました。\n\nSQL> ALTER TABLE hr.orders SHRINK SPACE;\nORA-10636: ROW MOVEMENT is not enabled\n\nSQL> ALTER TABLE hr.orders ENABLE ROW MOVEMENT;\n\nSQL> ALTER TABLE hr.orders SHRINK SPACE;\nORA-10635: Invalid segment or tablespace type\n\nこのエラーの原因と適切な対応策として正しいものを選択してください。",
+    "options": [
+      "A) SHRINK SPACEはASSM（自動セグメント領域管理）環境でのみサポートされるため、MSSM環境ではALTER TABLE MOVEを使用して空間を回収する必要がある。",
+      "B) MSSM環境では先にPCTUSEDの値を0に設定してからSHRINK SPACEを実行する必要がある。",
+      "C) エラーの原因はROW MOVEMENTの設定順序であり、テーブル作成時にROW MOVEMENTを有効にしていれば正常に動作する。",
+      "D) MSSM環境ではSEGMENT CREATION IMMEDIATEを指定してテーブルを再作成する必要がある。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — SHRINK SPACE는 ASSM(Automatic Segment Space Management) 테이블스페이스에서만 지원됩니다. MSSM(Manual Segment Space Management) 환경에서는 비트맵 기반 공간 관리가 아닌 Freelist 방식을 사용하므로 SHRINK SPACE를 실행할 수 없으며, ORA-10635 오류가 발생합니다. 대안으로 ALTER TABLE MOVE를 사용하여 테이블을 새 세그먼트로 재구성함으로써 공간을 회수해야 합니다.\n\nB) 오답 — PCTUSED 값 설정은 SHRINK SPACE의 전제조건과 관련이 없습니다. SHRINK SPACE가 MSSM에서 지원되지 않는 것은 세그먼트 관리 방식(비트맵 vs Freelist)의 차이 때문이며, PCTUSED를 변경해도 해결되지 않습니다.\n\nC) 오답 — ROW MOVEMENT의 설정 시점(테이블 생성 시 vs 이후)은 SHRINK SPACE 동작에 영향을 주지 않습니다. 첫 번째 ORA-10636 오류는 ROW MOVEMENT가 비활성 상태였기 때문이고, ROW MOVEMENT를 활성화한 후에도 발생한 ORA-10635 오류는 MSSM 테이블스페이스에서 SHRINK가 지원되지 않기 때문입니다.\n\nD) 오답 — SEGMENT CREATION IMMEDIATE는 지연 세그먼트 생성과 관련된 설정으로, SHRINK SPACE의 실행 가능 여부와는 무관합니다. MSSM 환경에서 공간을 회수하려면 ALTER TABLE MOVE를 사용해야 합니다.\n\n핵심 개념: SHRINK SPACE의 전제조건은 ROW MOVEMENT ENABLE과 ASSM 테이블스페이스입니다. MSSM 환경에서는 ALTER TABLE MOVE가 공간 회수의 대안이며, MOVE 후에는 인덱스가 UNUSABLE 상태가 되므로 ALTER INDEX REBUILD가 필요합니다."
   }
 ]

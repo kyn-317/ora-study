@@ -9,7 +9,9 @@
       "C) ORA-30036エラーが発生した場合、UNDO_RETENTIONの値を増やすことで問題を解決できる。",
       "D) ORA-30036エラーはRETENTION NOGUARANTEE設定時にのみ発生する可能性があるエラーである。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — ORA-30036은 UNDO 테이블스페이스에 새로운 Extent를 할당할 공간이 부족할 때 발생하는 에러입니다. 즉시 대응으로 ALTER DATABASE DATAFILE ... RESIZE 또는 ALTER TABLESPACE ... ADD DATAFILE로 데이터 파일 크기를 확장하거나 추가하여 공간을 확보할 수 있습니다.\n\nB) 오답 — 장기 실행 쿼리가 필요로 하는 UNDO 데이터가 이미 덮어쓰여진 경우 발생하는 에러는 ORA-01555(Snapshot Too Old)입니다. ORA-30036은 UNDO 공간 부족으로 DML 트랜잭션이 실패하는 에러입니다.\n\nC) 오답 — ORA-30036은 UNDO 공간 부족으로 발생하므로 UNDO_RETENTION을 늘리면 오히려 더 많은 UNEXPIRED Extent가 보존되어 가용 공간이 줄어들고 문제가 악화될 수 있습니다. NOGUARANTEE 모드에서는 UNDO_RETENTION을 줄이는 것이 대응 방법 중 하나입니다.\n\nD) 오답 — ORA-30036은 RETENTION GUARANTEE 설정 시 오히려 발생 위험이 더 높습니다. GUARANTEE 모드에서는 UNEXPIRED Extent를 재사용할 수 없어 공간 부족이 발생하면 새 트랜잭션이 실패합니다. NOGUARANTEE 모드에서는 UNEXPIRED Extent를 강제 재사용하여 ORA-30036을 회피할 수 있습니다.\n\n핵심 개념: ORA-30036은 UNDO 테이블스페이스 공간 부족 시 발생하며, 데이터 파일 확장/추가로 즉시 대응합니다. ORA-01555(읽기 일관성 실패)와는 원인과 대응이 다르며, RETENTION GUARANTEE 설정 시 ORA-30036 위험이 높아지는 반면 ORA-01555 위험은 낮아지는 트레이드오프 관계입니다."
   },
   {
@@ -23,7 +25,10 @@
       "D) SELECT操作の場合にも読取り一貫性を確保するためにUNDOデータが生成される。",
       "E) UNDOデータの変更内容はREDOログには記録されないためアーカイブ・ログからは復旧できない。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — INSERT 작업의 경우, 삽입된 행의 ROWID가 UNDO 데이터로 저장됩니다. 롤백 시 해당 ROWID를 사용하여 삽입된 행을 삭제하여 원래 상태로 복원합니다.\n\nC) 정답 — DELETE 작업의 경우, 삭제 전의 전체 행 데이터가 UNDO 데이터로 저장됩니다. 롤백 시 이 전체 행 데이터를 사용하여 행을 다시 삽입합니다.\n\nB) 오답 — UPDATE 작업의 경우, UNDO 데이터로 저장되는 것은 변경 후의 새로운 값이 아니라 변경 전의 컬럼 값(Before Image)입니다. 롤백 시 이 이전 값으로 복원합니다.\n\nD) 오답 — SELECT 작업은 데이터를 변경하지 않으므로 UNDO 데이터를 생성하지 않습니다. SELECT는 다른 세션이 생성한 기존 UNDO 데이터를 읽기 일관성(CR 블록 생성)을 위해 사용할 수 있지만, SELECT 자체가 UNDO를 생성하는 것은 아닙니다.\n\nE) 오답 — UNDO 데이터에 대한 변경도 Redo 로그에 기록됩니다. 이를 통해 장애 복구(Instance Recovery, Media Recovery) 시 UNDO 세그먼트도 함께 복구할 수 있으며, 미커밋 트랜잭션의 롤백이 가능합니다.\n\n핵심 개념: DML 유형별 UNDO 데이터 내용은 INSERT(삽입된 행의 ROWID), UPDATE(변경 전 컬럼 값), DELETE(삭제 전 전체 행)로 각각 다릅니다. UNDO 데이터의 변경도 Redo 로그에 기록되어 장애 복구 시 UNDO 세그먼트를 복구하고 미커밋 트랜잭션을 롤백할 수 있습니다."
   },
   {
@@ -36,7 +41,9 @@
       "C) 一時UNDOを使用するとData Guard Standbyデータベースにも一時UNDOデータが自動的に転送される。",
       "D) 一時UNDOが有効な場合、V$UNDOSTATビューでTemporary UNDOの使用統計を確認できる。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — Temporary UNDO 데이터는 Temp 테이블스페이스 내에 Temporary Undo Segment로 저장됩니다. 정렬(Sort)이나 해시 조인(Hash Join) 작업과 동일한 Temp 공간을 공유하므로, 대량의 GTT 작업 시 Temp 테이블스페이스의 크기를 사전에 충분히 확보해야 합니다.\n\nA) 오답 — GTT와 영구 테이블을 모두 조작하는 혼합 트랜잭션(Mixed Transaction)에서는 GTT용 Temporary UNDO와 일반 UNDO가 동시에 생성됩니다. Temporary UNDO만 생성되는 것이 아닙니다.\n\nC) 오답 — Temporary UNDO는 Data Guard Standby 데이터베이스로 전파되지 않습니다. GTT 데이터는 세션/트랜잭션 범위의 일시적인 데이터이므로 인스턴스 복구 대상이 아니며, Redo 로그에도 기록되지 않습니다.\n\nD) 오답 — Temporary UNDO의 사용 통계는 V$UNDOSTAT가 아닌 V$TEMPUNDOSTAT 뷰에서 확인합니다. V$TEMPUNDOSTAT는 10분 간격으로 Temporary UNDO 블록 수, 트랜잭션 수, 최대 동시성 등의 통계를 제공합니다.\n\n핵심 개념: Temporary UNDO는 Temp 테이블스페이스 내 Temporary Undo Segment에 저장되며, Sort/Hash 작업과 공간을 공유합니다. 혼합 트랜잭션에서는 GTT용과 영구 테이블용 UNDO가 동시에 생성되고, Data Guard Standby로는 전파되지 않으며, 사용 통계는 V$TEMPUNDOSTAT 뷰로 모니터링합니다."
   },
   {
@@ -49,7 +56,9 @@
       "C) ローカルUNDOモードへの切り替え後、CDB$ROOTの既存のUNDO表領域は即座に削除される。",
       "D) ローカルUNDOモードへの切り替え後も各PDBのUNDO表領域は手動で作成する必要がある。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — 공유 UNDO 모드에서 로컬 UNDO 모드로 전환하려면 먼저 CDB를 종료(SHUTDOWN IMMEDIATE)한 후, STARTUP UPGRADE 모드로 기동합니다. 이 상태에서 ALTER DATABASE LOCAL UNDO ON을 실행하고, CDB를 다시 재시작합니다.\n\nA) 오답 — ALTER DATABASE LOCAL UNDO ON은 데이터베이스가 OPEN 상태가 아닌 STARTUP UPGRADE 모드에서 실행해야 합니다. UNDO 모드 전환은 CDB 다운타임이 필수적으로 필요한 작업입니다.\n\nC) 오답 — 로컬 UNDO 모드로 전환 후에도 CDB$ROOT의 기존 UNDO 테이블스페이스는 즉시 삭제되지 않습니다. 기존 UNDO 데이터가 만료(EXPIRED)될 때까지 점진적으로 유지됩니다.\n\nD) 오답 — 로컬 UNDO 모드로 전환 시 CDB를 재시작하면 각 PDB에 UNDO 테이블스페이스가 자동으로 생성됩니다. DBA가 수동으로 생성할 필요가 없으며, 전환 전 PDB 수에 따른 디스크 공간을 사전에 확보해야 합니다.\n\n핵심 개념: UNDO 모드 전환(공유 → 로컬)은 SHUTDOWN IMMEDIATE → STARTUP UPGRADE → ALTER DATABASE LOCAL UNDO ON → SHUTDOWN IMMEDIATE → STARTUP 순서로 수행합니다. CDB 다운타임이 필수이며, 전환 후 각 PDB에 UNDO 테이블스페이스가 자동 생성되므로 사전 디스크 공간 확보가 필요합니다."
   },
   {
@@ -62,7 +71,9 @@
       "C) UNEXPIRED状態のエクステントは新しいトランザクションのUNDO領域としてEXPIRED状態より優先的に再使用される。",
       "D) UNEXPIRED状態からEXPIRED状態への遷移はDBAがALTER TABLESPACE文で手動で実行する必要がある。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — RETENTION NOGUARANTEE 모드(기본)에서 UNDO 공간이 부족하면, UNEXPIRED 상태의 Extent가 강제로 EXPIRED로 전환되어 재사용될 수 있습니다. 이 경우 ORA-01555(Snapshot Too Old) 에러 발생 위험이 증가합니다.\n\nA) 오답 — 트랜잭션이 아직 완료되지 않은 실행 중인 UNDO Extent의 상태는 ACTIVE입니다. UNEXPIRED는 트랜잭션이 COMMIT 또는 ROLLBACK으로 완료된 후 UNDO_RETENTION 기간이 아직 경과하지 않은 상태를 나타냅니다.\n\nC) 오답 — 새로운 트랜잭션의 UNDO 공간 할당 시 EXPIRED 상태의 Extent가 우선적으로 재사용됩니다. UNEXPIRED Extent는 EXPIRED Extent가 부족하고 새 Extent 할당도 불가능한 경우에 최후 수단으로 강제 재사용됩니다.\n\nD) 오답 — UNEXPIRED에서 EXPIRED로의 상태 전이는 UNDO_RETENTION으로 지정된 시간이 경과하면 Oracle이 자동으로 수행합니다. DBA가 수동으로 실행할 필요가 없습니다.\n\n핵심 개념: UNEXPIRED 상태는 트랜잭션 완료 후 UNDO_RETENTION 기간 내의 Extent로, 장기 쿼리의 읽기 일관성과 Flashback 기능을 지원합니다. NOGUARANTEE 모드에서는 공간 부족 시 강제 재사용이 가능하며(ORA-01555 위험), UNDO_RETENTION 경과 후 자동으로 EXPIRED로 전이됩니다."
   }
 ]

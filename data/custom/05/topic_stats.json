@@ -7,21 +7,33 @@
     "ユーザー認証": 1,
     "システム権限とオブジェクト権限(ADMIN/GRANT OPTION)": 2,
     "ロール管理": 1,
-    "プロファイル(リソース/パスワード)": 1,
     "権限分析(DBMS_PRIVILEGE_CAPTURE)": 1
   },
+  "note_migrated_to_ch11": "原本05_006(プロファイル)はch11帰属。original_topic_ratioから除外済み。",
   "custom_topic_counts": {
     "テーブルスペース割当て制限(QUOTA)": 1,
-    "共通ユーザーとローカル・ユーザー": 4,
-    "ユーザー認証": 5,
+    "共通ユーザーとローカル・ユーザー": 3,
+    "ユーザー認証": 4,
     "システム権限とオブジェクト権限(ADMIN/GRANT OPTION)": 8,
     "ロール管理": 4,
-    "プロファイル(リソース/パスワード)": 4,
-    "権限分析(DBMS_PRIVILEGE_CAPTURE)": 1,
+    "権限分析(DBMS_PRIVILEGE_CAPTURE)": 3,
     "CREATE SESSION権限とログイン": 1,
     "CREATE USER構文(QUOTA/TABLESPACE)": 1,
-    "Schema-Onlyアカウント": 1
+    "Schema-Onlyアカウント": 2,
+    "OS認証": 2,
+    "デフォルト・アカウント・セキュリティ": 3,
+    "共通ロールとローカル・ロール": 3,
+    "権限階層(直接権限vsロール権限)": 3,
+    "OS認証とパスワードファイル(REMOTE_LOGIN_PASSWORDFILE)": 2,
+    "GRANT/REVOKE連鎖効果(多重ユーザー)": 2,
+    "CONTAINER=ALL/CURRENT権限範囲": 2,
+    "ユーザー認証方式比較(4種類)": 2,
+    "ADMIN OPTIONとGRANT OPTIONの取消し差異": 2,
+    "パスワードファイル(orapwd)管理": 1,
+    "Secure Application Role": 1,
+    "共通ユーザー権限付与時のCONTAINERデフォルト値": 1,
+    "PUBLICに付与された権限と保安リスク": 1
   },
-  "total_custom": 30,
-  "last_number": "C_05_030"
+  "total_custom": 52,
+  "last_number": "C_05_052"
 }

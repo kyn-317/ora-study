@@ -1,0 +1,81 @@
+[
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_031",
+    "title": "Oracle DatabaseのSPFILE(サーバー・パラメータ・ファイル)とPFILE(テキスト・パラメータ・ファイル)について正しく述べているものを選択してください。",
+    "options": [
+      "A) SPFILEはバイナリ形式のファイルであるため、テキスト・エディタで直接編集するとファイルが破損しインスタンスの起動が不可能になる場合がある。",
+      "B) PFILEを使用している環境では、ALTER SYSTEM SET ... SCOPE=BOTH コマンドでパラメータの変更をファイルに永久反映することが可能である。",
+      "C) インスタンス起動時にSPFILEとPFILEの両方が存在する場合、PFILEが優先的に読み込まれる。",
+      "D) SPFILEが破損した場合、新規にSPFILEを作成するにはデータベースをOPEN状態にする必要がある。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — SPFILE은 바이너리 형식의 파일로, Oracle이 내부적으로 관리합니다. 텍스트 에디터로 직접 편집하면 바이너리 헤더가 손상되어 인스턴스 기동 시 ORA-01078 오류가 발생할 수 있습니다. 파라미터 변경은 반드시 ALTER SYSTEM 명령을 통해 수행해야 합니다.\n\nB) 오답 — PFILE 환경에서는 SCOPE=SPFILE과 SCOPE=BOTH를 사용할 수 없습니다. PFILE 환경의 기본 SCOPE는 MEMORY이며, 파일에 영구 반영하려면 텍스트 에디터로 PFILE을 직접 편집한 후 인스턴스를 재기동해야 합니다.\n\nC) 오답 — 인스턴스 기동 시 파라미터 파일 검색 순서는 spfile<SID>.ora → spfile.ora → init<SID>.ora 순입니다. SPFILE이 PFILE보다 우선합니다.\n\nD) 오답 — SPFILE이 손상된 경우, PFILE(init<SID>.ora)을 수동으로 작성하여 STARTUP PFILE='경로'로 기동한 후 CREATE SPFILE FROM PFILE 명령으로 새 SPFILE을 생성할 수 있습니다. 또는 RMAN의 RESTORE SPFILE FROM AUTOBACKUP으로 복원할 수도 있습니다. OPEN 상태가 필수는 아닙니다.\n\n핵심 개념: SPFILE(바이너리, ALTER SYSTEM으로 변경)은 PFILE(텍스트, 수동 편집)보다 기동 시 우선 검색됩니다. SPFILE 환경에서는 SCOPE=BOTH로 메모리와 파일에 동시 반영이 가능하지만, PFILE 환경에서는 SCOPE=MEMORY만 사용 가능합니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_032",
+    "title": "DBAが現在NOMOUNT状態のインスタンスで以下のSQL文を実行しました。\n\nSQL> SELECT name, value\n     FROM V$PARAMETER\n     WHERE name IN ('control_files', 'db_block_size', 'sga_target');\n\nNAME              VALUE\n----------------  ----------------------------------------\ncontrol_files     /u01/oradata/ORCL/control01.ctl, ...\ndb_block_size     8192\nsga_target        4294967296\n\nこの状況と出力結果について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) NOMOUNT状態ではV$PARAMETERビューを参照でき、初期化パラメータ・ファイルから読み込まれたパラメータ値が確認できる。",
+      "B) CONTROL_FILESに表示されたパスのファイルは、この時点で既にオープンされ読み込みが完了している。",
+      "C) この状態でCREATE DATABASEコマンドを実行して新規データベースを作成することが可能である。",
+      "D) DB_BLOCK_SIZEの値を変更するために、ALTER SYSTEM SET DB_BLOCK_SIZE=16384 SCOPE=MEMORY を実行することができる。",
+      "E) SGA_TARGETに表示された値は、DBA_TABLESビューから読み込まれたメタデータ情報である。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — NOMOUNT 상태에서는 초기화 파라미터 파일(SPFILE 또는 PFILE)이 읽혀 SGA가 할당되고 백그라운드 프로세스가 기동된 상태입니다. V$PARAMETER, V$INSTANCE, V$SGA 등 인스턴스 관련 동적 성능 뷰를 참조할 수 있으며, 파라미터 파일에서 읽어들인 값을 확인할 수 있습니다.\n\nC) 정답 — NOMOUNT 상태에서는 아직 컨트롤 파일이 열리지 않은 상태이므로 새 데이터베이스를 생성하는 CREATE DATABASE 명령을 실행할 수 있습니다. 또한 CREATE CONTROLFILE로 컨트롤 파일을 재생성하거나, RMAN으로 컨트롤 파일을 복원하는 작업도 가능합니다.\n\nB) 오답 — NOMOUNT 상태에서는 파라미터 파일에서 CONTROL_FILES 경로를 읽어들이지만, 실제 컨트롤 파일을 오픈하지는 않습니다. 컨트롤 파일은 MOUNT 단계에서 열립니다.\n\nD) 오답 — DB_BLOCK_SIZE는 정적(Static) 파라미터이며, 데이터베이스 생성 후에는 변경할 수 없습니다. ALTER SYSTEM으로 메모리 값을 변경하는 것이 불가능하므로 ORA-02095 오류가 발생합니다.\n\nE) 오답 — DBA_TABLES는 데이터 딕셔너리 뷰로, 데이터 파일이 열린 OPEN 상태에서만 참조할 수 있습니다. SGA_TARGET의 값은 초기화 파라미터 파일에서 읽어온 것이며, V$PARAMETER는 동적 성능 뷰(V$ 뷰)입니다.\n\n핵심 개념: NOMOUNT 단계에서는 파라미터 파일 읽기, SGA 할당, 백그라운드 프로세스 기동이 완료된 상태입니다. V$PARAMETER, V$SGA 등 인스턴스 관련 V$ 뷰는 조회 가능하지만, 컨트롤 파일은 아직 열리지 않았고, 데이터 딕셔너리(DBA_ 뷰)는 접근할 수 없습니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_033",
+    "title": "DBAが金曜日の夜にメンテナンス作業のためにデータベースを停止しようとしています。現在、以下の状態であることが確認されています。\n\n・アクティブなユーザーセッション: 50\n・長時間実行中のバッチ処理(未コミット): 1件\n\nDBAはできるだけ早く停止したいが、データの整合性を確保したうえで次回起動時のインスタンス復旧を回避したい。適切な停止モードを選択してください。",
+    "options": [
+      "A) SHUTDOWN NORMAL — すべてのユーザーが自発的にログアウトするまで待機する。",
+      "B) SHUTDOWN TRANSACTIONAL — アクティブなトランザクションが完了するまで待機し、トランザクションのないセッションは即座に切断する。",
+      "C) SHUTDOWN IMMEDIATE — 実行中のSQL文を中止し、未コミット・トランザクションをロールバックしてから停止する。",
+      "D) SHUTDOWN ABORT — インスタンスを即座に強制終了し、次回起動時にSMONがインスタンス復旧を自動実行する。"
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "정답: C\nC) 정답 — DBA의 요구 사항은 (1) 빠른 종료, (2) 데이터 정합성 확보, (3) 다음 기동 시 인스턴스 복구 회피입니다. SHUTDOWN IMMEDIATE는 실행 중인 SQL을 즉시 중단하고 미커밋 트랜잭션을 자동 롤백한 후 체크포인트를 수행합니다. Clean Shutdown이므로 다음 기동 시 인스턴스 복구가 필요 없으며, 세션 종료를 기다릴 필요도 없어 빠른 종료가 가능합니다.\n\nA) 오답 — SHUTDOWN NORMAL은 모든 사용자가 자발적으로 로그아웃할 때까지 무한정 대기합니다. 50개의 활성 세션이 있는 상황에서 빠른 종료가 불가능합니다.\n\nB) 오답 — SHUTDOWN TRANSACTIONAL은 활성 트랜잭션이 완료될 때까지 대기합니다. 장시간 실행 중인 배치 처리(미커밋)가 있으므로 해당 배치가 완료될 때까지 종료가 지연될 수 있습니다. 빠른 종료라는 요구 사항에 부합하지 않습니다.\n\nD) 오답 — SHUTDOWN ABORT는 가장 빠르게 종료되지만, 체크포인트를 수행하지 않아 다음 기동 시 인스턴스 복구가 필요합니다. DBA의 요구 사항에서 인스턴스 복구를 회피하고 싶다고 했으므로 적합하지 않습니다.\n\n핵심 개념: 4가지 종료 모드 중 SHUTDOWN IMMEDIATE는 안전성과 속도의 균형이 가장 좋아 실무에서 가장 많이 사용됩니다. 미커밋 트랜잭션을 롤백하고 체크포인트를 수행하여 Clean Shutdown을 보장하며, 세션이나 트랜잭션 완료를 기다리지 않습니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_034",
+    "title": "Oracle Databaseの初期化パラメータ・ファイルに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SPFILEはバイナリ形式であり、テキスト・エディタで直接編集してはならない。直接編集するとファイルが破損しインスタンスの起動に失敗する可能性がある。",
+      "B) インスタンス起動時のパラメータ・ファイル検索順序は、init<SID>.ora → spfile<SID>.ora → spfile.oraの順である。",
+      "C) PFILEを使用している環境でALTER SYSTEM SET ... SCOPE=SPFILEを実行すると、PFILEにパラメータが永続的に反映される。",
+      "D) CREATE PFILE FROM SPFILEコマンドにより、SPFILEの内容をテキスト形式のPFILEとしてバックアップできる。",
+      "E) SPFILEの場所はSTARTUP SPFILEオプションで明示的に指定できる。"
+    ],
+    "answer": [
+      "A",
+      "D"
+    ],
+    "explanation": "정답: A, D\nA) 정답 — SPFILE은 바이너리 형식의 파일로, Oracle이 내부적으로 관리합니다. 텍스트 에디터로 직접 편집하면 바이너리 헤더가 손상되어 인스턴스 기동 시 ORA-01078 오류가 발생할 수 있습니다.\n\nD) 정답 — CREATE PFILE FROM SPFILE 명령으로 SPFILE의 내용을 텍스트 형식의 PFILE로 추출할 수 있습니다. 이는 SPFILE 백업이나, SPFILE에 문제가 발생한 경우 텍스트 편집 후 재생성하는 워크플로우에 사용됩니다.\n\nB) 오답 — 인스턴스 기동 시 파라미터 파일의 검색 순서는 spfile<SID>.ora → spfile.ora → init<SID>.ora 순입니다. SPFILE이 우선이며 PFILE은 SPFILE이 없을 때 사용됩니다.\n\nC) 오답 — PFILE 환경에서는 SCOPE=SPFILE 및 SCOPE=BOTH를 사용할 수 없습니다. PFILE은 ALTER SYSTEM 명령으로 파일에 직접 반영하는 기능을 지원하지 않으며, 파라미터를 변경하려면 텍스트 에디터로 PFILE을 직접 편집한 후 인스턴스를 재기동해야 합니다.\n\nE) 오답 — STARTUP 명령에는 SPFILE을 명시적으로 지정하는 옵션이 없습니다. SPFILE의 위치를 변경하려면 PFILE 내에 SPFILE 파라미터로 경로를 지정하는 방법을 사용합니다.\n\n핵심 개념: SPFILE은 Oracle이 관리하는 바이너리 파일로 ALTER SYSTEM으로만 변경 가능하며, CREATE PFILE FROM SPFILE로 텍스트 백업이 가능합니다. 기동 시 검색 순서는 SPFILE 우선(spfile<SID>.ora → spfile.ora → init<SID>.ora)입니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_035",
+    "title": "DBAが以下のSQL文を実行してインスタンスの状態を確認しました。\n\nSQL> SELECT instance_name, status, database_status\n     FROM V$INSTANCE;\n\nINSTANCE_NAME     STATUS        DATABASE_STATUS\n----------------  ------------  -----------------\nORCL              STARTED       ACTIVE\n\nこの出力結果から読み取れる内容として正しいものを選択してください。",
+    "options": [
+      "A) インスタンスはNOMOUNT状態にあり、SGAの割当てとバックグラウンド・プロセスの起動が完了しているが、制御ファイルはまだ読み込まれていない。",
+      "B) インスタンスはMOUNT状態にあり、制御ファイルが読み込まれたがデータ・ファイルはまだオープンされていない。",
+      "C) インスタンスはOPEN状態にあり、データベースは通常の読み書きモードで運用されている。",
+      "D) インスタンスは起動中にエラーが発生し、異常状態にある。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — V$INSTANCE의 STATUS가 'STARTED'인 것은 인스턴스가 NOMOUNT 상태에 있음을 나타냅니다. 이 상태에서는 초기화 파라미터 파일을 읽고 SGA를 할당하며 백그라운드 프로세스를 기동한 상태이지만, 컨트롤 파일은 아직 읽지 않았습니다. DATABASE_STATUS가 'ACTIVE'인 것은 인스턴스가 정상적으로 동작 중임을 의미합니다.\n\nB) 오답 — MOUNT 상태에서는 V$INSTANCE의 STATUS가 'MOUNTED'로 표시됩니다. 'STARTED'가 아닙니다.\n\nC) 오답 — OPEN 상태에서는 V$INSTANCE의 STATUS가 'OPEN'으로 표시됩니다. 'STARTED'는 NOMOUNT 상태를 나타냅니다.\n\nD) 오답 — DATABASE_STATUS가 'ACTIVE'이므로 인스턴스는 정상적으로 동작 중입니다. 에러 상태가 아니라 NOMOUNT 단계에서 정상 대기 중인 상태입니다.\n\n핵심 개념: V$INSTANCE의 STATUS 컬럼은 인스턴스의 기동 단계를 나타냅니다. STARTED = NOMOUNT(SGA 할당 완료, 컨트롤 파일 미읽음), MOUNTED = MOUNT(컨트롤 파일 읽음), OPEN = OPEN(데이터 파일 열림)입니다."
+  }
+]

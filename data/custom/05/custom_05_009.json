@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_041",
+    "title": "CDB管理者がCDBルート(CDB$ROOT)に接続し、共通ユーザーC##APP_ADMINに対して以下のGRANT文を実行しました。\n\nGRANT CREATE TABLE TO C##APP_ADMIN;\n\nCONTAINER句を指定していない場合、この権限の有効範囲について正しく述べているものを選択してください。",
+    "options": [
+      "A) CDBルートでCONTAINER句を省略すると、デフォルトでCONTAINER=CURRENTが適用されるため、CREATE TABLE権限はCDBルートでのみ有効である。",
+      "B) 共通ユーザーに対する権限付与ではCONTAINER句を省略するとCONTAINER=ALLがデフォルトで適用され、すべてのPDBでCREATE TABLE権限が有効となる。",
+      "C) CONTAINER句を省略した場合、Oracleはエラーを返し、共通ユーザーに対してはCONTAINER句の明示的な指定が必須である。",
+      "D) CONTAINER句を省略すると、CDBルートおよび現在オープンしているPDBにのみ権限が適用され、将来作成されるPDBには適用されない。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — CDB 루트에서 CONTAINER 절을 생략하면 기본값으로 CONTAINER=CURRENT가 적용됩니다. 따라서 이 GRANT 문은 CDB 루트에서만 유효하며, 각 PDB에서는 CREATE TABLE 권한이 부여되지 않은 상태입니다. 모든 컨테이너에서 유효하게 하려면 GRANT CREATE TABLE TO C##APP_ADMIN CONTAINER=ALL; 과 같이 CONTAINER=ALL을 명시해야 합니다.\n\nB) 오답 — 공통 사용자에 대한 권한 부여라 하더라도, CONTAINER 절을 생략하면 CONTAINER=ALL이 아닌 CONTAINER=CURRENT가 기본 적용됩니다. 공통 사용자라는 것과 공통 부여(Commonly Granted)라는 것은 별개의 개념입니다.\n\nC) 오답 — CONTAINER 절을 생략해도 오류는 발생하지 않습니다. CONTAINER 절은 선택적(Optional)이며, 생략 시 기본값인 CONTAINER=CURRENT가 적용되어 정상적으로 실행됩니다.\n\nD) 오답 — CONTAINER 절을 생략하면 현재 컨테이너(CDB 루트)에서만 권한이 적용됩니다. 오픈 상태의 PDB에도 적용되지 않으며, 오직 CDB 루트에서만 유효합니다.\n\n핵심 개념: CDB 루트에서 GRANT 문 실행 시 CONTAINER 절을 생략하면 기본값으로 CONTAINER=CURRENT가 적용되어 현재 컨테이너(CDB 루트)에서만 권한이 유효합니다. 공통 사용자에게 모든 PDB에서 유효한 권한을 부여하려면 CONTAINER=ALL을 반드시 명시해야 합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_042",
+    "title": "マルチテナント環境において、PDB管理者がPDB(SALES_PDB)に接続した状態で以下のGRANT文を実行しようとしています。\n\nGRANT CREATE SESSION TO local_user1 CONTAINER=ALL;\n\nこの操作の結果について正しく述べているものを選択してください。",
+    "options": [
+      "A) PDB内からはCONTAINER=ALLを指定できないため、ORA-65050エラーが発生する。CONTAINER=ALLはCDBルートからのみ使用可能である。",
+      "B) local_user1はローカル・ユーザーであるため、CONTAINER=ALLを指定してもSALES_PDB内でのみCREATE SESSION権限が有効となる。",
+      "C) GRANT文は正常に実行され、local_user1はすべてのPDBでCREATE SESSION権限が有効となる。",
+      "D) CONTAINER=ALLの指定はCDBルートでも使用できないため、接続場所に関係なくエラーが発生する。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — CONTAINER=ALL은 CDB 루트(CDB$ROOT)에서만 사용 가능합니다. PDB에 접속한 상태에서 CONTAINER=ALL을 지정하면 ORA-65050 오류가 발생합니다. PDB에서의 GRANT는 기본적으로 CONTAINER=CURRENT만 사용 가능하며, 이는 해당 PDB 내에서만 유효합니다.\n\nB) 오답 — CONTAINER=ALL을 지정한 GRANT 문이 자동으로 CONTAINER=CURRENT로 변환되어 실행되는 것이 아닙니다. PDB에서 CONTAINER=ALL을 지정하면 오류가 발생하며, 문장 자체가 실행되지 않습니다.\n\nC) 오답 — 로컬 사용자는 특정 PDB 내에서만 존재하므로 모든 PDB에서 권한을 가질 수 없습니다. 또한 PDB에서 CONTAINER=ALL 자체를 사용할 수 없으므로 GRANT 문이 실행되지 않습니다.\n\nD) 오답 — CONTAINER=ALL은 CDB 루트에서 정상적으로 사용할 수 있습니다. CDB 루트에서 공통 사용자에게 CONTAINER=ALL로 권한을 부여하면 모든 컨테이너에서 해당 권한이 유효합니다.\n\n핵심 개념: CONTAINER=ALL은 CDB 루트(CDB$ROOT)에서만 사용 가능한 절이며, PDB에서 CONTAINER=ALL을 지정하면 오류가 발생합니다. PDB에서의 GRANT는 CONTAINER=CURRENT(기본값이며 유일한 옵션)로만 동작하여 해당 PDB 내에서만 권한이 유효합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_043",
+    "title": "Oracle Databaseのユーザー認証方式について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) パスワード認証ユーザーはCREATE USER ... IDENTIFIED BY句で作成され、認証情報はデータ・ディクショナリ内のUSER$テーブルにハッシュ値として格納される。",
+      "B) OS認証ユーザーはCREATE USER ... IDENTIFIED BY OS句で作成され、REMOTE_OS_AUTHENTパラメータの設定に関係なくローカルおよびリモートの両方で認証が可能である。",
+      "C) 外部認証ユーザーはCREATE USER ... IDENTIFIED GLOBALLY句で作成され、KerberosやSSLなどのネットワーク・サービスで認証される。",
+      "D) グローバル認証ユーザーはCREATE USER ... IDENTIFIED GLOBALLY句で作成され、LDAPなどのディレクトリ・サービスによる中央集中認証を使用する。",
+      "E) Schema-OnlyアカウントはCREATE USER ... NO AUTHENTICATION句で作成され、パスワード認証と同様にデータベースへのログインが可能であるが、デフォルトで全権限が制限される。"
+    ],
+    "answer": ["A", "D"],
+    "explanation": "정답: A, D\nA) 정답 — 패스워드 인증 사용자는 CREATE USER ... IDENTIFIED BY password 구문으로 생성됩니다. 인증 정보는 데이터 딕셔너리의 USER$ 테이블에 해시값으로 저장되며, 사용자가 접속 시 제공한 패스워드를 동일한 알고리즘으로 해시하여 비교합니다.\n\nD) 정답 — 글로벌 인증 사용자는 CREATE USER ... IDENTIFIED GLOBALLY 구문으로 생성되며, LDAP 등의 디렉토리 서비스를 통한 중앙 집중 인증 방식을 사용합니다. Oracle 26ai에서는 Microsoft Entra ID(구 Azure AD)와의 통합 인증(CMU)도 지원합니다.\n\nB) 오답 — 두 가지 오류가 있습니다. 첫째, IDENTIFIED BY OS라는 구문은 Oracle에 존재하지 않습니다. OS 인증 사용자는 CREATE USER OPS$username IDENTIFIED EXTERNALLY 구문으로 생성합니다. 둘째, REMOTE_OS_AUTHENT 파라미터의 기본값은 FALSE이므로, 기본 설정에서 OS 인증은 로컬 접속에서만 가능합니다. 원격 OS 인증은 사용자명 위조(Spoofing) 위험이 있어 Oracle에서 비권장(Deprecated) 상태입니다.\n\nC) 오답 — 외부 인증 사용자는 IDENTIFIED GLOBALLY가 아닌 IDENTIFIED EXTERNALLY 구문으로 생성됩니다. IDENTIFIED GLOBALLY는 글로벌 인증(LDAP 디렉토리 서비스) 용도입니다. Kerberos나 SSL 등의 네트워크 서비스 인증은 외부 인증(IDENTIFIED EXTERNALLY)에 해당합니다.\n\nE) 오답 — Schema-Only Account는 CREATE USER ... NO AUTHENTICATION 구문으로 생성되지만, 데이터베이스에 로그인할 수 없습니다. 이 계정은 객체를 소유하기 위한 스키마 전용 계정이며, 직접 접속이 불가능하여 애플리케이션 스키마를 보호하는 데 사용됩니다.\n\n핵심 개념: Oracle의 인증 방식은 패스워드(IDENTIFIED BY), 외부/OS(IDENTIFIED EXTERNALLY), 글로벌(IDENTIFIED GLOBALLY), Schema-Only(NO AUTHENTICATION)로 구분됩니다. 각 방식은 CREATE USER 구문에서 다른 절을 사용하며, 인증 주체와 용도가 다릅니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_044",
+    "title": "Oracle Databaseの認証方式とその特徴の組み合わせについて正しく述べているものを選択してください。",
+    "options": [
+      "A) パスワード認証はデータベースがOPEN状態でなければ認証できないため、SYSDBA権限でのリモート接続にはパスワード・ファイル認証が使用される。",
+      "B) OS認証ではREMOTE_OS_AUTHENT=TRUEがデフォルト設定であり、ローカルおよびリモートの両方からパスワードなしで接続が可能である。",
+      "C) 外部認証(IDENTIFIED EXTERNALLY)はOS認証と完全に同一の仕組みであり、設定パラメータやセキュリティ上の違いはない。",
+      "D) グローバル認証(IDENTIFIED GLOBALLY)はデータ・ディクショナリにパスワードを格納するため、パスワード認証と同等のセキュリティ・リスクがある。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 패스워드 인증은 데이터 딕셔너리(USER$ 테이블)에서 해시값을 비교하므로, 데이터베이스가 OPEN 상태여야 인증이 가능합니다. 따라서 데이터베이스 미기동 상태에서의 SYSDBA 원격 접속에는 패스워드 파일(orapwd 유틸리티로 생성) 인증이 사용됩니다. 패스워드 파일은 데이터 딕셔너리와 독립적으로 존재하므로, 데이터베이스 상태에 관계없이 인증이 가능합니다.\n\nB) 오답 — REMOTE_OS_AUTHENT의 기본값은 FALSE입니다. TRUE로 설정하면 원격 OS 인증이 허용되지만, 이는 사용자명 위조(Spoofing) 위험이 있어 Oracle에서 비권장(Deprecated) 상태입니다. 기본 설정에서는 OS 인증은 로컬 접속에서만 사용 가능합니다.\n\nC) 오답 — 외부 인증(IDENTIFIED EXTERNALLY)은 OS 인증을 포함하지만 완전히 동일한 것은 아닙니다. 외부 인증은 OS 인증 외에도 Kerberos, SSL 인증서 등 다양한 외부 인증 서비스를 포함하는 상위 개념입니다. 설정 파라미터(SQLNET.AUTHENTICATION_SERVICES)와 지원하는 인증 프로토콜에 차이가 있습니다.\n\nD) 오답 — 글로벌 인증(IDENTIFIED GLOBALLY)은 LDAP 등 외부 디렉토리 서비스에서 인증을 수행하며, 데이터 딕셔너리에 패스워드를 저장하지 않습니다. 인증 정보가 중앙 디렉토리 서비스에서 관리되므로, 데이터 딕셔너리 기반의 패스워드 인증과는 보안 모델이 다릅니다.\n\n핵심 개념: Oracle의 인증 방식마다 인증 주체와 인증 가능한 데이터베이스 상태가 다릅니다. 패스워드 인증은 데이터베이스 OPEN 상태에서만 가능하고, OS 인증과 패스워드 파일 인증은 미기동 상태에서도 가능합니다. REMOTE_OS_AUTHENT의 기본값은 FALSE이며, 원격 OS 인증은 보안 위험으로 비권장됩니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_045",
+    "title": "WITH ADMIN OPTIONで付与されたシステム権限のREVOKE動作と、WITH GRANT OPTIONで付与されたオブジェクト権限のREVOKE動作の違いについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) WITH GRANT OPTIONで付与されたオブジェクト権限をREVOKEすると、その権限に基づいて作成されたビューやPL/SQLオブジェクトがINVALID状態になる可能性がある。",
+      "B) WITH ADMIN OPTIONで付与されたシステム権限をREVOKEすると、被付与者が他のユーザーに付与したシステム権限も連鎖的に取り消される。",
+      "C) WITH GRANT OPTIONはロールに対しても付与可能であり、ロールを通じてオブジェクト権限の再付与チェーンを構成できる。",
+      "D) WITH ADMIN OPTIONで付与されたシステム権限をREVOKEした場合、被付与者が他のユーザーに付与した同一のシステム権限は取り消されずに維持される。",
+      "E) WITH GRANT OPTIONの連鎖取消し(Cascade Revoke)を防止するには、REVOKE文にNO CASCADEオプションを指定する必要がある。"
+    ],
+    "answer": ["A", "D"],
+    "explanation": "정답: A, D\nA) 정답 — WITH GRANT OPTION으로 부여된 객체 권한을 REVOKE하면 연쇄 취소가 발생합니다. 이 과정에서 해당 권한에 의존하여 생성된 뷰나 PL/SQL 객체가 INVALID 상태로 변경될 수 있습니다. 예를 들어, user_a가 hr.employees에 대한 SELECT 권한을 기반으로 뷰를 생성한 후 해당 권한이 취소되면, 뷰는 유효하지 않은 상태가 됩니다.\n\nD) 정답 — WITH ADMIN OPTION으로 부여된 시스템 권한은 REVOKE 시 연쇄 취소가 발생하지 않습니다. 예를 들어, DBA가 user_a에게 WITH ADMIN OPTION으로 CREATE TABLE을 부여하고, user_a가 user_b에게 같은 권한을 부여한 후 DBA가 user_a의 권한을 취소해도, user_b의 CREATE TABLE 권한은 유지됩니다. 이는 SYSAUTH$ 테이블에 부여자(Grantor) 정보가 기록되지 않기 때문입니다.\n\nB) 오답 — WITH ADMIN OPTION의 시스템 권한은 REVOKE 시 연쇄 취소가 발생하지 않습니다. 연쇄 취소는 WITH GRANT OPTION(객체 권한)의 동작이며, ADMIN OPTION과 반대입니다.\n\nC) 오답 — WITH GRANT OPTION은 사용자에게만 부여할 수 있으며, 롤(Role)에는 부여할 수 없습니다. 롤에 대한 권한 부여 시에는 WITH ADMIN OPTION만 사용 가능합니다.\n\nE) 오답 — Oracle의 객체 권한 REVOKE에는 NO CASCADE 옵션이 존재하지 않습니다. WITH GRANT OPTION으로 부여된 객체 권한의 연쇄 취소는 자동으로 발생하며, 이를 방지하는 방법은 없습니다.\n\n핵심 개념: WITH ADMIN OPTION(시스템 권한)은 REVOKE 시 비연쇄 취소가 발생하여 하위 사용자의 권한이 유지되고, WITH GRANT OPTION(객체 권한)은 REVOKE 시 연쇄 취소가 발생하여 부여 체인의 모든 하위 권한이 취소됩니다. 또한 WITH GRANT OPTION의 연쇄 취소는 관련 뷰와 PL/SQL 객체를 INVALID 상태로 변경할 수 있습니다."
+  }
+]

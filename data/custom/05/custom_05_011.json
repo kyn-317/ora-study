@@ -1,0 +1,28 @@
+[
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_051",
+    "title": "CDB管理者がCDBルート(CDB$ROOT)に接続して、共通ユーザーC##HR_ADMINに対して以下の操作を実行しました。\n\nGRANT CREATE SESSION TO C##HR_ADMIN;\nGRANT CREATE TABLE TO C##HR_ADMIN;\n\nその後、C##HR_ADMINがPDB(SALES_PDB)に接続を試みたところ、ログインに失敗しました。この原因について正しく述べているものを選択してください。",
+    "options": [
+      "A) 共通ユーザーはCDBルートにのみ接続可能であり、個別のPDBに直接接続する機能はサポートされていない。",
+      "B) CDBルートでCONTAINER句を省略したGRANT文はデフォルトでCONTAINER=CURRENTが適用されるため、CREATE SESSION権限がCDBルートでのみ有効であり、PDBでは接続できない。",
+      "C) 共通ユーザーに対するGRANT文ではCONTAINER句の省略は許可されず、CONTAINER=ALLまたはCONTAINER=CURRENTを必ず指定しなければエラーが発生する。",
+      "D) PDBへの接続にはCREATE SESSION権限ではなく、ALTER SESSION権限が必要であるため、付与した権限の種類が誤っている。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — CDB 루트에서 GRANT 문을 실행할 때 CONTAINER 절을 생략하면 기본값으로 CONTAINER=CURRENT가 적용됩니다. 이는 공통 사용자에 대한 부여라 하더라도 마찬가지입니다. 따라서 CREATE SESSION 권한은 CDB 루트에서만 유효하며, SALES_PDB에서는 해당 권한이 존재하지 않아 로그인에 실패합니다. PDB에서도 접속 가능하게 하려면 GRANT CREATE SESSION TO C##HR_ADMIN CONTAINER=ALL;과 같이 CONTAINER=ALL을 명시해야 합니다.\n\nA) 오답 — 공통 사용자는 CDB 루트뿐만 아니라 개별 PDB에도 접속할 수 있습니다. 단, 해당 PDB에서 CREATE SESSION 권한이 유효해야 합니다. CONTAINER=ALL로 권한을 부여하면 모든 PDB에서 접속이 가능합니다.\n\nC) 오답 — CONTAINER 절은 선택적(Optional)이며, 생략해도 오류가 발생하지 않습니다. 생략 시 기본값인 CONTAINER=CURRENT가 적용되어 현재 컨테이너에서만 권한이 유효하게 됩니다.\n\nD) 오답 — PDB에 접속하기 위해 필요한 권한은 CREATE SESSION이며, ALTER SESSION은 세션 속성을 변경하는 별도의 시스템 권한입니다. 접속 자체에 ALTER SESSION 권한은 필요하지 않습니다.\n\n핵심 개념: CDB 루트에서 CONTAINER 절을 생략한 GRANT 문은 공통 사용자에 대한 것이라 하더라도 CONTAINER=CURRENT가 기본 적용되어 CDB 루트에서만 유효합니다. 공통 사용자가 모든 PDB에서 권한을 행사하려면 반드시 CONTAINER=ALL을 명시적으로 지정해야 하며, '공통 사용자 = 자동으로 전체 권한'이라는 것은 잘못된 이해입니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_052",
+    "title": "Oracle DatabaseにおいてPUBLICに対する権限付与について正しく述べているものを選択してください。",
+    "options": [
+      "A) PUBLICに付与された権限は、現在存在するすべてのデータベース・ユーザーにのみ適用され、今後作成されるユーザーには個別に付与する必要がある。",
+      "B) PUBLICに付与されたシステム権限やオブジェクト権限は、現在および将来のすべてのデータベース・ユーザーに適用されるため、運用環境では最小限にすべきである。",
+      "C) PUBLICはデータベース・ロールの一種であるため、SET ROLE NONE文を実行することでPUBLICを通じた権限を無効化できる。",
+      "D) PUBLICに対してはシステム権限のみ付与可能であり、テーブルなどの特定オブジェクトに対する権限は付与できない。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — PUBLIC에 권한을 부여하면 데이터베이스 내의 현재 존재하는 모든 사용자뿐만 아니라 향후 생성될 사용자에게도 해당 권한이 자동으로 적용됩니다. 이러한 특성 때문에 PUBLIC에 불필요한 권한(특히 EXECUTE ON UTL_FILE, UTL_HTTP 등의 강력한 패키지 실행 권한)을 부여하면 보안 위험이 높아집니다. 따라서 운영 환경에서는 PUBLIC에 부여하는 권한을 최소한으로 유지해야 합니다.\n\nA) 오답 — PUBLIC에 부여된 권한은 현재 사용자뿐만 아니라 미래에 생성될 사용자에게도 자동으로 적용됩니다. 이것이 PUBLIC 권한의 핵심 특성이며, 개별적으로 재부여할 필요가 없습니다.\n\nC) 오답 — PUBLIC은 일반적인 데이터베이스 롤이 아니라 모든 사용자를 대표하는 특수한 사용자 그룹입니다. SET ROLE NONE 문은 세션에서 일반 롤을 비활성화하지만, PUBLIC을 통해 부여된 권한은 비활성화할 수 없습니다. PUBLIC 권한은 항상 세션에서 유효합니다.\n\nD) 오답 — PUBLIC에는 시스템 권한과 객체 권한 모두 부여할 수 있습니다. 예를 들어 GRANT SELECT ON hr.employees TO PUBLIC; 과 같이 특정 테이블에 대한 객체 권한을 PUBLIC에 부여하는 것이 가능합니다.\n\n핵심 개념: PUBLIC은 모든 현재 및 미래 사용자를 대표하는 특수 그룹이며, PUBLIC에 부여된 권한은 SET ROLE NONE으로도 비활성화할 수 없습니다. 보안 관점에서 PUBLIC에는 최소한의 권한만 부여해야 하며, 특히 UTL_FILE, UTL_HTTP, DBMS_SQL 등 강력한 PL/SQL 패키지의 EXECUTE 권한을 PUBLIC에 부여하는 것은 피해야 합니다."
+  }
+]

@@ -1,0 +1,81 @@
+[
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_081",
+    "title": "オンラインREDOログ・グループのステータスとログ・スイッチについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) ログ・スイッチが発生すると、LGWRは書き込み先を次のREDOログ・グループに切り替え、同時にチェックポイントがトリガーされる。",
+      "B) ACTIVE状態のREDOログ・グループは、インスタンス復旧に不要なグループであり、LGWRが次の書き込み先として即座に再利用できる。",
+      "C) ログ・スイッチの発生時に次のREDOログ・グループがACTIVE状態の場合、LGWRはチェックポイントの完了を待機するため、「log file switch」待機イベントが発生する可能性がある。",
+      "D) オンラインREDOログはデータベースあたり最低3グループが必要であり、2グループでの運用は許可されていない。",
+      "E) CURRENT状態のREDOログ・グループは、ALTER DATABASE DROP LOGFILEコマンドで削除した後、より大きいサイズのグループに置換できる。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — 로그 스위치가 발생하면 LGWR은 기록 대상을 다음 Redo Log 그룹으로 전환합니다. 동시에 체크포인트가 트리거되어, CKPT 프로세스가 컨트롤 파일과 데이터 파일 헤더에 체크포인트 정보를 기록하고, DBWn이 Dirty Buffer를 데이터 파일에 기록합니다. 이를 통해 이전 그룹이 ACTIVE에서 INACTIVE로 전이할 수 있습니다.\n\nC) 정답 — 로그 스위치 발생 시 다음 그룹이 아직 ACTIVE 상태(체크포인트 미완료)인 경우, LGWR은 해당 그룹을 재사용할 수 없어 체크포인트 완료를 대기합니다. 이때 'log file switch (checkpoint incomplete)' 대기 이벤트가 발생하며, 이는 Redo Log 그룹 수가 부족하거나 그룹 크기가 작아 로그 스위치가 빈번하게 발생하는 환경에서 나타날 수 있습니다.\n\nB) 오답 — ACTIVE 상태는 인스턴스 복구에 아직 필요한 그룹입니다. 체크포인트가 완료되지 않아 해당 그룹의 Redo 데이터가 인스턴스 복구에 필요할 수 있는 상태이므로, LGWR이 즉시 재사용할 수 없습니다. 재사용 가능한 것은 INACTIVE 상태의 그룹입니다.\n\nD) 오답 — 오라클 데이터베이스에서 온라인 Redo Log는 최소 2개 그룹이 필요합니다. 2개 그룹은 허용되며, LGWR이 순환 기록 방식으로 두 그룹을 번갈아 사용합니다. 다만, 운영 환경에서는 3개 이상의 그룹을 구성하는 것이 일반적으로 권장됩니다.\n\nE) 오답 — CURRENT 상태의 Redo Log 그룹은 현재 LGWR이 기록 중인 그룹이므로 삭제할 수 없습니다. ALTER DATABASE DROP LOGFILE로 삭제할 수 있는 것은 INACTIVE 상태의 그룹만 가능합니다. 그룹 크기를 변경하려면 새 그룹을 추가한 후 기존 그룹이 INACTIVE가 된 시점에 삭제해야 합니다.\n\n핵심 개념: 온라인 Redo Log 그룹은 CURRENT(기록 중) → ACTIVE(인스턴스 복구에 필요, 체크포인트 미완료) → INACTIVE(재사용 가능) 순서로 상태가 전이됩니다. 로그 스위치 시 체크포인트가 발생하며, 다음 그룹이 ACTIVE 상태이면 LGWR이 대기하여 'log file switch' 대기 이벤트가 발생합니다. 최소 2개 그룹이 필요하며, CURRENT/ACTIVE 상태의 그룹은 삭제할 수 없습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_082",
+    "title": "Oracle Databaseにおけるデータ・ファイルと表領域の関係について正しく述べているものを選択してください。",
+    "options": [
+      "A) 1つの表領域は複数のデータ・ファイルで構成できるが、1つのデータ・ファイルは1つの表領域にのみ属する。",
+      "B) 1つのデータ・ファイルは複数の表領域にまたがってデータを格納できるため、表領域間でデータ・ファイルを共有できる。",
+      "C) 1つの表領域は1つのデータ・ファイルのみで構成される制約があり、容量を追加するには既存ファイルのサイズ拡張のみが可能である。",
+      "D) データ・ファイルは論理的ストレージ構造の一部であり、テーブルやインデックスなどのセグメントと同じ階層に分類される。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Oracle에서 테이블스페이스와 데이터 파일은 1:N 관계입니다. 하나의 테이블스페이스는 여러 데이터 파일로 구성될 수 있어 저장 공간을 유연하게 확장할 수 있습니다. 반면, 하나의 데이터 파일은 정확히 하나의 테이블스페이스에만 속하며, 다른 테이블스페이스와 공유할 수 없습니다.\n\nB) 오답 — 하나의 데이터 파일은 반드시 하나의 테이블스페이스에만 속합니다. 데이터 파일을 여러 테이블스페이스에서 공유하는 것은 불가능합니다. 데이터 파일 생성 시 소속 테이블스페이스가 결정되며, 다른 테이블스페이스로 변경할 수 없습니다.\n\nC) 오답 — 하나의 테이블스페이스는 여러 데이터 파일로 구성될 수 있습니다. 용량을 추가할 때 기존 파일의 크기를 확장(RESIZE)하는 방법 외에, ALTER TABLESPACE ... ADD DATAFILE 명령으로 새로운 데이터 파일을 추가하는 방법도 가능합니다.\n\nD) 오답 — 데이터 파일은 물리적 저장 구조(Physical Storage Structures)에 속합니다. 논리적 저장 구조(Logical Storage Structures)는 테이블스페이스, 세그먼트, 익스텐트, 데이터 블록의 4계층으로 구성됩니다. 데이터 파일은 OS 파일 시스템에서 확인할 수 있는 물리적 파일이며, 테이블스페이스와 매핑되어 논리적 구조와 물리적 구조를 연결합니다.\n\n핵심 개념: Oracle의 저장 구조는 물리적 구조(데이터 파일, 컨트롤 파일, Redo Log 파일)와 논리적 구조(테이블스페이스 → 세그먼트 → 익스텐트 → 데이터 블록)로 나뉩니다. 데이터 파일과 테이블스페이스는 N:1 관계로, 하나의 테이블스페이스는 여러 데이터 파일을 포함할 수 있지만, 하나의 데이터 파일은 하나의 테이블스페이스에만 속합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_083",
+    "title": "次のSQL文の実行結果として表示されるV$SGAビューの情報について正しく述べているものを選択してください。\n\nSQL> SELECT * FROM V$SGA;\n\nNAME                      VALUE\n-------------------- ----------\nFixed Size              9137384\nVariable Size        1879048192\nDatabase Buffers      436207616\nRedo Buffers            7585792",
+    "options": [
+      "A) 「Fixed Size」はOracle内部のハウスキーピング情報を格納する領域であり、ラッチやロック構造のメモリー・アドレス情報を含み、DBAが動的に変更することはできない。",
+      "B) 「Variable Size」はデータベース・バッファ・キャッシュの合計サイズを示しており、DB_CACHE_SIZEパラメータで制御される領域である。",
+      "C) 「Database Buffers」は共有プール、Large Pool、Java Pool、Streams Poolなどの可変サイズ構成要素の合計サイズを示している。",
+      "D) 「Redo Buffers」はディスク上のオンラインREDOログ・ファイルの合計サイズを示しており、V$LOGビューでも確認できる値と同一である。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — V$SGA의 'Fixed Size'는 Oracle 인스턴스의 내부 하우스키핑 정보를 저장하는 Fixed SGA 영역의 크기입니다. 래치(Latch)와 락(Lock) 구조의 메모리 주소 정보, 백그라운드 프로세스 간 통신에 사용되는 내부 구조 등이 포함됩니다. 이 영역은 인스턴스 시작 시 크기가 결정되며, DBA가 직접 크기를 지정하거나 동적으로 변경할 수 있는 파라미터가 없습니다.\n\nB) 오답 — 'Variable Size'는 데이터베이스 버퍼 캐시가 아니라, Shared Pool, Large Pool, Java Pool, Streams Pool 등 가변 크기 SGA 구성요소의 합계입니다. 데이터베이스 버퍼 캐시의 크기는 'Database Buffers' 항목에 표시됩니다.\n\nC) 오답 — 'Database Buffers'는 데이터베이스 버퍼 캐시(Default Pool, Keep Pool, Recycle Pool 및 비표준 블록 크기 캐시 포함)의 합계 크기입니다. Shared Pool, Large Pool 등 가변 크기 구성요소의 합계는 'Variable Size'에 표시됩니다. 두 항목의 의미가 반대로 기술되어 있으므로 오답입니다.\n\nD) 오답 — 'Redo Buffers'는 SGA 내의 Redo Log Buffer 크기를 나타내며, LOG_BUFFER 파라미터로 제어되는 메모리 영역입니다. 디스크 상의 온라인 Redo Log 파일 크기가 아닙니다. 온라인 Redo Log 파일의 크기와 상태는 V$LOG 뷰에서 확인할 수 있으며, 이는 Redo Log Buffer와는 별도의 물리적 파일 정보입니다.\n\n핵심 개념: V$SGA 뷰는 SGA를 4가지 카테고리로 구분하여 표시합니다. Fixed Size는 내부 하우스키핑용 고정 영역, Variable Size는 Shared Pool/Large Pool/Java Pool 등 가변 구성요소의 합계, Database Buffers는 버퍼 캐시의 합계, Redo Buffers는 Redo Log Buffer의 크기입니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_084",
+    "title": "V$SGAビューで表示される「Variable Size」と「Database Buffers」の内容について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 「Variable Size」には共有プール、Large Pool、Java Pool、Streams Poolなどの合計サイズが含まれる。",
+      "B) 「Database Buffers」にはデフォルト・バッファ・プールの他に、KEEPバッファ・プールやRECYCLEバッファ・プールの割り当てサイズも含まれる。",
+      "C) 「Variable Size」はSGA_TARGET設定時に自動調整されない固定領域であり、インスタンス起動後にサイズを変更することはできない。",
+      "D) 「Database Buffers」の値はDB_CACHE_SIZEパラメータの値と常に完全に一致し、KEEPプールやRECYCLEプールの設定は反映されない。",
+      "E) 「Variable Size」にはREDOログ・バッファのサイズも含まれており、LOG_BUFFERパラメータを増加させると「Variable Size」の値も増加する。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — V$SGA의 'Variable Size'에는 Shared Pool, Large Pool, Java Pool, Streams Pool 등 가변 크기의 SGA 구성요소가 포함됩니다. ASMM(SGA_TARGET) 환경에서는 이 구성요소들의 크기가 워크로드에 따라 자동으로 조정될 수 있습니다.\n\nB) 정답 — V$SGA의 'Database Buffers'에는 Default Buffer Pool(DB_CACHE_SIZE)뿐만 아니라, Keep Buffer Pool(DB_KEEP_CACHE_SIZE), Recycle Buffer Pool(DB_RECYCLE_CACHE_SIZE), 그리고 비표준 블록 크기 캐시(DB_nK_CACHE_SIZE) 등 모든 버퍼 캐시 관련 메모리의 합계가 포함됩니다.\n\nC) 오답 — 'Variable Size'에 포함되는 Shared Pool, Large Pool 등은 SGA_TARGET이 설정된 ASMM 환경에서 자동 조정 대상입니다. Oracle이 워크로드를 분석하여 각 구성요소의 크기를 동적으로 조정할 수 있으며, V$SGA_DYNAMIC_COMPONENTS 뷰에서 조정 이력을 확인할 수 있습니다.\n\nD) 오답 — 'Database Buffers'는 DB_CACHE_SIZE만의 값이 아니라 모든 버퍼 풀(Default, Keep, Recycle, 비표준 블록 크기 캐시)의 합계입니다. DB_KEEP_CACHE_SIZE나 DB_RECYCLE_CACHE_SIZE를 설정한 경우 해당 크기도 'Database Buffers'에 반영됩니다.\n\nE) 오답 — Redo Log Buffer의 크기는 V$SGA에서 별도의 'Redo Buffers' 항목으로 표시됩니다. 'Variable Size'에는 Redo Log Buffer가 포함되지 않습니다. V$SGA는 Fixed Size, Variable Size, Database Buffers, Redo Buffers의 4개 카테고리로 구분되어 각각 독립적으로 표시됩니다.\n\n핵심 개념: V$SGA의 4가지 카테고리는 명확히 구분됩니다. Variable Size는 Shared Pool, Large Pool, Java Pool, Streams Pool 등 가변 구성요소의 합계이며 ASMM에 의해 자동 조정됩니다. Database Buffers는 Default/Keep/Recycle Pool과 비표준 블록 크기 캐시를 모두 포함하는 버퍼 캐시 합계입니다. Redo Buffers는 별도 카테고리로 분리되어 표시됩니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_085",
+    "title": "DBAが以下のSQL文を実行してSGA内の共有プールのメモリー使用状況を確認しています。V$SGASTATビューの解釈として正しく述べているものを選択してください。\n\nSQL> SELECT pool, name, bytes/1024/1024 AS mb\n     FROM V$SGASTAT\n     WHERE pool = 'shared pool'\n     ORDER BY bytes DESC\n     FETCH FIRST 5 ROWS ONLY;\n\nPOOL         NAME                           MB\n------------ ------------------------- -------\nshared pool  free memory               412.50\nshared pool  SQLA                      128.75\nshared pool  row cache                  45.20\nshared pool  KGLH0                      38.60\nshared pool  db_block_hash_buckets      22.10",
+    "options": [
+      "A) 「free memory」はShared Pool内の未使用メモリーを示しており、この値が極端に小さい場合はShared Poolの枯渇によるハード解析の失敗やORA-4031エラーの発生リスクが高まる。",
+      "B) 「SQLA」はSQLの実行結果をキャッシュするResult Cache領域のサイズを示しており、RESULT_CACHE_MAX_SIZEパラメータで制御される。",
+      "C) 「row cache」はバッファ・キャッシュ内のデータ・ブロック行を管理する領域であり、DB_CACHE_SIZEパラメータの設定に依存する。",
+      "D) V$SGASTATのpool列が「shared pool」の行はすべてSHARED_POOL_SIZEパラメータで指定された値の範囲内に収まるため、この値を超えるメモリーが割り当てられることはない。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — V$SGASTAT에서 pool이 'shared pool'이고 name이 'free memory'인 행은 Shared Pool 내의 미사용 여유 메모리를 나타냅니다. 이 값이 극단적으로 작으면 Shared Pool의 메모리가 부족한 상태를 의미하며, 새로운 SQL의 하드 파싱에 필요한 메모리를 확보하지 못해 ORA-4031(unable to allocate shared memory) 오류가 발생할 수 있습니다.\n\nB) 오답 — 'SQLA'는 SQL Area 관련 메모리로, Library Cache에서 SQL 문의 파싱 결과(Parse Tree)와 실행 계획(Execution Plan)을 저장하는 데 사용되는 영역입니다. Result Cache는 별도의 구성요소이며, V$SGASTAT에서 다른 이름으로 표시됩니다. RESULT_CACHE_MAX_SIZE는 Result Cache의 크기를 제어하는 파라미터입니다.\n\nC) 오답 — 'row cache'는 데이터 딕셔너리 캐시(Data Dictionary Cache)를 나타냅니다. 테이블, 컬럼, 사용자, 권한 등의 메타데이터 정보를 행(Row) 단위로 캐싱하는 Shared Pool 내부의 구성요소입니다. 버퍼 캐시의 데이터 블록과는 관련이 없으며, Shared Pool 크기 내에서 자동으로 관리됩니다.\n\nD) 오답 — ASMM(SGA_TARGET 설정) 환경에서는 SHARED_POOL_SIZE에 지정한 값이 최솟값(하한선)으로 작동합니다. Oracle이 워크로드에 따라 Shared Pool에 지정된 값 이상의 메모리를 자동으로 할당할 수 있으므로, 실제 Shared Pool 사용량이 SHARED_POOL_SIZE 파라미터 값을 초과할 수 있습니다.\n\n핵심 개념: V$SGASTAT 뷰는 SGA의 각 풀(Shared Pool, Large Pool, Java Pool 등) 내부 구성요소별 메모리 사용량을 상세히 보여줍니다. Shared Pool에서 'free memory'는 여유 메모리, 'SQLA'는 SQL Area(Library Cache), 'row cache'는 데이터 딕셔너리 캐시의 메모리 사용량입니다. free memory가 부족하면 ORA-4031 오류 발생 위험이 있으며, 이를 통해 Shared Pool 크기 조정 필요성을 판단할 수 있습니다."
+  }
+]

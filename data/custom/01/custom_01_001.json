@@ -9,7 +9,9 @@
       "C) 共有プールのサイズはLARGE_POOL_SIZEパラメータで制御される。",
       "D) リザルト・キャッシュに格納された結果は、基礎テーブルのデータが変更されても手動で無効化する必要がある。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — 라이브러리 캐시는 SQL 및 PL/SQL 문장의 파싱 결과(Parse Tree)와 실행 계획(Execution Plan)을 캐싱하는 공유 풀 내의 영역입니다. 동일한 SQL이 재실행될 때 Soft Parse를 통해 기존 실행 계획을 재사용할 수 있어 성능을 향상시킵니다.\n\nB) 오답 — 데이터 딕셔너리 캐시는 블록 단위가 아닌 행(Row) 단위로 메타데이터를 캐싱합니다. 그래서 Row Cache라고도 불립니다.\n\nC) 오답 — 공유 풀의 크기는 SHARED_POOL_SIZE 파라미터로 제어됩니다. LARGE_POOL_SIZE는 Large Pool의 크기를 제어하는 파라미터입니다.\n\nD) 오답 — 리절트 캐시에 저장된 결과는 기반 테이블의 데이터가 변경(DML)되면 자동으로 무효화(Auto-Invalidation)됩니다. 수동 무효화가 필요하지 않습니다.\n\n핵심 개념: 공유 풀은 라이브러리 캐시(SQL 파싱 결과/실행 계획), 데이터 딕셔너리 캐시(행 단위 메타데이터), 리절트 캐시(쿼리 결과 자동 무효화) 등으로 구성되며, SHARED_POOL_SIZE 파라미터로 크기를 제어합니다."
   },
   {
@@ -23,7 +25,10 @@
       "D) Large PoolのサイズはSHARED_POOL_SIZEパラメータで共有プールと一括で制御される。",
       "E) Large PoolはSQL文の解析結果をキャッシュするために使用される。"
     ],
-    "answer": ["B", "C"],
+    "answer": [
+      "B",
+      "C"
+    ],
     "explanation": "정답: B, C\nB) 정답 — Large Pool이 구성되지 않은 경우, RMAN의 I/O 버퍼 등 대형 메모리 요청은 공유 풀(Shared Pool)에서 처리됩니다. 이 경우 SQL 파싱 캐시와 경쟁하게 되어 성능 저하가 발생할 수 있습니다.\n\nC) 정답 — Large Pool의 주요 용도는 RMAN 백업/복구의 I/O 버퍼, Shared Server 모드에서의 UGA 할당, 병렬 실행(Parallel Execution)의 프로세스 간 메시지 버퍼입니다.\n\nA) 오답 — Large Pool은 LRU 리스트로 관리되지 않습니다. 할당된 메모리는 사용이 끝날 때까지 유지되며 다른 용도로 교체되지 않습니다.\n\nD) 오답 — Large Pool의 크기는 LARGE_POOL_SIZE 파라미터로 개별적으로 제어됩니다. SHARED_POOL_SIZE와는 별도의 파라미터입니다.\n\nE) 오답 — SQL 문의 파싱 결과를 캐싱하는 것은 공유 풀 내의 라이브러리 캐시(Library Cache)의 역할입니다. Large Pool은 SQL 캐싱과 관련이 없습니다.\n\n핵심 개념: Large Pool은 공유 풀의 부담을 줄이기 위한 선택적 SGA 구성요소로, LRU로 관리되지 않으며 RMAN, Shared Server, 병렬 실행 등 대형 메모리 할당을 전담합니다. LARGE_POOL_SIZE 파라미터로 크기를 제어합니다."
   },
   {
@@ -36,25 +41,14 @@
       "C) CKPTはREDOログ・バッファの内容をオンラインREDOログ・ファイルに書き込む。",
       "D) CKPTはFAST_START_MTTR_TARGETパラメータの値に関係なく、一定の間隔でフル・チェックポイントを実行する。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — CKPT(Checkpoint) 프로세스는 체크포인트 이벤트 발생 시 데이터 파일 헤더와 컨트롤 파일을 갱신합니다. 여기에는 마지막 체크포인트 SCN, 체크포인트 시간 등의 정보가 기록됩니다.\n\nA) 오답 — 변경된 버퍼(Dirty Buffer)를 데이터 파일에 직접 기록하는 것은 DBWn(Database Writer) 프로세스의 역할입니다. CKPT는 직접 데이터 블록을 기록하지 않고 DBWn에 기록을 요청한 후 그 결과를 파일 헤더에 반영합니다.\n\nC) 오답 — Redo Log Buffer의 내용을 온라인 Redo Log 파일에 기록하는 것은 LGWR(Log Writer) 프로세스의 역할입니다.\n\nD) 오답 — FAST_START_MTTR_TARGET 파라미터는 인스턴스 복구 목표 시간(초)을 지정하며, Oracle은 이 값에 따라 Incremental Checkpoint의 빈도를 자동으로 조정합니다. 일정 간격의 풀 체크포인트만 실행하는 것이 아닙니다.\n\n핵심 개념: CKPT 프로세스는 체크포인트 이벤트 발생 시 데이터 파일 헤더와 컨트롤 파일을 갱신하는 역할을 하며, 데이터 블록을 직접 기록하지 않습니다. FAST_START_MTTR_TARGET 파라미터로 Incremental Checkpoint 빈도를 자동 조정하여 인스턴스 복구 시간을 제어합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_004",
-    "title": "CDB(コンテナ・データベース)の構造に関して正しい内容を述べているものを選択してください。",
-    "options": [
-      "A) PDB$SEEDは新規PDB作成時のテンプレートとして使用される読取り専用コンテナであり、CDBから削除することが可能である。",
-      "B) CDB$ROOTはCON_IDが常に1である最上位コンテナであり、共通ユーザーの管理やマスター・データ・ディクショナリの保持を行う。",
-      "C) CDB内のすべてのPDBは独自のオンラインREDOログ・ファイルと制御ファイルを保持する。",
-      "D) ユーザーPDBのCON_IDは必ず2から割り当てられる。"
-    ],
-    "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — CDB$ROOT는 CON_ID가 항상 1인 CDB의 최상위 컨테이너입니다. 공통 사용자(Common User, C## 접두사)의 관리와 Oracle 제공 메타데이터의 원본(마스터 데이터 딕셔너리)을 보유하며, CDB 단위 관리 작업의 진입점 역할을 합니다.\n\nA) 오답 — PDB$SEED는 새 PDB 생성 시 템플릿으로 사용되는 읽기 전용 컨테이너이지만, CDB의 필수 구성요소이므로 삭제할 수 없습니다.\n\nC) 오답 — 온라인 Redo Log 파일과 컨트롤 파일은 CDB 전체에서 공유하는 자원입니다. 각 PDB가 독자적으로 보유하지 않습니다.\n\nD) 오답 — CON_ID 2는 PDB$SEED에 할당됩니다. 사용자 PDB의 CON_ID는 3 이상의 값이 부여됩니다.\n\n핵심 개념: CDB는 CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2, 읽기 전용 템플릿), 사용자 PDB(CON_ID=3 이상)로 구성됩니다. 컨트롤 파일과 온라인 Redo Log는 CDB 전체에서 공유되며, 각 PDB는 독립된 데이터 딕셔너리와 테이블스페이스를 보유합니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_005",
     "title": "Oracle Databaseの制御ファイルについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) 制御ファイルはデータベースの物理構造情報を記録するバイナリ・ファイルであり、インスタンスがMOUNT段階で読み込む。",
@@ -63,7 +57,25 @@
       "D) 制御ファイルの追加や移動は、データベースが稼働中にオンラインで実行可能である。",
       "E) 制御ファイルはテキスト形式であり、テキスト・エディタで直接編集することができる。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — 컨트롤 파일은 데이터베이스의 물리적 구조 정보를 기록하는 바이너리 파일입니다. 인스턴스가 MOUNT 단계에서 가장 먼저 읽어들이는 파일이며, 컨트롤 파일이 손상되면 데이터베이스를 열 수 없습니다.\n\nC) 정답 — 컨트롤 파일에는 데이터베이스 이름(DB_NAME), 데이터베이스 고유 식별자(DBID), 모든 데이터 파일의 위치와 상태, 온라인 Redo Log 파일 정보, 체크포인트 SCN 등 데이터베이스의 물리적 구조와 상태 정보가 저장됩니다.\n\nB) 오답 — 컨트롤 파일을 다중화하면 Oracle이 모든 복사본을 동기적으로 동시에 갱신합니다. 수동으로 동기화할 필요가 없습니다.\n\nD) 오답 — 컨트롤 파일의 추가나 이동은 데이터베이스를 SHUTDOWN한 후, OS 레벨에서 파일을 복사하고, SPFILE의 CONTROL_FILES 파라미터를 수정한 다음 STARTUP하는 절차가 필요합니다. 온라인 상태에서는 수행할 수 없습니다.\n\nE) 오답 — 컨트롤 파일은 바이너리 파일이므로 텍스트 에디터로 직접 편집할 수 없습니다.\n\n핵심 개념: 컨트롤 파일은 데이터베이스의 물리적 구조 메타데이터를 저장하는 바이너리 파일로, MOUNT 단계에서 읽어들입니다. 최소 2개를 서로 다른 디스크에 다중화하는 것이 권장되며, Oracle이 모든 복사본을 동기적으로 갱신합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_005",
+    "title": "Oracle Databaseのデータベース・バッファ・キャッシュにおけるバッファ・プールについて正しく述べているものを選択してください。",
+    "options": [
+      "A) DEFAULTプールの他に、KEEPプールとRECYCLEプールを構成することで、アクセス特性に応じてデータ・ブロックのキャッシュ戦略を分離できる。",
+      "B) KEEPプールは大規模な表のフルスキャンに最適化されたバッファ・プールであり、ブロックを短時間で再利用可能にする。",
+      "C) RECYCLEプールのサイズはDB_CACHE_SIZEパラメータで制御され、DEFAULTプールと共有される。",
+      "D) バッファ・プールの指定はデータベース作成時のみ可能であり、後からオブジェクト単位で変更することはできない。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Database Buffer Cache는 DEFAULT, KEEP, RECYCLE 3가지 버퍼 풀로 분리하여 운영할 수 있습니다. KEEP Pool은 자주 접근하는 소규모 객체를 캐시에 상주시키는 용도이고, RECYCLE Pool은 재사용 가능성이 낮은 대규모 객체용으로 빠르게 교체됩니다. 이를 통해 접근 특성에 따라 캐싱 전략을 분리할 수 있습니다.\n\nB) 오답 — KEEP Pool은 자주 접근하는 소규모 테이블/인덱스를 캐시에 상주시키기 위한 풀입니다. 대규모 테이블의 풀 스캔에 최적화된 것이 아니라, 오히려 소규모 객체의 캐시 히트율을 높이기 위한 것입니다.\n\nC) 오답 — RECYCLE Pool의 크기는 DB_RECYCLE_CACHE_SIZE 파라미터로 개별 제어됩니다. DB_CACHE_SIZE는 DEFAULT Pool의 크기를 제어하는 파라미터입니다.\n\nD) 오답 — ALTER TABLE 또는 ALTER INDEX의 STORAGE절에서 BUFFER_POOL 속성을 지정하여 개별 객체의 버퍼 풀을 변경할 수 있습니다(예: ALTER TABLE employees STORAGE (BUFFER_POOL KEEP)).\n\n핵심 개념: Database Buffer Cache는 DEFAULT(DB_CACHE_SIZE), KEEP(DB_KEEP_CACHE_SIZE), RECYCLE(DB_RECYCLE_CACHE_SIZE) 3가지 풀로 분리 운영 가능하며, 각 파라미터로 크기를 개별 제어합니다. 오브젝트의 STORAGE절 BUFFER_POOL 속성으로 캐싱 대상 풀을 지정합니다."
   }
 ]

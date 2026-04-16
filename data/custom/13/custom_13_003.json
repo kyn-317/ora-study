@@ -9,7 +9,9 @@
       "C) ASHのデータはインスタンス再起動後に完全に消失し、過去のASH情報を参照する手段はない。",
       "D) ASHはすべてのセッション(アクティブおよびアイドル)をサンプリング対象としている。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — ASH(Active Session History)는 V$ACTIVE_SESSION_HISTORY 뷰를 통해 제공되며, 1초 간격으로 ACTIVE 상태인 세션을 샘플링합니다. 각 샘플에는 SESSION_ID, SQL_ID, EVENT, WAIT_CLASS 등의 정보가 포함되어 있어, 특정 시점에 어떤 세션이 무엇을 하고 있었는지를 실시간으로 분석할 수 있습니다.\n\nB) 오답 — ASH 데이터는 먼저 SGA 메모리(ASH 버퍼)에 저장됩니다. 디스크에 직접 기록되는 것이 아니라, MMNL(Memory Monitor Light) 프로세스가 메모리가 가득 차면 일부 데이터를 AWR 리포지토리(SYSAUX 테이블스페이스)로 플러시합니다.\n\nC) 오답 — SGA 메모리 내의 ASH 데이터는 인스턴스 재시작 시 소멸되지만, AWR 스냅샷에 보존된 ASH 데이터는 DBA_HIST_ACTIVE_SESS_HISTORY 뷰를 통해 과거 이력을 참조할 수 있습니다.\n\nD) 오답 — ASH는 모든 세션을 대상으로 하는 것이 아니라, ACTIVE 상태(CPU 사용 중이거나 대기 이벤트에서 대기 중)인 세션만을 샘플링합니다. 아이들(Idle) 상태의 세션은 샘플링 대상에서 제외됩니다.\n\n핵심 개념: ASH(Active Session History)는 1초 간격으로 ACTIVE 세션을 샘플링하여 실시간 성능 분석 정보를 제공하는 기능입니다. 데이터는 SGA 메모리에 저장되며, AWR 스냅샷을 통해 과거 이력이 DBA_HIST_ACTIVE_SESS_HISTORY에 보존됩니다."
   },
   {
@@ -23,7 +25,10 @@
       "D) PDBレベルのADDMを有効にするためにはCDBの再起動が必要である。",
       "E) PDBレベルのAWRデータはCDB$ROOT内のSYSTEMテーブルスペースに一元的に格納される。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — Oracle 26ai에서는 AWR_PDB_AUTOFLUSH_ENABLED 파라미터의 기본값이 TRUE로 설정되어 있어, PDB 레벨의 AWR 스냅샷 수집과 ADDM 분석이 별도 설정 없이 자동으로 활성화됩니다.\n\nC) 정답 — PDB 레벨의 AWR 스냅샷 관리(수동 스냅샷 생성, 수집 간격/보존 기간 변경, 스냅샷 삭제 등)에는 DBMS_WORKLOAD_REPOSITORY 패키지를 해당 PDB 컨텍스트에서 사용합니다.\n\nB) 오답 — PDB 레벨의 ADDM은 해당 PDB 워크로드만을 분석합니다. SGA, CPU 등 CDB 전체 공유 자원의 보틀넥은 PDB ADDM에서 정확하게 분석할 수 없으며, CDB 레벨의 ADDM에서 분석해야 합니다.\n\nD) 오답 — AWR_PDB_AUTOFLUSH_ENABLED 파라미터는 ALTER SYSTEM 문으로 동적으로 변경 가능하며, CDB 재시작은 불필요합니다. 변경 후 다음 AWR 스냅샷부터 PDB 레벨 ADDM이 자동 수행됩니다.\n\nE) 오답 — PDB 레벨의 AWR 데이터는 CDB$ROOT가 아닌 각 PDB의 SYSAUX 테이블스페이스에 저장됩니다. 이로 인해 PDB별 SYSAUX 사용량이 증가할 수 있어 용량 관리에 주의가 필요합니다.\n\n핵심 개념: Oracle 26ai에서는 PDB 레벨 AWR이 기본 활성화(AWR_PDB_AUTOFLUSH_ENABLED=TRUE)되어 PDB별 독립적인 ADDM 분석이 자동으로 수행됩니다. PDB ADDM은 해당 PDB 워크로드에 한정되며, CDB 공유 자원 분석은 CDB 레벨 ADDM에서 수행합니다."
   },
   {
@@ -36,7 +41,9 @@
       "C) MMONはデータ・ディクショナリの変更を監視し、変更内容をアラート・ログに記録する専用プロセスである。",
       "D) MMONはデータベースのネットワーク接続を管理し、リスナーとの通信を制御するプロセスである。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — MMON(Manageability Monitor)은 V$ 뷰의 성능 통계 데이터를 기본 1시간(3600초) 간격으로 AWR 스냅샷으로 수집하여 SYSAUX 테이블스페이스에 저장하는 백그라운드 프로세스입니다. 또한 각 스냅샷 수집 후 ADDM 분석을 자동으로 트리거하고, 임계값 초과 시 서버 생성 알림(Server-Generated Alerts)을 발행하는 역할도 수행합니다.\n\nB) 오답 — 데이터베이스 백업 스케줄 관리와 자동 백업은 MMON이 아닌 Oracle Scheduler(CJQ0/Jnnn 프로세스)와 RMAN이 담당합니다. MMON은 성능 모니터링 및 관리성(Manageability) 기능에 특화된 프로세스입니다.\n\nC) 오답 — 데이터 딕셔너리 변경은 DDL 실행 시 Oracle 커널에 의해 자동으로 반영되며, Alert Log에의 기록은 데이터베이스 이벤트(기동/종료, 에러 등) 발생 시 이루어집니다. MMON은 딕셔너리 변경 감시가 아닌 성능 통계 수집 및 진단을 담당합니다.\n\nD) 오답 — 네트워크 접속 관리와 리스너와의 통신 제어는 MMON이 아닌 LREG(Listener Registration) 프로세스와 Oracle Net Listener가 담당합니다.\n\n핵심 개념: MMON(Manageability Monitor)은 Oracle의 자동 성능 관리 인프라의 핵심 프로세스로, AWR 스냅샷 수집, ADDM 자동 분석 트리거, 서버 생성 알림 발행을 담당합니다. ASH 데이터의 디스크 플러시는 보조 프로세스인 MMNL이 협력하여 수행합니다."
   },
   {
@@ -50,7 +57,10 @@
       "D) AWRレポートのSQL統計セクションには、分析期間中に実行されたすべてのSQL文が例外なく記録される。",
       "E) AWRレポートの生成にはOracle Tuning Packのライセンスのみが必要であり、Diagnostics Packでは使用できない。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — AWR 레포트의 Top 5 Timed Events 섹션은 분석 기간 동안 데이터베이스에서 가장 많은 시간을 소비한 상위 대기 이벤트를 표시합니다. 이 정보는 성능 보틀넥을 식별하는 데 핵심적인 역할을 하며, DBA가 튜닝 우선순위를 결정하는 출발점이 됩니다.\n\nB) 정답 — AWR 레포트는 DBMS_WORKLOAD_REPOSITORY 패키지의 AWR_REPORT_HTML(HTML 형식) 또는 AWR_REPORT_TEXT(텍스트 형식) 함수를 사용하여 생성할 수 있습니다. 또한 $ORACLE_HOME/rdbms/admin/awrrpt.sql 스크립트를 SQL*Plus에서 실행하여 대화형으로 생성할 수도 있습니다.\n\nC) 오답 — AWR 레포트는 연속된 두 스냅샷 간의 차이(Delta)를 분석하여 생성합니다. 또한 AWR Compare Period Report 기능을 사용하면 서로 다른 두 기간의 AWR 데이터를 비교 분석할 수 있습니다.\n\nD) 오답 — AWR 레포트의 SQL 통계 섹션에는 분석 기간 중 실행된 모든 SQL이 기록되는 것이 아니라, 경과 시간, CPU 시간, 논리적 읽기 등의 기준으로 상위 SQL만 포함됩니다. Top N SQL 설정에 따라 포함되는 SQL 수가 결정됩니다.\n\nE) 오답 — AWR 레포트 생성에는 Diagnostics Pack 라이선스가 필요합니다. Tuning Pack이 아닌 Diagnostics Pack이 AWR, ADDM 등의 성능 진단 기능에 대한 라이선스입니다. CONTROL_MANAGEMENT_PACK_ACCESS 파라미터가 DIAGNOSTIC 이상이어야 합니다.\n\n핵심 개념: AWR 레포트는 연속된 두 스냅샷 간의 성능 통계 차이를 분석한 보고서이며, Top 5 Timed Events 섹션이 성능 보틀넥 식별의 핵심입니다. DBMS_WORKLOAD_REPOSITORY 패키지나 awrrpt.sql 스크립트로 생성하며, Diagnostics Pack 라이선스가 필요합니다."
   },
   {
@@ -63,7 +73,9 @@
       "C) 自動SQLチューニング・タスク(SYS_AUTO_SQL_TUNING_TASK)はDBAが手動で作成・実行する必要があり、自動では実行されない。",
       "D) SQLプロファイルは実行計画を強制的に固定するオブジェクトであり、テーブルのデータが変わっても同じ実行計画が使用される。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — SQL 튜닝 어드바이저는 DBMS_SQLTUNE 패키지를 사용하여 개별 SQL 문을 분석하고, SQL 프로파일 생성, 인덱스 생성 권고, 통계 수집 권고 등의 최적화 권고 사항을 제공합니다. CREATE_TUNING_TASK로 태스크를 생성하고, EXECUTE_TUNING_TASK로 분석을 실행합니다.\n\nB) 오답 — SQL 워크로드 전체의 스키마 구조(인덱스, 구체화 뷰, 파티셔닝)를 최적화하는 것은 SQL 액세스 어드바이저(DBMS_ADVISOR)의 역할입니다. SQL 튜닝 어드바이저는 개별 SQL 문을 대상으로 분석을 수행합니다.\n\nC) 오답 — 자동 SQL 튜닝 태스크(SYS_AUTO_SQL_TUNING_TASK)는 Oracle의 자동 유지 관리 태스크로, 유지 관리 윈도우에서 자동으로 실행됩니다. AWR에서 고부하 SQL을 자동으로 식별하여 분석하며, DBA의 수동 개입 없이 동작합니다.\n\nD) 오답 — SQL 프로파일은 실행 계획을 강제로 고정하는 것이 아니라, 옵티마이저의 비용 추정(Cost Estimation)을 보정하는 보조 정보입니다. 데이터 변경이나 통계 변경에 따라 옵티마이저가 다른 실행 계획을 선택할 수 있으며, 실행 계획을 고정하는 것은 SQL Plan Baseline의 역할입니다.\n\n핵심 개념: SQL 튜닝 어드바이저는 DBMS_SQLTUNE 패키지를 통해 개별 SQL을 분석하여 SQL 프로파일, 인덱스 권고 등을 생성하는 어드바이저입니다. 자동 SQL 튜닝 태스크가 유지 관리 윈도우에서 고부하 SQL을 자동 분석하며, SQL 프로파일은 실행 계획을 고정하지 않고 옵티마이저의 비용 추정을 보정합니다."
   }
 ]

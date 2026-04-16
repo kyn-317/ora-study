@@ -10,7 +10,10 @@
       "D) ORA_LOGON_FAILURESポリシーは、データベース作成時に自動的に有効化され、認証失敗イベントを監査する。",
       "E) 事前定義監査ポリシーは、DROP AUDIT POLICY文を使用して削除し、必要に応じて再作成することが推奨されている。"
     ],
-    "answer": ["A", "D"],
+    "answer": [
+      "A",
+      "D"
+    ],
     "explanation": "정답: A, D\nA) 정답 — ORA_SECURECONFIG 정책은 데이터베이스 생성 시 자동으로 활성화되는 사전 정의 감사 정책으로, ALTER SYSTEM, CREATE USER, DROP USER, GRANT, REVOKE 등 주요 보안 관련 시스템 권한 및 명령을 감사합니다. 데이터베이스 보안의 기본 방어선 역할을 합니다.\n\nD) 정답 — ORA_LOGON_FAILURES 정책도 데이터베이스 생성 시 자동으로 활성화되며, 로그인 실패(인증 실패) 이벤트를 감사합니다. 이를 통해 무단 접근 시도를 탐지할 수 있습니다.\n\nB) 오답 — ORA_LOGON_FAILURES 정책은 로그인 실패 이벤트만 감사하며, 로그인 성공 이벤트는 감사 대상에 포함되지 않습니다. 정책 이름(LOGON_FAILURES)에서도 실패만을 대상으로 함을 알 수 있습니다.\n\nC) 오답 — 사전 정의 감사 정책은 ALTER AUDIT POLICY 문으로 수정할 수 없습니다. 활성화(AUDIT POLICY) 또는 비활성화(NOAUDIT POLICY)만 가능합니다.\n\nE) 오답 — 사전 정의 감사 정책은 DROP AUDIT POLICY 문으로 삭제할 수 없습니다. 사전 정의 정책은 Oracle이 제공하는 것으로, 활성화(AUDIT POLICY) 또는 비활성화(NOAUDIT POLICY)만 가능하며, 삭제나 수정(ALTER AUDIT POLICY)은 지원되지 않습니다.\n\n핵심 개념: Oracle Database는 ORA_SECURECONFIG(보안 관련 권한/명령 감사)와 ORA_LOGON_FAILURES(로그인 실패 감사)를 데이터베이스 생성 시 자동으로 활성화하며, 사전 정의 정책은 ALTER AUDIT POLICY로 수정할 수 없고 활성화/비활성화만 가능합니다."
   },
   {
@@ -23,7 +26,9 @@
       "C) AUDSYSスキーマには直接ログインして監査データを操作でき、AUDSYSユーザーとしてDELETE文で不要なレコードを削除できる。",
       "D) 統合監査トレイルのデータは監査対象の各ユーザーのデフォルト・テーブルスペースに分散して格納される。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — 통합 감사 트레일 데이터는 AUDSYS 스키마 내의 AUD$UNIFIED 테이블에 저장되며, 기본적으로 SYSAUX 테이블스페이스에 배치됩니다. 대용량 감사 데이터가 발생하는 환경에서는 DBMS_AUDIT_MGMT.SET_AUDIT_TRAIL_LOCATION을 사용하여 전용 테이블스페이스로 이동할 수 있습니다.\n\nA) 오답 — 통합 감사 트레일은 SYSTEM 테이블스페이스가 아닌 SYSAUX 테이블스페이스에 저장됩니다. 또한 SET_AUDIT_TRAIL_LOCATION 프로시저를 통해 다른 테이블스페이스로 이동이 가능합니다.\n\nC) 오답 — AUDSYS 스키마는 직접 로그인이 불가능하며, DROP이나 ALTER 등의 변경도 Oracle 내부적으로 보호됩니다. 감사 데이터 조회는 UNIFIED_AUDIT_TRAIL 뷰를 통해서만 가능하며, 삭제는 DBMS_AUDIT_MGMT.CLEAN_AUDIT_TRAIL 프로시저를 통해서만 수행할 수 있습니다.\n\nD) 오답 — 통합 감사 트레일은 각 사용자의 테이블스페이스에 분산 저장되지 않습니다. 모든 감사 레코드는 AUDSYS 스키마의 단일 테이블(AUD$UNIFIED)에 집중 저장되어 일원적으로 관리됩니다.\n\n핵심 개념: 통합 감사 트레일은 AUDSYS 스키마의 AUD$UNIFIED 테이블에 저장되며 기본 위치는 SYSAUX 테이블스페이스입니다. AUDSYS 스키마는 직접 로그인 및 변경이 불가능하도록 Oracle이 내부적으로 보호하며, 감사 데이터는 UNIFIED_AUDIT_TRAIL 뷰로 조회합니다."
   },
   {
@@ -36,7 +41,9 @@
       "C) V$OPTIONビューでUnified Auditingパラメータの値を確認することにより、現在のモードが混合モードか純粋統合監査モードかを判別できる。",
       "D) データベースをデフォルトでインストールした場合、純粋統合監査モードが自動的に設定される。"
     ],
-    "answer": ["C"],
+    "answer": [
+      "C"
+    ],
     "explanation": "정답: C\nC) 정답 — V$OPTION 뷰에서 'Unified Auditing' 파라미터의 값을 조회하여 현재 감사 모드를 확인할 수 있습니다. 값이 TRUE이면 순수 통합 감사 모드, FALSE이면 혼합 모드입니다.\n\nA) 오답 — 혼합 모드에서는 전통적 감사와 통합 감사가 공존합니다. 전통적 감사 기능이 완전히 비활성화되는 것은 순수 통합 감사 모드에서의 동작입니다.\n\nB) 오답 — 순수 통합 감사 모드로 전환하려면 ALTER SYSTEM 문이 아닌, Oracle 바이너리를 재링크(relink)해야 합니다. 이는 데이터베이스를 종료한 상태에서 수행하는 작업입니다.\n\nD) 오답 — 데이터베이스를 기본으로 설치하면 혼합 모드(Mixed Mode)가 설정됩니다. 순수 통합 감사 모드로 전환하려면 추가적인 바이너리 재링크 작업이 필요합니다.\n\n핵심 개념: Oracle Database는 기본 설치 시 혼합 모드(전통적 감사 + 통합 감사 공존)로 설정되며, 순수 통합 감사 모드로 전환하려면 Oracle 바이너리 재링크가 필요합니다. V$OPTION 뷰의 'Unified Auditing' 값으로 현재 모드를 확인할 수 있습니다."
   },
   {
@@ -50,7 +57,10 @@
       "D) AUDIT POLICY文にBY句もEXCEPT句も指定しない場合、SYSユーザーのみに監査ポリシーが適用される。",
       "E) AUDIT POLICY文のBY句で指定したユーザーは、対象のポリシーを自分自身でNOAUDIT POLICY文を使って無効化できる。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — AUDIT POLICY 문에 BY 절을 사용하면 특정 사용자에게만 감사 정책을 적용할 수 있습니다. 예를 들어 AUDIT POLICY pol_name BY hr, scott; 문은 HR과 SCOTT 사용자에게만 해당 정책을 적용합니다.\n\nB) 정답 — AUDIT POLICY 문에 EXCEPT 절을 사용하면 지정된 사용자를 제외한 나머지 모든 사용자에게 감사 정책을 적용할 수 있습니다. 예를 들어 AUDIT POLICY pol_name EXCEPT sys, system; 문은 SYS와 SYSTEM을 제외한 모든 사용자에게 정책을 적용합니다.\n\nC) 오답 — BY 절과 EXCEPT 절은 하나의 AUDIT POLICY 문에서 동시에 사용할 수 없습니다. 특정 사용자 대상(BY) 또는 특정 사용자 제외(EXCEPT) 중 하나만 지정 가능합니다.\n\nD) 오답 — BY 절과 EXCEPT 절을 모두 지정하지 않으면, 모든 사용자에게 감사 정책이 적용됩니다. SYS 사용자만을 대상으로 하는 것이 아닙니다.\n\nE) 오답 — 감사 정책의 활성화/비활성화는 AUDIT_ADMIN 롤을 가진 관리자만 수행할 수 있습니다. 일반 사용자가 자신에게 적용된 감사 정책을 NOAUDIT POLICY 문으로 해제할 수 없습니다.\n\n핵심 개념: 통합 감사 정책의 적용 범위는 AUDIT POLICY 문의 BY 절(특정 사용자 대상)과 EXCEPT 절(특정 사용자 제외)로 유연하게 제어할 수 있으며, 두 절은 동시에 사용할 수 없습니다. 아무 절도 지정하지 않으면 모든 사용자에게 적용됩니다."
   },
   {
@@ -63,7 +73,9 @@
       "C) 監査レコードはSQL実行と同期的にディスクに書き込まれるため、監査設定が多いほどパフォーマンスに大きく影響する。",
       "D) 監査レコードはユーザーのデフォルト・テーブルスペース内の一時セグメントに格納された後、定期的にSYSTEMテーブルスペースに統合される。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — 통합 감사 레코드는 먼저 SGA 내의 감사 큐(Audit Queue)에 기록된 후, 주기적으로 AUDSYS 스키마의 AUD$UNIFIED 테이블로 플러시(Flush)됩니다. 이 비동기 방식 덕분에 통합 감사는 전통적 감사 대비 성능 영향이 적습니다.\n\nA) 오답 — 감사 레코드는 REDO 로그에 직접 기록되는 것이 아닙니다. SGA의 감사 큐를 거쳐 AUDSYS 스키마의 내부 테이블에 저장되는 별도의 데이터 흐름을 따릅니다.\n\nC) 오답 — 통합 감사는 SGA 큐 기반의 비동기 기록 방식을 사용하므로, 동기적으로 디스크에 기록되지 않습니다. 이는 전통적 감사(동기 기록)에 비해 성능 영향이 적은 이유입니다.\n\nD) 오답 — 감사 레코드는 사용자의 테이블스페이스나 일시 세그먼트에 저장되지 않습니다. 모든 통합 감사 레코드는 AUDSYS 스키마의 AUD$UNIFIED 테이블에 저장되며, 기본 위치는 SYSAUX 테이블스페이스입니다.\n\n핵심 개념: 통합 감사는 SGA 내 감사 큐에 비동기적으로 레코드를 기록한 후 AUDSYS 스키마의 AUD$UNIFIED 테이블로 플러시하는 방식으로, 전통적 감사의 동기 기록 방식에 비해 성능 영향을 최소화합니다. UNIFIED_AUDIT_TRAIL 뷰를 통해 이 데이터를 조회할 수 있습니다."
   }
 ]

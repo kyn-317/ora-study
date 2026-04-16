@@ -10,7 +10,10 @@
       "D) PDB_PLUG_IN_VIOLATIONSビューのTYPE列がWARNINGの場合、PDBのオープン後にOracleが自動的に解決することがある。",
       "E) Plug In時に.xmlファイルを使用する場合、データ・ファイルは.xmlファイル内に含まれているためデータ・ファイルの別途コピーは不要である。"
     ],
-    "answer": ["A", "D"],
+    "answer": [
+      "A",
+      "D"
+    ],
     "explanation": "정답: A, D\nA) 정답 — Plug In을 수행하기 전에 DBMS_PDB.CHECK_PLUG_COMPATIBILITY 함수를 사용하여 캐릭터셋, Endian 형식, 데이터베이스 버전, 패치 수준 등의 호환성을 사전 검사할 수 있습니다. 검사 결과(위반 사항)는 PDB_PLUG_IN_VIOLATIONS 뷰에 기록되며, ERROR와 WARNING 유형으로 분류됩니다.\n\nD) 정답 — PDB_PLUG_IN_VIOLATIONS 뷰에서 TYPE이 WARNING인 위반 사항은 PDB를 오픈하면 Oracle이 자동으로 해결하는 경우가 많습니다. 예를 들어 패치 수준 차이에 따른 컴포넌트 업그레이드가 자동 수행됩니다. 반면 ERROR 유형은 Plug In이 차단되므로 반드시 수동으로 해결해야 합니다.\n\nB) 오답 — CREATE PLUGGABLE DATABASE ... USING 구문으로 Plug In을 실행하는 것은 맞지만, Plug In 후 PDB는 MOUNTED 상태로 생성됩니다. READ WRITE가 아닙니다. PDB를 사용하려면 ALTER PLUGGABLE DATABASE ... OPEN을 별도로 실행해야 합니다.\n\nC) 오답 — Plug In 작업(CREATE PLUGGABLE DATABASE)은 CDB$ROOT에 접속한 상태에서 실행해야 합니다. PDB에 직접 접속하는 것이 아닙니다.\n\nE) 오답 — .xml 파일에는 메타데이터만 포함되어 있으며, 데이터 파일은 원래 경로에 별도로 존재합니다. 데이터 파일을 포함하는 것은 .pdb(단일 아카이브) 형식입니다. XML 방식으로 Plug In하려면 XML 파일과 데이터 파일 모두 접근 가능해야 합니다.\n\n핵심 개념: PDB Plug In은 CDB$ROOT에서 CREATE PLUGGABLE DATABASE ... USING 구문으로 수행하며, 사전에 DBMS_PDB.CHECK_PLUG_COMPATIBILITY로 호환성을 검사합니다. Plug In 후 PDB는 MOUNTED 상태이며, WARNING 유형의 위반은 PDB 오픈 시 자동 해결될 수 있습니다."
   },
   {
@@ -23,7 +26,9 @@
       "C) Oracle Managed Files(OMF)環境ではKEEP DATAFILESがデフォルト動作として適用される。",
       "D) Unplug後にDROP PLUGGABLE DATABASEを実行する場合はINCLUDING DATAFILESが推奨される。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — DROP PLUGGABLE DATABASE 문에서 INCLUDING DATAFILES를 지정하면 PDB의 데이터 파일이 물리적으로 삭제되어 완전히 제거됩니다. KEEP DATAFILES를 지정하면 딕셔너리 정보만 삭제되고 데이터 파일은 원래 위치에 그대로 보존됩니다.\n\nA) 오답 — DROP PLUGGABLE DATABASE를 실행하려면 PDB가 MOUNTED(CLOSE) 또는 UNPLUGGED 상태여야 합니다. READ WRITE나 READ ONLY 상태에서는 DROP을 실행할 수 없습니다.\n\nC) 오답 — OMF(Oracle Managed Files) 환경에서는 INCLUDING DATAFILES가 기본값으로 적용됩니다. 비OMF 환경에서 KEEP DATAFILES가 기본값입니다. 따라서 OMF 환경에서 Unplug 후 DROP 시에는 KEEP DATAFILES를 명시적으로 지정해야 합니다.\n\nD) 오답 — Unplug 후 DROP을 실행하는 경우에는 KEEP DATAFILES를 사용하는 것이 권장됩니다. Unplug 시 XML 메타데이터에 데이터 파일 경로가 기록되어 있으므로, INCLUDING DATAFILES로 데이터 파일을 삭제하면 다른 CDB에 Plug In할 수 없게 됩니다.\n\n핵심 개념: DROP PLUGGABLE DATABASE는 PDB가 MOUNTED 또는 UNPLUGGED 상태에서 실행하며, INCLUDING DATAFILES는 데이터 파일을 물리적으로 삭제하고 KEEP DATAFILES는 보존합니다. OMF 환경에서는 INCLUDING DATAFILES가 기본값이므로, Unplug-DROP-Plug In 패턴에서는 KEEP DATAFILES를 명시해야 합니다."
   },
   {
@@ -37,7 +42,10 @@
       "D) PDBをCLOSEする際にIMMEDIATEオプションを指定しても、すべてのアクティブ・セッションが正常に終了するまで待機してからCLOSEされる。",
       "E) MOUNTED状態のPDBではDDL操作は不可であるがSELECT操作は可能である。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — FORCE 옵션을 사용하면 PDB를 먼저 CLOSE하지 않고 직접 오픈 모드를 전환할 수 있습니다. 내부적으로 PDB를 닫았다가 새 모드로 다시 오픈하는 작업이 자동 수행됩니다. 예를 들어 READ ONLY에서 READ WRITE로 직접 전환할 수 있습니다.\n\nC) 정답 — READ ONLY 모드에서는 SELECT 작업이 허용되며 DML(INSERT, UPDATE, DELETE)은 차단됩니다. 다만 임시 테이블스페이스에 대한 쓰기는 READ ONLY 모드에서도 허용됩니다. 이는 정렬 작업 등 임시 데이터 처리를 위해 필요합니다.\n\nB) 오답 — ALTER PLUGGABLE DATABASE ALL OPEN은 사용자 PDB를 일괄 오픈하는 명령입니다. PDB$SEED는 CDB의 필수 시드 컨테이너로서 항상 READ ONLY 상태를 유지하며, ALL OPEN으로 READ WRITE 모드가 적용되지 않습니다.\n\nD) 오답 — IMMEDIATE 옵션을 지정하면 활성 세션이 정상 종료될 때까지 대기하는 것이 아니라, 활성 세션을 강제로 종료하고 즉시 PDB를 닫습니다. IMMEDIATE를 생략한 경우에 활성 세션이 종료될 때까지 대기합니다.\n\nE) 오답 — MOUNTED 상태에서는 사용자 접속 자체가 불가능하며, SELECT를 포함한 모든 쿼리를 실행할 수 없습니다. 미디어 복구, 데이터 파일 이동, Unplug 등 일부 관리 작업만 가능합니다.\n\n핵심 개념: PDB의 오픈 모드에는 MOUNTED, READ ONLY, READ WRITE가 있습니다. FORCE 옵션으로 CLOSE 없이 모드를 직접 전환할 수 있으며, READ ONLY 모드에서는 SELECT와 임시 테이블스페이스 쓰기만 허용됩니다. MOUNTED 상태에서는 일반 쿼리가 불가능합니다."
   },
   {
@@ -50,7 +58,9 @@
       "C) リモート・クローンを実行するにはソースPDBが必ずMOUNTED状態である必要がある。",
       "D) リモート・クローンはローカル・クローンと異なり、ホット・クローン方式をサポートしていない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — 원격 클론(Remote Clone)을 수행하려면 소스 CDB에 공통 사용자(Common User)를 생성하고 CREATE PLUGGABLE DATABASE 시스템 권한을 부여해야 합니다. 대상 CDB에서는 해당 공통 사용자를 통해 DB Link를 구성하고, CREATE PLUGGABLE DATABASE ... FROM pdb@dblink 구문으로 원격 클론을 실행합니다.\n\nB) 오답 — 원격 클론에서 데이터 파일은 Oracle Net을 통해 블록 단위로 자동 전송됩니다. FTP를 사용하지 않으며, 수동으로 데이터 파일을 전송할 필요가 없습니다.\n\nC) 오답 — 원격 클론 시 소스 PDB는 READ ONLY 모드로 변경하거나, 핫 클론 방식을 사용하여 READ WRITE 상태에서도 수행할 수 있습니다. MOUNTED 상태가 필요한 것은 Unplug 작업입니다.\n\nD) 오답 — 원격 클론도 핫 클론 방식을 지원합니다. 소스 CDB가 ARCHIVELOG 모드이고 로컬 UNDO 모드로 운영되는 경우, 소스 PDB가 READ WRITE 상태에서도 원격 클론을 수행할 수 있습니다.\n\n핵심 개념: PDB 원격 클론은 DB Link를 통해 다른 CDB의 PDB를 현재 CDB로 복제하는 방법입니다. 소스 CDB에 CREATE PLUGGABLE DATABASE 권한을 가진 공통 사용자가 필요하며, 데이터 파일은 Oracle Net을 통해 자동 전송됩니다. 로컬 클론과 마찬가지로 핫 클론도 지원됩니다."
   },
   {
@@ -63,7 +73,9 @@
       "C) Lockdown Profileが割り当てられたPDBで制限された機能を使用するとORA-00942エラーが発生する。",
       "D) Lockdown ProfileはCDB$ROOTのPDBにのみ適用可能であり、ユーザーPDBには割り当てることができない。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — PDB Lockdown Profile은 PDB 내에서 사용할 수 있는 기능을 제한하는 명명된 규칙 집합(Named Rule Set)입니다. DISABLE STATEMENT(특정 SQL 문 실행 제한), DISABLE FEATURE(특정 기능 사용 제한), DISABLE OPTION(특정 데이터베이스 옵션 제한)의 세 가지 제한 유형을 제공합니다. PDB_LOCKDOWN 파라미터를 통해 특정 PDB에 할당합니다.\n\nA) 오답 — Lockdown Profile은 CDB$ROOT에서만 생성 및 수정이 가능합니다. PDB 관리자는 자신의 PDB에 할당된 Lockdown Profile을 변경하거나 해제할 수 없습니다. 이를 통해 CDB 관리자가 보안 정책을 중앙에서 일관되게 관리합니다.\n\nC) 오답 — Lockdown Profile에 의해 제한된 기능을 사용하려고 하면 ORA-01031(권한 부족) 또는 ORA-65203 오류가 발생합니다. ORA-00942는 테이블 또는 뷰가 존재하지 않는 경우의 오류이며, Lockdown Profile과는 관련이 없습니다.\n\nD) 오답 — Lockdown Profile은 사용자 PDB에 할당하기 위한 기능입니다. PDB_LOCKDOWN 파라미터를 사용하여 특정 사용자 PDB에 프로파일을 할당할 수 있습니다. CDB$ROOT 자체에 할당하는 것이 아니라, CDB$ROOT에서 생성하여 PDB에 적용합니다.\n\n핵심 개념: PDB Lockdown Profile은 CDB 관리자가 CDB$ROOT에서 생성하여 특정 PDB에 할당하는 보안 제한 메커니즘입니다. DISABLE STATEMENT/FEATURE/OPTION 세 가지 유형의 제한을 제공하며, PDB 관리자는 할당된 프로파일을 변경할 수 없어 중앙 집중식 보안 관리가 가능합니다."
   }
 ]

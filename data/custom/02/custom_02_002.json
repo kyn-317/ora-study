@@ -10,7 +10,10 @@
       "D) SET TIMINGコマンドはSQL*Plusのセッション・タイムアウト時間を設定する。",
       "E) SHOW PARAMETERコマンドはSQL*Plus固有の環境変数のみを表示し、初期化パラメータの表示には使用できない。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — SET LINESIZE n 명령은 SQL*Plus에서 한 줄에 표시하는 최대 문자 수를 설정합니다. 출력 결과의 가독성을 높이기 위해 자주 사용되는 환경 설정 명령입니다.\n\nC) 정답 — SET AUTOCOMMIT ON으로 설정하면 DML 문(INSERT, UPDATE, DELETE) 실행 후 자동으로 COMMIT이 수행됩니다. 기본값은 OFF이며, DML 실행 후 명시적으로 COMMIT을 수행해야 합니다.\n\nB) 오답 — SET PAGESIZE n 명령은 SQL 문의 실행 행수를 제한하는 것이 아니라, 페이지당 행 수를 설정하여 컬럼 헤더가 반복 표시되는 간격을 제어합니다.\n\nD) 오답 — SET TIMING ON/OFF 명령은 세션 타임아웃 시간을 설정하는 것이 아니라, SQL 문의 실행 시간(경과 시간)을 표시할지 여부를 설정합니다.\n\nE) 오답 — SHOW PARAMETER 명령은 데이터베이스의 초기화 파라미터 값을 조회하는 명령입니다. 예를 들어 SHOW PARAMETER sga로 SGA 관련 초기화 파라미터를 확인할 수 있습니다. SQL*Plus 고유 환경 변수 확인은 SHOW ALL 명령을 사용합니다.\n\n핵심 개념: SQL*Plus는 SET 명령으로 출력 형식(LINESIZE, PAGESIZE), 실행 동작(AUTOCOMMIT, TIMING) 등 다양한 환경을 설정하고, SHOW PARAMETER로 데이터베이스 초기화 파라미터를, SHOW ALL로 SQL*Plus 환경 변수를 각각 조회할 수 있습니다."
   },
   {
@@ -23,7 +26,9 @@
       "C) 対話型モードではデータベース作成と同時にリスナーの新規作成を行うことができる。",
       "D) 対話型モードではPDBを含まないNon-CDBデータベースのみ作成することができる。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — DBCA 대화형 모드에서는 데이터베이스 생성 시 「일반 구성(Typical)」과 「확장 구성(Advanced)」 두 가지 구성 모드를 선택할 수 있습니다. Typical 모드는 기본 설정으로 빠르게 생성하고, Advanced 모드는 SGA/PGA 개별 설정, 데이터 파일 위치 지정, NLS 파라미터 상세 지정 등 세부 옵션을 직접 제어할 수 있습니다.\n\nB) 오답 — 기존 데이터 파일을 포함하여 빠르게 생성할 수 있는 것은 Seed 템플릿(.dbc)입니다. Non-Seed 템플릿(.dbt)은 데이터 파일을 포함하지 않으며, 구성 정보만 포함하여 완전히 새로 생성하므로 시간이 더 소요됩니다.\n\nC) 오답 — DBCA는 데이터베이스 생성/관리 전용 도구이며, 리스너를 새로 생성하는 기능은 제공하지 않습니다. 대화형 모드의 「네트워크 구성」 단계는 기존에 생성되어 있는 리스너를 선택하는 것이며, 리스너 생성은 NETCA 또는 Net Manager(NETMGR)에서 수행합니다.\n\nD) 오답 — DBCA 대화형 모드에서는 CDB(Container Database) 생성 여부를 선택할 수 있으며, CDB 생성 시 PDB 수를 지정하여 PDB도 함께 생성할 수 있습니다. Oracle 26ai에서는 Non-CDB가 완전 제거되어 CDB 생성이 기본입니다.\n\n핵심 개념: DBCA 대화형(GUI) 모드에서는 Typical/Advanced 구성 모드를 선택하여 데이터베이스를 생성하며, 템플릿으로 Seed(데이터 파일 포함, 빠른 생성)와 Non-Seed(구성 정보만, 완전 새 생성)를 사용할 수 있습니다. 리스너 생성은 DBCA의 역할 범위가 아닙니다."
   },
   {
@@ -37,7 +42,10 @@
       "D) RMANを使用した増分バックアップでは、未使用ブロックも含めてすべてのブロックをバックアップする。",
       "E) RMANのバックアップ・メタデータを管理するためにはRecovery Catalogデータベースの構成が必須である。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — RMAN 증분 백업에서 Level 0은 기준이 되는 전체 백업이며, Level 1은 Level 0 이후 변경된 블록만을 백업합니다. 이를 통해 백업 시간과 저장 공간을 절약할 수 있습니다.\n\nC) 정답 — RMAN은 백업 수행 중에 데이터 파일의 블록 손상(Block Corruption)을 자동으로 감지합니다. 이는 OS 명령(cp, tar 등)을 사용한 User-Managed 백업에서는 불가능한 RMAN의 주요 장점 중 하나입니다.\n\nB) 오답 — 백업 세트(Backup Set)와 이미지 복사(Image Copy)는 크기가 다릅니다. 백업 세트는 사용되지 않는 블록을 건너뛰고, 여러 데이터 파일을 하나의 백업 피스에 다중화(Multiplexing)하여 저장하므로 일반적으로 이미지 복사보다 작은 크기가 됩니다. 이미지 복사는 데이터 파일의 완전한 복사본입니다.\n\nD) 오답 — RMAN은 Unused Block Compression 기능을 통해 사용하지 않는 블록을 자동으로 건너뛰어 백업합니다. 이는 전체 파일을 복사하는 User-Managed 백업 대비 백업 크기를 줄일 수 있는 장점입니다.\n\nE) 오답 — Recovery Catalog는 필수가 아니라 선택 사항입니다. 기본적으로 컨트롤 파일에 백업 메타데이터가 저장되며, Recovery Catalog를 별도로 구성하면 Stored Script 지원, 무제한 메타데이터 보존, 다중 데이터베이스 중앙 관리 등 추가 이점을 얻을 수 있습니다.\n\n핵심 개념: RMAN은 증분 백업(Level 0/1), 블록 손상 자동 감지, 미사용 블록 건너뛰기 등 User-Managed 백업 대비 고급 기능을 제공합니다. 백업 형식으로는 백업 세트(압축·다중화 지원, 작은 크기)와 이미지 복사(데이터 파일 완전 복사)가 있으며, Recovery Catalog는 선택적으로 구성하여 추가 기능을 활용할 수 있습니다."
   },
   {
@@ -50,7 +58,9 @@
       "C) EM ExpressはEM Cloud Controlと同じ機能を全て提供しており、大規模環境でも使用できる。",
       "D) EM Expressを有効にするにはEnterprise Manager Cloud Controlのインストールが前提条件として必要である。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — EM Express는 데이터베이스에 내장된 경량 웹 관리 도구로, 별도의 설치나 Management Agent 없이 사용할 수 있습니다. DBMS_XDB_CONFIG.setHTTPSPort 프로시저로 HTTPS 포트를 설정하면 https://hostname:5500/em 으로 접속하여 기본적인 모니터링과 관리를 수행할 수 있습니다.\n\nB) 오답 — EM Cloud Control은 Oracle Database뿐만 아니라 미들웨어(WebLogic 등), 호스트(OS), 클라우드 등 다양한 타겟을 중앙 집중식으로 관리할 수 있는 통합 관리 플랫폼입니다. Plug-in을 통해 관리 대상 유형을 확장할 수 있습니다.\n\nC) 오답 — EM Express는 단일 데이터베이스만 관리할 수 있는 경량 도구입니다. EM Cloud Control의 전체 기능(다수 타겟 중앙 관리, Job 시스템, 패치 관리, MOS 연계 등)을 제공하지 않으므로 대규모 환경에서는 EM Cloud Control이 필요합니다.\n\nD) 오답 — EM Express는 EM Cloud Control과 독립적으로 사용할 수 있습니다. EM Cloud Control 설치 없이도 DBMS_XDB_CONFIG.setHTTPSPort로 HTTPS 포트를 설정하는 것만으로 활성화됩니다.\n\n핵심 개념: EM Express는 데이터베이스에 내장된 경량 웹 관리 도구로, 별도 설치 없이 포트 설정만으로 활성화됩니다. EM Cloud Control은 다수 타겟을 중앙 집중식으로 관리하는 통합 플랫폼이며, EM Express는 단일 데이터베이스 관리에 적합한 간이 도구입니다."
   },
   {
@@ -63,7 +73,9 @@
       "C) SPOOLコマンドはSQL文の実行結果を他のデータベースに転送する機能である。",
       "D) @コマンドで実行できるのはDML文のみであり、DDL文やPL/SQL文は実行できない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — SQL*Plus에서 @명령으로 스크립트 파일을 실행할 때 .sql 확장자를 생략할 수 있습니다. 예를 들어 @pdborcl 이라고 입력하면 현재 디렉토리에서 pdborcl.sql 파일을 찾아 실행합니다. 확장자를 명시적으로 지정하는 것도 가능합니다.\n\nB) 오답 — @@명령은 현재 실행 중인 스크립트와 같은 디렉토리에 있는 스크립트를 실행하기 위한 명령입니다. 중첩 스크립트(스크립트 내에서 다른 스크립트를 호출) 실행 시 상대 경로 기준을 현재 스크립트의 위치로 설정하는 것이며, 절대 경로 전용이 아닙니다.\n\nC) 오답 — SPOOL 명령은 SQL*Plus의 화면 출력 결과를 로컬 파일로 저장하는 기능입니다. 다른 데이터베이스로 데이터를 전송하는 기능이 아니며, SPOOL filename으로 시작하고 SPOOL OFF로 저장을 종료합니다.\n\nD) 오답 — @명령으로 실행하는 스크립트 파일에는 DML, DDL, PL/SQL, SQL*Plus 명령 등 SQL*Plus에서 실행할 수 있는 모든 종류의 명령을 포함할 수 있습니다.\n\n핵심 개념: SQL*Plus의 @명령은 .sql 확장자를 생략하여 스크립트를 실행할 수 있으며, 스크립트 파일에는 SQL, PL/SQL, SQL*Plus 명령 등 모든 종류의 명령을 포함할 수 있습니다. @@명령은 중첩 스크립트 실행 시 현재 스크립트의 디렉토리를 기준으로 파일을 찾습니다."
   }
 ]

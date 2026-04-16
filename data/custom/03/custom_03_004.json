@@ -2,46 +2,6 @@
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_016",
-    "title": "Oracle Databaseの起動中にオンラインREDOログ・ファイルが破損していることが検出された場合、起動処理はどの段階で失敗しますか。正しいものを選択してください。",
-    "options": [
-      "A) NOMOUNT段階で失敗する。初期化パラメータ・ファイルの読込みにREDOログ情報が必要であるため起動できない。",
-      "B) MOUNT段階で失敗する。制御ファイルのオープン時にREDOログ・ファイルの検証が行われるため起動できない。",
-      "C) OPEN段階で失敗する。データ・ファイルとオンラインREDOログ・ファイルのオープン処理はOPEN段階で実行されるためである。",
-      "D) 起動処理自体は正常に完了するが、最初のログ・スイッチ発生時にエラーが検出される。"
-    ],
-    "answer": ["C"],
-    "explanation": "정답: C\nC) 정답 — 온라인 Redo Log 파일의 오픈과 검증은 OPEN 단계에서 수행됩니다. NOMOUNT 단계에서는 초기화 파라미터 파일을 읽고 SGA를 할당하며 백그라운드 프로세스를 기동합니다. MOUNT 단계에서는 컨트롤 파일을 열어 데이터 파일과 Redo Log 파일의 경로 정보를 인식하지만, 실제 파일을 열지는 않습니다. OPEN 단계에서 데이터 파일과 Redo Log 파일을 실제로 열고 검증하므로, Redo Log 파일이 손상된 경우 이 단계에서 실패합니다.\n\nA) 오답 — NOMOUNT 단계에서는 초기화 파라미터 파일만 읽으며 Redo Log 파일에 접근하지 않습니다. 따라서 Redo Log 파일 손상과 관계없이 NOMOUNT까지는 정상적으로 기동됩니다.\n\nB) 오답 — MOUNT 단계에서는 컨트롤 파일을 열어 Redo Log 파일의 경로 정보를 인식하지만, 실제 Redo Log 파일을 열거나 검증하지는 않습니다. 컨트롤 파일 자체가 손상된 경우에만 MOUNT 단계에서 실패합니다.\n\nD) 오답 — Redo Log 파일의 검증은 OPEN 단계에서 즉시 수행되므로, 로그 스위치까지 기다리지 않고 바로 오류가 감지됩니다.\n\n핵심 개념: Oracle 기동 3단계에서 각 파일의 오픈 시점이 다릅니다. NOMOUNT: 초기화 파라미터 파일만 사용. MOUNT: 컨트롤 파일 오픈(데이터/Redo Log 경로 인식). OPEN: 데이터 파일과 Redo Log 파일을 실제로 오픈하고 검증. 따라서 파일 손상 시 실패 단계가 달라집니다."
-  },
-  {
-    "chapter": "データベース・インスタンスの管理の説明",
-    "number": "C_03_017",
-    "title": "DBAがSPFILE環境で運用中のデータベースにおいて、PFILEへの変換を行いたい場合の正しい手順を選択してください。",
-    "options": [
-      "A) CREATE PFILE FROM SPFILEを実行し、生成されたPFILEを編集後、STARTUP PFILE='パス'でPFILEを指定して再起動する。",
-      "B) ALTER SYSTEM SET PARAMETER_FILE_TYPE = PFILE SCOPE=BOTH を実行して即座にPFILEに切り替える。",
-      "C) SPFILEをテキスト・エディタで直接開き、ファイル拡張子を.oraに変更してPFILEとして使用する。",
-      "D) SHUTDOWN IMMEDIATE後にSPFILEを削除し、インスタンスを再起動するとOracle が自動的にPFILEを生成する。"
-    ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — SPFILE에서 PFILE로 전환하는 올바른 절차는 다음과 같습니다: (1) CREATE PFILE FROM SPFILE 명령으로 현재 SPFILE의 내용을 텍스트 형식의 PFILE로 추출합니다. (2) 필요한 경우 텍스트 에디터로 PFILE을 편집합니다. (3) STARTUP PFILE='경로' 명령으로 PFILE을 명시적으로 지정하여 인스턴스를 기동합니다.\n\nB) 오답 — PARAMETER_FILE_TYPE이라는 초기화 파라미터는 존재하지 않습니다. 파라미터 파일 유형의 전환은 ALTER SYSTEM으로 수행하는 것이 아니라, CREATE PFILE/SPFILE 명령과 STARTUP 옵션으로 처리합니다.\n\nC) 오답 — SPFILE은 바이너리 파일이므로 텍스트 에디터로 열어 확장자를 변경하더라도 PFILE로 사용할 수 없습니다. 바이너리 헤더가 포함되어 있어 텍스트 파라미터 파일로 인식되지 않으며, 기동 시 오류가 발생합니다.\n\nD) 오답 — SPFILE을 삭제한 후 재기동하면 Oracle은 검색 순서에 따라 init<SID>.ora(PFILE)를 찾습니다. 해당 파일이 없으면 기동 자체가 실패하며, Oracle이 자동으로 PFILE을 생성하지 않습니다.\n\n핵심 개념: SPFILE에서 PFILE로 전환하려면 CREATE PFILE FROM SPFILE로 텍스트 형태를 추출한 뒤, STARTUP PFILE='경로'로 명시 지정하여 기동합니다. SPFILE은 바이너리 파일이므로 직접 편집하거나 확장자를 변경하여 PFILE로 사용할 수 없습니다."
-  },
-  {
-    "chapter": "データベース・インスタンスの管理の説明",
-    "number": "C_03_018",
-    "title": "DBAが以下のSQL文を実行してインスタンスとデータベースの状態を確認しました。\n\nSQL> SELECT instance_name, status\n     FROM V$INSTANCE;\n\nINSTANCE_NAME    STATUS\n---------------- ----------\norcl26ai         MOUNTED\n\nSQL> SELECT name, open_mode\n     FROM V$DATABASE;\n\nNAME      OPEN_MODE\n--------- ----------\nORCL26AI  MOUNTED\n\nこの出力結果から読み取れる内容として正しいものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) インスタンスが起動しており、制御ファイルがオープンされている状態である。",
-      "B) この状態ではARCHIVELOGモードへの変更が可能である。",
-      "C) 一般ユーザーがデータベースに接続してSELECT文でデータを参照することが可能である。",
-      "D) V$DATABASEビューはデータベースがOPEN状態でないと参照できないため、この出力は不正である。",
-      "E) データ・ファイルはオープンされており、すべてのデータにアクセス可能である。"
-    ],
-    "answer": ["A", "B"],
-    "explanation": "정답: A, B\nA) 정답 — V$INSTANCE의 STATUS가 MOUNTED이고 V$DATABASE의 OPEN_MODE가 MOUNTED이므로, 인스턴스가 기동되어 컨트롤 파일이 오픈된 상태입니다. MOUNT 단계에서는 컨트롤 파일을 읽어 데이터베이스 구조 정보를 인식합니다.\n\nB) 정답 — MOUNT 상태에서는 ALTER DATABASE ARCHIVELOG / NOARCHIVELOG 명령으로 아카이브 로그 모드를 변경할 수 있습니다. 이 작업은 MOUNT 단계에서만 수행할 수 있는 대표적인 관리 작업입니다.\n\nC) 오답 — MOUNT 상태에서는 데이터 파일이 열리지 않으므로 일반 사용자가 접속하여 데이터를 조회할 수 없습니다. 사용자 접속과 데이터 조회는 OPEN 상태에서만 가능합니다.\n\nD) 오답 — V$DATABASE 뷰는 컨트롤 파일의 정보를 기반으로 하므로, 컨트롤 파일이 열리는 MOUNT 상태 이상에서 참조할 수 있습니다. OPEN 상태가 아니어도 참조 가능하므로 이 출력은 정상입니다.\n\nE) 오답 — MOUNT 상태에서는 컨트롤 파일에서 데이터 파일의 경로 정보만 인식할 뿐, 데이터 파일 자체는 오픈되지 않습니다. 데이터 파일과 Redo Log 파일의 오픈은 OPEN 단계에서 수행됩니다.\n\n핵심 개념: MOUNT 상태(V$INSTANCE STATUS=MOUNTED)에서는 컨트롤 파일이 열려 있으며, ARCHIVELOG 모드 변경, 데이터 파일 이름 변경, 미디어 복구 등의 관리 작업이 가능합니다. V$DATABASE는 MOUNT 이상에서 참조 가능하고, 데이터 파일 오픈과 사용자 접속은 OPEN 단계에서 이루어집니다."
-  },
-  {
-    "chapter": "データベース・インスタンスの管理の説明",
-    "number": "C_03_019",
     "title": "Oracle Databaseの起動処理においてSPFILEの読み込みに失敗した場合、起動処理が失敗する段階として正しいものを選択してください。",
     "options": [
       "A) NOMOUNT段階で失敗する。初期化パラメータ・ファイルの読込みはNOMOUNT段階の最初の処理であるためである。",
@@ -49,20 +9,75 @@
       "C) OPEN段階で失敗する。SPFILEの内容はデータ・ファイルのオープン時に初めて参照されるためである。",
       "D) 起動処理は正常に完了するが、最初のALTER SYSTEM実行時にエラーが発生する。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — 초기화 파라미터 파일(SPFILE 또는 PFILE)의 읽기는 NOMOUNT 단계의 가장 첫 번째 작업입니다. 파라미터 파일을 읽어야 SGA 크기, 컨트롤 파일 위치 등을 알 수 있으므로, 파라미터 파일 읽기에 실패하면 NOMOUNT 단계에서 기동이 실패합니다.\n\nB) 오답 — MOUNT 단계에서는 이미 파라미터 파일을 읽은 후 SGA가 할당되고 백그라운드 프로세스가 기동된 상태입니다. MOUNT 단계의 주요 작업은 컨트롤 파일 오픈이므로, 컨트롤 파일에 문제가 있는 경우에 MOUNT에서 실패합니다.\n\nC) 오답 — OPEN 단계에서 참조되는 것은 데이터 파일과 Redo Log 파일이며, SPFILE은 이미 NOMOUNT 단계에서 읽기가 완료되어 있습니다.\n\nD) 오답 — SPFILE 읽기에 실패하면 인스턴스 자체가 기동되지 않으므로 ALTER SYSTEM을 실행할 수 있는 상태에 도달하지 못합니다.\n\n핵심 개념: Oracle 기동 시 파일 읽기 순서와 실패 단계의 관계는 다음과 같습니다. NOMOUNT 실패: 초기화 파라미터 파일(SPFILE/PFILE) 문제. MOUNT 실패: 컨트롤 파일 문제. OPEN 실패: 데이터 파일 또는 Redo Log 파일 문제. 각 단계에서 필요한 파일이 다르므로 파일 문제에 따라 실패 단계가 결정됩니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
-    "number": "C_03_020",
-    "title": "CDB環境でPDBの現在のオープン・モードと保存された状態を確認するために使用するビューの正しい組み合わせを選択してください。",
+    "number": "C_03_017",
+    "question_type": "運営-応用",
+    "title": "DBAがSPFILE環境で運用中のデータベースにおいて、以下のALTER SYSTEM SET文を実行しました。\n\nSQL> ALTER SYSTEM SET SGA_TARGET = 6G;\n\nSystem altered.\n\nSQL> ALTER SYSTEM SET PROCESSES = 500;\n\nORA-02095: specified initialization parameter cannot be modified\n\nこの実行結果から読み取れる内容として正しいものを選択してください(2つ選択してください)。",
     "options": [
-      "A) 現在のオープン・モードはV$PDBS、保存された状態はDBA_PDB_SAVED_STATESで確認する。",
-      "B) 現在のオープン・モードはDBA_PDB_SAVED_STATES、保存された状態はV$PDBAで確認する。",
-      "C) 現在のオープン・モードと保存された状態はいずれもV$PDBAのみで確認する。",
-      "D) 現在のオープン・モードはV$DATABASE、保存された状態はV$INSTANCEで確認する。"
+      "A) SGA_TARGETは動的パラメータであるため、SCOPE=BOTH(デフォルト)により現在のメモリとSPFILEの両方に即座に反映された。",
+      "B) SGA_TARGETの変更はSPFILEにのみ記録され、次回のインスタンス再起動時にメモリに反映される。",
+      "C) PROCESSESは静的パラメータであるため、SCOPE=BOTH(デフォルト)ではメモリへの即時反映ができずエラーとなった。変更するにはSCOPE=SPFILEを明示的に指定する必要がある。",
+      "D) PROCESSESは動的パラメータであるが、現在のセッション数が上限に達しているためエラーが発生した。",
+      "E) 両方のALTER SYSTEM SET文が失敗しており、どちらのパラメータも変更されていない。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — PDB의 현재 오픈 모드(READ WRITE, READ ONLY, MOUNTED)는 V$PDBS 뷰의 OPEN_MODE 컬럼으로 확인합니다. ALTER PLUGGABLE DATABASE ... SAVE STATE로 저장된 상태 정보는 DBA_PDB_SAVED_STATES 뷰에서 확인할 수 있으며, 이 뷰에는 저장된 PDB 이름과 오픈 모드 등이 기록됩니다.\n\nB) 오답 — DBA_PDB_SAVED_STATES는 저장된 상태를 확인하는 뷰이며 현재 오픈 모드를 조회하는 뷰가 아닙니다. 또한 V$PDBA라는 뷰는 존재하지 않습니다.\n\nC) 오답 — V$PDBA라는 뷰는 존재하지 않습니다. 현재 오픈 모드와 저장된 상태는 각각 V$PDBS와 DBA_PDB_SAVED_STATES라는 별도의 뷰에서 확인합니다.\n\nD) 오답 — V$DATABASE는 CDB 전체의 데이터베이스 정보(이름, OPEN_MODE, LOG_MODE 등)를 확인하는 뷰이며, 개별 PDB의 오픈 모드를 확인하는 용도가 아닙니다. V$INSTANCE는 인스턴스 상태 정보를 제공하며 SAVE STATE 정보와는 관련이 없습니다.\n\n핵심 개념: PDB 관리에서 V$PDBS 뷰는 PDB의 현재 오픈 모드(OPEN_MODE 컬럼)를 확인하고, DBA_PDB_SAVED_STATES 뷰는 SAVE STATE로 저장된 PDB 상태 정보를 확인합니다. CDB 재기동 시 SAVE STATE 설정이 되어 있으면 저장된 상태로 자동 복원됩니다."
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — SGA_TARGET은 동적(Dynamic) 파라미터로, SPFILE 환경에서 ALTER SYSTEM SET의 기본 SCOPE인 BOTH가 적용되어 현재 인스턴스의 메모리와 SPFILE 모두에 즉시 반영됩니다. 'System altered.' 메시지가 출력된 것은 명령이 정상 수행되었음을 의미합니다.\n\nC) 정답 — PROCESSES는 대표적인 정적(Static) 파라미터입니다. SPFILE 환경에서 SCOPE를 지정하지 않으면 기본값인 BOTH가 적용되는데, 정적 파라미터는 실행 중 메모리를 변경할 수 없으므로 ORA-02095 오류가 발생합니다. 정적 파라미터를 변경하려면 ALTER SYSTEM SET PROCESSES = 500 SCOPE=SPFILE로 SPFILE에만 기록한 후 인스턴스를 재기동해야 합니다.\n\nB) 오답 — SGA_TARGET은 동적 파라미터이며 SCOPE=BOTH(기본값)로 수행되었으므로, SPFILE뿐 아니라 현재 메모리에도 즉시 반영됩니다. SPFILE에만 기록되는 것은 SCOPE=SPFILE을 명시한 경우입니다.\n\nD) 오답 — PROCESSES는 동적 파라미터가 아니라 정적(Static) 파라미터입니다. 오류 원인은 세션 수 상한이 아니라 정적 파라미터에 대해 메모리 반영(SCOPE=BOTH 또는 MEMORY)이 불가능하기 때문입니다.\n\nE) 오답 — SGA_TARGET 변경은 'System altered.' 메시지로 정상 수행되었습니다. 실패한 것은 PROCESSES 변경만입니다.\n\n핵심 개념: SPFILE 환경에서 ALTER SYSTEM SET의 기본 SCOPE는 BOTH입니다. 동적 파라미터는 BOTH로 메모리+SPFILE 동시 반영이 가능하지만, 정적 파라미터(PROCESSES, DB_BLOCK_SIZE, CONTROL_FILES 등)는 SCOPE=SPFILE만 가능하며 메모리 반영을 포함하는 SCOPE(BOTH, MEMORY)를 지정하면 ORA-02095 오류가 발생합니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_018",
+    "question_type": "運営-応用",
+    "title": "DBAが以下のSQL文を実行してインスタンスの状態を確認しました。\n\nSQL> SELECT instance_name, status, logins\n     FROM V$INSTANCE;\n\nINSTANCE_NAME    STATUS       LOGINS\n---------------- ------------ ----------\norcl26ai         OPEN         RESTRICTED\n\nSQL> ALTER SYSTEM DISABLE RESTRICTED SESSION;\n\nSystem altered.\n\nこの操作に関する説明として正しいものを選択してください。",
+    "options": [
+      "A) ALTER SYSTEM DISABLE RESTRICTED SESSIONの実行後、既存のRESTRICTED SESSION権限を持つユーザーのセッションが即座に切断される。",
+      "B) ALTER SYSTEM DISABLE RESTRICTED SESSIONの実行後、RESTRICTED SESSION権限を持たない一般ユーザーも新規接続が可能となるが、既存のセッションには影響しない。",
+      "C) LOGINSの値がRESTRICTEDであることから、このデータベースはSTARTUP RESTRICTで起動された後、一度もモード変更されていないことが分かる。",
+      "D) RESTRICTED SESSION状態を解除するには、一度SHUTDOWN IMMEDIATEで停止した後、STARTUPで再起動する必要がある。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — ALTER SYSTEM DISABLE RESTRICTED SESSION 명령을 실행하면, RESTRICTED SESSION 모드가 해제되어 일반 사용자도 새로 접속할 수 있게 됩니다. 이 명령은 기존에 접속 중인 세션에는 영향을 주지 않으며, 새로운 접속에 대한 제한만 해제합니다.\n\nA) 오답 — ALTER SYSTEM DISABLE RESTRICTED SESSION은 새로운 접속에 대한 제한만 해제합니다. 기존에 접속 중인 세션(RESTRICTED SESSION 권한 보유 사용자)은 그대로 유지되며 강제로 끊기지 않습니다.\n\nC) 오답 — V$INSTANCE의 LOGINS 컬럼이 RESTRICTED인 것은 현재 RESTRICTED 모드임을 나타낼 뿐, 어떤 경로로 그 상태가 되었는지는 알 수 없습니다. STARTUP RESTRICT로 기동했을 수도 있고, OPEN 상태에서 ALTER SYSTEM ENABLE RESTRICTED SESSION으로 전환했을 수도 있습니다.\n\nD) 오답 — RESTRICTED SESSION 모드는 ALTER SYSTEM DISABLE RESTRICTED SESSION 명령으로 동적으로 해제할 수 있습니다. 인스턴스를 재기동할 필요가 없습니다.\n\n핵심 개념: RESTRICTED 모드는 STARTUP RESTRICT 또는 ALTER SYSTEM ENABLE RESTRICTED SESSION으로 활성화되며, ALTER SYSTEM DISABLE RESTRICTED SESSION으로 동적 해제가 가능합니다. 모드 전환 시 기존 세션에는 영향이 없으며 새로운 접속에만 적용됩니다. V$INSTANCE의 LOGINS 컬럼으로 현재 상태를 확인할 수 있습니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_019",
+    "question_type": "運営-応用",
+    "title": "DBAがデータベースのアラート・ログで以下のメッセージを確認しました。\n\nAlter database mount\nORA-00205: error in identifying control file, check alert log for more info\nORA-00202: control file: '/u01/oradata/ORCL/control01.ctl'\nORA-27037: unable to obtain file status\n\nこのエラーが発生した状況と対処方法について正しく述べているものを選択してください。",
+    "options": [
+      "A) このエラーはOPEN段階でデータ・ファイルのオープン処理中に発生したものであり、データ・ファイルを正しい場所に配置することで解決できる。",
+      "B) このエラーはMOUNT段階で制御ファイルのオープンに失敗したことを示しており、制御ファイルが存在しないか、アクセスできない状態にある。",
+      "C) このエラーはNOMOUNT段階で初期化パラメータ・ファイルの読込みに失敗したことを示しており、SPFILEの再作成が必要である。",
+      "D) このエラーは一時的なディスクI/Oの問題であり、STARTUPコマンドを再実行するだけで自動的に解決される。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — ORA-00205는 컨트롤 파일을 식별하는 데 실패했음을 나타내는 오류로, MOUNT 단계에서 발생합니다. Alert Log 메시지에서 'Alter database mount' 직후에 오류가 발생한 것을 확인할 수 있습니다. ORA-00202는 특정 컨트롤 파일 경로를, ORA-27037은 해당 파일의 상태를 확인할 수 없음을 나타냅니다. 컨트롤 파일이 삭제되었거나, 이동되었거나, 권한 문제로 접근할 수 없는 상태입니다.\n\nA) 오답 — 이 오류는 OPEN 단계가 아니라 MOUNT 단계에서 발생합니다. 'Alter database mount' 메시지가 이를 명확히 보여줍니다. 데이터 파일 오픈은 OPEN 단계에서 수행되며, 데이터 파일 문제 시에는 ORA-01157 등의 오류가 발생합니다.\n\nC) 오답 — NOMOUNT 단계에서는 초기화 파라미터 파일을 읽으며, 이 단계의 실패 시에는 ORA-01078 등의 오류가 발생합니다. ORA-00205는 컨트롤 파일 관련 오류로 MOUNT 단계에서 발생합니다.\n\nD) 오답 — 컨트롤 파일이 존재하지 않거나 접근 불가능한 상태는 일시적인 I/O 문제가 아닌 물리적 파일 문제입니다. 컨트롤 파일을 올바른 위치에 복원하거나, CONTROL_FILES 초기화 파라미터를 수정하여 정확한 경로를 지정해야 합니다.\n\n핵심 개념: Oracle 기동 시 각 단계별 오류 패턴이 다릅니다. NOMOUNT 실패: 파라미터 파일 문제(ORA-01078). MOUNT 실패: 컨트롤 파일 문제(ORA-00205, ORA-00210). OPEN 실패: 데이터 파일/Redo Log 문제(ORA-01157, ORA-00313). Alert Log의 단계 표시와 ORA 오류 번호로 문제의 원인과 단계를 정확히 식별할 수 있습니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_020",
+    "question_type": "内部-概念",
+    "title": "Oracleデータベースのインスタンス・リカバリにおけるロール・フォワード(Roll Forward)フェーズの動作として正しく述べているものを選択してください。",
+    "options": [
+      "A) ロール・フォワード・フェーズではコミット済みトランザクションの変更のみがオンラインREDOログから読み取られ、データ・ファイルに再適用される。",
+      "B) ロール・フォワード・フェーズでは制御ファイルに記録された最終チェックポイントSCN以降のすべてのREDO変更(コミット済み・未コミット両方)がデータ・ファイルに再適用される。",
+      "C) ロール・フォワード・フェーズではUNDO表領域のデータを使用してコミット済みトランザクションを復元する。",
+      "D) ロール・フォワード・フェーズはデータベースがOPEN状態に遷移した後にバックグラウンドで実行される。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — Roll Forward(캐시 복구) 단계에서는 컨트롤 파일에 기록된 마지막 체크포인트 SCN 이후의 모든 Redo 레코드를 온라인 Redo Log에서 읽어 데이터 파일에 재적용합니다. 이 과정에서 커밋된 트랜잭션과 커밋되지 않은 트랜잭션의 변경 사항을 구분하지 않고 모두 적용합니다. 이를 통해 데이터베이스를 장애 직전의 상태로 복원합니다.\n\nA) 오답 — Roll Forward에서는 커밋 여부와 관계없이 모든 변경 사항을 재적용합니다. 커밋된 것만 적용하는 것이 아닙니다. 커밋되지 않은 변경의 롤백은 이후 Roll Back 단계에서 수행됩니다.\n\nC) 오답 — Roll Forward는 UNDO 데이터가 아닌 온라인 Redo Log의 데이터를 사용합니다. UNDO 데이터를 사용하는 것은 Roll Back(트랜잭션 복구) 단계입니다.\n\nD) 오답 — Roll Forward는 MOUNT 단계에서 OPEN 단계로의 전환 과정(ALTER DATABASE OPEN 처리) 중에 수행되며, OPEN 전에 완료되어야 합니다. OPEN 후 백그라운드에서 수행되는 것은 Roll Back(트랜잭션 복구) 단계입니다. 즉, Roll Forward → 데이터베이스 OPEN → Roll Back(백그라운드) 순서입니다.\n\n핵심 개념: 인스턴스 복구의 Roll Forward 단계는 MOUNT→OPEN 전환 과정에서 수행되며, 체크포인트 SCN 이후의 모든 Redo(커밋/미커밋 불문)를 데이터 파일에 재적용합니다. Roll Forward 완료 후 데이터베이스가 OPEN되고, Roll Back 단계는 OPEN 후 백그라운드에서 수행되어 미커밋 변경을 UNDO 데이터로 되돌립니다."
   }
 ]

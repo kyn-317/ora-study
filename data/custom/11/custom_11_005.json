@@ -1,0 +1,66 @@
+[
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_021",
+    "title": "CREATE PROFILE文を使用してユーザーに設定できるパスワード管理パラメータについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) FAILED_LOGIN_ATTEMPTSで指定した回数を超えて連続ログインに失敗するとアカウントが自動的にロックされる。",
+      "B) パスワード管理パラメータはRESOURCE_LIMIT初期化パラメータがTRUEの場合にのみ適用される。",
+      "C) PASSWORD_REUSE_TIMEとPASSWORD_REUSE_MAXの両方を設定した場合、いずれか一方の条件を満たせばパスワードの再使用が可能になる。",
+      "D) PASSWORD_VERIFY_FUNCTIONにPL/SQL関数を指定することでパスワード変更時に複雑性を自動検証できる。",
+      "E) ALTER PROFILEでパスワード管理パラメータを変更した場合、そのプロファイルが割り当てられている既存のアクティブセッションにも即座に適用される。"
+    ],
+    "answer": [
+      "A",
+      "D"
+    ],
+    "explanation": "정답: A, D\nA) 정답 — FAILED_LOGIN_ATTEMPTS 파라미터에서 지정한 횟수를 초과하여 연속으로 로그인에 실패하면, 해당 계정은 LOCKED(TIMED) 상태로 자동 잠금됩니다. 잠금 기간은 PASSWORD_LOCK_TIME 파라미터로 설정합니다.\n\nD) 정답 — PASSWORD_VERIFY_FUNCTION 파라미터에 PL/SQL 함수를 지정하면, 비밀번호 변경 시 해당 함수가 자동으로 호출되어 비밀번호의 복잡성을 검증합니다. Oracle은 기본 제공 함수로 ora12c_verify_function과 ora12c_strong_verify_function을 제공합니다.\n\nB) 오답 — 비밀번호 관리 파라미터는 RESOURCE_LIMIT 초기화 파라미터의 설정과 무관하게 항상 적용됩니다. RESOURCE_LIMIT = TRUE가 필요한 것은 자원 제한 파라미터(CPU_PER_SESSION, CONNECT_TIME 등)뿐입니다.\n\nC) 오답 — PASSWORD_REUSE_TIME과 PASSWORD_REUSE_MAX를 모두 설정한 경우, 양쪽 조건을 모두 충족해야 비밀번호 재사용이 가능합니다. 어느 한쪽만 충족해서는 재사용할 수 없습니다.\n\nE) 오답 — ALTER PROFILE로 파라미터를 변경하면 해당 프로파일이 할당된 사용자의 다음 세션부터 새 값이 적용됩니다. 현재 활성 세션에는 즉시 적용되지 않습니다.\n\n핵심 개념: 프로파일의 비밀번호 관리 파라미터는 RESOURCE_LIMIT 설정과 무관하게 항상 적용되며, PASSWORD_REUSE_TIME과 PASSWORD_REUSE_MAX를 동시에 설정하면 양쪽 조건을 모두 충족해야 비밀번호를 재사용할 수 있습니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_022",
+    "title": "プロファイルのリソース制限パラメータについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) リソース制限パラメータが適用されるためには、初期化パラメータRESOURCE_LIMITがTRUEに設定されている必要がある。",
+      "B) CPU_PER_CALL制限を超過した場合、該当セッションが即座に終了される。",
+      "C) CONNECT_TIMEパラメータはセッションの最大接続維持時間を分単位で制限する。",
+      "D) PRIVATE_SGAパラメータは専用サーバー(Dedicated Server)モードでのみ適用される。",
+      "E) IDLE_TIMEパラメータはロング・ランニング・クエリの実行中にも適用されるため、大量データの処理時に注意が必要である。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — 프로파일의 자원 제한 파라미터(CPU_PER_SESSION, CONNECT_TIME, IDLE_TIME 등)가 실제로 적용되려면 초기화 파라미터 RESOURCE_LIMIT이 TRUE로 설정되어야 합니다. 이 파라미터는 ALTER SYSTEM으로 동적 변경이 가능합니다. 참고로 비밀번호 관리 파라미터는 RESOURCE_LIMIT 설정과 무관하게 항상 적용됩니다.\n\nC) 정답 — CONNECT_TIME 파라미터는 세션의 총 연결 유지 시간을 분(minutes) 단위로 제한합니다. 설정된 시간을 초과하면 세션이 종료됩니다. 배치 작업이나 장시간 연결을 제어하는 데 유용합니다.\n\nB) 오답 — CPU_PER_CALL은 호출(Call) 레벨의 파라미터로, 제한을 초과하면 해당 명령문(SQL)만 롤백되고 세션은 유지됩니다. 세션이 종료되는 것은 세션 레벨 파라미터(CPU_PER_SESSION, CONNECT_TIME 등)의 제한을 초과한 경우입니다.\n\nD) 오답 — PRIVATE_SGA 파라미터는 공유 서버(Shared Server) 모드에서만 의미가 있으며, 세션이 SGA의 Large Pool에서 사용할 수 있는 메모리 양을 제한합니다. 전용 서버(Dedicated Server) 모드에서는 이 파라미터가 무시됩니다.\n\nE) 오답 — IDLE_TIME은 세션이 유휴(Idle) 상태로 유지되는 시간을 제한하지만, 장시간 실행되는 쿼리(Long-running Query) 실행 중에는 IDLE_TIME이 적용되지 않습니다. 쿼리가 실행 중인 동안은 세션이 유휴 상태가 아니기 때문입니다.\n\n핵심 개념: 프로파일의 자원 제한은 RESOURCE_LIMIT=TRUE일 때만 적용되며(비밀번호 제한은 항상 적용), 호출 레벨 파라미터(CPU_PER_CALL) 초과 시 해당 명령문만 롤백되고 세션은 유지되지만, 세션 레벨 파라미터(CONNECT_TIME, CPU_PER_SESSION) 초과 시에는 세션이 종료됩니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_023",
+    "title": "プロファイルを作成してユーザーに割り当てる手順について正しく述べているものを選択してください。",
+    "options": [
+      "A) CREATE PROFILE文でプロファイルを作成し、ALTER USER文でユーザーにプロファイルを割り当てる。その後、リソース制限パラメータを適用するにはRESOURCE_LIMITパラメータをTRUEに設定する必要がある。",
+      "B) CREATE PROFILE文でプロファイルを作成する際に、対象ユーザーをプロファイル作成文の中で指定する必要がある。",
+      "C) ALTER PROFILE文でプロファイルのパスワード管理パラメータを変更した場合、そのプロファイルが割り当てられた既存アクティブ・セッションにも即座に適用される。",
+      "D) RESOURCE_LIMITパラメータがFALSEの場合、プロファイルのパスワード管理パラメータも適用されない。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — 프로파일 적용 절차는 다음과 같습니다: (1) CREATE PROFILE 문으로 프로파일을 생성하고, (2) ALTER USER ... PROFILE 문으로 사용자에게 프로파일을 할당합니다. (3) 자원 제한 파라미터(CPU_PER_SESSION, CONNECT_TIME 등)가 실제로 적용되려면 RESOURCE_LIMIT 초기화 파라미터가 TRUE로 설정되어야 합니다. 비밀번호 관리 파라미터는 RESOURCE_LIMIT과 무관하게 항상 적용됩니다.\n\nB) 오답 — CREATE PROFILE 문은 프로파일의 이름과 제한 파라미터를 정의하는 것이며, 대상 사용자를 프로파일 생성 시 지정하지 않습니다. 사용자에게 프로파일을 할당하는 것은 별도의 ALTER USER ... PROFILE 명령으로 수행합니다.\n\nC) 오답 — ALTER PROFILE로 파라미터를 변경하면 해당 프로파일이 할당된 사용자의 다음 세션부터 새 값이 적용됩니다. 현재 활성 세션에는 즉시 적용되지 않습니다.\n\nD) 오답 — RESOURCE_LIMIT=FALSE인 경우에도 비밀번호 관리 파라미터(FAILED_LOGIN_ATTEMPTS, PASSWORD_LIFE_TIME, PASSWORD_VERIFY_FUNCTION 등)는 항상 적용됩니다. RESOURCE_LIMIT은 자원 제한 파라미터에만 영향을 미칩니다.\n\n핵심 개념: 프로파일 적용은 CREATE PROFILE → ALTER USER ... PROFILE → RESOURCE_LIMIT=TRUE 설정의 3단계 절차이며, 비밀번호 관리 파라미터는 RESOURCE_LIMIT과 무관하게 항상 적용되고, 프로파일 변경은 다음 세션부터 적용됩니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_024",
+    "title": "管理者が以下のプロファイルを作成し、ユーザーに割り当てました。\n\nSQL> CREATE PROFILE strict_profile LIMIT\n     FAILED_LOGIN_ATTEMPTS 3\n     PASSWORD_LOCK_TIME 1/24\n     CPU_PER_SESSION 60000\n     CONNECT_TIME 480;\n\nSQL> ALTER USER test_user PROFILE strict_profile;\n\nこの状態でtest_userがデータベースにログインを4回連続で失敗した後、正しいパスワードで5回目のログインを試みました。また、RESOURCE_LIMIT初期化パラメータはFALSEに設定されています。この状況について正しく述べているものを選択してください。",
+    "options": [
+      "A) RESOURCE_LIMITがFALSEであるためプロファイルの設定はすべて無効であり、test_userは正常にログインできる。",
+      "B) アカウントはロックされているためログインは失敗するが、PASSWORD_LOCK_TIME(1時間)経過後に自動でアンロックされる。",
+      "C) FAILED_LOGIN_ATTEMPTSはリソース制限パラメータであるため、RESOURCE_LIMIT=FALSEの場合はアカウントロックが発生しない。",
+      "D) アカウントはロックされ、DBA権限を持つ管理者がALTER USER文で手動アンロックするまでログインできない。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — FAILED_LOGIN_ATTEMPTS와 PASSWORD_LOCK_TIME은 비밀번호 관리 파라미터입니다. 비밀번호 관리 파라미터는 RESOURCE_LIMIT 초기화 파라미터의 설정과 무관하게 항상 적용됩니다. 3회 연속 로그인 실패로 계정이 잠기며(LOCKED(TIMED) 상태), PASSWORD_LOCK_TIME이 1/24일(=1시간)로 설정되어 있으므로 1시간 경과 후 자동으로 잠금이 해제됩니다.\n\nA) 오답 — RESOURCE_LIMIT=FALSE는 CPU_PER_SESSION, CONNECT_TIME 등 자원 제한 파라미터에만 영향을 미칩니다. 비밀번호 관리 파라미터(FAILED_LOGIN_ATTEMPTS, PASSWORD_LOCK_TIME 등)는 RESOURCE_LIMIT 설정과 무관하게 항상 적용됩니다.\n\nC) 오답 — FAILED_LOGIN_ATTEMPTS는 비밀번호 관리 파라미터이지 자원 제한 파라미터가 아닙니다. 따라서 RESOURCE_LIMIT=FALSE여도 계정 잠금은 정상적으로 발생합니다.\n\nD) 오답 — PASSWORD_LOCK_TIME이 설정되어 있으면 지정된 기간(이 경우 1시간) 경과 후 자동으로 잠금이 해제됩니다. 관리자가 수동으로 ALTER USER test_user ACCOUNT UNLOCK을 실행할 필요 없이 자동 해제됩니다.\n\n핵심 개념: 프로파일의 비밀번호 관리 파라미터(FAILED_LOGIN_ATTEMPTS, PASSWORD_LOCK_TIME, PASSWORD_LIFE_TIME 등)는 RESOURCE_LIMIT 파라미터와 무관하게 항상 적용됩니다. RESOURCE_LIMIT=TRUE가 필요한 것은 CPU_PER_SESSION, CONNECT_TIME, IDLE_TIME 등의 자원 제한 파라미터뿐입니다."
+  }
+]

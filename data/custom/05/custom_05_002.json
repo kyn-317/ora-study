@@ -2,20 +2,6 @@
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_006",
-    "title": "Oracle Databaseの管理者ユーザーおよび管理権限について正しく述べているものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) SYSユーザーはAS SYSDBAまたはAS SYSOPERを指定して接続する必要があり、指定なしで接続するとエラーが発生する。",
-      "B) SYSTEMユーザーはSYSユーザーと同様にデータ・ディクショナリの基本テーブルを所有している。",
-      "C) SYSBACKUP権限はRMANバックアップ・リカバリ専用の管理権限であり、SYSDBA権限をすべて含んでいる。",
-      "D) SYSTEMユーザーはAS SYSDBAを指定せずに通常の接続方法でデータベースに接続することが可能である。",
-      "E) SYSユーザーのパスワードはデータ・ディクショナリにのみ保存され、パスワード・ファイルには保存されない。"
-    ],
-    "answer": ["A", "D"],
-    "explanation": "정답: A, D\nA) 정답 — SYS 사용자로 접속할 때는 반드시 AS SYSDBA 또는 AS SYSOPER를 지정해야 합니다. AS 절 없이 접속하면 ORA-28009 오류가 발생합니다. SYS는 데이터 딕셔너리의 소유자로서 최상위 권한을 보유하고 있습니다.\n\nD) 정답 — SYSTEM 사용자는 SYS 다음 수준의 관리 권한을 가지며, AS SYSDBA를 지정하지 않고 일반적인 접속 방법으로 데이터베이스에 접속할 수 있습니다. 일반 DBA 관리 작업에는 SYSTEM 계정 사용이 권장됩니다.\n\nB) 오답 — 데이터 딕셔너리의 기본 테이블(TAB$, OBJ$, COL$ 등)은 SYS 스키마가 소유합니다. SYSTEM 사용자는 추가적인 관리용 테이블과 뷰를 소유하지만, 데이터 딕셔너리의 기본 테이블은 소유하지 않습니다.\n\nC) 오답 — SYSBACKUP는 RMAN 백업/복구 전용의 관리 권한이며, SYSDBA 권한의 모든 기능을 포함하지 않습니다. 이는 직무 분리(Separation of Duties)와 최소 권한 원칙에 따라 설계된 세분화된 관리 권한입니다.\n\nE) 오답 — SYS 사용자의 패스워드는 데이터 딕셔너리와 패스워드 파일 양쪽에 모두 저장됩니다. 패스워드 파일은 데이터베이스가 기동되지 않은 상태에서도 원격 인증이 가능하게 합니다.\n\n핵심 개념: SYS는 데이터 딕셔너리 소유자로 AS SYSDBA/SYSOPER 필수 접속이며, SYSTEM은 일반 접속 가능한 관리자 계정입니다. SYSBACKUP, SYSDG, SYSKM 등은 직무 분리 원칙에 따른 세분화된 관리 권한으로, SYSDBA의 모든 권한을 포함하지 않습니다."
-  },
-  {
-    "chapter": "ユーザー、ロールおよび権限の管理",
-    "number": "C_05_007",
     "title": "DBMS_PRIVILEGE_CAPTUREパッケージを使用した権限分析について正しく述べているものを選択してください。",
     "options": [
       "A) DATABASE型のキャプチャでは、SYSおよびSYSTEMユーザーの権限使用も含めてデータベース全体の権限分析が可能である。",
@@ -23,12 +9,14 @@
       "C) DATABASE型のキャプチャは同時に複数有効化することが可能であり、用途別に分けて分析できる。",
       "D) オブジェクト所有者が自身のスキーマ・オブジェクトにアクセスした場合、そのアクセスは権限キャプチャの対象にならない。"
     ],
-    "answer": ["D"],
+    "answer": [
+      "D"
+    ],
     "explanation": "정답: D\nD) 정답 — 객체 소유자가 자신의 스키마 객체에 접근하는 경우, 별도의 객체 권한(Object Privilege)이 필요하지 않으므로 권한 캡처 대상이 되지 않습니다. 권한 분석은 명시적으로 부여받은 권한(시스템 권한, 객체 권한, 롤)의 사용 여부만 추적합니다.\n\nA) 오답 — DATABASE 유형의 캡처라 하더라도 ORACLE_MAINTAINED='Y'인 Oracle 유지 관리 계정(SYS, SYSTEM 등)의 권한 사용은 자동으로 제외됩니다. Oracle 내부 동작에 의한 권한 사용은 사용자 권한 분석과 무관하므로 노이즈 제거 목적으로 제외합니다.\n\nB) 오답 — DBA_USED_PRIVS 등의 결과 뷰에 데이터가 표시되려면 GENERATE_RESULT 프로시저를 반드시 호출해야 합니다. 캡처를 활성화하여 데이터를 수집한 후, GENERATE_RESULT를 호출해야 결과 뷰에 분석 데이터가 생성됩니다.\n\nC) 오답 — DATABASE 유형의 캡처는 동시에 하나만 활성화할 수 있습니다. 다만 ROLE, CONTEXT, ROLE_AND_CONTEXT 유형의 캡처는 동시에 여러 개를 활성화할 수 있습니다.\n\n핵심 개념: DBMS_PRIVILEGE_CAPTURE의 DATABASE 유형 캡처는 Oracle 유지 관리 계정(ORACLE_MAINTAINED='Y')을 자동 제외하며, 객체 소유자의 자기 스키마 접근은 암묵적 권한이므로 캡처 대상이 아닙니다. GENERATE_RESULT 호출 후에만 결과 뷰에 데이터가 표시됩니다."
   },
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
-    "number": "C_05_008",
+    "number": "C_05_007",
     "title": "Oracleデータベースのシステム権限に関するANYキーワードの動作について正しく述べているものを選択してください。",
     "options": [
       "A) SELECT ANY TABLE権限を持つユーザーは、SYSスキーマのデータ・ディクショナリ・テーブルに対しても常にアクセス可能である。",
@@ -36,26 +24,14 @@
       "C) ANY権限はロールに付与することができず、ユーザーに対してのみ付与可能である。",
       "D) CREATE TABLE権限とCREATE ANY TABLE権限は同じスコープで動作し、どちらも自身のスキーマでのみテーブルを作成できる。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — CREATE ANY TABLE 권한을 가진 사용자는 모든 스키마에서 테이블을 생성할 수 있습니다. ANY 키워드가 포함된 시스템 권한은 자신의 스키마뿐만 아니라 데이터베이스 내 모든 스키마에 걸쳐 해당 작업을 수행할 수 있음을 의미합니다.\n\nA) 오답 — O7_DICTIONARY_ACCESSIBILITY 파라미터가 FALSE(기본값)인 경우, ANY 권한을 보유하고 있더라도 SYS 소유의 데이터 딕셔너리 객체에 접근할 수 없습니다. ANY 권한으로 SYS 딕셔너리 객체에 접근하려면 이 파라미터를 TRUE로 설정해야 하지만, 보안상 권장되지 않습니다.\n\nC) 오답 — ANY 권한도 일반적인 시스템 권한과 마찬가지로 롤(Role)에 부여할 수 있습니다. 예를 들어 DBA 롤에는 SELECT ANY TABLE 등 여러 ANY 권한이 포함되어 있습니다.\n\nD) 오답 — CREATE TABLE 권한은 자신의 스키마에서만 테이블을 생성할 수 있지만, CREATE ANY TABLE 권한은 모든 스키마에서 테이블을 생성할 수 있어 스코프가 다릅니다. ANY 키워드가 데이터베이스 전체로 범위를 확장합니다.\n\n핵심 개념: ANY 키워드가 포함된 시스템 권한은 모든 스키마에 걸쳐 작업을 수행할 수 있는 강력한 권한입니다. 다만 O7_DICTIONARY_ACCESSIBILITY가 FALSE(기본값)인 경우 ANY 권한으로도 SYS 딕셔너리 객체에는 접근할 수 없으며, 운영 환경에서는 최소 권한 원칙에 따라 ANY 권한을 신중하게 부여해야 합니다."
   },
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
-    "number": "C_05_009",
-    "title": "プロファイルのリソース制限パラメータについて正しく述べているものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) リソース制限パラメータが適用されるためには、初期化パラメータRESOURCE_LIMITがTRUEに設定されている必要がある。",
-      "B) CPU_PER_CALL制限を超過した場合、該当セッションが即座に終了される。",
-      "C) CONNECT_TIMEパラメータはセッションの最大接続維持時間を分単位で制限する。",
-      "D) PRIVATE_SGAパラメータは専用サーバー(Dedicated Server)モードでのみ適用される。",
-      "E) IDLE_TIMEパラメータはロング・ランニング・クエリの実行中にも適用されるため、大量データの処理時に注意が必要である。"
-    ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — 프로파일의 자원 제한 파라미터(CPU_PER_SESSION, CONNECT_TIME, IDLE_TIME 등)가 실제로 적용되려면 초기화 파라미터 RESOURCE_LIMIT이 TRUE로 설정되어야 합니다. 이 파라미터는 ALTER SYSTEM으로 동적 변경이 가능합니다. 참고로 비밀번호 관리 파라미터는 RESOURCE_LIMIT 설정과 무관하게 항상 적용됩니다.\n\nC) 정답 — CONNECT_TIME 파라미터는 세션의 총 연결 유지 시간을 분(minutes) 단위로 제한합니다. 설정된 시간을 초과하면 세션이 종료됩니다. 배치 작업이나 장시간 연결을 제어하는 데 유용합니다.\n\nB) 오답 — CPU_PER_CALL은 호출(Call) 레벨의 파라미터로, 제한을 초과하면 해당 명령문(SQL)만 롤백되고 세션은 유지됩니다. 세션이 종료되는 것은 세션 레벨 파라미터(CPU_PER_SESSION, CONNECT_TIME 등)의 제한을 초과한 경우입니다.\n\nD) 오답 — PRIVATE_SGA 파라미터는 공유 서버(Shared Server) 모드에서만 의미가 있으며, 세션이 SGA의 Large Pool에서 사용할 수 있는 메모리 양을 제한합니다. 전용 서버(Dedicated Server) 모드에서는 이 파라미터가 무시됩니다.\n\nE) 오답 — IDLE_TIME은 세션이 유휴(Idle) 상태로 유지되는 시간을 제한하지만, 장시간 실행되는 쿼리(Long-running Query) 실행 중에는 IDLE_TIME이 적용되지 않습니다. 쿼리가 실행 중인 동안은 세션이 유휴 상태가 아니기 때문입니다.\n\n핵심 개념: 프로파일의 자원 제한은 RESOURCE_LIMIT=TRUE일 때만 적용되며(비밀번호 제한은 항상 적용), 호출 레벨 파라미터(CPU_PER_CALL) 초과 시 해당 명령문만 롤백되고 세션은 유지되지만, 세션 레벨 파라미터(CONNECT_TIME, CPU_PER_SESSION) 초과 시에는 세션이 종료됩니다."
-  },
-  {
-    "chapter": "ユーザー、ロールおよび権限の管理",
-    "number": "C_05_010",
+    "number": "C_05_008",
     "title": "Oracleデータベースのパスワード・ファイルに関して正しく述べているものを選択してください。",
     "options": [
       "A) パスワード・ファイルはorapwdユーティリティを使用して作成し、SYSDBA権限でのリモート接続時の認証に利用される。",
@@ -63,7 +39,41 @@
       "C) パスワード・ファイルにはSYSユーザーの認証情報のみが格納され、他の管理ユーザーは登録できない。",
       "D) パスワード・ファイルが必要な理由は、データベースが起動していない状態ではOS認証のみでしか接続できないためである。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — 패스워드 파일은 orapwd 유틸리티를 사용하여 생성하며, 주로 원격(네트워크 경유)에서 SYSDBA, SYSOPER 등의 관리 권한으로 접속할 때의 인증에 사용됩니다. 데이터베이스가 기동되지 않은 상태에서는 데이터 딕셔너리에 접근할 수 없으므로 패스워드 파일이 인증 수단으로 필수적입니다.\n\nB) 오답 — REMOTE_LOGIN_PASSWORDFILE을 NONE으로 설정하면 패스워드 파일을 사용하지 않으므로, 네트워크를 통한 SYSDBA 접속이 불가능합니다. 원격 관리자 접속에는 EXCLUSIVE 또는 SHARED 설정이 필요합니다.\n\nC) 오답 — REMOTE_LOGIN_PASSWORDFILE이 EXCLUSIVE 모드인 경우, SYS 이외의 사용자(SYSBACKUP, SYSDG 등 관리 권한을 가진 사용자)도 패스워드 파일에 등록할 수 있습니다. V$PWFILE_USERS 뷰로 등록된 사용자를 확인할 수 있습니다.\n\nD) 오답 — 패스워드 파일이 필요한 이유는 데이터베이스 미기동 상태에서의 인증뿐만 아니라, 원격 관리자 접속 시 OS 인증을 사용할 수 없기 때문이기도 합니다. 로컬 환경에서는 OS 인증(sqlplus / as sysdba)으로 접속 가능하지만, 원격 환경에서는 패스워드 파일을 통한 인증이 필요합니다.\n\n핵심 개념: 패스워드 파일은 orapwd 유틸리티로 생성하며, 데이터베이스 미기동 상태 및 원격 관리자 접속 시 인증에 사용됩니다. REMOTE_LOGIN_PASSWORDFILE 파라미터로 사용 모드를 제어하며, EXCLUSIVE 모드에서는 SYS 이외의 관리 사용자도 등록 가능합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_009",
+    "title": "Oracle DatabaseのSchema-Onlyアカウントについて正しく述べているものを選択してください。",
+    "options": [
+      "A) Schema-OnlyアカウントはCREATE USER文にNO AUTHENTICATION句を指定して作成し、データベースへの直接ログインはできないがオブジェクトを所有できる。",
+      "B) Schema-Onlyアカウントはパスワードを設定できないため、ALTER USER文でパスワード認証に変更することはできない。",
+      "C) Schema-Onlyアカウントはスキーマのみが作成され、他のユーザーがそのスキーマ内のオブジェクトにアクセスすることはできない。",
+      "D) Schema-Onlyアカウントを作成するにはSYSDBA権限が必要であり、一般の管理者ユーザーでは作成できない。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Schema-Only Account는 CREATE USER 문에 NO AUTHENTICATION 절을 지정하여 생성합니다(예: CREATE USER app_schema NO AUTHENTICATION;). 이 계정은 데이터베이스에 직접 로그인할 수 없지만, 테이블이나 뷰 등의 객체를 소유할 수 있습니다. 애플리케이션 스키마를 직접 로그인으로부터 보호하는 데 유용합니다.\n\nB) 오답 — Schema-Only Account는 ALTER USER 문을 사용하여 패스워드 인증 방식으로 변경할 수 있습니다. 인증 방식은 고정되지 않으며 나중에 변경 가능합니다.\n\nC) 오답 — Schema-Only Account의 스키마 내 객체에 대해 적절한 객체 권한(SELECT, INSERT 등)을 부여받은 다른 사용자는 해당 객체에 접근할 수 있습니다. 스키마 전용 계정은 로그인을 제한할 뿐, 객체 접근 자체를 차단하지는 않습니다.\n\nD) 오답 — Schema-Only Account를 생성하기 위해 반드시 SYSDBA 권한이 필요한 것은 아닙니다. CREATE USER 시스템 권한을 보유한 일반 관리자도 생성할 수 있습니다.\n\n핵심 개념: Schema-Only Account(NO AUTHENTICATION)는 로그인이 불가능한 스키마 전용 계정으로, 애플리케이션 스키마를 직접 로그인으로부터 보호하면서 객체 소유를 허용하는 보안 기능입니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_010",
+    "title": "Oracleデータベースの事前定義ロールであるCONNECT、RESOURCE、DBAについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) CONNECTロールにはCREATE SESSION権限のみが含まれている。",
+      "B) RESOURCEロールにはUNLIMITED TABLESPACEシステム権限が含まれているため、付与後に個別のQUOTA設定は不要である。",
+      "C) DBAロールにはほとんどのシステム権限がWITH ADMIN OPTIONで含まれている。",
+      "D) RESOURCEロールにはCREATE TABLE、CREATE VIEW、CREATE SEQUENCEなどのオブジェクト作成権限が含まれている。",
+      "E) CONNECTロールにはCREATE SESSIONに加えてCREATE TABLEとCREATE VIEW権限も含まれている。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — CONNECT 롤에는 현재 CREATE SESSION 권한만 포함되어 있습니다. 과거에는 더 많은 권한이 포함되어 있었으나, Oracle 10g 이후 축소되어 데이터베이스 접속 권한만 제공합니다.\n\nC) 정답 — DBA 롤에는 대부분의 시스템 권한이 WITH ADMIN OPTION으로 포함되어 있어, DBA 롤을 부여받은 사용자는 해당 권한을 다른 사용자에게 재부여할 수 있습니다.\n\nB) 오답 — RESOURCE 롤에는 Oracle 12c 이후 UNLIMITED TABLESPACE 시스템 권한이 포함되지 않습니다. 따라서 RESOURCE 롤을 부여한 후에도 별도로 테이블스페이스 쿼터(QUOTA)를 설정해야 합니다.\n\nD) 오답 — RESOURCE 롤에는 CREATE TABLE, CREATE SEQUENCE 등의 권한이 포함되어 있으나, CREATE VIEW는 포함되어 있지 않습니다. CREATE VIEW는 별도로 부여해야 합니다.\n\nE) 오답 — CONNECT 롤에는 CREATE SESSION 권한만 포함되어 있으며, CREATE TABLE이나 CREATE VIEW 권한은 포함되어 있지 않습니다. 이러한 권한은 별도로 또는 다른 롤을 통해 부여해야 합니다.\n\n핵심 개념: CONNECT 롤은 CREATE SESSION만, RESOURCE 롤은 객체 생성 권한(CREATE TABLE 등)을 포함하지만 UNLIMITED TABLESPACE는 12c 이후 제외되어 별도 쿼터 설정이 필요하며, DBA 롤은 대부분의 시스템 권한을 WITH ADMIN OPTION으로 포함합니다."
   }
 ]

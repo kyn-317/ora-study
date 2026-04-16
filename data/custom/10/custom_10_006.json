@@ -9,7 +9,9 @@
       "C) OMF環境ではDROP PLUGGABLE DATABASE文を実行する前にALTER PLUGGABLE DATABASE ... UNPLUG INTOが自動的に実行される。",
       "D) OMF環境と非OMF環境のどちらでもINCLUDING DATAFILESがデフォルト動作であるため、環境による違いはない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — Oracle Managed Files(OMF) 환경에서 DROP PLUGGABLE DATABASE 문을 실행하면 기본적으로 INCLUDING DATAFILES가 적용되어 데이터 파일이 물리적으로 삭제됩니다. 이는 OMF 환경에서 Oracle이 파일 생성과 삭제를 자동으로 관리하는 설계와 일치합니다. 따라서 OMF 환경에서 Unplug 후 DROP을 수행할 때는 KEEP DATAFILES를 명시적으로 지정하지 않으면 데이터 파일이 삭제되어 다른 CDB에 Plug In할 수 없게 됩니다.\n\nB) 오답 — KEEP DATAFILES가 기본값인 것은 비OMF 환경입니다. OMF 환경에서는 INCLUDING DATAFILES가 기본값이므로, Unplug-DROP-Plug In 패턴을 사용할 때는 반드시 KEEP DATAFILES를 명시적으로 지정해야 합니다.\n\nC) 오답 — DROP PLUGGABLE DATABASE 문을 실행할 때 자동으로 Unplug가 수행되는 동작은 존재하지 않습니다. Unplug와 DROP은 별개의 명령이며, PDB를 다른 CDB에 이전하려면 먼저 ALTER PLUGGABLE DATABASE ... UNPLUG INTO를 명시적으로 실행한 후 DROP을 수행해야 합니다.\n\nD) 오답 — OMF 환경과 비OMF 환경에서 기본 동작이 다릅니다. OMF 환경에서는 INCLUDING DATAFILES가 기본값이고, 비OMF 환경에서는 KEEP DATAFILES가 기본값입니다.\n\n핵심 개념: DROP PLUGGABLE DATABASE의 기본 데이터 파일 처리 방식은 OMF 환경 여부에 따라 다릅니다. OMF에서는 INCLUDING DATAFILES(물리 삭제), 비OMF에서는 KEEP DATAFILES(보존)가 기본값입니다. Unplug 후 다른 CDB에 Plug In하려면 KEEP DATAFILES를 명시적으로 지정해야 합니다."
   },
   {
@@ -23,7 +25,10 @@
       "D) PDB_HRのTOTAL_SIZEにはTEMP表領域のファイル・サイズも含まれている。",
       "E) PDB$SEEDのRESTRICTED列がNOであるため、PDB$SEEDに通常のユーザーとして接続してデータ操作が可能である。"
     ],
-    "answer": ["B", "C"],
+    "answer": [
+      "B",
+      "C"
+    ],
     "explanation": "정답: B, C\nB) 정답 — PDB_FIN은 V$CONTAINERS에서 OPEN_MODE가 READ ONLY로 표시되어 있으므로, SELECT 쿼리는 실행 가능하지만 INSERT, UPDATE, DELETE 등의 DML 작업은 차단됩니다. 다만 임시 테이블스페이스에 대한 쓰기(정렬 작업 등)는 READ ONLY 모드에서도 허용됩니다.\n\nC) 정답 — V$CONTAINERS 뷰는 CDB$ROOT(CON_ID=1), PDB$SEED(CON_ID=2), 모든 사용자 PDB(CON_ID≥3)를 포함한 전체 컨테이너 정보를 제공합니다. 이 결과에서 CDB$ROOT, PDB$SEED, 3개의 사용자 PDB가 모두 표시되고 있어 V$CONTAINERS의 포괄적인 성격을 확인할 수 있습니다.\n\nA) 오답 — MOUNTED 상태의 PDB는 데이터 파일이 열리지 않은 상태이므로 V$CONTAINERS에서 TOTAL_SIZE가 0으로 표시될 수 있습니다. 이는 PDB에 데이터 파일이 없다는 의미가 아니라, MOUNTED 상태에서는 Oracle이 데이터 파일 헤더를 읽지 않아 크기 정보가 정확히 수집되지 않기 때문입니다. PDB를 OPEN하면 TOTAL_SIZE에 실제 크기가 표시됩니다.\n\nD) 오답 — V$CONTAINERS의 TOTAL_SIZE는 PDB의 영구 데이터 파일(SYSTEM, SYSAUX, 사용자 테이블스페이스 등)의 합계 크기를 나타냅니다. TEMP 테이블스페이스의 파일 크기는 TOTAL_SIZE에 포함되지 않습니다.\n\nE) 오답 — PDB$SEED의 RESTRICTED 열이 NO인 것은 제한 모드가 아님을 나타낼 뿐이며, PDB$SEED에 대한 일반 사용자 접속이 허용된다는 의미가 아닙니다. PDB$SEED는 항상 READ ONLY 상태로 유지되는 시드 컨테이너이며, 통상적인 데이터 조작 대상이 아닙니다.\n\n핵심 개념: V$CONTAINERS는 CDB$ROOT, PDB$SEED, 모든 사용자 PDB를 포함한 전체 컨테이너 정보를 제공하는 동적 성능 뷰입니다. MOUNTED 상태의 PDB는 TOTAL_SIZE가 0으로 표시될 수 있으며, 이는 데이터 파일 부재가 아닌 OPEN 상태가 아니기 때문입니다. READ ONLY 모드에서는 SELECT만 허용되고 DML은 차단됩니다."
   },
   {
@@ -36,7 +41,9 @@
       "C) NO DATAオプションを使用したクローンではFILE_NAME_CONVERTの指定は不要であり、指定するとエラーが発生する。",
       "D) NO DATAオプションを使用するにはソースPDB（PDB1）がREAD WRITEモードでオープンされている必要がある。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — NO DATA 옵션을 사용한 PDB 클론은 소스 PDB의 스키마 구조(테이블 정의, 인덱스 정의, 뷰, 프로시저 등 메타데이터)만 복제하고 실제 데이터 행은 포함하지 않습니다. 이를 통해 테스트나 개발 환경에서 동일한 스키마 구조를 가진 빈 PDB를 빠르게 생성할 수 있습니다.\n\nB) 오답 — NO DATA 옵션은 사용자 테이블스페이스도 생성하며, 해당 테이블스페이스 내의 스키마 객체 정의도 복제합니다. 단지 테이블의 데이터 행만 비어있을 뿐, 테이블스페이스 자체가 생략되는 것은 아닙니다.\n\nC) 오답 — NO DATA 옵션을 사용해도 데이터 파일은 새 위치에 생성되므로 FILE_NAME_CONVERT 또는 CREATE_FILE_DEST 지정이 필요합니다(OMF 미사용 시). NO DATA는 데이터 행을 비우는 옵션이지 파일 생성 자체를 생략하는 것이 아닙니다.\n\nD) 오답 — NO DATA 클론의 소스 PDB 상태 요건은 일반 클론과 동일합니다. 소스 PDB는 READ ONLY 모드로 오픈하거나, 핫 클론 조건(ARCHIVELOG 모드 + 로컬 UNDO 모드)을 충족하면 READ WRITE 상태에서도 가능합니다. 예시에서는 PDB1을 READ ONLY로 전환한 후 클론을 수행하고 있습니다.\n\n핵심 개념: PDB 클론 시 NO DATA 옵션은 소스 PDB의 스키마 구조(테이블, 인덱스, 뷰 등의 정의)만 복제하고 실제 데이터 행은 포함하지 않습니다. 이는 개발/테스트 환경 구축에 유용하며, 데이터 파일 자체는 생성되므로 FILE_NAME_CONVERT 등의 경로 지정이 필요합니다."
   },
   {
@@ -50,7 +57,10 @@
       "D) .pdb方式でUnplugを実行するとデータ・ファイルが即座に元の場所から削除されるため、アーカイブ生成前にバックアップが必要である。",
       "E) .pdb方式で作成されたアーカイブ・ファイルは、Plug In時にOracle以外の標準的なツール（tar、gzipなど）で事前に展開してからCREATE PLUGGABLE DATABASE文を実行する必要がある。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — ALTER PLUGGABLE DATABASE ... UNPLUG INTO에서 .xml 확장자를 지정하면 XML 메타데이터 파일만 생성됩니다. 이 XML 파일에는 데이터 파일 경로, 테이블스페이스 정보, DBID, 캐릭터셋 등의 메타데이터가 기록되며, 데이터 파일 자체는 원래 위치에 그대로 유지됩니다.\n\nB) 정답 — .pdb 확장자를 지정하면 XML 메타데이터와 모든 데이터 파일이 하나의 압축 아카이브 파일로 통합됩니다. 내부적으로 ZIP 형식을 사용하므로 표준 ZIP 도구로 내용을 확인할 수 있습니다.\n\nC) 오답 — XML 방식으로 Unplug한 PDB를 다른 서버에 Plug In하려면 XML 파일과 데이터 파일을 모두 대상 서버에 복사해야 합니다. Oracle Net을 통한 데이터 파일 자동 전송은 원격 클론(Remote Clone) 기능이며, Unplug/Plug In 방식에서는 지원되지 않습니다.\n\nD) 오답 — .pdb 방식으로 Unplug를 수행해도 원래 위치의 데이터 파일은 삭제되지 않습니다. 데이터 파일이 아카이브에 복사/포함될 뿐이며, 원본 데이터 파일은 그대로 유지됩니다. 원본 데이터 파일을 삭제하려면 별도로 DROP PLUGGABLE DATABASE INCLUDING DATAFILES를 실행해야 합니다.\n\nE) 오답 — .pdb 아카이브 파일은 Plug In 시 CREATE PLUGGABLE DATABASE ... USING 구문에서 직접 지정할 수 있으며, Oracle이 내부적으로 아카이브를 자동 해제하여 데이터 파일을 배치합니다. tar나 gzip 같은 외부 도구로 사전에 전개할 필요가 없습니다.\n\n핵심 개념: PDB Unplug 시 파일 확장자에 따라 출력 형식이 결정됩니다. .xml은 메타데이터만 생성하고 데이터 파일은 원래 위치에 유지하며, .pdb는 메타데이터와 데이터 파일을 단일 ZIP 아카이브로 통합합니다. XML 방식은 동일 서버 내 작업에 적합하고, .pdb 방식은 서버 간 이동에 적합합니다."
   },
   {
@@ -63,7 +73,9 @@
       "C) ALTER SYSTEM RESETはPDB1のopen_cursorsをゼロに初期化した後、CDB$ROOTの値を自動的にコピーする動作を行っている。",
       "D) ALTER SYSTEM RESETを実行するにはCDB$ROOTに接続している必要があり、PDBに接続した状態では実行できない。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — ALTER SYSTEM RESET 명령은 PDB에서 명시적으로 설정된 파라미터 항목을 SPFILE에서 제거합니다. PDB 레벨의 명시적 설정이 제거되면 해당 PDB는 자동으로 CDB$ROOT의 파라미터 값을 상속받습니다. 이 시나리오에서 PDB1의 open_cursors가 500(명시적 설정)에서 300(CDB$ROOT 값 상속)으로 변경된 것은, RESET에 의해 PDB 레벨 설정이 제거되고 CDB$ROOT의 300이 상속되었기 때문입니다.\n\nA) 오답 — 300은 Oracle의 초기 기본값이 아니라 CDB$ROOT에 설정된 값입니다. ALTER SYSTEM RESET은 Oracle 기본값으로 되돌리는 것이 아니라, PDB 레벨의 명시적 설정을 제거하여 CDB$ROOT의 값을 상속받도록 하는 명령입니다.\n\nC) 오답 — ALTER SYSTEM RESET은 값을 0으로 초기화한 후 복사하는 2단계 동작이 아닙니다. SPFILE에서 해당 PDB의 파라미터 항목을 삭제하면 자동으로 CDB$ROOT의 값을 상속받게 되는 단일 동작입니다.\n\nD) 오답 — ALTER SYSTEM RESET은 PDB에 접속한 상태에서 실행할 수 있습니다. PDB에서 명시적으로 설정된 파라미터를 해당 PDB의 SPFILE 섹션에서 제거하는 것이므로, 해당 PDB에 접속한 상태에서 실행하는 것이 올바른 사용법입니다.\n\n핵심 개념: ALTER SYSTEM RESET은 PDB에서 명시적으로 설정된 파라미터를 SPFILE에서 제거하여 CDB$ROOT의 값을 상속받도록 복원하는 명령입니다. PDB에 명시적 설정이 없으면 자동으로 CDB$ROOT의 파라미터 값을 상속받으며, 이는 멀티테넌트 환경의 파라미터 계층 구조에 따른 동작입니다."
   }
 ]

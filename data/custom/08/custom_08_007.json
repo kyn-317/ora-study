@@ -1,0 +1,19 @@
+[
+  {
+    "chapter": "UNDOの管理",
+    "number": "C_08_031",
+    "title": "TEMP_UNDO_ENABLED=TRUEの環境で、大量のグローバル一時表（GTT）へのDML処理を実行した際に一時表領域の空間不足が発生しました。この状況の原因と対処について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 一時UNDOが有効な場合、GTTのUNDOデータは一時表領域に格納されるため、ソートやハッシュ結合の作業領域と合わせて一時表領域の使用量が増加し、空間不足の原因となる。",
+      "B) DBA_TEMP_FREE_SPACEビューやV$TEMPUNDOSTATビューを使用して一時表領域の空き容量やTemporary UNDOの使用状況を確認し、必要に応じて一時表領域のサイズ拡張やAUTOEXTEND ONの設定を行うことが適切な対処である。",
+      "C) 一時表領域の空間不足を解消するにはTEMP_UNDO_ENABLEDをFALSEに設定するしかなく、一時表領域のサイズを拡張しても根本的な解決にはならない。",
+      "D) 一時UNDOが有効であっても、GTTのUNDOデータはUNDO表領域に格納されるため、一時表領域の空間不足とは無関係である。",
+      "E) 一時UNDOによる一時表領域の空間不足が発生した場合、ORA-30036エラーが表示される。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — Temporary UNDO가 활성화되면 GTT에 대한 DML의 UNDO 데이터가 Temp 테이블스페이스에 저장됩니다. 이 Temp UNDO 데이터는 Sort 작업이나 Hash Join 작업의 작업 영역과 동일한 Temp 공간을 공유합니다. 따라서 대량 GTT DML이 발생하면 Temp UNDO 사용량이 증가하여, 기존 정렬/해시 작업과 합산된 총 사용량이 Temp 테이블스페이스의 가용 공간을 초과할 수 있습니다.\n\nB) 정답 — Temp 테이블스페이스 공간 부족 진단을 위해 DBA_TEMP_FREE_SPACE 뷰로 여유 공간을 확인하고, V$TEMPUNDOSTAT 뷰로 Temporary UNDO의 블록 수와 트랜잭션 수 등 사용 통계를 파악합니다. 대처로는 Temp 테이블스페이스에 Tempfile을 추가하거나, AUTOEXTEND ON을 설정하여 자동 확장을 활성화하는 방법이 유효합니다.\n\nC) 오답 — TEMP_UNDO_ENABLED를 FALSE로 설정하는 것은 하나의 방법이지만, 유일한 해결책은 아닙니다. Temp 테이블스페이스의 크기를 확장하면 Temporary UNDO를 활성화한 채로 공간 부족 문제를 해결할 수 있습니다. Temporary UNDO를 비활성화하면 UNDO 테이블스페이스와 REDO 로그의 I/O 감소 이점을 잃게 됩니다.\n\nD) 오답 — TEMP_UNDO_ENABLED=TRUE인 경우, GTT의 UNDO 데이터는 UNDO 테이블스페이스가 아닌 Temp 테이블스페이스에 저장됩니다. 따라서 대량 GTT DML은 Temp 테이블스페이스의 공간 부족에 직접적인 영향을 줍니다.\n\nE) 오답 — ORA-30036은 UNDO 테이블스페이스의 공간 부족 시 발생하는 에러입니다. Temp 테이블스페이스의 공간 부족 시에는 ORA-01652(unable to extend temp segment) 등의 Temp 관련 에러가 발생하며, ORA-30036과는 다릅니다.\n\n핵심 개념: TEMP_UNDO_ENABLED=TRUE 환경에서 GTT의 UNDO 데이터는 Temp 테이블스페이스에 저장되며, Sort/Hash 작업과 공간을 공유합니다. 대량 GTT DML 수행 시 Temp 테이블스페이스 공간 부족이 발생할 수 있으므로, DBA_TEMP_FREE_SPACE와 V$TEMPUNDOSTAT로 모니터링하고 Temp 테이블스페이스 확장(Tempfile 추가, AUTOEXTEND ON)으로 대응합니다."
+  }
+]

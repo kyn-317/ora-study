@@ -10,7 +10,10 @@
       "D) サービスorclXDBはOracle XML DB HTTP機能に関連するサービスであり、LREGプロセスによって動的に登録されたものである。",
       "E) ステータスREADYはデータベース・インスタンスへの認証が成功したことを意味している。"
     ],
-    "answer": ["B", "D"],
+    "answer": [
+      "B",
+      "D"
+    ],
     "explanation": "정답: B, D\nB) 정답 — lsnrctl status 출력에서 orcl, orclXDB, pdb1의 3개 서비스가 등록되어 있으며, 모든 인스턴스의 상태가 READY이므로 클라이언트 접속을 수락할 수 있는 상태입니다. pdb1 서비스로도 접속이 가능합니다.\n\nD) 정답 — orclXDB 서비스는 Oracle XML DB HTTP/HTTPS 기능을 위한 서비스이며, 상태가 READY로 표시되어 있으므로 LREG 프로세스에 의해 동적으로 등록된 것입니다. 정적 등록의 경우 상태가 UNKNOWN으로 표시됩니다.\n\nA) 오답 — 상태가 READY로 표시되는 것은 동적 서비스 등록의 특징입니다. 정적 서비스 등록의 경우 리스너가 인스턴스의 실제 상태를 알 수 없으므로 상태가 UNKNOWN으로 표시됩니다.\n\nC) 오답 — 서비스 pdb1의 상태가 READY로 표시되어 있는 것은 LREG 프로세스가 동적으로 등록한 것이며, PDB가 OPEN 상태일 때 READY로 등록됩니다. 따라서 이 출력으로 pdb1이 OPEN 상태임을 확인할 수 있습니다.\n\nE) 오답 — READY 상태는 인스턴스가 기동되어 접속을 수락할 수 있는 상태를 의미하며, 사용자 인증과는 관련이 없습니다. 인증은 실제 데이터베이스 접속 시 수행됩니다.\n\n핵심 개념: lsnrctl status 출력에서 서비스 상태가 READY이면 동적 서비스 등록에 의한 것이며 클라이언트 접속이 가능한 상태를, UNKNOWN이면 정적 서비스 등록을 의미합니다. PDB가 OPEN 상태이면 READY, MOUNTED이면 BLOCKED로 등록됩니다."
   },
   {
@@ -23,7 +26,9 @@
       "C) NAMES.DIRECTORY_PATHに指定された順序に関わらず、すべてのネーミング・メソッドが並列に試行される。",
       "D) NAMES.DIRECTORY_PATHにLDAPを指定するには、tnsnames.oraにLDAPサーバーの接続情報を記述する必要がある。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — NAMES.DIRECTORY_PATH 파라미터에 지정된 네이밍 메서드는 왼쪽부터 순서대로 시도됩니다. (TNSNAMES, EZCONNECT)으로 설정된 경우, 먼저 TNSNAMES 어댑터(tnsnames.ora 참조)로 이름 해석을 시도하고, 해당 서비스 이름을 찾지 못하면 EZCONNECT(간편 접속)으로 이름 해석을 시도합니다.\n\nB) 오답 — NAMES.DIRECTORY_PATH를 생략한 경우, Oracle의 기본값은 (TNSNAMES, EZCONNECT, LDAP)입니다. 간편 접속만 사용되는 것이 아니라 TNSNAMES를 포함한 여러 네이밍 메서드가 순서대로 시도됩니다.\n\nC) 오답 — NAMES.DIRECTORY_PATH에 지정된 네이밍 메서드는 병렬이 아닌 순차적으로 시도됩니다. 첫 번째 메서드에서 이름 해석이 실패하면 다음 메서드로 넘어가는 순차적(Fallback) 방식입니다.\n\nD) 오답 — LDAP 네이밍을 사용하려면 LDAP 서버의 접속 정보는 tnsnames.ora가 아닌 ldap.ora 파일에 구성합니다. tnsnames.ora는 로컬 네이밍 전용 구성 파일이며, LDAP 디렉토리 서비스의 구성과는 별도입니다.\n\n핵심 개념: NAMES.DIRECTORY_PATH는 sqlnet.ora에서 이름 해석 방법과 순서를 지정하는 파라미터입니다. 지정된 순서대로 순차적으로 시도되며, 생략 시 기본값은 (TNSNAMES, EZCONNECT, LDAP)입니다. 각 네이밍 메서드는 해당 구성 파일(tnsnames.ora, ldap.ora 등)에 의존합니다."
   },
   {
@@ -37,7 +42,10 @@
       "D) 同一名のPrivateデータベース・リンクとPublicデータベース・リンクが存在する場合、Publicデータベース・リンクが優先的に使用される。",
       "E) Publicデータベース・リンクの場合、リモート・データベースへの接続認証はリンクを使用するセッションのユーザー名で常に自動的に認証される。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — CREATE PUBLIC DATABASE LINK으로 생성된 Public 데이터베이스 링크는 데이터베이스 내의 모든 사용자가 사용할 수 있습니다. 반면 CREATE DATABASE LINK(PUBLIC 키워드 없음)으로 생성된 Private 링크는 해당 링크를 소유한 사용자만 사용할 수 있습니다.\n\nB) 정답 — Public 데이터베이스 링크를 삭제하려면 DROP PUBLIC DATABASE LINK 시스템 권한이 필요합니다. Private 데이터베이스 링크는 소유자 본인이 별도의 DROP DATABASE LINK 권한 없이도 삭제할 수 있습니다(자기 스키마 객체에 대한 기본 권한).\n\nC) 오답 — Public 데이터베이스 링크는 원격 데이터베이스에 시노님으로 등록되는 것이 아닙니다. 데이터베이스 링크는 로컬 데이터베이스에서 원격 데이터베이스로의 접속 경로를 정의하는 로컬 객체이며, 원격 측에는 아무런 객체도 생성되지 않습니다.\n\nD) 오답 — 동일한 이름의 Private 데이터베이스 링크와 Public 데이터베이스 링크가 존재하는 경우, Private 링크가 우선적으로 사용됩니다. Public 링크가 우선되는 것이 아니라, 더 구체적인 범위(사용자 자신의 스키마)에 있는 Private 링크가 먼저 검색됩니다.\n\nE) 오답 — Public 데이터베이스 링크에서도 CONNECT TO 절로 고정 사용자(Fixed User)가 지정되어 있으면 해당 계정으로 접속합니다. CONNECT TO 절이 없는 경우에만 현재 세션 사용자의 계정명/비밀번호로 원격 접속을 시도합니다(Connected User 방식). '항상 자동으로 인증된다'는 설명은 부정확합니다.\n\n핵심 개념: Public 데이터베이스 링크는 모든 사용자가 사용 가능하며 삭제에 DROP PUBLIC DATABASE LINK 권한이 필요합니다. Private 링크는 소유자만 사용 가능하며 소유자가 직접 삭제할 수 있습니다. 동일명 존재 시 Private가 Public보다 우선하며, 원격 인증은 CONNECT TO 절의 유무에 따라 Fixed User 또는 Connected User 방식으로 결정됩니다."
   },
   {
@@ -50,7 +58,9 @@
       "C) リモート・データベースのhr_userのパスワードが変更された場合、ALTER DATABASE LINK文でパスワードのみを変更できる。",
       "D) CONNECT TO句を省略した場合、ローカル・セッションのSYSユーザーとして自動的にリモート・データベースに接続される。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — USING 절에서 지정한 'HRDB'는 원격 데이터베이스에 접속하기 위한 TNS 접속 문자열이며, tnsnames.ora에 정의된 네트 서비스 이름 또는 간편 접속(Easy Connect) 문자열이어야 합니다. 리스너가 해당 서비스를 인식하고 있어야 접속이 성공합니다.\n\nA) 오답 — 이 구문은 CREATE DATABASE LINK이며, CREATE PUBLIC DATABASE LINK이 아닙니다. 따라서 Private 데이터베이스 링크로, 링크를 생성한 소유자만 사용할 수 있습니다.\n\nC) 오답 — ALTER DATABASE LINK 명령으로 비밀번호만 변경하는 것은 지원되지 않습니다. 원격 계정의 비밀번호가 변경되면 기존 링크를 DROP한 후 새 비밀번호로 재생성해야 합니다.\n\nD) 오답 — CONNECT TO 절을 생략하면 연결 사용자(Connected User) 방식이 적용되어, 현재 로컬 세션 사용자와 동일한 계정명/비밀번호로 원격 데이터베이스에 접속합니다. SYS 사용자로 자동 접속되는 것이 아닙니다.\n\n핵심 개념: CREATE DATABASE LINK는 Private 링크를 생성하며, CONNECT TO 절은 고정 사용자(Fixed User) 방식으로 원격 접속 계정을 지정합니다. USING 절에는 tnsnames.ora의 네트 서비스 이름 또는 간편 접속 문자열을 지정하며, 비밀번호 변경 시에는 링크를 재생성해야 합니다."
   },
   {
@@ -64,7 +74,10 @@
       "D) リスナーが接続要求を処理している間、他のクライアントからの新規接続要求はリスナーのキューで待機するため、同時接続は1つに制限される。",
       "E) 接続確立後、クライアントとサーバー間の通信はリスナーを経由して行われる。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — 전용 서버(Dedicated Server) 모드에서 리스너는 접속 요청을 받으면 클라이언트를 위한 전용 서버 프로세스를 기동하고, 접속을 해당 프로세스에 핸드오프(handoff)합니다. 이후 클라이언트는 서버 프로세스와 직접 통신하므로, 리스너는 해당 세션의 통신에 더 이상 관여하지 않습니다.\n\nB) 정답 — 간편 접속(Easy Connect) 메서드에서 host[:port]/service_name 형식을 사용할 때 포트 번호를 생략하면, Oracle의 기본 리스너 포트인 1521이 자동으로 사용됩니다.\n\nC) 오답 — NAMES.DIRECTORY_PATH에 여러 네이밍 메서드가 지정되어 있으면 왼쪽부터 순서대로 시도하지만, tnsnames.ora에서 서비스 이름을 찾지 못하면 TNS-03505 오류가 발생합니다. 자동으로 간편 접속으로 폴백되는 것이 아니라, NAMES.DIRECTORY_PATH의 다음 메서드로 이동하며, 해당 메서드에서도 해석에 실패하면 오류가 발생합니다.\n\nD) 오답 — 리스너는 다수의 동시 접속 요청을 처리할 수 있으며, 하나의 접속을 처리하는 동안 다른 요청을 차단하지 않습니다. 리스너는 접속 요청을 서버 프로세스에 신속하게 핸드오프하므로 동시 접속이 1개로 제한되지 않습니다.\n\nE) 오답 — 접속이 확립된 후 클라이언트와 서버 프로세스 간의 통신은 리스너를 경유하지 않고 직접 수행됩니다. 리스너의 역할은 초기 접속 요청을 서버 프로세스에 전달(핸드오프)하는 것에 한정됩니다.\n\n핵심 개념: Oracle 리스너는 초기 접속 요청만 처리하고 서버 프로세스에 핸드오프하며, 이후 통신에는 관여하지 않습니다. 간편 접속에서 포트 생략 시 기본 1521이 사용되고, 리스너는 다수의 동시 접속 요청을 처리할 수 있습니다."
   }
 ]

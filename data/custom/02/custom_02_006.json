@@ -1,0 +1,83 @@
+[
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_026",
+    "title": "以下のSQL*Plusスクリプトを実行した場合の動作として正しいものを選択してください。\n\nSET SERVEROUTPUT ON\nBEGIN\n  DBMS_OUTPUT.PUT_LINE('Current Date: ' || SYSDATE);\nEND;\n/\nSET SERVEROUTPUT OFF\nBEGIN\n  DBMS_OUTPUT.PUT_LINE('This is a test message.');\nEND;\n/",
+    "options": [
+      "A) 最初のPL/SQLブロックの出力「Current Date: ...」は画面に表示されるが、2番目のPL/SQLブロックの出力「This is a test message.」は画面に表示されない。",
+      "B) SET SERVEROUTPUTコマンドはPL/SQLブロック内でのみ有効であるため、2つのPL/SQLブロックの間で実行しても効果がない。",
+      "C) SET SERVEROUTPUT ONを設定するとDBMS_OUTPUT.PUT_LINEの出力がSPOOLファイルに記録されるが、画面には表示されない。",
+      "D) SET SERVEROUTPUTはデータベースの初期化パラメータであり、ALTER SYSTEM文を使用して変更する必要がある。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — SET SERVEROUTPUT ON을 설정하면 DBMS_OUTPUT.PUT_LINE의 출력이 SQL*Plus 화면에 표시됩니다. 첫 번째 PL/SQL 블록 실행 시에는 SERVEROUTPUT이 ON 상태이므로 'Current Date: ...'가 화면에 출력됩니다. 이후 SET SERVEROUTPUT OFF를 실행하면 DBMS_OUTPUT 출력이 비활성화되므로, 두 번째 PL/SQL 블록의 'This is a test message.'는 화면에 표시되지 않습니다.\n\nB) 오답 — SET SERVEROUTPUT은 SQL*Plus의 환경 설정 명령으로, PL/SQL 블록 내부가 아닌 SQL*Plus 프롬프트에서 실행합니다. PL/SQL 블록의 외부에서 실행해도 해당 세션 내에서 유효하게 동작하며, 이후 실행되는 PL/SQL 블록에 즉시 적용됩니다.\n\nC) 오답 — SET SERVEROUTPUT ON은 DBMS_OUTPUT.PUT_LINE의 출력을 SQL*Plus의 화면에 직접 표시하는 설정입니다. SPOOL 파일에만 기록되는 것이 아니라, 화면에 표시됩니다. SPOOL이 활성화되어 있다면 화면 출력과 동시에 파일에도 기록됩니다.\n\nD) 오답 — SET SERVEROUTPUT은 데이터베이스의 초기화 파라미터가 아니라 SQL*Plus 고유의 환경 설정 명령입니다. ALTER SYSTEM 문이 아닌 SQL*Plus의 SET 명령으로 변경하며, 해당 SQL*Plus 세션에서만 유효합니다.\n\n핵심 개념: SET SERVEROUTPUT ON/OFF는 SQL*Plus의 환경 설정 명령으로, DBMS_OUTPUT.PUT_LINE의 출력을 화면에 표시할지 여부를 제어합니다. SQL*Plus 세션 레벨에서 동작하며, ON 상태에서만 PL/SQL 블록의 출력 결과가 화면에 표시됩니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_027",
+    "title": "RMANにおけるRESTOREコマンドとRECOVERコマンドの役割について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) RESTOREコマンドはバックアップからデータファイルを物理的に元の場所に復元する操作を行う。",
+      "B) RECOVERコマンドは復元されたデータファイルにアーカイブ・ログおよびREDOログを適用して最新の状態に回復する操作を行う。",
+      "C) RECOVERコマンドを実行した後にRESTOREコマンドを実行するのが正しいリカバリの手順である。",
+      "D) RESTOREコマンドはアーカイブ・ログの適用も同時に行うため、RECOVERコマンドを別途実行する必要はない。",
+      "E) RESTOREコマンドとRECOVERコマンドはどちらもデータベースがOPEN状態でのみ実行することができる。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — RESTORE 명령은 RMAN 백업(백업 세트 또는 이미지 복사)으로부터 데이터 파일을 원래 위치(또는 지정된 위치)에 물리적으로 복원하는 작업을 수행합니다. 이 단계에서는 백업 시점의 데이터 파일이 디스크에 기록됩니다.\n\nB) 정답 — RECOVER 명령은 RESTORE로 복원된 데이터 파일에 아카이브 로그와 Online Redo Log를 순서대로 적용하여 장애 직전(완전 복구의 경우) 또는 지정 시점(불완전 복구의 경우)까지 데이터를 회복합니다. RESTORE → RECOVER → ALTER DATABASE OPEN이 표준 복구 절차입니다.\n\nC) 오답 — 올바른 복구 순서는 RESTORE(물리적 파일 복원) → RECOVER(Redo 적용)입니다. 데이터 파일이 먼저 복원되어야 Redo 로그를 적용할 수 있으므로, RECOVER를 먼저 실행하는 것은 올바른 절차가 아닙니다.\n\nD) 오답 — RESTORE와 RECOVER는 각각 다른 역할을 담당합니다. RESTORE는 백업 파일의 물리적 복원만 수행하며, 아카이브 로그 적용은 포함하지 않습니다. 아카이브 로그 및 Redo 로그 적용은 RECOVER 명령의 역할이므로, 완전한 복구를 위해서는 두 명령을 순서대로 실행해야 합니다.\n\nE) 오답 — 데이터베이스 전체 복구 시에는 MOUNT 상태에서 RESTORE와 RECOVER를 실행합니다. 개별 데이터 파일 복구의 경우에는 OPEN 상태에서도 수행할 수 있지만(해당 파일을 오프라인으로 전환), 데이터베이스 레벨의 복구는 MOUNT 상태가 필요합니다.\n\n핵심 개념: RMAN의 복구 절차는 RESTORE(백업에서 데이터 파일 물리 복원) → RECOVER(아카이브 로그 및 Redo 로그 적용으로 최신 상태 회복) → ALTER DATABASE OPEN의 순서로 수행됩니다. RESTORE는 파일 복원, RECOVER는 Redo 적용이라는 명확한 역할 구분이 있습니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_028",
+    "title": "Enterprise Manager Cloud ControlにおけるManagement Agentの通信と動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Management Agentが収集したメトリック・データはHTTPSを使用してOMS(Oracle Management Service)に送信される。",
+      "B) Management AgentはOMS上で動作するプロセスであり、管理対象ホストへの個別インストールは不要である。",
+      "C) OMSから管理作業(Jobなど)の指示を受けたManagement Agentは、対象ホスト上で実際のコマンド(sqlplusやlsnrctlなど)を実行する。",
+      "D) Management Agentが停止した場合でも、OMS側で直接ターゲットのメトリックを収集し続けることができる。",
+      "E) Management Agentは収集したメトリック・データをManagement Repositoryに直接書き込む。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — Management Agent가 수집한 메트릭 데이터는 XML 형태로 HTTPS를 통해 OMS에 전송됩니다. HTTPS 프로토콜을 사용하여 Agent와 OMS 간의 통신이 암호화되며, OMS Upload 포트(기본 4903)를 통해 데이터가 전달됩니다.\n\nC) 정답 — OMS에서 관리 작업(Job)을 전달받은 Management Agent는 해당 호스트에서 실제 명령을 실행합니다. 예를 들어 데이터베이스 기동/종료 시에는 sqlplus 명령을, 리스너 시작/중지 시에는 lsnrctl 명령을 Agent가 호스트에서 직접 실행하고, 그 결과를 OMS에 반환합니다.\n\nB) 오답 — Management Agent는 OMS 위에서 동작하는 프로세스가 아니라, 각 관리 대상 호스트에 개별적으로 설치되는 경량 프로세스입니다. Agent가 호스트에 설치되어야 해당 호스트의 메트릭 수집과 관리 작업 실행이 가능합니다.\n\nD) 오답 — Management Agent가 정지하면 해당 호스트의 메트릭 수집과 관리 작업 실행이 중단됩니다. OMS는 Agent를 통해서만 타겟의 정보를 수집하므로, Agent 정지 시 해당 타겟은 모니터링 불가 상태가 됩니다.\n\nE) 오답 — Agent는 수집한 메트릭을 Management Repository에 직접 기록하지 않습니다. Agent → OMS(HTTPS) → Management Repository(Oracle DB)의 경로로 데이터가 전달되며, OMS가 데이터를 처리하여 Repository DB에 저장합니다.\n\n핵심 개념: EM Cloud Control의 Management Agent는 각 관리 대상 호스트에 설치되어 메트릭 수집(HTTPS로 OMS에 전송)과 관리 작업 실행(sqlplus, lsnrctl 등 OS 명령 실행)을 담당합니다. 데이터 흐름은 Agent → OMS → Repository DB 순서이며, Agent 정지 시 해당 호스트 모니터링이 중단됩니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_029",
+    "title": "DBCAのサイレントモードで使用する主要コマンドについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) -deleteDatabase オプションを使用すると既存のデータベースをサイレントモードで削除することができる。",
+      "B) -configureDatabase オプションを使用すると既存のデータベースの構成変更をGUI画面なしで実行することができる。",
+      "C) -createDatabase オプションにはリスナーの自動作成機能が含まれており、-listenerNameパラメータでリスナー名を指定できる。",
+      "D) -deleteDatabase オプションの実行にはデータベースがOPEN状態である必要があり、MOUNT状態では実行できない。",
+      "E) -configureDatabase オプションはPDBの作成や削除にも使用でき、-createPluggableDatabaseオプションと同じ機能を提供する。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — DBCA 사일런트 모드에서 -deleteDatabase 옵션을 사용하면 GUI 없이 기존 데이터베이스를 삭제할 수 있습니다. 자동화 스크립트나 X Window가 없는 원격 서버 환경에서 데이터베이스 제거 작업을 수행할 때 유용합니다.\n\nB) 정답 — -configureDatabase 옵션을 사용하면 기존 데이터베이스의 옵션, 초기화 파라미터 등의 구성을 사일런트 모드에서 변경할 수 있습니다. GUI 화면 없이 명령줄에서 구성 변경 작업을 자동화할 수 있습니다.\n\nC) 오답 — DBCA는 데이터베이스 생성/관리 전용 도구이며, 리스너의 생성은 DBCA의 역할 범위에 포함되지 않습니다. 리스너 생성 및 구성은 NETCA 또는 Net Manager(NETMGR)에서 수행합니다. DBCA의 -createDatabase 옵션에 리스너 자동 생성 기능은 없습니다.\n\nD) 오답 — DBCA -deleteDatabase 옵션은 데이터베이스의 상태에 관계없이 삭제 작업을 수행할 수 있으며, OPEN 상태가 필수 조건은 아닙니다. DBCA가 내부적으로 필요한 상태 전환을 처리합니다.\n\nE) 오답 — -configureDatabase 옵션은 기존 데이터베이스의 구성(옵션, 초기화 파라미터 등) 변경에 사용되며, PDB의 생성이나 삭제 기능은 포함되지 않습니다. PDB 생성은 -createPluggableDatabase, PDB 삭제는 -deletePluggableDatabase라는 별도의 전용 옵션으로 수행합니다.\n\n핵심 개념: DBCA 사일런트 모드는 -createDatabase(DB 생성), -deleteDatabase(DB 삭제), -configureDatabase(DB 구성 변경), -createPluggableDatabase(PDB 생성), -deletePluggableDatabase(PDB 삭제) 등 용도별 전용 옵션을 제공합니다. 각 옵션은 고유한 역할을 가지며, 리스너 생성은 DBCA의 역할 범위가 아닙니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_030",
+    "title": "RMANのVALIDATEコマンドによるブロック破損検査について正しく述べているものを選択してください。",
+    "options": [
+      "A) VALIDATE DATABASEコマンドはバックアップを取得せずにデータファイルのブロック破損のみを検査する。",
+      "B) VALIDATE DATABASEコマンドで検出されたブロック破損の情報はALERT.LOGファイルにのみ記録され、データディクショナリ・ビューでは確認できない。",
+      "C) VALIDATEコマンドはデータベースがMOUNT状態でのみ実行可能であり、OPEN状態では使用できない。",
+      "D) VALIDATEコマンドで破損が検出された場合、RMANが自動的にブロックの修復を行う。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — VALIDATE DATABASE 명령은 백업을 수행하지 않고 데이터 파일의 블록 손상만을 검사하는 명령입니다. RMAN은 백업 수행 중에도 블록 손상을 자동으로 감지하지만, VALIDATE 명령을 사용하면 백업 없이 사전에 블록 무결성만 독립적으로 검증할 수 있습니다.\n\nB) 오답 — VALIDATE 명령으로 검출된 블록 손상 정보는 ALERT.LOG 파일에만 기록되는 것이 아니라, V$DATABASE_BLOCK_CORRUPTION 뷰에서도 확인할 수 있습니다. 이 뷰에서는 파일 번호(FILE#), 블록 번호(BLOCK#), 손상 유형(CORRUPTION_TYPE) 등의 상세 정보를 조회할 수 있으며, 이 정보를 기반으로 BLOCKRECOVER 명령으로 손상 블록을 복구할 수 있습니다.\n\nC) 오답 — VALIDATE 명령은 데이터베이스가 OPEN 상태에서도 실행할 수 있습니다. 운영 중인 데이터베이스에 대해 서비스 중단 없이 블록 손상 검사를 수행할 수 있어, 사전 점검에 유용합니다.\n\nD) 오답 — VALIDATE 명령은 블록 손상의 검사(감지)만 수행하며, 자동 수복은 하지 않습니다. 손상이 검출된 경우에는 DBA가 RMAN의 BLOCKRECOVER 명령 등을 사용하여 수동으로 복구 작업을 수행해야 합니다.\n\n핵심 개념: RMAN의 VALIDATE DATABASE 명령은 백업을 수행하지 않고 데이터 파일의 블록 손상만을 검사하는 전용 명령입니다. 검출된 손상 정보는 V$DATABASE_BLOCK_CORRUPTION 뷰에서 확인할 수 있으며, VALIDATE는 검사만 수행하고 자동 수복은 하지 않으므로 손상 복구는 별도로 BLOCKRECOVER 등으로 수행해야 합니다."
+  }
+]

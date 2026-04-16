@@ -10,7 +10,10 @@
       "D) ORACLE_DATAPUMPドライバはOracleバイナリ形式でデータを読み書きするため、データ型が元のまま保持される。",
       "E) ORACLE_DATAPUMPドライバではACCESS PARAMETERSにフィールド区切り文字やレコード区切り文字を必ず指定する必要がある。"
     ],
-    "answer": ["B", "D"],
+    "answer": [
+      "B",
+      "D"
+    ],
     "explanation": "정답: B, D\nB) 정답 — ORACLE_DATAPUMP 액세스 드라이버를 사용하면 CREATE TABLE ... ORGANIZATION EXTERNAL ... AS SELECT 구문(CTAS)으로 데이터베이스 내부의 데이터를 Oracle 바이너리 형식의 외부 파일로 언로드(추출)할 수 있습니다. 이는 ORACLE_DATAPUMP 드라이버만이 가지는 쓰기(언로드) 기능입니다.\n\nD) 정답 — ORACLE_DATAPUMP 드라이버는 Oracle 고유의 바이너리 덤프 형식을 사용하므로, 데이터 타입을 원본 그대로 보존합니다. 텍스트 변환이 필요하지 않아 ORACLE_LOADER보다 파싱 오버헤드가 없으며 고속 처리가 가능합니다.\n\nA) 오답 — ORACLE_DATAPUMP 드라이버는 Oracle 고유의 바이너리 형식만을 다룹니다. CSV나 텍스트 형식 파일의 읽기는 ORACLE_LOADER 드라이버가 담당합니다.\n\nC) 오답 — 외부 테이블을 DROP해도 OS 상의 데이터 파일은 자동으로 삭제되지 않습니다. 데이터 파일은 OS 레벨에서 별도로 삭제해야 합니다.\n\nE) 오답 — ORACLE_DATAPUMP 드라이버는 Oracle 바이너리 형식을 자동으로 인식하므로, ORACLE_LOADER와 달리 필드 구분자나 레코드 구분자 등의 ACCESS PARAMETERS를 별도로 지정할 필요가 없습니다.\n\n핵심 개념: ORACLE_DATAPUMP 액세스 드라이버는 Oracle 바이너리 형식으로 읽기/쓰기를 지원하는 양방향 드라이버로, CTAS를 통한 데이터 언로드가 가능하며 데이터 타입을 원본 그대로 보존합니다. 외부 테이블을 DROP해도 OS 파일은 삭제되지 않습니다."
   },
   {
@@ -23,7 +26,9 @@
       "C) TABLESモードでは、他のスキーマに属するテーブルを指定することはできない。",
       "D) DUMPFILEパラメータに%Uを指定すると、PARALLELの値に関係なく常に1つのダンプ・ファイルが生成される。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — FULL=Y를 지정하면 데이터베이스 전체(모든 스키마, 모든 객체)를 Export할 수 있습니다. FULL 모드 실행에는 EXP_FULL_DATABASE 롤이 필요합니다.\n\nA) 오답 — SCHEMAS 모드에서 자기 자신의 스키마를 Export하는 경우에는 EXP_FULL_DATABASE 롤이 필요하지 않습니다. SCHEMAS 모드는 기본 모드이며, 자신의 스키마는 별도의 특별한 롤 없이 Export할 수 있습니다.\n\nC) 오답 — TABLES 모드에서는 적절한 권한이 있으면 다른 스키마의 테이블을 TABLES=schema.table 형식으로 지정하여 Export할 수 있습니다.\n\nD) 오답 — DUMPFILE에 %U 치환 변수를 사용하면 PARALLEL 파라미터와 연동하여 자동으로 번호가 부여된 다중 덤프 파일(예: exp_01.dmp, exp_02.dmp 등)이 생성됩니다.\n\n핵심 개념: Data Pump Export(expdp)는 FULL, SCHEMAS(기본), TABLES, TABLESPACES, TRANSPORTABLE의 5가지 모드를 지원하며, FULL 모드에는 EXP_FULL_DATABASE 롤이 필요합니다. DUMPFILE에 %U를 사용하면 PARALLEL과 연동하여 다중 덤프 파일이 자동 생성됩니다."
   },
   {
@@ -37,7 +42,10 @@
       "D) REMAP_SCHEMAは1回のインポートで1つのスキーマ・マッピングしか指定できない。",
       "E) REMAP_TABLESPACEを指定すると、データ・ファイルの物理パスも自動的に変更される。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — REMAP_SCHEMA를 사용하면 소스 스키마의 모든 객체(테이블, 인덱스, 제약조건, 프로시저, 뷰 등)를 대상 스키마로 Import할 수 있습니다. DDL 내의 스키마 참조도 자동으로 변환됩니다.\n\nC) 정답 — REMAP_TABLESPACE를 사용하면 소스 환경과 대상 환경의 테이블스페이스 이름이 다를 때 매핑을 변경할 수 있습니다. 예를 들어 REMAP_TABLESPACE=USERS:NEW_USERS로 지정하면 USERS 테이블스페이스의 객체가 NEW_USERS에 생성됩니다.\n\nB) 오답 — REMAP_SCHEMA를 사용하려면 IMP_FULL_DATABASE 롤 또는 DBA 권한이 필요합니다. 일반 사용자는 다른 스키마로의 리매핑을 수행할 수 없습니다.\n\nD) 오답 — REMAP_SCHEMA는 동일 파라미터를 여러 번 지정하여 다중 리매핑이 가능합니다. 예: REMAP_SCHEMA=HR:NEW_HR REMAP_SCHEMA=SCOTT:NEW_SCOTT과 같이 복수의 스키마를 동시에 리매핑할 수 있습니다.\n\nE) 오답 — REMAP_TABLESPACE는 DDL 내의 테이블스페이스 이름을 변환하는 기능이며, 데이터 파일의 물리적 경로는 변경하지 않습니다. 데이터 파일 경로를 변경하려면 REMAP_DATAFILE 파라미터를 사용해야 합니다.\n\n핵심 개념: Data Pump Import의 REMAP 파라미터는 소스 환경과 대상 환경의 차이를 처리하기 위한 핵심 기능입니다. REMAP_SCHEMA(스키마 리매핑, IMP_FULL_DATABASE 필요), REMAP_TABLESPACE(테이블스페이스 리매핑), REMAP_TABLE(테이블명 변경), REMAP_DATAFILE(데이터파일 경로 변환)을 조합하여 유연한 환경 간 이관이 가능합니다."
   },
   {
@@ -50,7 +58,9 @@
       "C) Direct Pathではロード完了後にインデックスが一括で再構築されるが、失敗した場合インデックスがUNUSABLE状態になることがある。",
       "D) Conventional PathではUNDOが生成されないため、ロード中にロールバックを行うことはできない。"
     ],
-    "answer": ["C"],
+    "answer": [
+      "C"
+    ],
     "explanation": "정답: C\nC) 정답 — Direct Path Load는 SQL 레이어를 우회하여 데이터 블록을 직접 포맷하므로, 인덱스는 로드 중에 실시간으로 유지보수되지 않고 로드 완료 후 일괄 재구축됩니다. 재구축이 실패하면 해당 인덱스는 UNUSABLE 상태로 표시되며, 수동으로 재구축(ALTER INDEX REBUILD)해야 합니다.\n\nA) 오답 — HWM 위에 데이터 블록을 직접 기록하는 것은 Direct Path의 동작입니다. Conventional Path는 SQL INSERT 문을 사용하여 SGA의 버퍼 캐시를 통해 데이터를 기록하며, 완전한 Redo Log를 생성합니다.\n\nB) 오답 — Direct Path에서는 INSERT 트리거가 실행되지 않습니다. INSERT 트리거가 실행되는 것은 Conventional Path 로드 방식에서만 해당됩니다.\n\nD) 오답 — Conventional Path에서는 Undo가 정상적으로 생성되므로 롤백이 가능합니다. Undo가 생성되지 않는 것은 Direct Path 방식입니다.\n\n핵심 개념: Direct Path Load는 SQL 레이어를 우회하여 HWM 위에 직접 데이터를 기록하며, Redo/Undo를 최소화하고 트리거를 실행하지 않습니다. 인덱스는 로드 후 일괄 재구축되며 실패 시 UNUSABLE 상태가 됩니다. Conventional Path는 SQL INSERT를 사용하여 완전한 Redo/Undo를 생성하고 트리거도 실행합니다."
   },
   {
@@ -63,7 +73,9 @@
       "C) Data Pumpのダンプ・ファイルのパスは、ディレクトリ・オブジェクトを使用せずにOS絶対パスで直接指定することができる。",
       "D) 外部表で使用するディレクトリ・オブジェクトに対してREAD権限を付与すれば、WRITE権限がなくてもデータのアンロードを実行することができる。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — 디렉토리 객체를 생성하려면 CREATE ANY DIRECTORY 시스템 권한이 필요하며, 생성된 디렉토리 객체는 SYS 소유로 등록됩니다. 사용자에게는 GRANT READ, WRITE ON DIRECTORY 명령으로 개별 권한을 부여합니다.\n\nA) 오답 — 디렉토리 객체 생성 시 지정된 OS 경로의 존재 여부를 검증하지 않습니다. 실제 파일 접근 시점에 경로가 유효하지 않으면 ORA-29913 에러가 발생합니다.\n\nC) 오답 — Data Pump는 서버 측에서 동작하므로, 보안상의 이유로 OS 절대 경로를 직접 지정할 수 없습니다. 반드시 사전에 생성된 디렉토리 객체를 통해 파일 경로를 참조해야 합니다.\n\nD) 오답 — ORACLE_DATAPUMP 드라이버를 사용한 데이터 언로드(CTAS로 파일 생성)에는 해당 디렉토리에 대한 WRITE 권한이 필요합니다. READ 권한만으로는 파일을 생성(쓰기)할 수 없습니다.\n\n핵심 개념: 디렉토리 객체는 CREATE ANY DIRECTORY 권한으로 생성하며 SYS 소유입니다. OS 경로의 존재 여부는 생성 시 검증되지 않으며, Data Pump는 보안상 OS 절대 경로 대신 디렉토리 객체를 통해서만 파일 경로를 지정할 수 있습니다."
   }
 ]

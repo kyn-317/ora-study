@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_056",
+    "title": "ARCHIVELOGモードで運用しているOracle Databaseにおいて、ARCnプロセスによるアーカイブが完了していないオンラインREDOログ・グループに対するログ・スイッチが発生した場合の動作について正しく述べているものを選択してください。",
+    "options": [
+      "A) アーカイブが完了していないオンラインREDOログ・グループはLGWRによって上書きできないため、LGWRはアーカイブの完了を待機する。この状態が続くとデータベースの操作が停止する可能性がある。",
+      "B) LGWRはアーカイブの完了を待たずに該当オンラインREDOログ・グループを上書きし、ARCnは次のログ・スイッチ時にまとめてアーカイブを実行する。",
+      "C) ARCnのアーカイブが遅延した場合、CKPTプロセスが代わりにアーカイブ処理を引き継ぎ、LGWRのログ・スイッチが中断されることはない。",
+      "D) ARCnのアーカイブが完了していないオンラインREDOログ・グループが存在する場合、Oracleは自動的にNOARCHIVELOGモードに切り替えてデータベースの継続稼働を優先する。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — ARCHIVELOG 모드에서는 아카이빙이 완료되지 않은 온라인 Redo Log 그룹을 LGWR이 재사용(덮어쓰기)할 수 없습니다. 모든 온라인 Redo Log 그룹이 아카이빙 미완료 상태인데 LGWR이 새 Redo Log 그룹으로 전환해야 하는 상황이 발생하면, LGWR은 ARCn의 아카이빙 완료를 대기합니다. 이 대기 중에는 Redo 기록이 불가능하므로 DML 및 COMMIT이 중단되어 데이터베이스 운영이 사실상 정지할 수 있습니다. 이를 방지하기 위해 적절한 수의 Redo Log 그룹을 구성하고, LOG_ARCHIVE_MAX_PROCESSES 값을 늘려 아카이빙 처리량을 확보해야 합니다.\n\nB) 오답 — ARCHIVELOG 모드에서 LGWR은 아카이빙이 완료되지 않은 Redo Log 그룹을 절대 덮어쓸 수 없습니다. 덮어쓰면 미디어 복구(Point-in-Time Recovery)에 필요한 Redo 정보가 손실되기 때문입니다. ARCn이 다음 로그 스위치 시에 일괄 아카이빙하는 동작은 존재하지 않습니다.\n\nC) 오답 — CKPT(체크포인트) 프로세스는 데이터 파일 헤더와 컨트롤 파일을 갱신하는 프로세스이며, 아카이브 처리를 대행하는 기능은 없습니다. 아카이브 작업은 오직 ARCn 프로세스만 수행합니다.\n\nD) 오답 — Oracle은 아카이빙 지연 시 자동으로 NOARCHIVELOG 모드로 전환하지 않습니다. 아카이브 모드의 전환은 데이터 보호 정책과 직결되므로 DBA가 명시적으로 수행해야 하며, Oracle이 자동으로 변경하면 미디어 복구 능력이 예고 없이 상실되어 데이터 손실 위험이 발생합니다.\n\n핵심 개념: ARCHIVELOG 모드에서는 ARCn이 아카이빙을 완료해야만 해당 온라인 Redo Log 그룹이 재사용 가능합니다. 아카이빙이 지연되어 모든 Redo Log 그룹이 재사용 불가 상태가 되면, LGWR이 대기하게 되어 데이터베이스 운영이 정지할 수 있습니다. 충분한 Redo Log 그룹 수 확보와 ARCn 프로세스 수 조정으로 이를 예방합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_057",
+    "title": "Oracle Databaseのバックグラウンド・プロセスであるSMON(System Monitor)の役割について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SMONは、インスタンスの異常終了後の再起動時に自動的にインスタンス・リカバリを実行し、オンラインREDOログの変更をデータ・ファイルに再適用(ロール・フォワード)する。",
+      "B) SMONは、異常終了したセッションが残した未解放の一時セグメントを定期的に検出してクリーンアップする。",
+      "C) SMONは、障害が発生したユーザー・プロセスのトランザクションをロールバックし、保持していたロックを解除する。",
+      "D) SMONは、インスタンスに登録されたサービス情報をリスナーに動的に登録する処理を定期的に実行する。",
+      "E) SMONは、LGWR(ログ・ライター)の障害を検知した場合に代わりにREDOログ・バッファをオンラインREDOログ・ファイルに書き込む。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — SMON(System Monitor)은 인스턴스가 비정상 종료(크래시, SHUTDOWN ABORT 등) 후 재기동될 때 자동으로 인스턴스 리커버리를 수행합니다. 인스턴스 리커버리의 첫 번째 단계로 온라인 Redo Log의 변경 사항을 데이터 파일에 재적용(Roll Forward/Cache Recovery)합니다. 이후 데이터베이스를 오픈하고, 커밋되지 않은 트랜잭션을 Undo 데이터를 사용하여 롤백(Roll Back)합니다.\n\nB) 정답 — SMON은 비정상 종료된 세션이 남긴 임시 세그먼트(Temporary Segment)를 주기적으로 검출하여 정리합니다. 정렬 작업이나 임시 테이블 등에 사용되었던 임시 세그먼트가 세션의 비정상 종료로 해제되지 않은 경우, SMON이 이를 감지하고 공간을 해제합니다.\n\nC) 오답 — 장애가 발생한 사용자 프로세스의 트랜잭션 롤백과 잠금 해제는 SMON이 아닌 PMON(Process Monitor)의 역할입니다. PMON은 비정상 종료된 사용자 프로세스를 감지하여 미완료 트랜잭션을 Undo 데이터로 롤백하고, 보유 중이던 잠금(Lock)을 해제합니다.\n\nD) 오답 — 인스턴스 및 서비스 정보를 리스너에 동적으로 등록하는 것은 LREG(Listener Registration) 프로세스의 역할입니다. LREG는 약 60초마다 인스턴스 이름, 서비스 이름, 부하 정보 등을 리스너에 갱신합니다.\n\nE) 오답 — SMON이 LGWR의 장애 시 Redo 기록을 대행하는 기능은 존재하지 않습니다. LGWR은 필수 백그라운드 프로세스이며, LGWR이 실패하면 인스턴스가 즉시 크래시됩니다. 다른 프로세스가 LGWR의 역할을 대체할 수 없습니다.\n\n핵심 개념: SMON(System Monitor)의 주요 역할은 ①인스턴스 비정상 종료 후 재기동 시 자동 인스턴스 리커버리 수행(Roll Forward → DB 오픈 → Roll Back), ②비정상 종료 세션이 남긴 임시 세그먼트 정리, ③Dictionary Managed Tablespace에서 인접 Free Extent 병합입니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_058",
+    "title": "Oracle DatabaseのSMON(System Monitor)プロセスが実行するディクショナリ管理表領域における空き領域の管理について正しく述べているものを選択してください。",
+    "options": [
+      "A) SMONは、ディクショナリ管理表領域(Dictionary Managed Tablespace)において隣接する空きエクステントを1つに結合(コアレス)して連続した空き領域を確保する。この操作はローカル管理表領域(LMT)では不要である。",
+      "B) SMONは、ローカル管理表領域(LMT)においてビットマップを再構成し、断片化した空き領域を定期的にデフラグメントする。",
+      "C) SMONは、すべての表領域に対して定期的にセグメントの縮小を実行し、使用されていない領域をデータ・ファイルに返却する。",
+      "D) SMONによる空きエクステントの結合は、ディクショナリ管理表領域とローカル管理表領域の両方で同一のアルゴリズムにより実行される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — SMON은 Dictionary Managed Tablespace(DMT)에서 인접한 Free Extent를 하나로 병합(Coalescing)하여 큰 연속 공간을 확보합니다. DMT에서는 데이터가 삭제되면 여러 개의 작은 Free Extent가 생길 수 있으며, SMON이 이를 병합합니다. Locally Managed Tablespace(LMT)에서는 비트맵으로 공간을 관리하므로 이러한 병합 작업이 불필요합니다.\n\nB) 오답 — SMON이 LMT의 비트맵을 재구성하거나 디프래그먼트하는 기능은 없습니다. LMT는 비트맵 기반으로 공간을 관리하므로 DMT에서 발생하는 Free Extent 단편화 문제가 구조적으로 발생하지 않습니다.\n\nC) 오답 — SMON은 모든 테이블스페이스에 대해 세그먼트 축소(Shrink)를 수행하지 않습니다. SMON의 공간 관련 역할은 DMT에서의 인접 Free Extent 병합과 임시 세그먼트 정리에 한정됩니다. 세그먼트 축소는 DBA가 ALTER TABLE ... SHRINK SPACE 등을 통해 명시적으로 수행하는 작업입니다.\n\nD) 오답 — Free Extent 병합은 DMT에서만 필요하고 수행되는 작업이며, LMT에서는 수행되지 않습니다. DMT와 LMT의 공간 관리 메커니즘이 근본적으로 다르므로 동일한 알고리즘이 적용될 수 없습니다.\n\n핵심 개념: SMON은 Dictionary Managed Tablespace(DMT)에서 인접한 Free Extent를 병합(Coalescing)하여 연속된 가용 공간을 확보합니다. Locally Managed Tablespace(LMT)에서는 비트맵 기반 관리로 이러한 단편화 문제가 발생하지 않아 SMON의 병합 작업이 불필요합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_059",
+    "title": "Oracle DatabaseのPMON(Process Monitor)プロセスの役割について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) PMONは、異常終了したユーザー・プロセスを検出し、対応するサーバー・プロセスが保持していた未コミットのトランザクションをUndo データを使用してロールバックする。",
+      "B) PMONは、異常終了したプロセスが保持していたテーブルやロウ・レベルのロックを解除し、PGAメモリーをOSに返却する。",
+      "C) PMONは、インスタンス再起動時にオンラインREDOログの変更内容をデータ・ファイルに適用するロール・フォワード処理を実行する。",
+      "D) PMONは、バッファ・キャッシュ内のDirty Bufferを定期的に検出し、データ・ファイルへの書き出しをDBWnに依頼する。",
+      "E) PMONは、ディクショナリ管理表領域内の隣接する空きエクステントを結合して連続した空き領域を確保する。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — PMON(Process Monitor)은 비정상 종료된 사용자 프로세스(네트워크 장애, 클라이언트 크래시 등)를 감지하고, 해당 서버 프로세스가 보유하고 있던 미완료(미커밋) 트랜잭션을 Undo 데이터를 사용하여 롤백합니다. 이를 통해 데이터 일관성을 유지합니다.\n\nB) 정답 — PMON은 비정상 종료된 프로세스가 보유하고 있던 테이블 및 행(Row) 수준의 잠금(Lock)을 해제하고, 해당 서버 프로세스의 PGA 메모리를 OS에 반환합니다. 또한 SGA 내의 리소스(커서, 래치 등)도 해제하며, V$SESSION에서 해당 세션 정보를 제거합니다.\n\nC) 오답 — 인스턴스 재기동 시 온라인 Redo Log의 변경 내용을 데이터 파일에 적용하는 Roll Forward(Cache Recovery) 처리는 PMON이 아닌 SMON(System Monitor)의 역할입니다. SMON이 인스턴스 리커버리 전체를 담당합니다.\n\nD) 오답 — Buffer Cache 내의 Dirty Buffer를 감지하여 데이터 파일에 기록하는 것은 DBWn(Database Writer) 자체의 역할입니다. PMON은 Dirty Buffer의 기록과는 관련이 없으며, 프로세스 장애 정리에 특화된 프로세스입니다.\n\nE) 오답 — Dictionary Managed Tablespace에서 인접 Free Extent를 병합하는 것은 SMON(System Monitor)의 역할입니다. PMON은 공간 관리 작업을 수행하지 않습니다.\n\n핵심 개념: PMON(Process Monitor)의 핵심 역할은 비정상 종료된 사용자 프로세스의 정리입니다. 구체적으로 ①미커밋 트랜잭션의 Undo 롤백, ②잠금(Lock) 해제, ③PGA 메모리 및 SGA 리소스 반환, ④V$SESSION에서 세션 정보 제거를 수행합니다. Oracle 23ai부터는 PMON의 정리 기능이 CLMN(Cleanup Main Process)과 CLnn(Cleanup Helper)으로 분리되어 대규모 정리 작업의 병렬 처리가 가능해졌습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_060",
+    "title": "Oracle 23ai以降でPMON(Process Monitor)の機能が分離されたプロセス構成について正しく述べているものを選択してください。",
+    "options": [
+      "A) Oracle 23aiからPMONの機能はPMON、CLMN(Cleanup Main Process)、CLnn(Cleanup Helper)に分離された。CLMNがクリーンアップ作業を調整し、CLnnが大規模なクリーンアップを並列に実行する。",
+      "B) Oracle 23aiからPMONの機能はPMONとSMONに統合され、プロセスのクリーンアップとインスタンス・リカバリが単一プロセスで実行される。",
+      "C) Oracle 23aiではPMONが廃止され、すべてのプロセス・クリーンアップ機能がCLMN(Cleanup Main Process)に完全に移管された。",
+      "D) Oracle 23ai以降、CLnn(Cleanup Helper)プロセスはDBAが手動で起動する必要があり、CLMNのみがインスタンス起動時に自動的に開始される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — Oracle 23ai부터 PMON의 프로세스 정리 기능이 세분화되었습니다. PMON은 주기적으로 프로세스 상태를 모니터링하고 장애를 감지하는 역할을 유지하며, CLMN(Cleanup Main Process)이 정리 작업의 조율과 관리를 담당합니다. CLnn(Cleanup Helper)은 대규모 정리 작업을 병렬로 수행하는 워커 프로세스입니다. 이 분리를 통해 다수의 프로세스가 동시에 장애를 일으키는 상황에서도 정리 작업이 신속하게 완료됩니다.\n\nB) 오답 — PMON과 SMON이 통합된 사실은 없습니다. PMON은 프로세스 장애 정리를 담당하고 SMON은 인스턴스 리커버리와 공간 관리를 담당하는 별개의 프로세스이며, 23ai에서도 각각 독립적으로 존재합니다.\n\nC) 오답 — Oracle 23ai에서 PMON이 폐지된 것이 아닙니다. PMON은 여전히 프로세스 상태 모니터링과 장애 감지 역할을 수행하며, 정리 작업의 실행 부분이 CLMN과 CLnn으로 분리된 것입니다.\n\nD) 오답 — CLnn(Cleanup Helper) 프로세스는 DBA가 수동으로 기동하는 것이 아니라, 대규모 정리 작업이 필요할 때 CLMN에 의해 자동으로 생성됩니다. 정리 작업 완료 후에는 자동으로 해제됩니다.\n\n핵심 개념: Oracle 23ai부터 PMON의 기능이 PMON(장애 감지/모니터링), CLMN(정리 작업 조율), CLnn(병렬 정리 실행)의 3종류 프로세스로 분리되었습니다. 이를 통해 다수의 프로세스가 동시에 실패하는 상황에서도 정리 작업이 병렬로 신속하게 완료되며, 데이터베이스의 가용성이 향상되었습니다."
+  }
+]

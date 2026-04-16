@@ -1,0 +1,36 @@
+[
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_030",
+    "title": "SQLアクセス・アドバイザとSQLチューニング・アドバイザの違いについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SQLアクセス・アドバイザはDBMS_ADVISORパッケージを使用してワークロード全体のスキーマ構造（索引、マテリアライズド・ビュー、パーティション）を最適化する推奨事項を提供し、SQLチューニング・アドバイザはDBMS_SQLTUNEパッケージを使用して個別のSQL文に対するSQLプロファイル生成や統計分析などの推奨事項を提供する。",
+      "B) SQLアクセス・アドバイザは個別のSQL文を分析対象とし、SQLチューニング・アドバイザはSQL Tuning Set(STS)を入力としてワークロード全体を分析対象とする。",
+      "C) SQLアクセス・アドバイザの推奨事項にはGET_TASK_SCRIPTで生成される実装DDLスクリプトとUNDOスクリプトが含まれ、SQLチューニング・アドバイザの推奨事項にはSQLプロファイル、索引作成、SQL構造の修正などが含まれる。",
+      "D) SQLアクセス・アドバイザとSQLチューニング・アドバイザはどちらもDBMS_SQLTUNEパッケージに含まれるプロシージャであり、同一のタスク作成インタフェースを使用する。",
+      "E) SQLアクセス・アドバイザは自動メンテナンス・タスク（SYS_AUTO_SQL_TUNING_TASK）としてメンテナンス・ウィンドウ内で自動的に実行されるが、SQLチューニング・アドバイザは手動でのみ実行可能である。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — SQL 액세스 어드바이저는 DBMS_ADVISOR 패키지를 사용하여 CREATE_TASK(advisor_name => 'SQL Access Advisor')로 태스크를 생성하고, STS 또는 현재 워크로드를 입력으로 전체 SQL 워크로드를 분석합니다. 인덱스, 구체화 뷰(MV), 파티셔닝 등 스키마 설계 수준의 액세스 구조 최적화를 권고합니다. 반면 SQL 튜닝 어드바이저는 DBMS_SQLTUNE 패키지를 사용하여 CREATE_TUNING_TASK로 태스크를 생성하고, 개별 SQL 문을 심층 분석하여 SQL 프로파일 생성, 통계 분석, 인덱스 권고, SQL 구조 변경 등의 최적화를 제안합니다.\n\nC) 정답 — SQL 액세스 어드바이저는 DBMS_ADVISOR.GET_TASK_SCRIPT 함수를 통해 권고 사항을 구현하기 위한 IMPLEMENTATION 스크립트(DDL)와 변경을 되돌리기 위한 UNDO 스크립트를 자동으로 생성합니다. SQL 튜닝 어드바이저는 4가지 분석 유형(통계 분석, SQL 프로파일링, 액세스 경로 분석, SQL 구조 분석)의 결과로 SQL 프로파일 생성 권고, 인덱스 생성 권고, SQL 문 수정 권고 등을 제공합니다.\n\nB) 오답 — 설명이 반대입니다. SQL 액세스 어드바이저는 전체 SQL 워크로드를 분석 대상으로 하며, SQL 튜닝 어드바이저는 개별 SQL 문을 분석 대상으로 합니다. SQL 튜닝 어드바이저도 STS를 입력으로 사용할 수 있지만, 분석은 STS 내의 개별 SQL 문 단위로 수행됩니다.\n\nD) 오답 — SQL 액세스 어드바이저는 DBMS_ADVISOR 패키지를 사용하고, SQL 튜닝 어드바이저는 DBMS_SQLTUNE 패키지를 사용합니다. 두 어드바이저는 서로 다른 패키지에 속하며 태스크 생성 인터페이스도 다릅니다(CREATE_TASK vs CREATE_TUNING_TASK).\n\nE) 오답 — 자동 메인터넌스 태스크(SYS_AUTO_SQL_TUNING_TASK)로 유지 관리 윈도우에서 자동 실행되는 것은 SQL 튜닝 어드바이저입니다. SQL 액세스 어드바이저는 자동 유지 관리 태스크에 포함되지 않으며 필요 시 수동으로 실행합니다.\n\n핵심 개념: SQL 액세스 어드바이저(DBMS_ADVISOR)는 전체 워크로드의 스키마 구조(인덱스, MV, 파티션)를 최적화하고 구현 DDL 스크립트를 생성하며, SQL 튜닝 어드바이저(DBMS_SQLTUNE)는 개별 SQL을 심층 분석하여 SQL 프로파일, 통계, 인덱스, SQL 수정 등의 권고를 제공합니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_031",
+    "title": "DBAがデータベースのアップグレード前にSQLパフォーマンス・アナライザ(SPA)を使用して性能影響評価を計画しています。本番環境では実際にSQLを実行することによるリソース消費を避けたいため、実行計画の比較のみでTrialを実施する方針です。また、分析対象のSQLワークロードはAWRから過去1週間の上位SQLを選定する予定です。この計画に関して正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SPA分析タスクの変更前Trialと変更後TrialでDBMS_SQLPA.EXECUTE_ANALYSIS_TASKのexecution_typeに'EXPLAIN PLAN'を指定すると、SQLを実際に実行せずに実行計画のみを生成・比較できる。",
+      "B) AWRからSQLを選定するには、DBMS_SQLTUNE.CREATE_SQLSETでSQL Tuning Set(STS)を作成した後、DBMS_SQLTUNE.LOAD_SQLSETにSELECT_WORKLOAD_REPOSITORYテーブル関数の結果をロードし、ranking_measureやbasic_filterパラメータでフィルタリングできる。",
+      "C) SPA分析タスクはDBMS_SQLPA.CREATE_ANALYSIS_TASKで作成するが、STS名を指定する必要はなく、分析対象のSQLはAWRから自動的に選定される。",
+      "D) execution_typeに'EXPLAIN PLAN'を指定した場合でも、SQLの実行統計（経過時間、CPU時間、Buffer Gets）が実測値として取得されるため、'TEST EXECUTE'と同等の精度で比較分析が可能である。",
+      "E) AWRからSTSにSQLをロードする場合、DBMS_SQLTUNE.SELECT_CURSOR_CACHEテーブル関数を使用してLibrary Cacheの現在のSQL文を取得する。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — SPA에서 Trial 실행 시 execution_type 파라미터로 'EXPLAIN PLAN'을 지정하면, SQL을 실제로 실행하지 않고 옵티마이저의 실행 계획만 생성하여 비교합니다. 이 방식은 리소스 소비가 적어 운영 환경에서도 안전하게 사용할 수 있습니다. 반면 'TEST EXECUTE'는 SQL을 실제로 실행하여 경과 시간, CPU 시간, Buffer Gets 등의 실측 성능 통계를 수집하므로 보다 정확한 비교가 가능하지만 리소스를 소비합니다.\n\nB) 정답 — AWR에서 SQL을 STS로 로드하는 절차는 다음과 같습니다: (1) DBMS_SQLTUNE.CREATE_SQLSET으로 빈 STS를 생성하고, (2) DBMS_SQLTUNE.LOAD_SQLSET에 SELECT_WORKLOAD_REPOSITORY 테이블 함수의 결과를 입력으로 지정하여 AWR 스냅샷 범위의 SQL을 로드합니다. ranking_measure 파라미터(예: ELAPSED_TIME, CPU_TIME)로 순위 기준을, basic_filter로 스키마 필터링 등의 조건을 지정할 수 있습니다.\n\nC) 오답 — SPA 분석 태스크는 DBMS_SQLPA.CREATE_ANALYSIS_TASK 프로시저에서 sqlset_name 파라미터로 분석 대상 STS를 명시적으로 지정해야 합니다. AWR에서 SQL이 자동으로 선정되지 않으며, 사전에 STS를 준비하여 입력으로 제공해야 합니다.\n\nD) 오답 — execution_type이 'EXPLAIN PLAN'인 경우에는 실행 계획만 생성되고 SQL을 실행하지 않으므로, 경과 시간, CPU 시간, Buffer Gets 등의 실행 통계는 실측값이 아닌 옵티마이저의 추정값(Optimizer Cost)에 기반합니다. 실측 성능 통계를 얻으려면 'TEST EXECUTE'를 사용해야 하며, 두 방식의 정확도에는 차이가 있습니다.\n\nE) 오답 — AWR에서 SQL을 로드할 때는 SELECT_WORKLOAD_REPOSITORY 테이블 함수를 사용합니다. SELECT_CURSOR_CACHE는 현재 Library Cache(커서 캐시)에 있는 SQL을 선택하는 함수로, AWR 기반 로드와는 소스가 다릅니다.\n\n핵심 개념: SPA의 Trial은 execution_type으로 'TEST EXECUTE'(실제 실행으로 실측 통계 수집)와 'EXPLAIN PLAN'(실행 계획만 생성)을 선택할 수 있습니다. STS에 SQL을 로드할 때는 소스에 따라 SELECT_WORKLOAD_REPOSITORY(AWR), SELECT_CURSOR_CACHE(커서 캐시), SELECT_SQL_TRACE(SQL 트레이스) 등의 테이블 함수를 구분하여 사용합니다."
+  }
+]

@@ -1,0 +1,81 @@
+[
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_021",
+    "title": "Oracle Databaseの運用で必要な各タスクに対して使用するツールの組み合わせとして正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 新規データベースの作成にはDBCAを使用し、そのデータベースへの接続に必要なリスナーの作成にはNETCAを使用する。",
+      "B) データベースのバックアップにはRMANを使用し、バックアップの自動スケジューリングにはSQL*Plusを使用する。",
+      "C) データベースの起動にはSQL*PlusまたはRMANを使用でき、テーブル構造の視覚的な確認にはSQL Developerを使用できる。",
+      "D) 複数のデータベースの一元的な監視にはEM Expressを使用し、単一データベースの管理にはEM Cloud Controlを使用する。",
+      "E) データベースの削除にはSQL*Plusを使用し、データベースの構成変更にはRMANを使用する。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — 데이터베이스 신규 생성은 DBCA(Database Configuration Assistant)의 핵심 역할이며, 접속에 필요한 리스너 생성은 NETCA(Net Configuration Assistant)의 역할입니다. DBCA는 데이터베이스 생성/관리 전용 도구이고, 대화형 모드의 '네트워크 구성' 단계에서는 기존 리스너를 선택하는 것이지 새로 생성하는 것이 아닙니다.\n\nC) 정답 — SQL*Plus와 RMAN은 모두 STARTUP/SHUTDOWN 명령으로 데이터베이스 기동이 가능합니다. SQL Developer는 GUI 기반의 Object Browser를 통해 테이블, 뷰, 인덱스 등의 구조를 트리 형태로 시각적으로 확인할 수 있습니다.\n\nB) 오답 — 데이터베이스 백업에 RMAN을 사용하는 것은 맞지만, 백업 자동 스케줄링은 SQL*Plus가 아닌 Enterprise Manager Cloud Control의 Job 시스템으로 수행합니다. SQL*Plus는 SQL 실행 및 인스턴스 관리를 위한 CLI 도구입니다.\n\nD) 오답 — 복수 데이터베이스의 일원 모니터링은 EM Express가 아닌 EM Cloud Control의 역할입니다. EM Express는 단일 데이터베이스에 내장된 경량 관리 도구이며, EM Cloud Control이 다수 타겟의 중앙 집중 관리를 담당합니다.\n\nE) 오답 — 데이터베이스 삭제는 SQL*Plus가 아닌 DBCA(-deleteDatabase 옵션)로 수행하며, 데이터베이스 구성 변경도 RMAN이 아닌 DBCA(-configureDatabase 옵션)로 수행합니다. RMAN은 백업/복구 전용 도구입니다.\n\n핵심 개념: Oracle의 각 관리 도구는 명확한 역할 경계를 가집니다. DBCA(DB 생성/삭제/구성), NETCA(리스너/네트워크 구성), SQL*Plus·RMAN(기동/종료), RMAN(백업/복구), EM Cloud Control(다수 타겟 모니터링·Job 스케줄링), SQL Developer(GUI 개발·객체 관리)로 역할이 구분됩니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_022",
+    "title": "RMANのバックアップ・メタデータの保存先として使用される制御ファイルとRecovery Catalogの違いについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 制御ファイルに保存されたバックアップ・メタデータはCONTROL_FILE_RECORD_KEEP_TIME初期化パラメータで指定された期間を超えると上書きされる可能性がある。",
+      "B) Recovery Catalogを使用すると、繰り返し使用するRMANコマンドをStored Scriptとして保存し、複数のデータベースで実行することができる。",
+      "C) 制御ファイルの損失に備えるためにRecovery Catalogの構成が必須であり、制御ファイルのみではRMANのバックアップ操作は実行できない。",
+      "D) Recovery Catalogは管理対象データベースの制御ファイル内に構成されるため、別途データベースを用意する必要がない。",
+      "E) Recovery Catalogを構成した場合、バックアップ・メタデータはRecovery Catalogのみに保存され、制御ファイルには記録されなくなる。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — 컨트롤 파일에 저장된 백업 메타데이터는 CONTROL_FILE_RECORD_KEEP_TIME 초기화 파라미터(기본값 7일)로 지정된 기간을 초과하면 새로운 레코드에 의해 덮어쓰기될 수 있습니다. 이로 인해 오래된 백업 정보가 유실될 수 있으며, 이것이 Recovery Catalog 사용을 고려하는 주된 이유 중 하나입니다.\n\nB) 정답 — Recovery Catalog를 사용하면 반복적으로 실행하는 RMAN 명령을 Stored Script로 저장하고, 카탈로그에 등록된 여러 데이터베이스에서 재사용할 수 있습니다. 이는 다수의 데이터베이스를 관리하는 환경에서 백업 정책의 일관성을 유지하는 데 유용합니다.\n\nC) 오답 — Recovery Catalog는 필수가 아닌 선택 사항입니다. 기본적으로 컨트롤 파일에 백업 메타데이터가 저장되므로, Recovery Catalog 없이도 RMAN의 백업 및 복구를 수행할 수 있습니다.\n\nD) 오답 — Recovery Catalog는 관리 대상 데이터베이스의 컨트롤 파일 내부가 아닌 별도의 Oracle Database에 구성합니다. 관리 대상 데이터베이스와 동일한 데이터베이스에 구성하면 해당 DB 장애 시 카탈로그도 함께 손실될 위험이 있으므로, 별도 데이터베이스에 구성하는 것이 권장됩니다.\n\nE) 오답 — Recovery Catalog를 구성하더라도 백업 메타데이터는 컨트롤 파일과 Recovery Catalog 양쪽 모두에 저장됩니다. Recovery Catalog 구성이 컨트롤 파일의 메타데이터 기록을 대체하는 것은 아닙니다.\n\n핵심 개념: RMAN의 백업 메타데이터는 기본적으로 컨트롤 파일에 저장되며 CONTROL_FILE_RECORD_KEEP_TIME 기간(기본 7일) 후 덮어쓰기될 수 있습니다. Recovery Catalog(별도 DB)를 구성하면 메타데이터 무제한 보존, Stored Script 지원, 다중 데이터베이스 중앙 관리가 가능하며, 이는 선택 사항입니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_023",
+    "title": "EM Expressの有効化方法および機能範囲に関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) EM Expressを有効にするにはDBMS_XDB_CONFIG.setHTTPSPortプロシージャでHTTPSポートを設定する必要がある。",
+      "B) EM Expressは複数のデータベースを一元管理でき、Jobシステムによる自動化機能も提供する。",
+      "C) EM ExpressのHTTPSポートを設定するには、Enterprise Manager Cloud Controlのインストールが前提条件として必要である。",
+      "D) EM Expressではデータベースの起動および停止操作をウェブ画面から実行することができる。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — EM Express를 활성화하려면 SQL*Plus에서 DBMS_XDB_CONFIG.setHTTPSPort 프로시저를 실행하여 HTTPS 포트(예: 5500)를 설정해야 합니다. 포트 설정 후 https://hostname:5500/em으로 접속할 수 있으며, PDB별로도 별도의 포트를 설정하여 개별 PDB의 EM Express에 접근할 수 있습니다.\n\nB) 오답 — EM Express는 단일 데이터베이스에 내장된 경량 관리 도구이므로, 복수 데이터베이스의 일원 관리나 Job 시스템에 의한 자동화 기능은 제공하지 않습니다. 이러한 기능은 Enterprise Manager Cloud Control에서 지원됩니다.\n\nC) 오답 — EM Express는 Enterprise Manager Cloud Control과 독립적으로 사용할 수 있습니다. EM Cloud Control을 설치하지 않아도 DBMS_XDB_CONFIG.setHTTPSPort로 HTTPS 포트를 설정하는 것만으로 활성화할 수 있으며, Management Agent도 불필요합니다.\n\nD) 오답 — EM Express는 기본적인 모니터링과 관리 기능을 제공하지만, 데이터베이스의 기동/종료 기능은 제공하지 않습니다. 웹에서 데이터베이스의 기동/종료를 수행하려면 Management Agent가 설치된 EM Cloud Control을 사용해야 합니다.\n\n핵심 개념: EM Express는 데이터베이스에 내장된 경량 웹 관리 도구로, DBMS_XDB_CONFIG.setHTTPSPort 프로시저로 HTTPS 포트를 설정하면 별도 설치 없이 활성화됩니다. 단일 데이터베이스의 기본 모니터링/관리에 적합하며, 다수 타겟 관리, Job 시스템, 기동/종료 기능은 EM Cloud Control에서만 지원됩니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_024",
+    "title": "以下のSQL*Plusの操作を順に実行した場合の動作として正しいものを選択してください。\n\nSQL> SPOOL /tmp/tablespace_report.txt\nSQL> SELECT tablespace_name, status FROM dba_tablespaces;\nSQL> HOST ls /tmp/tablespace_report.txt\nSQL> SPOOL OFF",
+    "options": [
+      "A) SPOOL開始直後からファイルが作成されるが、SPOOL OFF実行前にHOSTコマンドでファイルを参照した場合、クエリの結果はまだファイルに書き込まれていない可能性がある。",
+      "B) HOSTコマンドはSQL*Plusのセッションを終了してOSのコマンドラインに戻る命令であるため、以降のSPOOL OFF文は実行されない。",
+      "C) SPOOLコマンドの出力先としてディレクトリ・パスを指定することはできず、カレント・ディレクトリにのみファイルが作成される。",
+      "D) HOSTコマンドの実行結果もSPOOLの出力対象に含まれるため、lsコマンドの出力結果もファイルに記録される。"
+    ],
+    "answer": [
+      "D"
+    ],
+    "explanation": "정답: D\nD) 정답 — SPOOL 명령이 활성화된 상태에서는 SQL*Plus의 화면에 표시되는 모든 출력이 파일에 기록됩니다. HOST 명령의 실행 결과(이 경우 ls 명령의 출력)도 화면에 표시되므로 SPOOL 출력 대상에 포함되어 파일에 기록됩니다.\n\nA) 오답 — SPOOL이 활성화된 상태에서 SQL*Plus는 화면에 출력되는 내용을 실시간으로 파일에 기록합니다. 따라서 SELECT 문의 실행 결과는 실행 완료 직후 파일에 반영되며, HOST 명령 실행 시점에서 쿼리 결과는 이미 파일에 기록된 상태입니다. SPOOL OFF는 파일 기록의 종료(파일 핸들 해제)를 의미하는 것이지, 그 시점에서 일괄적으로 기록하는 것이 아닙니다.\n\nB) 오답 — HOST 명령은 SQL*Plus 세션을 종료하지 않습니다. OS 명령을 실행한 후 SQL*Plus 세션으로 자동으로 돌아오며, 이후의 SQL*Plus 명령(SPOOL OFF 등)은 정상적으로 실행됩니다.\n\nC) 오답 — SPOOL 명령에서 /tmp/tablespace_report.txt와 같이 디렉토리 경로를 포함한 파일명을 지정할 수 있습니다. 카렌트 디렉토리로 제한되지 않으며, 절대 경로 또는 상대 경로를 사용하여 원하는 위치에 파일을 생성할 수 있습니다.\n\n핵심 개념: SQL*Plus의 SPOOL 명령은 화면 출력 결과를 파일로 저장하며, SQL 실행 결과뿐 아니라 HOST 명령의 출력도 파일에 기록됩니다. HOST 명령은 OS 명령 실행 후 자동으로 SQL*Plus 세션에 복귀하며, SPOOL은 절대 경로를 포함한 파일명 지정이 가능합니다."
+  },
+  {
+    "chapter": "Oracle提供のデータベース・ツールの採用",
+    "number": "C_02_025",
+    "title": "開発環境のデータベースを迅速に作成する必要があり、本番環境と同じ初期化パラメータや表領域構成は不要である場合、DBCAで使用するテンプレートとして最も適切なものを選択してください。",
+    "options": [
+      "A) Non-Seedテンプレート(.dbt)を使用する。データ・ファイルを含まないため不要な設定を省略でき、短時間で作成できる。",
+      "B) Seedテンプレート(.dbc)を使用する。データ・ファイルを含むテンプレートからの複製方式であるため、短時間でデータベースを作成できる。",
+      "C) 本番環境のデータベースから-createTemplateFromDBオプションで作成したカスタム・テンプレートを使用する。",
+      "D) テンプレートを使用せず、DBCAの拡張構成(Advanced)モードですべてのパラメータを個別に指定して作成する。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — Seed 템플릿(.dbc)은 데이터 파일을 포함하고 있어 복사 방식으로 데이터베이스를 빠르게 생성할 수 있습니다. 개발 환경에서 신속하게 데이터베이스를 생성해야 하고 본번 환경과 동일한 구성이 불필요한 경우, Seed 템플릿을 사용하는 것이 가장 적합합니다.\n\nA) 오답 — Non-Seed 템플릿(.dbt)은 데이터 파일을 포함하지 않으며, 구성 정보만 포함합니다. 데이터베이스를 처음부터 완전히 새로 생성하므로 Seed 템플릿보다 시간이 더 오래 걸립니다. '불요한 설정을 생략하여 단시간에 생성 가능'이라는 설명은 부정확합니다.\n\nC) 오답 — 본번 환경에서 -createTemplateFromDB로 작성한 커스텀 템플릿은 본번 환경의 구조를 그대로 반영합니다. 문제 조건에서 '본번 환경과 동일한 초기화 파라미터나 테이블스페이스 구성은 불필요'라고 명시하고 있으므로, 본번 환경의 커스텀 템플릿을 사용하는 것은 적절하지 않습니다.\n\nD) 오답 — 확장 구성(Advanced) 모드에서 모든 파라미터를 개별 지정하는 방식은 가장 시간이 많이 걸리는 방법입니다. 개발 환경의 신속한 데이터베이스 생성이라는 요구사항에 부합하지 않습니다.\n\n핵심 개념: DBCA의 Seed 템플릿(.dbc)은 데이터 파일을 포함하여 복사 방식으로 빠르게 데이터베이스를 생성하며, Non-Seed 템플릿(.dbt)은 구성 정보만 포함하여 처음부터 새로 생성하므로 시간이 더 소요됩니다. 운영 요구사항(신속성 vs 커스터마이즈)에 따라 적절한 템플릿을 선택해야 합니다."
+  }
+]

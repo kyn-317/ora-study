@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_036",
+    "title": "BIGFILE表領域とSMALLFILE表領域におけるデータ・ファイルのサイズ変更について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SMALLFILE表領域ではALTER TABLESPACE文のRESIZE句を使用してデータ・ファイルのサイズを変更できる。",
+      "B) BIGFILE表領域ではALTER TABLESPACE文のRESIZE句を使用してデータ・ファイルのサイズを変更できる。",
+      "C) BIGFILE表領域ではALTER DATABASE DATAFILE文のRESIZE句は使用できない。",
+      "D) BIGFILE表領域ではALTER DATABASE DATAFILE文とALTER TABLESPACE文の両方でRESIZE操作が可能である。",
+      "E) SMALLFILE表領域とBIGFILE表領域のいずれでも、ALTER TABLESPACE文によるRESIZE操作が可能である。"
+    ],
+    "answer": ["B", "D"],
+    "explanation": "정답: B, D\nB) 정답 — BIGFILE 테이블스페이스에서는 ALTER TABLESPACE ts1 RESIZE 50G와 같이 테이블스페이스 레벨에서 직접 RESIZE가 가능합니다. 이는 BIGFILE이 단일 데이터 파일로 구성되므로 테이블스페이스 레벨의 크기 변경이 곧 데이터 파일의 크기 변경을 의미하기 때문입니다.\n\nD) 정답 — BIGFILE 테이블스페이스에서는 ALTER DATABASE DATAFILE ... RESIZE(데이터 파일 레벨)와 ALTER TABLESPACE ... RESIZE(테이블스페이스 레벨) 두 가지 방법 모두 사용 가능합니다.\n\nA) 오답 — SMALLFILE 테이블스페이스에서는 ALTER TABLESPACE ... RESIZE를 사용할 수 없습니다. SMALLFILE은 여러 데이터 파일을 가질 수 있으므로, 크기 변경은 ALTER DATABASE DATAFILE ... RESIZE로 개별 데이터 파일 단위로 수행해야 합니다.\n\nC) 오답 — BIGFILE 테이블스페이스에서도 ALTER DATABASE DATAFILE ... RESIZE는 사용 가능합니다. ALTER TABLESPACE RESIZE와 함께 두 가지 방법을 모두 지원합니다.\n\nE) 오답 — ALTER TABLESPACE ... RESIZE는 BIGFILE 테이블스페이스에서만 사용 가능하며, SMALLFILE 테이블스페이스에서는 사용할 수 없습니다.\n\n핵심 개념: BIGFILE 테이블스페이스는 단일 데이터 파일로 구성되므로 ALTER TABLESPACE 레벨과 ALTER DATABASE DATAFILE 레벨 두 가지 방법으로 RESIZE가 가능합니다. 반면 SMALLFILE은 여러 데이터 파일을 가질 수 있어 ALTER DATABASE DATAFILE 레벨에서만 개별 파일의 크기를 변경할 수 있습니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_037",
+    "title": "以下のシナリオについて正しい動作を述べているものを選択してください。\n\n表領域SALES_DATAには、別の表領域ORDER_DATAのテーブルから外部キー制約で参照されているテーブルが含まれています。DBAがSALES_DATAを完全に削除しようとしています。",
+    "options": [
+      "A) DROP TABLESPACE sales_data INCLUDING CONTENTS AND DATAFILES文を実行すれば、外部キー制約に関係なく正常に削除される。",
+      "B) DROP TABLESPACE sales_data INCLUDING CONTENTS AND DATAFILES CASCADE CONSTRAINTS文を実行すると、SALES_DATAの削除とともにORDER_DATAのテーブルに定義された外部キー制約も削除される。",
+      "C) CASCADE CONSTRAINTS句はSALES_DATA内のテーブルに定義された制約のみを削除し、他の表領域の制約には影響しない。",
+      "D) 外部キー制約が存在する場合、CASCADE CONSTRAINTS句を使用しても表領域の削除は不可能である。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — DROP TABLESPACE sales_data INCLUDING CONTENTS AND DATAFILES CASCADE CONSTRAINTS를 실행하면, SALES_DATA 테이블스페이스가 삭제됨과 동시에 다른 테이블스페이스(ORDER_DATA)에 있는 테이블에 정의된 외부키 제약 중 SALES_DATA의 테이블을 참조하는 제약도 함께 삭제됩니다. CASCADE CONSTRAINTS는 삭제 대상 테이블스페이스 외부에 존재하는 참조 무결성 제약을 제거합니다.\n\nA) 오답 — INCLUDING CONTENTS AND DATAFILES만으로는 다른 테이블스페이스에서 참조하는 외부키 제약이 있을 경우 ORA-02449 오류가 발생하여 삭제가 실패합니다. CASCADE CONSTRAINTS 구가 반드시 필요합니다.\n\nC) 오답 — CASCADE CONSTRAINTS는 삭제 대상 테이블스페이스 내부의 제약이 아니라, 다른 테이블스페이스에서 삭제 대상을 참조하는 외부키 제약을 제거합니다. 방향성이 중요합니다.\n\nD) 오답 — CASCADE CONSTRAINTS를 사용하면 외부키 참조가 있어도 테이블스페이스를 정상적으로 삭제할 수 있습니다. 이 구가 없을 때만 삭제가 불가능합니다.\n\n핵심 개념: DROP TABLESPACE의 CASCADE CONSTRAINTS 구는 삭제 대상 테이블스페이스를 참조하는 다른 테이블스페이스의 외부키 제약을 함께 제거합니다. INCLUDING CONTENTS만으로는 외부키 참조가 있을 때 삭제가 실패하므로, CASCADE CONSTRAINTS를 함께 지정해야 합니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_038",
+    "title": "以下のSQL文を順番に実行した場合の動作について正しく述べているものを選択してください。\n\nSQL> DROP TABLESPACE archive_data INCLUDING CONTENTS AND DATAFILES CASCADE CONSTRAINTS;",
+    "options": [
+      "A) INCLUDING CONTENTS句により表領域内のすべてのセグメントが削除されるが、空でないデータ・ファイルはOS上に残される。",
+      "B) AND DATAFILES句を指定すると、Oracle Managed Files(OMF)環境かどうかに関係なく、データ・ファイルがOSレベルで削除される。",
+      "C) AND DATAFILES句を指定しない場合、OMF環境ではデータ・ファイルがOSレベルで自動的に削除されるが、非OMF環境ではOSファイルは残る。",
+      "D) CASCADE CONSTRAINTS句を指定しなくても、外部キー制約の有無に関係なく表領域は常に削除可能である。"
+    ],
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — AND DATAFILES 구를 지정하지 않은 경우, OMF(Oracle Managed Files) 환경에서는 Oracle이 관리하는 데이터 파일이 OS 레벨에서 자동으로 삭제됩니다. 하지만 비OMF 환경에서는 데이터 딕셔너리에서만 파일 정보가 제거되고 OS 파일은 남아 DBA가 수동으로 삭제해야 합니다.\n\nA) 오답 — AND DATAFILES 구가 지정되어 있으므로 데이터 파일은 OS 레벨에서 삭제됩니다. AND DATAFILES를 지정하면 OMF 여부와 관계없이 OS 파일이 삭제됩니다.\n\nB) 오답 — AND DATAFILES를 지정하면 OMF 여부와 관계없이 데이터 파일이 OS에서 삭제되는 것은 맞지만, 이 선택지의 표현은 AND DATAFILES 미지정 시의 동작과 혼동할 수 있습니다. 실제로 AND DATAFILES를 지정하면 항상 OS 파일이 삭제됩니다.\n\nD) 오답 — 다른 테이블스페이스의 테이블이 외부키로 삭제 대상 테이블스페이스의 테이블을 참조하는 경우, CASCADE CONSTRAINTS를 지정하지 않으면 ORA-02449 오류가 발생합니다.\n\n핵심 개념: DROP TABLESPACE에서 AND DATAFILES를 지정하면 항상 OS 파일이 삭제됩니다. 미지정 시에는 OMF 환경에서만 자동 삭제되고, 비OMF 환경에서는 OS 파일이 남습니다. OMF의 자동 파일 관리 동작은 삭제 시에도 적용됩니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_039",
+    "title": "表領域のオフライン・モードに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) NORMAL モードでオフラインにすると、表領域に属するすべてのデータ・ファイルに対してチェックポイントが実行され、オンラインに戻す際にメディア・リカバリは不要である。",
+      "B) TEMPORARY モードでオフラインにすると、チェックポイントが一切実行されず、すべてのデータ・ファイルに対してメディア・リカバリが必要になる。",
+      "C) IMMEDIATE モードでオフラインにすると、チェックポイントが実行されないため、オンラインに戻す前にメディア・リカバリが必要である。",
+      "D) すべてのオフライン・モードにおいて、SYSTEM表領域をオフラインにすることが可能である。",
+      "E) TEMPORARY モードでオフラインにすると、すべてのデータ・ファイルに対してチェックポイントが実行されるが、メディア・リカバリは不要である。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — NORMAL 모드(기본값)로 오프라인하면 테이블스페이스에 속한 모든 데이터 파일에 대해 체크포인트가 수행됩니다. 이로 인해 버퍼 캐시의 더티 버퍼가 모두 디스크에 기록되므로, 온라인으로 복귀할 때 미디어 리커버리가 필요하지 않습니다.\n\nC) 정답 — IMMEDIATE 모드로 오프라인하면 체크포인트가 전혀 수행되지 않고 즉시 오프라인됩니다. 따라서 온라인으로 복귀하기 전에 미디어 리커버리(ALTER TABLESPACE ... RECOVER 또는 RMAN RECOVER)가 필요합니다. 데이터 파일에 장애가 발생하여 체크포인트를 수행할 수 없는 상황에서 사용합니다.\n\nB) 오답 — TEMPORARY 모드는 체크포인트가 전혀 실행되지 않는 것이 아니라, 현재 온라인 상태인 데이터 파일에 대해서만 체크포인트를 수행합니다. 이미 오프라인인 데이터 파일은 건너뜁니다.\n\nD) 오답 — SYSTEM 테이블스페이스는 어떤 모드로도 오프라인으로 전환할 수 없습니다. SYSTEM은 데이터 딕셔너리를 포함하고 있어 항상 온라인 상태를 유지해야 합니다.\n\nE) 오답 — TEMPORARY 모드는 모든 데이터 파일에 대해 체크포인트를 수행하는 것이 아니라, 현재 온라인 상태인 데이터 파일에 대해서만 체크포인트를 수행합니다. 이미 오프라인인 파일은 건너뛰며, 해당 파일은 온라인 복귀 시 미디어 리커버리가 필요할 수 있습니다.\n\n핵심 개념: 테이블스페이스 오프라인 모드는 3가지입니다. NORMAL(기본, 전체 체크포인트→복구 불필요), TEMPORARY(온라인 파일만 체크포인트), IMMEDIATE(체크포인트 없음→미디어 리커버리 필요). SYSTEM 테이블스페이스는 오프라인 전환이 불가능합니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_040",
+    "title": "あるデータ・ファイルがすでにオフライン状態であるSMALLFILE表領域REPORT_DATAについて、ALTER TABLESPACE report_data OFFLINE文を実行しようとしています。この状況での正しい動作を述べているものを選択してください。",
+    "options": [
+      "A) OFFLINE NORMAL モードを使用すると、すでにオフラインのデータ・ファイルを含むすべてのファイルに対してチェックポイントが実行されるため、正常に完了する。",
+      "B) すでにオフラインのデータ・ファイルが存在する場合、OFFLINE NORMALは失敗するため、OFFLINE TEMPORARYまたはOFFLINE IMMEDIATEを使用する必要がある。",
+      "C) OFFLINE IMMEDIATE モードを使用すれば、チェックポイントなしで即座にオフラインになるが、オンラインに戻す際にリカバリは不要である。",
+      "D) いずれのオフライン・モードでも、すでにオフラインのデータ・ファイルがある場合は表領域のオフライン操作は実行できない。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 테이블스페이스 내에 이미 오프라인 상태인 데이터 파일이 존재하는 경우, OFFLINE NORMAL 모드는 모든 데이터 파일에 대해 체크포인트를 수행해야 하지만 오프라인 파일에는 체크포인트를 수행할 수 없으므로 실패합니다. 이 경우 OFFLINE TEMPORARY(온라인 파일에 대해서만 체크포인트 수행) 또는 OFFLINE IMMEDIATE(체크포인트 없이 즉시 오프라인)를 사용해야 합니다.\n\nA) 오답 — 이미 오프라인인 데이터 파일에 대해서는 체크포인트를 수행할 수 없으므로, OFFLINE NORMAL은 실패합니다. NORMAL 모드는 모든 데이터 파일이 온라인 상태일 때만 정상 실행됩니다.\n\nC) 오답 — OFFLINE IMMEDIATE 모드를 사용하면 체크포인트 없이 즉시 오프라인으로 전환됩니다. 그러나 온라인으로 복귀할 때 미디어 리커버리가 필요합니다. 리커버리가 불필요하다는 설명은 잘못되었습니다.\n\nD) 오답 — OFFLINE TEMPORARY와 OFFLINE IMMEDIATE 모드는 이미 오프라인인 데이터 파일이 있어도 실행 가능합니다. 제한되는 것은 OFFLINE NORMAL뿐입니다.\n\n핵심 개념: OFFLINE NORMAL은 모든 데이터 파일이 온라인 상태여야 성공합니다. 일부 데이터 파일이 이미 오프라인이면 TEMPORARY 또는 IMMEDIATE 모드를 사용해야 하며, 이후 온라인 복귀 시 오프라인이었던 파일에 대한 미디어 리커버리가 필요할 수 있습니다."
+  }
+]

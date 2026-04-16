@@ -1,0 +1,49 @@
+[
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_036",
+    "title": "CDB(コンテナ・データベース)内の共有資源と個別資源について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) オンラインREDOログ・ファイルはCDB全体で共有され、各PDBが個別のREDOログを持つことはない。",
+      "B) UNDO表領域はLocal UNDOモードの場合であってもCDB内で1つのみ共有される。",
+      "C) 各PDBは独自のSYSTEM表領域とSYSAUX表領域を持ち、PDB固有のデータ・ディクショナリを保持する。",
+      "D) SGAはPDBごとに独立して割り当てられ、PDB間でメモリーを共有することはない。",
+      "E) バックグラウンド・プロセスはPDBの数に合わせて個別に起動される。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — 온라인 Redo Log 파일은 CDB 전체에서 공유되는 자원입니다. LGWR 프로세스가 CDB 단위로 하나의 Redo Log 세트에 기록하며, 각 PDB가 개별적으로 Redo Log를 보유하지 않습니다.\n\nC) 정답 — 각 PDB는 자체 SYSTEM 테이블스페이스와 SYSAUX 테이블스페이스를 보유합니다. 이 테이블스페이스에 PDB 고유의 데이터 딕셔너리(메타데이터)가 저장되어, PDB 간 완전한 논리적 격리를 보장합니다.\n\nB) 오답 — Local UNDO Mode에서는 각 PDB가 자체 UNDO 테이블스페이스를 보유합니다. CDB 전체에서 1개만 공유되는 것은 Shared UNDO Mode(기본)의 경우입니다.\n\nD) 오답 — SGA는 CDB 전체에서 하나만 할당되며, 모든 PDB가 공유합니다. PDB별로 별도의 SGA가 할당되는 것이 아니라, 하나의 SGA를 효율적으로 공유하는 것이 멀티테넌트 아키텍처의 핵심 이점입니다.\n\nE) 오답 — 백그라운드 프로세스(LGWR, DBWn, PMON 등)는 CDB 전체에서 공유됩니다. PDB 수에 따라 개별적으로 기동되지 않으며, 모든 PDB의 요청을 공유 프로세스가 처리합니다.\n\n핵심 개념: CDB에서 SGA, 백그라운드 프로세스, 컨트롤 파일, 온라인 Redo Log는 전체 공유 자원이며, 각 PDB는 SYSTEM/SYSAUX 테이블스페이스와 데이터 딕셔너리를 개별 보유합니다. UNDO 테이블스페이스는 모드(Shared/Local)에 따라 공유 또는 개별 보유됩니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_037",
+    "title": "CDB環境においてPDBをREAD ONLYモードからREAD WRITEモードに変更するための正しいコマンドを選択してください。",
+    "options": [
+      "A) ALTER PLUGGABLE DATABASE pdb_name OPEN READ WRITE FORCE;",
+      "B) ALTER DATABASE pdb_name OPEN READ WRITE;",
+      "C) ALTER SESSION SET CONTAINER = pdb_name READ WRITE;",
+      "D) ALTER SYSTEM SET PDB_OPEN_MODE = READ WRITE SCOPE=MEMORY;"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — 이미 READ ONLY로 오픈된 PDB를 READ WRITE로 전환하려면 ALTER PLUGGABLE DATABASE ... OPEN READ WRITE FORCE 명령을 사용합니다. FORCE 옵션을 사용하면 PDB를 먼저 CLOSE하지 않고 직접 모드를 전환할 수 있으며, 내부적으로 PDB를 닫았다가 새 모드로 다시 오픈하는 작업이 자동 수행됩니다.\n\nB) 오답 — ALTER DATABASE는 CDB 전체를 대상으로 하는 명령이며, PDB 개별 오픈 모드를 변경할 때는 ALTER PLUGGABLE DATABASE를 사용해야 합니다.\n\nC) 오답 — ALTER SESSION SET CONTAINER는 현재 세션의 작업 컨테이너를 전환하는 명령이며, PDB의 오픈 모드를 변경하는 기능이 아닙니다.\n\nD) 오답 — PDB_OPEN_MODE라는 초기화 파라미터는 존재하지 않습니다. PDB의 오픈 모드는 ALTER PLUGGABLE DATABASE 명령으로 제어합니다.\n\n핵심 개념: PDB의 오픈 모드 변경은 ALTER PLUGGABLE DATABASE ... OPEN [READ WRITE | READ ONLY] 명령으로 수행하며, 이미 오픈된 PDB의 모드를 변경할 때는 FORCE 옵션을 사용하여 CLOSE 없이 직접 전환할 수 있습니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_038",
+    "title": "CDB環境において、PDB1が現在READ WRITEモードで稼働しています。DBAがCDB$ROOTに接続し、以下のコマンドを実行しました。\n\nSQL> ALTER PLUGGABLE DATABASE pdb1 SAVE STATE;\n\nその後、CDBをSHUTDOWN IMMEDIATEで停止し、再度STARTUPで起動しました。この操作後のPDB1の状態について正しく述べているものを選択してください。",
+    "options": [
+      "A) SAVE STATEコマンドの効果により、CDB再起動後にPDB1は自動的にREAD WRITEモードでオープンされる。",
+      "B) SAVE STATEを実行しても、CDB再起動後にPDB1はデフォルトのMOUNTED状態になり、手動でオープンする必要がある。",
+      "C) SAVE STATEコマンドはCDBの停止モードがSHUTDOWN NORMALの場合にのみ有効であり、SHUTDOWN IMMEDIATEでは状態が保存されない。",
+      "D) SAVE STATEコマンドはPDB1のデータをディスクに永続化する操作であり、PDBのオープン・モードの保存とは関係がない。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — ALTER PLUGGABLE DATABASE ... SAVE STATE 명령은 PDB의 현재 오픈 모드를 기록하여, CDB 재기동 시 해당 PDB가 자동으로 저장된 상태로 오픈되도록 합니다. PDB1이 READ WRITE 상태에서 SAVE STATE를 실행했으므로, CDB 재기동 후 PDB1은 자동으로 READ WRITE 모드로 오픈됩니다.\n\nB) 오답 — SAVE STATE를 실행하지 않은 경우에는 CDB 재기동 시 사용자 PDB가 기본적으로 MOUNTED 상태가 됩니다. 그러나 SAVE STATE를 실행했으므로 PDB1은 자동으로 이전 상태(READ WRITE)로 오픈됩니다.\n\nC) 오답 — SAVE STATE의 효과는 CDB의 종료 모드(NORMAL, IMMEDIATE, TRANSACTIONAL, ABORT)에 관계없이 유지됩니다. SAVE STATE로 저장된 정보는 데이터 딕셔너리에 영구적으로 기록되므로 종료 방식에 영향을 받지 않습니다.\n\nD) 오답 — SAVE STATE 명령은 PDB의 오픈 모드(READ WRITE, READ ONLY 등)를 저장하여 CDB 재기동 시 자동으로 해당 모드로 복원하는 기능입니다. 데이터의 디스크 영속화(체크포인트)와는 무관한 명령입니다.\n\n핵심 개념: ALTER PLUGGABLE DATABASE ... SAVE STATE는 PDB의 현재 오픈 모드를 데이터 딕셔너리에 기록하여, CDB 재기동 시 수동 개입 없이 PDB를 자동으로 이전 상태로 오픈합니다. 이 설정은 CDB 종료 모드에 관계없이 유효합니다."
+  }
+]

@@ -1,0 +1,19 @@
+[
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_030",
+    "title": "次のファイングレイン監査(FGA)ポリシーがHR.EMPLOYEES表に対して作成されています。\n\nBEGIN\n  DBMS_FGA.ADD_POLICY(\n    object_schema   => 'HR',\n    object_name     => 'EMPLOYEES',\n    policy_name     => 'FGA_SALARY_AUDIT',\n    audit_condition => 'DEPARTMENT_ID = 10',\n    audit_column    => 'SALARY, COMMISSION_PCT',\n    enable          => TRUE,\n    statement_types => 'SELECT',\n    audit_column_opts => DBMS_FGA.ALL_COLUMNS\n  );\nEND;\n/\n\nこのポリシーが有効な状態で、次のSQL文のうち監査レコードが生成されるものを選択してください。なお、HR.EMPLOYEES表にはDEPARTMENT_ID = 10のデータが存在するものとします(2つ選択してください)。\n\nSQL文A: SELECT employee_id, salary, commission_pct FROM hr.employees WHERE department_id = 10;\nSQL文B: SELECT employee_id, salary FROM hr.employees WHERE department_id = 10;\nSQL文C: SELECT employee_id, salary, commission_pct FROM hr.employees WHERE department_id = 20;\nSQL文D: SELECT employee_id, commission_pct FROM hr.employees WHERE department_id = 10;\nSQL文E: SELECT employee_id, salary, commission_pct FROM hr.employees;",
+    "options": [
+      "A) SQL文Aのみ監査レコードが生成される。SQL文Aはaudit_conditionとaudit_column条件の両方を満たしている。",
+      "B) SQL文Bも監査レコードが生成される。audit_column_optsがALL_COLUMNSであってもSALARY列だけのアクセスで監査が発動する。",
+      "C) SQL文Cは監査レコードが生成されない。audit_conditionで指定されたDEPARTMENT_ID = 10の条件を満たさないためである。",
+      "D) SQL文Dも監査レコードが生成される。COMMISSION_PCT列へのアクセスがあるため、audit_column条件を満たしている。",
+      "E) SQL文Eは監査レコードが生成される。audit_conditionで指定されたDEPARTMENT_ID = 10の行がテーブルに存在すれば、条件に該当する行が返される場合に監査が発動する。"
+    ],
+    "answer": [
+      "A",
+      "E"
+    ],
+    "explanation": "정답: A, E\nA) 정답 — SQL문A는 DEPARTMENT_ID = 10 조건으로 audit_condition을 충족하며, SALARY와 COMMISSION_PCT 두 열 모두에 접근하므로 ALL_COLUMNS 조건도 충족합니다. 따라서 감사 레코드가 생성됩니다.\n\nE) 정답 — SQL문E는 WHERE 절에 DEPARTMENT_ID = 10을 명시하지 않았지만, 테이블 전체를 조회하므로 DEPARTMENT_ID = 10인 행도 반환 대상에 포함됩니다. audit_condition은 반환되는 행이 조건을 충족하는지를 평가하므로, 해당 행이 존재하면 감사가 발동됩니다. 또한 SALARY와 COMMISSION_PCT 두 열 모두에 접근하므로 ALL_COLUMNS 조건도 충족합니다.\n\nB) 오답 — SQL문B는 audit_condition(DEPARTMENT_ID = 10)은 충족하지만, audit_column_opts가 ALL_COLUMNS로 설정되어 있어 SALARY와 COMMISSION_PCT 두 열 모두에 접근해야 감사가 발동됩니다. SALARY 열만 접근하고 COMMISSION_PCT 열에는 접근하지 않으므로 감사 레코드가 생성되지 않습니다.\n\nC) 오답 — SQL문C는 DEPARTMENT_ID = 20인 행만 조회하므로 audit_condition(DEPARTMENT_ID = 10)을 충족하는 행이 반환되지 않아 감사가 발동되지 않습니다. 선택지의 설명 자체는 기술적으로 정확하지만, 감사 레코드가 생성되지 않으므로 이 문제의 정답에 해당하지 않습니다.\n\nD) 오답 — SQL문D는 audit_condition(DEPARTMENT_ID = 10)은 충족하지만, COMMISSION_PCT 열만 접근하고 SALARY 열에는 접근하지 않습니다. audit_column_opts가 ALL_COLUMNS이므로 지정된 모든 감사 대상 열(SALARY, COMMISSION_PCT)에 접근해야 하며, 하나만 접근하면 감사가 발동되지 않습니다.\n\n핵심 개념: FGA의 ALL_COLUMNS 옵션은 audit_column에 지정된 모든 열에 접근해야만 감사가 발동되는 엄격한 조건입니다. 또한 audit_condition은 SQL 문의 WHERE 절이 아닌, 실제 반환되는 행이 조건을 충족하는지를 평가합니다. 따라서 WHERE 절 없이 전체 테이블을 조회해도, 조건에 해당하는 행이 존재하면 감사가 발동됩니다."
+  }
+]

@@ -2,19 +2,6 @@
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_006",
-    "title": "Oracle Databaseのデータベース・バッファ・キャッシュにおけるバッファ・プールについて正しく述べているものを選択してください。",
-    "options": [
-      "A) DEFAULTプールの他に、KEEPプールとRECYCLEプールを構成することで、アクセス特性に応じてデータ・ブロックのキャッシュ戦略を分離できる。",
-      "B) KEEPプールは大規模な表のフルスキャンに最適化されたバッファ・プールであり、ブロックを短時間で再利用可能にする。",
-      "C) RECYCLEプールのサイズはDB_CACHE_SIZEパラメータで制御され、DEFAULTプールと共有される。",
-      "D) バッファ・プールの指定はデータベース作成時のみ可能であり、後からオブジェクト単位で変更することはできない。"
-    ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — Database Buffer Cache는 DEFAULT, KEEP, RECYCLE 3가지 버퍼 풀로 분리하여 운영할 수 있습니다. KEEP Pool은 자주 접근하는 소규모 객체를 캐시에 상주시키는 용도이고, RECYCLE Pool은 재사용 가능성이 낮은 대규모 객체용으로 빠르게 교체됩니다. 이를 통해 접근 특성에 따라 캐싱 전략을 분리할 수 있습니다.\n\nB) 오답 — KEEP Pool은 자주 접근하는 소규모 테이블/인덱스를 캐시에 상주시키기 위한 풀입니다. 대규모 테이블의 풀 스캔에 최적화된 것이 아니라, 오히려 소규모 객체의 캐시 히트율을 높이기 위한 것입니다.\n\nC) 오답 — RECYCLE Pool의 크기는 DB_RECYCLE_CACHE_SIZE 파라미터로 개별 제어됩니다. DB_CACHE_SIZE는 DEFAULT Pool의 크기를 제어하는 파라미터입니다.\n\nD) 오답 — ALTER TABLE 또는 ALTER INDEX의 STORAGE절에서 BUFFER_POOL 속성을 지정하여 개별 객체의 버퍼 풀을 변경할 수 있습니다(예: ALTER TABLE employees STORAGE (BUFFER_POOL KEEP)).\n\n핵심 개념: Database Buffer Cache는 DEFAULT(DB_CACHE_SIZE), KEEP(DB_KEEP_CACHE_SIZE), RECYCLE(DB_RECYCLE_CACHE_SIZE) 3가지 풀로 분리 운영 가능하며, 각 파라미터로 크기를 개별 제어합니다. 오브젝트의 STORAGE절 BUFFER_POOL 속성으로 캐싱 대상 풀을 지정합니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_007",
     "title": "Oracle DatabaseのLGWR(ログ・ライター)プロセスがREDOログ・バッファの内容をディスクに書き込む条件として正しいものを選択してください(2つ選択してください)。",
     "options": [
       "A) ユーザーがCOMMITを発行したとき",
@@ -23,39 +10,15 @@
       "D) データ・ディクショナリ・キャッシュの内容が変更されたとき",
       "E) REDOログ・バッファの使用量がDB_CACHE_SIZE の1/3に達したとき"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — 사용자가 COMMIT을 발행하면, LGWR은 해당 트랜잭션의 Redo Entry를 즉시 온라인 Redo Log 파일에 기록합니다(Log Force at Commit). 이를 통해 트랜잭션의 영속성(Durability)을 보장합니다.\n\nC) 정답 — Write-Ahead Logging 원칙에 따라, DBWn이 Dirty Buffer를 데이터 파일에 기록하기 전에 해당 변경에 대한 Redo가 먼저 디스크에 기록되어야 합니다. 따라서 LGWR이 관련 Redo를 먼저 기록합니다.\n\nB) 오답 — 서버 프로세스가 데이터 블록을 버퍼 캐시에 로드하는 것은 읽기(Read) 작업이며, 이 동작이 LGWR의 기록을 트리거하지 않습니다.\n\nD) 오답 — 데이터 딕셔너리 캐시의 내용 변경은 LGWR의 기록 조건이 아닙니다. LGWR은 Redo Log Buffer의 기록 조건(COMMIT, 1/3 사용, 1MB 축적, 3초 타임아웃, DBWn 기록 전)에 의해 동작합니다.\n\nE) 오답 — Redo Log Buffer 사용량이 약 1/3에 달하면 LGWR이 기록하지만, 기준은 DB_CACHE_SIZE가 아니라 Redo Log Buffer 자체의 1/3입니다. DB_CACHE_SIZE는 Database Buffer Cache의 크기를 제어하는 파라미터입니다.\n\n핵심 개념: LGWR은 COMMIT 발행, Redo Log Buffer 1/3 사용, 1MB 이상 축적, 3초 타임아웃, DBWn 기록 전(Write-Ahead Logging)의 5가지 조건에서 Redo Log Buffer를 디스크에 기록합니다."
   },
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_008",
-    "title": "PDB(Pluggable Database)のオープン・モードについて正しく述べているものを選択してください。",
-    "options": [
-      "A) 新規に作成されたPDBはREAD WRITE状態で自動的にオープンされるため、手動でオープンする必要はない。",
-      "B) PDBをMOUNTED状態にすると、PDBのメタデータのみがロードされ、ユーザーはそのPDB内のデータにアクセスできない。",
-      "C) PDBのオープン・モードをREAD ONLYに変更するには、CDB全体を停止する必要がある。",
-      "D) PDBがREAD WRITEモードで稼働中の場合、他のPDBを独立してMOUNTED状態に変更することはできない。"
-    ],
-    "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — PDB가 MOUNTED 상태일 때는 메타데이터만 로드되며, 사용자는 해당 PDB 내의 데이터에 접근할 수 없습니다. PDB를 사용하려면 READ ONLY 또는 READ WRITE 모드로 OPEN해야 합니다.\n\nA) 오답 — 새로 생성된 PDB는 MOUNTED 상태로 생성됩니다. 사용하려면 ALTER PLUGGABLE DATABASE ... OPEN 명령으로 수동으로 오픈해야 합니다.\n\nC) 오답 — PDB의 오픈 모드 변경은 CDB 전체를 중지할 필요 없이, ALTER PLUGGABLE DATABASE ... CLOSE 후 ALTER PLUGGABLE DATABASE ... OPEN READ ONLY 명령으로 개별 PDB 단위로 수행할 수 있습니다.\n\nD) 오답 — CDB 내의 각 PDB는 독립적으로 상태를 관리할 수 있습니다. 하나의 PDB가 READ WRITE로 운영 중이더라도, 다른 PDB를 독립적으로 CLOSE하거나 MOUNTED 상태로 변경할 수 있습니다.\n\n핵심 개념: PDB는 MOUNTED, READ ONLY, READ WRITE, MIGRATE의 4가지 오픈 모드를 가지며, 각 PDB는 CDB 내에서 독립적으로 상태를 전환할 수 있습니다. 새 PDB는 MOUNTED 상태로 생성되므로 수동 OPEN이 필요합니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_009",
-    "title": "CDB(コンテナ・データベース)内の共有資源と個別資源について正しく述べているものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) オンラインREDOログ・ファイルはCDB全体で共有され、各PDBが個別のREDOログを持つことはない。",
-      "B) UNDO表領域はLocal UNDOモードの場合であってもCDB内で1つのみ共有される。",
-      "C) 各PDBは独自のSYSTEM表領域とSYSAUX表領域を持ち、PDB固有のデータ・ディクショナリを保持する。",
-      "D) SGAはPDBごとに独立して割り当てられ、PDB間でメモリーを共有することはない。",
-      "E) バックグラウンド・プロセスはPDBの数に合わせて個別に起動される。"
-    ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — 온라인 Redo Log 파일은 CDB 전체에서 공유되는 자원입니다. LGWR 프로세스가 CDB 단위로 하나의 Redo Log 세트에 기록하며, 각 PDB가 개별적으로 Redo Log를 보유하지 않습니다.\n\nC) 정답 — 각 PDB는 자체 SYSTEM 테이블스페이스와 SYSAUX 테이블스페이스를 보유합니다. 이 테이블스페이스에 PDB 고유의 데이터 딕셔너리(메타데이터)가 저장되어, PDB 간 완전한 논리적 격리를 보장합니다.\n\nB) 오답 — Local UNDO Mode에서는 각 PDB가 자체 UNDO 테이블스페이스를 보유합니다. CDB 전체에서 1개만 공유되는 것은 Shared UNDO Mode(기본)의 경우입니다.\n\nD) 오답 — SGA는 CDB 전체에서 하나만 할당되며, 모든 PDB가 공유합니다. PDB별로 별도의 SGA가 할당되는 것이 아니라, 하나의 SGA를 효율적으로 공유하는 것이 멀티테넌트 아키텍처의 핵심 이점입니다.\n\nE) 오답 — 백그라운드 프로세스(LGWR, DBWn, PMON 등)는 CDB 전체에서 공유됩니다. PDB 수에 따라 개별적으로 기동되지 않으며, 모든 PDB의 요청을 공유 프로세스가 처리합니다.\n\n핵심 개념: CDB에서 SGA, 백그라운드 프로세스, 컨트롤 파일, 온라인 Redo Log는 전체 공유 자원이며, 각 PDB는 SYSTEM/SYSAUX 테이블스페이스와 데이터 딕셔너리를 개별 보유합니다. UNDO 테이블스페이스는 모드(Shared/Local)에 따라 공유 또는 개별 보유됩니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_010",
+    "number": "C_01_007",
     "title": "Oracle Databaseの接続(Connection)とセッション(Session)について正しく述べているものを選択してください。",
     "options": [
       "A) セッションはユーザーがOracle Databaseに対する認証を完了した後に作成される論理的なエンティティである。",
@@ -63,7 +26,58 @@
       "C) セッションはプロセスID(PID)で一意に識別され、接続の切断後もセッション情報が保持される。",
       "D) Dedicated Server構成の場合、複数のユーザー・プロセスが1つのサーバー・プロセスを共有して使用する。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — 세션(Session)은 사용자가 Oracle Database에 대한 인증(Authentication)을 완료한 후에 생성되는 논리적 엔티티입니다. 세션은 사용자 로그인부터 로그아웃(또는 비정상 종료)까지의 기간을 나타내며, SID와 Serial#의 조합으로 고유하게 식별됩니다.\n\nB) 오답 — 1개의 Connection(연결)에 여러 Session이 존재할 수 있습니다. Oracle Net의 Session Multiplexing 기능을 통해 하나의 물리적 연결에서 복수의 세션을 운용할 수 있습니다.\n\nC) 오답 — 세션은 프로세스 ID(PID)가 아니라 SID(Session ID)와 Serial#의 조합으로 고유하게 식별됩니다. 또한 연결이 종료되면 해당 세션도 종료되어 V$SESSION에서 제거됩니다.\n\nD) 오답 — Dedicated Server 구성에서는 각 사용자 프로세스에 전용 서버 프로세스가 1:1로 할당됩니다. 복수의 사용자 프로세스가 하나의 서버 프로세스를 공유하는 것은 Shared Server 구성의 특징입니다.\n\n핵심 개념: Connection은 사용자 프로세스와 인스턴스 간의 물리적 통신 경로이고, Session은 인증 완료 후 생성되는 논리적 엔티티입니다. 세션은 SID+Serial#로 식별되며, 하나의 Connection에 여러 Session이 존재할 수 있습니다. Dedicated Server는 1:1, Shared Server는 N:M 연결 방식입니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_008",
+    "title": "Oracle Databaseのオンライン REDOログ・ファイルの構造と管理について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) オンラインREDOログは最低2つ以上のグループが必要であり、LGWRプロセスは各グループを順環的に使用してREDOデータを記録する。",
+      "B) 同一グループ内のメンバー・ファイルにはそれぞれ異なる内容が記録され、障害時にメンバー間でデータを補完して復旧する。",
+      "C) CURRENT状態のREDOログ・グループを削除するには、ALTER SYSTEM CHECKPOINT を実行してINACTIVE状態に変更する必要がある。",
+      "D) ARCHIVELOG モードでは、ログ・スイッチ発生時にARCnプロセスが以前のREDOログ・グループをアーカイブ・ログとして保存する。",
+      "E) REDOログ・グループの追加は、データベースを停止した状態でのみ実行可能である。"
+    ],
+    "answer": [
+      "A",
+      "D"
+    ],
+    "explanation": "정답: A, D\nA) 정답 — 온라인 Redo Log는 최소 2개 이상의 그룹이 필요하며, LGWR 프로세스는 각 그룹을 순환 기록 방식(Circular Writing)으로 사용합니다. 현재 그룹이 가득 차면 다음 그룹으로 전환(로그 스위치)하여 Redo 데이터를 기록합니다.\n\nD) 정답 — ARCHIVELOG 모드에서는 로그 스위치가 발생하면 ARCn(Archiver) 프로세스가 이전 Redo Log 그룹의 내용을 아카이브 로그 파일로 복사합니다. 이를 통해 미디어 복구(Media Recovery)와 Point-in-Time Recovery가 가능해집니다.\n\nB) 오답 — 같은 그룹 내의 멤버 파일들은 Oracle이 동시에 동일한 내용을 기록합니다. 서로 다른 내용이 기록되는 것이 아니라 동일한 Redo 데이터의 복사본입니다. 다중화의 목적은 디스크 장애에 대한 보호입니다.\n\nC) 오답 — CURRENT 상태의 Redo Log 그룹은 현재 LGWR이 기록 중인 그룹이므로 삭제할 수 없습니다. CHECKPOINT를 실행해도 CURRENT 그룹이 INACTIVE로 바로 전환되지 않으며, 먼저 로그 스위치가 필요합니다.\n\nE) 오답 — ALTER DATABASE ADD LOGFILE 명령으로 데이터베이스가 열린(OPEN) 상태에서 Redo Log 그룹을 추가할 수 있습니다. 데이터베이스 중지가 필요하지 않습니다.\n\n핵심 개념: 온라인 Redo Log는 최소 2개 그룹을 순환 사용하며, 같은 그룹의 멤버는 동일 내용을 동시 기록합니다. ARCHIVELOG 모드에서 로그 스위치 시 ARCn이 아카이브 복사를 수행합니다. Redo Log 그룹 추가는 온라인 상태에서 가능하지만, CURRENT/ACTIVE 그룹은 삭제할 수 없습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_009",
+    "title": "Oracle Databaseのデータ・ファイルと表領域の関係について正しく述べているものを選択してください。",
+    "options": [
+      "A) 1つのデータ・ファイルは複数の表領域にまたがって使用することが可能である。",
+      "B) データ・ファイルのAUTOEXTEND設定では、NEXT句で増分サイズを、MAXSIZE句で最大サイズを制御する。",
+      "C) 一時表領域に属するファイルの変更情報はREDOログに記録されるため、メディア・リカバリの対象となる。",
+      "D) データ・ファイルの情報はDBA_TEMP_FILESディクショナリ・ビューで確認する。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — 데이터 파일의 AUTOEXTEND 설정에서 NEXT 절은 자동 확장 시 증가하는 크기를, MAXSIZE 절은 자동 확장의 최대 크기를 제어합니다. 예를 들어 ALTER DATABASE DATAFILE ... AUTOEXTEND ON NEXT 100M MAXSIZE 10G와 같이 설정합니다.\n\nA) 오답 — 하나의 데이터 파일은 정확히 하나의 테이블스페이스에만 속합니다(N:1 매핑 불가). 반대로 하나의 테이블스페이스는 여러 데이터 파일로 구성할 수 있습니다(1:N 매핑).\n\nC) 오답 — 임시 테이블스페이스에 속하는 임시 파일(Temp File)은 Redo Log에 변경 사항이 기록되지 않습니다. 따라서 미디어 복구의 대상이 아니며, 필요 시 재생성하면 됩니다.\n\nD) 오답 — 일반 데이터 파일의 정보는 DBA_DATA_FILES 딕셔너리 뷰에서 확인합니다. DBA_TEMP_FILES는 임시 파일(Temp File)의 정보를 조회하는 뷰입니다.\n\n핵심 개념: 데이터 파일과 테이블스페이스는 N:1 관계로, 하나의 데이터 파일은 하나의 테이블스페이스에만 속합니다. AUTOEXTEND ON NEXT/MAXSIZE로 자동 확장을 설정하며, 일반 데이터 파일은 DBA_DATA_FILES, 임시 파일은 DBA_TEMP_FILES에서 조회합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_010",
+    "title": "Oracle Databaseの論理的ストレージ構造の階層関係について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 1つのセグメントは1つの表領域内に存在するが、そのエクステントは複数のデータ・ファイルにまたがることが可能である。",
+      "B) 1つのエクステントは複数のデータ・ファイルにまたがって割り当てることが可能である。",
+      "C) エクステントは連続したデータ・ブロックの集合であり、セグメントへの最小の領域割当て単位である。",
+      "D) セグメントの作成は常にCREATE TABLE文の実行時に即時行われ、遅延することはない。",
+      "E) 表領域の管理方式としてディクショナリ管理がデフォルトであり、Oracle推奨の方式である。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — 하나의 세그먼트는 하나의 테이블스페이스 내에 존재하지만, 그 세그먼트에 할당된 익스텐트는 해당 테이블스페이스를 구성하는 여러 데이터 파일에 걸쳐 존재할 수 있습니다.\n\nC) 정답 — 익스텐트는 물리적으로 연속된 데이터 블록들의 집합이며, 세그먼트에 공간이 할당될 때의 최소 할당 단위입니다. 세그먼트에 공간이 부족하면 새로운 익스텐트를 할당받아 확장합니다.\n\nB) 오답 — 하나의 익스텐트는 반드시 하나의 데이터 파일 내에 존재합니다. 익스텐트는 연속된 블록의 집합이므로 파일 간에 걸칠 수 없습니다. 여러 데이터 파일에 걸칠 수 있는 것은 세그먼트의 익스텐트 전체입니다.\n\nD) 오답 — Oracle 11gR2부터 지연 세그먼트 생성(Deferred Segment Creation, DEFERRED_SEGMENT_CREATION=TRUE가 기본값)이 지원되어, 테이블 생성 시 즉시 세그먼트를 할당하지 않고 첫 번째 행이 INSERT될 때까지 세그먼트 생성을 지연시킵니다.\n\nE) 오답 — 테이블스페이스의 기본 관리 방식은 로컬 관리(Locally Managed)이며, 이것이 Oracle 권장 방식입니다. 딕셔너리 관리(Dictionary Managed)는 레거시 방식으로 비권장됩니다.\n\n핵심 개념: Oracle의 논리적 저장 구조는 테이블스페이스→세그먼트→익스텐트→데이터 블록의 4단계 계층입니다. 세그먼트는 하나의 테이블스페이스에 존재하되 여러 데이터 파일에 익스텐트를 가질 수 있으며, 하나의 익스텐트는 반드시 단일 데이터 파일 내의 연속 블록입니다."
   }
 ]

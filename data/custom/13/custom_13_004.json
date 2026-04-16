@@ -10,7 +10,10 @@
       "D) AWRスナップショットの保存期間はALTER SYSTEM SET AWR_RETENTION初期化パラメータで設定する。",
       "E) AWRスナップショットの自動作成間隔はデフォルトで30分であり、変更することはできない。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT() 프로시저를 실행하면 현재 시점의 V$ 뷰 통계를 캡처하여 AWR 스냅샷이 즉시 생성됩니다. 성능 문제 발생 전후에 수동으로 스냅샷을 생성하면 해당 시간대의 성능 분석에 활용할 수 있습니다.\n\nB) 정답 — MODIFY_SNAPSHOT_SETTINGS 프로시저의 retention 파라미터에 분(minute) 단위로 보존 기간을 지정합니다. 43200분은 30일에 해당하며, 기본값인 8일(691200초 = 11520분)에서 변경할 수 있습니다.\n\nC) 오답 — CREATE SNAPSHOT이라는 SQL 문은 존재하지 않습니다. AWR 스냅샷의 수동 생성은 DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT() 프로시저를 사용합니다.\n\nD) 오답 — AWR_RETENTION이라는 초기화 파라미터는 존재하지 않습니다. AWR 스냅샷의 보존 기간 변경은 DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS 프로시저의 retention 파라미터로 설정합니다.\n\nE) 오답 — AWR 스냅샷의 기본 자동 생성 간격은 30분이 아니라 60분(3600초)입니다. MODIFY_SNAPSHOT_SETTINGS 프로시저의 interval 파라미터로 변경할 수 있습니다.\n\n핵심 개념: AWR 스냅샷 관리는 DBMS_WORKLOAD_REPOSITORY 패키지를 사용합니다. CREATE_SNAPSHOT()으로 수동 스냅샷을 생성하고, MODIFY_SNAPSHOT_SETTINGS로 보존 기간(retention, 분 단위)과 수집 간격(interval, 분 단위)을 변경합니다. 기본값은 보존 8일, 간격 60분입니다."
   },
   {
@@ -23,7 +26,9 @@
       "C) log file syncの割合が20%であることは、データベースのCOMMIT頻度が極端に低いことを意味する。",
       "D) latch: shared poolの平均待機時間が最も長いため、このイベントがパフォーマンスに最も大きな影響を与えている。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — db file sequential read는 인덱스 스캔이나 ROWID를 통한 단일 블록 읽기 시 발생하는 I/O 대기 이벤트입니다. 이 이벤트가 전체 DB Time의 45%를 차지하고 있으므로, 물리적 I/O가 성능의 주요 보틀넥일 가능성이 높습니다. 비효율적인 인덱스 사용, 버퍼 캐시 크기 부족, 또는 스토리지 I/O 성능 저하 등을 조사해야 합니다.\n\nB) 오답 — DB CPU의 Waits가 N/A인 것은 에러가 아닙니다. CPU 사용 시간은 대기 이벤트(Wait Event)가 아니라 CPU에서 실제로 작업을 수행한 시간이므로, 대기 횟수(Waits)와 평균 대기 시간(Avg Wait)이 해당하지 않아 N/A로 표시되는 것이 정상입니다.\n\nC) 오답 — log file sync가 DB Time의 20%를 차지한다는 것은 COMMIT 빈도가 낮다는 의미가 아니라, COMMIT 작업에 의한 대기 시간이 상당하다는 의미입니다. 오히려 COMMIT이 빈번하게 발생하여 Redo Log 기록 대기 시간이 누적되었을 가능성이 있습니다.\n\nD) 오답 — Top 5 Timed Events에서 성능 영향도는 평균 대기 시간(Avg Wait)이 아니라 % DB time(전체 DB Time에서 해당 이벤트가 차지하는 비율)으로 판단합니다. latch: shared pool은 평균 대기 시간이 40.5ms로 가장 길지만, % DB time은 5%에 불과하여 전체 성능에 미치는 영향은 상대적으로 작습니다.\n\n핵심 개념: AWR 레포트의 Top 5 Timed Events 섹션에서 성능 보틀넥을 식별할 때는 % DB time을 기준으로 영향도를 판단합니다. DB CPU의 Waits/Avg Wait는 N/A가 정상이며, 평균 대기 시간이 길더라도 전체 DB Time 비중이 낮으면 우선순위가 낮은 이벤트입니다."
   },
   {
@@ -37,7 +42,10 @@
       "D) データ・ディクショナリ・ビュー(DBA_/ALL_/USER_ビュー)の参照ができなくなる。",
       "E) Oracle Net Servicesのリスナー機能が無効化される。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — STATISTICS_LEVEL을 BASIC으로 설정하면 AWR 스냅샷의 자동 수집이 비활성화됩니다. MMON 프로세스에 의한 주기적인 V$ 통계 캡처가 중단되어 성능 통계 이력이 SYSAUX에 축적되지 않으며, AWR 레포트 생성도 불가능해집니다.\n\nB) 정답 — ADDM은 AWR 스냅샷을 기반으로 동작하므로, AWR이 비활성화되면 ADDM의 자동 성능 진단도 함께 비활성화됩니다. 스냅샷 데이터가 수집되지 않으면 두 스냅샷 간의 성능 비교 분석을 수행할 수 없습니다.\n\nC) 오답 — Alert Log는 STATISTICS_LEVEL 설정과 무관하게 항상 동작합니다. 데이터베이스 기동/종료, ORA- 에러, Redo Log 전환, 체크포인트 등의 주요 이벤트는 STATISTICS_LEVEL=BASIC이더라도 Alert Log에 기록됩니다.\n\nD) 오답 — 데이터 딕셔너리 뷰(DBA_/ALL_/USER_ 뷰)는 데이터베이스의 메타데이터를 조회하는 기본 기능이며, STATISTICS_LEVEL 설정과 무관하게 항상 사용 가능합니다.\n\nE) 오답 — Oracle Net Services의 리스너 기능은 데이터베이스 인스턴스와 독립적으로 동작하며, STATISTICS_LEVEL 파라미터와 관련이 없습니다.\n\n핵심 개념: STATISTICS_LEVEL=BASIC으로 설정하면 AWR 스냅샷 자동 수집, ADDM 자동 진단, ASH(Active Session History) 등 대부분의 자동 성능 관리 기능이 비활성화됩니다. TYPICAL(기본값) 이상으로 설정해야 이러한 기능이 활성화됩니다."
   },
   {
@@ -51,7 +59,10 @@
       "D) AWRスナップショットにはREDOログファイルの内容がすべてバックアップとして保存される。",
       "E) AWRスナップショットの収集にはDiagnostics Packのライセンスは不要であり、すべてのエディションで自由に使用できる。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — V$SYSSTAT의 시스템 통계(논리적 읽기, 물리적 읽기, Parse 횟수 등)가 AWR 스냅샷으로 캡처되어 DBA_HIST_SYSSTAT에 저장됩니다. 두 스냅샷 간의 값 차이(Delta)를 계산하면 해당 기간의 시스템 활동량을 분석할 수 있습니다.\n\nB) 정답 — V$SYSTEM_EVENT의 대기 이벤트 통계(대기 횟수, 대기 시간 등)가 DBA_HIST_SYSTEM_EVENT에 저장됩니다. 이 데이터를 통해 특정 기간에 어떤 대기 이벤트가 가장 많이 발생했는지 분석할 수 있으며, AWR 레포트의 Top 5 Timed Events 섹션의 기반 데이터가 됩니다.\n\nC) 오답 — AWR 스냅샷에는 사용자가 실행한 DML의 결과 행 데이터가 포함되지 않습니다. AWR은 성능 통계(실행 횟수, 경과 시간, 버퍼 읽기 수 등)만을 저장하며, 실제 데이터 내용은 포함하지 않습니다.\n\nD) 오답 — AWR 스냅샷에는 Redo 로그 파일의 내용이 포함되지 않습니다. AWR은 성능 통계 이력을 저장하는 것이지 데이터 복구를 위한 백업 시스템이 아닙니다.\n\nE) 오답 — AWR 기능을 사용하려면 Oracle Diagnostics Pack 라이선스가 필요합니다. CONTROL_MANAGEMENT_PACK_ACCESS 파라미터가 DIAGNOSTIC 이상이어야 AWR 데이터에 접근할 수 있습니다.\n\n핵심 개념: AWR 스냅샷에는 V$ 뷰의 성능 통계(시스템 통계, 대기 이벤트, SQL 통계, 세그먼트 통계, SGA 정보, OS 통계, ASH 데이터 등)가 포함되며, 두 스냅샷 간의 차이(Delta)를 통해 해당 기간의 성능을 분석합니다. 실제 데이터 내용이나 Redo 로그는 포함되지 않습니다."
   },
   {
@@ -65,7 +76,10 @@
       "D) AWRベースラインはDBMS_ADVISORパッケージを使用して作成し、DBMS_WORKLOAD_REPOSITORYパッケージでは管理できない。",
       "E) AWRベースラインを作成すると対象期間の新しいスナップショットが自動的に再取得されるため、過去のスナップショットが存在しなくても作成可能である。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — AWR 베이스라인은 정상 운영 시의 일정 기간 스냅샷을 이름을 붙여 보존하는 기능입니다. 성능 문제 발생 시 베이스라인의 정상 시점 데이터와 문제 시점의 데이터를 비교하여 성능 저하 원인을 분석할 수 있습니다. DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE 프로시저로 생성합니다.\n\nB) 정답 — AWR 베이스라인에 포함된 스냅샷은 AWR의 자동 퍼지(보존 기간 경과 시 자동 삭제) 대상에서 제외됩니다. 이를 통해 중요한 기준점 데이터가 장기간 보존되며, 베이스라인 자체를 삭제해야만 해당 스냅샷이 퍼지 대상이 됩니다.\n\nC) 오답 — AWR 베이스라인은 AWR 기능의 일부이므로, AWR 데이터 접근과 마찬가지로 Oracle Diagnostics Pack 라이선스가 필요합니다.\n\nD) 오답 — AWR 베이스라인의 생성 및 관리는 DBMS_ADVISOR가 아닌 DBMS_WORKLOAD_REPOSITORY 패키지를 사용합니다. CREATE_BASELINE(생성), DROP_BASELINE(삭제) 등의 프로시저를 사용합니다.\n\nE) 오답 — AWR 베이스라인은 이미 수집된 기존 스냅샷을 기반으로 생성됩니다. 과거 스냅샷이 존재하지 않는 기간에 대해서는 베이스라인을 생성할 수 없으며, 스냅샷을 새로 재취득하는 기능은 없습니다.\n\n핵심 개념: AWR 베이스라인은 DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE으로 생성하며, 정상 시점의 스냅샷을 장기 보존하여 문제 발생 시 비교 분석의 기준으로 활용합니다. 베이스라인에 포함된 스냅샷은 자동 퍼지 대상에서 제외되어 보존됩니다."
   }
 ]

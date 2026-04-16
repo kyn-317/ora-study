@@ -9,7 +9,9 @@
       "C) EM Cloud Controlのアラート通知はウェブ・コンソール上の表示のみであり、電子メールによる通知はサポートされていない。",
       "D) EM Cloud Controlで監視できるターゲット・タイプはOracle Databaseのみに限定されている。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — EM Cloud Control에서는 CPU 사용률, 테이블스페이스 사용률, 응답 시간 등 다양한 메트릭에 대해 임계값(Threshold)을 설정할 수 있으며, 임계값을 초과하면 Warning 또는 Critical 알림을 자동으로 생성합니다. 이를 통해 문제를 사전에 감지하고 대응할 수 있습니다.\n\nA) 오답 — Management Agent는 다양한 방법으로 모니터링 데이터를 수집합니다. 데이터베이스 메트릭 수집 시에는 JDBC뿐 아니라 SQL*Net 접속, OS 명령 실행 등 다양한 방법을 사용합니다.\n\nC) 오답 — EM Cloud Control은 웹 콘솔 표시 외에도 이메일, SNMP 트랩, PagerDuty 등 다양한 통지(Notification) 방법을 지원합니다. Notification Rules를 설정하여 특정 이벤트 발생 시 자동으로 이메일을 발송할 수 있습니다.\n\nD) 오답 — EM Cloud Control은 Oracle Database 외에도 미들웨어(WebLogic Server 등), 호스트(OS), 네트워크 장비, 클라우드 인프라 등 다양한 타겟 유형을 모니터링할 수 있는 통합 관리 플랫폼입니다.\n\n핵심 개념: EM Cloud Control은 메트릭 기반 임계값 모니터링으로 Warning/Critical 알림을 자동 생성하며, 이메일 등 다양한 통지 방법을 지원합니다. Oracle Database뿐 아니라 미들웨어, 호스트 등 다양한 타겟을 통합 관리합니다."
   },
   {
@@ -23,7 +25,10 @@
       "D) ローカル・ユーザーでCDB$ROOTに接続した後にALTER SESSION SET CONTAINERでPDBに切り替えることが可能である。",
       "E) PDBへの接続にはSQL*Plusでは不可能であり、SQL Developerのみが使用可能である。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — SQL*Plus에서 Easy Connect 또는 TNS 이름으로 PDB의 서비스명을 지정하면 해당 PDB에 직접 접속할 수 있습니다. 예: sqlplus sys/password@hostname:1521/pdb1 as sysdba. PDB는 각각 고유한 서비스 이름을 가지므로 이를 통해 직접 접속이 가능합니다.\n\nB) 정답 — CDB$ROOT에 SYSDBA 권한으로 접속한 후, ALTER SESSION SET CONTAINER = pdb_name 명령으로 특정 PDB로 작업 컨테이너를 전환할 수 있습니다. 이는 CDB 관리의 표준적인 운영 방법입니다.\n\nC) 오답 — PDB 접속 시에는 SID가 아닌 Service Name을 사용하는 것이 표준입니다. CDB/PDB 환경에서는 Service Name 사용이 필수적이며, 각 PDB가 고유한 서비스 이름을 보유합니다.\n\nD) 오답 — 로컬 사용자(Local User)는 특정 PDB에만 존재하며 CDB$ROOT에 접속할 수 없습니다. CDB$ROOT에 접속하려면 공통 사용자(Common User, C## 접두사)로 접속해야 합니다.\n\nE) 오답 — SQL*Plus에서도 PDB에 직접 접속하거나 ALTER SESSION SET CONTAINER로 전환하여 접속할 수 있습니다. SQL Developer만 가능한 것이 아닙니다.\n\n핵심 개념: SQL*Plus에서 PDB에 접속하는 방법은 두 가지입니다. (1) 서비스 이름을 지정하여 직접 접속, (2) CDB$ROOT에 공통 사용자로 접속 후 ALTER SESSION SET CONTAINER로 전환. PDB 접속 시에는 SID가 아닌 Service Name을 사용합니다."
   },
   {
@@ -36,7 +41,9 @@
       "C) テンプレート・ファイルはデフォルトで$ORACLE_HOME/bin/ディレクトリに保存される。",
       "D) カスタム・テンプレートは作成できず、Oracle提供のテンプレートのみ使用することができる。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — Non-Seed 템플릿(.dbt)은 데이터 파일을 포함하지 않고 구성 정보만 가지고 있으므로, 데이터베이스를 처음부터 완전히 새로 생성합니다. 따라서 데이터 파일을 포함하고 있어 복사 방식으로 빠르게 생성하는 Seed 템플릿(.dbc)보다 생성 시간이 더 오래 걸립니다.\n\nA) 오답 — Seed 템플릿(.dbc)은 데이터 파일을 포함하는 템플릿입니다. 포함된 데이터 파일을 복사하는 방식으로 빠른 데이터베이스 생성이 가능합니다. 데이터 파일을 포함하지 않는 것은 Non-Seed 템플릿(.dbt)입니다.\n\nC) 오답 — 템플릿 파일은 $ORACLE_HOME/assistants/dbca/templates/ 디렉터리에 저장됩니다. $ORACLE_HOME/bin/은 실행 파일이 저장되는 디렉터리입니다.\n\nD) 오답 — DBCA에서 기존 데이터베이스의 구조를 추출하여 커스텀 템플릿을 생성할 수 있습니다. 또한 사일런트 모드의 -createTemplateFromDB 옵션으로도 커스텀 템플릿을 생성할 수 있습니다.\n\n핵심 개념: DBCA 템플릿은 Seed(.dbc, 데이터 파일 포함, 빠른 생성)와 Non-Seed(.dbt, 구성 정보만, 완전 새 생성)의 두 유형이 있으며, $ORACLE_HOME/assistants/dbca/templates/ 디렉터리에 저장됩니다. 기존 DB에서 커스텀 템플릿도 생성 가능합니다."
   },
   {
@@ -49,7 +56,9 @@
       "C) RMAN> EXPORT DATABASE FULL;",
       "D) RMAN> COPY DATABASE TO '/backup/full_backup';"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — BACKUP DATABASE PLUS ARCHIVELOG 명령은 RMAN에서 데이터베이스 전체 백업과 함께 아카이브 로그도 백업하는 명령입니다. ARCHIVELOG 모드에서 데이터베이스가 OPEN 상태인 동안 온라인 백업을 수행할 수 있으며, PLUS ARCHIVELOG 옵션은 백업 전후로 아카이브 로그를 자동으로 백업합니다.\n\nA) 오답 — BACKUP AS COPY DATABASE는 유효한 RMAN 명령이지만, 이미지 복사(Image Copy) 형태로 데이터베이스를 백업합니다. 아카이브 로그를 함께 백업하지 않으므로 완전한 온라인 백업 전략으로는 부족합니다.\n\nC) 오답 — EXPORT DATABASE FULL은 RMAN 명령이 아닙니다. 데이터 내보내기는 Data Pump(expdp) 유틸리티의 기능이며, RMAN은 백업/복구 전용 도구입니다.\n\nD) 오답 — COPY DATABASE TO는 유효한 RMAN 구문이 아닙니다. RMAN에서 이미지 복사를 수행하려면 BACKUP AS COPY DATABASE를 사용합니다.\n\n핵심 개념: RMAN의 BACKUP DATABASE PLUS ARCHIVELOG 명령은 ARCHIVELOG 모드에서 데이터베이스와 아카이브 로그를 함께 백업하는 표준 온라인 백업 명령입니다. 이를 통해 Point-in-Time Recovery에 필요한 모든 데이터를 확보할 수 있습니다."
   },
   {
@@ -62,7 +71,9 @@
       "C) memoryPercentage=40の設定はSGA内のバッファ・キャッシュに40%を割り当てることを意味する。",
       "D) templateType=0はNon-Seedテンプレートを使用することを意味する。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — numberOfPDBs=2로 설정되어 있으므로 PDB가 2개 생성되며, pdbName=salespdb로 PDB의 기본 이름이 지정되어 있습니다. 복수 PDB 생성 시 salespdb, salespdb2와 같은 형태로 이름이 부여됩니다.\n\nA) 오답 — createAsContainerDatabase=true로 설정되어 있으므로 CDB(Container Database) 구성으로 데이터베이스가 생성됩니다. Non-CDB가 아닙니다.\n\nC) 오답 — memoryPercentage=40은 시스템 전체 물리 메모리의 40%를 Oracle 인스턴스에 할당한다는 의미이며, SGA 내 버퍼 캐시의 할당 비율이 아닙니다. Oracle은 이 전체 메모리를 SGA와 PGA에 자동 배분합니다.\n\nD) 오답 — templateType=0은 Seed 템플릿을 의미합니다. Seed 템플릿은 데이터 파일을 포함하여 빠르게 데이터베이스를 생성하는 방식입니다. Non-Seed 템플릿의 경우 다른 값이 사용됩니다.\n\n핵심 개념: DBCA 응답 파일에서 createAsContainerDatabase=true는 CDB 생성, numberOfPDBs는 PDB 수, pdbName은 PDB 이름, memoryPercentage는 시스템 메모리 대비 Oracle 할당 비율, templateType=0은 Seed 템플릿 사용을 각각 의미합니다."
   }
 ]

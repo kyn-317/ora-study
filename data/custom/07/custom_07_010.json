@@ -1,0 +1,83 @@
+[
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_045",
+    "title": "Oracle DatabaseのLOBデータ格納方式であるBASICFILE LOBとSECUREFILE LOBの比較について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SECUREFILE LOBはLOBデータに対する圧縮、重複除去、暗号化の機能をサポートしているが、BASICFILE LOBではこれらの機能はサポートされていない。",
+      "B) BASICFILE LOBはOracle 11g以降のデフォルトのLOB格納方式であり、明示的に指定しない限りすべてのLOB列はBASICFILE方式で作成される。",
+      "C) SECUREFILE LOBを使用するには、LOBが格納されるテーブルスペースがASSM(自動セグメント領域管理)で管理されている必要がある。",
+      "D) BASICFILE LOBとSECUREFILE LOBは同じ内部格納構造を使用しており、パフォーマンス特性に違いはない。",
+      "E) SECUREFILE LOBの重複除去機能はEnterprise Editionの基本機能として含まれており、追加ライセンスなしで利用可能である。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — SECUREFILE LOB은 압축(Compression), 중복 제거(Deduplication), 암호화(Encryption) 기능을 지원하며, 이는 BASICFILE LOB에서는 지원되지 않는 SECUREFILE 고유의 기능입니다.\n\nC) 정답 — SECUREFILE LOB을 사용하려면 LOB이 저장되는 테이블스페이스가 ASSM(Automatic Segment Space Management)으로 관리되어야 합니다. MSSM(Manual Segment Space Management) 테이블스페이스에서는 SECUREFILE LOB을 생성할 수 없습니다.\n\nB) 오답 — Oracle 11g 이전에는 BASICFILE이 유일한 LOB 저장 방식이었으나, Oracle 12c 이후부터 SECUREFILE LOB이 기본값으로 변경되었습니다. 따라서 명시적 지정 없이 LOB 열을 생성하면 SECUREFILE 방식이 적용됩니다.\n\nD) 오답 — SECUREFILE LOB은 BASICFILE LOB과 완전히 다른 내부 저장 구조를 사용합니다. SECUREFILE은 향상된 성능(특히 대량 LOB 데이터의 읽기/쓰기)과 공간 효율성을 제공하며, 내부적으로 버퍼 캐시 활용이 개선되어 있습니다.\n\nE) 오답 — SECUREFILE LOB의 압축과 중복 제거 기능을 사용하려면 Advanced Compression Option 라이선스가 필요합니다. 암호화 기능은 Advanced Security Option이 필요합니다. SECUREFILE 자체의 기본 저장 기능은 라이선스 없이 사용 가능하지만, 부가 기능에는 별도 라이선스가 필요합니다.\n\n핵심 개념: SECUREFILE LOB은 Oracle 12c 이후 기본 LOB 저장 방식으로, ASSM 테이블스페이스에서만 사용 가능하며 압축/중복 제거/암호화를 지원합니다. BASICFILE LOB은 이러한 부가 기능을 지원하지 않습니다. SECUREFILE의 압축 및 중복 제거에는 Advanced Compression Option 라이선스가 필요합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_046",
+    "title": "Oracle DatabaseでCLOBまたはBLOB列を持つテーブルを作成した際のLOBデータの格納方式について正しく述べているものを選択してください。",
+    "options": [
+      "A) LOBデータのサイズが4000バイト以下の場合、デフォルトでは行データと同じデータ・ブロックにインラインで格納される。",
+      "B) DISABLE STORAGE IN ROW句を指定した場合、LOBデータのサイズにかかわらずすべてのLOBデータが行データと同じブロックに格納される。",
+      "C) ENABLE STORAGE IN ROW句はデフォルト設定であるが、テーブル作成後にALTER TABLE文で変更することが可能である。",
+      "D) LOBデータがアウトオブライン(out-of-line)で格納された場合、LOBロケータ(ポインタ)は行データとは別の管理領域に格納される。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — LOB 데이터의 크기가 4000바이트 이하인 경우, 기본적으로 행 데이터와 동일한 데이터 블록에 인라인(inline)으로 저장됩니다. 이는 ENABLE STORAGE IN ROW가 기본 설정이기 때문이며, 소규모 LOB 데이터에 대한 접근 성능을 향상시킵니다.\n\nB) 오답 — DISABLE STORAGE IN ROW를 지정하면, LOB 데이터는 크기와 관계없이 항상 별도의 LOB 세그먼트(아웃오브라인)에 저장됩니다. 행 데이터 블록에는 LOB 로케이터(포인터)만 저장됩니다. 설명이 반대입니다.\n\nC) 오답 — ENABLE STORAGE IN ROW가 기본 설정인 것은 맞지만, 이 속성은 테이블 생성 시에만 지정할 수 있으며 ALTER TABLE 문으로 나중에 변경할 수 없습니다. 변경하려면 테이블을 재생성해야 합니다.\n\nD) 오답 — LOB 데이터가 아웃오브라인으로 저장되는 경우에도, LOB 로케이터(포인터)는 항상 행 데이터 블록 내에 저장됩니다. LOB 로케이터를 통해 실제 LOB 데이터가 저장된 LOB 세그먼트의 위치를 참조합니다.\n\n핵심 개념: LOB 인라인 저장(ENABLE STORAGE IN ROW)은 기본 설정으로, 4000바이트 이하의 LOB 데이터를 행 데이터와 함께 저장하여 추가 I/O를 방지합니다. 4000바이트를 초과하면 자동으로 별도의 LOB 세그먼트에 저장됩니다. STORAGE IN ROW 설정은 테이블 생성 시에만 지정 가능하며 이후 변경할 수 없습니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_047",
+    "title": "CLOB列を含むテーブルのLOBセグメントをDBA_SEGMENTSビューで確認し、別のテーブルスペースに移動する操作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) LOB列を含むテーブルを作成すると、DBA_SEGMENTSビューにはテーブル・セグメントのほかにLOBSEGMENTタイプとLOBINDEXタイプのセグメントが自動的に作成される。",
+      "B) LOBセグメントのテーブルスペース移動は、ALTER TABLE ... MOVE文では実行できず、Data Pumpによるエクスポート/インポートが必要である。",
+      "C) ALTER TABLE ... MOVEを実行すると、テーブル・セグメントとLOBセグメントは常に同時に同じテーブルスペースに移動される。",
+      "D) DBA_SEGMENTSビューでLOBセグメントを検索する際、SEGMENT_TYPEが「LOB」のみを指定すれば、LOBに関連するすべてのセグメントを確認できる。",
+      "E) LOBSEGMENTにはLOBデータ本体が格納され、LOBINDEXにはLOBチャンクの位置情報が格納される。"
+    ],
+    "answer": [
+      "A",
+      "E"
+    ],
+    "explanation": "정답: A, E\nA) 정답 — LOB 열을 포함하는 테이블을 생성하면, DBA_SEGMENTS 뷰에 테이블 세그먼트(TABLE 타입) 외에 LOB 데이터 본체를 저장하는 LOBSEGMENT 타입과 LOB 청크의 위치 정보를 관리하는 LOBINDEX 타입의 세그먼트가 자동으로 생성됩니다.\n\nE) 정답 — LOBSEGMENT에는 실제 LOB 데이터가 청크(chunk) 단위로 저장되며, LOBINDEX에는 각 LOB 청크의 물리적 위치 정보가 B-tree 인덱스 구조로 저장되어 LOB 데이터에 대한 효율적인 접근을 지원합니다.\n\nB) 오답 — LOB 세그먼트의 테이블스페이스 이동은 ALTER TABLE ... MOVE LOB (lob_column) STORE AS (TABLESPACE new_ts) 구문으로 수행할 수 있습니다. Data Pump(expdp/impdp)를 사용한 Export/Import 방식으로도 결과적으로 이동이 가능하지만, ALTER TABLE ... MOVE 문으로 직접 이동이 가능하므로 Data Pump가 유일한 방법이라는 설명은 오답입니다.\n\nC) 오답 — ALTER TABLE ... MOVE를 실행하면 테이블 세그먼트만 이동되며, LOB 세그먼트는 자동으로 함께 이동되지 않습니다. LOB 세그먼트를 이동하려면 MOVE LOB 절을 별도로 지정해야 합니다.\n\nD) 오답 — DBA_SEGMENTS에서 LOB 관련 세그먼트를 검색할 때는 SEGMENT_TYPE이 'LOBSEGMENT'와 'LOBINDEX' 두 가지를 확인해야 합니다. 'LOB'이라는 단일 타입은 존재하지 않습니다.\n\n핵심 개념: LOB 열이 있는 테이블은 DBA_SEGMENTS에 TABLE, LOBSEGMENT, LOBINDEX 3종류의 세그먼트가 생성됩니다. 특정 테이블의 전체 공간 사용량을 파악하려면 이 3가지를 모두 합산해야 합니다. LOB 세그먼트는 ALTER TABLE ... MOVE 시 자동으로 이동되지 않으며, MOVE LOB 절로 별도 이동이 필요합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_048",
+    "title": "遅延セグメント作成が有効な環境で空のテーブルを作成した後、DBA_TABLESビューのSEGMENT_CREATED列が「NO」と表示されています。この状態に関する説明として正しいものを選択してください。",
+    "options": [
+      "A) SEGMENT_CREATEDが「NO」のテーブルはDBA_SEGMENTSビューに表示されないが、テーブルのメタデータ(列定義や制約など)はデータ・ディクショナリに正常に記録されている。",
+      "B) SEGMENT_CREATEDが「NO」のテーブルにSELECT文を実行するとORA-00942エラーが発生する。",
+      "C) SEGMENT_CREATEDが「NO」のテーブルにDELETE文を実行するとセグメントが自動的に作成される。",
+      "D) SEGMENT_CREATEDが「NO」のテーブルのSEGMENT_CREATED列を「YES」に変更するには、ALTER TABLE文でSEGMENT CREATION IMMEDIATE句を設定する必要がある。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — SEGMENT_CREATED = 'NO' 상태의 테이블은 세그먼트가 아직 할당되지 않았으므로 DBA_SEGMENTS 뷰에 표시되지 않습니다. 그러나 테이블의 메타데이터(열 정의, 제약조건, 권한 등)는 데이터 딕셔너리에 정상적으로 기록되어 있어 DDL/DML 수행이 가능합니다.\n\nB) 오답 — SEGMENT_CREATED = 'NO'인 테이블에 SELECT 문을 실행해도 오류가 발생하지 않습니다. 빈 테이블에 대한 조회로 결과가 0건 반환될 뿐, 테이블 자체는 데이터 딕셔너리에 존재하므로 ORA-00942(테이블 또는 뷰가 존재하지 않음) 오류는 발생하지 않습니다.\n\nC) 오답 — DELETE 문은 기존 행을 삭제하는 작업이므로, 빈 테이블에 대해 DELETE를 실행해도 삭제할 행이 없어 세그먼트가 생성되지 않습니다. 세그먼트가 자동으로 생성되는 시점은 첫 번째 INSERT 문이 실행될 때입니다.\n\nD) 오답 — ALTER TABLE 문의 SEGMENT CREATION IMMEDIATE 절은 이미 생성된 테이블의 세그먼트 할당 상태를 변경하는 데 사용할 수 없습니다. 세그먼트를 강제로 할당하려면 데이터를 INSERT하거나, DBMS_SPACE_ADMIN.MATERIALIZE_DEFERRED_SEGMENTS 프로시저를 사용하거나, ALTER TABLE ... ALLOCATE EXTENT를 실행해야 합니다.\n\n핵심 개념: 지연 세그먼트 생성 상태(SEGMENT_CREATED = 'NO')의 테이블은 메타데이터만 존재하고 물리적 세그먼트가 없는 상태입니다. DBA_SEGMENTS에 표시되지 않지만 DDL/DML은 정상 수행 가능하며, 첫 번째 INSERT 시 세그먼트가 자동 생성됩니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_049",
+    "title": "DBMS_SPACE_ADMIN.MATERIALIZE_DEFERRED_SEGMENTSプロシージャに関する説明として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) データを挿入せずにセグメントを強制的に割り当てる必要がある場面として、遅延セグメント状態のテーブルを別のテーブルスペースにALTER TABLE ... MOVEで移動する前処理がある。",
+      "B) このプロシージャはテーブル名を指定して特定のテーブルのみを対象にすることができるが、スキーマ全体を一括して処理することはできない。",
+      "C) Data Pump Export(expdp)を実行する前に遅延セグメント状態のテーブルのセグメントを強制的に割り当てることで、エクスポートにおけるテーブル定義の欠落を防止できる場合がある。",
+      "D) このプロシージャを実行すると対象テーブルにダミーデータが1行挿入された後に削除されることでセグメントが作成される。",
+      "E) MATERIALIZE_DEFERRED_SEGMENTSの実行には、テーブル所有者の権限のみで十分であり、DBA権限は必要ない。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — 세그먼트가 할당되지 않은 지연 상태의 테이블에는 ALTER TABLE ... MOVE TABLESPACE를 실행할 수 없습니다. 따라서 이러한 테이블을 다른 테이블스페이스로 이동해야 하는 경우, 먼저 MATERIALIZE_DEFERRED_SEGMENTS를 실행하여 세그먼트를 강제 할당한 후 MOVE를 수행해야 합니다.\n\nC) 정답 — Data Pump Export 시 지연 세그먼트 상태의 테이블은 메타데이터가 Export되지만, 일부 시나리오(기존 exp/imp 도구 사용, 특정 구성의 전송 가능 테이블스페이스 등)에서는 세그먼트가 없는 테이블의 처리에 제한이 있을 수 있습니다. 이러한 경우 사전에 세그먼트를 강제 할당하여 Export의 완전성을 확보할 수 있습니다.\n\nB) 오답 — MATERIALIZE_DEFERRED_SEGMENTS 프로시저는 schema_name과 table_name 파라미터를 모두 지정하여 특정 테이블만 처리할 수도 있고, schema_name만 지정하여 해당 스키마의 모든 지연 세그먼트를 일괄적으로 강제 할당할 수도 있습니다.\n\nD) 오답 — MATERIALIZE_DEFERRED_SEGMENTS는 데이터 삽입 없이 세그먼트를 직접 할당합니다. 더미 데이터를 삽입/삭제하는 방식이 아니라, 내부적으로 세그먼트와 초기 익스텐트를 직접 할당하여 SEGMENT_CREATED 상태를 'YES'로 변경합니다.\n\nE) 오답 — DBMS_SPACE_ADMIN 패키지는 관리용 패키지로, 실행하려면 SYSDBA 권한 또는 해당 패키지에 대한 EXECUTE 권한이 필요합니다. 테이블 소유자의 기본 권한만으로는 실행할 수 없습니다.\n\n핵심 개념: DBMS_SPACE_ADMIN.MATERIALIZE_DEFERRED_SEGMENTS는 데이터 삽입 없이 지연 세그먼트를 강제 할당하는 프로시저입니다. 주요 활용 시나리오는 테이블스페이스 이동(ALTER TABLE MOVE) 전처리, Data Pump Export 사전 준비, 공간 모니터링을 위한 DBA_SEGMENTS 가시성 확보 등이 있습니다. 테이블 단위 또는 스키마 전체를 일괄 처리할 수 있습니다."
+  }
+]

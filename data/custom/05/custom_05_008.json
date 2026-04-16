@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_036",
+    "title": "マルチテナント環境のPDB(PDB1)に接続しているPDB管理者が、以下の操作を実行しました。\n\nSQL> GRANT c##app_role TO local_user1;\n\nこの操作とその結果について正しく述べているものを選択してください。",
+    "options": [
+      "A) PDB内からローカル・ユーザーに共通ロールを付与することは可能であり、local_user1はPDB1内で共通ロールc##app_roleに含まれる権限を使用できる。",
+      "B) 共通ロールはCDBルートでのみ付与可能であるため、PDB内からlocal_user1にc##app_roleを付与しようとするとエラーが発生する。",
+      "C) local_user1に共通ロールを付与するには、GRANT文にCONTAINER=ALLを明示的に指定する必要がある。",
+      "D) ローカル・ユーザーには共通ロールを付与できず、ローカル・ロールのみ付与可能であるため、エラーが発生する。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — PDB 내에서 로컬 사용자에게 공통 롤을 부여하는 것은 가능합니다. 공통 롤은 CDB 전체에서 인식되므로, 개별 PDB에서도 해당 롤을 로컬 사용자에게 부여할 수 있습니다. 이 경우 local_user1은 PDB1 내에서 공통 롤 c##app_role에 포함된 권한 중 해당 PDB에서 유효한 권한을 사용할 수 있습니다.\n\nB) 오답 — 공통 롤의 생성은 CDB 루트에서만 가능하지만, 생성된 공통 롤의 부여는 PDB에서도 가능합니다. 공통 롤은 모든 컨테이너에서 인식되므로, PDB 관리자가 PDB 내의 사용자에게 부여할 수 있습니다.\n\nC) 오답 — PDB에서는 CONTAINER=ALL을 지정할 수 없습니다. CONTAINER=ALL은 CDB 루트에서만 사용 가능합니다. PDB에서의 GRANT는 기본적으로 CONTAINER=CURRENT가 적용되며, 이 경우 해당 PDB에서만 롤 부여가 유효합니다.\n\nD) 오답 — 로컬 사용자에게 공통 롤을 부여하는 것은 허용됩니다. 로컬 사용자는 로컬 롤뿐만 아니라 공통 롤도 부여받을 수 있으며, 해당 PDB에서 공통 롤의 권한을 사용할 수 있습니다.\n\n핵심 개념: 멀티테넌트 환경에서 공통 롤의 생성은 CDB 루트에서만 가능하지만, 부여는 PDB에서도 가능합니다. 로컬 사용자에게 공통 롤을 부여하면 해당 PDB 내에서 공통 롤에 포함된 유효 권한을 사용할 수 있으며, PDB에서는 CONTAINER=CURRENT만 사용 가능합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_037",
+    "title": "管理者が以下の操作を順番に実行しました。\n\nSQL> CREATE ROLE report_role;\nSQL> GRANT SELECT ON hr.employees TO report_role;\nSQL> GRANT report_role TO dev_user;\n\nその後、dev_userが以下のSQL文を実行しました。\n\nSQL> SELECT * FROM hr.employees;\n-- 正常に実行される\n\nSQL> CREATE VIEW emp_view AS SELECT * FROM hr.employees;\n-- エラーが発生する\n\nこのエラーの原因として正しく述べているものを選択してください。",
+    "options": [
+      "A) ビューの作成にはCREATE VIEW権限に加えて、ビューの基表に対するSELECT権限がロールではなく直接付与されている必要があるため、ロールを通じたSELECT権限ではビューを作成できない。",
+      "B) dev_userにCREATE VIEW権限が付与されていないことがエラーの唯一の原因であり、SELECT権限がロール経由であることは問題ではない。",
+      "C) report_roleがデフォルト・ロールとして設定されていないため、SELECT権限が有効になっていない。",
+      "D) ロールに付与されたオブジェクト権限では他のスキーマのテーブルに対するSELECT文は実行できず、自スキーマのテーブルに対してのみ使用可能である。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — Oracle에서 뷰를 생성할 때, 뷰의 기반 테이블에 대한 권한은 롤을 통해 간접적으로 부여된 것이 아니라, 사용자에게 직접 부여된 권한이어야 합니다. 이는 PL/SQL의 Definer's Rights 동작과 동일한 원칙입니다. dev_user는 report_role을 통해 hr.employees에 대한 SELECT 권한을 보유하고 있어 SELECT 문은 정상 실행되지만, 뷰 생성 시에는 롤 기반 권한이 무시되므로 ORA-01031(insufficient privileges) 오류가 발생합니다.\n\nB) 오답 — CREATE VIEW 권한이 없는 것도 문제가 될 수 있지만, 이 시나리오의 핵심 원인은 SELECT 권한이 롤 경유로만 부여되어 있다는 점입니다. CREATE VIEW 권한이 있더라도 기반 테이블에 대한 SELECT 권한이 직접 부여되지 않으면 뷰 생성은 실패합니다.\n\nC) 오답 — report_role이 기본 롤(Default Role)로 설정되어 있든 아니든, SELECT * FROM hr.employees가 정상 실행되었으므로 롤은 이미 활성화된 상태입니다. 문제는 롤의 활성화 여부가 아니라, 뷰 생성 시 롤 기반 권한이 적용되지 않는다는 것입니다.\n\nD) 오답 — 롤에 부여된 객체 권한으로 다른 스키마의 테이블에 대한 SELECT를 실행하는 것은 가능합니다. 실제로 이 시나리오에서 SELECT * FROM hr.employees가 정상 실행되었습니다. 롤 기반 권한이 제한되는 것은 뷰 생성, 프로시저 생성 등의 DDL 작업입니다.\n\n핵심 개념: Oracle에서 뷰 생성 시 기반 테이블에 대한 권한은 사용자에게 직접 부여된 것이어야 하며, 롤을 통해 부여된 권한으로는 뷰를 생성할 수 없습니다. SELECT 문 자체는 롤 기반 권한으로 실행 가능하지만, DDL(CREATE VIEW) 시에는 직접 부여 권한만 유효합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_038",
+    "title": "管理者が以下のようにdev_userに権限を設定しました。\n\nSQL> CREATE ROLE data_role;\nSQL> GRANT SELECT ON hr.employees TO data_role;\nSQL> GRANT data_role TO dev_user;\nSQL> GRANT CREATE PROCEDURE TO dev_user;\n\ndev_userが以下のPL/SQLプロシージャを作成しました。\n\nCREATE OR REPLACE PROCEDURE get_emp_count AS\n  v_count NUMBER;\nBEGIN\n  SELECT COUNT(*) INTO v_count FROM hr.employees;\n  DBMS_OUTPUT.PUT_LINE(v_count);\nEND;\n\nこのプロシージャの作成結果について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) プロシージャのコンパイルは成功するが、実行時にhr.employeesに対するSELECT権限がロール経由でしか付与されていないためORA-00942エラーが発生する。",
+      "B) プロシージャのコンパイル自体が失敗し、警告付きで作成される。これはDefiner's Rightsモデルではロールを通じた権限が無視されるためである。",
+      "C) AUTHID CURRENT_USER句を追加してInvoker's Rightsプロシージャに変更すれば、ロール経由のSELECT権限でもプロシージャの作成と実行の両方が成功する。",
+      "D) hr.employeesに対するSELECT権限をdev_userに直接付与すれば、プロシージャの作成と実行が正常に行われる。",
+      "E) このプロシージャはAUTHID句を指定していないため、Invoker's Rightsモデルが適用され、実行者のロール権限で動作する。"
+    ],
+    "answer": ["B", "D"],
+    "explanation": "정답: B, D\nB) 정답 — PL/SQL 프로시저를 AUTHID 절 없이 생성하면 기본적으로 Definer's Rights(정의자 권한) 모델이 적용됩니다. Definer's Rights에서는 롤을 통해 부여된 권한이 무시되므로, hr.employees에 대한 SELECT 권한이 롤(data_role) 경유로만 존재하면 컴파일 시 해당 테이블을 인식하지 못합니다. 프로시저는 경고(Warning) 상태로 생성되며 INVALID 상태가 됩니다.\n\nD) 정답 — hr.employees에 대한 SELECT 권한을 GRANT SELECT ON hr.employees TO dev_user; 로 직접 부여하면, Definer's Rights 프로시저에서도 해당 권한이 유효합니다. 이를 통해 프로시저의 컴파일과 실행이 모두 정상적으로 수행됩니다.\n\nA) 오답 — Definer's Rights 프로시저에서 참조 테이블에 대한 권한이 롤 경유로만 있는 경우, 실행 시가 아니라 컴파일 단계에서 이미 실패합니다. 컴파일러가 정적 SQL의 참조 객체를 해석할 때 롤 권한이 무시되므로, ORA-00942(table or view does not exist) 오류는 컴파일 시점에 발생합니다.\n\nC) 오답 — AUTHID CURRENT_USER를 지정하면 Invoker's Rights 모델이 적용되어 실행 시 실행자의 롤 권한이 사용됩니다. 그러나 컴파일 시에는 여전히 정의자의 직접 권한이 필요하므로, 롤 경유 권한만으로는 컴파일이 경고 상태로 완료될 수 있습니다. 실행자가 직접 권한 또는 활성 롤 권한을 보유하고 있으면 실행은 가능하지만, 컴파일 문제가 먼저 해결되어야 합니다.\n\nE) 오답 — AUTHID 절을 생략한 PL/SQL 프로시저는 Invoker's Rights가 아닌 Definer's Rights가 기본 적용됩니다. Definer's Rights에서는 정의자(프로시저 소유자)에게 직접 부여된 권한만 유효하며, 롤 기반 권한은 무시됩니다.\n\n핵심 개념: PL/SQL에서 AUTHID 절을 생략하면 Definer's Rights(기본값)가 적용되며, 이 모드에서는 롤을 통해 부여된 권한이 무시됩니다. 프로시저 내에서 참조하는 객체에 대한 권한은 프로시저 소유자에게 직접 부여되어야 하며, 롤 경유 권한만 있으면 컴파일 시점에서 실패합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_039",
+    "title": "以下の操作が順番に実行されました。\n\n1. HRユーザーがuser_aにSELECT権限を付与:\n   GRANT SELECT ON hr.departments TO user_a WITH GRANT OPTION;\n\n2. user_aがuser_bにSELECT権限を付与:\n   GRANT SELECT ON hr.departments TO user_b WITH GRANT OPTION;\n\n3. user_bがuser_cにSELECT権限を付与:\n   GRANT SELECT ON hr.departments TO user_c;\n\n4. HRユーザーがuser_aのSELECT権限を取り消し:\n   REVOKE SELECT ON hr.departments FROM user_a;\n\nこの操作後のuser_a、user_b、user_cの権限状態について正しく述べているものを選択してください。",
+    "options": [
+      "A) user_aのみSELECT権限が取り消され、user_bとuser_cはSELECT権限を維持する。",
+      "B) user_aとuser_bのSELECT権限が取り消されるが、user_cはuser_bから付与されたSELECT権限を維持する。",
+      "C) user_a、user_b、user_cの3名すべてのhr.departmentsに対するSELECT権限が取り消される。",
+      "D) REVOKE文にCASCADEオプションを明示的に指定しない限り、user_aの権限のみが取り消される。"
+    ],
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — WITH GRANT OPTION으로 부여된 객체 권한을 REVOKE하면 연쇄 취소(Cascade Revoke)가 자동으로 발생합니다. HR이 user_a의 SELECT 권한을 취소하면, user_a가 user_b에게 부여한 권한도 자동 취소되고, user_b가 user_c에게 부여한 권한도 재귀적으로 취소됩니다. Oracle은 OBJAUTH$ 딕셔너리 테이블에서 부여자(GRANTOR) 정보를 추적하므로, 부여 체인의 깊이에 관계없이 모든 하위 사용자의 권한이 취소됩니다.\n\nA) 오답 — 이 동작은 WITH ADMIN OPTION(시스템 권한)의 특성입니다. WITH GRANT OPTION(객체 권한)에서는 REVOKE 시 부여 체인의 모든 하위 사용자 권한이 연쇄적으로 취소됩니다.\n\nB) 오답 — 연쇄 취소는 부여 체인의 중간 사용자뿐만 아니라 최하위 사용자까지 모두 영향을 미칩니다. user_c는 user_b를 통해 간접적으로 HR의 부여 체인에 속하므로, user_b의 권한이 취소되면 user_c의 권한도 함께 취소됩니다.\n\nD) 오답 — 객체 권한의 연쇄 취소는 CASCADE 옵션 없이도 자동으로 발생합니다. REVOKE SELECT ON hr.departments FROM user_a; 명령만으로 부여 체인 전체의 권한이 취소됩니다. 별도의 CASCADE 옵션을 지정할 필요가 없습니다.\n\n핵심 개념: WITH GRANT OPTION으로 부여된 객체 권한의 REVOKE는 부여 체인을 따라 자동으로 연쇄 취소가 발생하며, CASCADE 옵션을 별도로 지정할 필요가 없습니다. 이는 OBJAUTH$ 테이블의 GRANTOR 추적 메커니즘에 의해 깊이 제한 없이 재귀적으로 수행됩니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_040",
+    "title": "同じ権限付与チェーンのシナリオにおいて、WITH ADMIN OPTIONとWITH GRANT OPTIONのREVOKE動作の違いについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) WITH ADMIN OPTIONで付与されたシステム権限をREVOKEすると、OracleはSYSAUTH$ディクショナリ・テーブルで付与者（Grantor）情報を追跡しているが、パフォーマンス上の理由から連鎖取消しを行わない設計となっている。",
+      "B) WITH GRANT OPTIONで付与されたオブジェクト権限をREVOKEすると、OBJAUTH$ディクショナリ・テーブルのGRANTOR情報に基づいて連鎖取消しが発生し、付与チェーンの全下位ユーザーの権限が取り消される。",
+      "C) WITH ADMIN OPTIONとWITH GRANT OPTIONのいずれも、REVOKE時の連鎖取消しの動作は同一であり、付与チェーンの全下位ユーザーの権限が取り消される。",
+      "D) WITH GRANT OPTIONの連鎖取消しはデータ・ディクショナリの内部構造に関係なく、すべてのオブジェクト権限をスキャンして取り消すため処理に時間がかかる。",
+      "E) WITH ADMIN OPTIONで付与されたシステム権限のREVOKE時に連鎖取消しが発生しないのは、SYSAUTH$ディクショナリ・テーブルに付与者(Grantor)情報が記録されていないためである。"
+    ],
+    "answer": ["B", "E"],
+    "explanation": "정답: B, E\nB) 정답 — WITH GRANT OPTION으로 부여된 객체 권한을 REVOKE하면, Oracle은 OBJAUTH$ 딕셔너리 테이블에 저장된 GRANTOR#(부여자 번호) 컬럼을 기반으로 부여 체인을 재귀적으로 추적하여 연쇄 취소를 수행합니다. 이에 따라 부여 체인의 모든 하위 사용자 권한이 자동으로 취소됩니다.\n\nE) 정답 — WITH ADMIN OPTION의 시스템 권한은 SYSAUTH$ 딕셔너리 테이블에 저장되며, 이 테이블에는 부여자(Grantor) 정보가 기록되지 않습니다. 따라서 REVOKE 시 부여 체인을 추적할 수 없어 연쇄 취소가 발생하지 않습니다. 이것이 ADMIN OPTION과 GRANT OPTION의 REVOKE 동작 차이의 근본적인 내부 원리입니다.\n\nA) 오답 — SYSAUTH$ 딕셔너리 테이블에는 부여자(Grantor) 정보가 기록되지 않습니다. 따라서 SYSAUTH$에서 부여자 정보를 추적하고 있다는 전제 자체가 틀렸습니다. 연쇄 취소가 발생하지 않는 이유는 퍼포먼스상의 이유가 아니라, 부여자 정보 자체가 존재하지 않아 부여 체인을 추적할 수 없기 때문입니다.\n\nC) 오답 — WITH ADMIN OPTION과 WITH GRANT OPTION의 REVOKE 동작은 동일하지 않습니다. ADMIN OPTION은 비연쇄 취소(No Cascade), GRANT OPTION은 연쇄 취소(Cascade Revoke)가 발생합니다. 이는 내부적으로 SYSAUTH$와 OBJAUTH$의 구조 차이에 기인합니다.\n\nD) 오답 — WITH GRANT OPTION의 연쇄 취소는 모든 객체 권한을 무차별적으로 스캔하는 것이 아니라, OBJAUTH$의 GRANTOR# 컬럼을 통해 부여 체인만을 효율적으로 추적합니다. 부여 체인에 속하지 않는 권한은 영향을 받지 않습니다.\n\n핵심 개념: WITH ADMIN OPTION(시스템 권한, SYSAUTH$)은 부여자를 추적하지 않아 비연쇄 취소가 발생하고, WITH GRANT OPTION(객체 권한, OBJAUTH$)은 GRANTOR 컬럼으로 부여자를 추적하여 연쇄 취소가 발생합니다. 이 내부 딕셔너리 구조의 차이가 두 옵션의 REVOKE 동작 차이의 근본 원인입니다."
+  }
+]

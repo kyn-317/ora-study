@@ -1,0 +1,83 @@
+[
+  {
+    "chapter": "データの移動",
+    "number": "C_09_021",
+    "title": "SQL*LoaderのExpress Modeに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Express Modeは制御ファイル（.ctl）を指定せず、TABLEパラメータでロード先テーブルを指定することで有効になり、テーブルのDDL定義に基づいてカラム・マッピングが自動的に行われる。",
+      "B) Express ModeではDATAパラメータを省略した場合、テーブル名.datまたはテーブル名.csvファイルがカレント・ディレクトリから自動的に検索される。",
+      "C) Express ModeはStandard Modeと同様にWHEN句による条件付きロードや、複数のINTO TABLE句による多重テーブル・ロードをサポートしている。",
+      "D) Express ModeではDirect Path Loadを使用することができないため、大量データの高速ロードにはStandard Modeを使用する必要がある。",
+      "E) Express Modeのデフォルトのロード・モードはINSERTであり、対象テーブルにデータが存在する場合はエラーが発生する。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — Express Mode는 CONTROL 파라미터를 생략하고 TABLE 파라미터로 대상 테이블을 지정하면 자동으로 활성화됩니다. SQL*Loader가 테이블의 DDL(컬럼 정의)에서 컬럼 순서와 데이터 타입을 유추하여 컨트롤 파일을 자동 생성하고 매핑합니다. 기본적으로 CSV 형식(쉼표 구분, 큰따옴표 감싸기)을 가정합니다.\n\nB) 정답 — Express Mode에서 DATA 파라미터를 지정하지 않으면, SQL*Loader가 커런트 디렉토리에서 테이블명.dat 또는 테이블명.csv 파일을 자동으로 검색합니다. 예를 들어 TABLE=EMPLOYEES를 지정하면 employees.dat 또는 employees.csv를 찾습니다.\n\nC) 오답 — Express Mode는 WHEN 절에 의한 조건부 로드와 복수 INTO TABLE 절에 의한 다중 테이블 로드를 지원하지 않습니다. 이러한 고급 기능이 필요한 경우에는 컨트롤 파일을 수동으로 작성하는 Standard Mode를 사용해야 합니다.\n\nD) 오답 — Express Mode에서도 DIRECT=TRUE 파라미터를 지정하여 Direct Path Load를 수행할 수 있습니다. Express Mode와 Direct Path는 독립적인 옵션이므로, sqlldr TABLE=emp DATA=emp.csv DIRECT=TRUE와 같이 조합하여 고속 로드가 가능합니다.\n\nE) 오답 — Express Mode의 기본 로드 모드는 INSERT가 아닌 APPEND입니다. APPEND 모드는 대상 테이블에 기존 데이터가 있어도 에러 없이 새 데이터를 추가합니다.\n\n핵심 개념: SQL*Loader Express Mode는 CONTROL 파라미터 생략 + TABLE 파라미터 지정으로 활성화되며, 테이블 DDL 기반으로 컬럼 매핑을 자동 수행합니다. 기본 로드 모드는 APPEND이고, DIRECT=TRUE와 조합 가능하지만 WHEN 절과 다중 테이블 로드는 미지원입니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_022",
+    "title": "SQL*LoaderのExpress Modeで以下のコマンドを実行しました。\n\n$ sqlldr hr/oracle@pdborcl TABLE=employees DATA=emp.csv DATE_FORMAT='YYYY-MM-DD' DIRECT=TRUE\n\nこのコマンドに関する内容について正しく述べているものを選択してください。",
+    "options": [
+      "A) Express Modeでは制御ファイルが自動生成されるが、その内容はログ・ファイルには記録されないため確認できない。",
+      "B) 対象テーブルにVIRTUAL列が存在する場合、Express Modeの自動マッピングではVIRTUAL列は自動的にスキップされる。",
+      "C) DATA=emp.csvを指定しているため、データ・ファイルの区切り文字はタブ文字がデフォルトで使用される。",
+      "D) Express ModeではCHARACTERSETパラメータを指定できないため、データ・ファイルの文字セットは常にデータベースの文字セットに制限される。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — Express Mode의 자동 매핑에서 VIRTUAL 컬럼은 자동으로 건너뜁니다. VIRTUAL 컬럼은 테이블에 물리적으로 저장되지 않고 수식으로 계산되는 컬럼이므로, 데이터 파일에서 해당 컬럼의 데이터를 제공할 필요가 없습니다. 마찬가지로 INVISIBLE 컬럼도 매핑에서 제외됩니다.\n\nA) 오답 — Express Mode로 실행하면 SQL*Loader가 자동으로 생성한 컨트롤 파일의 내용이 로그 파일에 포함됩니다. 이를 통해 자동 매핑이 올바르게 수행되었는지 확인할 수 있습니다.\n\nC) 오답 — Express Mode의 기본 필드 구분자는 쉼표(,)이며, 필드 감싸기 문자로 큰따옴표(\")가 선택적으로 사용됩니다. CSV 형식을 기본으로 가정하므로, 탭 문자가 아닌 쉼표가 기본 구분자입니다.\n\nD) 오답 — Express Mode에서도 CHARACTERSET 파라미터를 지정할 수 있습니다. 예를 들어 CHARACTERSET=UTF8을 지정하여 데이터 파일의 문자셋을 명시적으로 설정할 수 있습니다. 지정하지 않으면 데이터베이스 문자셋이 사용됩니다.\n\n핵심 개념: Express Mode에서는 VIRTUAL 컬럼과 INVISIBLE 컬럼이 자동 매핑에서 제외되며, 자동 생성된 컨트롤 파일 내용은 로그 파일에서 확인할 수 있습니다. 기본 구분자는 쉼표(CSV)이고, CHARACTERSET, DATE_FORMAT, DIRECT 등의 파라미터와 함께 사용할 수 있습니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_023",
+    "title": "Data Pump Export/ImportのEXCLUDEおよびINCLUDEパラメータに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) EXCLUDEパラメータでテーブルを除外すると、そのテーブルに依存する索引、制約、トリガーも自動的に除外される。",
+      "B) EXCLUDEパラメータとINCLUDEパラメータは同じexpdp/impdpコマンド内で同時に使用することが可能である。",
+      "C) EXCLUDE=TABLE_DATAを指定すると、テーブルのDDL定義は含まれるが、テーブル・データのみがエクスポートから除外される。",
+      "D) INCLUDEパラメータはエクスポート(expdp)でのみ使用可能であり、インポート(impdp)では使用できない。",
+      "E) EXCLUDEパラメータにname_clauseを指定する場合、LIKE演算子は使用できず、IN演算子のみサポートされる。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — EXCLUDE=TABLE로 특정 테이블을 제외하면, 해당 테이블에 종속된 인덱스, 제약조건, 트리거도 자동으로 제외됩니다. 상위 객체를 제외하면 종속 객체도 함께 제외되는 것이 EXCLUDE 필터의 동작 방식입니다.\n\nC) 정답 — EXCLUDE=TABLE_DATA를 지정하면 테이블의 DDL 정의(CREATE TABLE 문 등)는 덤프 파일에 포함되지만, 데이터 행은 제외됩니다. 이는 스키마 구조만 백업하거나 다른 환경에 DDL만 적용하려는 경우에 유용합니다.\n\nB) 오답 — EXCLUDE와 INCLUDE는 동일한 expdp/impdp 명령에서 동시에 사용할 수 없습니다. 두 파라미터는 상호 배타적이므로, 어느 한쪽만 지정해야 합니다.\n\nD) 오답 — INCLUDE 파라미터는 Export(expdp)와 Import(impdp) 양쪽 모두에서 사용할 수 있습니다. Import 시에도 덤프 파일에서 특정 객체 유형만 선별적으로 Import하도록 필터링할 수 있습니다.\n\nE) 오답 — EXCLUDE의 name_clause에서는 IN 연산자뿐만 아니라 LIKE 연산자도 사용할 수 있습니다. 예를 들어 EXCLUDE=TABLE:\"LIKE 'TMP_%'\"와 같이 와일드카드 패턴을 사용하여 특정 접두어의 테이블을 일괄 제외할 수 있습니다.\n\n핵심 개념: EXCLUDE는 지정 객체를 제외, INCLUDE는 지정 객체만 포함하며 두 파라미터는 동시 사용 불가입니다. EXCLUDE로 테이블을 제외하면 종속 객체도 자동 제외됩니다. name_clause에서는 IN, LIKE 등 SQL 표현식으로 세밀한 이름 필터링이 가능하고, Export/Import 양쪽에서 모두 사용할 수 있습니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_024",
+    "title": "Data Pump ExportのEXCLUDEパラメータを使用して以下のコマンドを実行しました。\n\nexpdp hr/oracle DIRECTORY=dp_dir DUMPFILE=hr_export.dmp SCHEMAS=HR EXCLUDE=INDEX EXCLUDE=STATISTICS EXCLUDE=TABLE:\"LIKE 'TMP_%'\"\n\nこのコマンドに関する内容について正しく述べているものを選択してください。",
+    "options": [
+      "A) EXCLUDEパラメータを複数回指定しているため、最後に指定したEXCLUDE=TABLE:\"LIKE 'TMP_%'\"のみが有効となる。",
+      "B) HRスキーマのすべてのオブジェクトがエクスポートされるが、索引、統計情報、およびTMP_で始まるテーブルとその依存オブジェクトが除外される。",
+      "C) EXCLUDE=INDEXを指定した場合でもプライマリ・キー制約に関連する索引は除外されずにエクスポートされる。",
+      "D) 使用可能なオブジェクト・タイプはTABLE、INDEX、VIEWの3種類に限定されている。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — EXCLUDE 파라미터는 동일 명령 내에서 여러 번 지정할 수 있으며, 지정한 모든 필터가 적용됩니다. 이 명령에서는 (1) 모든 인덱스, (2) 통계 정보, (3) TMP_로 시작하는 테이블이 Export에서 제외됩니다. TMP_로 시작하는 테이블이 제외되면 해당 테이블의 종속 객체(인덱스, 제약조건, 트리거 등)도 자동으로 제외됩니다.\n\nA) 오답 — EXCLUDE 파라미터를 여러 번 지정하면 마지막 것만 유효한 것이 아니라, 지정한 모든 EXCLUDE 필터가 누적적으로 적용됩니다. 다중 객체 유형을 필터링하기 위해 같은 파라미터를 반복 지정하는 것이 EXCLUDE의 사용 방법입니다.\n\nC) 오답 — EXCLUDE=INDEX를 지정하면 프라이머리 키 제약조건과 관련된 인덱스를 포함하여 모든 인덱스가 제외됩니다. 인덱스 유형에 따라 선택적으로 제외되지 않습니다. 특정 인덱스만 제외하려면 name_clause를 사용해야 합니다.\n\nD) 오답 — 사용 가능한 객체 유형은 TABLE, INDEX, VIEW 외에도 CONSTRAINT, REF_CONSTRAINT, GRANT, TRIGGER, SEQUENCE, PROCEDURE, FUNCTION, PACKAGE, MATERIALIZED_VIEW, STATISTICS, TABLE_DATA 등 다양합니다. DATABASE_EXPORT_OBJECTS, SCHEMA_EXPORT_OBJECTS, TABLE_EXPORT_OBJECTS 딕셔너리 뷰에서 확인할 수 있습니다.\n\n핵심 개념: EXCLUDE 파라미터는 동일 명령에서 여러 번 지정하여 다중 객체 유형을 필터링할 수 있으며, name_clause에 SQL 표현식(IN, LIKE 등)을 사용하여 특정 이름 패턴을 지정합니다. 사용 가능한 객체 유형은 DATABASE_EXPORT_OBJECTS 등의 딕셔너리 뷰에서 확인할 수 있습니다."
+  },
+  {
+    "chapter": "データの移動",
+    "number": "C_09_025",
+    "title": "Data Pump ImportのNETWORK_LINKパラメータとFLASHBACK_TIMEパラメータについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) NETWORK_LINKパラメータを使用すると、ダンプ・ファイルを生成せずにデータベース・リンク経由でソース・データベースから直接データをインポートすることができる。",
+      "B) NETWORK_LINKを使用したインポートでは、REMAP_SCHEMAやEXCLUDEなどの変換パラメータを併用することはできない。",
+      "C) FLASHBACK_TIMEパラメータはData Pump Exportで指定でき、Undo情報を利用して指定時刻時点の一貫性のあるデータをエクスポートする。",
+      "D) FLASHBACK_TIMEパラメータを使用する場合、対象のテーブルが事前にFLASHBACK ARCHIVEに登録されている必要がある。",
+      "E) NETWORK_LINKを使用したインポートでは、DIRECTORYパラメータは不要であり指定することはできない。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — NETWORK_LINK 파라미터를 사용하면 덤프 파일을 생성하지 않고, 데이터베이스 링크(DB Link)를 통해 소스 데이터베이스에서 직접 데이터를 Import할 수 있습니다. 소스 DB에 대한 DB Link를 대상 DB에서 생성하고, impdp 명령에서 NETWORK_LINK=dblink_name 형태로 지정합니다. 중간 파일이 불필요하며 Import 시점의 최신 데이터를 가져올 수 있다는 장점이 있습니다.\n\nC) 정답 — FLASHBACK_TIME 파라미터를 Data Pump Export에서 지정하면, Undo 정보를 활용하여 지정된 시간 시점의 일관된(Consistent) 데이터를 Export합니다. Export 수행 중 소스 테이블에 대한 DML이 발생하더라도 지정 시점 기준의 데이터를 추출하므로, UNDO 경합을 줄이고 데이터 일관성을 확보할 수 있습니다.\n\nB) 오답 — NETWORK_LINK를 사용한 Import에서도 REMAP_SCHEMA, REMAP_TABLESPACE, EXCLUDE, INCLUDE 등 모든 변환 파라미터를 함께 사용할 수 있습니다. 예를 들어 NETWORK_LINK=source_link REMAP_SCHEMA=HR:NEW_HR EXCLUDE=STATISTICS와 같이 조합하여 사용합니다.\n\nD) 오답 — FLASHBACK_TIME은 Undo 정보를 활용하는 기능으로, 테이블이 FLASHBACK ARCHIVE에 등록되어 있을 필요는 없습니다. Undo Retention 기간 내의 시점이면 사용 가능합니다. FLASHBACK ARCHIVE는 장기간 이력 추적을 위한 별도의 기능입니다.\n\nE) 오답 — NETWORK_LINK를 사용한 Import에서도 DIRECTORY 파라미터는 필요합니다. 덤프 파일은 사용하지 않지만, 로그 파일(LOGFILE)을 저장하기 위한 디렉토리 객체가 필요하기 때문입니다.\n\n핵심 개념: NETWORK_LINK는 DB Link를 통해 덤프 파일 없이 직접 Import하는 기능으로, 모든 변환 파라미터(REMAP, EXCLUDE 등)와 함께 사용 가능합니다. 단 로그 파일용 DIRECTORY는 여전히 필요합니다. FLASHBACK_TIME은 Undo 정보를 활용하여 특정 시점 기준의 일관된 Export를 보장하며, FLASHBACK ARCHIVE 등록은 필요하지 않습니다."
+  }
+]

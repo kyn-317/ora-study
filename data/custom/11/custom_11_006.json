@@ -1,0 +1,83 @@
+[
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_025",
+    "title": "DBMS_PRIVILEGE_CAPTUREパッケージを使用した権限分析について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) CREATE_CAPTUREプロシージャで権限分析ポリシーを作成した後、ENABLE_CAPTUREで有効化し、分析期間終了後にDISABLE_CAPTUREで停止する。結果を確認するにはGENERATE_RESULTを実行する必要がある。",
+      "B) DATABASE型のキャプチャでは、SYSやSYSTEMなどのOracle保守アカウント(ORACLE_MAINTAINED='Y')を含むすべてのユーザーの権限使用状況をキャプチャできる。",
+      "C) GENERATE_RESULTプロシージャを実行すると、DBA_USED_PRIVSおよびDBA_UNUSED_PRIVSビューにキャプチャデータに基づく分析結果が表示される。",
+      "D) DATABASE型のキャプチャは同時に複数有効化でき、異なる分析目的で並行して使用できる。",
+      "E) 権限分析のキャプチャを有効化すると、データベースのパフォーマンスに約20-30%のオーバーヘッドが発生するため、本番環境での使用は推奨されない。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — DBMS_PRIVILEGE_CAPTURE를 사용한 권한 분석 워크플로우는 CREATE_CAPTURE(정책 생성) → ENABLE_CAPTURE(활성화) → 워크로드 실행 기간 → DISABLE_CAPTURE(비활성화) → GENERATE_RESULT(결과 생성)의 순서로 진행됩니다. GENERATE_RESULT를 호출해야만 결과 뷰에 데이터가 표시됩니다.\n\nC) 정답 — GENERATE_RESULT 프로시저를 실행하면 캡처된 데이터를 기반으로 DBA_USED_PRIVS(사용된 권한)와 DBA_UNUSED_PRIVS(미사용 권한) 뷰에 분석 결과가 생성됩니다.\n\nB) 오답 — DATABASE 유형의 캡처라 해도 ORACLE_MAINTAINED='Y'인 Oracle 유지 관리 계정(SYS, SYSTEM 등)의 권한 사용은 자동으로 제외됩니다. Oracle 내부 동작에 의한 권한 사용은 사용자 권한 분석과 무관하므로 노이즈 제거를 위해 제외됩니다.\n\nD) 오답 — DATABASE 유형의 캡처는 동시에 하나만 활성화할 수 있습니다. 단, ROLE, CONTEXT, ROLE_AND_CONTEXT 유형은 동시에 여러 개 활성화할 수 있습니다.\n\nE) 오답 — 캡처 활성화 시 성능 오버헤드는 일반적으로 1-3%로 미미합니다. 따라서 본번 환경에서도 충분히 사용할 수 있습니다.\n\n핵심 개념: DBMS_PRIVILEGE_CAPTURE는 CREATE_CAPTURE → ENABLE_CAPTURE → DISABLE_CAPTURE → GENERATE_RESULT의 4단계 워크플로우로 운영되며, GENERATE_RESULT를 호출해야 DBA_USED_PRIVS/DBA_UNUSED_PRIVS 뷰에 결과가 표시됩니다. DATABASE 유형 캡처는 동시에 하나만 활성화 가능하고, Oracle 유지 관리 계정은 자동 제외됩니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_026",
+    "title": "管理者がDBMS_PRIVILEGE_CAPTUREを使用して以下の手順を実行しました。\n\nSQL> BEGIN\n       DBMS_PRIVILEGE_CAPTURE.CREATE_CAPTURE(\n         name => 'app_priv_analysis',\n         type => DBMS_PRIVILEGE_CAPTURE.G_DATABASE\n       );\n     END;\n     /\n\nSQL> BEGIN\n       DBMS_PRIVILEGE_CAPTURE.ENABLE_CAPTURE(\n         name => 'app_priv_analysis'\n       );\n     END;\n     /\n\n-- (1週間の業務運用期間)\n\nSQL> BEGIN\n       DBMS_PRIVILEGE_CAPTURE.DISABLE_CAPTURE(\n         name => 'app_priv_analysis'\n       );\n     END;\n     /\n\nこの時点でDBA_UNUSED_PRIVSビューを問い合わせましたが、データが表示されません。この原因について正しく述べているものを選択してください。",
+    "options": [
+      "A) DATABASE型のキャプチャではDBA_UNUSED_PRIVSビューはサポートされておらず、ROLE型のキャプチャでのみ使用可能である。",
+      "B) DISABLE_CAPTUREを実行した後、GENERATE_RESULTプロシージャを実行していないため、結果ビューにデータが生成されていない。",
+      "C) 1週間のキャプチャ期間が短すぎるため、分析に十分なデータが収集されなかった。",
+      "D) DBA_UNUSED_PRIVSビューを参照するにはCAPTURE_ADMINロールではなくDBAロールが必要である。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — 캡처를 비활성화(DISABLE_CAPTURE)한 후 DBA_UNUSED_PRIVS 등의 결과 뷰에 데이터가 표시되려면 반드시 GENERATE_RESULT 프로시저를 실행해야 합니다. GENERATE_RESULT를 호출하기 전에는 결과 뷰에 데이터가 나타나지 않습니다.\n\nA) 오답 — DBA_UNUSED_PRIVS 뷰는 DATABASE 유형의 캡처에서도 사용할 수 있습니다. 모든 캡처 유형(DATABASE, ROLE, CONTEXT, ROLE_AND_CONTEXT)에서 사용된 권한과 미사용 권한 결과를 조회할 수 있습니다.\n\nC) 오답 — 1주일의 캡처 기간은 일반적인 분석에 적합한 기간입니다. 데이터가 표시되지 않는 이유는 캡처 기간이 아니라 GENERATE_RESULT를 실행하지 않았기 때문입니다.\n\nD) 오답 — DBA_UNUSED_PRIVS 뷰의 참조에 DBA 롤이 필요한 것이 아닙니다. CAPTURE_ADMIN 역할 또는 DBMS_PRIVILEGE_CAPTURE 패키지에 대한 EXECUTE 권한이 있으면 권한 분석을 수행할 수 있습니다.\n\n핵심 개념: DBMS_PRIVILEGE_CAPTURE의 결과 뷰(DBA_USED_PRIVS, DBA_UNUSED_PRIVS 등)에 데이터가 표시되려면 DISABLE_CAPTURE 이후 반드시 GENERATE_RESULT 프로시저를 실행해야 합니다. GENERATE_RESULT 호출 시점까지의 캡처 데이터를 기반으로 분석 결과가 생성됩니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_027",
+    "title": "プロファイルのリソース制限パラメータとパスワード管理パラメータの適用条件について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) CONNECT_TIMEやIDLE_TIMEなどのリソース制限パラメータが適用されるためには、初期化パラメータRESOURCE_LIMITをTRUEに設定する必要がある。",
+      "B) FAILED_LOGIN_ATTEMPTSやPASSWORD_LIFE_TIMEなどのパスワード管理パラメータもRESOURCE_LIMITがTRUEの場合にのみ適用される。",
+      "C) CPU_PER_SESSIONの制限を超過するとセッションが終了されるが、CPU_PER_CALLの制限を超過した場合は該当SQL文のみがロールバックされセッションは維持される。",
+      "D) PRIVATE_SGAパラメータは専用サーバー(Dedicated Server)モードと共有サーバー(Shared Server)モードの両方で適用される。",
+      "E) DEFAULTプロファイルのすべてのリソース制限パラメータの初期値は0に設定されており、明示的に変更しない限りリソース使用が禁止される。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — CONNECT_TIME, IDLE_TIME, CPU_PER_SESSION 등의 자원 제한 파라미터가 실제로 적용되려면 초기화 파라미터 RESOURCE_LIMIT이 TRUE로 설정되어야 합니다. 이 파라미터는 ALTER SYSTEM SET RESOURCE_LIMIT = TRUE로 동적 변경이 가능합니다.\n\nC) 정답 — 세션 레벨 파라미터(CPU_PER_SESSION)의 제한을 초과하면 세션이 종료됩니다. 반면 호출 레벨 파라미터(CPU_PER_CALL)의 제한을 초과하면 해당 SQL 문(파싱/실행/페치)만 롤백되고 세션은 유지됩니다.\n\nB) 오답 — 비밀번호 관리 파라미터(FAILED_LOGIN_ATTEMPTS, PASSWORD_LIFE_TIME, PASSWORD_VERIFY_FUNCTION 등)는 RESOURCE_LIMIT 설정과 무관하게 항상 적용됩니다. RESOURCE_LIMIT이 FALSE여도 비밀번호 정책은 정상적으로 작동합니다.\n\nD) 오답 — PRIVATE_SGA 파라미터는 공유 서버(Shared Server) 모드에서만 의미가 있으며, 세션이 SGA의 Large Pool에서 사용할 수 있는 메모리 양을 제한합니다. 전용 서버(Dedicated Server) 모드에서는 이 파라미터가 무시됩니다.\n\nE) 오답 — DEFAULT 프로파일의 모든 자원 제한 파라미터 기본값은 0이 아닌 UNLIMITED로 설정되어 있습니다. 사용자에게 별도 프로파일을 지정하지 않으면 DEFAULT 프로파일이 자동 적용되며, 자원 사용에 제한이 없습니다.\n\n핵심 개념: 프로파일의 자원 제한 파라미터는 RESOURCE_LIMIT=TRUE일 때만 적용되지만, 비밀번호 관리 파라미터는 항상 적용됩니다. 세션 레벨(CPU_PER_SESSION) 초과 시 세션 종료, 호출 레벨(CPU_PER_CALL) 초과 시 해당 문만 롤백이라는 차이를 이해하는 것이 중요합니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_028",
+    "title": "テーブルスペース・クォータ(Tablespace Quota)の管理について正しく述べているものを選択してください。",
+    "options": [
+      "A) ALTER USER文でQUOTA 0を設定すると、そのテーブルスペース上に既に存在するオブジェクトは削除されないが、新しいエクステントの割り当ては拒否される。",
+      "B) UNLIMITED TABLESPACEシステム権限を付与されたユーザーに対してもALTER USER文で個別にクォータを設定した場合、個別クォータが優先される。",
+      "C) 一時(Temporary)テーブルスペースとUNDOテーブルスペースにもクォータの設定が必要であり、設定しないとこれらのテーブルスペースを使用できない。",
+      "D) UNLIMITED TABLESPACEシステム権限をREVOKEすると、そのユーザーは即座にすべてのテーブルスペースへのアクセス権を失い、既存オブジェクトも自動的に削除される。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — ALTER USER 문으로 QUOTA 0을 설정하면 해당 테이블스페이스에 기존에 생성된 객체(테이블, 인덱스 등)는 삭제되지 않고 유지됩니다. 그러나 새로운 익스텐트 할당(INSERT로 인한 익스텐트 확장, 새 테이블 생성 등)은 허용되지 않으며, ORA-01536 오류가 발생합니다.\n\nB) 오답 — UNLIMITED TABLESPACE 시스템 권한을 부여받은 사용자는 개별적으로 설정된 쿼터와 무관하게 모든 영구 테이블스페이스에 무제한으로 공간을 사용할 수 있습니다. UNLIMITED TABLESPACE 권한이 개별 쿼터 설정보다 우선합니다.\n\nC) 오답 — 임시(Temporary) 테이블스페이스와 UNDO 테이블스페이스에는 쿼터가 필요하지 않습니다. 이러한 테이블스페이스는 Oracle이 자동으로 관리하며, 사용자가 직접 영구 객체를 생성하지 않기 때문입니다.\n\nD) 오답 — UNLIMITED TABLESPACE 시스템 권한을 REVOKE하면 이전에 설정된 개별 쿼터가 다시 적용됩니다. 기존 객체가 자동으로 삭제되는 것은 아니며, 새로운 공간 할당만 개별 쿼터에 따라 제한됩니다.\n\n핵심 개념: 테이블스페이스 쿼터는 영구(Permanent) 테이블스페이스에만 적용되며, QUOTA 0으로 설정해도 기존 객체는 유지됩니다. UNLIMITED TABLESPACE 시스템 권한은 모든 개별 쿼터 설정을 무시하며, 이 권한을 REVOKE하면 이전에 설정된 개별 쿼터가 다시 적용됩니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_029",
+    "title": "ファイングレイン監査(FGA)のハンドラ・プロシージャおよびDML文の監査について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) DBMS_FGA.ADD_POLICYのhandler_moduleパラメータにPL/SQLプロシージャを指定すると、監査イベント発生時にそのプロシージャが自動的に呼び出される。",
+      "B) FGAでDELETE文を監査する場合、audit_columnパラメータで指定した列のみが対象となり、指定していない列に関連するDELETEは監査されない。",
+      "C) FGAのハンドラ・プロシージャ内でDMLを実行する場合、PRAGMA AUTONOMOUS_TRANSACTIONを使用して元のトランザクションと独立してコミットすることが推奨される。",
+      "D) FGAではSELECT文のみを監査対象として設定でき、INSERT、UPDATE、DELETE文はFGAの監査対象に含めることができない。",
+      "E) DBMS_FGA.ADD_POLICYのenableパラメータのデフォルト値はFALSEであり、DBMS_FGA.ENABLE_POLICYを別途実行しないとFGA監査が開始されない。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — DBMS_FGA.ADD_POLICY의 handler_module 파라미터에 PL/SQL 프로시저를 지정하면, 감사 이벤트가 발생할 때 해당 프로시저가 자동으로 호출됩니다. 핸들러를 활용하면 감사 레코드 기록 외에 이메일 알림, 커스텀 로그 기록 등 추가 조치를 수행할 수 있습니다.\n\nC) 정답 — FGA 핸들러 프로시저 내에서 DML을 실행하는 경우, PRAGMA AUTONOMOUS_TRANSACTION을 사용하여 원본 트랜잭션과 독립적으로 커밋하는 것이 권장됩니다. 이를 통해 핸들러의 DML이 원본 트랜잭션에 영향을 미치지 않습니다.\n\nB) 오답 — DELETE 문의 경우 audit_column 파라미터가 무시되며, 모든 열과 관련된 삭제가 감사 대상이 됩니다. audit_column에 의한 열 필터링은 SELECT, INSERT, UPDATE 문에서 적용됩니다.\n\nD) 오답 — FGA는 SELECT뿐만 아니라 INSERT, UPDATE, DELETE, MERGE 5가지 DML 유형에 대해 감사를 수행할 수 있습니다. statement_types 파라미터로 감사할 DML 유형을 지정합니다.\n\nE) 오답 — DBMS_FGA.ADD_POLICY의 enable 파라미터 기본값은 TRUE입니다. 따라서 ADD_POLICY를 호출하면 별도의 ENABLE_POLICY 실행 없이도 정책이 즉시 활성화됩니다.\n\n핵심 개념: FGA 핸들러 프로시저는 감사 이벤트 발생 시 자동 호출되며, PRAGMA AUTONOMOUS_TRANSACTION으로 원본 트랜잭션과 독립적으로 커밋합니다. FGA는 SELECT, INSERT, UPDATE, DELETE, MERGE 문을 감사할 수 있으며, DELETE 문에서는 audit_column이 무시됩니다."
+  }
+]

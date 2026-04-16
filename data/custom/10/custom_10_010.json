@@ -1,0 +1,79 @@
+[
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_044",
+    "title": "マルチテナント環境におけるApplication Containerの構造について正しく述べているものを選択してください。",
+    "options": [
+      "A) Application Rootは公共アプリケーション定義を格納するコンテナであり、READ WRITE状態で運用される。",
+      "B) Application Seedは各Application Container内に複数作成でき、テナントごとに異なるSeedを使い分けることができる。",
+      "C) Application PDBはCDB$ROOTの直下に作成され、Application Rootとは独立した階層に存在する。",
+      "D) Application RootはCDB$ROOT内に1つのみ作成可能であり、同一CDB内に複数のApplication Containerを構成することはできない。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Application Root는 공통 애플리케이션 정의(스키마, 테이블, 데이터)를 저장하는 컨테이너이며, READ WRITE 상태로 운영됩니다. Application Root에서 공통 오브젝트를 생성하고 관리해야 하므로 READ WRITE 모드가 필요합니다. 이는 항상 READ ONLY인 PDB$SEED와 구별되는 특성입니다.\n\nB) 오답 — Application Seed는 각 Application Container당 0개 또는 1개만 생성할 수 있습니다. 복수의 Application Seed를 생성하여 테넌트별로 다른 Seed를 사용하는 것은 지원되지 않습니다.\n\nC) 오답 — Application PDB는 CDB$ROOT의 직하가 아닌 Application Root 내에 생성됩니다. Application Container의 계층 구조는 CDB$ROOT → Application Root → Application Seed/Application PDB입니다.\n\nD) 오답 — 하나의 CDB 내에 여러 Application Container를 생성할 수 있습니다. 각 Application Container는 독립적인 Application Root를 가지며, 서로 다른 애플리케이션을 관리하는 별도의 논리적 그룹으로 운영됩니다.\n\n핵심 개념: Application Container는 Application Root, Application Seed(0~1개), Application PDB로 구성되는 3계층 구조입니다. Application Root는 READ WRITE 모드로 운영되며 공통 오브젝트를 정의합니다. 하나의 CDB 내에 여러 Application Container를 동시에 구성할 수 있습니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_045",
+    "title": "Application Container内でアプリケーションの初期インストールを実施する際の手順について正しく述べているものを選択してください。",
+    "options": [
+      "A) Application Rootに接続した状態でALTER PLUGGABLE DATABASE APPLICATION app1 BEGIN INSTALL文を実行してからスキーマやテーブルなどの共通オブジェクトを作成し、ALTER PLUGGABLE DATABASE APPLICATION app1 END INSTALL文で完了する。",
+      "B) Application PDBに接続した状態でアプリケーションのインストールを実行し、ALTER PLUGGABLE DATABASE APPLICATION SYNC文でApplication Rootに反映する。",
+      "C) Application Rootに接続した状態で共通オブジェクトを作成すると、BEGIN INSTALL/END INSTALL文を実行しなくてもすべてのApplication PDBに自動的に反映される。",
+      "D) アプリケーションのインストールにはDBMS_PDB_ALTER_SHARINGパッケージの実行が必須であり、ALTER PLUGGABLE DATABASE APPLICATION文では実行できない。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Application Container에서 애플리케이션을 최초 설치할 때는 Application Root에 접속한 상태에서 ALTER PLUGGABLE DATABASE APPLICATION app1 BEGIN INSTALL 문을 실행한 후, 스키마, 테이블 등의 공통 오브젝트를 생성하고, ALTER PLUGGABLE DATABASE APPLICATION app1 END INSTALL 문으로 설치를 완료합니다. 이후 기존 Application PDB에는 ALTER PLUGGABLE DATABASE APPLICATION app1 SYNC로 변경 사항을 전파합니다.\n\nB) 오답 — 애플리케이션의 설치는 Application Root에서 수행하며, Application PDB에서 설치를 실행하여 Root에 반영하는 방식이 아닙니다. Application PDB는 SYNC 명령으로 Application Root의 변경 사항을 수신하는 역할입니다.\n\nC) 오답 — Application Root에서 공통 오브젝트를 생성하더라도 BEGIN INSTALL/END INSTALL 없이 실행하면 Application으로 등록되지 않으며, Application PDB에 SYNC로 전파할 수 없습니다. 애플리케이션 정의 변경은 반드시 BEGIN/END 블록 안에서 수행해야 합니다.\n\nD) 오답 — 애플리케이션의 설치는 ALTER PLUGGABLE DATABASE APPLICATION ... BEGIN INSTALL/END INSTALL 구문으로 수행합니다. DBMS_PDB_ALTER_SHARING은 오브젝트의 공유 속성을 변경하는 패키지이며, 애플리케이션 설치 자체에 필수적인 것은 아닙니다.\n\n핵심 개념: Application Container에서의 애플리케이션 설치는 Application Root에 접속하여 ALTER PLUGGABLE DATABASE APPLICATION BEGIN INSTALL ~ END INSTALL 블록 내에서 공통 오브젝트를 생성하는 절차로 수행됩니다. 설치 완료 후 기존 Application PDB에는 SYNC 명령으로 변경 사항을 명시적으로 전파해야 합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_046",
+    "title": "Application Container内でApplication Root上に定義したテーブルのデータをApplication PDBと共有する方法について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) メタデータ・リンクとして定義されたテーブルは、テーブル構造(DDL)のみがApplication PDBに共有され、各Application PDBはそれぞれ独自のデータを保持する。",
+      "B) データ・リンクとして定義されたテーブルでは、各Application PDBがApplication Rootのデータのコピーをローカルに保持し、各PDBで独立してデータを変更できる。",
+      "C) 拡張データ・リンクとして定義されたテーブルでは、Application Rootのデータに加えて各Application PDBが独自のローカル・データを追加することができる。",
+      "D) メタデータ・リンクとして定義されたテーブルのデータはApplication Rootに一元的に格納され、Application PDBからは読み取り専用でアクセスする。",
+      "E) データ・リンクとして定義されたテーブルでは、各Application PDBがApplication Rootのデータを自由に更新でき、変更内容がリアルタイムに他のApplication PDBに反映される。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — 메타데이터 링크(Metadata Link)로 정의된 테이블은 테이블 구조(DDL)만 Application Root에서 Application PDB로 공유됩니다. 각 Application PDB는 동일한 테이블 구조를 가지지만 데이터는 각 PDB가 독립적으로 보유합니다. SaaS 환경에서 테넌트별로 동일 스키마에 각자의 데이터를 저장하는 경우에 적합합니다.\n\nC) 정답 — 확장 데이터 링크(Extended Data Link)로 정의된 테이블에서는 Application Root의 공통 데이터(마스터 데이터 등)가 각 Application PDB에 읽기 전용으로 공유되면서, 동시에 각 Application PDB가 자체적인 로컬 데이터를 추가하여 보유할 수 있습니다. 공통 참조 데이터와 테넌트 고유 데이터를 병합하여 사용하는 시나리오에 적합합니다.\n\nB) 오답 — 데이터 링크(Data Link)로 정의된 테이블에서는 Application Root에 데이터가 저장되고 각 Application PDB에서는 읽기 전용으로 접근합니다. 각 Application PDB가 데이터의 로컬 카피를 보유하여 독립적으로 변경할 수 있다는 설명은 잘못되었습니다. 데이터 링크에서 데이터는 Application Root에만 존재하며 PDB에 복사되지 않습니다.\n\nD) 오답 — 메타데이터 링크의 설명으로 올바르지 않습니다. 메타데이터 링크에서는 데이터가 Application Root에 일원적으로 저장되는 것이 아니라, 각 Application PDB에 독립적으로 저장됩니다. Root에 데이터가 저장되는 것은 데이터 링크 또는 객체 링크 방식입니다.\n\nE) 오답 — 데이터 링크로 정의된 테이블의 데이터는 Application Root에만 저장되며, Application PDB에서는 읽기 전용으로만 접근 가능합니다. Application PDB에서 데이터를 자유롭게 업데이트하거나 다른 PDB에 리얼타임 반영하는 기능은 제공되지 않습니다.\n\n핵심 개념: Application Container의 데이터 공유 유형에는 메타데이터 링크(구조만 공유, 데이터는 PDB별 독립), 데이터 링크(Root 데이터를 읽기 전용 공유), 확장 데이터 링크(Root 데이터 공유 + PDB별 로컬 데이터 추가 가능)의 세 가지가 있으며, SaaS 환경의 다양한 데이터 공유 요구사항에 맞게 선택하여 사용합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_047",
+    "title": "Snapshot Copy PDBの作成に関する前提条件と構文について正しく述べているものを選択してください。",
+    "options": [
+      "A) Snapshot Copy PDBはCREATE PLUGGABLE DATABASE ... FROM ... SNAPSHOT COPY構文で作成し、ソースPDBのデータ・ファイルがACFSやDirect NFSなどCopy-on-Writeをサポートするファイル・システム上に存在する必要がある。",
+      "B) Snapshot Copy PDBの作成には、ソースPDBがARCHIVELOGモードかつLocal UNDOモードで運用されている環境が必須の前提条件である。",
+      "C) 非ACFSのローカル・ファイル・システム環境でSnapshot Copy PDBを作成する場合、CLONEDBパラメータの設定は不要であり、SNAPSHOT COPY句のみで作成できる。",
+      "D) Snapshot Copy PDBはRefreshable Clone PDBと同様にREFRESH MODE句を使用して作成し、作成後にソースPDBとの定期的な同期が可能である。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Snapshot Copy PDB는 CREATE PLUGGABLE DATABASE ... FROM ... SNAPSHOT COPY 구문으로 생성합니다. 이 기능은 스토리지 레벨의 스냅샷 기능을 활용하므로, 소스 PDB의 데이터 파일이 ACFS(ASM Cluster File System)나 Direct NFS(dNFS) 등 Copy-on-Write를 지원하는 파일 시스템 위에 존재해야 합니다.\n\nB) 오답 — ARCHIVELOG 모드와 Local UNDO 모드가 모두 필수인 것은 핫 클론(Hot Clone)의 전제 조건입니다. Snapshot Copy PDB는 스토리지 레벨의 스냅샷 메커니즘에 의존하며, 이 두 조건이 필수 요건은 아닙니다.\n\nC) 오답 — 비ACFS의 로컬 파일 시스템 환경에서 Snapshot Copy를 사용하려면 CLONEDB 초기화 파라미터를 TRUE로 설정해야 합니다. SNAPSHOT COPY 절만으로는 Copy-on-Write를 지원하지 않는 파일 시스템에서 Snapshot Copy PDB를 생성할 수 없습니다.\n\nD) 오답 — Snapshot Copy PDB는 REFRESH MODE 절이 아닌 SNAPSHOT COPY 절을 사용하여 생성합니다. REFRESH MODE는 Refreshable Clone PDB에서 사용되는 구문이며, Snapshot Copy PDB는 1회성 클론으로서 소스 PDB와의 정기적 동기화 기능은 제공하지 않습니다.\n\n핵심 개념: Snapshot Copy PDB는 CREATE PLUGGABLE DATABASE ... SNAPSHOT COPY 구문으로 생성하며, Copy-on-Write를 지원하는 스토리지(ACFS, Direct NFS 등)가 필수 전제 조건입니다. 비ACFS 환경에서는 CLONEDB 파라미터를 TRUE로 설정해야 사용 가능합니다. 핫 클론과 전제 조건이 다르며, Refreshable Clone과는 구문 및 동기화 동작에서 차이가 있습니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_048",
+    "title": "大規模な本番データベース(500GB)のPDBを利用してテスト環境を迅速に構築する必要があります。ストレージ使用量を最小限に抑えつつ、テスト環境ではデータの読み書きが可能な状態にしたいと考えています。最も適切なPDBクローン方法について正しく述べているものを選択してください。",
+    "options": [
+      "A) ローカル・クローンを使用してソースPDBの完全なコピーを作成する。データ・ファイルが物理的に複製されるため、テスト環境の独立性が最も高い。",
+      "B) Snapshot Copy PDBを使用する。Copy-on-Writeメカニズムにより即座にクローンが作成され、初期ディスク使用量はほぼゼロであり、テスト中に変更されたブロックのみが追加ストレージを消費する。",
+      "C) Refreshable Clone PDBを使用する。ソースPDBとの定期的な同期が可能であり、テスト環境でのデータ変更も自由に行える。",
+      "D) PDB Relocateを使用してソースPDBをテスト用CDBに移動する。元のCDBからPDBが削除されるため、ストレージの二重使用を回避できる。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — 이 시나리오에서는 대규모 데이터베이스(500GB)의 테스트 환경을 신속하게 구축하면서 스토리지 사용량을 최소화해야 하고, 데이터의 읽기/쓰기가 가능해야 합니다. Snapshot Copy PDB는 Copy-on-Write 메커니즘으로 데이터 파일을 물리적으로 복사하지 않고 즉시 클론을 생성하므로, 생성 속도가 데이터 크기에 무관하게 거의 즉시 완료됩니다. 초기 디스크 사용량은 거의 없으며, 테스트 중 변경된 블록만 추가 스토리지를 소비합니다. 또한 READ WRITE 모드로 오픈할 수 있어 테스트 데이터의 변경이 가능합니다.\n\nA) 오답 — 로컬 클론은 소스 PDB의 데이터 파일을 물리적으로 복사하므로 500GB의 추가 스토리지가 필요하며, 복사에 상당한 시간이 소요됩니다. 독립성은 높지만, 이 시나리오의 요구사항인 빠른 구축과 스토리지 절약에는 부적합합니다.\n\nC) 오답 — Refreshable Clone PDB는 READ ONLY 모드로만 오픈할 수 있으므로, 테스트 환경에서 데이터 변경이 불가능합니다. 데이터 읽기/쓰기가 필요한 이 시나리오에는 적합하지 않습니다.\n\nD) 오답 — PDB Relocate는 소스 PDB를 다른 CDB로 이동하는 기능이며, 원래 CDB에서 PDB가 삭제됩니다. 운영 중인 본번 PDB를 테스트 목적으로 이동하면 본번 서비스가 중단되므로 적절하지 않습니다.\n\n핵심 개념: 대규모 데이터베이스의 테스트 환경을 빠르게 구축하면서 스토리지를 절약해야 하는 경우, Snapshot Copy PDB가 가장 적합합니다. Copy-on-Write 메커니즘으로 즉시 클론이 생성되고 초기 디스크 사용량이 거의 없으며, READ WRITE 모드로 오픈하여 데이터 변경도 가능합니다."
+  }
+]

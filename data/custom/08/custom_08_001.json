@@ -9,7 +9,9 @@
       "C) UNDO_RETENTIONで指定した期間内のUNDOデータは、UNDO表領域の空き容量が不足しても必ず保持される。",
       "D) UNDO_RETENTIONの設定値はUNDO Extentの「ACTIVE」から「UNEXPIRED」への状態遷移の時間を制御する。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — UNDO_RETENTION은 커밋 완료된 UNDO 데이터의 최소 보존 시간을 초 단위로 지정하는 초기화 파라미터이며, 기본값은 900초(15분)입니다. 이 파라미터는 UNEXPIRED → EXPIRED 전환 시점을 결정하며, 읽기 일관성(Read Consistency)과 Flashback 기능의 가용 범위에 영향을 줍니다.\n\nA) 오답 — UNDO_RETENTION은 ALTER SYSTEM 명령으로 동적 변경이 가능하며, 데이터베이스 재시작은 필요하지 않습니다.\n\nC) 오답 — 기본 설정인 RETENTION NOGUARANTEE 모드에서는 UNDO 테이블스페이스의 공간이 부족할 경우, UNDO_RETENTION 기간 내의 UNEXPIRED UNDO 데이터도 강제로 재사용될 수 있습니다. 절대적 보존을 보장하려면 RETENTION GUARANTEE를 설정해야 합니다.\n\nD) 오답 — UNDO_RETENTIONはACTIVE → UNEXPIRED 전환이 아닌, UNEXPIRED → EXPIRED 전환 시점을 결정합니다. ACTIVE에서 UNEXPIRED로의 전환은 트랜잭션의 COMMIT 또는 ROLLBACK에 의해 발생합니다.\n\n핵심 개념: UNDO_RETENTION(기본 900초)은 커밋 후 UNDO 데이터의 최소 보존 시간을 지정하며 ALTER SYSTEM으로 동적 변경이 가능합니다. 기본 NOGUARANTEE 모드에서는 공간 부족 시 보존이 보장되지 않으므로, 절대적 보존이 필요하면 RETENTION GUARANTEE를 설정해야 합니다."
   },
   {
@@ -23,7 +25,10 @@
       "D) UNDOセグメントはUNDO表領域以外にも、任意の永続表領域に作成することが可能である。",
       "E) 各トランザクションは複数のUNDOセグメントにまたがってUNDOデータを格納する。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — Automatic UNDO Management(AUM, UNDO_MANAGEMENT=AUTO) 모드에서는 Oracle이 UNDO 세그먼트의 생성, 크기 변경, 삭제를 자동으로 수행합니다. Oracle 26ai에서는 AUM이 기본이며 MANUAL 모드는 Deprecated 상태입니다.\n\nC) 정답 — UNDO 세그먼트는 Extent를 순환적(Circular)으로 사용합니다. 현재 활성 트랜잭션이 사용 중인 ACTIVE 상태의 UNDO 데이터가 포함된 Extent는 건너뛰어 데이터가 보호됩니다.\n\nB) 오답 — Automatic UNDO Management(AUM) 모드에서는 Oracle이 UNDO 세그먼트의 수를 워크로드에 맞추어 자동으로 조정합니다. UNDO_SEGMENTS 파라미터는 존재하지만 AUM에서는 Oracle이 자동 관리하므로 DBA가 수동으로 조정할 필요가 없습니다.\n\nD) 오답 — UNDO 세그먼트는 UNDO 표領域にのみ 작성됩니다. UNDO 테이블스페이스는 UNDO 세그먼트만을 포함하는 전용 테이블스페이스이며, 임의의 영구 테이블스페이스에 UNDO 세그먼트를 생성할 수 없습니다.\n\nE) 오답 — 각 트랜잭션은 하나의 UNDO 세그먼트에 할당됩니다. 하나의 트랜잭션이 여러 UNDO 세그먼트에 걸쳐 데이터를 저장하지 않습니다.\n\n핵심 개념: AUM(Automatic UNDO Management)에서 Oracle은 UNDO 세그먼트를 자동 관리합니다. 각 트랜잭션은 하나의 UNDO 세그먼트에 할당되지만, 하나의 UNDO 세그먼트는 복수의 트랜잭션을 서비스할 수 있으며, Extent는 순환적으로 사용되면서 ACTIVE 데이터를 보호합니다."
   },
   {
@@ -36,7 +41,9 @@
       "C) EXPIRED状態のExtentが不足した場合、次にACTIVE状態のExtentが強制的に再使用される。",
       "D) RETENTION GUARANTEE設定時にのみEXPIRED状態への遷移が発生する。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — EXPIRED 상태의 UNDO Extent는 UNDO_RETENTION 기간이 경과하여 자유롭게 재사용 가능한 상태입니다. 새로운 트랜잭션이 UNDO 공간을 필요로 할 때, EXPIRED Extent가 1순위로 재사용됩니다.\n\nB) 오답 — EXPIRED 상태의 Extent는 DBA의 수동 해방 없이 Oracle에 의해 자동으로 재사용됩니다. Automatic UNDO Management에서는 UNDO 공간 관리가 자동으로 이루어집니다.\n\nC) 오답 — ACTIVE 상태의 Extent는 어떤 경우에도 절대 강제로 재사용되지 않습니다. EXPIRED Extent 부족 시의 공간 확보 순서는 EXPIRED 재사용 → Free Space → AUTOEXTEND → UNEXPIRED 강제 전환이며, ACTIVE Extent는 보호됩니다. 모든 수단이 소진되면 ORA-30036 에러가 발생합니다.\n\nD) 오답 — EXPIRED로의 상태 전환은 RETENTION GUARANTEE 설정 여부와 관계없이 발생합니다. UNDO_RETENTION 기간이 경과하면 UNEXPIRED에서 EXPIRED로 전환됩니다. RETENTION GUARANTEE는 UNEXPIRED Extent의 강제 재사용을 방지하는 설정이며, EXPIRED 전환 자체를 제어하는 것이 아닙니다.\n\n핵심 개념: UNDO Extent의 상태는 ACTIVE → UNEXPIRED → EXPIRED 순으로 전이됩니다. EXPIRED Extent는 재사용 1순위이며, ACTIVE Extent는 절대 강제 재사용되지 않습니다. 공간 부족 시 EXPIRED → Free Space → AUTOEXTEND → UNEXPIRED 강제 전환 순으로 공간을 확보하며, 모든 수단 소진 시 ORA-30036이 발생합니다."
   },
   {
@@ -49,7 +56,9 @@
       "C) 読取り一貫性で使用されるUNDOデータはACTIVE状態のExtentのみから取得される。",
       "D) トランザクション・レベルの読取り一貫性はOracle AI Databaseのデフォルト分離レベルである。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — Oracle은 쿼리 시작 시점의 SCN(System Change Number)을 기록하고, 읽으려는 블록의 SCN이 쿼리 시작 SCN보다 크면(즉, 쿼리 시작 이후 변경된 블록이면), Current Block의 복사본에 UNDO 레코드를 역적용하여 과거 시점의 CR(Consistent Read) 블록을 생성합니다.\n\nA) 오답 — Oracle의 읽기 일관성은 UNDO를 이용한 다중 버전 동시성 제어(MVCC)로 구현됩니다. 읽기 작업(SELECT)이 쓰기 작업(DML)을 차단하지 않으며, 쓰기 작업도 읽기 작업을 차단하지 않습니다.\n\nC) 오답 — 읽기 일관성에 사용되는 UNDO 데이터는 ACTIVE 상태뿐만 아니라 UNEXPIRED 상태의 Extent에서도 취득됩니다. 장기 실행 쿼리가 필요로 하는 UNDO 데이터는 이미 커밋된 트랜잭션의 것일 수 있으므로 UNEXPIRED 상태에서 제공됩니다.\n\nD) 오답 — Oracle의 기본 분리 레벨은 READ COMMITTED이며, 이는 문장(Statement) 수준의 읽기 일관성을 제공합니다. 트랜잭션 수준의 읽기 일관성(SERIALIZABLE)은 명시적으로 설정해야 합니다.\n\n핵심 개념: Oracle은 UNDO 데이터를 활용한 MVCC로 읽기-쓰기 비차단(Non-blocking)을 구현합니다. 기본 분리 레벨은 READ COMMITTED(문장 수준 읽기 일관성)이며, 쿼리 시작 SCN 이후 변경된 블록에 대해 UNDO를 역적용한 CR 블록을 생성하여 일관된 데이터를 제공합니다."
   },
   {
@@ -63,7 +72,10 @@
       "D) UNDO表領域にはUNDOセグメント以外にユーザー表やインデックスを格納することができる。",
       "E) UNDO表領域のRETENTION GUARANTEE設定はALTER SYSTEM文で変更する。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — 인스턴스당 하나의 UNDO 테이블스페이스만 활성화될 수 있으며, UNDO_TABLESPACE 초기화 파라미터로 지정됩니다.\n\nC) 정답 — UNDO 테이블스페이스의 AUTOEXTEND를 ON으로 설정하면 Oracle이 자동으로 최적의 UNDO retention을 계산하여 적용하는 Auto-Tuning 기능이 활성화됩니다. V$UNDOSTAT의 TUNED_UNDORETENTION 컬럼으로 자동 조정된 값을 확인할 수 있습니다.\n\nB) 오답 — ALTER SYSTEM SET UNDO_TABLESPACE 명령으로 운영 중에 UNDO 테이블스페이스를 전환할 수 있으며, 인스턴스 재시작은 필요하지 않습니다. 전환 후 기존 UNDO 테이블스페이스의 활성 트랜잭션이 완료되면 점진적으로 해제됩니다.\n\nD) 오답 — UNDO 테이블스페이스는 UNDO 세그먼트만을 포함하는 전용 테이블스페이스입니다. 사용자 테이블이나 인덱스 등 일반 데이터베이스 객체를 저장할 수 없습니다.\n\nE) 오답 — RETENTION GUARANTEE 설정은 ALTER SYSTEM이 아닌 ALTER TABLESPACE 문으로 변경합니다(예: ALTER TABLESPACE undotbs1 RETENTION GUARANTEE). 이는 UNDO 테이블스페이스 레벨의 속성이며, DBA_TABLESPACES 뷰의 RETENTION 컬럼으로 현재 설정을 확인할 수 있습니다.\n\n핵심 개념: 인스턴스당 하나의 UNDO 테이블스페이스만 활성화되며 UNDO_TABLESPACE 파라미터로 지정합니다. ALTER SYSTEM으로 운영 중 전환이 가능하고, AUTOEXTEND ON 설정 시 UNDO_RETENTION Auto-Tuning이 활성화되어 Oracle이 워크로드에 맞는 최적의 보존 시간을 자동으로 산정합니다."
   }
 ]

@@ -1,0 +1,79 @@
+[
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_051",
+    "title": "Oracle Databaseの自動メモリー管理(AMM)において、MEMORY_TARGETとMEMORY_MAX_TARGETの関係について正しく述べているものを選択してください。",
+    "options": [
+      "A) MEMORY_TARGETはSGAとPGAの合計メモリーの目標サイズを指定し、MEMORY_MAX_TARGETはMEMORY_TARGETを動的に変更する際の上限値を定める。MEMORY_TARGETはMEMORY_MAX_TARGETを超える値に動的変更することはできない。",
+      "B) MEMORY_TARGETはSGAの目標サイズを指定し、MEMORY_MAX_TARGETはPGAの目標サイズを指定する。両パラメータの合計がインスタンス全体のメモリー上限となる。",
+      "C) MEMORY_TARGETを設定すると、SGA_TARGETおよびPGA_AGGREGATE_TARGETへの値の設定は禁止され、いかなる値を指定してもエラーが発生する。",
+      "D) MEMORY_MAX_TARGETはインスタンス起動後にALTER SYSTEMコマンドで動的に増加させることが可能であり、再起動なしにメモリーの上限を拡張できる。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — AMM(자동 메모리 관리)에서 MEMORY_TARGET은 SGA + PGA의 총 메모리 목표 크기를 지정하는 파라미터이며, MEMORY_MAX_TARGET은 MEMORY_TARGET을 동적으로 변경할 때의 상한선을 설정합니다. Oracle은 워크로드를 분석하여 MEMORY_TARGET 범위 내에서 SGA와 PGA 간의 메모리 비율을 자동으로 재분배합니다. MEMORY_TARGET은 MEMORY_MAX_TARGET을 초과하는 값으로 동적 변경할 수 없습니다.\n\nB) 오답 — MEMORY_TARGET은 SGA만의 목표 크기가 아니라 SGA + PGA의 총 메모리 목표 크기를 지정합니다. SGA의 목표 크기를 지정하는 것은 SGA_TARGET이며, PGA의 목표 크기를 지정하는 것은 PGA_AGGREGATE_TARGET입니다. MEMORY_MAX_TARGET은 PGA 목표 크기가 아니라 MEMORY_TARGET의 동적 확장 상한선입니다.\n\nC) 오답 — AMM 환경(MEMORY_TARGET > 0)에서 SGA_TARGET과 PGA_AGGREGATE_TARGET에 값을 설정하면 에러가 발생하는 것이 아니라, 해당 값이 각각의 최솟값(하한선)으로 작동합니다. 예를 들어 SGA_TARGET=3G로 설정하면 Oracle은 SGA를 3G 미만으로 줄이지 않습니다.\n\nD) 오답 — MEMORY_MAX_TARGET은 인스턴스 기동 시 OS에서 메모리를 예약하는 기준이 되므로, 인스턴스 실행 중에 동적으로 증가시킬 수 없습니다. MEMORY_MAX_TARGET을 변경하려면 SPFILE에 설정한 후 인스턴스를 재기동해야 합니다.\n\n핵심 개념: AMM에서 MEMORY_TARGET은 SGA + PGA 총 메모리 목표를, MEMORY_MAX_TARGET은 동적 확장 상한선을 설정합니다. SGA_TARGET과 PGA_AGGREGATE_TARGET에 값을 설정하면 최솟값(하한선)으로 기능하며, MEMORY_MAX_TARGET은 인스턴스 기동 시 결정되므로 동적 변경이 불가합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_052",
+    "title": "ASMM（自動共有メモリー管理）環境でSGA_TARGETを設定している場合、DBAが手動でサイズを指定しなければならないSGA構成要素として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) DB_KEEP_CACHE_SIZE（KEEPバッファ・プール）",
+      "B) SHARED_POOL_SIZE（共有プール）",
+      "C) LOG_BUFFER（REDOログ・バッファ）",
+      "D) LARGE_POOL_SIZE（ラージ・プール）",
+      "E) JAVA_POOL_SIZE（Javaプール）"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — DB_KEEP_CACHE_SIZE(Keep Buffer Pool)은 ASMM의 자동 조정 대상이 아닙니다. Keep Pool을 사용하려면 DBA가 DB_KEEP_CACHE_SIZE 파라미터를 수동으로 설정해야 합니다. 마찬가지로 DB_RECYCLE_CACHE_SIZE(Recycle Pool)과 DB_nK_CACHE_SIZE(비표준 블록 크기 캐시)도 수동 설정이 필요합니다.\n\nC) 정답 — LOG_BUFFER(Redo Log Buffer)는 ASMM의 자동 조정 대상이 아닙니다. Redo Log Buffer의 크기를 지정하려면 DBA가 LOG_BUFFER 파라미터를 수동으로 설정해야 합니다.\n\nB) 오답 — SHARED_POOL_SIZE(Shared Pool)은 ASMM의 자동 조정 대상 5가지 구성요소 중 하나입니다. SGA_TARGET 범위 내에서 워크로드에 따라 Oracle이 자동으로 크기를 조정합니다. 다만, SHARED_POOL_SIZE에 명시적으로 값을 설정하면 해당 값이 최솟값(하한선)으로 기능합니다.\n\nD) 오답 — LARGE_POOL_SIZE(Large Pool)은 ASMM의 자동 조정 대상 5가지 구성요소 중 하나이며, Oracle이 SGA_TARGET 범위 내에서 자동으로 크기를 조정합니다.\n\nE) 오답 — JAVA_POOL_SIZE(Java Pool)은 ASMM의 자동 조정 대상 5가지 구성요소 중 하나이며, Oracle이 SGA_TARGET 범위 내에서 자동으로 크기를 조정합니다.\n\n핵심 개념: ASMM에서 자동 조정되는 5가지 SGA 구성요소는 Database Buffer Cache(DB_CACHE_SIZE), Shared Pool(SHARED_POOL_SIZE), Large Pool(LARGE_POOL_SIZE), Java Pool(JAVA_POOL_SIZE), Streams Pool(STREAMS_POOL_SIZE)입니다. Keep Pool, Recycle Pool, 비표준 블록 캐시, Redo Log Buffer는 자동 조정 대상이 아니므로 DBA가 수동으로 설정해야 합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_053",
+    "title": "DBAがASMM（自動共有メモリー管理）環境のSGA構成要素の動的調整状況を確認するために以下のSQL文を実行しました。\n\nSQL> SELECT component, current_size/1024/1024 AS current_mb,\n            min_size/1024/1024 AS min_mb,\n            max_size/1024/1024 AS max_mb\n     FROM V$SGA_DYNAMIC_COMPONENTS\n     WHERE current_size > 0;\n\nこのビューの出力結果の解釈として正しく述べているものを選択してください。",
+    "options": [
+      "A) current_sizeはASMMによって現在割り当てられている各構成要素の実際のサイズを示し、ワークロードの変化に応じてSGA_TARGETの範囲内で動的に増減する。",
+      "B) min_sizeは各構成要素に対してDBAがALTER SYSTEMコマンドで明示的に設定した最小保証サイズを示し、設定していない場合は常に0として表示される。",
+      "C) max_sizeはSGA_MAX_SIZEパラメータの値をすべての構成要素に均等に分配した上限値を示す。",
+      "D) このビューにはLOG_BUFFER（REDOログ・バッファ）の情報も含まれ、ASMMによる自動調整の結果を確認できる。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — V$SGA_DYNAMIC_COMPONENTS 뷰의 current_size는 ASMM에 의해 현재 각 구성요소에 실제로 할당된 크기를 나타냅니다. ASMM은 워크로드 변화를 분석하여 SGA_TARGET 범위 내에서 자동 조정 대상 구성요소(Buffer Cache, Shared Pool, Large Pool, Java Pool, Streams Pool)의 크기를 동적으로 증감합니다.\n\nB) 오답 — min_size는 DBA가 명시적으로 설정한 최소 보장 크기만을 나타내는 것이 아니라, 인스턴스 기동 후 해당 구성요소가 가졌던 최소 크기를 기록합니다. DBA가 개별 파라미터에 값을 설정하지 않아도 Oracle이 초기 할당한 크기에 따라 0이 아닌 값이 표시될 수 있습니다.\n\nC) 오답 — max_size는 SGA_MAX_SIZE를 균등 분배한 값이 아니라, 인스턴스 기동 후 해당 구성요소가 도달한 최대 크기를 기록합니다. 각 구성요소의 max_size는 워크로드 패턴에 따라 서로 다른 값을 가집니다.\n\nD) 오답 — V$SGA_DYNAMIC_COMPONENTS 뷰에는 동적으로 조정 가능한 구성요소의 정보가 포함됩니다. LOG_BUFFER(Redo Log Buffer)는 ASMM의 자동 조정 대상이 아니므로, 이 뷰에서 ASMM에 의한 동적 크기 조정 이력을 확인할 수 없습니다.\n\n핵심 개념: V$SGA_DYNAMIC_COMPONENTS 뷰는 SGA 동적 구성요소의 현재 할당 크기(current_size), 과거 최소/최대 크기(min_size/max_size), Granule 크기 등을 제공합니다. ASMM 환경에서 각 구성요소의 동적 크기 조정 상태를 모니터링하는 핵심 뷰이며, 자동 조정 대상이 아닌 LOG_BUFFER 등은 동적 조정 이력을 이 뷰에서 확인할 수 없습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_054",
+    "title": "AMM（自動メモリー管理）からASMM（自動共有メモリー管理）に切り替える際のPGAメモリー管理の変化について正しく述べているものを選択してください。",
+    "options": [
+      "A) AMM環境ではMEMORY_TARGETの範囲内でSGAとPGA間のメモリー再分配が自動的に行われるが、ASMMに切り替えるとSGAとPGAの間での自動再分配は行われなくなる。PGAはPGA_AGGREGATE_TARGETパラメータによって独立して管理される。",
+      "B) ASMMに切り替えた後もSGA_TARGETの値にPGAの管理が含まれるため、PGA_AGGREGATE_TARGETを個別に設定する必要はない。",
+      "C) AMM環境ではPGAサイズは固定されており、ASMMに切り替えることでPGAの自動管理が初めて有効になる。",
+      "D) ASMMに切り替えると、PGAのメモリーは完全に手動管理となり、WORKAREA_SIZE_POLICYをMANUALに設定してSORT_AREA_SIZE等を個別に指定する必要がある。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — AMM(MEMORY_TARGET > 0)에서는 Oracle이 SGA와 PGA 합계를 MEMORY_TARGET 범위 내에서 관리하며, 워크로드에 따라 SGA↔PGA 간 메모리 자동 재분배가 가능합니다. ASMM(MEMORY_TARGET=0, SGA_TARGET > 0)으로 전환하면, SGA 내부 구성요소는 SGA_TARGET 범위 내에서 자동 조정되지만, SGA와 PGA 간의 자동 재분배는 더 이상 수행되지 않습니다. PGA는 PGA_AGGREGATE_TARGET 파라미터로 독립적으로 관리됩니다.\n\nB) 오답 — SGA_TARGET은 SGA 내부의 구성요소만 관리하며, PGA 관리 기능은 포함하지 않습니다. ASMM 환경에서 PGA를 자동 관리하려면 PGA_AGGREGATE_TARGET을 반드시 별도로 설정해야 합니다.\n\nC) 오답 — AMM 환경에서 PGA 크기가 고정되는 것이 아닙니다. AMM에서는 MEMORY_TARGET 범위 내에서 Oracle이 PGA 크기도 자동으로 조정합니다. ASMM으로 전환해야 PGA 자동 관리가 시작되는 것이 아니라, AMM에서도 PGA는 이미 자동 관리됩니다.\n\nD) 오답 — ASMM으로 전환해도 PGA가 완전히 수동 관리가 되는 것은 아닙니다. PGA_AGGREGATE_TARGET을 설정하면 Oracle이 각 서버 프로세스의 SQL Work Area 크기를 자동으로 조정합니다. WORKAREA_SIZE_POLICY=MANUAL로 설정하고 SORT_AREA_SIZE 등을 개별 지정하는 것은 수동 메모리 관리 모드이며, ASMM과는 별개입니다.\n\n핵심 개념: AMM에서 ASMM으로 전환 시 가장 큰 변화는 SGA↔PGA 간 자동 재분배가 중단된다는 점입니다. AMM은 SGA+PGA를 통합 관리하여 워크로드에 따라 양쪽 간 메모리를 자동 재분배하지만, ASMM에서는 SGA 내부만 자동 조정하고 PGA는 PGA_AGGREGATE_TARGET으로 독립 관리합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_055",
+    "title": "Oracle Databaseのバックグラウンド・プロセスであるARCn(アーカイバ)の役割と動作条件について正しく述べているものを選択してください。",
+    "options": [
+      "A) ARCnはARCHIVELOGモードで動作し、ログ・スイッチの発生後に以前のオンラインREDOログ・ファイルをアーカイブ先にコピーする。LOG_ARCHIVE_MAX_PROCESSESパラメータでARCnプロセスの数を制御できる。",
+      "B) ARCnはNOARCHIVELOGモードおよびARCHIVELOGモードの両方で常に動作し、すべてのREDOログ・グループを自動的にアーカイブする。",
+      "C) ARCnはオンラインREDOログ・バッファから直接REDOデータを読み取り、アーカイブ・ログ・ファイルとして保存する。ログ・スイッチの発生を待たずにリアルタイムでアーカイブを実行する。",
+      "D) ARCnプロセスの数はインスタンス起動時に固定され、インスタンス実行中にプロセス数を変更することはできない。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — ARCn(Archiver)은 ARCHIVELOG 모드에서 로그 스위치가 발생한 후, 가득 찬 온라인 Redo Log 파일을 지정된 아카이브 목적지로 복사하는 백그라운드 프로세스입니다. LOG_ARCHIVE_MAX_PROCESSES 파라미터로 ARCn 프로세스의 수를 제어할 수 있으며, 기본값은 4, 최대 30까지 설정 가능합니다. 아카이빙이 완료되어야 해당 Redo Log 그룹이 재사용 가능 상태로 전환됩니다.\n\nB) 오답 — ARCn은 ARCHIVELOG 모드에서만 동작하며, NOARCHIVELOG 모드에서는 비활성 상태입니다. NOARCHIVELOG 모드에서는 체크포인트 완료 후 온라인 Redo Log 그룹이 아카이빙 없이 즉시 재사용됩니다. NOARCHIVELOG 모드에서는 미디어 복구(Point-in-Time Recovery)가 불가능합니다.\n\nC) 오답 — ARCn은 온라인 Redo Log 버퍼(메모리)에서 데이터를 읽는 것이 아니라, 로그 스위치 후 디스크 상의 온라인 Redo Log 파일에서 데이터를 읽어 아카이브 목적지로 복사합니다. 또한 리얼타임으로 아카이브를 수행하는 것이 아니라, 로그 스위치가 발생한 후에 이전 그룹의 Redo Log를 복사합니다.\n\nD) 오답 — ARCn 프로세스의 수는 인스턴스 실행 중에도 LOG_ARCHIVE_MAX_PROCESSES 파라미터를 ALTER SYSTEM 명령으로 동적으로 변경할 수 있습니다. 대량의 로그 스위치가 발생하는 환경에서는 ARCn 프로세스 수를 늘려 아카이빙 지연을 방지할 수 있습니다.\n\n핵심 개념: ARCn(아카이버)은 ARCHIVELOG 모드에서만 동작하며, 로그 스위치 후 가득 찬 온라인 Redo Log 파일을 아카이브 목적지에 복사합니다. 이를 통해 미디어 복구(Point-in-Time Recovery)가 가능해집니다. LOG_ARCHIVE_MAX_PROCESSES로 프로세스 수를 제어하며(기본 4, 최대 30), 아카이빙이 완료되지 않으면 해당 Redo Log 그룹을 재사용할 수 없어 데이터베이스가 멈출 수 있습니다."
+  }
+]

@@ -9,7 +9,9 @@
       "C) メンテナンス・ウィンドウの開始時間を変更するには、既存のウィンドウを削除してから新しい開始時間で再作成する必要がある。",
       "D) DBMS_AUTO_TASK_ADMIN.SET_WINDOW_TIMEプロシージャを使用して、メンテナンス・ウィンドウの開始時間を変更する。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — DBMS_SCHEDULER.SET_ATTRIBUTE 프로시저를 사용하여 메인터넌스 윈도우의 REPEAT_INTERVAL 속성을 변경합니다. 예를 들어, 월요일 윈도우의 시작 시간을 23:00으로 변경하려면 다음과 같이 실행합니다:\nBEGIN\n  DBMS_SCHEDULER.SET_ATTRIBUTE(\n    name      => 'MONDAY_WINDOW',\n    attribute => 'REPEAT_INTERVAL',\n    value     => 'FREQ=WEEKLY;BYDAY=MON;BYHOUR=23;BYMINUTE=0;BYSECOND=0'\n  );\nEND;\n/\nScheduler Calendar Expression 문법으로 반복 주기와 시작 시간을 함께 지정합니다.\n\nB) 오답 — DBMS_SCHEDULER.ALTER_WINDOW라는 프로시저는 존재하지 않습니다. 윈도우 속성 변경은 DBMS_SCHEDULER.SET_ATTRIBUTE 프로시저를 사용합니다.\n\nC) 오답 — 메인터넌스 윈도우의 속성(시작 시간, 지속 시간 등)은 DBMS_SCHEDULER.SET_ATTRIBUTE로 변경할 수 있으므로, 삭제 후 재생성할 필요가 없습니다.\n\nD) 오답 — DBMS_AUTO_TASK_ADMIN.SET_WINDOW_TIME이라는 프로시저는 존재하지 않습니다. DBMS_AUTO_TASK_ADMIN 패키지는 AutoTask의 활성화/비활성화를 담당하며, 윈도우 속성 변경은 DBMS_SCHEDULER 패키지의 역할입니다.\n\n핵심 개념: 메인터넌스 윈도우의 속성(REPEAT_INTERVAL, DURATION, RESOURCE_PLAN 등)은 DBMS_SCHEDULER.SET_ATTRIBUTE 프로시저로 변경하며, 시작 시간 변경 시 REPEAT_INTERVAL 속성에 Scheduler Calendar Expression(FREQ, BYDAY, BYHOUR 등)을 사용합니다."
   },
   {
@@ -23,7 +25,10 @@
       "D) 自動オプティマイザ統計収集が動作しない場合は、必ずデータベースを再起動する必要がある。",
       "E) 統計が古くなった原因はオプティマイザ統計収集が無効化されている可能性はないため、メンテナンス・ウィンドウのDURATION設定のみを確認すればよい。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — 자동 옵티마이저 통계 수집(auto optimizer stats collection)은 유지 관리 윈도우 내에서만 실행됩니다. 윈도우 시간이 부족하면 태스크가 완료되기 전에 중단되며, DBA_AUTOTASK_CLIENT_HISTORY 뷰에서 JOB_STATUS가 STOPPED로 기록됩니다. 이 경우 DBMS_SCHEDULER.SET_ATTRIBUTE로 윈도우의 DURATION을 늘리는 것을 검토해야 합니다.\n\nB) 정답 — 자동 옵티마이저 통계 수집은 통계가 수집되지 않았거나 실효(Stale)된 객체만을 대상으로 합니다. 테이블의 데이터 변경량이 기본 임계값(약 10%)을 초과하지 않으면 통계가 실효 상태가 아니므로 수집 대상에 포함되지 않습니다.\n\nC) 오답 — 자동 옵티마이저 통계 수집은 24시간 상시 실행되는 것이 아니라, AutoTask 프레임워크를 통해 유지 관리 윈도우가 열려 있는 동안에만 실행됩니다.\n\nD) 오답 — 자동 통계 수집이 동작하지 않는 경우, 데이터베이스 재시작이 필요한 것이 아닙니다. DBA_AUTOTASK_CLIENT에서 해당 클라이언트의 상태를 확인하고, 비활성화된 경우 DBMS_AUTO_TASK_ADMIN.ENABLE로 활성화하면 됩니다.\n\nE) 오답 — 통계가 오래된 원인을 조사할 때는 DURATION 설정뿐만 아니라, 해당 클라이언트(auto optimizer stats collection)가 DBMS_AUTO_TASK_ADMIN.DISABLE로 비활성화되어 있지 않은지도 반드시 확인해야 합니다.\n\n핵심 개념: 자동 옵티마이저 통계 수집은 유지 관리 윈도우 내에서만 실행되며, 통계가 미수집되었거나 실효된 객체만 대상으로 합니다. 통계가 오래된 경우 윈도우 시간 부족(JOB_STATUS=STOPPED), 클라이언트 비활성화, 데이터 변경량 미달 등을 종합적으로 조사해야 합니다."
   },
   {
@@ -37,7 +42,10 @@
       "D) 事前定義されたメンテナンス・ウィンドウの開始時間やDURATIONは変更できず、カスタム・ウィンドウの追加のみが可能である。",
       "E) すべてのメンテナンス・ウィンドウは同一のDURATIONに設定されており、平日と週末で異なるDURATIONを設定することはできない。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — Oracle의 사전 정의된 메인터넌스 윈도우에서 평일(MONDAY_WINDOW ~ FRIDAY_WINDOW)의 기본 시작 시간은 22:00이며 DURATION은 4시간입니다. 주말(SATURDAY_WINDOW, SUNDAY_WINDOW)은 운영 부하가 적은 점을 고려하여 DURATION이 더 길게 설정되어 있어, 대량의 유지관리 작업을 처리할 수 있습니다.\n\nB) 정답 — MAINTENANCE_WINDOW_GROUP은 AutoTask 프레임워크의 실행 대상이 되는 윈도우들을 관리하는 윈도우 그룹입니다. 이 그룹에 속한 윈도우가 열릴 때만 자동 유지관리 태스크(auto optimizer stats collection, sql tuning advisor, auto space advisor)가 실행됩니다.\n\nC) 오답 — DURATION이 경과하면 메인터넌스 윈도우가 닫히며, 실행 중인 AutoTask 작업은 완료를 기다리지 않고 중단됩니다. 이 경우 DBA_AUTOTASK_CLIENT_HISTORY 뷰에서 JOB_STATUS가 STOPPED로 기록됩니다.\n\nD) 오답 — 사전 정의된 메인터넌스 윈도우는 DBMS_SCHEDULER.SET_ATTRIBUTE를 사용하여 REPEAT_INTERVAL(시작 시간), DURATION(지속 시간), RESOURCE_PLAN 등의 속성을 변경할 수 있습니다. 운영 환경에 맞게 유연하게 조정할 수 있습니다.\n\nE) 오답 — 메인터넌스 윈도우는 각각 독립적인 DURATION 설정이 가능합니다. 기본 설정에서도 평일(4시간)과 주말(장시간)의 DURATION이 다르게 설정되어 있으며, DBMS_SCHEDULER.SET_ATTRIBUTE로 개별 윈도우의 DURATION을 변경할 수 있습니다.\n\n핵심 개념: 사전 정의된 메인터넌스 윈도우는 MAINTENANCE_WINDOW_GROUP에 속하며, 이 그룹에 포함된 윈도우만 AutoTask 실행 대상입니다. 평일(4시간, 22:00 시작)과 주말(장시간)로 기본 DURATION이 다르며, 윈도우 종료 시 실행 중인 작업은 중단(STOPPED)됩니다."
   },
   {
@@ -50,7 +58,9 @@
       "C) 特定のウィンドウでのみタスクを無効化する機能はサポートされておらず、すべてのウィンドウに対して一括で有効化または無効化のみが可能である。",
       "D) DBMS_AUTO_TASK_ADMIN.DISABLEプロシージャにwindow_nameのみを指定すると、そのウィンドウに関連するすべてのクライアントが無効化される。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — DBMS_AUTO_TASK_ADMIN.DISABLE 프로시저에 client_name과 window_name을 동시에 지정하면, 해당 클라이언트를 특정 윈도우에서만 비활성화할 수 있습니다. 예를 들어, SQL Tuning Advisor를 평일 윈도우에서만 비활성화하고 주말에는 실행하도록 설정할 수 있습니다.\n\nB) 오답 — DBMS_SCHEDULER.SET_ATTRIBUTE에는 auto_task_enabled라는 속성이 존재하지 않습니다. AutoTask의 활성화/비활성화 제어는 DBMS_AUTO_TASK_ADMIN 패키지의 역할입니다.\n\nC) 오답 — DBMS_AUTO_TASK_ADMIN.DISABLE/ENABLE 프로시저는 3단계의 세밀한 제어를 지원합니다: (1) 파라미터 없이 호출하면 전체 AutoTask 비활성화, (2) client_name만 지정하면 해당 클라이언트를 모든 윈도우에서 비활성화, (3) client_name + window_name을 지정하면 특정 윈도우에서만 비활성화할 수 있습니다.\n\nD) 오답 — DBMS_AUTO_TASK_ADMIN.DISABLE에서 window_name만 지정하고 client_name을 지정하지 않으면 특정 윈도우의 모든 클라이언트가 비활성화되는 것이 아니라, AutoTask 전체(프레임워크 수준)의 비활성화로 처리됩니다. 윈도우별 제어를 하려면 반드시 client_name도 함께 지정해야 합니다.\n\n핵심 개념: DBMS_AUTO_TASK_ADMIN.DISABLE/ENABLE은 파라미터 조합에 따라 3단계 제어가 가능합니다: 전체 AutoTask(파라미터 없음), 클라이언트 단위(client_name만), 클라이언트+윈도우 단위(client_name + window_name)로 세밀한 제어가 가능합니다."
   },
   {
@@ -63,7 +73,9 @@
       "C) DBMS_AUTO_TASK_ADMIN.CREATE_WINDOWプロシージャで、メンテナンス・ウィンドウの作成とグループへの追加が同時に行われる。",
       "D) 新しいメンテナンス・ウィンドウを作成する場合、既存のすべてのウィンドウを一度削除してから再構成する必要がある。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — 새로운 메인터넌스 윈도우를 AutoTask 실행 대상으로 설정하려면 2단계가 필요합니다. 먼저 DBMS_SCHEDULER.CREATE_WINDOW로 윈도우를 생성하고, 그 후 DBMS_SCHEDULER.ADD_WINDOW_GROUP_MEMBER로 MAINTENANCE_WINDOW_GROUP에 해당 윈도우를 추가해야 합니다. MAINTENANCE_WINDOW_GROUP에 속한 윈도우만 AutoTask 프레임워크의 실행 대상으로 인식됩니다.\n\nB) 오답 — DBMS_SCHEDULER.CREATE_WINDOW로 윈도우를 생성해도 자동으로 MAINTENANCE_WINDOW_GROUP에 추가되지 않습니다. 반드시 ADD_WINDOW_GROUP_MEMBER 프로시저를 별도로 실행하여 그룹에 추가해야 AutoTask 실행 대상이 됩니다.\n\nC) 오답 — DBMS_AUTO_TASK_ADMIN.CREATE_WINDOW라는 프로시저는 존재하지 않습니다. 메인터넌스 윈도우의 생성과 관리는 DBMS_SCHEDULER 패키지를 사용합니다.\n\nD) 오답 — 새로운 메인터넌스 윈도우를 추가하기 위해 기존 윈도우를 삭제할 필요가 없습니다. 기존 윈도우를 유지한 채 새 윈도우를 생성하고 MAINTENANCE_WINDOW_GROUP에 추가할 수 있습니다.\n\n핵심 개념: 새로운 메인터넌스 윈도우를 AutoTask 대상으로 등록하려면 DBMS_SCHEDULER.CREATE_WINDOW(윈도우 생성) → DBMS_SCHEDULER.ADD_WINDOW_GROUP_MEMBER(MAINTENANCE_WINDOW_GROUP에 추가)의 2단계 작업이 필요합니다."
   }
 ]

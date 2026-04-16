@@ -9,7 +9,9 @@
       "C) SHUTDOWN TRANSACTIONALはアクティブなトランザクションの完了を待たずにすべてのセッションを即座に終了する。",
       "D) SHUTDOWN ABORTはチェックポイントを実行し、すべてのデータ・ファイルを正常にクローズしてから停止する。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — SHUTDOWN NORMAL(기본 종료 모드)은 새로운 접속을 차단한 뒤, 현재 접속 중인 모든 사용자가 자발적으로 로그아웃할 때까지 대기합니다. 종료 전에 체크포인트가 수행되므로 다음 기동 시 인스턴스 복구가 필요 없습니다(Clean Shutdown).\n\nB) 오답 — SHUTDOWN IMMEDIATE는 미커밋 트랜잭션을 자동 ROLLBACK한 후 종료합니다. 체크포인트를 수행하므로 인스턴스 복구는 불필요합니다. 롤백을 수행하지 않는 것은 SHUTDOWN ABORT입니다.\n\nC) 오답 — SHUTDOWN TRANSACTIONAL은 활성 트랜잭션이 COMMIT 또는 ROLLBACK으로 완료될 때까지 대기합니다. 트랜잭션이 없는 세션만 즉시 종료되며, 활성 트랜잭션이 있는 세션은 완료까지 대기합니다.\n\nD) 오답 — SHUTDOWN ABORT는 체크포인트를 수행하지 않으며, 파일을 정상적으로 닫지 않고 즉시 인스턴스를 종료합니다. 따라서 다음 기동 시 인스턴스 복구가 반드시 필요합니다.\n\n핵심 개념: SHUTDOWN 모드 4종(NORMAL/TRANSACTIONAL/IMMEDIATE/ABORT) 중 ABORT만이 체크포인트를 수행하지 않아 인스턴스 복구가 필요합니다. NORMAL/TRANSACTIONAL/IMMEDIATE는 모두 Clean Shutdown으로 인스턴스 복구가 불필요합니다."
   },
   {
@@ -23,25 +25,15 @@
       "D) V$ビューはディスク上のデータ・ディクショナリを読み取るため、読取り一貫性が保証される。",
       "E) V$ビューへのアクセスにはDBA_ROLE権限のみが必要であり、他の権限は不要である。"
     ],
-    "answer": ["B", "C"],
+    "answer": [
+      "B",
+      "C"
+    ],
     "explanation": "정답: B, C\nB) 정답 — V$DATABASE 뷰는 컨트롤 파일의 정보(데이터베이스 이름, OPEN_MODE, LOG_MODE 등)를 표시하므로, 컨트롤 파일이 열리는 MOUNT 상태 이상에서 참조할 수 있습니다.\n\nC) 정답 — V$ 뷰는 SGA 메모리 내의 커널 데이터 구조를 SQL로 접근 가능하게 한 읽기 전용 가상 테이블이며, 인스턴스 종료 시 SGA가 해제되므로 누적 통계가 초기화됩니다.\n\nA) 오답 — V$INSTANCE 뷰는 SGA 할당 후 사용 가능하므로, NOMOUNT 상태부터 참조할 수 있습니다. MOUNT 이상이 아니라 NOMOUNT 이상입니다.\n\nD) 오답 — V$ 뷰는 디스크가 아닌 SGA 메모리를 직접 읽으므로, 조회 중에도 데이터가 변경될 수 있어 완벽한 읽기 일관성이 보장되지 않습니다.\n\nE) 오답 — V$ 뷰 조회에는 SELECT_CATALOG_ROLE 또는 SELECT ANY DICTIONARY 시스템 권한이 필요합니다. DBA_ROLE만으로 접근이 보장되는 것은 아닙니다.\n\n핵심 개념: V$ 뷰(동적 성능 뷰)는 SGA 메모리 기반의 읽기 전용 가상 테이블로, 인스턴스 상태(NOMOUNT/MOUNT/OPEN)에 따라 참조 가능한 범위가 달라지며, 인스턴스 재시작 시 누적 통계가 초기화됩니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_003",
-    "title": "自動診断リポジトリ(ADR)のアラート・ログに関して正しく述べているものを選択してください。",
-    "options": [
-      "A) アラート・ログの保存場所はV$DIAG_INFOビューで確認でき、データベースがNOMOUNT状態からでも参照可能である。",
-      "B) アラート・ログにはユーザーが実行した個々のSELECT文やDML文の実行履歴が記録される。",
-      "C) アラート・ログはOracle Databaseにより定期的に自動でローテーションされるため、手動での管理は不要である。",
-      "D) アラート・ログはSYSAUX表領域に格納されており、SQLでのみ参照が可能である。"
-    ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — V$DIAG_INFO 뷰로 ADR Home 경로와 Alert Log 위치를 SQL로 확인할 수 있으며, 이 뷰는 SGA 기반이므로 NOMOUNT 상태부터 참조 가능합니다. Alert Log는 ADR 디렉터리 구조 내의 trace/ 및 alert/ 디렉터리에 파일로 저장됩니다.\n\nB) 오답 — Alert Log에는 데이터베이스의 기동/종료, Redo 로그 전환, 체크포인트, ORA-에러 등 주요 운영 이벤트가 기록됩니다. 개별 사용자의 SELECT문이나 DML문 실행 이력은 기록되지 않습니다.\n\nC) 오답 — Alert Log는 자동 로테이션되지 않으므로, OS 레벨에서 주기적으로 관리(백업/삭제)해야 합니다. 방치하면 파일 크기가 계속 증가합니다.\n\nD) 오답 — Alert Log는 SYSAUX 표영역이 아닌 파일 시스템(ADR 디렉터리)에 저장됩니다. SQL(V$DIAG_ALERT_EXT 뷰)로도 조회 가능하고, ADRCI 도구나 OS 레벨의 텍스트 편집기로도 확인할 수 있습니다.\n\n핵심 개념: Alert Log는 ADR(DIAGNOSTIC_DEST 하위 파일 시스템)에 관리되며, 기동/종료/에러 등 주요 이벤트가 기록됩니다. V$DIAG_INFO로 경로를 확인하고, V$DIAG_ALERT_EXT나 ADRCI로 내용을 조회할 수 있습니다."
-  },
-  {
-    "chapter": "データベース・インスタンスの管理の説明",
-    "number": "C_03_004",
     "title": "SPFILE(サーバー・パラメータ・ファイル)に関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) SPFILEはバイナリ形式のファイルであり、テキスト・エディタで直接編集するとファイルが破損してインスタンスが起動できなくなる可能性がある。",
@@ -50,20 +42,42 @@
       "D) CREATE PFILE FROM SPFILEコマンドでSPFILEの内容をテキスト形式のPFILEとして抽出し、バックアップとして保管できる。",
       "E) STARTUPコマンドのオプションでSPFILEの場所を直接指定して起動することができる。"
     ],
-    "answer": ["A", "D"],
+    "answer": [
+      "A",
+      "D"
+    ],
     "explanation": "정답: A, D\nA) 정답 — SPFILE은 바이너리 형식의 서버 파라미터 파일로, Oracle이 내부적으로 관리합니다. 텍스트 에디터로 직접 편집하면 바이너리 헤더가 손상되어 인스턴스 기동 시 ORA-01078 오류가 발생할 수 있습니다.\n\nD) 정답 — CREATE PFILE FROM SPFILE 명령으로 SPFILE의 내용을 텍스트 형식의 PFILE로 추출할 수 있습니다. 이를 통해 파라미터 설정 내용을 확인하거나 백업으로 보관할 수 있으며, SPFILE 손상 시 복구에도 활용됩니다.\n\nB) 오답 — SPFILE 환경에서 ALTER SYSTEM SET의 SCOPE 기본값은 BOTH(메모리 + SPFILE 동시 반영)입니다. MEMORY가 아닙니다.\n\nC) 오답 — 정적(Static) 파라미터는 인스턴스 기동 시에만 설정되므로 실행 중에 메모리를 변경할 수 없습니다. 따라서 SCOPE=SPFILE만 사용 가능하며, SCOPE=BOTH를 지정하면 ORA-02095 오류가 발생합니다.\n\nE) 오답 — STARTUP 명령에서 직접 지정할 수 있는 것은 PFILE뿐입니다(STARTUP PFILE='경로'). SPFILE의 위치를 변경하려면 PFILE 내에 SPFILE 파라미터로 경로를 지정해야 합니다.\n\n핵심 개념: SPFILE은 Oracle 권장 바이너리 파라미터 파일로, ALTER SYSTEM으로만 변경해야 합니다. SCOPE의 기본값은 BOTH이며, 정적 파라미터는 SCOPE=SPFILE만 가능합니다. STARTUP 명령에서는 PFILE만 직접 지정할 수 있습니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
-    "number": "C_03_005",
-    "title": "CDB環境において、CDB再起動後にPDBを自動的にオープンする方法について正しく述べているものを選択してください。",
+    "number": "C_03_004",
+    "title": "Oracleデータベースの各種STARTUPオプションに関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) CDBを起動するとすべてのPDBは自動的にREAD WRITE状態でオープンされる。",
-      "B) ALTER PLUGGABLE DATABASE ALL SAVE STATEを実行すると、すべてのPDBの現在のオープン状態がCDB$ROOTのデータ・ディクショナリに保存され、次回CDB起動時に自動的に復元される。",
-      "C) SAVE STATE情報が保存されたPDBのオープン状態を確認するにはV$PDBSビューを使用する。",
-      "D) SAVE STATEの設定は一度行うと解除することができず、PDBは常に自動オープンされる。"
+      "A) STARTUP RESTRICTを実行すると、RESTRICTED SESSION権限を持つユーザーのみがデータベースに接続できる状態でオープンされる。",
+      "B) STARTUP FORCEは内部的にSHUTDOWN IMMEDIATEを実行した後にSTARTUPを実行する。",
+      "C) STARTUP MOUNT後にALTER DATABASE OPEN READ ONLYを実行すると、データベースは読取り専用でオープンされ、一時表領域への書込みも不可となる。",
+      "D) ALTER SYSTEM ENABLE RESTRICTED SESSIONを実行しても、既に接続中のセッションは切断されない。",
+      "E) STARTUP UPGRADEは通常の運用時に使用するコマンドであり、一般ユーザーの接続を許可する。"
     ],
-    "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — ALTER PLUGGABLE DATABASE ALL SAVE STATE 명령으로 모든 PDB의 현재 오픈 상태를 CDB$ROOT의 데이터 딕셔너리에 저장할 수 있습니다. CDB 재기동 시 Oracle은 저장된 상태 정보를 확인하여 해당 PDB를 이전 상태(READ WRITE 등)로 자동 오픈합니다.\n\nA) 오답 — CDB를 STARTUP하면 CDB$ROOT는 자동으로 OPEN되지만, 사용자 PDB는 기본적으로 MOUNTED 상태입니다. PDB를 사용하려면 별도로 OPEN하거나 SAVE STATE를 미리 설정해야 합니다.\n\nC) 오답 — V$PDBS 뷰는 PDB의 현재 오픈 상태(OPEN_MODE)를 확인하는 용도이며, SAVE STATE로 저장된 상태 정보를 확인하려면 DBA_PDB_SAVED_STATES 뷰를 사용해야 합니다.\n\nD) 오답 — ALTER PLUGGABLE DATABASE <PDB명> DISCARD STATE 명령으로 저장된 상태를 해제할 수 있습니다. 해제 후에는 CDB 재기동 시 해당 PDB가 MOUNTED 상태로 시작됩니다.\n\n핵심 개념: CDB 재기동 시 PDB는 기본적으로 MOUNTED 상태이며, SAVE STATE를 설정하면 이전 오픈 상태가 자동 복원됩니다. DISCARD STATE로 설정을 해제할 수 있으며, DBA_PDB_SAVED_STATES 뷰로 저장 상태를 확인합니다."
+    "answer": [
+      "A",
+      "D"
+    ],
+    "explanation": "정답: A, D\nA) 정답 — STARTUP RESTRICT는 데이터베이스를 OPEN하되, RESTRICTED SESSION 시스템 권한을 가진 사용자만 접속 가능한 상태로 시작합니다. 유지보수, 마이그레이션, 대규모 데이터 로드 시 일반 사용자 접속을 차단할 때 사용합니다.\n\nD) 정답 — ALTER SYSTEM ENABLE RESTRICTED SESSION 명령으로 OPEN 상태에서 제한 모드로 전환할 수 있지만, 이미 접속 중인 세션은 끊기지 않습니다. 새로운 접속만 RESTRICTED SESSION 권한이 있는 사용자로 제한됩니다.\n\nB) 오답 — STARTUP FORCE는 내부적으로 SHUTDOWN ABORT + STARTUP을 수행합니다. SHUTDOWN IMMEDIATE가 아닙니다. 인스턴스가 비정상 상태(Hang)에서 재기동이 필요할 때 사용하며, 다음 기동 시 인스턴스 복구가 수행됩니다.\n\nC) 오답 — READ ONLY 모드에서는 데이터 파일에 대한 쓰기가 불가하지만, 임시 테이블스페이스에는 쓰기가 가능합니다. 소트 작업 등에 필요한 임시 영역 사용은 허용됩니다.\n\nE) 오답 — STARTUP UPGRADE는 데이터베이스 업그레이드 스크립트 실행 시에 사용되는 특수 모드이며, 일반 사용자의 접속을 허가하지 않습니다. 통상 운용에서는 사용하지 않습니다.\n\n핵심 개념: STARTUP에는 RESTRICT, FORCE, MOUNT, NOMOUNT, UPGRADE, READ ONLY 등 다양한 옵션이 있으며, RESTRICTED 모드는 OPEN 후에도 ALTER SYSTEM으로 동적 전환이 가능합니다. 기존 세션에는 영향을 주지 않고 새로운 접속만 제한합니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_005",
+    "title": "OracleデータベースがMOUNT状態のときに実行可能な操作として正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) データ・ディクショナリを参照して表のメタデータを確認する。",
+      "B) ARCHIVELOGモードからNOARCHIVELOGモードへの変更を行う。",
+      "C) 一般ユーザーがSELECT文を使用してデータを照会する。",
+      "D) オンラインREDOログ・ファイルをオープンして内容を検証する。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — ALTER DATABASE ARCHIVELOG / NOARCHIVELOG 명령에 의한 아카이브 로그 모드 변경은 MOUNT 상태에서만 수행할 수 있습니다. 이 외에도 MOUNT 상태에서는 데이터 파일 이름/위치 변경(ALTER DATABASE RENAME FILE), Redo 로그 그룹 추가/삭제, 미디어 복구 수행 등의 관리 작업이 가능합니다.\n\nA) 오답 — 데이터 딕셔너리는 SYSTEM 테이블스페이스의 데이터 파일에 저장되어 있으며, MOUNT 상태에서는 데이터 파일이 열리지 않으므로 접근할 수 없습니다. 데이터 딕셔너리 참조는 OPEN 상태에서만 가능합니다.\n\nC) 오답 — 일반 사용자의 접속과 데이터 조회는 OPEN 상태에서만 가능합니다. MOUNT 상태에서는 데이터 파일이 열리지 않으므로 SELECT문을 실행할 수 없습니다.\n\nD) 오답 — MOUNT 상태에서 컨트롤 파일은 열리지만, 온라인 Redo 로그 파일은 열리지 않습니다. 컨트롤 파일에서 Redo 로그의 경로 정보만 인식할 뿐이며, 실제 Redo 로그 파일의 오픈은 OPEN 단계에서 수행됩니다.\n\n핵심 개념: MOUNT 상태는 컨트롤 파일만 열린 상태로, 아카이브 로그 모드 변경, 데이터 파일 이름 변경, 미디어 복구 등 데이터 파일이 열리기 전에 수행해야 하는 관리 작업을 처리하는 단계입니다."
   }
 ]

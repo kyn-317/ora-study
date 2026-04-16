@@ -2,33 +2,6 @@
   {
     "chapter": "ストレージの管理",
     "number": "C_07_026",
-    "title": "DBAがV$SYSSTATビューを使用してシステム統計を確認したところ、以下の結果が得られました。\n\nSQL> SELECT name, value\n     FROM v$sysstat\n     WHERE name = 'table fetch continued row';\n\nNAME                             VALUE\n-------------------------------  ----------\ntable fetch continued row           385000\n\nこの統計値が継続的に増加している場合の分析と対応として正しいものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) 'table fetch continued row'の値が継続的に増加していることは、行移行（Row Migration）または行連鎖（Row Chaining）が発生していることを示唆しており、追加のI/Oによりパフォーマンスが低下している可能性がある。",
-      "B) 'table fetch continued row'はFull Table Scanの実行回数を示す統計であるため、索引の作成によって解決すべきである。",
-      "C) 行移行が原因である場合、対象テーブルに対してALTER TABLE MOVEまたはSHRINK SPACEを実行してデータを再配置し、行移行を解消することが有効な対策である。",
-      "D) この統計値が高い場合、テーブルのPCTFREEを0%に設定することで行移行の発生を防止できる。",
-      "E) 行連鎖が原因である場合、SHRINK SPACEを実行すれば行連鎖は完全に解消される。"
-    ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — V$SYSSTAT의 'table fetch continued row' 통계는 행 접근 시 다른 블록으로의 추가 접근(continued fetch)이 발생한 횟수를 나타냅니다. 이 값이 지속적으로 증가하면 Row Migration(행 이동) 또는 Row Chaining(행 연쇄)이 심각한 상태이며, 단일 행 접근 시 추가 I/O가 발생하여 성능이 저하됩니다.\n\nC) 정답 — Row Migration이 원인인 경우, ALTER TABLE MOVE(새 세그먼트에 데이터 재구성) 또는 SHRINK SPACE(기존 세그먼트 내 재배치)를 실행하면 이동된 행이 원래 위치에 재배치되어 포인터 추적이 불필요해집니다. 동시에 PCTFREE를 적절히 증가시켜 향후 Row Migration 재발을 방지하는 것이 권장됩니다.\n\nB) 오답 — 'table fetch continued row'는 Full Table Scan 실행 횟수가 아니라, 행 접근 시 다른 블록으로의 추가 접근 횟수를 나타내는 통계입니다. 인덱스 생성은 이 문제의 해결 방법이 아닙니다.\n\nD) 오답 — PCTFREE를 0%로 설정하면 블록 내에 UPDATE를 위한 여유 공간이 전혀 없으므로, UPDATE로 행 크기가 조금이라도 증가하면 Row Migration이 오히려 더 빈번하게 발생합니다. Row Migration을 방지하려면 PCTFREE를 적절히 증가시켜야 합니다.\n\nE) 오답 — Row Chaining은 행의 전체 크기가 블록 크기보다 큰 구조적 원인으로 발생하므로, SHRINK SPACE로는 해소되지 않습니다. Row Chaining을 해결하려면 더 큰 블록 크기를 사용하는 테이블스페이스로 이동하거나 테이블을 재설계해야 합니다.\n\n핵심 개념: V$SYSSTAT의 'table fetch continued row'는 Row Migration/Chaining 발생 빈도를 모니터링하는 핵심 통계입니다. Row Migration은 PCTFREE 증가와 ALTER TABLE MOVE/SHRINK SPACE로 해결 가능하지만, Row Chaining은 블록 크기 변경이나 테이블 재설계가 필요한 구조적 문제입니다."
-  },
-  {
-    "chapter": "ストレージの管理",
-    "number": "C_07_027",
-    "title": "DBAがMSSM（手動セグメント領域管理）環境のテーブルの空間を回収する必要があります。以下の操作を実行しようとしましたがエラーが発生しました。\n\nSQL> ALTER TABLE hr.orders SHRINK SPACE;\nORA-10636: ROW MOVEMENT is not enabled\n\nSQL> ALTER TABLE hr.orders ENABLE ROW MOVEMENT;\n\nSQL> ALTER TABLE hr.orders SHRINK SPACE;\nORA-10635: Invalid segment or tablespace type\n\nこのエラーの原因と適切な対応策として正しいものを選択してください。",
-    "options": [
-      "A) SHRINK SPACEはASSM（自動セグメント領域管理）環境でのみサポートされるため、MSSM環境ではALTER TABLE MOVEを使用して空間を回収する必要がある。",
-      "B) MSSM環境では先にPCTUSEDの値を0に設定してからSHRINK SPACEを実行する必要がある。",
-      "C) エラーの原因はROW MOVEMENTの設定順序であり、テーブル作成時にROW MOVEMENTを有効にしていれば正常に動作する。",
-      "D) MSSM環境ではSEGMENT CREATION IMMEDIATEを指定してテーブルを再作成する必要がある。"
-    ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — SHRINK SPACE는 ASSM(Automatic Segment Space Management) 테이블스페이스에서만 지원됩니다. MSSM(Manual Segment Space Management) 환경에서는 비트맵 기반 공간 관리가 아닌 Freelist 방식을 사용하므로 SHRINK SPACE를 실행할 수 없으며, ORA-10635 오류가 발생합니다. 대안으로 ALTER TABLE MOVE를 사용하여 테이블을 새 세그먼트로 재구성함으로써 공간을 회수해야 합니다.\n\nB) 오답 — PCTUSED 값 설정은 SHRINK SPACE의 전제조건과 관련이 없습니다. SHRINK SPACE가 MSSM에서 지원되지 않는 것은 세그먼트 관리 방식(비트맵 vs Freelist)의 차이 때문이며, PCTUSED를 변경해도 해결되지 않습니다.\n\nC) 오답 — ROW MOVEMENT의 설정 시점(테이블 생성 시 vs 이후)은 SHRINK SPACE 동작에 영향을 주지 않습니다. 첫 번째 ORA-10636 오류는 ROW MOVEMENT가 비활성 상태였기 때문이고, ROW MOVEMENT를 활성화한 후에도 발생한 ORA-10635 오류는 MSSM 테이블스페이스에서 SHRINK가 지원되지 않기 때문입니다.\n\nD) 오답 — SEGMENT CREATION IMMEDIATE는 지연 세그먼트 생성과 관련된 설정으로, SHRINK SPACE의 실행 가능 여부와는 무관합니다. MSSM 환경에서 공간을 회수하려면 ALTER TABLE MOVE를 사용해야 합니다.\n\n핵심 개념: SHRINK SPACE의 전제조건은 ROW MOVEMENT ENABLE과 ASSM 테이블스페이스입니다. MSSM 환경에서는 ALTER TABLE MOVE가 공간 회수의 대안이며, MOVE 후에는 인덱스가 UNUSABLE 상태가 되므로 ALTER INDEX REBUILD가 필요합니다."
-  },
-  {
-    "chapter": "ストレージの管理",
-    "number": "C_07_028",
     "title": "ASSM（自動セグメント領域管理）環境のHWMに関する内部動作について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) ASSMではLow HWMとHigh HWMの2種類のHWMが管理されており、Low HWM以下のブロックはすべてフォーマット済みである。",
@@ -37,12 +10,15 @@
       "D) MSSM（手動セグメント領域管理）環境でもLow HWMとHigh HWMの2種類が使用される。",
       "E) INSERT操作はLow HWMとHigh HWMの間のフォーマットされていないブロックを優先的に使用する。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — ASSM(Automatic Segment Space Management) 환경에서는 Low HWM과 High HWM 두 종류의 HWM이 관리됩니다. Low HWM 이하의 블록은 모두 포맷 완료 상태이며, 데이터가 기록된 적이 있거나 INSERT를 위해 준비된 블록입니다.\n\nC) 정답 — Low HWM과 High HWM 사이의 영역에는 포맷된 블록과 아직 포맷되지 않은 블록이 혼재합니다. Full Table Scan 시 Oracle은 High HWM까지의 모든 블록을 읽어야 하며, Low HWM과 High HWM 사이의 블록은 포맷 여부를 확인한 후 데이터가 있는 블록만 처리합니다.\n\nB) 오답 — Full Table Scan은 Low HWM이 아닌 High HWM까지의 모든 블록을 읽습니다. Low HWM까지만 읽으면 Low HWM과 High HWM 사이에 있는 유효한 데이터를 놓칠 수 있습니다.\n\nD) 오답 — MSSM(Manual Segment Space Management) 환경에서는 단일 HWM만 사용됩니다. Low HWM과 High HWM의 구분은 ASSM의 비트맵 기반 공간 관리에서만 적용되는 개념입니다.\n\nE) 오답 — INSERT 작업은 Low HWM과 High HWM 사이의 포맷되지 않은 블록을 '우선적으로' 사용하는 것이 아닙니다. ASSM에서는 비트맵이 블록의 여유 공간 상태를 추적하며, 빈 공간이 있는 블록(Low HWM 이하 포함)에 먼저 삽입을 시도합니다.\n\n핵심 개념: ASSM 환경의 Low HWM(모든 블록 포맷 완료)과 High HWM(포맷된 최고 블록) 구분은 Full Table Scan의 읽기 범위를 결정합니다. Full Table Scan은 High HWM까지 읽으며, Low HWM ~ High HWM 사이 블록은 포맷 여부를 확인합니다. MSSM에서는 단일 HWM만 사용됩니다."
   },
   {
     "chapter": "ストレージの管理",
-    "number": "C_07_029",
+    "number": "C_07_027",
     "title": "Oracle DatabaseのINDEX COALESCE操作とINDEX REBUILD操作の内部動作の違いについて正しく述べているものを選択してください。",
     "options": [
       "A) ALTER INDEX COALESCEはインデックス全体を新しいセグメントとして再作成するため、追加のディスク領域が必要である。",
@@ -50,12 +26,14 @@
       "C) ALTER INDEX REBUILDは既存のインデックス・セグメント内でブロックを再配置するため、追加のディスク領域は不要である。",
       "D) ALTER INDEX COALESCEとALTER INDEX REBUILDはいずれもUNUSABLE状態のインデックスに対して実行可能である。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — ALTER INDEX COALESCE는 인접한 리프 블록의 인덱스 엔트리를 병합하여 빈 리프 블록을 해제하는 가벼운 작업입니다. 인덱스 세그먼트 전체를 재구축하지 않고 리프 블록 수준에서만 정리하므로, REBUILD에 비해 빠르고 자원 소모가 적습니다.\n\nA) 오답 — 인덱스 전체를 새 세그먼트로 재생성하는 것은 ALTER INDEX REBUILD의 동작 방식입니다. COALESCE는 기존 인덱스 세그먼트 내에서 리프 블록만 정리하므로 추가 디스크 공간이 필요하지 않습니다.\n\nC) 오답 — ALTER INDEX REBUILD는 기존 인덱스 데이터를 읽어 새로운 인덱스 세그먼트를 생성하는 방식으로 동작합니다. 작업 중에는 기존 세그먼트와 새 세그먼트가 동시에 존재하므로 추가 디스크 공간이 필요합니다.\n\nD) 오답 — ALTER INDEX COALESCE는 UNUSABLE 상태의 인덱스에는 실행할 수 없습니다. UNUSABLE 인덱스는 세그먼트가 삭제된 상태이므로 병합할 리프 블록이 존재하지 않습니다. UNUSABLE 인덱스를 복구하려면 ALTER INDEX REBUILD를 사용해야 합니다.\n\n핵심 개념: COALESCE는 기존 인덱스 세그먼트 내에서 리프 블록을 병합하는 가벼운 정리 작업이고, REBUILD는 인덱스를 완전히 새로 구축하는 작업입니다. COALESCE는 추가 공간이 불필요하고 빠르지만 단편화가 심한 경우 효과가 제한적이며, REBUILD는 인덱스를 최적 상태로 재구성하지만 추가 공간과 시간이 필요합니다."
   },
   {
     "chapter": "ストレージの管理",
-    "number": "C_07_030",
+    "number": "C_07_028",
     "title": "大量のデータ・ロード処理の性能向上のため、DBAが以下の手順を計画しています。\n\n手順1: 対象テーブルの索引をUNUSABLE状態に設定\n手順2: INSERT /*+ APPEND */ ... SELECT文でデータをロード\n手順3: 索引をREBUILD\n\nこの手順に関して正しく述べているものを選択してください。",
     "options": [
       "A) 手順1で索引をUNUSABLEにすると索引セグメントが削除されるため、手順2のデータ・ロード時に索引メンテナンスのオーバーヘッドが排除され、ロード速度が向上する。",
@@ -63,7 +41,26 @@
       "C) 手順2のDirect-Path InsertはHWM以下の空きブロックを再利用するため、索引がUNUSABLEでなくても同等のロード速度が得られる。",
       "D) 手順3でALTER INDEX REBUILD ONLINEを使用すれば、手順2のデータ・ロードと手順3のREBUILDを並行して同時に実行することができる。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — ALTER INDEX ... UNUSABLE을 실행하면 인덱스 세그먼트가 삭제되고, 이후 DML 시 인덱스 유지관리가 수행되지 않습니다. 대량 데이터 적재 시 인덱스 유지관리는 상당한 오버헤드(인덱스 블록 분할, 정렬, I/O 등)를 유발하므로, 인덱스를 UNUSABLE로 설정한 후 적재하면 적재 속도가 크게 향상됩니다. 적재 완료 후 ALTER INDEX ... REBUILD로 인덱스를 재구성하는 전략은 대량 적재의 표준적인 성능 최적화 기법입니다.\n\nB) 오답 — SKIP_UNUSABLE_INDEXES의 기본값은 TRUE이며, FALSE가 아닙니다. 기본값(TRUE)에서는 UNUSABLE 인덱스가 있어도 DML이 정상적으로 수행됩니다. FALSE로 설정된 경우에만 ORA-01502 오류가 발생합니다.\n\nC) 오답 — Direct-Path Insert(INSERT /*+ APPEND */)는 HWM 이하의 빈 블록을 재사용하지 않고, 항상 HWM 위에 새로운 블록을 할당하여 기록합니다. 또한 인덱스가 유효한 상태에서 Direct-Path Insert를 수행하면 인덱스 유지관리 오버헤드가 발생하므로, 인덱스를 UNUSABLE로 설정하는 것이 더 빠릅니다.\n\nD) 오답 — REBUILD ONLINE은 DML 동시 수행이 가능한 온라인 재구성이지만, 인덱스가 UNUSABLE 상태에서는 인덱스 세그먼트가 없으므로 먼저 데이터 적재가 완료된 후에 REBUILD를 수행해야 합니다. 데이터 적재와 REBUILD를 동시에 병행하면 REBUILD 중에 적재되는 데이터는 인덱스에 반영되지 않아 불완전한 인덱스가 생성될 수 있습니다.\n\n핵심 개념: 대량 데이터 적재 시 인덱스 UNUSABLE 설정 -> 데이터 적재 -> REBUILD 전략은 인덱스 유지관리 오버헤드를 제거하여 적재 속도를 크게 향상시키는 표준 기법입니다. SKIP_UNUSABLE_INDEXES의 기본값은 TRUE이므로 UNUSABLE 인덱스가 있어도 DML은 정상 수행되며, 적재 완료 후 REBUILD를 순차적으로 수행해야 합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_029",
+    "title": "Oracle AI Databaseにおいて、DELETE文で大量の行を削除した後にFull Table Scanの実行時間が改善されない原因と対処方法について、内部メカニズムの観点から正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) DELETE文は行データを削除するがHigh Water Mark(HWM)を下げないため、Full Table ScanではHWMまでのすべてのブロック(空のブロックを含む)が読み込まれる。",
+      "B) ALTER TABLE ... SHRINK SPACE文を実行するとデータが再配置されHWMが下がるが、この操作には事前にALTER TABLE ... ENABLE ROW MOVEMENTの設定が必要である。",
+      "C) DELETE文を実行した後は、チェックポイントが発生すれば自動的にHWMが下がるため、待機するだけで性能が改善される。",
+      "D) TRUNCATE TABLE文はDELETE文と同様にHWMを変更しないため、Full Table Scanの性能改善にはSHRINK SPACE文のみが有効である。",
+      "E) HWMはセグメントのメタデータとしてSGA内のバッファ・キャッシュにのみ保持されるため、インスタンスの再起動によりリセットされる。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — DELETE 문은 행 데이터를 삭제하지만 HWM(High Water Mark)는 하향시키지 않습니다. Oracle의 Full Table Scan은 HWM 아래의 모든 블록을 읽으므로, 대량 삭제 후에도 빈 블록까지 읽게 되어 성능이 개선되지 않습니다.\n\nB) 정답 — ALTER TABLE ... SHRINK SPACE는 세그먼트 내 데이터를 재배치(Compact)한 후 HWM을 하향시킵니다. 이 작업은 행의 물리적 위치(ROWID)가 변경되므로, 사전에 ALTER TABLE ... ENABLE ROW MOVEMENT를 실행하여 행 이동을 허용해야 합니다.\n\nC) 오답 — 체크포인트는 더티 버퍼를 데이터 파일에 기록하는 작업이며, HWM과는 관련이 없습니다. DELETE 후 체크포인트가 발생하더라도 HWM은 하향되지 않습니다. HWM을 내리려면 SHRINK SPACE, ALTER TABLE MOVE, TRUNCATE 등의 명시적 작업이 필요합니다.\n\nD) 오답 — TRUNCATE TABLE은 DELETE와 달리 HWM을 초기 위치로 리셋하며, 모든 익스텐트를 해제(MINEXTENTS 제외)합니다. 따라서 TRUNCATE 후에는 Full Table Scan 성능이 즉시 개선됩니다. SHRINK SPACE만이 유일한 방법인 것은 아닙니다.\n\nE) 오답 — HWM은 세그먼트의 메타데이터로 데이터 파일(세그먼트 헤더 블록)에 영구적으로 저장됩니다. SGA의 버퍼 캐시에만 존재하는 것이 아니므로, 인스턴스를 재시작해도 HWM은 리셋되지 않습니다.\n\n핵심 개념: DELETE는 행을 삭제하지만 HWM을 변경하지 않으므로 Full Table Scan 성능이 개선되지 않습니다. HWM을 내리려면 SHRINK SPACE(ROW MOVEMENT 필요), ALTER TABLE MOVE, 또는 TRUNCATE TABLE을 사용해야 합니다. HWM은 데이터 파일에 영구 저장되는 세그먼트 메타데이터입니다."
   }
 ]

@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_031",
+    "title": "REMOTE_LOGIN_PASSWORDFILEパラメータの設定値に関して正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) EXCLUSIVEに設定すると、1つのインスタンスのみがパスワード・ファイルを使用し、SYS以外のユーザーにもSYSDBAやSYSBACKUP等の管理権限を付与してパスワード・ファイルに登録できる。",
+      "B) SHAREDに設定すると、複数のインスタンスがパスワード・ファイルを共有でき、新たなユーザーをパスワード・ファイルに追加登録することが可能である。",
+      "C) NONEに設定すると、パスワード・ファイルを使用しないため、リモートからのSYSDBA接続ができなくなるが、ローカルからのOS認証によるSYSDBA接続は引き続き可能である。",
+      "D) EXCLUSIVEとSHAREDの違いは接続速度のみであり、いずれの設定でもSYS以外の管理ユーザーをパスワード・ファイルに登録できる。",
+      "E) デフォルト値はNONEであり、パスワード・ファイルを使用するにはパラメータを明示的にEXCLUSIVEまたはSHAREDに変更する必要がある。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — REMOTE_LOGIN_PASSWORDFILE=EXCLUSIVE로 설정하면, 하나의 인스턴스만 패스워드 파일을 사용합니다. 이 모드에서는 SYS 외의 사용자에게도 SYSDBA, SYSOPER, SYSBACKUP, SYSDG, SYSKM, SYSRAC 등의 관리 권한을 부여하여 패스워드 파일에 등록할 수 있습니다.\n\nC) 정답 — REMOTE_LOGIN_PASSWORDFILE=NONE으로 설정하면 패스워드 파일을 사용하지 않으므로 원격(네트워크 경유)에서의 SYSDBA 접속이 불가능해집니다. 그러나 로컬 환경에서는 OS 그룹 멤버십(dba 그룹 등)을 기반으로 한 OS 인증(sqlplus / as sysdba)이 여전히 가능합니다.\n\nB) 오답 — SHARED 모드에서는 여러 인스턴스(RAC 환경 등)가 패스워드 파일을 공유할 수 있지만, SYS와 기존 등록 사용자만 인증이 가능하며 새로운 사용자를 추가 등록할 수 없습니다. 새로운 관리 사용자를 등록하려면 EXCLUSIVE 모드가 필요합니다.\n\nD) 오답 — EXCLUSIVE와 SHARED의 차이는 접속 속도가 아니라, 패스워드 파일의 소유 형태와 사용자 추가 등록 가능 여부입니다. EXCLUSIVE에서는 SYS 외 사용자 등록이 가능하지만, SHARED에서는 불가능합니다.\n\nE) 오답 — REMOTE_LOGIN_PASSWORDFILE의 기본값은 EXCLUSIVE입니다. NONE이 기본값이 아니므로, 별도 설정 없이도 패스워드 파일을 사용한 원격 관리자 인증이 가능합니다.\n\n핵심 개념: REMOTE_LOGIN_PASSWORDFILE 파라미터는 EXCLUSIVE(기본값, 단일 인스턴스, SYS 외 사용자 등록 가능), SHARED(다중 인스턴스 공유, 신규 등록 불가), NONE(패스워드 파일 미사용, 원격 SYSDBA 접속 불가) 세 가지 값을 가지며, NONE 설정 시에도 로컬 OS 인증은 사용 가능합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_032",
+    "title": "REMOTE_LOGIN_PASSWORDFILEパラメータがEXCLUSIVEに設定されている環境で、GRANT SYSDBA TO C##BACKUP_ADMIN文を実行しました。この操作に関して正しく述べているものを選択してください。",
+    "options": [
+      "A) C##BACKUP_ADMINユーザーがパスワード・ファイルに自動的に登録され、V$PWFILE_USERSビューで確認できる。",
+      "B) SYSDBA権限を付与するにはorapwdユーティリティで事前にユーザーをパスワード・ファイルに手動登録しておく必要がある。",
+      "C) SYSDBAの代わりにSYSBACKUP権限を付与した場合、パスワード・ファイルには登録されないため、リモートからのSYSBACKUP接続はできない。",
+      "D) パスワード・ファイルに登録されたユーザーの一覧はDBA_SYS_PRIVSビューのみで確認でき、V$PWFILE_USERSビューには管理権限の情報は表示されない。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — REMOTE_LOGIN_PASSWORDFILE=EXCLUSIVE 모드에서 GRANT SYSDBA TO 사용자 명령을 실행하면, 해당 사용자가 자동으로 패스워드 파일에 등록됩니다. V$PWFILE_USERS 뷰에서 USERNAME, SYSDBA, SYSOPER, SYSBACKUP, SYSDG, SYSKM, SYSRAC 등의 컬럼을 통해 등록된 사용자와 부여된 관리 권한을 확인할 수 있습니다.\n\nB) 오답 — EXCLUSIVE 모드에서는 GRANT SYSDBA(또는 SYSOPER, SYSBACKUP 등) 명령 실행 시 해당 사용자가 패스워드 파일에 자동으로 등록됩니다. orapwd 유틸리티로 사전에 수동 등록할 필요가 없습니다. orapwd는 패스워드 파일 자체를 최초 생성할 때 사용하는 유틸리티입니다.\n\nC) 오답 — SYSBACKUP 권한을 부여한 경우에도 EXCLUSIVE 모드에서는 해당 사용자가 패스워드 파일에 자동 등록됩니다. SYSDBA뿐만 아니라 SYSOPER, SYSBACKUP, SYSDG, SYSKM, SYSRAC 등 모든 관리 권한의 부여가 패스워드 파일 자동 등록 대상입니다.\n\nD) 오답 — 패스워드 파일에 등록된 사용자 및 각 관리 권한은 V$PWFILE_USERS 뷰에서 확인할 수 있습니다. 이 뷰는 각 관리 권한(SYSDBA, SYSOPER, SYSBACKUP 등)의 부여 여부를 개별 컬럼으로 표시합니다. DBA_SYS_PRIVS는 시스템 권한의 부여 현황을 보여주지만 패스워드 파일 등록 여부를 확인하는 뷰는 아닙니다.\n\n핵심 개념: EXCLUSIVE 모드에서 GRANT SYSDBA/SYSOPER/SYSBACKUP 등의 관리 권한을 부여하면, 해당 사용자가 패스워드 파일에 자동 등록되어 원격 관리자 인증이 가능해집니다. V$PWFILE_USERS 뷰로 등록된 사용자와 각 관리 권한의 부여 상태를 확인할 수 있습니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_033",
+    "title": "Oracle Databaseの運用環境において、OPEN状態のデフォルト・アカウントを識別するために使用するクエリとして正しいものを選択してください。",
+    "options": [
+      "A) SELECT USERNAME, ACCOUNT_STATUS FROM DBA_USERS WHERE ACCOUNT_STATUS = 'OPEN' AND ORACLE_MAINTAINED = 'Y'で、SYSとSYSTEM以外にOPEN状態のOracle内部アカウントが存在するかを確認できる。",
+      "B) SELECT * FROM DBA_USERS_WITH_DEFPWDで、OPEN状態のすべてのデフォルト・アカウントを一覧表示できる。",
+      "C) SELECT USERNAME FROM V$PWFILE_USERS WHERE ACCOUNT_STATUS = 'OPEN'で、パスワード・ファイルに登録されたOPEN状態のアカウントを確認できる。",
+      "D) SELECT USERNAME, ACCOUNT_STATUS FROM ALL_USERSで、すべてのデフォルト・アカウントの状態(OPEN、LOCKED、EXPIRED)を確認できる。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — DBA_USERS 뷰의 ORACLE_MAINTAINED 컬럼이 'Y'인 계정은 Oracle 내부 관리 계정입니다. ACCOUNT_STATUS='OPEN'이면서 ORACLE_MAINTAINED='Y'인 계정을 조회하면, SYS와 SYSTEM 외에 활성화된 Oracle 내부 계정이 있는지 확인할 수 있습니다. 이러한 계정이 발견되면 보안 위험이 있으므로 잠금 처리가 필요합니다.\n\nB) 오답 — DBA_USERS_WITH_DEFPWD 뷰는 기본 비밀번호(Default Password)를 변경하지 않고 사용 중인 계정을 식별하는 뷰이지, OPEN 상태의 계정을 일괄 표시하는 뷰가 아닙니다. 계정 상태(OPEN, LOCKED, EXPIRED)에 관계없이 기본 비밀번호를 사용하는 계정을 보여줍니다.\n\nC) 오답 — V$PWFILE_USERS 뷰에는 ACCOUNT_STATUS 컬럼이 존재하지 않습니다. 이 뷰는 패스워드 파일에 등록된 사용자와 각 관리 권한(SYSDBA, SYSOPER, SYSBACKUP 등)의 부여 여부를 보여주는 뷰입니다. 계정 상태 확인은 DBA_USERS 뷰를 사용해야 합니다.\n\nD) 오답 — ALL_USERS 뷰에는 ACCOUNT_STATUS 컬럼이 포함되어 있지 않습니다. ALL_USERS는 현재 사용자가 볼 수 있는 사용자의 기본 정보(USERNAME, USER_ID, CREATED 등)만 제공합니다. 계정 상태를 포함한 상세 정보를 확인하려면 DBA_USERS 뷰를 사용해야 합니다.\n\n핵심 개념: 운영 환경에서 OPEN 상태의 기본 계정을 식별하려면 DBA_USERS 뷰의 ACCOUNT_STATUS와 ORACLE_MAINTAINED 컬럼을 조합하여 조회합니다. SYS, SYSTEM 외에 OPEN 상태인 Oracle 내부 계정이 있으면 보안 위험이므로 잠금 처리가 필요합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_034",
+    "title": "Oracle Databaseの運用環境へのデプロイ前に実施すべきデフォルト・アカウントのセキュリティ対策について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SYSおよびSYSTEMアカウントのパスワードをデータベース作成時のデフォルトから強力なパスワードに変更する。",
+      "B) HR、SH、SCOTTなどのサンプル・スキーマ・アカウントはデータベース作成時にOPEN状態であるため、運用環境では削除またはロックする必要がある。",
+      "C) DBA_USERS_WITH_DEFPWDビューでデフォルト・パスワードを使用しているアカウントを特定し、パスワードを変更する。",
+      "D) 使用しないOracle内部アカウント(DBSNMP、CTXSYS等)のロック状態を解除してパスワードを設定する必要がある。",
+      "E) すべてのデフォルト・アカウントのプロファイルをDEFAULTに統一し、個別のプロファイル設定は避けるべきである。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — SYS와 SYSTEM은 데이터베이스 생성 시 기본적으로 OPEN 상태인 관리자 계정입니다. 운영 환경 배포 전에 반드시 데이터베이스 생성 시 설정한 비밀번호를 강력한 비밀번호로 변경해야 합니다. 이는 기본 계정 보안의 가장 기본적인 단계입니다.\n\nC) 정답 — DBA_USERS_WITH_DEFPWD 뷰를 조회하면 기본 비밀번호를 변경하지 않고 그대로 사용 중인 계정을 식별할 수 있습니다. 이 뷰에 조회되는 계정은 즉시 비밀번호를 변경해야 하며, 이는 운영 환경 보안 점검의 필수 항목입니다.\n\nB) 오답 — HR, SH, SCOTT 등의 샘플 스키마 계정은 데이터베이스 생성 시 OPEN 상태가 아니라 LOCKED & EXPIRED 상태로 생성됩니다. 따라서 이미 잠금 상태이지만, 운영 환경에서는 이 계정들의 삭제가 권장됩니다. 잠금 해제 없이 삭제하거나 잠금 상태를 유지하는 것이 올바른 대책입니다.\n\nD) 오답 — 사용하지 않는 Oracle 내부 계정(DBSNMP, CTXSYS 등)은 잠금 해제가 아니라, LOCKED 상태를 유지해야 합니다. 불필요한 계정의 잠금을 해제하면 공격 표면(Attack Surface)이 넓어져 보안 위험이 증가합니다. 필요한 기능을 사용할 때에만 최소한으로 활성화해야 합니다.\n\nE) 오답 — 모든 계정의 프로파일을 DEFAULT로 통일하는 것은 적절한 보안 대책이 아닙니다. DEFAULT 프로파일의 자원 제한 파라미터는 UNLIMITED로 설정되어 있으므로, 보안 요구사항에 맞는 적절한 비밀번호 정책을 가진 커스텀 프로파일을 생성하여 활성 사용자에게 할당하는 것이 권장됩니다.\n\n핵심 개념: 운영 환경 배포 전 기본 계정 보안 대책으로, SYS/SYSTEM의 강력한 비밀번호 변경, DBA_USERS_WITH_DEFPWD로 기본 비밀번호 사용 계정 식별 및 변경, 불필요한 계정의 잠금 유지가 필수적입니다. 샘플 스키마 계정은 이미 LOCKED & EXPIRED 상태이므로 삭제 또는 유지가 적절합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_035",
+    "title": "マルチテナント環境において共通ロールに対する権限付与のCONTAINER句に関して正しく述べているものを選択してください。",
+    "options": [
+      "A) CDBルートで共通ロールに対してGRANT文を実行する際にCONTAINER句を省略すると、デフォルトでCONTAINER=CURRENTが適用され、CDBルートのみで権限が有効になる。",
+      "B) PDB内でGRANT文にCONTAINER=ALLを指定して共通ロールに権限を付与することが可能であり、すべてのコンテナに適用される。",
+      "C) 共通ロールにCONTAINER=ALLで権限を付与すると、その時点で存在するPDBにのみ権限が適用され、将来作成されるPDBには自動的に適用されない。",
+      "D) ローカル・ユーザーに共通ロールを付与する場合、CONTAINER=ALLの指定が必須であり、CONTAINER=CURRENTでは付与できない。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — CDB 루트에서 GRANT 문을 실행할 때 CONTAINER 절을 생략하면, 기본값으로 CONTAINER=CURRENT가 적용됩니다. 따라서 공통 롤에 권한을 부여하더라도 CDB 루트에서만 해당 권한이 유효하며, 모든 PDB에서 유효하게 하려면 명시적으로 CONTAINER=ALL을 지정해야 합니다.\n\nB) 오답 — PDB 내에서는 CONTAINER=ALL을 지정할 수 없습니다. CONTAINER=ALL은 CDB 루트에서만 사용 가능하며, PDB에서 이를 시도하면 오류가 발생합니다. PDB에서는 CONTAINER=CURRENT만 가능하며, 이 역시 기본값이므로 생략할 수 있습니다.\n\nC) 오답 — CONTAINER=ALL로 권한을 부여하면 현재 존재하는 PDB뿐만 아니라, 장래에 생성되는 PDB에도 자동으로 해당 권한이 적용됩니다. 공통 사용자와 공통 롤의 정의에 따라, 기존 및 미래의 모든 컨테이너에 걸쳐 권한이 전파됩니다.\n\nD) 오답 — 로컬 사용자에게 공통 롤을 부여할 때 CONTAINER=ALL의 지정이 필수가 아닙니다. PDB 내에서 로컬 사용자에게 공통 롤을 부여할 수 있으며, 이 경우 해당 PDB에서만 공통 롤의 권한이 유효합니다. PDB에서는 CONTAINER=CURRENT가 기본값이며, 이를 통해 공통 롤을 로컬 사용자에게 부여할 수 있습니다.\n\n핵심 개념: CDB 루트에서 GRANT 시 CONTAINER 절 미지정 시 기본값은 CONTAINER=CURRENT이며, 모든 컨테이너에 권한을 적용하려면 CONTAINER=ALL을 명시해야 합니다. CONTAINER=ALL은 CDB 루트에서만 사용 가능하고, PDB에서는 사용할 수 없습니다."
+  }
+]

@@ -2,60 +2,6 @@
   {
     "chapter": "Oracle Databaseアーキテクチャの説明",
     "number": "C_01_011",
-    "title": "Oracle Databaseのオンライン REDOログ・ファイルの構造と管理について正しく述べているものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) オンラインREDOログは最低2つ以上のグループが必要であり、LGWRプロセスは各グループを順環的に使用してREDOデータを記録する。",
-      "B) 同一グループ内のメンバー・ファイルにはそれぞれ異なる内容が記録され、障害時にメンバー間でデータを補完して復旧する。",
-      "C) CURRENT状態のREDOログ・グループを削除するには、ALTER SYSTEM CHECKPOINT を実行してINACTIVE状態に変更する必要がある。",
-      "D) ARCHIVELOG モードでは、ログ・スイッチ発生時にARCnプロセスが以前のREDOログ・グループをアーカイブ・ログとして保存する。",
-      "E) REDOログ・グループの追加は、データベースを停止した状態でのみ実行可能である。"
-    ],
-    "answer": ["A", "D"],
-    "explanation": "정답: A, D\nA) 정답 — 온라인 Redo Log는 최소 2개 이상의 그룹이 필요하며, LGWR 프로세스는 각 그룹을 순환 기록 방식(Circular Writing)으로 사용합니다. 현재 그룹이 가득 차면 다음 그룹으로 전환(로그 스위치)하여 Redo 데이터를 기록합니다.\n\nD) 정답 — ARCHIVELOG 모드에서는 로그 스위치가 발생하면 ARCn(Archiver) 프로세스가 이전 Redo Log 그룹의 내용을 아카이브 로그 파일로 복사합니다. 이를 통해 미디어 복구(Media Recovery)와 Point-in-Time Recovery가 가능해집니다.\n\nB) 오답 — 같은 그룹 내의 멤버 파일들은 Oracle이 동시에 동일한 내용을 기록합니다. 서로 다른 내용이 기록되는 것이 아니라 동일한 Redo 데이터의 복사본입니다. 다중화의 목적은 디스크 장애에 대한 보호입니다.\n\nC) 오답 — CURRENT 상태의 Redo Log 그룹은 현재 LGWR이 기록 중인 그룹이므로 삭제할 수 없습니다. CHECKPOINT를 실행해도 CURRENT 그룹이 INACTIVE로 바로 전환되지 않으며, 먼저 로그 스위치가 필요합니다.\n\nE) 오답 — ALTER DATABASE ADD LOGFILE 명령으로 데이터베이스가 열린(OPEN) 상태에서 Redo Log 그룹을 추가할 수 있습니다. 데이터베이스 중지가 필요하지 않습니다.\n\n핵심 개념: 온라인 Redo Log는 최소 2개 그룹을 순환 사용하며, 같은 그룹의 멤버는 동일 내용을 동시 기록합니다. ARCHIVELOG 모드에서 로그 스위치 시 ARCn이 아카이브 복사를 수행합니다. Redo Log 그룹 추가는 온라인 상태에서 가능하지만, CURRENT/ACTIVE 그룹은 삭제할 수 없습니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_012",
-    "title": "Oracle Databaseのデータ・ファイルと表領域の関係について正しく述べているものを選択してください。",
-    "options": [
-      "A) 1つのデータ・ファイルは複数の表領域にまたがって使用することが可能である。",
-      "B) データ・ファイルのAUTOEXTEND設定では、NEXT句で増分サイズを、MAXSIZE句で最大サイズを制御する。",
-      "C) 一時表領域に属するファイルの変更情報はREDOログに記録されるため、メディア・リカバリの対象となる。",
-      "D) データ・ファイルの情報はDBA_TEMP_FILESディクショナリ・ビューで確認する。"
-    ],
-    "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — 데이터 파일의 AUTOEXTEND 설정에서 NEXT 절은 자동 확장 시 증가하는 크기를, MAXSIZE 절은 자동 확장의 최대 크기를 제어합니다. 예를 들어 ALTER DATABASE DATAFILE ... AUTOEXTEND ON NEXT 100M MAXSIZE 10G와 같이 설정합니다.\n\nA) 오답 — 하나의 데이터 파일은 정확히 하나의 테이블스페이스에만 속합니다(N:1 매핑 불가). 반대로 하나의 테이블스페이스는 여러 데이터 파일로 구성할 수 있습니다(1:N 매핑).\n\nC) 오답 — 임시 테이블스페이스에 속하는 임시 파일(Temp File)은 Redo Log에 변경 사항이 기록되지 않습니다. 따라서 미디어 복구의 대상이 아니며, 필요 시 재생성하면 됩니다.\n\nD) 오답 — 일반 데이터 파일의 정보는 DBA_DATA_FILES 딕셔너리 뷰에서 확인합니다. DBA_TEMP_FILES는 임시 파일(Temp File)의 정보를 조회하는 뷰입니다.\n\n핵심 개념: 데이터 파일과 테이블스페이스는 N:1 관계로, 하나의 데이터 파일은 하나의 테이블스페이스에만 속합니다. AUTOEXTEND ON NEXT/MAXSIZE로 자동 확장을 설정하며, 일반 데이터 파일은 DBA_DATA_FILES, 임시 파일은 DBA_TEMP_FILES에서 조회합니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_013",
-    "title": "Oracle Databaseの論理的ストレージ構造の階層関係について正しく述べているものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) 1つのセグメントは1つの表領域内に存在するが、そのエクステントは複数のデータ・ファイルにまたがることが可能である。",
-      "B) 1つのエクステントは複数のデータ・ファイルにまたがって割り当てることが可能である。",
-      "C) エクステントは連続したデータ・ブロックの集合であり、セグメントへの最小の領域割当て単位である。",
-      "D) セグメントの作成は常にCREATE TABLE文の実行時に即時行われ、遅延することはない。",
-      "E) 表領域の管理方式としてディクショナリ管理がデフォルトであり、Oracle推奨の方式である。"
-    ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — 하나의 세그먼트는 하나의 테이블스페이스 내에 존재하지만, 그 세그먼트에 할당된 익스텐트는 해당 테이블스페이스를 구성하는 여러 데이터 파일에 걸쳐 존재할 수 있습니다.\n\nC) 정답 — 익스텐트는 물리적으로 연속된 데이터 블록들의 집합이며, 세그먼트에 공간이 할당될 때의 최소 할당 단위입니다. 세그먼트에 공간이 부족하면 새로운 익스텐트를 할당받아 확장합니다.\n\nB) 오답 — 하나의 익스텐트는 반드시 하나의 데이터 파일 내에 존재합니다. 익스텐트는 연속된 블록의 집합이므로 파일 간에 걸칠 수 없습니다. 여러 데이터 파일에 걸칠 수 있는 것은 세그먼트의 익스텐트 전체입니다.\n\nD) 오답 — Oracle 11gR2부터 지연 세그먼트 생성(Deferred Segment Creation, DEFERRED_SEGMENT_CREATION=TRUE가 기본값)이 지원되어, 테이블 생성 시 즉시 세그먼트를 할당하지 않고 첫 번째 행이 INSERT될 때까지 세그먼트 생성을 지연시킵니다.\n\nE) 오답 — 테이블스페이스의 기본 관리 방식은 로컬 관리(Locally Managed)이며, 이것이 Oracle 권장 방식입니다. 딕셔너리 관리(Dictionary Managed)는 레거시 방식으로 비권장됩니다.\n\n핵심 개념: Oracle의 논리적 저장 구조는 테이블스페이스→세그먼트→익스텐트→데이터 블록의 4단계 계층입니다. 세그먼트는 하나의 테이블스페이스에 존재하되 여러 데이터 파일에 익스텐트를 가질 수 있으며, 하나의 익스텐트는 반드시 단일 데이터 파일 내의 연속 블록입니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_014",
-    "title": "Oracle DatabaseのSMALLFILE表領域とBIGFILE表領域について正しく述べているものを選択してください。",
-    "options": [
-      "A) BIGFILE表領域は1つの表領域に対してデータ・ファイルを1つのみ持ち、大容量の単一ファイルとして管理される。",
-      "B) SMALLFILE表領域はデータ・ファイルを1つのみ保持できるため、容量の拡張には新しい表領域の作成が必要である。",
-      "C) BIGFILE表領域がデフォルトの表領域タイプであり、明示的にSMALLFILEを指定しない限りBIGFILEとして作成される。",
-      "D) BIGFILE表領域は永続表領域としてのみ使用可能であり、一時表領域やUNDO表領域には使用できない。"
-    ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — BIGFILE 테이블스페이스는 정확히 1개의 데이터 파일만 가질 수 있으며, 단일 파일이 최대 약 32TB(8KB 블록 기준)까지 확장 가능한 대용량 테이블스페이스입니다. ASM이나 대용량 데이터 환경에 적합합니다.\n\nB) 오답 — SMALLFILE 테이블스페이스는 여러 데이터 파일(최대 1022개)로 구성할 수 있으며, ALTER TABLESPACE ADD DATAFILE 명령으로 데이터 파일을 추가하여 용량을 확장할 수 있습니다. 새 테이블스페이스를 생성할 필요가 없습니다.\n\nC) 오답 — SMALLFILE 테이블스페이스가 기본 유형입니다. BIGFILE 테이블스페이스를 생성하려면 CREATE BIGFILE TABLESPACE와 같이 명시적으로 지정해야 합니다.\n\nD) 오답 — BIGFILE 테이블스페이스는 영구(Permanent) 테이블스페이스뿐만 아니라, 임시(Temporary) 테이블스페이스와 UNDO 테이블스페이스로도 사용할 수 있습니다.\n\n핵심 개념: SMALLFILE(기본값, 여러 데이터 파일, 최대 1022개)과 BIGFILE(명시 지정 필요, 단일 파일, 최대 32TB)은 테이블스페이스의 두 가지 유형입니다. BIGFILE은 영구, 임시, UNDO 등 모든 유형의 테이블스페이스에 사용 가능하며, ASM 및 대용량 환경에 적합합니다."
-  },
-  {
-    "chapter": "Oracle Databaseアーキテクチャの説明",
-    "number": "C_01_015",
     "title": "Oracle Databaseのデータ・ブロックとDB_BLOCK_SIZEパラメータについて正しく述べているものを選択してください。",
     "options": [
       "A) DB_BLOCK_SIZEパラメータのデフォルト値は8KBであり、データベース作成後に変更することはできない。",
@@ -63,7 +9,71 @@
       "C) PCTFREEパラメータは、ブロック内で新規INSERTに予約される空き領域の比率を制御する。",
       "D) データ・ブロックはOracle内部の管理単位であり、I/O操作の最小単位はエクステントである。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — DB_BLOCK_SIZE 파라미터의 기본값은 8KB이며, 데이터베이스 생성 시 설정되어 이후 변경이 불가능합니다. 대부분의 OLTP 환경에 적합한 크기입니다.\n\nB) 오답 — DB_BLOCK_SIZE는 데이터베이스 생성 시 설정되며 이후 변경할 수 없는 정적 파라미터입니다. ALTER SYSTEM 문으로 동적 변경이 불가능합니다.\n\nC) 오답 — PCTFREE(기본값 10)는 INSERT가 아닌 기존 행의 UPDATE에 의한 크기 증가를 위해 예약하는 빈 공간 비율입니다. 블록에 INSERT가 진행되어 사용 공간이 (100-PCTFREE)%에 도달하면 더 이상 새 행을 INSERT하지 않고, 나머지 PCTFREE% 공간을 UPDATE용으로 남겨둡니다.\n\nD) 오답 — 데이터 블록은 Oracle의 최소 I/O 단위입니다. Oracle이 데이터를 읽거나 쓸 때 항상 블록 단위로 처리합니다. 익스텐트는 세그먼트에 대한 공간 할당의 최소 단위이지 I/O의 최소 단위가 아닙니다.\n\n핵심 개념: 데이터 블록은 Oracle의 최소 I/O 단위이며, DB_BLOCK_SIZE(기본 8KB)로 데이터베이스 생성 시 설정한 후 변경할 수 없습니다. PCTFREE(기본 10%)는 UPDATE에 의한 행 확장을 위해 블록 내에 예약하는 공간 비율로, 부족 시 행 마이그레이션(Row Migration)이 발생하여 성능이 저하됩니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_012",
+    "title": "Oracle Databaseの自動共有メモリー管理(ASMM)においてSGA_TARGETパラメータを使用している環境で、DBAがALTER SYSTEM SET SHARED_POOL_SIZE = 800M SCOPE=BOTH を実行しました。この操作の結果について正しく述べているものを選択してください。",
+    "options": [
+      "A) SHARED_POOL_SIZEの設定値はASMMが管理するSGA全体サイズの上限を超えることができないため、SGA_TARGETを超える値を指定するとエラーが発生する。",
+      "B) SHARED_POOL_SIZEの設定値は共有プールの最小保証サイズとして機能し、ASMMはこの値を下回るサイズに共有プールを縮小しない。",
+      "C) SHARED_POOL_SIZEの設定値はASMMによって無視され、共有プールのサイズは常にASMMが自動的に決定する。",
+      "D) SHARED_POOL_SIZEの設定値は共有プールの固定サイズとなり、ASMMによる動的調整が無効になる。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — 자동 공유 메모리 관리(ASMM) 환경에서 SHARED_POOL_SIZE 등 개별 SGA 구성요소 파라미터를 설정하면, 해당 값은 최소 보장 크기(Minimum Size)로 기능합니다. ASMM은 이 값 이하로 공유 풀을 축소하지 않으며, 워크로드에 따라 이 값 이상으로는 동적 확장할 수 있습니다.\n\nA) 오답 — SGA_TARGET을 초과하는 개별 구성요소 크기를 설정할 수는 없지만, 문제의 시나리오에서는 특정 크기(800M)만 지정한 것이므로 SGA_TARGET 초과 여부와 상관없이 이 설명은 최소 보장 크기 개념을 설명하고 있지 않아 부정확합니다.\n\nC) 오답 — ASMM 환경에서도 개별 SGA 구성요소 파라미터의 설정값은 무시되지 않습니다. 최소 보장 크기로 반영되므로 ASMM이 이를 완전히 무시하는 것은 아닙니다.\n\nD) 오답 — 설정값은 고정 크기가 아닌 최소 보장 크기입니다. ASMM은 이 값을 하한선으로 하여 워크로드에 따라 동적으로 조정합니다. ASMM의 동적 조정 기능이 무효화되는 것이 아닙니다.\n\n핵심 개념: ASMM(SGA_TARGET 기반) 환경에서 SHARED_POOL_SIZE, DB_CACHE_SIZE 등 개별 SGA 구성요소 파라미터를 설정하면 최소 보장 크기(Minimum Guaranteed Size)로 동작하며, ASMM은 이 값 이상에서 워크로드에 따라 동적으로 크기를 조정합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_013",
+    "title": "DBAが以下のSQL文を実行してSGAの構成情報を確認しました。\n\nSQL> SELECT name, value FROM V$SGA;\n\nNAME                      VALUE\n------------------------  ----------\nFixed Size                   9137384\nVariable Size             1577058304\nDatabase Buffers           503316480\nRedo Buffers                 7012352\n\nこの出力結果から読み取れる内容として正しいものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Variable Sizeには共有プール、Large Pool、Java Poolなどの可変サイズ・コンポーネントが含まれている。",
+      "B) Database Buffersの値はDB_BLOCK_SIZEパラメータの値を表している。",
+      "C) Fixed Sizeの値はDBAがALTER SYSTEM文で変更可能な領域のサイズである。",
+      "D) Redo Buffersの値はオンラインREDOログ・ファイルの合計サイズを表している。",
+      "E) Database Buffersの値はデータベース・バッファ・キャッシュに割り当てられたメモリー・サイズを表している。"
+    ],
+    "answer": [
+      "A",
+      "E"
+    ],
+    "explanation": "정답: A, E\nA) 정답 — V$SGA의 Variable Size에는 공유 풀(Shared Pool), Large Pool, Java Pool, Streams Pool 등 SGA 내 가변 크기 구성요소가 포함됩니다. 이들은 Granule 단위로 동적으로 크기가 조정될 수 있습니다.\n\nE) 정답 — Database Buffers는 데이터베이스 버퍼 캐시(Database Buffer Cache)에 할당된 메모리 크기를 나타냅니다. 여기에는 Default Pool, Keep Pool, Recycle Pool, 비표준 블록 크기 캐시가 모두 포함됩니다.\n\nB) 오답 — Database Buffers의 값은 DB_BLOCK_SIZE 파라미터 값이 아니라 버퍼 캐시에 할당된 전체 메모리 크기입니다. DB_BLOCK_SIZE는 데이터 블록의 크기(기본 8KB)를 나타내는 별개의 파라미터입니다.\n\nC) 오답 — Fixed Size는 Oracle 내부 하우스키핑 정보(래치, 락 구조 등)를 저장하는 고정 SGA 영역으로, DBA가 ALTER SYSTEM 문으로 변경할 수 없습니다. Oracle이 자동으로 결정하고 관리합니다.\n\nD) 오답 — Redo Buffers는 SGA 내의 Redo Log Buffer 크기를 나타내며, 디스크의 온라인 Redo Log 파일 합계 크기가 아닙니다. Redo Log Buffer는 변경 사항을 일시적으로 저장하는 메모리 영역이고, 온라인 Redo Log 파일은 디스크 파일입니다.\n\n핵심 개념: V$SGA 뷰는 Fixed Size(내부 고정 영역), Variable Size(공유 풀/Large Pool 등 가변 영역), Database Buffers(버퍼 캐시), Redo Buffers(Redo Log Buffer)의 4가지 항목으로 SGA 구성을 요약합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_014",
+    "title": "Oracle Databaseのオンライン REDOログのグループ3に2つのメンバー・ファイルが多重化されている構成で、一方のメンバーが格納されているディスクに障害が発生しました。この状況における動作として正しく述べているものを選択してください。",
+    "options": [
+      "A) LGWRは残りの正常なメンバーへの書き込みを継続し、データベースの運用は継続される。",
+      "B) LGWRは障害のあるディスクが復旧するまでREDO書き込みを一時停止し、データベースがハングする。",
+      "C) LGWRはグループ3を使用不可とし、直ちにログ・スイッチを実行して次のグループへ移行する。",
+      "D) メンバーの1つが損失したため、インスタンスが即座にABORTモードで停止される。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Redo Log 그룹 내에 여러 멤버가 다중화되어 있는 경우, 하나의 멤버가 손실되어도 LGWR은 나머지 정상적인 멤버에 계속 기록하며 데이터베이스 운영은 중단되지 않습니다. Alert Log에 오류 메시지가 기록되지만 데이터베이스는 정상 동작합니다. 이것이 Redo Log 멤버 다중화의 핵심 목적입니다.\n\nB) 오답 — LGWR은 그룹 내 최소 하나의 멤버가 정상이면 기록을 계속합니다. 장애 디스크의 복구를 기다리며 기록을 일시 중지하지 않습니다.\n\nC) 오답 — 그룹 내 최소 하나의 멤버가 정상이면 해당 그룹은 계속 사용 가능합니다. 모든 멤버가 손실된 경우에만 그룹이 사용 불가능해지며, CURRENT 그룹의 모든 멤버가 손실되면 인스턴스가 중지됩니다.\n\nD) 오답 — 멤버 하나의 손실로 인스턴스가 즉시 중지되지는 않습니다. 그룹의 모든 멤버가 손실된 CURRENT 그룹의 경우에만 인스턴스 중지가 발생합니다.\n\n핵심 개념: Redo Log 멤버 다중화의 목적은 디스크 장애에 대한 보호이며, 같은 그룹 내 멤버 중 하나 이상이 정상이면 LGWR은 기록을 계속하여 데이터베이스 운영이 중단되지 않습니다. 그룹의 모든 멤버가 손실되면 해당 그룹은 사용 불가능해지고, CURRENT 그룹인 경우 인스턴스가 중지됩니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_015",
+    "title": "Oracle DatabaseのREDOログ・バッファに関して正しい内容を述べているものを選択してください。",
+    "options": [
+      "A) REDOログ・バッファは循環バッファ構造であり、LGWRがディスクに書き込んだ領域は再利用される。",
+      "B) REDOログ・バッファのサイズはDB_CACHE_SIZEパラメータで制御される。",
+      "C) REDOログ・バッファにはCOMMIT済みのトランザクションの変更情報のみが記録される。",
+      "D) REDOログ・バッファの内容はDBWnプロセスによってオンラインREDOログ・ファイルに書き込まれる。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Redo Log Buffer는 순환 버퍼(Circular Buffer) 구조로 동작합니다. 서버 프로세스가 Redo Entry를 버퍼에 기록하고, LGWR 프로세스가 해당 내용을 디스크의 온라인 Redo Log 파일에 기록하면 그 공간은 다시 사용할 수 있게 됩니다.\n\nB) 오답 — Redo Log Buffer의 크기는 LOG_BUFFER 파라미터로 제어됩니다. DB_CACHE_SIZE는 Database Buffer Cache(Default Pool)의 크기를 제어하는 파라미터입니다.\n\nC) 오답 — Redo Log Buffer에는 COMMIT 여부와 관계없이 모든 변경 사항(Redo Entry)이 기록됩니다. 커밋되지 않은 트랜잭션의 변경도 기록되며, 인스턴스 복구 시 Roll Forward 단계에서 모든 Redo가 재적용됩니다.\n\nD) 오답 — Redo Log Buffer의 내용을 온라인 Redo Log 파일에 기록하는 것은 LGWR(Log Writer) 프로세스의 역할입니다. DBWn(Database Writer)은 Database Buffer Cache의 Dirty Buffer를 데이터 파일에 기록하는 프로세스입니다.\n\n핵심 개념: Redo Log Buffer는 LOG_BUFFER 파라미터로 크기를 제어하는 순환 버퍼로, COMMIT 여부와 관계없이 모든 변경 사항을 기록합니다. LGWR 프로세스가 디스크에 기록하면 해당 공간이 재사용됩니다."
   }
 ]

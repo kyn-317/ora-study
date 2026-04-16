@@ -10,7 +10,10 @@
       "D) DBMS_STATSパッケージによる統計収集は手動でのみ実行可能であり、自動メンテナンス・タスクとしては提供されていない。",
       "E) オプティマイザ統計はV$ビューと同様にSGAメモリにのみ保持されるため、インスタンス再起動時に消失する。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — 옵티마이저 통계 수집에는 DBMS_STATS 패키지를 사용하는 것이 Oracle에서 공식적으로 권장하는 방법입니다. GATHER_DATABASE_STATS(데이터베이스 전체), GATHER_SCHEMA_STATS(스키마 단위), GATHER_TABLE_STATS(테이블 단위) 등의 프로시저가 제공되며, ANALYZE 명령어보다 정확하고 기능이 풍부합니다.\n\nB) 정답 — 자동 옵티마이저 통계 수집 작업(auto optimizer stats collection)은 Oracle의 자동 유지 관리 태스크로, 유지 관리 윈도우(기본: 야간/주말) 동안 통계가 없거나 노후화된(Stale) 객체를 대상으로 통계를 자동으로 재수집합니다. DBA_AUTOTASK_CLIENT 뷰에서 상태를 확인할 수 있습니다.\n\nC) 오답 — 통계 노후화(Stale) 판정 기준은 50%가 아닌 10%입니다. 테이블 전체 행 수의 10% 이상이 변경(INSERT, UPDATE, DELETE)되면 해당 테이블의 통계가 Stale 상태로 표시됩니다. 이 임계값은 STALE_PERCENT 기본 설정으로 변경할 수 있습니다.\n\nD) 오답 — DBMS_STATS를 통한 통계 수집은 수동 실행뿐만 아니라, 자동 유지 관리 태스크(auto optimizer stats collection)로도 제공됩니다. 이 자동 태스크는 기본적으로 활성화되어 있으며, 유지 관리 윈도우에서 자동으로 실행됩니다.\n\nE) 오답 — 옵티마이저 통계는 데이터 딕셔너리(SYSTEM/SYSAUX 테이블스페이스)에 영구적으로 저장됩니다. V$ 뷰처럼 SGA 메모리에만 존재하는 것이 아니므로, 인스턴스 재시작 후에도 통계가 유지됩니다.\n\n핵심 개념: 옵티마이저 통계는 비용 기반 옵티마이저(CBO)가 최적의 실행 계획을 생성하기 위해 참조하는 핵심 정보입니다. DBMS_STATS 패키지로 수동 수집하거나, 자동 유지 관리 태스크를 통해 노후화된 통계를 자동으로 재수집합니다. 통계 노후화 기준은 데이터 변경량 10% 이상입니다."
   },
   {
@@ -24,7 +27,10 @@
       "D) アラート・ログは自動的にローテーション(分割保存)されるため、DBAによる容量管理は不要である。",
       "E) アラート・ログにはSQLの実行計画や個別SQLの実行時間などのSQL詳細情報も記録される。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — Alert Log에는 데이터베이스의 기동/종료, Redo Log 전환(Log Switch), 체크포인트, 테이블스페이스 변경, ORA-에러 등의 주요 운영 이벤트가 시간순으로 기록됩니다. DBA가 데이터베이스의 운영 이력을 파악하는 1차적인 진단 도구입니다.\n\nC) 정답 — Oracle 12c 이후, V$DIAG_ALERT_EXT 뷰를 사용하여 Alert Log의 내용을 SQL로 직접 조회할 수 있습니다. Alert Log의 XML 형식을 파싱하여 컬럼 기반으로 접근할 수 있습니다.\n\nB) 오답 — Alert Log는 인스턴스가 시작된 시점부터 기록됩니다. NOMOUNT 단계에서의 파라미터 로딩, MOUNT 단계에서의 Control File 읽기 등도 모두 기록되며, OPEN 상태에만 한정되지 않습니다.\n\nD) 오답 — Alert Log는 자동 로테이션되지 않으므로, 크기가 매우 커질 수 있습니다. DBA가 OS 레벨에서 주기적으로 아카이빙하거나 관리해야 합니다.\n\nE) 오답 — Alert Log에는 SQL의 실행 계획이나 개별 SQL의 실행 시간 등의 상세 정보는 기록되지 않습니다. SQL 관련 상세 정보는 V$SQL, AWR 스냅샷, SQL Trace(Trace 파일) 등에서 확인합니다.\n\n핵심 개념: Alert Log는 ADR(자동 진단 리포지토리) 내에 XML 형식과 텍스트 형식으로 유지되며, 데이터베이스의 주요 운영 이벤트를 시간순으로 기록합니다. 자동 로테이션은 지원되지 않으므로 DBA의 관리가 필요합니다."
   },
   {
@@ -37,7 +43,9 @@
       "C) STATISTICS_LEVELをBASICに変更すると、既に収集済みのAWRスナップショットも自動的に削除される。",
       "D) STATISTICS_LEVELはALTER SYSTEM文で動的に変更できず、変更にはインスタンスの再起動が必要である。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — STATISTICS_LEVEL의 기본값은 TYPICAL이며, 이 설정에서 AWR 스냅샷 수집, ADDM 자동 분석, ASH(Active Session History) 등의 자동 관리 기능이 활성화됩니다. Oracle은 TYPICAL 설정을 권장합니다.\n\nA) 오답 — STATISTICS_LEVEL=ALL로 설정하면 AWR 스냅샷과 ADDM이 모두 활성화되며, 추가로 OS 통계, Plan 통계 등의 부가 통계가 수집됩니다. AWR이 비활성화되는 것은 BASIC 설정입니다.\n\nC) 오답 — STATISTICS_LEVEL을 BASIC으로 변경하면 이후의 AWR 자동 스냅샷 수집이 비활성화되지만, 이미 수집된 AWR 데이터와 ADDM 결과는 삭제되지 않고 그대로 보존됩니다.\n\nD) 오답 — STATISTICS_LEVEL은 ALTER SYSTEM 문 또는 ALTER SESSION 문으로 동적으로 변경할 수 있으며, 인스턴스 재시작 없이 즉시 적용됩니다.\n\n핵심 개념: STATISTICS_LEVEL 파라미터는 Oracle의 자동 관리 기능(AWR, ADDM, ASH 등)의 활성화 수준을 제어합니다. 기본값 TYPICAL에서 표준 자동 관리가 활성화되고, BASIC으로 설정하면 대부분의 자동 관리 기능이 비활성화되므로 BASIC 설정은 피해야 합니다."
   },
   {
@@ -51,7 +59,10 @@
       "D) 動的パフォーマンス・ビュー(V$ビュー)のデータはディスクに永続化されるため、インスタンス再起動後もデータが保持される。",
       "E) データ・ディクショナリ・ビューはデータベースがNOMOUNT状態からすべてアクセス可能である。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — 데이터 딕셔너리 뷰(DBA_/ALL_/USER_ 뷰)는 일반 테이블과 동일하게 UNDO 기반의 읽기 일관성이 보장됩니다. 이는 SGA 메모리를 직접 읽어 읽기 일관성이 보장되지 않는 V$ 뷰와의 주요 차이점입니다.\n\nC) 정답 — ADR(Automatic Diagnostic Repository)은 파일 시스템 기반의 통합 진단 데이터 저장소입니다. DIAGNOSTIC_DEST 파라미터가 지정하는 경로 하위에 Alert Log, Trace 파일, 인시던트 덤프 등의 진단 데이터를 일원화된 디렉터리 구조로 관리합니다.\n\nB) 오답 — AWR 스냅샷 데이터는 SYSTEM 테이블스페이스가 아닌 SYSAUX 테이블스페이스에 저장됩니다. WRM$(메타데이터) 및 WRH$(이력 데이터) 테이블에 저장되며, DBA_HIST_ 뷰로 조회 가능합니다.\n\nD) 오답 — V$ 뷰(동적 성능 뷰)는 SGA 메모리에 기반하므로, 인스턴스가 종료되면 데이터가 소멸됩니다. 과거 성능 이력을 보존하려면 AWR 스냅샷을 활용해야 합니다.\n\nE) 오답 — 데이터 딕셔너리 뷰는 데이터베이스가 OPEN 상태에서만 접근 가능합니다. NOMOUNT 상태에서 접근 가능한 것은 V$ 뷰(동적 성능 뷰)의 일부입니다.\n\n핵심 개념: Oracle의 성능 모니터링 인프라는 V$ 뷰(실시간/메모리), 데이터 딕셔너리(메타데이터/디스크), ADR(진단 로그/파일 시스템), AWR(이력 통계/SYSAUX)의 4가지 구성요소로 이루어져 있으며, 각각 데이터의 저장 위치, 영속성, 접근 시점이 다릅니다."
   },
   {
@@ -64,7 +75,9 @@
       "C) ADDMレポートはテキスト形式のみ生成でき、HTMLやXML形式は対応していない。",
       "D) ADDMの分析結果はSGAメモリ内にのみ保持されるため、インスタンス再起動後に過去の分析結果を確認することはできない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — ADDM 분석 결과는 DBA_ADVISOR_TASKS(태스크 목록), DBA_ADVISOR_FINDINGS(발견 사항), DBA_ADVISOR_RECOMMENDATIONS(권고 사항), DBA_ADVISOR_ACTIONS(구체적 조치) 등의 딕셔너리 뷰를 통해 조회할 수 있습니다. 또한 addmrpt.sql 스크립트나 Enterprise Manager에서도 결과를 확인할 수 있습니다.\n\nB) 오답 — ADDM은 연속된 두 AWR 스냅샷 간의 차이를 분석하여 성능 문제를 진단하므로, AWR 스냅샷이 반드시 존재해야 합니다. AWR 스냅샷이 ADDM의 핵심 입력 데이터 소스입니다.\n\nC) 오답 — ADDM 레포트는 DBMS_ADVISOR.GET_TASK_REPORT 함수를 통해 TEXT, HTML, XML의 3가지 형식으로 생성할 수 있습니다. Enterprise Manager에서는 그래픽 형식으로도 확인 가능합니다.\n\nD) 오답 — ADDM 분석 결과는 AWR 리포지토리(SYSAUX 테이블스페이스)에 저장되므로, 인스턴스 재시작 후에도 보존 기간 내의 과거 분석 결과를 조회할 수 있습니다.\n\n핵심 개념: ADDM 분석 결과는 SYSAUX 테이블스페이스의 AWR 리포지토리에 영구 저장되며, DBA_ADVISOR_* 딕셔너리 뷰, addmrpt.sql 스크립트, DBMS_ADVISOR.GET_TASK_REPORT(TEXT/HTML/XML), Enterprise Manager 등 다양한 방법으로 확인할 수 있습니다."
   }
 ]

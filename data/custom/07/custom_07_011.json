@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_050",
+    "title": "MSSM（手動セグメント領域管理）テーブルスペースに存在するテーブルに対して、多数のセッションが同時にINSERTを実行している環境で、buffer busy waitsイベントが頻発しています。この問題の原因と対策について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) MSSM環境ではフリーリスト（Freelist）を使用して空きブロックを管理するため、同時に多数のセッションがINSERTを実行するとフリーリストのヘッド・ブロックに対する競合が発生し、buffer busy waitsの原因となる。",
+      "B) MSSMからASSMへセグメント領域管理方式を変更するには、ALTER TABLESPACE文でSEGMENT SPACE MANAGEMENT AUTOに変更できる。",
+      "C) この問題を根本的に解決するためには、ASSM（自動セグメント領域管理）のテーブルスペースを新規作成し、ALTER TABLE ... MOVE TABLESPACE句でテーブルを移動する方法がある。ASSMではビットマップ・ブロックにより複数のセッションが異なるブロックに同時挿入できるため、競合が大幅に軽減される。",
+      "D) MSSM環境でのフリーリスト競合を解消するには、テーブルのPCTFREEを0%に設定すれば、すべてのブロックがINSERT対象となりフリーリスト競合は発生しなくなる。",
+      "E) MSSM環境ではFREELISTS句で複数のフリーリストを割り当てることで競合を軽減できるが、ASSM環境ではFREELISTS句は無視されるためこの設定は不要である。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — MSSM 환경에서는 Freelist라는 단일 연결 리스트로 빈 블록을 관리한다. 다수 세션이 동시에 INSERT할 때 Freelist 헤드 블록에 대한 경합이 발생하여 buffer busy waits 대기 이벤트가 나타난다.\n\nC) 정답 — MSSM에서 ASSM으로의 변경은 기존 테이블스페이스의 속성을 ALTER TABLESPACE로 변경할 수 없으므로, ASSM 테이블스페이스를 새로 생성하고 ALTER TABLE ... MOVE TABLESPACE로 테이블을 이동해야 한다. ASSM은 비트맵 블록으로 각 데이터 블록의 빈 공간 상태를 추적하므로, 여러 세션이 서로 다른 블록에 동시에 삽입할 수 있어 경합이 크게 줄어든다.\n\nB) 오답 — 테이블스페이스의 세그먼트 영역 관리 방식(ASSM/MSSM)은 생성 후 ALTER TABLESPACE로 변경할 수 없다. 새로운 ASSM 테이블스페이스를 생성하고 오브젝트를 이동해야 한다.\n\nD) 오답 — PCTFREE를 0%로 설정하면 블록의 모든 공간을 INSERT에 사용할 수 있지만, Freelist 자체의 경합 문제는 해결되지 않는다. PCTFREE는 UPDATE 시 행 확장을 위한 예약 공간 비율이며, Freelist 구조와는 무관하다.\n\nE) 오답 — FREELISTS 구문으로 복수 Freelist를 할당하여 경합을 일부 완화할 수 있다는 내용과 ASSM에서 무시된다는 내용 자체는 사실이지만, 이 선택지는 정답 A, C에 비해 질문이 요구하는 「원인과 대책」에 해당하는 핵심 설명으로는 부족하다. 또한 FREELISTS 설정은 근본적 해결이 아닌 임시 완화책이다.\n\n핵심 개념: MSSM은 Freelist 기반, ASSM은 비트맵 기반으로 빈 블록을 관리한다. 동시 INSERT 경합 해소를 위해 ASSM이 권장되며, ASSM/MSSM 전환은 테이블스페이스 재생성이 필요하다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_051",
+    "title": "Oracle Databaseでテーブルスペースを作成する際のSEGMENT SPACE MANAGEMENT句に関して正しく述べているものを選択してください。",
+    "options": [
+      "A) SEGMENT SPACE MANAGEMENTをAUTOに指定すると、セグメント内のブロック空き領域がビットマップで管理され、PCTUSEDパラメータは無視される。テーブルスペース作成後にMANUALに変更することはできない。",
+      "B) SEGMENT SPACE MANAGEMENTのデフォルト値はMANUALであり、ASSMを使用するには明示的にAUTOを指定する必要がある。",
+      "C) SEGMENT SPACE MANAGEMENTをMANUALに指定して作成したテーブルスペースでも、ALTER TABLESPACE文でAUTOに変更できるため、既存テーブルの移動は不要である。",
+      "D) SEGMENT SPACE MANAGEMENT AUTOが指定されたテーブルスペースでは、PCTFREEとPCTUSEDの両方のパラメータが有効に機能し、INSERT対象ブロックの選択に使用される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — SEGMENT SPACE MANAGEMENT AUTO(ASSM)로 생성하면 비트맵 블록이 각 데이터 블록의 빈 공간 상태(full, 75-100%, 50-75% 등)를 관리한다. ASSM 환경에서는 PCTUSED가 무시되고 PCTFREE만 유효하다. 또한 테이블스페이스의 세그먼트 영역 관리 방식은 생성 시에만 결정되며, 이후 ALTER TABLESPACE로 변경할 수 없다.\n\nB) 오답 — SEGMENT SPACE MANAGEMENT의 기본값은 AUTO이다. 명시적으로 지정하지 않으면 ASSM이 적용된다.\n\nC) 오답 — 세그먼트 영역 관리 방식(AUTO/MANUAL)은 테이블스페이스 생성 후 변경할 수 없다. MSSM에서 ASSM으로 전환하려면 새로운 ASSM 테이블스페이스를 생성하고 오브젝트를 이동해야 한다.\n\nD) 오답 — ASSM 환경에서는 PCTFREE만 유효하며, PCTUSED는 무시된다. PCTUSED는 MSSM 환경에서 Freelist에 블록을 다시 등록하는 임계값으로만 사용된다.\n\n핵심 개념: SEGMENT SPACE MANAGEMENT의 기본값은 AUTO(ASSM)이며, 생성 후 변경 불가하다. ASSM에서는 비트맵으로 블록 관리가 자동화되어 PCTUSED가 불필요하고, 높은 동시성을 제공한다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_052",
+    "title": "すべてのテーブルがほぼ同じサイズ（約5MB）であるアプリケーション環境で、永続テーブルスペースのエクステント管理方式としてUNIFORM SIZE 5MとAUTOALLOCATEを比較した場合の説明として正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) UNIFORM SIZE 5Mを使用すると、各テーブルの初期エクステントが5MBで割り当てられるため、5MB程度のテーブルでは1つのエクステントでデータが格納され、エクステント管理のオーバーヘッドが最小限に抑えられる。",
+      "B) AUTOALLOCATEでは初期エクステントが64KBから割り当てられ、セグメントが成長するにつれて1MB→8MBと段階的にエクステント・サイズが増加する。5MBのテーブルでは複数の小さなエクステントが割り当てられ、エクステント数が増加する可能性がある。",
+      "C) AUTOALLOCATEは常にUNIFORMより空間効率が高い。5MBのテーブルが多数存在する環境では、AUTOALLOCATEの方がUNIFORMよりディスク使用量が少なくなる。",
+      "D) UNIFORM SIZE 5Mの場合、テーブルサイズが1MB未満でも5MBのエクステントが割り当てられるため、小さなオブジェクト（索引、LOBセグメントなど）が混在する環境では空間の無駄が発生する可能性がある。",
+      "E) AUTOALLOCATEテーブルスペースをUNIFORMに変更するには、ALTER TABLESPACE文でEXTENT MANAGEMENT UNIFORM SIZE 5Mを実行すればよい。"
+    ],
+    "answer": ["B", "D"],
+    "explanation": "정답: B, D\nB) 정답 — AUTOALLOCATE에서는 세그먼트 초기 익스텐트가 64KB부터 시작되며, 세그먼트 성장에 따라 1MB→8MB→64MB로 단계적으로 증가한다. 5MB 테이블의 경우, 64KB 익스텐트 여러 개와 1MB 익스텐트 여러 개가 혼재하게 되어 익스텐트 수가 증가할 수 있다.\n\nD) 정답 — UNIFORM SIZE 5M은 모든 세그먼트(테이블, 인덱스, LOB 등)에 동일한 5MB 익스텐트를 할당한다. 1MB 미만의 소규모 인덱스나 LOB 세그먼트에도 5MB가 할당되므로, 다양한 크기의 오브젝트가 혼재하는 환경에서는 공간 낭비가 발생할 수 있다.\n\nA) 오답 — UNIFORM SIZE 5M으로 설정하면 초기 익스텐트가 5MB로 할당되는 것은 사실이지만, 5MB 테이블이 반드시 1개의 익스텐트에 수용된다는 보장은 없다. 블록 헤더, PCTFREE 등의 오버헤드로 실제 데이터 저장 공간이 5MB보다 적을 수 있어 2번째 익스텐트가 필요할 수 있다. 따라서 「エクステント管理のオーバーヘッドが最小限」이라는 표현은 부정확하다.\n\nC) 오답 — AUTOALLOCATE가 항상 UNIFORM보다 공간 효율이 높은 것은 아니다. 모든 테이블이 비슷한 크기인 환경에서는 UNIFORM이 오히려 효율적일 수 있다. AUTOALLOCATE는 크기가 다양한 세그먼트가 혼재하는 일반적인 환경에 적합하다.\n\nE) 오답 — 테이블스페이스의 익스텐트 관리 방식(AUTOALLOCATE/UNIFORM)은 생성 시에만 지정 가능하며, ALTER TABLESPACE로 변경할 수 없다.\n\n핵심 개념: AUTOALLOCATE는 다양한 크기의 세그먼트가 혼재하는 범용 환경에 적합하고, UNIFORM은 세그먼트 크기가 균일한 환경에서 익스텐트 관리를 단순화한다. 단, UNIFORM은 소규모 오브젝트에 불필요하게 큰 공간을 할당할 수 있다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_053",
+    "title": "一時テーブルスペース（TEMPORARY TABLESPACE）を作成する際のエクステント管理方式に関して正しく述べているものを選択してください。",
+    "options": [
+      "A) 一時テーブルスペースではAUTOALLOCATE方式がデフォルトであり、ソート操作のサイズに応じてエクステントが段階的に拡張されるため最も効率的である。",
+      "B) 一時テーブルスペースではUNIFORM方式が推奨される。一時セグメントはセッション間で再利用されるため、均一なサイズのエクステントにより効率的な割り当てと解放が可能になる。UNIFORM SIZE句を省略した場合のデフォルト・サイズは1MBである。",
+      "C) 一時テーブルスペースのエクステント・サイズは、SORT_AREA_SIZEパラメータと同じ値に設定する必要があり、異なるサイズを指定するとORAエラーが発生する。",
+      "D) 一時テーブルスペースではUNIFORMとAUTOALLOCATEの違いはなく、どちらを選択してもOracleが内部的に同じ方式で管理する。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 일시 테이블스페이스에서는 UNIFORM 방식이 권장된다. 일시 세그먼트는 소트, 해시 조인 등의 작업에서 익스텐트를 할당받고 완료 후 해제하는 반복적 패턴을 보인다. UNIFORM 방식이면 모든 익스텐트가 동일한 크기이므로 해제된 익스텐트를 다른 세션이 재사용하기 쉽고, 단편화가 발생하지 않는다. UNIFORM SIZE를 명시하지 않으면 기본값 1MB가 적용된다.\n\nA) 오답 — 일시 테이블스페이스의 기본 익스텐트 관리 방식은 UNIFORM이며 AUTOALLOCATE가 아니다. AUTOALLOCATE는 다양한 크기의 익스텐트가 혼재하여 일시 세그먼트의 반복적 할당/해제 패턴에 비효율적이다.\n\nC) 오답 — 일시 테이블스페이스의 EXTENT SIZE는 SORT_AREA_SIZE와 독립적으로 설정 가능하며, 일치시키지 않아도 오류가 발생하지 않는다. PGA 자동 메모리 관리를 사용하는 경우 SORT_AREA_SIZE는 더 이상 직접 설정하지 않는다.\n\nD) 오답 — 일시 테이블스페이스에서도 UNIFORM과 AUTOALLOCATE는 서로 다른 방식으로 동작한다. UNIFORM은 고정 크기 익스텐트를, AUTOALLOCATE는 단계적 증가 크기 익스텐트를 할당한다.\n\n핵심 개념: 일시 테이블스페이스는 익스텐트의 반복적 할당/해제가 빈번하므로 UNIFORM 방식이 권장된다. 균일한 크기의 익스텐트는 세션 간 재사용 효율이 높고 공간 단편화를 방지한다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_054",
+    "title": "パラレルDirect-Path Insert（ALTER SESSION ENABLE PARALLEL DML実行後のINSERT /*+ APPEND PARALLEL(t,4) */）を実行した後の索引への影響について正しく述べているものを選択してください。",
+    "options": [
+      "A) パラレルDirect-Path Insertでは、各パラレル・スレーブ・プロセスがそれぞれ独立してHWMの上にデータを書き込む。非パーティション表のグローバル索引は複数のプロセスから同時に更新できないため、索引がUNUSABLE状態になる。単一セッションのDirect-Path Insert（INSERT /*+ APPEND */）では索引はUNUSABLEにならず正常に維持される。",
+      "B) パラレルDirect-Path Insertでも単一セッションのDirect-Path Insertでも、索引への影響は同じであり、どちらの場合も索引はUNUSABLE状態にならない。",
+      "C) パラレルDirect-Path Insertの後に索引がUNUSABLE状態になった場合、SKIP_UNUSABLE_INDEXESがTRUE（デフォルト）であれば、UNUSABLE索引が自動的にREBUILDされて正常状態に復元される。",
+      "D) パラレルDirect-Path Insertでは索引がUNUSABLE状態になるが、ALTER SESSION SET SKIP_UNUSABLE_INDEXES = TRUEを設定していれば、パラレルDirect-Path Insert実行時に索引がUNUSABLEになること自体を防ぐことができる。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 병렬 Direct-Path Insert에서는 여러 Parallel Slave 프로세스가 각각 독립적으로 HWM 위에 데이터를 기록한다. 비파티션 테이블의 글로벌 인덱스는 여러 프로세스가 동시에 갱신할 수 없어 UNUSABLE 상태가 된다. 반면 단일 세션 Direct-Path Insert(INSERT /*+ APPEND */)에서는 하나의 프로세스만 데이터를 기록하므로 인덱스가 정상적으로 유지관리된다.\n\nB) 오답 — 병렬 Direct-Path Insert와 단일 세션 Direct-Path Insert는 인덱스에 대한 영향이 다르다. 병렬 실행 시 비파티션 테이블의 인덱스가 UNUSABLE이 되지만, 단일 세션에서는 그렇지 않다.\n\nC) 오답 — SKIP_UNUSABLE_INDEXES=TRUE는 UNUSABLE 인덱스를 건너뛰고 DML을 정상 실행할 수 있게 하는 설정이지, UNUSABLE 인덱스를 자동으로 REBUILD하는 기능이 아니다. UNUSABLE 인덱스를 복원하려면 ALTER INDEX ... REBUILD를 명시적으로 실행해야 한다.\n\nD) 오답 — SKIP_UNUSABLE_INDEXES는 UNUSABLE 상태의 인덱스가 있을 때 DML이 에러 없이 실행되도록 하는 설정이다. 병렬 Direct-Path Insert 시 인덱스가 UNUSABLE이 되는 것 자체를 방지하지는 않는다.\n\n핵심 개념: 병렬 Direct-Path Insert 후 비파티션 테이블의 인덱스가 UNUSABLE이 되는 이유는 여러 Parallel Slave가 동시에 인덱스를 갱신할 수 없기 때문이다. 단일 세션 Direct-Path Insert에서는 인덱스가 정상 유지된다. SKIP_UNUSABLE_INDEXES=TRUE는 UNUSABLE 인덱스 존재 시 DML 오류를 방지하지만, 인덱스 복원에는 별도의 REBUILD가 필요하다."
+  }
+]

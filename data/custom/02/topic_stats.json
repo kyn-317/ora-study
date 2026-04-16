@@ -9,13 +9,13 @@
     "SQL Developer": 1
   },
   "custom_topic_counts": {
-    "DBCA": 4,
-    "SQL*Plus": 5,
-    "RMAN": 4,
-    "Enterprise Manager Cloud Control": 4,
+    "DBCA": 6,
+    "SQL*Plus": 7,
+    "RMAN": 7,
+    "Enterprise Manager Cloud Control": 6,
     "SQL Developer": 2,
-    "ツール横断比較": 1
+    "ツール横断比較": 3
   },
-  "total_custom": 20,
-  "last_number": "C_02_020"
+  "total_custom": 31,
+  "last_number": "C_02_031"
 }

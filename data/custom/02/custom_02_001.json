@@ -10,7 +10,10 @@
       "D) サイレントモードではGUI環境が利用可能なサーバーでのみ実行することができる。",
       "E) サイレントモードでは応答ファイルを使用せずにコマンドライン引数のみで実行することはできない。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — DBCA 사일런트 모드에서는 응답 파일(.rsp)을 사용하여 데이터베이스 생성에 필요한 모든 구성 파라미터를 key=value 형식으로 정의할 수 있습니다. 샘플 응답 파일은 $ORACLE_HOME/assistants/dbca/ 디렉토리에 제공됩니다.\n\nB) 정답 — -generateScripts 옵션을 사용하면 실제로 데이터베이스를 생성하지 않고 SQL 스크립트만 생성할 수 있습니다. 이를 통해 생성 전에 스크립트를 검토하거나 다른 환경에서 활용할 수 있습니다.\n\nC) 오답 — DBCA는 데이터베이스 생성/관리 전용 도구이며, 리스너 생성 및 네트워크 구성은 NETCA 또는 Net Manager(NETMGR)의 역할입니다. DBCA 대화형 모드의 '네트워크 구성' 단계도 기존 리스너를 선택하는 것이지 새로 생성하는 것이 아닙니다.\n\nD) 오답 — 사일런트 모드는 GUI를 사용하지 않고 명령줄에서 실행되므로, X Window가 없는 서버에서도 데이터베이스를 생성할 수 있습니다. 이것이 사일런트 모드의 주요 장점 중 하나입니다.\n\nE) 오답 — 사일런트 모드에서는 응답 파일 없이 명령줄 파라미터를 직접 지정하여 실행하는 것도 가능합니다. 예를 들어 dbca -silent -createDatabase -templateName ... -gdbName ... 와 같이 파라미터를 직접 지정할 수 있습니다.\n\n핵심 개념: DBCA 사일런트 모드는 GUI 없이 CLI로 데이터베이스를 생성·관리하는 방식으로, 응답 파일 또는 명령줄 파라미터로 구성을 지정합니다. -generateScripts로 스크립트만 생성할 수 있으며, 리스너 구성은 DBCA의 역할 범위가 아닙니다."
   },
   {
@@ -23,7 +26,9 @@
       "C) CDB$ROOTにはローカル・ユーザーとして接続することができる。",
       "D) CDB$ROOTから他のPDBに切り替えた場合、SHOW CON_NAMEの出力は変化しない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — CDB$ROOT에 SYSDBA로 접속한 상태에서 ALTER SESSION SET CONTAINER = pdb_name 명령을 사용하면 특정 PDB로 전환할 수 있습니다. 일반적으로 CDB$ROOT에서 다른 컨테이너로 전환하는 것이 표준적인 운영 방법입니다.\n\nB) 오답 — CDB$ROOT에서 V$ 뷰를 참조하면 CDB 전체의 정보가 표시됩니다. PDB에 직접 접속한 경우에만 해당 PDB의 정보만 표시됩니다.\n\nC) 오답 — 로컬 사용자(Local User)는 특정 PDB에만 존재하며, CDB$ROOT에는 접속할 수 없습니다. CDB$ROOT에 접속하려면 공통 사용자(Common User)로 접속해야 합니다.\n\nD) 오답 — ALTER SESSION SET CONTAINER로 PDB에 전환하면 SHOW CON_NAME의 출력이 해당 PDB 이름으로 변경됩니다. 이 명령은 현재 접속된 컨테이너 이름을 표시합니다.\n\n핵심 개념: CDB$ROOT에 접속하면 ALTER SESSION SET CONTAINER로 PDB 전환이 가능하고, V$ 뷰는 CDB 전체 범위를 조회합니다. 일반적인 운영 시에는 CDB$ROOT에서 PDB로 전환하는 방식을 사용하며, V$ 뷰는 PDB에 직접 접속한 경우 해당 PDB 범위로 한정됩니다."
   },
   {
@@ -37,7 +42,10 @@
       "D) RMANのバックアップ・メタデータはREDOログ・ファイルに記録される。",
       "E) RMANではARCHIVELOGモードのデータベースに対してのみ増分バックアップを実行することができる。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — RMAN에서도 SQL*Plus와 동일한 구문의 STARTUP 명령을 사용할 수 있습니다. STARTUP MOUNT 명령으로 인스턴스를 기동하고 컨트롤 파일을 읽어 마운트 상태까지 전환할 수 있으며, 이는 복구 작업 전에 자주 사용됩니다.\n\nC) 정답 — RMAN은 SYSDBA 권한 외에도 SYSBACKUP 권한으로 접속하여 백업 및 복구 작업을 수행할 수 있습니다. SYSBACKUP은 백업/복구에 필요한 최소 권한을 제공하는 세분화된 관리 권한입니다.\n\nB) 오답 — RMAN 내에서 SQL 문을 실행하려면 SQL 접두사를 붙여야 합니다. 예를 들어 SQL 'ALTER SYSTEM ...' 형태로 실행해야 합니다. SQL 접두사 없이는 RMAN 고유 명령만 실행할 수 있습니다.\n\nD) 오답 — RMAN의 백업 메타데이터는 기본적으로 컨트롤 파일(Control File)에 저장됩니다. 선택적으로 별도의 Recovery Catalog 데이터베이스를 구성하여 메타데이터를 저장할 수도 있습니다. REDO 로그 파일은 데이터 변경 이력을 기록하는 것이지 백업 메타데이터를 저장하지 않습니다.\n\nE) 오답 — RMAN의 증분 백업은 ARCHIVELOGモード뿐만 아니라 NOARCHIVELOGモード에서도 수행할 수 있습니다. 단, NOARCHIVELOG 모드에서는 데이터베이스를 일관된 상태로 종료(SHUTDOWN IMMEDIATE 등)한 후 MOUNT 상태에서 백업을 수행해야 합니다.\n\n핵심 개념: RMAN은 데이터베이스의 기동/종료, 백업/복구를 수행하는 전용 CLI 도구입니다. SYSBACKUP 권한으로 접속 가능하고, SQL 실행 시 SQL 접두사가 필요하며, 백업 메타데이터는 컨트롤 파일 또는 Recovery Catalog에 저장됩니다."
   },
   {
@@ -50,7 +58,9 @@
       "C) OMSは管理対象ホストごとに1つずつインストールする必要がある。",
       "D) Enterprise Manager Cloud Controlのウェブ・コンソールにアクセスするにはManagement Agentのインストールが必要である。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — Management Agent는 관리 대상 호스트에 설치되는 경량 프로세스입니다. 데이터베이스, OS 등의 메트릭을 주기적으로 수집하여 OMS에 HTTPS를 통해 전송하며, OMS로부터 전달받은 관리 작업(기동/종료, 패치 등)을 호스트에서 실행하는 역할을 합니다.\n\nB) 오답 — Management Repository는 OMS의 구성 정보, 수집된 메트릭, 경고 이력 등을 저장하는 전용 Oracle Database입니다. 메모리 영역이 아니라 별도의 데이터베이스에 설치하는 것이 권장됩니다.\n\nC) 오답 — OMS(Oracle Management Service)는 EM의 핵심 서버 컴포넌트로, 관리 대상 호스트가 아닌 별도의 서버에 설치합니다. 고가용성을 위해 다중 OMS 구성이 가능하지만, 관리 대상 호스트마다 설치하는 것이 아닙니다.\n\nD) 오답 — 웹 콘솔 접속은 웹 브라우저에서 OMS의 URL(https://hostname:7803/em)에 접속하는 것이며, 웹 브라우저가 설치된 클라이언트에 Management Agent를 설치할 필요는 없습니다. Agent는 관리 대상 호스트에 설치됩니다.\n\n핵심 개념: Enterprise Manager Cloud Control은 3-tier 아키텍처(웹 브라우저 → OMS → Management Repository)로 구성됩니다. Management Agent는 관리 대상 호스트에서 메트릭 수집 및 작업 실행을 담당하며, Repository는 별도 Oracle Database에 데이터를 저장합니다."
   },
   {
@@ -63,7 +73,9 @@
       "C) SQL DeveloperはJDBCドライバを使用するため、Oracle Client環境のインストールなしでデータベースに接続することができる。",
       "D) SQL Developerのライセンスは有償であり、Enterprise Editionライセンスに含まれている。"
     ],
-    "answer": ["C"],
+    "answer": [
+      "C"
+    ],
     "explanation": "정답: C\nC) 정답 — SQL Developer는 JDBC Thin Driver를 기본으로 사용하므로, 별도의 Oracle Client를 설치하지 않아도 데이터베이스에 접속할 수 있습니다. Java 기반의 데스크톱 애플리케이션으로, 호스트명, 포트, 서비스 이름만 지정하면 접속이 가능합니다.\n\nA) 오답 — SQL Developer는 JDBC Thin Driver를 사용하여 접속하므로 Oracle Client 설치가 필요하지 않습니다. TNS 접속을 사용할 경우에만 Oracle Client의 tnsnames.ora 파일이 필요할 수 있습니다.\n\nB) 오답 — SQL Developer에서는 데이터베이스의 기동(STARTUP) 및 종료(SHUTDOWN) 기능을 제공하지 않습니다. 데이터베이스의 기동/종료는 SQL*Plus 또는 RMAN을 사용해야 합니다.\n\nD) 오답 — SQL Developer는 Oracle Technology Network(OTN)에서 무료로 다운로드할 수 있는 도구입니다. 별도의 라이센스 비용이 필요하지 않습니다.\n\n핵심 개념: SQL Developer는 Oracle이 제공하는 무료 GUI 기반 데이터베이스 관리·개발 도구로, JDBC Thin Driver를 사용하여 Oracle Client 없이 접속 가능합니다. 단, 데이터베이스의 기동/종료 기능은 제공하지 않으며, 이 작업은 SQL*Plus 또는 RMAN에서 수행해야 합니다."
   }
 ]

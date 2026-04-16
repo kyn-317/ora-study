@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_046",
+    "title": "非標準ブロック・サイズの設定に関する制約について正しく述べているものを選択してください。",
+    "options": [
+      "A) DB_BLOCK_SIZEが8KBの場合、DB_8K_CACHE_SIZEパラメータを設定して8KBの非標準キャッシュを追加で割り当てることができる。",
+      "B) DB_BLOCK_SIZEが8KBの場合、DB_8K_CACHE_SIZEパラメータは標準ブロック・サイズと同じであるため設定できない。",
+      "C) SYSTEM表領域やSYSAUX表領域を非標準ブロック・サイズで作成することが可能である。",
+      "D) DB_nK_CACHE_SIZEパラメータはSGA外のメモリー領域に割り当てられる。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — DB_BLOCK_SIZE가 8KB인 경우, 8KB는 표준 블록 사이즈이므로 DB_8K_CACHE_SIZE를 설정할 수 없습니다. 표준 블록 사이즈와 동일한 크기의 DB_nK_CACHE_SIZE는 설정 불가하며, 표준 블록 사이즈의 캐시는 DB_CACHE_SIZE로 관리됩니다. 설정 가능한 비표준 크기는 2K, 4K, 16K, 32K입니다.\n\nA) 오답 — 표준 블록 사이즈(이 경우 8KB)와 동일한 크기의 DB_nK_CACHE_SIZE는 설정할 수 없습니다. 8KB 캐시는 DB_CACHE_SIZE 파라미터로 관리됩니다.\n\nC) 오답 — SYSTEM 테이블스페이스와 SYSAUX 테이블스페이스는 반드시 DB_BLOCK_SIZE(표준 블록 사이즈)로 생성되어야 합니다. 비표준 블록 사이즈로 생성할 수 없습니다.\n\nD) 오답 — DB_nK_CACHE_SIZE로 할당되는 비표준 블록 사이즈 캐시는 SGA 내 버퍼 캐시의 일부로 할당됩니다. SGA 외부의 메모리 영역이 아닙니다.\n\n핵심 개념: DB_nK_CACHE_SIZE에서 n은 표준 블록 사이즈(DB_BLOCK_SIZE)와 다른 값이어야 합니다. 표준이 8KB이면 2K, 4K, 16K, 32K만 설정 가능합니다. SYSTEM/SYSAUX는 반드시 표준 블록 사이즈를 사용해야 하며, 비표준 캐시는 SGA 내 버퍼 캐시에 할당됩니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_047",
+    "title": "CREATE TABLESPACE文の構文とデフォルト動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) CREATE TABLESPACE文でSMALLFILEまたはBIGFILEを指定しない場合、デフォルトのテーブルスペース・タイプ(通常はSMALLFILE)が適用される。",
+      "B) CREATE TABLESPACE文でLOGGINGまたはNOLOGGINGを指定しない場合、デフォルトはNOLOGGINGである。",
+      "C) CREATE TABLESPACE文で作成されたテーブルスペースの初期状態はデフォルトでONLINEである。",
+      "D) CREATE TABLESPACE文でEXTENT MANAGEMENTを指定しない場合、デフォルトはDICTIONARY管理である。",
+      "E) CREATE TABLESPACE文でSEGMENT SPACE MANAGEMENTを指定しない場合、デフォルトはMANUAL(フリーリスト管理)である。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — CREATE TABLESPACE 문에서 SMALLFILE 또는 BIGFILE을 명시하지 않으면 데이터베이스의 기본 테이블스페이스 타입이 적용됩니다. 별도 설정이 없는 일반 환경에서는 SMALLFILE이 기본입니다. ALTER DATABASE SET DEFAULT BIGFILE TABLESPACE로 변경하면 BIGFILE이 기본이 됩니다.\n\nC) 정답 — CREATE TABLESPACE로 생성된 테이블스페이스의 초기 상태는 기본적으로 ONLINE입니다. 명시적으로 OFFLINE을 지정하지 않는 한 생성 즉시 사용 가능합니다.\n\nB) 오답 — LOGGING/NOLOGGING을 지정하지 않으면 기본값은 LOGGING입니다. 즉, 테이블스페이스에서 수행되는 작업에 대해 리두 로그가 기록됩니다.\n\nD) 오답 — EXTENT MANAGEMENT를 지정하지 않으면 기본값은 LOCAL(로컬 관리)입니다. DICTIONARY 관리는 구버전 호환을 위해 존재하며, 현재는 비권장(deprecated)입니다.\n\nE) 오답 — SEGMENT SPACE MANAGEMENT를 지정하지 않으면 기본값은 AUTO(ASSM, 자동 세그먼트 공간 관리)입니다. MANUAL(프리리스트 관리)은 구버전 호환용이며 기본값이 아닙니다.\n\n핵심 개념: CREATE TABLESPACE의 주요 기본값은 SMALLFILE(일반 환경), LOGGING, ONLINE, EXTENT MANAGEMENT LOCAL AUTOALLOCATE, SEGMENT SPACE MANAGEMENT AUTO입니다. 이 기본값을 이해하면 구문 생략 시 Oracle의 동작을 예측할 수 있습니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_048",
+    "title": "データベースレベルのデフォルト表領域タイプに関して正しく述べているものを選択してください。",
+    "options": [
+      "A) ALTER DATABASE SET DEFAULT BIGFILE TABLESPACE文を実行した後、CREATE TABLESPACE文でSMALLFILEもBIGFILEも指定しなかった場合、BIGFILE表領域として作成される。",
+      "B) ALTER DATABASE SET DEFAULT BIGFILE TABLESPACE文を実行すると、既存のSMALLFILE表領域が自動的にBIGFILE表領域に変換される。",
+      "C) デフォルト表領域タイプの設定は、DBA_TABLESPACESビューのBIGFILEカラムで確認できる。",
+      "D) デフォルト表領域タイプはデータベース作成時に固定され、後から変更することはできない。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — ALTER DATABASE SET DEFAULT BIGFILE TABLESPACE를 실행하면 이후 CREATE TABLESPACE에서 SMALLFILE/BIGFILE을 명시하지 않은 경우 BIGFILE 테이블스페이스가 생성됩니다. DATABASE_PROPERTIES 뷰의 DEFAULT_TBS_TYPE 속성에서 현재 기본 타입을 확인할 수 있습니다.\n\nB) 오답 — 기본 테이블스페이스 타입을 변경해도 기존에 생성된 테이블스페이스에는 영향을 주지 않습니다. 이 설정은 새로 생성되는 테이블스페이스에만 적용됩니다.\n\nC) 오답 — 데이터베이스 레벨의 기본 테이블스페이스 타입은 DBA_TABLESPACES가 아니라 DATABASE_PROPERTIES 뷰의 PROPERTY_NAME = 'DEFAULT_TBS_TYPE' 행에서 확인합니다. DBA_TABLESPACES의 BIGFILE 컬럼은 개별 테이블스페이스가 BIGFILE인지 여부를 보여줍니다.\n\nD) 오답 — 기본 테이블스페이스 타입은 ALTER DATABASE SET DEFAULT BIGFILE/SMALLFILE TABLESPACE 문으로 언제든 변경할 수 있습니다. 데이터베이스 생성 시에 고정되지 않습니다.\n\n핵심 개념: ALTER DATABASE SET DEFAULT BIGFILE TABLESPACE로 기본 타입을 변경하면 이후 새로 생성되는 테이블스페이스에 적용됩니다. 현재 설정은 DATABASE_PROPERTIES 뷰(DEFAULT_TBS_TYPE)에서 확인하며, 기존 테이블스페이스에는 영향을 주지 않습니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_049",
+    "title": "ALTER DATABASE RENAME FILE文を使用したデータ・ファイルのオフライン移動の手順について正しく述べているものを選択してください。",
+    "options": [
+      "A) データベースをOPEN状態にしたまま、ALTER DATABASE RENAME FILE文を実行してデータ・ファイルの経路を変更できる。",
+      "B) 正しい手順は、SHUTDOWN → OSレベルでファイル複製 → STARTUP MOUNT → ALTER DATABASE RENAME FILE → ALTER DATABASE OPENである。",
+      "C) ALTER DATABASE RENAME FILE文は実際にデータ・ファイルを新しい位置に移動する操作を行う。",
+      "D) ALTER DATABASE RENAME FILE文の実行後、元のファイルは自動的に削除される。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — ALTER DATABASE RENAME FILE을 사용한 오프라인 이동의 올바른 절차는 다음과 같습니다: (1) SHUTDOWN IMMEDIATE로 DB를 종료, (2) OS 레벨에서 데이터 파일을 새 위치로 복사(cp 명령), (3) STARTUP MOUNT로 MOUNT 상태 기동, (4) ALTER DATABASE RENAME FILE 'old_path' TO 'new_path'로 컨트롤 파일의 경로 정보 갱신, (5) ALTER DATABASE OPEN으로 DB 오픈. 이 방법은 SYSTEM 테이블스페이스를 포함한 모든 데이터 파일에 적용 가능합니다.\n\nA) 오답 — ALTER DATABASE RENAME FILE은 데이터베이스가 MOUNT 상태일 때 실행해야 합니다. OPEN 상태에서는 실행할 수 없습니다.\n\nC) 오답 — ALTER DATABASE RENAME FILE은 실제로 파일을 이동하는 것이 아니라, 컨트롤 파일에 기록된 데이터 파일 경로 정보만 갱신합니다. 실제 파일 복사는 DBA가 OS 레벨에서 수동으로 수행해야 합니다.\n\nD) 오답 — ALTER DATABASE RENAME FILE 실행 후 원본 파일은 자동으로 삭제되지 않습니다. DBA가 수동으로 원본 파일을 삭제해야 합니다.\n\n핵심 개념: ALTER DATABASE RENAME FILE은 컨트롤 파일의 경로 정보만 갱신하는 명령으로, MOUNT 상태에서 실행합니다. 실제 파일 복사는 OS에서 수동 수행하며, 원본 삭제도 수동입니다. SYSTEM 테이블스페이스 이동에 사용됩니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_050",
+    "title": "ALTER TABLESPACE RENAME DATAFILE文を使用したデータ・ファイルのオフライン移動について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) この方法はデータベースをOPEN状態のまま実行できるが、対象の表領域をOFFLINEにする必要がある。",
+      "B) ALTER TABLESPACE RENAME DATAFILE文の実行後、元のデータ・ファイルはOracleが自動的に削除する。",
+      "C) SYSTEM表領域のデータ・ファイルもこの方法で移動することが可能である。",
+      "D) この方法でデータ・ファイルを移動した後、表領域をONLINEに戻す前に元のファイルを手動で削除する必要はないが、ディスク管理のために後から手動で削除することが推奨される。",
+      "E) ALTER TABLESPACE RENAME DATAFILE文を実行する前に、OSレベルでデータ・ファイルを新しい位置にコピーしておく必要がある。"
+    ],
+    "answer": ["A", "E"],
+    "explanation": "정답: A, E\nA) 정답 — ALTER TABLESPACE RENAME DATAFILE 방식은 데이터베이스가 OPEN 상태에서 실행 가능합니다. 단, 대상 테이블스페이스를 먼저 ALTER TABLESPACE ts_name OFFLINE으로 오프라인 전환해야 합니다. 절차: (1) ALTER TABLESPACE OFFLINE → (2) OS 파일 복사 → (3) ALTER TABLESPACE RENAME DATAFILE → (4) ALTER TABLESPACE ONLINE.\n\nE) 정답 — ALTER TABLESPACE RENAME DATAFILE 명령은 컨트롤 파일의 경로 정보만 갱신하므로, 실행 전에 DBA가 OS 레벨에서 데이터 파일을 새 위치로 복사해야 합니다. 파일 복사 없이 RENAME만 실행하면 온라인 전환 시 오류가 발생합니다.\n\nB) 오답 — ALTER TABLESPACE RENAME DATAFILE 실행 후 원본 파일은 자동으로 삭제되지 않습니다. DBA가 수동으로 삭제해야 합니다.\n\nC) 오답 — SYSTEM 테이블스페이스는 오프라인으로 전환할 수 없으므로 이 방법으로 이동할 수 없습니다. SYSTEM 테이블스페이스의 이동은 ALTER DATABASE RENAME FILE(MOUNT 상태)을 사용해야 합니다.\n\nD) 오답 — 원본 파일 삭제는 ONLINE 전환 후에 수행해도 문제없으며, ONLINE 전환 전에 삭제할 필요는 없습니다. 다만 원본 파일이 자동 삭제되지 않으므로 수동으로 삭제해야 한다는 점은 맞습니다. 그러나 \"삭제할 필요가 없다\"는 표현이 오해를 줄 수 있습니다.\n\n핵심 개념: ALTER TABLESPACE RENAME DATAFILE은 DB OPEN 상태에서 실행 가능하지만 테이블스페이스 오프라인이 필수이며, OS 파일 복사를 먼저 수행해야 합니다. SYSTEM 테이블스페이스는 이 방법으로 이동 불가하고, 원본 파일은 자동 삭제되지 않습니다."
+  }
+]

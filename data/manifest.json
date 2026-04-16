@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-14T05:10:50.802Z",
+  "generatedAt": "2026-04-16T11:38:54.115Z",
   "study": {
     "00": [
       "00_00_전체흐름총정리"
@@ -84,6 +84,12 @@
       "custom_10_004",
       "custom_10_005",
       "custom_10_006",
+      "custom_10_007",
+      "custom_10_008",
+      "custom_10_009",
+      "custom_10_010",
+      "custom_10_011",
+      "custom_10_012",
       "topic_stats"
     ],
     "11": [
@@ -91,6 +97,11 @@
       "custom_11_002",
       "custom_11_003",
       "custom_11_004",
+      "custom_11_005",
+      "custom_11_006",
+      "custom_11_007",
+      "custom_11_008",
+      "custom_11_009",
       "topic_stats"
     ],
     "12": [
@@ -98,6 +109,11 @@
       "custom_12_002",
       "custom_12_003",
       "custom_12_004",
+      "custom_12_005",
+      "custom_12_006",
+      "custom_12_007",
+      "custom_12_008",
+      "custom_12_009",
       "topic_stats"
     ],
     "13": [
@@ -105,6 +121,10 @@
       "custom_13_002",
       "custom_13_003",
       "custom_13_004",
+      "custom_13_005",
+      "custom_13_006",
+      "custom_13_007",
+      "custom_13_008",
       "topic_stats"
     ],
     "01": [
@@ -117,6 +137,14 @@
       "custom_01_007",
       "custom_01_008",
       "custom_01_009",
+      "custom_01_010",
+      "custom_01_011",
+      "custom_01_012",
+      "custom_01_013",
+      "custom_01_014",
+      "custom_01_015",
+      "custom_01_016",
+      "custom_01_017",
       "topic_stats"
     ],
     "02": [
@@ -124,6 +152,9 @@
       "custom_02_002",
       "custom_02_003",
       "custom_02_004",
+      "custom_02_005",
+      "custom_02_006",
+      "custom_02_007",
       "topic_stats"
     ],
     "03": [
@@ -133,6 +164,13 @@
       "custom_03_004",
       "custom_03_005",
       "custom_03_006",
+      "custom_03_007",
+      "custom_03_008",
+      "custom_03_009",
+      "custom_03_010",
+      "custom_03_011",
+      "custom_03_012",
+      "custom_03_013",
       "topic_stats"
     ],
     "04": [
@@ -140,6 +178,8 @@
       "custom_04_002",
       "custom_04_003",
       "custom_04_004",
+      "custom_04_005",
+      "custom_04_006",
       "topic_stats"
     ],
     "05": [
@@ -149,6 +189,11 @@
       "custom_05_004",
       "custom_05_005",
       "custom_05_006",
+      "custom_05_007",
+      "custom_05_008",
+      "custom_05_009",
+      "custom_05_010",
+      "custom_05_011",
       "topic_stats"
     ],
     "06": [
@@ -158,6 +203,11 @@
       "custom_06_004",
       "custom_06_005",
       "custom_06_006",
+      "custom_06_007",
+      "custom_06_008",
+      "custom_06_009",
+      "custom_06_010",
+      "custom_06_011",
       "topic_stats"
     ],
     "07": [
@@ -167,6 +217,12 @@
       "custom_07_004",
       "custom_07_005",
       "custom_07_006",
+      "custom_07_007",
+      "custom_07_008",
+      "custom_07_009",
+      "custom_07_010",
+      "custom_07_011",
+      "custom_07_012",
       "topic_stats"
     ],
     "08": [
@@ -174,6 +230,9 @@
       "custom_08_002",
       "custom_08_003",
       "custom_08_004",
+      "custom_08_005",
+      "custom_08_006",
+      "custom_08_007",
       "topic_stats"
     ],
     "09": [
@@ -181,33 +240,28 @@
       "custom_09_002",
       "custom_09_003",
       "custom_09_004",
+      "custom_09_005",
+      "custom_09_006",
+      "custom_09_007",
       "topic_stats"
     ]
   },
   "mockExams": {
     "examSets": [
-      "exam_set_1",
-      "exam_set_2",
-      "exam_set_3",
-      "exam_set_4",
-      "exam_set_5"
+      "exam_set_01",
+      "exam_set_02",
+      "exam_set_03",
+      "exam_set_04",
+      "exam_set_05",
+      "exam_set_06",
+      "exam_set_07",
+      "exam_set_08",
+      "exam_set_09",
+      "exam_set_10",
+      "exam_set_11"
     ],
-    "allocations": [
-      "allocation_ch01",
-      "allocation_ch02",
-      "allocation_ch03",
-      "allocation_ch04",
-      "allocation_ch05",
-      "allocation_ch06",
-      "allocation_ch07",
-      "allocation_ch08",
-      "allocation_ch09",
-      "allocation_ch10",
-      "allocation_ch11",
-      "allocation_ch12",
-      "allocation_ch13"
-    ],
-    "hasReservePool": true
+    "allocations": [],
+    "hasReservePool": false
   },
   "keywordIndex": {
     "1Z0-182": [

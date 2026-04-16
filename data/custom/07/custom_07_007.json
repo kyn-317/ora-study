@@ -1,0 +1,70 @@
+[
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_030",
+    "title": "OLTP環境で頻繁にINSERT、UPDATE、DELETE操作が発生するテーブルに対して、ストレージコストを削減するためにデータ圧縮を導入する計画があります。この環境に適した圧縮オプションとその理由について正しく述べているものを選択してください。",
+    "options": [
+      "A) ROW STORE COMPRESS ADVANCEDを使用すべきである。このオプションはすべてのDML操作で圧縮を維持し、ブロックが一定レベルまで充填されるとバッチ方式で自動圧縮を実行するため、DML性能への影響を最小限に抑えることができる。ただし、Advanced Compression Optionライセンスが別途必要である。",
+      "B) ROW STORE COMPRESS BASICを使用すべきである。このオプションはすべてのDML操作で圧縮を維持し、Enterprise Editionに含まれているため追加のライセンスコストが発生しない。",
+      "C) COLUMN STORE COMPRESS FOR QUERY LOWを使用すべきである。HCCはOLTP環境で最も高い圧縮率を実現でき、すべてのストレージ環境で使用可能である。",
+      "D) ROW STORE COMPRESS ADVANCEDを使用すべきである。このオプションはDirect-Path Insert操作でのみ圧縮が適用されるが、OLTP環境では十分な圧縮効果が得られる。追加のライセンスは不要である。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — ROW STORE COMPRESS ADVANCED(Advanced Row Compression)는 모든 DML(INSERT, UPDATE, DELETE)에서 압축을 유지하는 유일한 행 기반 압축 옵션입니다. 블록이 일정 수준까지 채워지면 배치(Batch) 방식으로 자동 압축을 수행하여 DML 성능 영향을 최소화합니다. 단, Advanced Compression Option 라이선스가 별도로 필요합니다.\n\nB) 오답 — ROW STORE COMPRESS BASIC은 Direct-Path Insert(INSERT /*+ APPEND */, CTAS, SQL*Loader Direct Path)에서만 압축이 적용됩니다. 일반 INSERT/UPDATE로 변경된 행은 비압축 상태로 저장되므로 OLTP 환경에서는 효과가 제한적입니다.\n\nC) 오답 — HCC(Hybrid Columnar Compression)는 Oracle Exadata, ZFS Storage Appliance 등 특정 스토리지에서만 지원되며, 모든 스토리지 환경에서 사용 가능하지 않습니다. 또한 일반 DML이 발생하면 해당 Compression Unit(CU)이 비압축 상태로 전환될 수 있어 OLTP 환경에 부적합합니다.\n\nD) 오답 — ROW STORE COMPRESS ADVANCED는 Direct-Path Insert만이 아닌 모든 DML에서 압축을 유지합니다. 또한 Advanced Compression Option 라이선스가 필요하므로 '추가 라이선스 불요'라는 설명은 잘못되었습니다.\n\n핵심 개념: OLTP 환경에서는 모든 DML 유형에서 압축을 유지하는 ROW STORE COMPRESS ADVANCED가 적합하며, 이를 위해서는 Advanced Compression Option 라이선스가 필요합니다. Basic Compression은 Direct-Path Insert에서만 동작하므로 OLTP에는 부적합합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_031",
+    "title": "データウェアハウス環境で、夜間バッチ処理としてDirect-Path Insert（INSERT /*+ APPEND */）のみを使用して大量のデータを日次でロードするテーブルがあります。このテーブルに対する圧縮戦略として正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Direct-Path Insertのみを使用するため、ROW STORE COMPRESS BASICで十分な圧縮効果が得られる。このオプションはEnterprise Editionに含まれており、追加のライセンスコストは発生しない。",
+      "B) HCC（Hybrid Columnar Compression）のCOLUMN STORE COMPRESS FOR QUERY LOWは、Direct-Path Insertで6～10倍の高い圧縮率を実現できるが、Oracle Exadata、ZFS Storage Applianceなどの特定のストレージ環境でのみ使用可能である。",
+      "C) データウェアハウス環境であっても、通常のDML（INSERT/UPDATE）が発生する可能性があるため、ROW STORE COMPRESS ADVANCEDが必須である。",
+      "D) HCC（Hybrid Columnar Compression）はすべてのOracle環境で使用可能であり、一般的なストレージでもCOLUMN STORE COMPRESS FOR QUERY HIGHを適用できる。",
+      "E) ROW STORE COMPRESS BASICが設定されたテーブルでは、Direct-Path Insertで圧縮が適用された後、通常のUPDATE文で更新された行にも自動的に圧縮が維持される。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — Direct-Path Insert만 사용하는 DW 환경에서는 ROW STORE COMPRESS BASIC으로 충분합니다. Basic Compression은 Direct-Path Insert(INSERT /*+ APPEND */, CTAS, SQL*Loader Direct Path) 시에만 압축이 적용되며, Enterprise Edition에 기본 포함되어 별도 라이선스가 불필요합니다.\n\nB) 정답 — HCC(Hybrid Columnar Compression)의 QUERY LOW 옵션은 Compression Unit(CU) 단위로 열 기반 압축을 수행하여 6~10배의 높은 압축률을 달성할 수 있습니다. 단, Oracle Exadata, ZFS Storage Appliance 등 특정 스토리지에서만 지원됩니다.\n\nC) 오답 — Direct-Path Insert만 사용하는 환경에서는 Advanced Compression이 필수가 아닙니다. Basic Compression으로도 Direct-Path Insert 시 압축이 적용되므로 충분합니다. Advanced Compression Option의 추가 라이선스 비용을 불필요하게 발생시킵니다.\n\nD) 오답 — HCC는 모든 Oracle 환경에서 사용 가능하지 않습니다. Oracle Exadata, ZFS Storage Appliance 등 특정 스토리지에서만 지원됩니다.\n\nE) 오답 — ROW STORE COMPRESS BASIC에서는 통상 UPDATE로 변경된 행은 비압축 상태로 저장됩니다. 압축은 Direct-Path Insert 시에만 적용되며, 이후 일반 DML로 변경된 행에는 유지되지 않습니다.\n\n핵심 개념: DW 환경에서 Direct-Path Insert만 사용하는 경우 Basic Compression으로 충분하며, 더 높은 압축률이 필요하면 Exadata 등 지원 스토리지에서 HCC를 사용할 수 있습니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_032",
+    "title": "Oracle ExadataまたはZFS Storage Applianceを使用している環境で、Hybrid Columnar Compression（HCC）の圧縮オプションに関して正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) COLUMN STORE COMPRESS FOR QUERY LOWは、頻繁にクエリされるデータウェアハウスのテーブルに適しており、6～10倍の圧縮率を実現できるが、Direct-Path Insertでのみ圧縮が適用される。",
+      "B) COLUMN STORE COMPRESS FOR ARCHIVE HIGHは最大50倍の圧縮率を実現でき、アクセス頻度が極めて低いアーカイブデータに適しているが、クエリ時のCPUオーバーヘッドが非常に高い。",
+      "C) HCCが設定されたテーブルに対して通常のINSERT文やUPDATE文を実行しても、Compression Unit（CU）内のデータは常に圧縮状態が維持される。",
+      "D) COLUMN STORE COMPRESS FOR QUERY HIGHはROW STORE COMPRESS ADVANCEDと同じ圧縮方式を使用しており、圧縮率の差はない。",
+      "E) HCCは標準的なSANストレージやNFSストレージ環境でも使用可能であり、Exadata以外の環境でもCOLUMN STORE COMPRESSオプションを指定できる。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — COLUMN STORE COMPRESS FOR QUERY LOW는 DW에서 자주 조회되는 테이블에 적합합니다. 6~10배의 압축률을 달성할 수 있으며, Direct-Path Insert에서만 압축이 적용됩니다.\n\nB) 정답 — COLUMN STORE COMPRESS FOR ARCHIVE HIGH는 최대 15~50배의 압축률을 달성할 수 있으며, 접근 빈도가 극히 낮은 아카이브 데이터에 적합합니다. 압축 해제 시 CPU 오버헤드가 매우 높습니다.\n\nC) 오답 — HCC가 설정된 테이블에 일반 DML(INSERT, UPDATE)이 발생하면 해당 Compression Unit(CU)이 비압축 상태로 전환될 수 있습니다. 이를 재압축하려면 주기적으로 ALTER TABLE MOVE를 수행해야 합니다.\n\nD) 오답 — COLUMN STORE COMPRESS FOR QUERY HIGH는 열 기반(Columnar) 압축 방식이며, ROW STORE COMPRESS ADVANCED는 행 기반 압축 방식입니다. HCC는 CU(Compression Unit) 단위로 열별 데이터를 모아 압축하여 행 기반 방식보다 훨씬 높은 압축률을 달성합니다.\n\nE) 오답 — HCC는 Oracle Exadata, ZFS Storage Appliance 등 특정 스토리지에서만 지원됩니다. 표준 SAN이나 NFS 환경에서는 COLUMN STORE COMPRESS 옵션을 사용할 수 없습니다.\n\n핵심 개념: HCC는 Exadata/ZFS 등 특정 스토리지 환경에서만 사용 가능하며, QUERY LOW/HIGH(DW 조회용)와 ARCHIVE LOW/HIGH(아카이브용)로 워크로드에 따라 구분합니다. 일반 DML 발생 시 CU가 비압축으로 전환될 수 있어 주기적인 재압축이 필요합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_033",
+    "title": "本番環境のOLTPデータベースにおいて、ある索引の断片化が進行してクエリ性能が低下しています。しかし、追加のディスク領域を確保することが困難な状況です。この状況で索引の断片化を解消するために最も適切な操作を選択してください。",
+    "options": [
+      "A) ALTER INDEX idx_name REBUILD — 索引全体を新しいセグメントとして再構築することで断片化を完全に解消する。",
+      "B) ALTER INDEX idx_name COALESCE — 隣接するリーフ・ブロック内のインデックス・エントリを統合し、空のリーフ・ブロックを解放する。索引セグメント全体の再構築は行わないため、追加のディスク領域は不要である。",
+      "C) ALTER INDEX idx_name UNUSABLE — 索引セグメントを削除して領域を回収し、その後ALTER INDEX REBUILDで再構築する。",
+      "D) DROP INDEX idx_name — 索引を削除して再作成することが断片化の解消には常に最善の方法である。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — ALTER INDEX COALESCE는 인접한 리프 블록 내의 인덱스 엔트리를 통합하여 빈 리프 블록을 해제하는 경량 작업입니다. 인덱스 세그먼트 전체를 재구축하지 않으므로 추가 디스크 공간이 필요하지 않습니다. 추가 디스크 확보가 어려운 상황에서 단편화 해소에 가장 적합합니다.\n\nA) 오답 — ALTER INDEX REBUILD는 인덱스 전체를 새로운 세그먼트로 재구축합니다. 재구축 과정에서 기존 세그먼트와 새 세그먼트가 일시적으로 공존하므로 추가 디스크 공간이 필요합니다. 디스크 공간 확보가 어려운 상황에서는 부적합합니다.\n\nC) 오답 — UNUSABLE로 설정하면 세그먼트가 삭제되어 공간이 회수되지만, 이후 REBUILD 시에는 다시 추가 공간이 필요합니다. 또한 UNUSABLE 상태에서는 인덱스를 사용한 쿼리가 불가능하여 서비스에 영향을 줄 수 있습니다.\n\nD) 오답 — DROP 후 재작성은 인덱스가 존재하지 않는 동안 쿼리 성능에 심각한 영향을 미칩니다. 또한 재작성 시 추가 공간이 필요하며, 항상 최선의 방법이라고 할 수 없습니다.\n\n핵심 개념: COALESCE는 기존 세그먼트 내에서 리프 블록을 통합하는 경량 작업으로 추가 공간이 불필요합니다. REBUILD는 새 세그먼트를 생성하므로 일시적으로 추가 공간이 필요합니다. 디스크 공간이 부족한 상황에서는 COALESCE가 적합합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_034",
+    "title": "DBAが新しい索引を作成した後、本番環境のクエリ性能に与える影響をテストしたいと考えています。テスト期間中は通常のクエリでは新しい索引を使用せず、特定のセッションでのみ索引の効果を確認したい場合、適切な手順について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 索引をINVISIBLE状態に設定すると、オプティマイザはデフォルトでその索引を実行計画に含めないが、DML操作（INSERT、UPDATE、DELETE）による索引のメンテナンスは継続される。",
+      "B) テスト対象のセッションでALTER SESSION SET OPTIMIZER_USE_INVISIBLE_INDEXES = TRUE を実行すると、そのセッションのみでINVISIBLE索引がオプティマイザに参照されるようになる。",
+      "C) 索引をINVISIBLE状態に設定すると、索引のセグメントが削除されてディスク領域が回収されるため、再テスト時にはREBUILDが必要となる。",
+      "D) 索引をUNUSABLE状態に設定すれば、INVISIBLE状態と同様にオプティマイザから参照されなくなり、DML操作による索引メンテナンスも継続される。",
+      "E) OPTIMIZER_USE_INVISIBLE_INDEXESパラメータをシステム・レベルで設定しなければ、セッション・レベルでINVISIBLE索引を参照することはできない。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — INVISIBLE 인덱스는 옵티마이저의 실행 계획에 기본적으로 포함되지 않지만, DML(INSERT, UPDATE, DELETE) 시 인덱스 메인터넌스는 계속 수행됩니다. 즉, 인덱스 데이터는 항상 최신 상태로 유지되므로, 테스트 시 바로 사용할 수 있습니다.\n\nB) 정답 — 특정 세션에서 ALTER SESSION SET OPTIMIZER_USE_INVISIBLE_INDEXES = TRUE를 실행하면, 해당 세션에서만 INVISIBLE 인덱스가 옵티마이저에 의해 참조됩니다. 이를 통해 다른 세션의 쿼리에는 영향을 주지 않으면서 인덱스 효과를 테스트할 수 있습니다.\n\nC) 오답 — INVISIBLE 인덱스는 세그먼트가 삭제되지 않습니다. 세그먼트가 삭제되는 것은 UNUSABLE 상태입니다. INVISIBLE은 옵티마이저의 참조 여부만 변경하며, 인덱스 세그먼트와 데이터는 그대로 유지됩니다.\n\nD) 오답 — UNUSABLE 상태로 설정하면 인덱스 세그먼트가 삭제되며, DML 시 인덱스 메인터넌스도 수행되지 않습니다(SKIP_UNUSABLE_INDEXES=TRUE일 경우). INVISIBLE과 달리 인덱스 데이터가 유지되지 않으므로 즉시 테스트에 활용할 수 없습니다.\n\nE) 오답 — OPTIMIZER_USE_INVISIBLE_INDEXES는 세션 레벨에서 독립적으로 설정할 수 있습니다. 시스템 레벨 설정 없이도 ALTER SESSION으로 해당 세션에서만 INVISIBLE 인덱스를 참조하도록 설정 가능합니다.\n\n핵심 개념: INVISIBLE 인덱스는 세그먼트와 DML 메인터넌스가 유지되면서 옵티마이저에만 보이지 않는 상태입니다. OPTIMIZER_USE_INVISIBLE_INDEXES를 세션 레벨에서 TRUE로 설정하면 특정 세션에서만 인덱스 효과를 테스트할 수 있어, 본번 환경에서의 안전한 성능 테스트에 적합합니다."
+  }
+]

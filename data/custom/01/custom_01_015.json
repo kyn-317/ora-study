@@ -1,0 +1,83 @@
+[
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_071",
+    "title": "Oracle Databaseへの接続方式であるDedicated Server、Shared Server、DRCPの使い分けについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 多数の短時間接続を行うWebアプリケーションでは、DRCPを使用することでサーバー・プロセスをプールから動的に割り当て・返却でき、アイドル時にプロセスを占有しないため効率的である。",
+      "B) 長時間にわたる大量データ処理を行うバッチ・ジョブでは、Shared Serverを使用することでキュー待機なしに安定したスループットが得られるため最適である。",
+      "C) Shared Server構成ではディスパッチャと要求キューを経由するため、大量データの長時間バッチ処理ではキュー待機による応答遅延の可能性があり、Dedicated Serverの方が適している。",
+      "D) DRCPではUGAがSGA内のLarge Poolに配置されるため、Shared Serverと同じメモリー構成であり、Dedicated Serverに比べてSGAのサイズを大きく設定する必要がある。",
+      "E) SYSDBA権限での接続やRMANによるバックアップ作業では、リソース節約のためにShared ServerまたはDRCPを使用することが推奨される。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — DRCP(Database Resident Connection Pooling)는 데이터베이스 서버 측에서 서버 프로세스 풀을 관리하는 연결 풀링 방식입니다. SQL 실행 시에만 풀에서 서버 프로세스를 할당(Attach)하고, 완료 후 풀로 반환(Detach)합니다. 유휴 상태에서는 서버 프로세스를 점유하지 않으므로, 짧은 접속을 빈번하게 수행하는 웹 애플리케이션에 효율적입니다.\n\nC) 정답 — Shared Server 구성에서는 사용자 요청이 디스패처를 거쳐 공유 요청 큐(Request Queue)에 배치되고, 대기 중인 공유 서버 프로세스가 큐에서 요청을 가져와 처리합니다. 이 큐 기반 처리 방식은 대량 데이터의 장시간 배치 처리 시 큐 대기로 인한 응답 지연이 발생할 수 있습니다. 따라서 배치 작업에는 전용 서버 프로세스가 1:1로 할당되는 Dedicated Server가 적합합니다.\n\nB) 오답 — Shared Server는 대규모 동시 접속 환경에서 서버 프로세스 수를 줄여 리소스를 절약하는 데 적합하지만, 장시간 배치 처리에는 부적합합니다. 큐 기반 처리로 인해 대기 시간이 발생할 수 있으며, 배치 작업에는 Dedicated Server가 권장됩니다.\n\nD) 오답 — DRCP에서 UGA는 PGA 내부에 위치하며, Dedicated Server와 동일한 메모리 구조를 유지합니다. UGA가 SGA로 이동하는 것은 Shared Server 구성에서의 특성입니다. DRCP는 Dedicated Server의 응답 성능과 Shared Server의 확장성을 결합한 방식입니다.\n\nE) 오답 — SYSDBA/SYSOPER 권한으로의 접속, RMAN 백업/복구 작업, Data Guard 관련 작업, 인스턴스 시작/종료 등의 관리 작업은 반드시 Dedicated Server를 통해 수행되어야 합니다. 이러한 작업에서는 Shared Server나 DRCP를 사용할 수 없습니다.\n\n핵심 개념: Dedicated Server는 1:1 전용 할당으로 배치 작업 및 관리 작업에 적합하고, Shared Server는 큐 기반 공유 처리로 대규모 동시 접속에 유리하지만 배치 작업에는 부적합합니다. DRCP는 풀에서 동적 할당/반환으로 웹 애플리케이션 등 짧은 접속에 효율적이며, UGA가 PGA에 위치하여 Dedicated Server와 동일한 메모리 구조를 유지합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_072",
+    "title": "Oracle DatabaseにおけるSELECT文の処理の流れについて正しく述べているものを選択してください。",
+    "options": [
+      "A) サーバー・プロセスはまず共有プール内のライブラリ・キャッシュで同一のSQL文を検索し、見つかった場合（ソフト解析）は既存の実行計画を再利用して解析処理の負荷を軽減する。",
+      "B) サーバー・プロセスはバッファ・キャッシュにデータ・ブロックが存在しない場合、DBWnプロセスにディスクからの読み込みを依頼し、DBWnがブロックをバッファ・キャッシュに適載する。",
+      "C) SELECT文の実行時、バックグラウンド・プロセスであるLGWRが問合せ結果のキャッシュ情報をREDOログ・バッファに記録する。",
+      "D) ユーザー・プロセスはSGA内のバッファ・キャッシュに直接アクセスし、必要なデータ・ブロックを自ら検索して読み取ることで応答時間を短縮する。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — SELECT 문 실행 시, 서버 프로세스는 먼저 Shared Pool의 Library Cache에서 동일한 SQL 문을 검색합니다. 이미 캐시에 존재하는 경우(소프트 파싱) 기존의 실행 계획을 재사용하여 파싱 처리 부하를 줄입니다. 캐시에 없는 경우(하드 파싱)에는 구문 분석, 최적화, 실행 계획 생성을 수행하고 Library Cache에 캐싱합니다.\n\nB) 오답 — Buffer Cache에 필요한 데이터 블록이 없는 경우(Cache Miss), 디스크에서 블록을 읽어 Buffer Cache에 적재하는 것은 서버 프로세스가 직접 수행합니다. DBWn은 Buffer Cache의 Dirty Buffer를 데이터 파일에 기록하는 역할을 하며, 디스크에서 블록을 읽어오는 역할은 담당하지 않습니다.\n\nC) 오답 — SELECT 문 실행 시에는 데이터 변경이 발생하지 않으므로, LGWR이 Redo Log Buffer에 기록하는 작업이 수행되지 않습니다. Redo 레코드는 DML(INSERT, UPDATE, DELETE) 등 데이터 변경 시에만 생성됩니다. 또한 LGWR은 Redo Log Buffer의 내용을 온라인 Redo Log 파일에 기록하는 프로세스입니다.\n\nD) 오답 — 사용자 프로세스는 SGA에 직접 접근할 수 없습니다. 사용자 프로세스는 클라이언트 머신에서 실행되며, Oracle Net 프로토콜을 통해 서버 프로세스와 통신합니다. Buffer Cache에서의 데이터 블록 검색과 읽기는 반드시 서버 프로세스를 통해 수행됩니다.\n\n핵심 개념: SELECT 문 처리는 서버 프로세스가 주도하며, 백그라운드 프로세스는 직접 관여하지 않습니다. 서버 프로세스는 Library Cache에서 SQL을 검색하여 소프트 파싱을 시도하고, Buffer Cache에서 데이터 블록을 검색한 후, Cache Miss 시 직접 데이터 파일에서 블록을 읽어 Buffer Cache에 적재합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_073",
+    "title": "Oracle DatabaseにおけるSELECT文の処理でキャッシュ・ミスが発生した場合の動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) サーバー・プロセスは必要なデータ・ブロックがバッファ・キャッシュに存在しない場合、データ・ファイルからブロックを読み取りバッファ・キャッシュに適載した後、そのバッファから結果を取得してユーザー・プロセスに返す。",
+      "B) サーバー・プロセスがデータ・ファイルからブロックを読み込む際に空きバッファが不足している場合、DBWnプロセスにダーティ・バッファの書き込みを要求することで空きバッファを確保させる。",
+      "C) キャッシュ・ミスが発生すると、CKPTプロセスがチェックポイントを強制的に発生させ、すべてのダーティ・バッファをデータ・ファイルに書き込んでバッファ・キャッシュ全体を解放する。",
+      "D) キャッシュ・ミスの発生時、サーバー・プロセスはデータ・ファイルから直接ユーザー・プロセスにブロックを転送し、バッファ・キャッシュには適載しない。",
+      "E) サーバー・プロセスはキャッシュ・ミスが発生するとLGWRプロセスにREDOログ・バッファのフラッシュを依頼し、フラッシュが完了した後にデータ・ファイルからの読み込みを開始する。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — Buffer Cache에 필요한 데이터 블록이 없는 경우(Cache Miss), 서버 프로세스가 직접 데이터 파일에서 블록을 읽어 Buffer Cache에 적재합니다. 이후 Buffer Cache에 적재된 블록에서 조건에 맞는 데이터를 추출하여 사용자 프로세스에 결과를 반환합니다. 서버 프로세스가 데이터 파일에서의 읽기(Read)를 직접 수행하는 것이 핵심입니다.\n\nB) 정답 — 서버 프로세스가 데이터 파일에서 블록을 읽어 Buffer Cache에 적재하려 할 때, 사용 가능한 Free Buffer가 부족한 경우가 있습니다. 이때 서버 프로세스는 DBWn에게 Dirty Buffer의 기록을 요청하여 Free Buffer를 확보합니다. 이것은 DBWn이 데이터 파일에 기록하는 트리거 조건 중 하나인 'Free Buffer 부족'에 해당합니다.\n\nC) 오답 — Cache Miss 발생 시 CKPT가 강제 체크포인트를 발생시키는 것은 아닙니다. 또한 체크포인트는 Buffer Cache 전체를 해방하는 것이 아니라, Dirty Buffer를 데이터 파일에 기록하여 디스크와의 일관성을 보장하는 작업입니다. Free Buffer 확보는 DBWn이 Dirty Buffer를 기록함으로써 이루어집니다.\n\nD) 오답 — 서버 프로세스는 데이터 파일에서 블록을 읽을 때 반드시 Buffer Cache에 적재한 후 처리합니다. 데이터 파일에서 사용자 프로세스로 직접 전송하는 것이 아니라, Buffer Cache를 경유하는 것이 Oracle의 기본 동작입니다. 이를 통해 동일 블록에 대한 후속 요청 시 디스크 I/O 없이 메모리에서 처리할 수 있습니다.\n\nE) 오답 — Cache Miss 발생 시 LGWR에게 Redo Log Buffer 플러시를 의뢰하는 과정은 필요하지 않습니다. SELECT 문은 데이터를 변경하지 않으므로 Redo 기록과 관련이 없습니다. LGWR의 기록 조건은 COMMIT 발생, Redo Log Buffer 1/3 사용, 1MB 축적, 3초 타임아웃, DBWn 기록 전 등이며, SELECT의 Cache Miss와는 무관합니다.\n\n핵심 개념: SELECT 문에서 Cache Miss가 발생하면 서버 프로세스가 직접 데이터 파일에서 블록을 읽어 Buffer Cache에 적재합니다. Free Buffer가 부족한 경우에는 DBWn에게 Dirty Buffer 기록을 요청하여 Free Buffer를 확보합니다. 데이터 파일에서의 읽기는 항상 Buffer Cache를 경유하며, 서버 프로세스가 이 작업의 주체입니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_074",
+    "title": "Oracle DatabaseにおけるDML（UPDATE文）実行時のプロセス間相互作用について正しく述べているものを選択してください。",
+    "options": [
+      "A) サーバー・プロセスは変更対象のブロックをバッファ・キャッシュで確認し、存在しない場合はデータ・ファイルからブロックを読み込んでバッファ・キャッシュに適載した後、変更前イメージをUNDOセグメントに記録してからデータ・ブロックを変更する。",
+      "B) UPDATE文の実行時、サーバー・プロセスがデータ・ブロックを変更すると、DBWnが即座にダーティ・バッファをデータ・ファイルに書き込み、変更内容の永続性を保証する。",
+      "C) UPDATE文の実行時、LGWRがデータ・ブロックの変更前イメージをUNDOセグメントに記録する役割を担い、サーバー・プロセスはデータ・ブロックの変更のみを実行する。",
+      "D) サーバー・プロセスはデータ・ブロックの変更後、REDOエントリをオンラインREDOログ・ファイルに直接書き込む。REDOログ・バッファは使用されず、変更内容は即座にディスクに永続化される。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — UPDATE 문 실행 시, 서버 프로세스는 먼저 변경 대상 블록을 Buffer Cache에서 확인합니다. Cache Miss인 경우 데이터 파일에서 블록을 읽어 Buffer Cache에 적재합니다. 이후 변경 전 이미지(Before Image)를 Undo 세그먼트에 기록하고, Buffer Cache의 데이터 블록을 변경하여 Dirty Buffer를 생성합니다. 또한 변경에 대한 Redo Entry를 Redo Log Buffer에 기록합니다.\n\nB) 오답 — DML 실행 시 DBWn이 즉시 Dirty Buffer를 데이터 파일에 기록하는 것은 아닙니다. DBWn은 비동기적으로 동작하며, 체크포인트 발생, Dirty Buffer 임계값 초과, Free Buffer 부족, 3초 타임아웃 등의 조건이 충족될 때 기록합니다. 트랜잭션의 영속성(Durability)은 LGWR이 Redo를 온라인 Redo Log 파일에 기록함으로써 보장됩니다.\n\nC) 오답 — 변경 전 이미지를 Undo 세그먼트에 기록하는 것은 LGWR이 아니라 서버 프로세스의 역할입니다. LGWR은 Redo Log Buffer의 내용을 온라인 Redo Log 파일에 기록하는 백그라운드 프로세스입니다. DML 처리 시 서버 프로세스가 Undo 기록, 데이터 블록 변경, Redo Entry 생성을 모두 수행합니다.\n\nD) 오답 — 서버 프로세스는 Redo Entry를 온라인 Redo Log 파일에 직접 기록하는 것이 아니라, SGA의 Redo Log Buffer에 기록합니다. Redo Log Buffer의 내용을 온라인 Redo Log 파일에 기록하는 것은 LGWR 프로세스의 역할입니다. Redo Log Buffer라는 메모리 영역을 중간에 사용함으로써 디스크 I/O 효율을 높입니다.\n\n핵심 개념: DML(UPDATE) 실행 시 서버 프로세스는 Buffer Cache에서 블록 확인 → Undo 세그먼트에 변경 전 이미지 기록 → 데이터 블록 변경(Dirty Buffer 생성) → Redo Log Buffer에 Redo Entry 기록의 순서로 처리합니다. DBWn은 비동기적으로 Dirty Buffer를 기록하며, DML 시점에 즉시 기록하지 않습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_075",
+    "title": "Oracle DatabaseにおけるDML実行後のCOMMIT処理のプロセス間相互作用について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) COMMITが実行されると、LGWRがREDOログ・バッファの内容をオンラインREDOログ・ファイルに書き込み、書き込み完了後にCOMMIT成功がユーザーに返される。",
+      "B) COMMITが成功した時点で、変更されたデータ・ブロック（ダーティ・バッファ）はまだデータ・ファイルに書き込まれていない可能性がある。DBWnによるデータ・ファイルへの書き込みはCOMMITとは非同期に行われる。",
+      "C) COMMIT時にDBWnがすべてのダーティ・バッファをデータ・ファイルに即座に書き込み、その完了をもってCOMMIT成功がユーザーに返される。",
+      "D) COMMITが実行されるとサーバー・プロセスがREDOログ・バッファの内容を直接オンラインREDOログ・ファイルに書き込む。LGWRはCOMMIT処理には関与しない。",
+      "E) COMMIT時にLGWRがREDOをオンラインREDOログ・ファイルに書き込むが、インスタンス障害が発生した場合、REDOが記録されていてもCOMMIT済みトランザクションの復旧は保証されない。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — COMMIT이 실행되면 서버 프로세스가 COMMIT Redo Entry를 Redo Log Buffer에 기록하고, LGWR이 Redo Log Buffer의 내용을 온라인 Redo Log 파일에 즉시 기록합니다(Log Force at Commit). LGWR의 기록이 완료된 후에 비로소 COMMIT 성공이 사용자에게 반환됩니다. 이 동기적 기록을 통해 트랜잭션의 영속성(Durability)이 보장됩니다.\n\nB) 정답 — COMMIT이 성공하더라도 변경된 데이터 블록(Dirty Buffer)은 아직 데이터 파일에 기록되지 않았을 수 있습니다. DBWn에 의한 Dirty Buffer의 데이터 파일 기록은 COMMIT과는 비동기적으로 수행되며, 체크포인트 발생, Dirty Buffer 임계값 초과, Free Buffer 부족 등의 조건에서 이루어집니다. 인스턴스 장애 시에는 SMON이 온라인 Redo Log의 Redo를 사용하여 COMMIT된 트랜잭션을 복구(Roll Forward)합니다.\n\nC) 오답 — COMMIT 시 DBWn이 모든 Dirty Buffer를 즉시 데이터 파일에 기록하는 것은 아닙니다. COMMIT의 영속성은 LGWR이 Redo를 온라인 Redo Log 파일에 기록함으로써 보장되며, DBWn에 의한 데이터 파일 기록은 비동기적으로 별도의 시점에 수행됩니다. 이러한 분리를 통해 COMMIT 응답 시간을 단축할 수 있습니다.\n\nD) 오답 — 서버 프로세스는 Redo Log Buffer에 Redo Entry를 기록하지만, 온라인 Redo Log 파일에 직접 기록하지는 않습니다. 온라인 Redo Log 파일에 대한 기록은 LGWR의 핵심 역할이며, COMMIT 처리에서 LGWR은 가장 중요한 역할을 담당합니다.\n\nE) 오답 — COMMIT 시 LGWR이 Redo를 온라인 Redo Log 파일에 기록한 이상, 인스턴스 장애가 발생하더라도 COMMIT된 트랜잭션의 복구는 보장됩니다. 인스턴스 재기동 시 SMON이 온라인 Redo Log를 사용하여 Roll Forward(캐시 리커버리)를 수행하고, COMMIT되지 않은 트랜잭션은 Undo 데이터를 사용하여 Roll Back합니다.\n\n핵심 개념: COMMIT 시 LGWR이 Redo Log Buffer를 온라인 Redo Log 파일에 동기적으로 기록하고, 기록 완료 후 COMMIT 성공을 반환합니다. DBWn에 의한 Dirty Buffer의 데이터 파일 기록은 COMMIT과 비동기적으로 수행됩니다. 인스턴스 장애 시에도 Redo Log에 기록된 COMMIT 트랜잭션은 SMON의 Roll Forward에 의해 복구가 보장됩니다."
+  }
+]

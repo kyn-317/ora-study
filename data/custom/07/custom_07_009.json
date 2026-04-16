@@ -1,0 +1,71 @@
+[
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_040",
+    "title": "DBAがV$SYSSTATを確認したところ、'table fetch continued row'の値が過去1時間で急激に増加していることが判明しました。原因を調査し対策を講じる場合、正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 'table fetch continued row'の値が増加する原因として行移行（Row Migration）と行連鎖（Row Chaining）の両方が考えられる。行移行が主な原因である場合は、PCTFREEの値を適切に増加させた上でALTER TABLE MOVEを実行することで、既存の行移行を解消し今後の発生も抑制できる。",
+      "B) 行移行が原因の場合、PCTFREEの値を増加させるだけで既存の行移行はすべて自動的に解消される。ALTER TABLE MOVEやSHRINK SPACEの追加実行は不要である。",
+      "C) V$SYSSTATの'table fetch continued row'の値は行移行のみをカウントする統計であり、行連鎖はこの統計に含まれない。行連鎖を検出するにはANALYZE TABLE ... LIST CHAINED ROWSを使用する必要がある。",
+      "D) ALTER TABLE MOVEを実行すると行移行が解消されるが、ASSM環境ではMOVE後にPCTFREEの値が自動的にOracle推奨値にリセットされるため、MOVE前のPCTFREE変更は不要である。",
+      "E) 'table fetch continued row'の値が増加している場合、対象テーブルを特定するためにV$SYSSTATの統計値だけでなく、個別テーブルに対してANALYZE TABLE ... LIST CHAINED ROWSを実行してCHAINED_ROWSテーブルの結果を確認する必要がある。V$SYSSTATはインスタンス全体の累計値であり、テーブル単位の情報は提供しない。"
+    ],
+    "answer": ["A", "E"],
+    "explanation": "정답: A, E\nA) 정답 — V$SYSSTAT의 'table fetch continued row'는 행 접근 시 다른 블록으로의 추가 접근이 발생한 횟수를 나타내며, 행 이행(Row Migration)과 행 연쇄(Row Chaining) 모두가 원인이 될 수 있습니다. 행 이행이 주요 원인인 경우, PCTFREE를 적절히 증가시켜 향후 UPDATE 시 행 이행 발생을 억제하고, ALTER TABLE MOVE를 실행하여 기존 행 이행을 해소할 수 있습니다. PCTFREE 변경은 새로운 INSERT에만 적용되므로, 기존 행 이행은 MOVE로 물리적으로 재배치해야 합니다.\n\nE) 정답 — V$SYSSTAT의 'table fetch continued row'는 인스턴스 전체의 누적 통계값이므로, 어떤 테이블에서 행 이행/연쇄가 발생했는지 특정할 수 없습니다. 특정 테이블을 대상으로 ANALYZE TABLE ... LIST CHAINED ROWS를 실행하면 해당 테이블의 행 이행/연쇄된 개별 행의 ROWID가 CHAINED_ROWS 테이블에 기록되어 상세 분석이 가능합니다.\n\nB) 오답 — PCTFREE 값을 증가시키는 것은 향후 새로운 INSERT에 대해 블록 내 여유 공간을 더 확보하여 행 이행 발생을 억제하는 예방 조치입니다. 기존에 이미 발생한 행 이행은 자동으로 해소되지 않으며, ALTER TABLE MOVE 또는 SHRINK SPACE를 실행하여 물리적으로 재배치해야 합니다.\n\nC) 오답 — V$SYSSTAT의 'table fetch continued row'는 행 이행과 행 연쇄 모두에 의해 증가합니다. 행 접근 시 다른 블록으로의 추가 페치가 발생하는 모든 경우를 카운트하므로, 행 이행(포인터 추적)과 행 연쇄(다중 블록 접근) 양쪽이 포함됩니다.\n\nD) 오답 — ALTER TABLE MOVE를 실행해도 PCTFREE 값이 자동으로 변경되지 않습니다. MOVE는 현재 설정된 PCTFREE 값을 유지한 채 데이터를 재배치합니다. 따라서 행 이행 재발을 방지하려면 MOVE 실행 전에 PCTFREE를 적절히 조정해야 합니다.\n\n핵심 개념: V$SYSSTAT의 'table fetch continued row'는 인스턴스 전체의 행 이행/연쇄 누적 통계이며, 개별 테이블 특정은 ANALYZE TABLE LIST CHAINED ROWS로 수행합니다. 행 이행 해결은 PCTFREE 증가(예방) + ALTER TABLE MOVE(기존 해소)를 병행해야 합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_041",
+    "title": "あるテーブルHR.ORDERSにはCLOB型の列が含まれ、3つのBツリー索引が定義されています。このテーブルが使用している総ディスク領域を正確に把握するためにDBA_SEGMENTSビューを照会する場合、正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) DBA_SEGMENTSでSEGMENT_TYPEが'TABLE'であるセグメントのBYTES値のみを合算すれば、CLOB列のデータと索引のデータを含む総ディスク領域が算出される。",
+      "B) CLOB列のデータはテーブルセグメントとは別にSEGMENT_TYPEが'LOBSEGMENT'のセグメントに格納される。さらにLOBセグメントには対応するSEGMENT_TYPEが'LOBINDEX'の索引セグメントも存在するため、テーブルの総領域にはこれらも含めて計算する必要がある。",
+      "C) DBA_SEGMENTSでSEGMENT_TYPEが'TABLE'、'INDEX'、'LOBSEGMENT'、'LOBINDEX'のすべてのセグメントのBYTES値を合算することで、テーブルとその関連オブジェクト（索引、LOBデータ）が使用する総ディスク領域を算出できる。",
+      "D) LOB列のデータはSEGMENT_TYPEが'LOB'として一つのセグメントに格納され、LOB用の索引セグメントは存在しない。Oracleは内部的にLOBデータの位置をテーブルセグメント内のロケータで管理する。",
+      "E) DBA_SEGMENTSにはLOBに関するセグメント情報は含まれないため、LOBの領域を確認するにはDBA_LOBSビューのSEGMENT_NAME列からLOBセグメント名を取得し、別途OSレベルでファイルサイズを確認する必要がある。"
+    ],
+    "answer": ["B", "C"],
+    "explanation": "정답: B, C\nB) 정답 — CLOB, BLOB 등의 LOB 컬럼 데이터는 아웃오브라인(out-of-line) 저장 시 테이블 세그먼트와는 별도의 LOB 세그먼트(SEGMENT_TYPE = 'LOBSEGMENT')에 저장됩니다. Oracle은 LOB 데이터의 위치를 관리하기 위해 LOB 인덱스(SEGMENT_TYPE = 'LOBINDEX')도 별도로 생성합니다. 따라서 LOB 컬럼을 포함한 테이블의 총 디스크 사용량을 정확히 파악하려면 LOBSEGMENT와 LOBINDEX도 함께 계산해야 합니다.\n\nC) 정답 — 테이블의 총 디스크 사용량을 정확히 산정하려면 DBA_SEGMENTS에서 해당 테이블 관련 모든 세그먼트를 합산해야 합니다. 여기에는 TABLE(테이블 데이터), INDEX(B-tree 인덱스 3개), LOBSEGMENT(CLOB 데이터), LOBINDEX(LOB 인덱스)가 포함됩니다.\n\nA) 오답 — SEGMENT_TYPE이 'TABLE'인 세그먼트에는 테이블의 행 데이터만 저장됩니다. CLOB 데이터는 별도의 LOBSEGMENT에, B-tree 인덱스는 별도의 INDEX 세그먼트에 저장되므로, TABLE 세그먼트의 BYTES만으로는 총 디스크 사용량을 산출할 수 없습니다.\n\nD) 오답 — LOB 데이터의 SEGMENT_TYPE은 'LOB'가 아니라 'LOBSEGMENT'입니다. 또한 Oracle은 LOB 데이터의 청크(Chunk) 위치를 관리하기 위해 SEGMENT_TYPE이 'LOBINDEX'인 별도의 인덱스 세그먼트를 생성합니다. LOB 인덱스가 존재하지 않는다는 설명은 잘못입니다.\n\nE) 오답 — DBA_SEGMENTS에는 LOBSEGMENT와 LOBINDEX 타입의 세그먼트 정보가 정상적으로 포함됩니다. OS 레벨에서 별도로 확인할 필요 없이 DBA_SEGMENTS 뷰만으로 LOB 관련 세그먼트의 크기를 조회할 수 있습니다.\n\n핵심 개념: LOB 컬럼을 포함한 테이블의 총 디스크 사용량을 산정하려면 DBA_SEGMENTS에서 TABLE, INDEX, LOBSEGMENT, LOBINDEX 타입의 세그먼트를 모두 합산해야 합니다. LOB 데이터는 테이블 세그먼트와 별도의 LOBSEGMENT에 저장되며, LOB 청크 관리를 위한 LOBINDEX도 별도로 존재합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_042",
+    "title": "DBAがDBA_EXTENTSビューで特定のテーブルのエクステント情報を照会したところ、エクステント数が異常に多く（数百個）、それぞれのサイズも64KB、1MB、8MBなど不均一であることが判明しました。この状況の原因と対策について正しく述べているものを選択してください（2つ選択してください）。",
+    "options": [
+      "A) テーブルが存在するテーブルスペースがAUTOALLOCATE（自動割当て）で作成されている可能性が高い。AUTOALLOCATEではOracleがセグメントの成長に応じて64KB→1MB→8MB→64MBと段階的にエクステントサイズを増加させるため、成長過程で異なるサイズのエクステントが混在する。",
+      "B) エクステント数が多く不均一なサイズが混在しているのは、テーブルスペースのデータファイルが自動拡張（AUTOEXTEND）されるたびにエクステントサイズがリセットされるためである。AUTOEXTENDを無効にすればエクステントサイズは均一になる。",
+      "C) エクステント数を削減してサイズを均一にするには、テーブルスペースをUNIFORM SIZE句を指定して再作成し、テーブルをそのテーブルスペースにALTER TABLE MOVEで移動する方法がある。UNIFORMではすべてのエクステントが指定した同一サイズで割り当てられる。",
+      "D) AUTOALLOCATEテーブルスペースのエクステントサイズの段階は、ALTER TABLESPACE文で変更できる。例えばALTER TABLESPACE ... MINIMUM EXTENT SIZE 1Mを実行すれば、以後のエクステント最小サイズを1MBに固定できる。",
+      "E) AUTOALLOCATEテーブルスペース内でALTER TABLE MOVEを実行するだけで、既存の複数の小さなエクステントが自動的に統合されて均一なサイズになる。UNIFORM SIZE テーブルスペースを別途作成する必要はない。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — AUTOALLOCATE(자동 할당) 방식의 테이블스페이스에서는 Oracle이 세그먼트 크기에 따라 익스텐트 크기를 자동으로 결정합니다. 세그먼트가 성장함에 따라 64KB → 1MB → 8MB → 64MB로 단계적으로 익스텐트 크기를 증가시킵니다. 따라서 오랜 기간 성장한 테이블의 DBA_EXTENTS를 조회하면 초기의 작은 익스텐트(64KB)부터 이후의 큰 익스텐트(1MB, 8MB 등)가 혼재하여 수백 개의 익스텐트가 존재할 수 있습니다.\n\nC) 정답 — 익스텐트 크기를 균일하게 하려면 UNIFORM SIZE를 지정한 테이블스페이스를 별도로 생성한 후, ALTER TABLE MOVE를 사용하여 테이블을 해당 테이블스페이스로 이동하는 방법이 있습니다. UNIFORM 방식에서는 모든 익스텐트가 지정한 동일 크기(기본 1MB, 사용자 지정 가능)로 할당되므로 크기 불균일 문제가 해소됩니다.\n\nB) 오답 — AUTOEXTEND(데이터파일 자동 확장)는 데이터파일의 물리적 크기를 확장하는 것이며, 익스텐트 크기 결정과는 무관합니다. 데이터파일이 자동 확장되어도 AUTOALLOCATE의 익스텐트 크기 단계는 세그먼트 크기에 따라 결정되며, AUTOEXTEND 발생 시마다 리셋되지 않습니다.\n\nD) 오답 — AUTOALLOCATE 테이블스페이스의 익스텐트 크기 단계는 ALTER TABLESPACE 문으로 변경할 수 없습니다. AUTOALLOCATE의 단계적 증가 규칙(64KB→1MB→8MB→64MB)은 Oracle 내부 로직에 의해 고정되어 있습니다. MINIMUM EXTENT는 딕셔너리 관리 테이블스페이스에서 사용되던 구문이며, 로컬 관리 AUTOALLOCATE 테이블스페이스에는 적용되지 않습니다.\n\nE) 오답 — AUTOALLOCATE 테이블스페이스 내에서 ALTER TABLE MOVE를 실행해도 익스텐트가 자동 통합되지 않습니다. MOVE는 데이터를 재배치하지만, 동일 AUTOALLOCATE 테이블스페이스 내에서는 새로운 익스텐트도 AUTOALLOCATE의 단계적 규칙에 따라 할당됩니다. 균일한 익스텐트 크기를 원한다면 반드시 UNIFORM SIZE를 지정한 별도의 테이블스페이스를 생성하여 이동해야 합니다.\n\n핵심 개념: AUTOALLOCATE 테이블스페이스에서는 Oracle이 세그먼트 성장에 따라 64KB→1MB→8MB→64MB로 익스텐트 크기를 단계적으로 증가시킵니다. 이로 인해 장기간 성장한 세그먼트는 다양한 크기의 익스텐트가 혼재합니다. 균일한 익스텐트 크기가 필요한 경우 UNIFORM SIZE를 지정한 테이블스페이스를 생성하고 ALTER TABLE MOVE로 이동합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_043",
+    "title": "Data Guard環境のプライマリ・データベースで、DBAがNOLOGGING属性のテーブルにDirect-Path Insertで大量データをロードしました。その後、スタンバイ・データベースに対してクエリを実行したところ、該当テーブルのブロックでORA-01578（データ・ブロック破損）エラーが発生しました。この問題の原因と対策について正しく述べているものを選択してください（2つ選択してください）。",
+    "options": [
+      "A) NOLOGGING属性のテーブルにDirect-Path Insertを実行すると、REDOログの生成が最小限に抑えられる。スタンバイ・データベースはREDOログを適用してデータを同期するため、REDO情報が不足するブロックは論理的に破損した状態（nologging change）となり、スタンバイ側でアクセス時にORA-01578エラーが発生する。",
+      "B) ORA-01578エラーの原因はネットワーク転送中のREDOログ破損であり、NOLOGGING設定とは無関係である。REDO転送プロトコルをSYNCモードに変更すれば解決できる。",
+      "C) この問題を防止するためにデータベースレベルでALTER DATABASE FORCE LOGGINGを設定すると、NOLOGGING属性が設定されたテーブルを含むすべてのオブジェクトに対してREDOが強制的に生成される。テーブルスペースレベルでもALTER TABLESPACE ... FORCE LOGGINGを設定可能であり、テーブルスペースレベルの設定はそのテーブルスペース内のオブジェクトにのみ適用される。",
+      "D) FORCE LOGGINGはテーブルスペースレベルでのみ設定可能であり、データベースレベルでは設定できない。Data Guard環境では各テーブルスペースに個別にFORCE LOGGINGを設定する必要がある。",
+      "E) NOLOGGING作業完了後にALTER DATABASE BACKUP INCREMENTAL LEVEL 0を実行すれば、スタンバイ・データベースのブロック破損が自動的に修復される。FORCE LOGGINGの設定は不要である。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — NOLOGGING 속성의 테이블에 Direct-Path Insert를 실행하면 Redo 생성이 최소화됩니다(익스텐트 무효화 정보 수준만 기록). Data Guard의 스탠바이 데이터베이스는 프라이머리에서 전송된 Redo 로그를 적용하여 데이터를 동기화하므로, NOLOGGING으로 인해 Redo 정보가 부족한 블록은 스탠바이에서 '논리적 손상(nologging change)' 상태가 됩니다. 이러한 블록에 접근하면 ORA-01578 에러가 발생합니다.\n\nC) 정답 — 이 문제를 예방하기 위해 DB 레벨에서 ALTER DATABASE FORCE LOGGING을 설정하면 NOLOGGING 속성이 무시되고 모든 작업에 대해 Redo가 강제 생성됩니다. 테이블스페이스 레벨에서도 ALTER TABLESPACE ... FORCE LOGGING을 설정할 수 있으며, 이 경우 해당 테이블스페이스 내 오브젝트에만 적용됩니다. Data Guard 환경에서는 스탠바이 보호를 위해 DB 레벨의 FORCE LOGGING이 권장됩니다.\n\nB) 오답 — ORA-01578 에러의 원인은 네트워크 전송 중 Redo 로그 손상이 아니라, NOLOGGING 설정으로 인해 Redo 정보 자체가 생성되지 않았기 때문입니다. SYNC 모드로 변경하면 Redo 전송의 동기화 방식이 바뀔 뿐, NOLOGGING으로 인한 Redo 미생성 문제는 해결되지 않습니다.\n\nD) 오답 — FORCE LOGGING은 테이블스페이스 레벨과 데이터베이스 레벨 모두에서 설정할 수 있습니다. ALTER DATABASE FORCE LOGGING 명령으로 DB 전체에 일괄 적용이 가능하며, Data Guard 환경에서는 DB 레벨 설정이 권장됩니다.\n\nE) 오답 — ALTER DATABASE BACKUP INCREMENTAL LEVEL 0은 RMAN 백업 명령이 아닌 SQL 문이며, 이 명령만으로 스탠바이의 블록 손상이 자동 복구되지 않습니다. NOLOGGING으로 인한 스탠바이 블록 손상을 복구하려면 RMAN RECOVER ... FROM SERVICE 명령으로 프라이머리에서 해당 데이터파일을 스탠바이로 전송해야 합니다. 근본적인 예방을 위해서는 FORCE LOGGING 설정이 필요합니다.\n\n핵심 개념: Data Guard 환경에서 NOLOGGING으로 Direct-Path Insert를 수행하면 스탠바이 DB의 해당 블록이 논리적 손상 상태가 됩니다. 이를 방지하려면 ALTER DATABASE FORCE LOGGING(DB 레벨) 또는 ALTER TABLESPACE FORCE LOGGING(테이블스페이스 레벨)을 설정하여 NOLOGGING을 무시하고 Redo를 강제 생성해야 합니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_044",
+    "title": "Data Guard環境で大量のバッチデータをプライマリ・データベースにロードする必要があります。ロード速度の最大化とスタンバイ・データベースの即時的なデータ保護を両立させる方法について正しく述べているものを選択してください。",
+    "options": [
+      "A) FORCE LOGGINGを有効にしたまま大量データをロードすることが推奨される。FORCE LOGGINGが有効であればNOLOGGINGオプションを指定してもREDOが強制的に生成されるため、ロード速度に影響なくスタンバイの即時保護が保証される。",
+      "B) ロード前にALTER DATABASE NO FORCE LOGGINGに設定し、テーブルをNOLOGGINGに変更してDirect-Path Insertでロードした後、ALTER DATABASE FORCE LOGGINGに戻す。NOLOGGINGでロードされたデータのスタンバイ側のブロック破損を修復するには、プライマリからスタンバイへRMAN RECOVER ... FROM SERVICE句で該当データファイルを増分バックアップとして転送する方法がある。",
+      "C) NOLOGGINGでロードした後にALTER SYSTEM SWITCH LOGFILE文でログスイッチを実行すれば、その時点でNOLOGGINGのデータも含めてスタンバイに自動的に伝播されるため、追加の復旧手順は不要である。",
+      "D) Data Guard環境ではNOLOGGINGオプションは常にOracleによって自動的に無視され、すべてのDML操作でREDOが強制的に生成されるため、ロード方法に関わらずスタンバイの即時保護は保証されている。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 로드 속도를 극대화하면서 스탠바이를 보호하는 전략으로, NOLOGGING + Direct-Path Insert로 고속 적재를 수행한 후, 스탠바이의 손상된 블록을 RMAN RECOVER ... FROM SERVICE 명령으로 프라이머리에서 증분 백업 형태로 복구하는 방법이 있습니다. 이 방법은 로드 중에는 Redo 오버헤드를 제거하여 속도를 극대화하고, 로드 완료 후 스탠바이를 동기화합니다. FORCE LOGGING을 해제하고 다시 설정하는 절차가 필요하며, 로드 중에는 스탠바이 보호가 일시적으로 약화됩니다.\n\nA) 오답 — FORCE LOGGING이 활성화된 상태에서 NOLOGGING을 지정해도 Redo가 강제 생성되므로, 스탠바이 보호는 보장됩니다. 그러나 Redo가 강제 생성된다는 것은 NOLOGGING의 성능 이점(Redo 최소화에 의한 속도 향상)이 완전히 사라진다는 의미입니다. 따라서 '로드 속도에 영향 없이'라는 설명은 잘못입니다.\n\nC) 오답 — ALTER SYSTEM SWITCH LOGFILE은 현재 온라인 Redo 로그 그룹의 전환을 발생시킬 뿐, NOLOGGING으로 생성되지 않은 Redo 데이터를 사후에 생성하지 않습니다. NOLOGGING 작업에서는 익스텐트 무효화(Extent Invalidation) 정보만 최소한으로 기록되며, 실제 데이터는 Redo에 포함되지 않으므로 로그 스위치로는 스탠바이에 데이터를 전파할 수 없습니다.\n\nD) 오답 — Data Guard 환경이라고 해서 NOLOGGING이 자동으로 무시되지 않습니다. NOLOGGING 동작의 무시는 명시적으로 FORCE LOGGING을 설정한 경우에만 발생합니다. FORCE LOGGING이 설정되지 않은 Data Guard 환경에서는 NOLOGGING 작업이 그대로 적용되어 스탠바이에서 블록 손상이 발생할 수 있습니다.\n\n핵심 개념: Data Guard 환경에서 대량 배치 적재 시, FORCE LOGGING 유지(속도 감소, 즉시 보호)와 NOLOGGING 적재 후 재동기화(속도 최대화, 사후 복구 필요) 두 가지 전략이 있습니다. RMAN RECOVER FROM SERVICE를 통해 프라이머리에서 스탠바이로 증분 백업을 전송하여 NOLOGGING으로 인한 블록 손상을 복구할 수 있습니다."
+  }
+]

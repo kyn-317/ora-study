@@ -227,7 +227,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
         [...selected].sort().every((v, i) => v === [...correct].sort()[i]);
       if (isCorrect) totalScore++;
 
-      const chapterMatch = q.number.match(/^C_(\d+)_/);
+      const chapterMatch = q.number.match(/^(?:C_)?(\d+)_/);
       return {
         questionId: q.number,
         chapter: chapterMatch ? chapterMatch[1] : '00',
@@ -348,7 +348,7 @@ export default function MockExamClient({ questions, setId }: MockExamClientProps
     // Chapter breakdown
     const chapterStats = new Map<string, { total: number; correct: number }>();
     shuffled.forEach((q, idx) => {
-      const ch = q.number.match(/^C_(\d+)_/)?.[1] ?? '00';
+      const ch = q.number.match(/^(?:C_)?(\d+)_/)?.[1] ?? '00';
       const stat = chapterStats.get(ch) || { total: 0, correct: 0 };
       stat.total++;
       const selected = answers[idx] ?? [];

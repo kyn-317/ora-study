@@ -9,7 +9,9 @@
       "C) TRUNCATE TABLE文はデータを削除するがHWMは変更されないため、フル・テーブル・スキャンの性能は改善されない。",
       "D) SHRINK SPACE COMPACT句を使用すると、データの再配置とHWMの下方調整が同時に実行される。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — Direct-Path Insert(INSERT /*+ APPEND */)는 Buffer Cache를 우회하여 항상 HWM(High Water Mark) 위의 새로운 블록에 데이터를 직접 기록합니다. 따라서 기존의 빈 블록을 재사용하지 않고 HWM은 항상 상향됩니다.\n\nA) 오답 — DELETE 문은 행 데이터를 삭제하지만 HWM을 자동으로 하향하지 않습니다. 따라서 대량 삭제 후에도 Full Table Scan은 HWM까지의 모든 블록(빈 블록 포함)을 읽으므로 성능은 개선되지 않습니다.\n\nC) 오답 — TRUNCATE TABLE은 DDL로서 모든 행을 삭제하고 HWM을 세그먼트 시작점으로 초기화합니다. 따라서 Full Table Scan 성능은 즉시 개선됩니다.\n\nD) 오답 — SHRINK SPACE COMPACT는 데이터 재배치(Compaction)만 수행하고 HWM의 하방 조정은 수행하지 않습니다. HWM을 하향하려면 COMPACT 구를 제외한 SHRINK SPACE를 별도로 실행해야 합니다.\n\n핵심 개념: HWM(High Water Mark)은 세그먼트에서 데이터가 기록된 적 있는 최고 지점으로, DELETE로는 하향되지 않습니다. TRUNCATE는 HWM을 초기화하고, SHRINK SPACE는 HWM을 하향합니다. Direct-Path Insert는 항상 HWM 위에 기록하여 HWM을 상향시킵니다."
   },
   {
@@ -23,7 +25,10 @@
       "D) ROW STORE COMPRESS BASICオプションは標準のINSERT文やUPDATE文で変更された行にも圧縮を適用する。",
       "E) ROW STORE COMPRESS ADVANCEDオプションはブロックが一定の水準まで充填されるとバッチ方式で自動的に圧縮を実行する。"
     ],
-    "answer": ["B", "E"],
+    "answer": [
+      "B",
+      "E"
+    ],
     "explanation": "정답: B, E\nB) 정답 — ROW STORE COMPRESS ADVANCED(Advanced Row Compression)는 INSERT, UPDATE, DELETE 등 모든 DML 작업에서 데이터를 압축 상태로 유지합니다. OLTP 환경에 적합한 압축 방식입니다.\n\nE) 정답 — Advanced Row Compression은 초기에는 데이터를 비압축 상태로 삽입하고, 블록이 일정 수준으로 채워지면 배치(Batch) 방식으로 자동 압축을 수행합니다. 이를 통해 DML 성능에 대한 영향을 최소화합니다.\n\nA) 오답 — ROW STORE COMPRESS BASIC(Basic Compression)은 Enterprise Edition에 기본 포함되어 있으며 별도의 Advanced Compression Option 라이선스가 필요하지 않습니다. Advanced Compression Option이 필요한 것은 ROW STORE COMPRESS ADVANCED입니다.\n\nC) 오답 — ROW STORE COMPRESS BASIC은 테이블 생성 시 명시적으로 지정해야 적용되며, 기본 설정(NOCOMPRESS)에서는 압축이 적용되지 않습니다. CREATE TABLE 또는 ALTER TABLE에서 ROW STORE COMPRESS BASIC을 명시해야 합니다.\n\nD) 오답 — ROW STORE COMPRESS BASIC은 Direct-Path Insert(INSERT /*+ APPEND */, CTAS, SQL*Loader Direct Path 등)에서만 압축이 적용됩니다. 표준 INSERT나 UPDATE로 변경된 행은 비압축 상태로 저장됩니다.\n\n핵심 개념: Oracle의 데이터 압축에서 Basic Compression(ROW STORE COMPRESS BASIC)은 EE에 포함되며 Direct-Path Insert에서만 적용됩니다. Advanced Compression(ROW STORE COMPRESS ADVANCED)은 별도 라이선스가 필요하며 모든 DML에서 압축을 유지하고, 배치 방식으로 블록 압축을 수행하여 DML 성능 영향을 최소화합니다. 압축은 기본 설정이 아니므로 명시적으로 지정해야 합니다."
   },
   {
@@ -36,7 +41,9 @@
       "C) SHRINK SPACEはMSSM(手動セグメント領域管理)環境のテーブルスペースでも実行可能である。",
       "D) ALTER TABLE MOVEを実行する前にROW MOVEMENTをENABLEにする必要がある。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — ALTER TABLE MOVE(비Online)를 실행하면 테이블 데이터가 새로운 세그먼트에 재구성되며, 기존 ROWID가 변경되기 때문에 테이블에 의존하는 모든 인덱스가 UNUSABLE 상태가 됩니다. 따라서 MOVE 후 반드시 ALTER INDEX ... REBUILD를 수행해야 합니다.\n\nA) 오답 — SHRINK SPACE는 기존 세그먼트 내에서 데이터를 재배치하므로 추가 디스크 공간이 필요하지 않습니다. 추가 디스크 공간이 필요한 것은 ALTER TABLE MOVE로, 새 세그먼트를 위한 공간이 필요합니다.\n\nC) 오답 — SHRINK SPACE는 ASSM(Automatic Segment Space Management) 테이블스페이스에서만 지원됩니다. MSSM(Manual Segment Space Management) 환경에서는 사용할 수 없으며, 대안으로 ALTER TABLE MOVE를 사용해야 합니다.\n\nD) 오답 — ROW MOVEMENT ENABLE이 필요한 것은 SHRINK SPACE입니다. ALTER TABLE MOVE는 ROW MOVEMENT 설정과 관계없이 실행 가능합니다.\n\n핵심 개념: SHRINK SPACE는 기존 세그먼트 내에서 동작하여 추가 공간이 불필요하지만 ASSM 환경과 ROW MOVEMENT ENABLE이 필요합니다. ALTER TABLE MOVE는 새 세그먼트를 생성하므로 추가 공간이 필요하고, 비Online 실행 시 인덱스가 UNUSABLE 상태가 되어 REBUILD가 필요합니다."
   },
   {
@@ -50,7 +57,10 @@
       "D) ROW STORE COMPRESS BASICが設定されたテーブルでは、Direct-Path Insertで挿入されたデータに圧縮が適用される。",
       "E) Direct-Path Insert実行中でも他のセッションからの通常のINSERT文やUPDATE文は制限なく実行できる。"
     ],
-    "answer": ["B", "D"],
+    "answer": [
+      "B",
+      "D"
+    ],
     "explanation": "정답: B, D\nB) 정답 — Direct-Path Insert는 항상 HWM(High Water Mark) 위에 새로운 블록을 할당하여 데이터를 기록합니다. 기존의 빈 블록을 재사용하지 않으므로, 반복적으로 사용하면 세그먼트 크기가 불필요하게 증가할 수 있습니다.\n\nD) 정답 — ROW STORE COMPRESS BASIC(Basic Compression)이 설정된 테이블에서는 Direct-Path Insert(INSERT /*+ APPEND */, CTAS, SQL*Loader Direct Path 등)로 삽입된 데이터에 압축이 적용됩니다. Basic Compression은 Direct-Path 작업에서만 압축이 동작합니다.\n\nA) 오답 — Direct-Path Insert는 SGA의 Buffer Cache를 우회(경유하지 않고)하여 HWM 위의 데이터 파일에 직접 기록합니다. Buffer Cache를 경유하지 않는 것이 고속 적재의 핵심입니다.\n\nC) 오답 — Direct-Path Insert는 HWM 이하의 빈 블록을 재사용하지 않고, 항상 HWM 위에 새로운 블록을 할당하여 기록합니다.\n\nE) 오답 — Direct-Path Insert 실행 중에는 테이블에 대해 배타적 잠금이 획득되므로, 다른 세션의 DML(INSERT, UPDATE, DELETE) 작업이 차단됩니다.\n\n핵심 개념: Direct-Path Insert는 Buffer Cache를 우회하여 HWM 위에 직접 기록하는 고속 적재 방식입니다. 기존의 빈 블록을 재사용하지 않아 세그먼트 크기가 증가할 수 있으며, 실행 중 다른 세션의 DML이 차단됩니다. ROW STORE COMPRESS BASIC은 Direct-Path Insert에서만 압축이 적용됩니다."
   },
   {
@@ -63,7 +73,9 @@
       "C) RESUMABLE_TIMEOUTを0に設定すると、一時停止された操作は無制限に再開を待機する。",
       "D) DBMS_RESUMABLEパッケージでは現在のセッションのタイムアウト値のみを変更することができ、他のセッションのタイムアウトは変更できない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — AFTER SUSPEND 시스템 트리거는 재개 가능 작업이 일시 중지될 때 자동으로 실행됩니다. 이 트리거를 통해 데이터 파일 자동 추가, DBA 이메일 알림, 테이블스페이스 쿼터 자동 조정 등 공간 부족에 대한 자동화된 대응을 구현할 수 있습니다.\n\nB) 오답 — DBA_RESUMABLE 뷰의 STATUS 열에는 RUNNING, SUSPENDED 외에도 TIMEOUT(타임아웃 만료), ABORTED(강제 중단) 등의 상태가 기록됩니다.\n\nC) 오답 — RESUMABLE_TIMEOUT을 0으로 설정하면 시스템 레벨에서 재개 가능 영역 할당이 비활성화됩니다. 무제한 대기가 아니라 기능 자체가 꺼지는 것입니다.\n\nD) 오답 — DBMS_RESUMABLE 패키지의 SET_SESSION_TIMEOUT 프로시저를 사용하면 다른 세션의 타임아웃 값도 동적으로 변경할 수 있습니다. 또한 ABORT 프로시저로 다른 세션의 재개 가능 작업을 강제 중단하는 것도 가능합니다.\n\n핵심 개념: 재개 가능 영역 할당의 모니터링에는 DBA_RESUMABLE 뷰(RUNNING, SUSPENDED, TIMEOUT, ABORTED 등의 상태)와 AFTER SUSPEND 트리거를 활용합니다. DBMS_RESUMABLE 패키지로 다른 세션의 타임아웃 변경 및 작업 강제 중단이 가능하며, RESUMABLE_TIMEOUT=0은 비활성화를 의미합니다."
   }
 ]

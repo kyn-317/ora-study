@@ -2,20 +2,6 @@
   {
     "chapter": "ストレージの管理",
     "number": "C_07_011",
-    "title": "Oracle Databaseの行移行(Row Migration)と行連鎖(Row Chaining)について正しく述べているものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) 行移行(Row Migration)は、UPDATE操作で行サイズが増加し元のブロック内の空き領域に収まらなくなった場合に、行全体が別のブロックに移動される現象である。",
-      "B) 行連鎖(Row Chaining)は、PCTFREEを適切に設定することにより完全に防止できる。",
-      "C) V$SYSSTATの「table fetch continued row」統計値の継続的な増加は、行移行または行連鎖が発生していることを示唆している。",
-      "D) 行移行が発生した場合、元のブロックからデータは完全に削除され、索引のROWID参照は自動的に新しい位置に更新される。",
-      "E) 行連鎖はSHRINK SPACE操作で解消することができる。"
-    ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — 행 이동(Row Migration)은 UPDATE로 행 크기가 증가하여 원래 블록의 여유 공간(PCTFREE 포함)에 들어가지 않을 때 발생합니다. 이 경우 행 전체가 다른 블록으로 이동되며, 원래 블록에는 새 위치를 가리키는 포인터(Row Piece Pointer)만 남게 됩니다.\n\nC) 정답 — V$SYSSTAT의 'table fetch continued row' 통계는 행 접근 시 다른 블록으로의 추가 접근(continued fetch)이 발생한 횟수를 나타냅니다. 이 값이 지속적으로 증가하면 Row Migration 또는 Row Chaining이 심각한 상태임을 나타냅니다.\n\nB) 오답 — 행 연쇄(Row Chaining)는 행의 전체 크기가 블록 크기보다 큰 경우에 발생하며, 이는 구조적인 원인입니다. PCTFREE 설정으로 방지할 수 있는 것은 Row Migration이며, Row Chaining은 더 큰 블록 크기 사용이나 테이블 재설계가 필요합니다.\n\nD) 오답 — 행 이동이 발생하면 원래 블록에서 데이터가 완전히 삭제되는 것이 아니라, 새 위치를 가리키는 포인터가 남습니다. 인덱스의 ROWID는 여전히 원래 블록을 가리키므로, 인덱스를 통한 접근 시 원래 블록(포인터) → 새 블록(실제 데이터)으로 2회 I/O가 발생합니다.\n\nE) 오답 — SHRINK SPACE로 해소할 수 있는 것은 Row Migration입니다. Row Chaining은 행 크기가 블록 크기를 초과하는 구조적 문제이므로 SHRINK SPACE로는 해소되지 않으며, 더 큰 블록 크기를 사용하거나 테이블을 재설계해야 합니다.\n\n핵심 개념: Row Migration은 UPDATE로 행 크기 증가 시 발생하며 PCTFREE 조정과 SHRINK SPACE로 해결 가능합니다. Row Chaining은 행 크기가 블록 크기를 초과하는 구조적 문제로, 블록 크기 변경이나 테이블 재설계가 필요합니다. V$SYSSTAT의 'table fetch continued row'로 두 현상을 모니터링합니다."
-  },
-  {
-    "chapter": "ストレージの管理",
-    "number": "C_07_012",
     "title": "Oracle DatabaseのPCTFREEパラメータに関して正しい内容を述べているものを選択してください。",
     "options": [
       "A) PCTFREEはデータ・ブロック内でUPDATEのために予約する空き領域の比率(%)を指定し、デフォルト値は10%である。",
@@ -23,12 +9,14 @@
       "C) ASSM(自動セグメント領域管理)環境ではPCTFREEとPCTUSEDの両方が使用される。",
       "D) PCTFREEはINSERT操作のために予約される領域であり、UPDATE操作には使用されない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — PCTFREE는 데이터 블록 내에서 향후 UPDATE를 위해 예약하는 여유 공간의 비율(%)을 지정하는 파라미터이며, 기본값은 10%입니다. 블록 사용률이 (100 - PCTFREE)%에 도달하면 해당 블록은 INSERT 대상에서 제외되고, PCTFREE 영역은 UPDATE 전용으로 예약됩니다.\n\nB) 오답 — PCTFREE 값을 높게 설정하면 블록 내 UPDATE용 예약 공간이 증가하므로, 반대로 블록당 저장 가능한 행 수가 감소합니다. PCTFREE를 높이면 Row Migration은 줄어들지만 공간 활용도는 낮아집니다.\n\nC) 오답 — ASSM(Automatic Segment Space Management) 환경에서는 PCTFREE만 사용되며 PCTUSED는 무시됩니다. PCTUSED는 MSSM(Manual Segment Space Management) 환경에서만 유효하며, 블록 사용률이 PCTUSED 이하로 내려가면 다시 INSERT 대상(Freelist)에 등록됩니다.\n\nD) 오답 — PCTFREE는 INSERT가 아닌 UPDATE를 위해 예약되는 영역입니다. INSERT 시 블록 사용률이 (100-PCTFREE)%에 도달하면 INSERT가 중단되고, 남은 PCTFREE 영역은 UPDATE 시 행 크기 증가에 대응하기 위해 사용됩니다.\n\n핵심 개념: PCTFREE는 블록 내 UPDATE를 위한 예약 공간 비율(기본 10%)입니다. PCTFREE가 너무 낮으면 Row Migration이 빈번하게 발생하고, 너무 높으면 블록당 저장 행 수가 줄어 공간이 낭비됩니다. ASSM 환경에서는 PCTFREE만 유효하고 PCTUSED는 무시됩니다."
   },
   {
     "chapter": "ストレージの管理",
-    "number": "C_07_013",
+    "number": "C_07_012",
     "title": "Oracle Databaseの索引のUNUSABLEとINVISIBLEの状態に関して正しい内容を述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) 索引をUNUSABLE状態にすると索引のセグメントは削除され、ディスク領域が即座に回収される。",
@@ -37,12 +25,15 @@
       "D) UNUSABLE索引が存在する状態でDML操作を実行すると、SKIP_UNUSABLE_INDEXESの設定に関わらず常にORA-01502エラーが発生する。",
       "E) TRUNCATE TABLE文を実行すると、表に依存するすべての索引がUNUSABLE状態になる。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — ALTER INDEX ... UNUSABLE을 실행하면 인덱스의 세그먼트(물리적 저장 공간)가 삭제되어 디스크 공간이 즉시 회수됩니다. 데이터 딕셔너리에는 인덱스의 메타데이터(구조 정의, 열 정보 등)만 유지되며, 필요 시 ALTER INDEX ... REBUILD로 복구할 수 있습니다.\n\nC) 정답 — INVISIBLE 인덱스는 옵티마이저의 실행 계획에서 기본적으로 참조되지 않지만, 세그먼트는 존재하며 DML(INSERT, UPDATE, DELETE) 시 인덱스 메인터넌스가 계속 수행됩니다. 이는 인덱스 삭제 전 성능 영향을 테스트하는 데 유용합니다.\n\nB) 오답 — INVISIBLE 인덱스는 세그먼트가 삭제되지 않고 유지됩니다. 세그먼트가 삭제되는 것은 UNUSABLE 상태입니다. INVISIBLE은 옵티마이저에게만 보이지 않을 뿐 물리적으로는 정상 상태를 유지합니다.\n\nD) 오답 — SKIP_UNUSABLE_INDEXES 파라미터가 TRUE(기본값)이면 UNUSABLE 인덱스가 있어도 DML이 정상적으로 수행됩니다. FALSE로 설정된 경우에만 ORA-01502 오류가 발생합니다.\n\nE) 오답 — TRUNCATE TABLE은 모든 행 데이터와 인덱스 데이터를 삭제하지만, 인덱스를 UNUSABLE 상태로 만들지 않습니다. 인덱스는 빈 상태로 VALID(USABLE)를 유지합니다. 인덱스를 UNUSABLE로 만드는 것은 ALTER TABLE MOVE(비Online) 등의 작업입니다.\n\n핵심 개념: UNUSABLE 인덱스는 세그먼트가 삭제되어 공간이 회수되고 DML 유지관리도 중단됩니다. INVISIBLE 인덱스는 세그먼트가 유지되고 DML 유지관리도 계속되지만 옵티마이저에게만 보이지 않습니다. SKIP_UNUSABLE_INDEXES=TRUE(기본)이면 UNUSABLE 인덱스가 있어도 DML이 정상 수행됩니다."
   },
   {
     "chapter": "ストレージの管理",
-    "number": "C_07_014",
+    "number": "C_07_013",
     "title": "Oracle DatabaseのSHRINK SPACEの前提条件および制約事項について正しく述べているものを選択してください。",
     "options": [
       "A) SHRINK SPACEを実行する前にALTER TABLE文で行移動(ROW MOVEMENT)を有効にする必要があるが、これは行のROWIDが変更される可能性があるためである。",
@@ -50,12 +41,14 @@
       "C) 既に圧縮(COMPRESS)が設定されているテーブルに対してもSHRINK SPACEを実行できる。",
       "D) SHRINK SPACE CASCADE句を指定すると、テーブルのみが縮小され、依存する索引は別途縮小操作が必要となる。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — SHRINK SPACE를 수행하기 전에 반드시 ALTER TABLE ... ENABLE ROW MOVEMENT를 실행해야 합니다. SHRINK SPACE는 세그먼트 끝쪽의 행을 앞쪽 빈 블록으로 재배치하는데, 이 과정에서 행의 물리적 위치(ROWID)가 변경됩니다. ROW MOVEMENT가 활성화되어야 Oracle이 행의 ROWID 변경을 허용합니다.\n\nB) 오답 — SHRINK SPACE는 ASSM(Automatic Segment Space Management) 테이블스페이스에서만 지원됩니다. MSSM(Manual Segment Space Management) 환경에서는 SHRINK SPACE를 사용할 수 없으며, ALTER TABLE MOVE가 대안이 됩니다.\n\nC) 오답 — 이미 압축(Compressed)이 설정된 테이블에는 SHRINK SPACE를 실행할 수 없습니다. 이 외에도 LONG/LONG RAW 타입 열이 있는 테이블, 클러스터 테이블 등도 SHRINK 대상에서 제외됩니다.\n\nD) 오답 — SHRINK SPACE CASCADE를 지정하면 테이블뿐 아니라 종속 인덱스와 LOB 세그먼트까지 함께 축소됩니다. CASCADE 없이 SHRINK SPACE만 실행하면 테이블 세그먼트만 축소됩니다.\n\n핵심 개념: SHRINK SPACE의 전제조건은 ROW MOVEMENT ENABLE과 ASSM 테이블스페이스입니다. 압축된 테이블, LONG 타입 열 보유 테이블, 클러스터 테이블은 SHRINK 대상에서 제외됩니다. CASCADE 절을 사용하면 종속 인덱스까지 함께 축소되어 별도 조치가 필요 없습니다."
   },
   {
     "chapter": "ストレージの管理",
-    "number": "C_07_015",
+    "number": "C_07_014",
     "title": "Oracle Databaseの索引の再構築(REBUILD)に関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) ALTER TABLE MOVE(非Online)を実行した後、表に定義されたすべての索引がUNUSABLE状態になるため、ALTER INDEX REBUILD文で再構築する必要がある。",
@@ -64,7 +57,25 @@
       "D) SHRINK SPACE実行後の索引は自動的に最適化されるため、索引の再構築は不要である。",
       "E) 大量データのロード時に索引をUNUSABLE状態にしてからデータをロードし、その後REBUILDする戦略は、ロード速度の向上には効果がない。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — ALTER TABLE MOVE(비Online)를 실행하면 테이블의 모든 행이 새로운 세그먼트로 이동되어 ROWID가 변경됩니다. 이로 인해 기존 인덱스의 ROWID 참조가 무효화되어 모든 인덱스가 UNUSABLE 상태가 됩니다. ALTER INDEX ... REBUILD로 반드시 재구성해야 합니다.\n\nB) 정답 — ALTER INDEX ... REBUILD ONLINE은 DML 동시 수행이 가능한 온라인 재구성 방식입니다. 재구성 중에도 INSERT, UPDATE, DELETE가 가능하므로 서비스 중단 없이 인덱스를 복구할 수 있습니다.\n\nC) 오답 — ALTER INDEX COALESCE는 인덱스 세그먼트 전체를 재생성하지 않습니다. COALESCE는 인접한 리프 블록의 인덱스 항목을 병합하여 빈 리프 블록을 해제하는 가벼운 작업입니다. 새로운 세그먼트를 생성하는 것은 ALTER INDEX REBUILD입니다.\n\nD) 오답 — SHRINK SPACE 실행 시 테이블 내 행의 ROWID가 변경될 수 있으며, 이 경우 인덱스가 UNUSABLE 상태가 될 수 있습니다. SHRINK SPACE CASCADE를 사용하면 종속 인덱스도 함께 축소되지만, 인덱스가 자동으로 최적 상태가 되는 것은 아닙니다.\n\nE) 오답 — 대량 데이터 적재 시 인덱스를 UNUSABLE로 설정 → 데이터 적재 → REBUILD 전략은 적재 속도를 크게 향상시킵니다. 인덱스가 UNUSABLE 상태이면 DML 시 인덱스 유지관리가 수행되지 않으므로 적재 오버헤드가 감소합니다.\n\n핵심 개념: ALTER TABLE MOVE(비Online) 후에는 반드시 인덱스 REBUILD가 필요합니다. REBUILD ONLINE은 DML 동시 수행이 가능하고, COALESCE는 리프 블록 병합만 수행하는 가벼운 작업입니다. 대량 적재 시 UNUSABLE → 적재 → REBUILD 전략으로 성능을 향상시킬 수 있습니다."
+  },
+  {
+    "chapter": "ストレージの管理",
+    "number": "C_07_015",
+    "title": "Oracle Databaseのデータ圧縮の種類とAdvanced Compression Optionライセンスについて正しく述べているものを選択してください。",
+    "options": [
+      "A) ROW STORE COMPRESS BASICは全てのDML操作（INSERT、UPDATE、DELETE）でデータ圧縮が行われるため、OLTP環境に適している。",
+      "B) ROW STORE COMPRESS ADVANCEDはAdvanced Compression Optionライセンスが必要であり、ブロック内のデータが一定レベルに達するとバッチ方式で自動圧縮が実行される。",
+      "C) Hybrid Columnar Compression（HCC）はすべてのストレージ環境で使用可能であり、50倍以上の圧縮率を実現できる。",
+      "D) ROW STORE COMPRESS BASICが設定されたテーブルに対して通常のINSERT文を実行するとAdvanced Compressionと同等の圧縮率が適用される。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — ROW STORE COMPRESS ADVANCED는 Advanced Compression Option 라이선스가 필요하며, 모든 DML(INSERT, UPDATE, DELETE)에서 압축을 유지합니다. 블록 내 데이터가 일정 수준 채워지면 배치(Batch) 방식으로 자동 압축을 수행하여 DML 성능에 대한 영향을 최소화합니다.\n\nA) 오답 — ROW STORE COMPRESS BASIC은 모든 DML에서 압축하는 것이 아니라, Direct-Path Insert(INSERT /*+ APPEND */, CTAS, SQL*Loader Direct Path 등)에서만 압축이 적용됩니다. 일반 INSERT/UPDATE로 변경된 행은 비압축 상태로 저장됩니다.\n\nC) 오답 — HCC(Hybrid Columnar Compression)는 Oracle Exadata, ZFS Storage Appliance 등 특정 스토리지 환경에서만 지원됩니다. 모든 스토리지에서 사용할 수 있는 것이 아닙니다.\n\nD) 오답 — ROW STORE COMPRESS BASIC이 설정된 테이블이라도 일반 INSERT 문으로 삽입된 행은 비압축 상태로 저장됩니다. 압축이 적용되려면 Direct-Path Insert를 사용해야 합니다.\n\n핵심 개념: Basic Compression은 Enterprise Edition에 포함되며 Direct-Path Insert에서만 압축이 적용됩니다. Advanced Row Compression은 별도 라이선스가 필요하지만 모든 DML에서 압축을 유지하며, 블록 단위 배치 압축을 통해 OLTP 환경에서도 효율적으로 동작합니다."
   }
 ]

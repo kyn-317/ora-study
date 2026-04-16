@@ -2,33 +2,6 @@
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_016",
-    "title": "管理者ユーザーが以下の操作でユーザーを作成しました。\n\nSQL> CREATE USER app_user IDENTIFIED BY password123\n     DEFAULT TABLESPACE users\n     TEMPORARY TABLESPACE temp;\n\nこの時点でapp_userがデータベースにログインを試みた場合の結果について正しく述べているものを選択してください。",
-    "options": [
-      "A) デフォルト表領域としてUSERSが設定されているため、ログインしてテーブルの作成が可能である。",
-      "B) ORA-01045: user APP_USER lacks CREATE SESSION privilege; logon denied エラーが発生し、ログインに失敗する。",
-      "C) ユーザー作成時にパスワードが設定されているため、ログインは成功するが、テーブル操作は行えない。",
-      "D) ORA-28000: The account is locked エラーが発生し、アカウントがロックされているためログインできない。"
-    ],
-    "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — CREATE USER 문으로 사용자를 생성하더라도 CREATE SESSION 시스템 권한이 부여되지 않으면 데이터베이스에 로그인할 수 없습니다. ORA-01045 오류가 발생하며 로그인이 거부됩니다. 사용자 생성 후 반드시 GRANT CREATE SESSION TO app_user; 명령으로 접속 권한을 부여해야 합니다.\n\nA) 오답 — DEFAULT TABLESPACE 설정은 사용자가 객체를 생성할 때 기본으로 사용할 테이블스페이스를 지정하는 것이며, 로그인 권한이나 테이블 생성 권한과는 관련이 없습니다. 로그인에는 CREATE SESSION, 테이블 생성에는 CREATE TABLE 권한과 테이블스페이스 쿼터(QUOTA)가 별도로 필요합니다.\n\nC) 오답 — 패스워드가 설정되어 있어도 CREATE SESSION 권한이 없으면 로그인 자체가 불가능합니다. 패스워드는 인증 수단일 뿐, 접속 권한(CREATE SESSION)은 별도로 부여해야 합니다.\n\nD) 오답 — CREATE USER로 생성된 사용자의 계정은 기본적으로 OPEN 상태이며, 자동으로 잠기지 않습니다. 계정 잠금(LOCKED)은 명시적으로 ACCOUNT LOCK 절을 지정하거나, FAILED_LOGIN_ATTEMPTS 초과 시 발생합니다.\n\n핵심 개념: Oracle에서 사용자를 생성한 후에는 반드시 CREATE SESSION 시스템 권한을 부여해야 데이터베이스에 로그인할 수 있습니다. CREATE SESSION은 데이터베이스 접속에 필수적인 가장 기본적인 시스템 권한이며, 이 권한 없이 로그인을 시도하면 ORA-01045 오류가 발생합니다."
-  },
-  {
-    "chapter": "ユーザー、ロールおよび権限の管理",
-    "number": "C_05_017",
-    "title": "以下のSQL文を使用してユーザーを作成する場合の構文について正しく述べているものを選択してください。\n\nSQL> CREATE USER sales_user IDENTIFIED BY SalesPass123\n     DEFAULT TABLESPACE sales_data\n     TEMPORARY TABLESPACE temp\n     QUOTA 500M ON sales_data;\n\nこの操作に関する説明として正しいものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) このCREATE USER文により、sales_userはsales_dataテーブルスペースに最大500MBまでのオブジェクトを作成できる領域割当てが設定される。",
-      "B) QUOTA句で指定された500Mは、sales_userが使用できるメモリー(SGA)のサイズを制限している。",
-      "C) sales_data表領域が存在しない場合、CREATE USER文は自動的にsales_data表領域を作成する。",
-      "D) この操作に成功しても、sales_userがテーブルを作成するにはCREATE TABLE権限が別途必要である。",
-      "E) TEMPORARY TABLESPACE句を省略した場合、ユーザーにはテンポラリ表領域が割り当てられないため一時セグメントを使用できない。"
-    ],
-    "answer": ["A", "D"],
-    "explanation": "정답: A, D\nA) 정답 — QUOTA 500M ON sales_data 절은 sales_user가 sales_data 테이블스페이스에 최대 500MB까지의 공간을 사용하여 객체(테이블, 인덱스 등)를 생성할 수 있도록 영역 할당 한도를 설정합니다. 이 쿼터는 디스크 공간 사용량을 제한하는 것입니다.\n\nD) 정답 — QUOTA가 설정되어 있더라도 테이블을 생성하려면 CREATE TABLE 시스템 권한이 별도로 부여되어야 합니다. 쿼터는 테이블스페이스에 대한 공간 사용 한도만 설정하는 것이며, 테이블 생성 권한은 별개의 시스템 권한입니다.\n\nB) 오답 — QUOTA는 테이블스페이스의 디스크 공간(물리적 저장 공간)에 대한 사용 한도를 설정하는 것이며, SGA의 메모리 사용량과는 관련이 없습니다. 메모리 자원 제한은 프로파일(PROFILE)의 PRIVATE_SGA 파라미터로 설정합니다.\n\nC) 오답 — CREATE USER 문에서 지정하는 DEFAULT TABLESPACE는 이미 존재하는 테이블스페이스를 참조해야 합니다. 존재하지 않는 테이블스페이스를 지정하면 ORA-00959 오류가 발생하며, 테이블스페이스가 자동으로 생성되지는 않습니다.\n\nE) 오답 — TEMPORARY TABLESPACE를 생략하면 데이터베이스의 기본 임시 테이블스페이스(DEFAULT_TEMP_TABLESPACE)가 자동으로 할당됩니다. 임시 테이블스페이스가 할당되지 않는 것이 아닙니다.\n\n핵심 개념: CREATE USER 문에서 QUOTA는 테이블스페이스의 디스크 공간 사용 한도를 설정하며, 객체 생성에는 별도의 시스템 권한(CREATE TABLE 등)이 필요합니다. DEFAULT TABLESPACE는 이미 존재하는 테이블스페이스여야 하고, TEMPORARY TABLESPACE를 생략하면 DB 기본 임시 테이블스페이스가 자동 할당됩니다."
-  },
-  {
-    "chapter": "ユーザー、ロールおよび権限の管理",
-    "number": "C_05_018",
     "title": "ユーザーAがユーザーBに対して以下のようにシステム権限を付与しました。\n\nSQL> GRANT CREATE TABLE TO user_b WITH ADMIN OPTION;\n\nその後、ユーザーBはこのCREATE TABLE権限をユーザーCに付与しました。管理者がユーザーBからCREATE TABLE権限を取り消した場合の結果について正しく述べているものを選択してください。",
     "options": [
       "A) ユーザーBとユーザーCの両方からCREATE TABLE権限が自動的に取り消される。",
@@ -36,25 +9,14 @@
       "C) ユーザーCのCREATE TABLE権限のみが取り消され、ユーザーBの権限は維持される。",
       "D) REVOKE文にCASCADEオプションを指定しなければ、ユーザーBの権限も取り消すことはできない。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — WITH ADMIN OPTION으로 부여된 시스템 권한을 REVOKE할 때는 연쇄 취소(Cascade Revoke)가 발생하지 않습니다. Oracle은 시스템 권한의 부여자(Grantor)를 추적하지 않으므로, 사용자 B의 CREATE TABLE 권한만 취소되고 사용자 B가 사용자 C에게 부여한 CREATE TABLE 권한은 그대로 유지됩니다.\n\nA) 오답 — WITH ADMIN OPTION의 시스템 권한에서는 연쇄 취소가 발생하지 않습니다. 사용자 B와 C의 권한이 모두 취소되는 동작은 WITH GRANT OPTION(객체 권한)의 특성입니다.\n\nC) 오답 — REVOKE 대상은 사용자 B이며, 사용자 C는 REVOKE의 대상이 아닙니다. 사용자 B의 권한만 취소되고, 사용자 C의 권한은 영향을 받지 않습니다.\n\nD) 오답 — 시스템 권한의 REVOKE에는 CASCADE 옵션이 필요하지 않으며, 지정할 수도 없습니다. REVOKE CREATE TABLE FROM user_b; 명령으로 직접 취소하면 됩니다.\n\n핵심 개념: WITH ADMIN OPTION(시스템 권한/롤)의 REVOKE는 비연쇄 취소(No Cascade)이며, 피부여자가 다른 사용자에게 부여한 권한은 유지됩니다. 이는 WITH GRANT OPTION(객체 권한)에서 연쇄 취소가 발생하는 것과 대조적인 핵심 차이점입니다."
   },
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
-    "number": "C_05_019",
-    "title": "プロファイルを作成してユーザーに割り当てる手順について正しく述べているものを選択してください。",
-    "options": [
-      "A) CREATE PROFILE文でプロファイルを作成し、ALTER USER文でユーザーにプロファイルを割り当てる。その後、リソース制限パラメータを適用するにはRESOURCE_LIMITパラメータをTRUEに設定する必要がある。",
-      "B) CREATE PROFILE文でプロファイルを作成する際に、対象ユーザーをプロファイル作成文の中で指定する必要がある。",
-      "C) ALTER PROFILE文でプロファイルのパスワード管理パラメータを変更した場合、そのプロファイルが割り当てられた既存アクティブ・セッションにも即座に適用される。",
-      "D) RESOURCE_LIMITパラメータがFALSEの場合、プロファイルのパスワード管理パラメータも適用されない。"
-    ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — 프로파일 적용 절차는 다음과 같습니다: (1) CREATE PROFILE 문으로 프로파일을 생성하고, (2) ALTER USER ... PROFILE 문으로 사용자에게 프로파일을 할당합니다. (3) 자원 제한 파라미터(CPU_PER_SESSION, CONNECT_TIME 등)가 실제로 적용되려면 RESOURCE_LIMIT 초기화 파라미터가 TRUE로 설정되어야 합니다. 비밀번호 관리 파라미터는 RESOURCE_LIMIT과 무관하게 항상 적용됩니다.\n\nB) 오답 — CREATE PROFILE 문은 프로파일의 이름과 제한 파라미터를 정의하는 것이며, 대상 사용자를 프로파일 생성 시 지정하지 않습니다. 사용자에게 프로파일을 할당하는 것은 별도의 ALTER USER ... PROFILE 명령으로 수행합니다.\n\nC) 오답 — ALTER PROFILE로 파라미터를 변경하면 해당 프로파일이 할당된 사용자의 다음 세션부터 새 값이 적용됩니다. 현재 활성 세션에는 즉시 적용되지 않습니다.\n\nD) 오답 — RESOURCE_LIMIT=FALSE인 경우에도 비밀번호 관리 파라미터(FAILED_LOGIN_ATTEMPTS, PASSWORD_LIFE_TIME, PASSWORD_VERIFY_FUNCTION 등)는 항상 적용됩니다. RESOURCE_LIMIT은 자원 제한 파라미터에만 영향을 미칩니다.\n\n핵심 개념: 프로파일 적용은 CREATE PROFILE → ALTER USER ... PROFILE → RESOURCE_LIMIT=TRUE 설정의 3단계 절차이며, 비밀번호 관리 파라미터는 RESOURCE_LIMIT과 무관하게 항상 적용되고, 프로파일 변경은 다음 세션부터 적용됩니다."
-  },
-  {
-    "chapter": "ユーザー、ロールおよび権限の管理",
-    "number": "C_05_020",
+    "number": "C_05_017",
     "title": "Oracle Databaseの権限分析(Privilege Analysis)機能について正しく述べているものを選択してください。",
     "options": [
       "A) DBMS_PRIVILEGE_CAPTUREパッケージを使用して権限キャプチャ・ポリシーを作成し、一定期間の権限使用状況を記録した後、DBA_USED_PRIVS/DBA_UNUSED_PRIVSビューで使用済み・未使用の権限を分析できる。",
@@ -62,7 +24,58 @@
       "C) 権限分析はシステム権限の使用状況のみを記録し、オブジェクト権限やロールの使用状況は分析対象に含まれない。",
       "D) 権限キャプチャ・ポリシーの作成にはSYSDBA権限が必須であり、CAPTURE_ADMINロールでは作成できない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — DBMS_PRIVILEGE_CAPTURE 패키지를 사용하여 권한 캡처 정책을 생성하고 활성화하면, 해당 기간 동안 실제로 사용된 권한을 기록합니다. 캡처를 중지한 후 GENERATE_RESULT 프로시저를 실행하면 DBA_USED_PRIVS(사용된 권한)와 DBA_UNUSED_PRIVS(미사용 권한) 뷰를 통해 최소 권한 원칙(Least Privilege) 적용을 위한 분석이 가능합니다.\n\nB) 오답 — 권한 분석은 데이터베이스가 정상 운영 중인 상태에서 수행할 수 있으며, 제한 모드로 기동할 필요가 없습니다. 실제 운영 환경에서의 권한 사용 패턴을 분석하는 것이 목적이므로, 정상 운영 중에 캡처하는 것이 권장됩니다.\n\nC) 오답 — 권한 분석은 시스템 권한뿐만 아니라 객체 권한과 롤의 사용 상황도 분석 대상에 포함합니다. CREATE_CAPTURE 프로시저의 type 파라미터로 G_DATABASE(전체), G_ROLE(특정 롤), G_CONTEXT(조건부) 등의 분석 범위를 지정할 수 있습니다.\n\nD) 오답 — 권한 캡처 정책의 생성에는 SYSDBA 권한이 반드시 필요한 것은 아닙니다. CAPTURE_ADMIN 롤이 부여된 사용자도 권한 캡처 정책을 생성하고 관리할 수 있습니다.\n\n핵심 개념: 권한 분석(Privilege Analysis)은 DBMS_PRIVILEGE_CAPTURE 패키지를 사용하여 실제 사용되는 권한과 미사용 권한을 식별하는 보안 기능입니다. 최소 권한 원칙 적용과 과도한 권한 부여 식별에 활용되며, 시스템 권한, 객체 권한, 롤 모두를 분석 대상으로 합니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_018",
+    "title": "CDBルートに接続した管理者が以下の操作を順番に実行しました。\n\nSQL> CREATE USER C##APP_ADMIN IDENTIFIED BY SecurePass1\n     DEFAULT TABLESPACE users\n     CONTAINER = ALL;\n\nSQL> GRANT CREATE SESSION TO C##APP_ADMIN CONTAINER = ALL;\n\nSQL> GRANT CREATE TABLE TO C##APP_ADMIN CONTAINER = CURRENT;\n\nその後、C##APP_ADMINユーザーがPDB1に接続してテーブルを作成しようとしました。この操作の結果について正しく述べているものを選択してください。",
+    "options": [
+      "A) PDB1に正常にログインでき、テーブルの作成も成功する。",
+      "B) PDB1にはログインできるが、CREATE TABLE権限はCDBルートにのみ付与されているためテーブル作成は失敗する。",
+      "C) CONTAINER=ALLでユーザーを作成しているため、すべての権限が自動的にすべてのPDBに伝播される。",
+      "D) C##APP_ADMINはCDBルートにしか接続できず、PDB1への接続自体が失敗する。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — CREATE SESSION 권한은 CONTAINER=ALL로 부여되었으므로 PDB1에 정상적으로 로그인할 수 있습니다. 그러나 CREATE TABLE 권한은 CONTAINER=CURRENT로 부여되었기 때문에 실행 시점의 현재 컨테이너(CDB 루트)에서만 유효합니다. PDB1에서는 CREATE TABLE 권한이 없으므로 테이블 생성이 실패합니다.\n\nA) 오답 — CREATE TABLE 권한은 CONTAINER=CURRENT(CDB 루트)에서만 유효하므로, PDB1에서는 테이블을 생성할 수 없습니다.\n\nC) 오답 — CONTAINER=ALL로 사용자를 생성하면 모든 컨테이너에 사용자가 존재하지만, 각 권한의 적용 범위는 해당 권한의 GRANT 문에서 지정한 CONTAINER 절에 따라 결정됩니다. 사용자 생성 시 CONTAINER=ALL이라고 해서 모든 권한이 자동으로 모든 PDB에 전파되지는 않습니다.\n\nD) 오답 — 공통 사용자는 CDB 루트뿐만 아니라 개별 PDB에도 접속할 수 있습니다. CREATE SESSION이 CONTAINER=ALL로 부여되었으므로 모든 컨테이너에서 접속이 가능합니다.\n\n핵심 개념: 공통 사용자의 권한 범위는 각 GRANT 문의 CONTAINER 절에 의해 개별적으로 결정됩니다. CONTAINER=ALL은 모든 컨테이너에, CONTAINER=CURRENT는 현재 컨테이너에서만 유효하며, CONTAINER 절을 생략하면 CDB 루트에서는 기본값이 CONTAINER=CURRENT입니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_019",
+    "title": "管理者が以下のSQL文を実行して権限の付与状況を確認しました。\n\nSQL> SELECT grantee, privilege, admin_option\n     FROM dba_sys_privs\n     WHERE grantee = 'DEV_USER';\n\nGRANTEE   PRIVILEGE        ADMIN_OPTION\n--------- ---------------- ------------\nDEV_USER  CREATE SESSION   NO\nDEV_USER  CREATE TABLE     YES\nDEV_USER  CREATE VIEW      NO\n\nこの結果に基づいて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) DEV_USERはCREATE TABLE権限を他のユーザーに付与することができる。",
+      "B) DEV_USERがCREATE TABLE権限を他のユーザーに付与した後、DEV_USERからCREATE TABLE権限を取り消すと、付与先ユーザーのCREATE TABLE権限も連鎖的に取り消される。",
+      "C) DEV_USERはCREATE VIEW権限をADMIN OPTIONなしで保持しているため、自身のスキーマでもビューを作成できない。",
+      "D) DEV_USERはCREATE SESSION権限をADMIN OPTIONなしで保持しているため、データベースに接続することは可能だが、他のユーザーにCREATE SESSION権限を付与することはできない。",
+      "E) DEV_USERからCREATE VIEW権限を取り消す場合、CREATE TABLEのADMIN OPTIONも同時に取り消される。"
+    ],
+    "answer": [
+      "A",
+      "D"
+    ],
+    "explanation": "정답: A, D\nA) 정답 — DEV_USER는 CREATE TABLE 권한을 ADMIN_OPTION=YES로 보유하고 있으므로, 이 권한을 다른 사용자에게 GRANT할 수 있습니다. WITH ADMIN OPTION으로 부여된 시스템 권한은 피부여자가 해당 권한을 재부여할 수 있게 합니다.\n\nD) 정답 — DEV_USER는 CREATE SESSION 권한을 보유하고 있으므로 데이터베이스에 접속할 수 있습니다. 그러나 ADMIN_OPTION=NO이므로 CREATE SESSION 권한을 다른 사용자에게 부여할 수는 없습니다.\n\nB) 오답 — WITH ADMIN OPTION으로 부여된 시스템 권한은 REVOKE 시 연쇄 취소(Cascade Revoke)가 발생하지 않습니다. DEV_USER의 CREATE TABLE 권한을 취소해도, DEV_USER가 다른 사용자에게 부여한 CREATE TABLE 권한은 그대로 유지됩니다.\n\nC) 오답 — ADMIN OPTION은 해당 권한을 다른 사용자에게 재부여할 수 있는지 여부를 결정하는 것이며, 자신이 그 권한을 사용할 수 있는지와는 관련이 없습니다. DEV_USER는 CREATE VIEW 권한을 보유하고 있으므로 자신의 스키마에서 뷰를 생성할 수 있습니다.\n\nE) 오답 — 각 시스템 권한은 독립적으로 부여되고 취소됩니다. CREATE VIEW를 취소해도 CREATE TABLE의 ADMIN OPTION에는 영향이 없습니다.\n\n핵심 개념: DBA_SYS_PRIVS 뷰에서 ADMIN_OPTION 컬럼이 YES이면 해당 시스템 권한을 다른 사용자에게 재부여할 수 있습니다. ADMIN OPTION의 유무는 권한의 사용 자체와는 무관하며, 시스템 권한의 REVOKE 시에는 연쇄 취소가 발생하지 않습니다."
+  },
+  {
+    "chapter": "ユーザー、ロールおよび権限の管理",
+    "number": "C_05_020",
+    "title": "WITH GRANT OPTIONを使用した権限付与チェーンにおけるREVOKEの連鎖取消し(Cascade Revoke)の内部動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 連鎖取消しはOBJAUTH$ディクショナリ・テーブルに記録された付与者(GRANTOR)情報に基づいて、付与チェーンを再帰的にたどって実行される。",
+      "B) WITH GRANT OPTIONで付与された権限に基づいてビューが作成されている場合、権限の連鎖取消し後もビューは有効(VALID)な状態を維持する。",
+      "C) 連鎖取消しの深さには制限があり、付与チェーンが5段階を超える場合は最初の5段階までのみ取り消される。",
+      "D) 連鎖取消しにより権限を失ったユーザーが作成済みのテーブルデータは削除されず、そのまま保持される。",
+      "E) 連鎖取消しは非同期で実行されるため、REVOKE文の実行直後は付与チェーンの下位ユーザーがまだ権限を保持している場合がある。"
+    ],
+    "answer": [
+      "A",
+      "D"
+    ],
+    "explanation": "정답: A, D\nA) 정답 — Oracle은 객체 권한을 OBJAUTH$ 딕셔너리 테이블에 저장하며, 이 테이블에는 GRANTOR#(부여자 번호) 컬럼이 포함됩니다. REVOKE 실행 시 Oracle은 이 부여자 정보를 기반으로 부여 체인을 재귀적으로 추적하여, 해당 부여자에서 파생된 모든 권한을 삭제합니다. 이것이 시스템 권한(SYSAUTH$ 테이블, 부여자 미추적)과의 핵심적인 내부 구조 차이입니다.\n\nD) 정답 — 연쇄 취소로 인해 사용자가 객체 권한(SELECT, INSERT 등)을 잃더라도, 해당 사용자가 이미 생성한 테이블의 데이터는 삭제되지 않습니다. 연쇄 취소는 권한만 취소하는 것이며, 이미 생성된 데이터에는 영향을 미치지 않습니다.\n\nB) 오답 — WITH GRANT OPTION으로 받은 권한에 기반하여 뷰를 생성한 경우, 해당 권한이 연쇄 취소되면 뷰는 INVALID 상태로 변경됩니다. 뷰의 기반 객체에 대한 권한이 없어졌기 때문입니다.\n\nC) 오답 — 연쇄 취소에는 깊이 제한이 없습니다. 부여 체인이 몇 단계든 상관없이 해당 부여자에서 파생된 모든 하위 권한이 재귀적으로 취소됩니다.\n\nE) 오답 — 연쇄 취소는 REVOKE 문 실행 시 동기적으로 즉시 수행됩니다. REVOKE 문이 성공적으로 완료되면 부여 체인의 모든 하위 사용자의 권한이 이미 취소된 상태입니다.\n\n핵심 개념: WITH GRANT OPTION의 연쇄 취소는 OBJAUTH$ 테이블의 GRANTOR 정보를 기반으로 재귀적으로 수행되며, 깊이 제한 없이 동기적으로 실행됩니다. 연쇄 취소 시 관련 뷰는 INVALID 상태가 되지만, 이미 생성된 데이터는 영향을 받지 않습니다."
   }
 ]

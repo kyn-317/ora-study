@@ -9,7 +9,9 @@
       "C) ORACLE_LOADERアクセス・ドライバはOracle独自のバイナリ・ダンプ形式のファイルを処理するために使用される。",
       "D) 外部表のアクセス・ドライバの種類に関係なく、すべての外部表でINSERT/UPDATE/DELETE操作を実行することができる。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — ORACLE_LOADER 액세스 드라이버는 CSV, 고정폭, 구분자 기반 텍스트 파일 등 다양한 텍스트 형식의 파일을 읽을 수 있습니다. 단, 읽기 전용(SELECT만 가능)이므로 데이터베이스에서 파일로의 언로드 기능은 제공하지 않습니다.\n\nB) 오답 — ORACLE_DATAPUMP 액세스 드라이버는 읽기/쓰기 양방향을 지원합니다. CREATE TABLE ... ORGANIZATION EXTERNAL ... AS SELECT 구문을 사용하여 데이터를 Oracle 바이너리 형식 파일로 언로드할 수 있습니다.\n\nC) 오답 — Oracle 독자적인 바이너리 덤프 형식 파일을 처리하는 것은 ORACLE_DATAPUMP 드라이버의 역할입니다. ORACLE_LOADER는 텍스트 기반 파일을 처리합니다.\n\nD) 오답 — 외부 테이블은 기본적으로 SELECT만 가능하며 INSERT/UPDATE/DELETE를 실행할 수 없습니다. 유일한 예외는 ORACLE_DATAPUMP 드라이버를 사용한 언로드(CREATE TABLE ... AS SELECT)뿐입니다.\n\n핵심 개념: 외부 테이블의 액세스 드라이버는 ORACLE_LOADER(텍스트 파일 읽기 전용), ORACLE_DATAPUMP(바이너리 덤프 읽기/쓰기), ORACLE_BIGDATA(Parquet, Avro 등 읽기 전용)의 3종류가 있으며, 각 드라이버는 처리 가능한 파일 형식과 방향(읽기/쓰기)이 다릅니다."
   },
   {
@@ -23,7 +25,10 @@
       "D) TRANSPORTABLEモードはデータとメタデータの両方をダンプ・ファイルにエクスポートする。",
       "E) TABLESPACESモードではエクスポート対象の表領域を事前にREAD ONLYに設定する必要がある。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — SCHEMAS 모드는 Data Pump Export의 기본(디폴트) 모드입니다. 지정한 스키마에 속하는 테이블, 인덱스, 뷰, 프로시저 등 모든 객체를 Export합니다.\n\nC) 정답 — TABLES 모드에서는 특정 테이블과 해당 테이블에 종속된 인덱스, 제약조건 등의 객체를 함께 Export할 수 있습니다.\n\nB) 오답 — FULL 모드는 데이터베이스 전체를 Export하는 모드로, 데이터 파일뿐만 아니라 모든 스키마의 데이터와 메타데이터(DDL)를 포함합니다.\n\nD) 오답 — TRANSPORTABLE 모드는 메타데이터만 덤프 파일에 Export하고, 실제 데이터는 데이터 파일을 OS 레벨에서 직접 복사하는 방식입니다. 데이터와 메타데이터 모두를 덤프 파일에 Export하는 것이 아닙니다.\n\nE) 오답 — TABLESPACES 모드에서 테이블스페이스를 사전에 READ ONLY로 설정할 필요는 없습니다. READ ONLY 설정이 필요한 것은 Transportable Tablespace Export의 경우입니다.\n\n핵심 개념: Data Pump Export에는 FULL(전체), SCHEMAS(기본값, 스키마 단위), TABLES(테이블 단위), TABLESPACES(테이블스페이스 단위), TRANSPORTABLE(메타데이터만)의 5가지 모드가 있으며, 각 모드의 범위와 전제조건을 정확히 구분해야 합니다."
   },
   {
@@ -37,7 +42,10 @@
       "D) INTO TABLE句はデータのロード先テーブルを指定するが、1つの制御ファイルに複数のINTO TABLE句を記述することはできない。",
       "E) 制御ファイル内ではSQLファンクションを使用してロード時にデータ変換を行うことが可能である。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — 컨트롤 파일의 선두에는 LOAD DATA 키워드를 기술해야 하며, 이는 컨트롤 파일의 시작을 표시하는 필수 선언입니다. LOAD DATA가 없으면 SQL*Loader가 컨트롤 파일을 올바르게 인식할 수 없습니다.\n\nB) 정답 — INFILE 절로 외부 데이터 파일의 경로를 지정합니다. INFILE *로 기술하면 컨트롤 파일 내에 BEGINDATA 키워드 이후에 데이터를 직접 포함(인라인 데이터)시킬 수 있습니다. 또한 여러 INFILE 절을 사용하여 다수의 데이터 파일을 순차적으로 로드할 수도 있습니다.\n\nC) 오답 — FIELDS TERMINATED BY는 CSV 등 구분자 방식의 파일에서 구분자를 지정하는 절입니다. 고정 길이(Fixed-Length) 파일의 경우에는 FIELDS TERMINATED BY가 아닌 POSITION(start:end)으로 각 필드의 위치를 지정하므로, 반드시 지정할 필요는 없습니다.\n\nD) 오답 — 하나의 컨트롤 파일에 여러 INTO TABLE 절을 기술할 수 있습니다. 이를 통해 하나의 데이터 파일에서 WHEN 조건에 따라 레코드를 여러 테이블에 분배하여 로드하거나, 동일 레코드를 여러 테이블에 동시에 로드하는 것이 가능합니다.\n\nE) 해당 선택지는 정답이 아닙니다(2개 선택 문제에서 A, B가 정답) — 다만 내용 자체는 사실입니다. 컨트롤 파일 내에서 \"UPPER(:column_name)\"이나 \"TO_NUMBER(:column_name, '999,999')\" 등의 SQL 함수를 사용하여 로드 시 데이터를 변환할 수 있습니다.\n\n핵심 개념: SQL*Loader 컨트롤 파일은 LOAD DATA(필수 시작 선언), INFILE(데이터 파일 지정), INTO TABLE(대상 테이블), FIELDS TERMINATED BY(구분자 지정) 등의 절로 구성됩니다. 구분자 방식과 고정 길이 방식에 따라 필드 지정 방법이 달라지며, 다중 INTO TABLE 절로 복수 테이블 로드도 가능합니다."
   },
   {
@@ -51,7 +59,10 @@
       "D) Data Pumpユーザーがディレクトリ・オブジェクトを利用するには、GRANT SELECT ON DIRECTORYで権限を付与する必要がある。",
       "E) DUMPFILEパラメータにOS絶対パスを直接指定することで、ディレクトリ・オブジェクトを使用せずにData Pumpを実行できる。"
     ],
-    "answer": ["A", "B"],
+    "answer": [
+      "A",
+      "B"
+    ],
     "explanation": "정답: A, B\nA) 정답 — 디렉토리 객체는 CREATE DIRECTORY 문(또는 CREATE OR REPLACE DIRECTORY)으로 생성하며, OS 파일 시스템의 실제 경로를 데이터베이스 내의 논리적 이름으로 매핑합니다. 예: CREATE OR REPLACE DIRECTORY dp_dir AS '/u01/app/oracle/dpump';\n\nB) 정답 — Data Pump 실행 시 DIRECTORY 파라미터를 생략하면, Oracle 설치 시 기본으로 생성되는 DATA_PUMP_DIR 디렉토리 객체가 사용됩니다. DATA_PUMP_DIR의 기본 경로는 $ORACLE_BASE/admin/<db_name>/dpdump/입니다.\n\nC) 오답 — 전반부는 맞지만 후반부가 부정확합니다. CREATE ANY DIRECTORY 권한이 필요한 것은 맞습니다. 또한 OS 경로의 존재 여부를 검증하지 않아 DDL 자체는 에러 없이 실행되지만, 실제로 Data Pump가 파일을 읽고 쓸 때는 OS 디렉토리가 존재하고 Oracle 프로세스가 읽기/쓰기 권한을 가져야 합니다. 이 선택지는 DDL 실행은 성공한다는 점에서 사실이지만, 2개 선택 문제에서 A와 B가 더 핵심적인 정답입니다.\n\nD) 오답 — Data Pump 사용자에게 디렉토리 객체에 대한 권한을 부여할 때는 GRANT SELECT가 아닌 GRANT READ, WRITE ON DIRECTORY를 사용합니다. READ는 파일 읽기(Import 시), WRITE는 파일 쓰기(Export 시 덤프/로그 파일 생성)에 필요합니다.\n\nE) 오답 — Data Pump는 서버 측에서 동작하므로, DUMPFILE에 OS 절대경로를 직접 지정할 수 없습니다. 반드시 디렉토리 객체를 통해 파일 위치를 참조해야 하며, DUMPFILE에는 파일명만 지정하거나 directory_name:file_name 형식을 사용합니다.\n\n핵심 개념: Data Pump는 서버 측 유틸리티이므로, 덤프 파일과 로그 파일의 경로를 디렉토리 객체(Directory Object)로 지정해야 합니다. CREATE DIRECTORY로 생성하고 GRANT READ, WRITE ON DIRECTORY로 권한을 부여하며, 기본 DATA_PUMP_DIR이 Oracle 설치 시 자동 생성됩니다."
   },
   {
@@ -64,7 +75,9 @@
       "C) ソース・データベースとターゲット・データベースのブロック・サイズが異なっていても、自動的に変換される。",
       "D) トランスポータブル表領域で移動したデータ・ファイルはインポート後に自動的に削除される。"
     ],
-    "answer": ["B"],
+    "answer": [
+      "B"
+    ],
     "explanation": "정답: B\nB) 정답 — Transportable Tablespace Export를 수행하기 전에 대상 테이블스페이스를 READ ONLY로 설정해야 합니다. 이는 Export 중 데이터 변경을 방지하여 데이터 일관성을 보장하기 위한 전제조건입니다.\n\nA) 오답 — Transportable Tablespace Export에서는 메타데이터만 덤프 파일에 저장됩니다. 실제 데이터는 데이터 파일을 OS 레벨에서 직접 복사하여 이동시키며, 이것이 대량 데이터를 고속으로 이관할 수 있는 핵심 이유입니다.\n\nC) 오답 — 소스와 대상 데이터베이스의 블록 크기가 동일하거나, 다를 경우 대상 데이터베이스에서 DB_nK_CACHE_SIZE 파라미터를 설정하여 해당 블록 크기의 버퍼 캐시를 구성해야 합니다. 블록 크기가 자동으로 변환되는 것은 아니며, 수동 설정이 필요합니다.\n\nD) 오답 — Import 후 데이터 파일은 삭제되지 않고 대상 데이터베이스의 테이블스페이스에 포함됩니다. 데이터 파일은 Import 시 TRANSPORT_DATAFILES 파라미터로 경로를 지정하며, 대상 데이터베이스에서 계속 사용됩니다.\n\n핵심 개념: Transportable Tablespace는 메타데이터만 Export하고 데이터 파일은 OS 레벨에서 복사하여 대량 데이터를 고속으로 이관하는 방법입니다. 전제조건으로 Self-Contained 확인, READ ONLY 설정, 플랫폼 호환성, 블록 크기 일치가 필요합니다."
   }
 ]

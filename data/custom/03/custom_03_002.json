@@ -2,33 +2,6 @@
   {
     "chapter": "データベース・インスタンスの管理の説明",
     "number": "C_03_006",
-    "title": "Oracleデータベースの各種STARTUPオプションに関して正しく述べているものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) STARTUP RESTRICTを実行すると、RESTRICTED SESSION権限を持つユーザーのみがデータベースに接続できる状態でオープンされる。",
-      "B) STARTUP FORCEは内部的にSHUTDOWN IMMEDIATEを実行した後にSTARTUPを実行する。",
-      "C) STARTUP MOUNT後にALTER DATABASE OPEN READ ONLYを実行すると、データベースは読取り専用でオープンされ、一時表領域への書込みも不可となる。",
-      "D) ALTER SYSTEM ENABLE RESTRICTED SESSIONを実行しても、既に接続中のセッションは切断されない。",
-      "E) STARTUP UPGRADEは通常の運用時に使用するコマンドであり、一般ユーザーの接続を許可する。"
-    ],
-    "answer": ["A", "D"],
-    "explanation": "정답: A, D\nA) 정답 — STARTUP RESTRICT는 데이터베이스를 OPEN하되, RESTRICTED SESSION 시스템 권한을 가진 사용자만 접속 가능한 상태로 시작합니다. 유지보수, 마이그레이션, 대규모 데이터 로드 시 일반 사용자 접속을 차단할 때 사용합니다.\n\nD) 정답 — ALTER SYSTEM ENABLE RESTRICTED SESSION 명령으로 OPEN 상태에서 제한 모드로 전환할 수 있지만, 이미 접속 중인 세션은 끊기지 않습니다. 새로운 접속만 RESTRICTED SESSION 권한이 있는 사용자로 제한됩니다.\n\nB) 오답 — STARTUP FORCE는 내부적으로 SHUTDOWN ABORT + STARTUP을 수행합니다. SHUTDOWN IMMEDIATE가 아닙니다. 인스턴스가 비정상 상태(Hang)에서 재기동이 필요할 때 사용하며, 다음 기동 시 인스턴스 복구가 수행됩니다.\n\nC) 오답 — READ ONLY 모드에서는 데이터 파일에 대한 쓰기가 불가하지만, 임시 테이블스페이스에는 쓰기가 가능합니다. 소트 작업 등에 필요한 임시 영역 사용은 허용됩니다.\n\nE) 오답 — STARTUP UPGRADE는 데이터베이스 업그레이드 스크립트 실행 시에 사용되는 특수 모드이며, 일반 사용자의 접속을 허가하지 않습니다. 통상 운용에서는 사용하지 않습니다.\n\n핵심 개념: STARTUP에는 RESTRICT, FORCE, MOUNT, NOMOUNT, UPGRADE, READ ONLY 등 다양한 옵션이 있으며, RESTRICTED 모드는 OPEN 후에도 ALTER SYSTEM으로 동적 전환이 가능합니다. 기존 세션에는 영향을 주지 않고 새로운 접속만 제한합니다."
-  },
-  {
-    "chapter": "データベース・インスタンスの管理の説明",
-    "number": "C_03_007",
-    "title": "OracleデータベースがMOUNT状態のときに実行可能な操作として正しい内容を述べているものを選択してください。",
-    "options": [
-      "A) データ・ディクショナリを参照して表のメタデータを確認する。",
-      "B) ARCHIVELOGモードからNOARCHIVELOGモードへの変更を行う。",
-      "C) 一般ユーザーがSELECT文を使用してデータを照会する。",
-      "D) オンラインREDOログ・ファイルをオープンして内容を検証する。"
-    ],
-    "answer": ["B"],
-    "explanation": "정답: B\nB) 정답 — ALTER DATABASE ARCHIVELOG / NOARCHIVELOG 명령에 의한 아카이브 로그 모드 변경은 MOUNT 상태에서만 수행할 수 있습니다. 이 외에도 MOUNT 상태에서는 데이터 파일 이름/위치 변경(ALTER DATABASE RENAME FILE), Redo 로그 그룹 추가/삭제, 미디어 복구 수행 등의 관리 작업이 가능합니다.\n\nA) 오답 — 데이터 딕셔너리는 SYSTEM 테이블스페이스의 데이터 파일에 저장되어 있으며, MOUNT 상태에서는 데이터 파일이 열리지 않으므로 접근할 수 없습니다. 데이터 딕셔너리 참조는 OPEN 상태에서만 가능합니다.\n\nC) 오답 — 일반 사용자의 접속과 데이터 조회는 OPEN 상태에서만 가능합니다. MOUNT 상태에서는 데이터 파일이 열리지 않으므로 SELECT문을 실행할 수 없습니다.\n\nD) 오답 — MOUNT 상태에서 컨트롤 파일은 열리지만, 온라인 Redo 로그 파일은 열리지 않습니다. 컨트롤 파일에서 Redo 로그의 경로 정보만 인식할 뿐이며, 실제 Redo 로그 파일의 오픈은 OPEN 단계에서 수행됩니다.\n\n핵심 개념: MOUNT 상태는 컨트롤 파일만 열린 상태로, 아카이브 로그 모드 변경, 데이터 파일 이름 변경, 미디어 복구 등 데이터 파일이 열리기 전에 수행해야 하는 관리 작업을 처리하는 단계입니다."
-  },
-  {
-    "chapter": "データベース・インスタンスの管理の説明",
-    "number": "C_03_008",
     "title": "初期化パラメータの動的パラメータと静的パラメータに関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) V$PARAMETERビューのISSYS_MODIFIABLE列がDEFERREDのパラメータは、ALTER SYSTEMで変更すると新しく作成されるセッションから適用される。",
@@ -37,12 +10,15 @@
       "D) V$PARAMETERビューのISSYS_MODIFIABLE列がFALSEのパラメータは、ALTER SYSTEMでSCOPE=BOTHを指定して変更できる。",
       "E) 動的パラメータのうちISSYS_MODIFIABLE列がIMMEDIATEのパラメータはALTER SYSTEMで変更しても再起動後に元の値に戻る。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — V$PARAMETER의 ISSYS_MODIFIABLE 컬럼이 DEFERRED인 파라미터는 ALTER SYSTEM으로 변경할 수 있지만, 기존 세션에는 적용되지 않고 변경 후 새로 생성되는 세션부터 적용됩니다.\n\nC) 정답 — PROCESSES, DB_BLOCK_SIZE, CONTROL_FILES는 대표적인 정적 파라미터로, 인스턴스 기동 시에만 설정됩니다. 변경하려면 ALTER SYSTEM SET ... SCOPE=SPFILE로 SPFILE에 기록한 후 인스턴스를 재기동해야 합니다.\n\nB) 오답 — 동적 파라미터 중에서도 시스템 레벨에서만 변경 가능한 것(ISSES_MODIFIABLE = FALSE)이 있습니다. ALTER SESSION으로 세션 레벨 변경이 가능한지는 V$PARAMETER의 ISSES_MODIFIABLE 컬럼으로 확인합니다.\n\nD) 오답 — ISSYS_MODIFIABLE = FALSE인 파라미터는 정적 파라미터로, 실행 중 메모리를 변경할 수 없습니다. 따라서 SCOPE=BOTH를 지정하면 ORA-02095 오류가 발생하며, SCOPE=SPFILE만 사용할 수 있습니다.\n\nE) 오답 — ISSYS_MODIFIABLE = IMMEDIATE인 파라미터의 동작은 SCOPE 옵션에 따라 달라집니다. SPFILE 환경에서 기본값인 SCOPE=BOTH로 변경하면 메모리와 SPFILE 모두에 반영되므로 재기동 후에도 유지됩니다.\n\n핵심 개념: 초기화 파라미터는 동적(IMMEDIATE/DEFERRED)과 정적(FALSE)으로 구분되며, V$PARAMETER의 ISSYS_MODIFIABLE 컬럼으로 확인합니다. 정적 파라미터는 SCOPE=SPFILE만 가능하고, DEFERRED 파라미터는 새 세션부터 적용됩니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
-    "number": "C_03_009",
+    "number": "C_03_007",
     "title": "Oracleデータベースのインスタンス・リカバリに関して正しく述べているものを選択してください。",
     "options": [
       "A) インスタンス・リカバリはDBAがRECOVER DATABASEコマンドを手動で実行して開始する。",
@@ -50,12 +26,14 @@
       "C) ロール・バック(Roll Back)フェーズはデータベースがOPEN状態に遷移した後にバックグラウンドで実行され、ユーザーは復旧完了前でもアクセスが可能である。",
       "D) FAST_START_MTTR_TARGETパラメータの値を大きくするとチェックポイントの頻度が増加し、インスタンス・リカバリ時間が短縮される。"
     ],
-    "answer": ["C"],
+    "answer": [
+      "C"
+    ],
     "explanation": "정답: C\nC) 정답 — 인스턴스 복구의 Roll Back(트랜잭션 복구) 단계는 데이터베이스가 OPEN 상태로 전환된 후 백그라운드에서 수행됩니다. 따라서 사용자는 복구가 완전히 완료되기 전에도 데이터베이스에 접속할 수 있으며, 아직 롤백되지 않은 데이터에 접근하면 해당 블록이 즉시(on-demand) 롤백 처리됩니다.\n\nA) 오답 — 인스턴스 복구는 SMON 백그라운드 프로세스가 자동으로 수행하며, DBA의 수동 개입은 필요 없습니다. RECOVER DATABASE 명령은 미디어 복구에 사용되는 것으로, 인스턴스 복구와는 다릅니다.\n\nB) 오답 — Roll Forward 단계에서는 커밋 여부와 관계없이 모든 변경 사항을 온라인 Redo 로그로부터 재적용합니다. 커밋되지 않은 트랜잭션의 변경도 함께 적용된 후, 이후 Roll Back 단계에서 UNDO를 이용하여 되돌립니다.\n\nD) 오답 — FAST_START_MTTR_TARGET 값을 크게 설정하면 허용 복구 시간이 길어지므로 체크포인트 빈도가 감소합니다. 반대로 값을 작게 설정하면 체크포인트 빈도가 증가하여 복구 시간이 단축되지만, 일상 운영 시 I/O 부하가 증가합니다.\n\n핵심 개념: 인스턴스 복구는 SMON이 자동으로 수행하며, Roll Forward(모든 Redo 적용) → Roll Back(미커밋 UNDO 적용) 두 단계로 진행됩니다. Roll Back은 OPEN 후 백그라운드로 실행되어 빠른 서비스 재개가 가능합니다."
   },
   {
     "chapter": "データベース・インスタンスの管理の説明",
-    "number": "C_03_010",
+    "number": "C_03_008",
     "title": "Oracleインスタンスの起動時に読み込まれる初期化パラメータ・ファイルの検索順序と管理について正しく述べているものを選択してください。",
     "options": [
       "A) インスタンス起動時のパラメータ・ファイル検索順序は、spfile<SID>.ora → spfile.ora → init<SID>.ora の順である。",
@@ -63,7 +41,43 @@
       "C) SPFILEとPFILEの両方がデフォルトの場所に存在する場合、PFILEが優先して使用される。",
       "D) 現在使用中のパラメータ・ファイルの種類はV$DATABASE ビューで確認する。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — Oracle 인스턴스 기동 시, 파라미터 파일은 spfile<SID>.ora → spfile.ora → init<SID>.ora 순서로 검색됩니다. 가장 먼저 발견된 파일을 사용하므로, SID 특정 SPFILE이 최우선입니다.\n\nB) 오답 — STARTUP 명령에서 직접 경로를 지정할 수 있는 것은 PFILE뿐입니다(STARTUP PFILE='경로'). SPFILE의 위치를 변경하려면 PFILE 내에 SPFILE 파라미터로 경로를 지정해야 합니다.\n\nC) 오답 — SPFILE과 PFILE이 모두 기본 위치에 존재하면 SPFILE이 우선합니다. 검색 순서에서 spfile<SID>.ora가 init<SID>.ora보다 먼저 탐색되므로, SPFILE이 사용됩니다.\n\nD) 오답 — 현재 사용 중인 파라미터 파일 종류는 V$PARAMETER 뷰에서 spfile 파라미터의 값으로 확인합니다(SHOW PARAMETER spfile). 값이 있으면 SPFILE, 비어있으면 PFILE로 기동된 것입니다. V$DATABASE는 데이터베이스 이름, OPEN_MODE, LOG_MODE 등의 정보를 제공합니다.\n\n핵심 개념: Oracle은 기동 시 SPFILE을 우선 검색하며(spfile<SID>.ora → spfile.ora → init<SID>.ora), STARTUP PFILE='경로'로 PFILE만 직접 지정 가능합니다. SPFILE 사용 여부는 SHOW PARAMETER spfile로 확인합니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_009",
+    "title": "Oracleデータベースのトレース・ファイルに関して正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) トレース・ファイルはサーバー・プロセスおよびバックグラウンド・プロセスによって生成され、ADRのtraceディレクトリに格納される。",
+      "B) バックグラウンド・プロセスのトレース・ファイルの命名形式は<SID>_ora_<PID>.trcである。",
+      "C) MAX_DUMP_FILE_SIZEパラメータで個別のトレース・ファイルの最大サイズを制限でき、デフォルト値はUNLIMITEDである。",
+      "D) トレース・ファイルはOracle Databaseにより定期的に自動ローテーションされるため、手動でのサイズ管理は不要である。",
+      "E) トレース・ファイルはSYSAUX表領域に格納されるため、SQL文でのみ内容を確認できる。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — 트레이스 파일은 서버 프로세스 및 백그라운드 프로세스(PMON, SMON, DBWn, LGWR 등)에 의해 생성되며, ADR Home 내의 trace/ 디렉터리에 저장됩니다. 오류 발생 시 자동 생성되거나, SQL Trace 등으로 수동으로 생성할 수 있습니다.\n\nC) 정답 — MAX_DUMP_FILE_SIZE 초기화 파라미터로 개별 트레이스 파일의 최대 크기를 제한할 수 있으며, 기본값은 UNLIMITED입니다. 디스크 공간 보호를 위해 적절한 크기를 설정하는 것이 권장됩니다.\n\nB) 오답 — <SID>_ora_<PID>.trc는 서버 프로세스의 트레이스 파일 명명 형식입니다. 백그라운드 프로세스의 트레이스 파일은 <SID>_<process>_<PID>.trc 형식입니다(예: orcl_smon_12345.trc).\n\nD) 오답 — 트레이스 파일은 자동 로테이션되지 않습니다. MMON 프로세스가 오래된 진단 데이터를 자동 퍼지(기본 30일)하지만, 활성 트레이스 파일의 로테이션은 수행되지 않으므로 디스크 공간 모니터링이 필요합니다.\n\nE) 오답 — 트레이스 파일은 SYSAUX 표영역이 아닌 파일 시스템(ADR의 trace/ 디렉터리)에 저장됩니다. OS 레벨에서 직접 확인하거나, ADRCI 도구, V$DIAG_TRACE_FILE_CONTENTS 뷰로도 조회할 수 있습니다.\n\n핵심 개념: 트레이스 파일은 서버/백그라운드 프로세스가 ADR의 trace/ 디렉터리에 생성하는 진단 파일로, MAX_DUMP_FILE_SIZE(기본 UNLIMITED)로 크기를 제한할 수 있으며, 자동 로테이션은 되지 않으므로 디스크 공간 관리가 필요합니다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_010",
+    "title": "Oracleデータベースのデータ・ディクショナリ・ビューに関して正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) DBA_ビューはデータベース全体のオブジェクト情報を表示し、参照にはSELECT_CATALOG_ROLEまたはSELECT ANY DICTIONARY権限が必要である。",
+      "B) USER_ビューは現在のユーザーが所有するオブジェクトのみを表示し、OWNER列が含まれていない。",
+      "C) データ・ディクショナリ・ビューはSGA内に格納されているため、インスタンスの再起動時にメタデータが初期化される。",
+      "D) ALL_ビューはデータベース内のすべてのオブジェクトをDBA_ビューと同じ範囲で表示する。",
+      "E) データ・ディクショナリ・ビューはNOMOUNT状態から参照可能である。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — DBA_ 뷰는 데이터베이스 전체의 모든 객체 정보를 표시하며, 참조하려면 SELECT_CATALOG_ROLE 또는 SELECT ANY DICTIONARY 시스템 권한이 필요합니다. 예: DBA_TABLES, DBA_USERS, DBA_TABLESPACES 등.\n\nB) 정답 — USER_ 뷰는 현재 접속한 사용자가 소유한 객체만 표시하므로, 소유자가 항상 자기 자신이기 때문에 OWNER 컬럼이 포함되어 있지 않습니다. DBA_와 ALL_ 뷰에는 OWNER 컬럼이 있습니다.\n\nC) 오답 — 데이터 딕셔너리 뷰는 SGA가 아닌 SYSTEM 테이블스페이스(디스크)에 저장된 기본 테이블을 기반으로 합니다. DDL 실행 시 자동 갱신되며, 인스턴스 재기동과 관계없이 영구적으로 보존됩니다. 인스턴스 재기동 시 초기화되는 것은 V$ 뷰(SGA 기반)입니다.\n\nD) 오답 — ALL_ 뷰는 현재 사용자가 소유하거나 접근 권한이 부여된 객체만 표시합니다. DBA_ 뷰처럼 데이터베이스 내 모든 객체를 표시하는 것이 아닙니다.\n\nE) 오답 — 데이터 딕셔너리 뷰는 SYSTEM 테이블스페이스의 데이터 파일에 저장되어 있으므로, 데이터 파일이 열리는 OPEN 상태에서만 참조 가능합니다. NOMOUNT 상태에서 참조 가능한 것은 SGA 기반의 V$ 뷰입니다.\n\n핵심 개념: 데이터 딕셔너리 뷰는 SYSTEM 테이블스페이스에 저장된 메타데이터를 조회하는 읽기 전용 뷰로, DBA_(전체), ALL_(접근 가능), USER_(소유) 세 가지 접두어로 제공되며, OPEN 상태에서만 참조 가능합니다. V$ 뷰(SGA 기반)와 달리 디스크 기반으로 영구 보존되고 읽기 일관성이 보장됩니다."
   }
 ]

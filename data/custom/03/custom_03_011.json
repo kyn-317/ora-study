@@ -1,0 +1,29 @@
+[
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_051",
+    "title": "ARCHIVELOGモードで運用中のデータベースにおいて、データ・ファイルが損失した場合のメディア・リカバリについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) 完全リカバリ（Complete Recovery）では、バックアップからのデータ・ファイルのリストア後にアーカイブ・ログとオンラインREDOログを適用して障害直前の最新状態までリカバリする。",
+      "B) 不完全リカバリ（Incomplete Recovery）を実行した後は、ALTER DATABASE OPEN RESETLOGSでデータベースをオープンする必要がある。",
+      "C) メディア・リカバリはSMONプロセスが自動的に検出して実行するため、DBAの手動介入は不要である。",
+      "D) NOARCHIVELOGモードで運用している場合でも、オンラインREDOログが残っていればメディア・リカバリを実行できる。",
+      "E) データ・ファイル・レベルのリカバリはデータベースをMOUNT状態にしないと実行できないため、リカバリ中はデータベース全体へのアクセスが不可能となる。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — 완전 복구(Complete Recovery)는 백업에서 손상된 데이터 파일을 복원(Restore)한 후, 아카이브 로그와 온라인 Redo 로그를 순서대로 적용(Recover)하여 장애 직전의 최신 상태까지 복구한다. 커밋된 모든 트랜잭션이 복구된다.\n\nB) 정답 — 불완전 복구(Incomplete Recovery / Point-in-Time Recovery)는 특정 시점까지만 복구하며, 복구 후 반드시 ALTER DATABASE OPEN RESETLOGS로 데이터베이스를 열어야 한다. RESETLOGS는 온라인 Redo 로그를 초기화하고 새로운 로그 시퀀스를 시작한다.\n\nC) 오답 — 미디어 복구는 인스턴스 복구와 달리 SMON이 자동으로 수행하지 않는다. DBA가 수동으로 RMAN 또는 SQL 명령(RECOVER DATABASE 등)을 사용하여 백업과 아카이브 로그를 이용하여 복구를 진행해야 한다.\n\nD) 오답 — NOARCHIVELOG 모드에서는 로그 스위치 시 아카이브 로그가 생성되지 않으므로, 과거 Redo 변경 사항을 재적용할 수 없어 미디어 복구가 불가능하다. 온라인 Redo 로그만으로는 장기간의 변경 사항을 커버할 수 없다.\n\nE) 오답 — 데이터 파일 레벨의 복구는 데이터베이스가 OPEN 상태에서도 수행할 수 있다. 해당 데이터 파일만 오프라인으로 전환한 후 복구를 진행하므로, 다른 테이블스페이스에 대한 접근은 정상적으로 유지된다. 데이터베이스 전체 복구(불완전 복구 등)만 MOUNT 상태가 필요하다.\n\n핵심 개념: 미디어 복구는 ARCHIVELOG 모드에서만 가능하며 DBA의 수동 개입이 필요하다. 완전 복구는 장애 직전까지 모든 변경을 재적용하고, 불완전 복구는 특정 시점까지만 복구한 후 RESETLOGS로 데이터베이스를 여는 것이 필수이다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_052",
+    "title": "Oracleデータベースの主要な初期化パラメータの分類について正しく述べているものを選択してください。",
+    "options": [
+      "A) DB_BLOCK_SIZEは静的パラメータであり、データベース作成後に変更することはできない。ALTER SYSTEM SET DB_BLOCK_SIZE SCOPE=SPFILEで設定しても、再起動後にエラーとなる。",
+      "B) PROCESSESは動的パラメータであり、ALTER SYSTEM SET PROCESSES=500 SCOPE=BOTHで即座にメモリとSPFILEの両方に反映され、再起動は不要である。",
+      "C) OPEN_CURSORSは静的パラメータであるため、変更するにはSCOPE=SPFILEで設定した後にインスタンスを再起動する必要がある。",
+      "D) SGA_TARGETは動的パラメータであり、ALTER SYSTEM SET SGA_TARGET SCOPE=BOTHでメモリとSPFILEに即座に反映できる。SGA_TARGETを0以外に設定するとASMM(自動共有メモリー管理)が有効になる。"
+    ],
+    "answer": ["D"],
+    "explanation": "정답: D\nD) 정답 — SGA_TARGET은 동적 파라미터로 ALTER SYSTEM SET으로 즉시 변경 가능하며, SCOPE=BOTH로 메모리와 SPFILE에 동시 반영할 수 있다. SGA_TARGET을 0이 아닌 값으로 설정하면 SGA 내부 구성요소(Buffer Cache, Shared Pool 등)의 크기를 Oracle이 자동으로 조정하는 ASMM(Automatic Shared Memory Management)이 활성화된다.\n\nA) 오답 — DB_BLOCK_SIZE는 정적 파라미터이며 데이터베이스 생성 후 변경 불가인 것은 맞다. 그러나 이 선택지는 'SCOPE=SPFILEで設定しても再起動後にエラーとなる'라고 서술하고 있어, 마치 ALTER SYSTEM SET 명령 자체는 성공하지만 재기동 시 오류가 발생하는 것처럼 기술하고 있다. 실제로는 DB_BLOCK_SIZE는 데이터베이스 생성 시에 결정되며 이후 변경 자체가 의미 없는 파라미터이므로, 이 설명은 복구 절차로서 부정확하다.\n\nB) 오답 — PROCESSES는 정적 파라미터이다. ALTER SYSTEM SET PROCESSES=500 SCOPE=BOTH를 실행하면 ORA-02095 오류가 발생한다. 정적 파라미터는 SCOPE=SPFILE만 가능하며, 인스턴스 재기동 후에 적용된다.\n\nC) 오답 — OPEN_CURSORS는 동적 파라미터(ISSYS_MODIFIABLE=IMMEDIATE)이다. ALTER SYSTEM SET OPEN_CURSORS=500 SCOPE=BOTH로 인스턴스 재기동 없이 즉시 변경할 수 있다.\n\n핵심 개념: 초기화 파라미터는 동적(Dynamic)과 정적(Static)으로 분류되며, 정적 파라미터(PROCESSES, DB_BLOCK_SIZE 등)는 SCOPE=SPFILE로만 변경 가능하고 재기동이 필요하다. 동적 파라미터(SGA_TARGET, OPEN_CURSORS 등)는 SCOPE=BOTH로 즉시 반영 가능하다."
+  }
+]

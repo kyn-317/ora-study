@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_026",
+    "title": "Oracle Net Servicesのリスナー・セキュリティについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) sqlnet.oraのTCP.VALIDNODE_CHECKINGをYESに設定すると、TCP.INVITED_NODESまたはTCP.EXCLUDED_NODESに基づいてリスナーへの接続を制限できる。",
+      "B) lsnrctl SET PASSWORDコマンドでリスナーにパスワードを設定することは、Oracle 12c以降でもセキュリティの観点から推奨されている。",
+      "C) SQLNET.INBOUND_CONNECT_TIMEOUTパラメータは、クライアントが接続を確立してから認証を完了するまでの制限時間(秒)を指定し、不完全な接続によるリソース消費を防止できる。",
+      "D) TCP.INVITED_NODESを設定するとホワイトリスト方式でノードを許可するが、同時にTCP.EXCLUDED_NODESも設定した場合、TCP.EXCLUDED_NODESが常に優先される。",
+      "E) listener.oraのSECURE_REGISTER_LISTENERパラメータは、クライアントからの接続要求を暗号化するために使用される。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — sqlnet.ora에서 TCP.VALIDNODE_CHECKING=YES로 설정하면, TCP.INVITED_NODES(허용 노드 목록) 또는 TCP.EXCLUDED_NODES(거부 노드 목록)에 기반하여 리스너로의 접속을 제한할 수 있습니다. 화이트리스트(INVITED) 또는 블랙리스트(EXCLUDED) 방식으로 IP 기반 접근 제어를 구현합니다.\n\nC) 정답 — SQLNET.INBOUND_CONNECT_TIMEOUT(기본값 60초)은 클라이언트가 접속을 시작한 후 인증을 완료하기까지의 제한 시간을 지정합니다. 이 시간 내에 인증이 완료되지 않으면 접속이 강제 종료되어, 불완전한 접속에 의한 리소스 소비(DoS 공격 등)를 방지할 수 있습니다.\n\nB) 오답 — Oracle 12c 이후에서는 lsnrctl SET PASSWORD를 통한 리스너 비밀번호 설정이 비권장(Deprecated)되었습니다. 대신 로컬 OS 인증에 의한 리스너 관리 보안이 권장되며, 리스너 관리 명령은 리스너가 실행 중인 호스트의 OS 사용자만 실행할 수 있습니다.\n\nD) 오답 — TCP.INVITED_NODES와 TCP.EXCLUDED_NODES를 동시에 설정한 경우, TCP.INVITED_NODES(허용 목록)가 우선됩니다. TCP.EXCLUDED_NODES가 우선되는 것이 아니라, 허용 목록에 포함된 노드만 접속이 허가되고, 그 외 노드는 거부됩니다.\n\nE) 오답 — SECURE_REGISTER_LISTENER는 동적 서비스 등록의 보안을 제어하는 파라미터이며, 클라이언트 접속 요청을 암호화하는 것이 아닙니다. 이 파라미터는 리스너에 서비스를 등록할 수 있는 호스트를 IPC 또는 TCPS 프로토콜로 제한하여, 악의적인 서비스 등록을 방지합니다.\n\n핵심 개념: 리스너 보안은 TCP.VALIDNODE_CHECKING으로 IP 기반 접근 제어, SQLNET.INBOUND_CONNECT_TIMEOUT으로 불완전 접속 방지, SECURE_REGISTER_LISTENER로 동적 등록 보안, OS 인증으로 관리 명령 보안을 구현합니다. Oracle 12c 이후 리스너 비밀번호(SET PASSWORD)는 비권장이며 OS 인증이 기본입니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_027",
+    "title": "以下の環境を確認してください。\n\nローカル・データベース:\n  DB_NAME = SALESDB\n  DB_DOMAIN = US.EXAMPLE.COM\n  GLOBAL_NAMES = TRUE\n\nリモート・データベース:\n  グローバル名 = HRDB.US.EXAMPLE.COM\n\nこの環境で以下のSQL文を実行した場合の結果について正しく述べているものを選択してください。\n\nSQL> CREATE DATABASE LINK remote_hr\n     CONNECT TO hr_app IDENTIFIED BY hr_pass\n     USING 'HR_SERVICE';",
+    "options": [
+      "A) データベース・リンクremote_hrが正常に作成される。",
+      "B) GLOBAL_NAMES=TRUEであるため、CREATE DATABASE LINK文の実行時にORA-02085エラーが即座に発生し、リンクは作成されない。",
+      "C) DB_DOMAINが設定されているため、リンク名はREMOTE_HR.US.EXAMPLE.COMとして自動的に解決され、正常に作成される。",
+      "D) GLOBAL_NAMESパラメータはリンク作成時には検証されず、リンクを使用してリモート・テーブルを参照するときに初めてエラーが発生する。"
+    ],
+    "answer": ["D"],
+    "explanation": "정답: D\nD) 정답 — GLOBAL_NAMES 파라미터에 의한 이름 검증은 링크 생성(CREATE DATABASE LINK) 시점이 아닌, 링크를 사용(SELECT ... @dblink)하는 시점에 수행됩니다. 따라서 CREATE DATABASE LINK remote_hr 문은 정상적으로 실행되어 링크가 생성되지만, 이 링크를 통해 원격 테이블을 참조할 때 링크 이름(REMOTE_HR.US.EXAMPLE.COM)과 원격 DB의 글로벌 이름(HRDB.US.EXAMPLE.COM)이 불일치하여 ORA-02085 오류가 발생합니다.\n\nA) 오답 — CREATE DATABASE LINK 자체는 성공하지만, 링크를 사용할 때 GLOBAL_NAMES=TRUE에 의해 이름 불일치가 검증되어 ORA-02085 오류가 발생하므로, 정상적으로 사용할 수 없습니다.\n\nB) 오답 — GLOBAL_NAMES=TRUE 환경에서 링크 이름과 원격 DB 글로벌 이름이 불일치하면 ORA-02085 오류가 발생하는 것은 맞지만, 이 오류는 CREATE DATABASE LINK 실행 시점이 아닌 링크 사용 시점에 발생합니다. CREATE 문 자체는 성공하여 링크가 데이터 딕셔너리에 저장됩니다.\n\nC) 오답 — DB_DOMAIN이 설정되어 있으면 도메인 없는 링크 이름에 자동으로 로컬 DB_DOMAIN이 추가되어 REMOTE_HR.US.EXAMPLE.COM이 되지만, 이것이 원격 DB의 글로벌 이름(HRDB.US.EXAMPLE.COM)과 일치하지 않으므로 GLOBAL_NAMES=TRUE 조건을 충족하지 못합니다.\n\n핵심 개념: GLOBAL_NAMES=TRUE 환경에서 데이터베이스 링크 이름은 원격 DB의 글로벌 이름(DB_NAME.DB_DOMAIN)과 일치해야 합니다. 이름 검증은 링크 생성 시가 아닌 사용 시에 수행되므로, CREATE DATABASE LINK는 성공하더라도 링크 사용 시 ORA-02085 오류가 발생할 수 있습니다. 로컬 DB_DOMAIN이 설정되면 링크 이름에 도메인이 자동 추가되므로, 이를 고려하여 링크 이름을 지정해야 합니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_028",
+    "title": "マルチテナント環境のデータベース・リンクについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) CDB$ROOTでCONTAINER=ALL句を指定してPublicデータベース・リンクを作成すると、そのリンクはCDB内のすべてのPDBで使用可能な共通リンクとなる。",
+      "B) 同一CDB内のPDB間でデータを参照する場合、ALTER SESSION SET CONTAINERコマンドで対象PDBに切り替えれば、データベース・リンクは不要である。",
+      "C) PDB内で作成されたローカル・データベース・リンクは、そのPDB内でのみ使用可能であり、他のPDBからは参照できない。",
+      "D) 共通データベース・リンクと同じ名前のローカル・リンクがPDB内に存在する場合、共通リンクが優先的に使用される。",
+      "E) PDBのリモート・クローン(Remote Clone)にデータベース・リンクを使用する場合、ローカル・ユーザーの資格情報でリンクを作成する必要がある。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — CDB$ROOT에서 CONTAINER=ALL 절을 지정하여 Public 데이터베이스 링크를 생성하면, 해당 링크는 공통(Common) 링크로서 CDB 내의 모든 PDB에서 별도 생성 없이 사용할 수 있습니다. 이를 통해 PDB별 개별 링크 생성 없이 중앙에서 일괄 관리가 가능합니다.\n\nC) 정답 — PDB 내에서 생성된 로컬 데이터베이스 링크는 해당 PDB 내의 사용자만 사용할 수 있으며, 다른 PDB에서는 참조할 수 없습니다. PDB는 독립된 데이터베이스처럼 동작하므로, 각 PDB의 데이터 딕셔너리에 저장된 링크는 해당 PDB에 한정됩니다.\n\nB) 오답 — ALTER SESSION SET CONTAINER 명령은 현재 세션의 컨테이너를 전환하는 관리 명령이며, SYSDBA 또는 적절한 공통 사용자 권한이 필요합니다. 일반 애플리케이션 사용자가 다른 PDB의 데이터에 접근하려면 해당 PDB의 서비스를 통한 별도 접속 또는 데이터베이스 링크가 필요합니다.\n\nD) 오답 — 동일 이름의 로컬 링크와 공통 링크가 존재하는 경우, 로컬 링크가 공통 링크보다 우선적으로 해석됩니다. 이는 Private 링크가 Public 링크보다 우선하는 것과 동일한 원칙(더 구체적인 범위 우선)입니다.\n\nE) 오답 — PDB 원격 복제(Remote Clone)에 사용하는 데이터베이스 링크는 공통 사용자(C## 접두사) 자격 증명으로 생성해야 합니다. 원격 CDB에 접속하여 PDB를 복제하는 작업이므로 로컬 사용자가 아닌 공통 사용자 권한이 필요합니다.\n\n핵심 개념: 멀티테넌트 환경에서 공통 데이터베이스 링크는 CDB$ROOT에서 CONTAINER=ALL로 생성하며 모든 PDB에서 사용 가능합니다. 로컬 링크는 해당 PDB에 한정되며, 동일 이름 존재 시 로컬 링크가 공통 링크보다 우선합니다. PDB 원격 복제에는 공통 사용자(C##) 자격 증명이 필요합니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_029",
+    "title": "Oracle Net Servicesにおけるリスナーの接続処理方式について正しく述べているものを選択してください。",
+    "options": [
+      "A) Direct Hand-off方式では、リスナーがサーバー・プロセスを起動した後、IPCプロトコルを使用してクライアントの接続情報をサーバー・プロセスに直接転送し、クライアントはリスナーと同じポートでサーバー・プロセスと通信を継続する。",
+      "B) Redirect方式では、リスナーがサーバー・プロセスを起動した後、クライアントにサーバー・プロセスが使用する新しいポート番号を通知し、クライアントはその新しいポートに再接続する。",
+      "C) 共有サーバー(Shared Server)構成では、リスナーはクライアントの接続をDirect Hand-off方式で専用サーバー・プロセスに転送する。",
+      "D) 接続確立後もリスナーはクライアントとサーバー・プロセス間の通信を中継し続け、セッション終了時にリスナーが接続を切断する。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — Redirect 방식에서는 리스너가 서버 프로세스를 기동한 후, 클라이언트에게 서버 프로세스가 사용하는 새로운 포트(임의 포트) 번호를 통지합니다. 클라이언트는 리스너와의 연결을 끊고 통지받은 새 포트로 서버 프로세스에 직접 재접속합니다. 이 방식은 IPC(Inter-Process Communication)를 사용할 수 없는 환경에서 사용됩니다.\n\nA) 오답 — Direct Hand-off 방식에서는 리스너가 IPC를 사용하여 클라이언트의 접속 정보를 서버 프로세스에 직접 전달하는 것은 맞지만, 클라이언트가 리스너와 동일한 포트로 통신을 계속하는 것은 아닙니다. Direct Hand-off에서는 리스너가 이미 수립된 네트워크 연결(소켓)을 서버 프로세스에 전달하므로, 클라이언트는 재접속 없이 서버 프로세스와 통신합니다.\n\nC) 오답 — 공유 서버(Shared Server) 구성에서 리스너는 클라이언트의 접속을 전용 서버 프로세스가 아닌 Dispatcher에 전달합니다. Dispatcher가 여러 클라이언트의 요청을 받아 공유 서버 프로세스에 분배하는 구조입니다.\n\nD) 오답 — 접속이 확립된 후에는 리스너가 클라이언트와 서버 프로세스 간의 통신에 관여하지 않습니다. 리스너의 역할은 초기 접속 요청을 수신하고 서버 프로세스에 핸드오프하는 것으로 한정되며, 이후 통신은 클라이언트와 서버 프로세스가 직접 수행합니다.\n\n핵심 개념: Oracle 리스너의 핸드오프 방식에는 Direct Hand-off(IPC로 소켓을 직접 전달, 재접속 불필요)와 Redirect(새 포트 통지 후 재접속)가 있습니다. Direct Hand-off가 Oracle의 기본 방식이며, 공유 서버 구성에서는 리스너가 Dispatcher에 접속을 전달합니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_030",
+    "title": "Oracle Databaseへの接続時に発生する以下のエラーについて、その原因として正しい組み合わせを選択してください。\n\na) ORA-12541: TNS:no listener\nb) ORA-12514: TNS:listener does not currently know of service requested in connect descriptor\nc) ORA-12170: TNS:Connect timeout occurred",
+    "options": [
+      "A) a) 指定されたホスト/ポートでリスナーが実行されていない、b) リスナーは到達可能だが要求されたサービスが登録されていない、c) ネットワーク・ファイアウォールによりパケットが遮断されている",
+      "B) a) tnsnames.oraにネット・サービス名が定義されていない、b) データベース・サービス名のスペルが間違っている、c) リスナーが過負荷で応答できない",
+      "C) a) リスナーは実行中だがサービスが登録されていない、b) データベース・インスタンスが起動していない、c) クライアントのネットワーク・アダプタに障害がある",
+      "D) a) 指定されたホスト/ポートでリスナーが実行されていない、b) データベース・インスタンスが起動していない、c) ネットワーク経路上でルーティング障害が発生しパケットがドロップされている"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 각 오류 코드의 원인이 정확합니다.\n- ORA-12541(TNS:no listener): 지정된 호스트/포트에서 리스너 프로세스가 실행되고 있지 않습니다. 리스너가 미기동 상태이거나 호스트/포트 정보가 잘못된 경우 발생합니다.\n- ORA-12514(listener does not currently know of service): 리스너에는 도달했지만, 요청된 서비스가 리스너에 등록되어 있지 않습니다. 인스턴스 미기동, PDB가 CLOSED 상태, 서비스 이름 오류 등이 원인일 수 있습니다.\n- ORA-12170(Connect timeout): 네트워크 방화벽에 의한 패킷 차단, 호스트 도달 불가, 네트워크 지연 등으로 접속 시간이 초과된 경우 발생합니다.\n\nB) 오답 — a)의 원인이 부정확합니다. tnsnames.ora에 네트 서비스 이름이 정의되어 있지 않으면 ORA-12154(TNS:could not resolve the connect identifier) 오류가 발생하며, ORA-12541은 리스너 미실행이 원인입니다. 또한 c)에서 리스너 과부하가 원인이 되는 경우는 드물며, ORA-12170은 주로 네트워크 레벨의 연결 시간 초과입니다.\n\nC) 오답 — a)의 원인이 부정확합니다. 리스너가 실행 중이지만 서비스가 등록되지 않은 경우에는 ORA-12514가 발생합니다. ORA-12541은 리스너 프로세스 자체에 도달하지 못한 경우에 발생합니다.\n\nD) 오답 — b)의 원인이 부정확합니다. 데이터베이스 인스턴스가 미기동 상태이면 동적 등록이 수행되지 않아 서비스가 미등록 상태가 되므로 ORA-12514가 발생할 수 있지만, 직접적인 원인 설명으로는 '서비스 미등록'이 더 정확합니다. c)의 라우팅 장애에 의한 패킷 드롭은 ORA-12170의 원인이 될 수 있으나, 이는 정답 A의 c) '방화벽에 의한 패킷 차단'과 증상 수준에서 동일한 네트워크 레이어 문제입니다. b)의 부정확성에 의해 D)는 오답입니다.\n\n핵심 개념: Oracle 접속 오류를 단계별로 구분하면, ORA-12154는 이름 해석 실패(클라이언트 측), ORA-12541은 리스너 미실행(네트워크/리스너 층), ORA-12514는 서비스 미등록(리스너→서비스 층), ORA-12170은 네트워크 타임아웃(네트워크 층)입니다. 이 단계적 진단 체계를 이해하면 접속 장애의 원인을 신속하게 파악할 수 있습니다."
+  }
+]

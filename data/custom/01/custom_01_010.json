@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_046",
+    "title": "PGA内のSQL作業領域(SQL Work Area)の種類と用途について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Sort Areaは、ORDER BY、GROUP BY、DISTINCT句の処理やインデックス作成時のソート操作に使用される作業領域である。",
+      "B) Hash Areaは、ハッシュ結合(HASH JOIN)実行時にハッシュ・テーブルを構築するために使用される作業領域である。",
+      "C) Bitmap Merge Areaは、B-Treeインデックスの範囲スキャン結果を一時的に格納するための作業領域である。",
+      "D) Sort Areaは、ORDER BY句の処理にのみ使用され、GROUP BYやDISTINCT句の処理では別の専用領域が使用される。",
+      "E) Hash Areaは、ネステッド・ループ結合(NESTED LOOPS JOIN)の外部表のスキャン結果をキャッシュするために使用される作業領域である。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — Sort Area는 정렬 작업을 수행하기 위한 PGA 내 SQL Work Area의 한 종류입니다. ORDER BY, GROUP BY, DISTINCT 처리 및 인덱스 생성 시의 정렬 작업에 사용됩니다.\n\nB) 정답 — Hash Area는 해시 조인(HASH JOIN) 실행 시 해시 테이블을 구축하기 위해 사용되는 SQL Work Area입니다. 조인 대상 데이터를 해시 테이블로 구축하여 효율적인 조인을 수행합니다.\n\nC) 오답 — Bitmap Merge Area는 B-Tree 인덱스의 범위 스캔과는 관련이 없습니다. Bitmap Merge Area는 Bitmap Index의 AND/OR 병합 작업에 사용되는 작업 영역입니다.\n\nD) 오답 — Sort Area는 ORDER BY 처리에만 사용되는 것이 아닙니다. GROUP BY, DISTINCT, 인덱스 생성 등 정렬이 필요한 다양한 작업에 사용됩니다.\n\nE) 오답 — Hash Area는 네스티드 루프 조인(NESTED LOOPS JOIN)이 아니라 해시 조인(HASH JOIN)에 사용됩니다. 네스티드 루프 조인은 외부 테이블의 각 행에 대해 내부 테이블을 반복 탐색하는 방식으로, Hash Area와는 관련이 없습니다.\n\n핵심 개념: PGA의 SQL Work Area는 Sort Area(정렬: ORDER BY, GROUP BY, DISTINCT, 인덱스 생성), Hash Area(해시 조인 시 해시 테이블 구축), Bitmap Merge Area(Bitmap Index의 AND/OR 병합), Create Bitmap Area(Star Transformation 시 비트맵 생성)로 구성됩니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_047",
+    "title": "PGA内のSQL作業領域(SQL Work Area)の実行モードについて正しく述べているものを選択してください。",
+    "options": [
+      "A) Optimalモードでは作業全体がメモリー内で完了し、ディスクI/Oが発生しないため最も高いパフォーマンスを実現する。",
+      "B) One-passモードでは作業データがメモリーを超過した際に一時表領域を複数回にわたって使用するため、パフォーマンスが最も低い。",
+      "C) Multi-passモードでは一時表領域を1回だけ使用し、Optimalモードの次に良いパフォーマンスが得られる。",
+      "D) SQL Work Areaのサイズが不足した場合、OracleはSGA内のShared Poolから追加メモリーを自動的に借用してOptimalモードでの実行を保証する。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — Optimal 모드에서는 전체 작업이 메모리 내에서 완료되며, 디스크 I/O가 발생하지 않으므로 가장 높은 성능을 제공합니다. 이상적으로는 대부분의 SQL Work Area 작업이 Optimal 모드로 실행되어야 합니다.\n\nB) 오답 — One-pass 모드에서는 작업 데이터가 메모리를 초과하여 임시 디스크 공간을 1회 사용합니다. 복수 회 사용하는 것은 Multi-pass 모드입니다. One-pass 모드의 성능은 Optimal과 Multi-pass의 중간 수준입니다.\n\nC) 오답 — Multi-pass 모드에서는 메모리가 매우 부족하여 임시 디스크를 여러 번 사용하며, 성능이 가장 낮습니다. 임시 디스크를 1회만 사용하는 것은 One-pass 모드입니다. 설명에서 One-pass와 Multi-pass의 특성이 뒤바뀌어 있습니다.\n\nD) 오답 — SQL Work Area의 크기가 부족해도 SGA의 Shared Pool에서 메모리를 빌려오지 않습니다. PGA는 각 서버 프로세스에 독립적으로 할당되는 비공유 메모리 영역이며, 메모리가 부족하면 One-pass 또는 Multi-pass 모드로 전환하여 임시 테이블스페이스(Temp Tablespace)를 사용합니다.\n\n핵심 개념: SQL Work Area의 실행 모드는 Optimal(메모리 내 완료, 디스크 I/O 없음), One-pass(임시 디스크 1회 사용), Multi-pass(임시 디스크 다회 사용)의 3단계로 구분되며, V$SQL_WORKAREA_HISTOGRAM 뷰에서 각 모드별 실행 비율을 모니터링하여 Multi-pass 비율이 높으면 PGA 크기 증가를 검토해야 합니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_048",
+    "title": "自動PGAメモリー管理においてPGA_AGGREGATE_TARGETパラメータの役割について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) PGA_AGGREGATE_TARGETはインスタンス全体で使用するPGAの目標サイズを指定するパラメータであり、WORKAREA_SIZE_POLICYがAUTO（デフォルト）の場合にOracleが各プロセスのSQL Work Areaサイズを自動的に調整する。",
+      "B) PGA_AGGREGATE_TARGETを設定すると、SORT_AREA_SIZEやHASH_AREA_SIZEなどの個別作業領域サイズのパラメータは無視され、Oracleが自動的にWork Area割当てを管理する。",
+      "C) PGA_AGGREGATE_TARGETはサーバー・プロセスごとに使用可能なPGAの上限値を指定するパラメータであり、この値を超えたプロセスは強制終了される。",
+      "D) PGA_AGGREGATE_TARGETを設定した場合でも、各セッションのSQL Work Areaサイズは均等に固定配分され、ワークロードに応じた動的調整は行われない。",
+      "E) PGA_AGGREGATE_TARGETはSGA内のLarge Poolから割り当てるPGA用メモリーの目標サイズを指定するパラメータである。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — PGA_AGGREGATE_TARGET은 인스턴스 전체 PGA의 목표 크기를 지정하는 파라미터입니다. WORKAREA_SIZE_POLICY가 AUTO(기본값)일 때 자동 PGA 메모리 관리가 활성화되며, Oracle이 각 프로세스의 SQL Work Area 크기를 워크로드에 따라 자동으로 조정합니다.\n\nB) 정답 — 자동 PGA 관리(WORKAREA_SIZE_POLICY = AUTO)가 활성화되면, SORT_AREA_SIZE, HASH_AREA_SIZE 등 개별 작업 영역 크기를 수동 지정하는 파라미터는 무시됩니다. Oracle이 PGA_AGGREGATE_TARGET 범위 내에서 각 프로세스의 Work Area 할당을 자동으로 관리합니다.\n\nC) 오답 — PGA_AGGREGATE_TARGET은 인스턴스 전체 PGA의 목표 크기이지, 개별 서버 프로세스의 상한값이 아닙니다. 또한 이 값을 초과한 프로세스가 강제 종료되지 않습니다. 이는 목표(target)값으로, 실제 PGA 사용량이 이 값을 초과할 수도 있습니다.\n\nD) 오답 — 자동 PGA 관리에서는 각 세션의 SQL Work Area 크기가 균등하게 고정 배분되지 않습니다. Oracle은 워크로드를 분석하여 각 프로세스의 Work Area 크기를 동적으로 조정하며, 대량 정렬이나 해시 조인이 필요한 프로세스에 더 많은 메모리를 할당합니다.\n\nE) 오답 — PGA는 SGA 내의 Large Pool에서 할당되는 것이 아닙니다. PGA는 각 서버 프로세스에 독립적으로 할당되는 비공유(Private) 메모리 영역으로, SGA와는 별도의 메모리 공간입니다.\n\n핵심 개념: PGA_AGGREGATE_TARGET은 인스턴스 전체 PGA 목표 크기를 지정하며, WORKAREA_SIZE_POLICY = AUTO(기본값)일 때 Oracle이 각 프로세스의 SQL Work Area 크기를 자동으로 조정합니다. 자동 관리 시 SORT_AREA_SIZE, HASH_AREA_SIZE 등 수동 파라미터는 무시되며, V$PGASTAT 뷰에서 PGA 사용 통계를 확인할 수 있습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_049",
+    "title": "V$PGASTATビューおよびV$SQL_WORKAREA_HISTOGRAMビューから取得できるPGA関連統計情報について正しく述べているものを選択してください。",
+    "options": [
+      "A) V$PGASTATビューは各セッションのPGA使用量を個別に表示し、セッション単位でOptimal/One-pass/Multi-pass実行比率を確認できるが、インスタンス全体の集計値は提供しない。",
+      "B) V$SQL_WORKAREA_HISTOGRAMビューでは、SQL Work Areaのサイズ区間ごとにOptimal、One-pass、Multi-passの各モードで実行された回数を確認でき、Multi-pass比率が高い場合はPGAサイズの増加を検討すべきである。",
+      "C) V$PGASTATビューはPGA_AGGREGATE_TARGETの推奨値を算出するためのアドバイザリービューであり、現在のPGAメモリー使用量の統計は提供しない。",
+      "D) V$SQL_WORKAREA_HISTOGRAMビューはSGA内のShared Poolの使用統計を表示するビューであり、PGAのWork Area情報は含まれない。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — V$SQL_WORKAREA_HISTOGRAM 뷰에서는 SQL Work Area의 크기 구간별로 Optimal, One-pass, Multi-pass 각 모드의 실행 횟수를 확인할 수 있습니다. Multi-pass 비율이 높으면 메모리 부족으로 임시 디스크를 여러 번 사용하고 있다는 의미이므로, PGA 크기 증가를 검토해야 합니다.\n\nA) 오답 — V$PGASTAT은 세션별 뷰가 아니라 인스턴스 전체의 PGA 사용 통계를 제공하는 뷰입니다. 총 할당량, 사용량, 캐시 적중률 등의 인스턴스 전체 집계값을 확인할 수 있으며, Optimal/One-pass/Multi-pass 실행 횟수도 인스턴스 전체 수준에서 포함됩니다. 세션 단위의 PGA 사용량을 확인하려면 V$SESSTAT 뷰에서 'session pga memory' 통계를 조회해야 합니다.\n\nC) 오답 — V$PGASTAT은 PGA_AGGREGATE_TARGET의 추천값을 산출하는 어드바이저리 뷰가 아닙니다. PGA_AGGREGATE_TARGET의 최적 크기를 예측하는 뷰는 V$PGA_TARGET_ADVICE입니다. V$PGASTAT은 현재 PGA 메모리의 사용 통계(총 할당량, 사용량, 캐시 적중률, 실행 비율 등)를 제공하는 뷰입니다.\n\nD) 오답 — V$SQL_WORKAREA_HISTOGRAM은 SGA의 Shared Pool 사용 통계를 표시하는 뷰가 아닙니다. 이 뷰는 PGA의 SQL Work Area에서 수행된 작업의 Optimal/One-pass/Multi-pass 실행 통계를 크기 구간별로 제공합니다.\n\n핵심 개념: PGA 모니터링 시 V$PGASTAT은 인스턴스 전체 PGA 통계(총 할당량, 사용량, 캐시 적중률, 실행 비율)를 제공하고, V$SQL_WORKAREA_HISTOGRAM은 Work Area의 크기 구간별 Optimal/One-pass/Multi-pass 실행 횟수를 제공합니다. V$PGA_TARGET_ADVICE로 PGA_AGGREGATE_TARGET의 최적 크기를 예측할 수 있으며, V$SESSTAT으로 세션별 PGA 사용량을 확인할 수 있습니다."
+  },
+  {
+    "chapter": "Oracle Databaseアーキテクチャの説明",
+    "number": "C_01_050",
+    "title": "自動メモリー管理(AMM)においてMEMORY_TARGETパラメータを設定した場合のSGAとPGAの管理動作について正しく述べているものを選択してください。",
+    "options": [
+      "A) MEMORY_TARGETを設定すると、OracleはSGAとPGAの合計がMEMORY_TARGETの値を上限としてワークロードに応じてSGAとPGA間のメモリーを自動的に再分配する。",
+      "B) MEMORY_TARGETを設定した場合、SGAとPGAの比率は常に50:50に固定され、ワークロードに応じた動的な再分配は行われない。",
+      "C) MEMORY_TARGETを設定しても、MEMORY_MAX_TARGETを別途設定しなければAMMは有効にならず、ASMMとして動作する。",
+      "D) MEMORY_TARGETを設定すると、SGA内のすべての構成要素が自動調整の対象となり、LOG_BUFFERやDB_KEEP_CACHE_SIZEもワークロードに応じて動的にサイズ変更される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — MEMORY_TARGET을 설정하면 AMM(자동 메모리 관리)이 활성화되며, Oracle은 SGA + PGA의 합계가 MEMORY_TARGET 값을 상한으로 하여 워크로드에 따라 SGA와 PGA 간 메모리를 자동으로 재분배합니다. OLTP 워크로드가 많으면 SGA(Buffer Cache, Shared Pool)에 더 많이 할당하고, 분석/배치 워크로드가 많으면 PGA(Sort/Hash Area)에 더 많이 할당합니다.\n\nB) 오답 — AMM에서 SGA와 PGA의 비율은 50:50으로 고정되지 않습니다. Oracle이 워크로드를 분석하여 SGA와 PGA 간 메모리 비율을 동적으로 조정하는 것이 AMM의 핵심 기능입니다. V$MEMORY_DYNAMIC_COMPONENTS 뷰로 현재 할당 상태를 모니터링할 수 있습니다.\n\nC) 오답 — MEMORY_MAX_TARGET을 별도로 설정하지 않아도 MEMORY_TARGET이 0보다 크면 AMM이 활성화됩니다. MEMORY_MAX_TARGET은 MEMORY_TARGET의 동적 확장 상한선을 설정하는 파라미터로, 설정하지 않으면 MEMORY_TARGET 값이 MEMORY_MAX_TARGET으로 사용됩니다.\n\nD) 오답 — AMM이 활성화되어도 SGA 내 모든 구성요소가 자동 조정 대상이 되는 것은 아닙니다. LOG_BUFFER(Redo Log Buffer), DB_KEEP_CACHE_SIZE(Keep Pool), DB_RECYCLE_CACHE_SIZE(Recycle Pool), DB_nK_CACHE_SIZE(비표준 블록 크기 캐시)는 AMM 환경에서도 자동 조정 대상이 아니며, DBA가 수동으로 설정해야 합니다.\n\n핵심 개념: AMM(MEMORY_TARGET)은 SGA + PGA를 하나의 통합 메모리 풀로 관리하는 최상위 자동화 방식으로, 워크로드에 따라 SGA와 PGA 간 메모리를 자동 재분배합니다. SGA_TARGET과 PGA_AGGREGATE_TARGET에 값을 지정하면 각각의 최솟값(하한선)으로 작동하며, LOG_BUFFER, Keep/Recycle Pool 등은 자동 조정 대상에서 제외됩니다."
+  }
+]

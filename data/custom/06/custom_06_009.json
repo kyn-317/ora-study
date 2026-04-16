@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_041",
+    "title": "READ ONLY表領域に対して実行可能な操作として正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) READ ONLY表領域に対してDROP TABLE文を実行することができる。",
+      "B) READ ONLY表領域に対してINSERT文を実行することができる。",
+      "C) READ ONLY表領域に対してTRUNCATE TABLE文を実行することができる。",
+      "D) READ ONLY表領域に対してCREATE INDEX文で新しいインデックスを作成することができる。",
+      "E) READ ONLY表領域に対してDROP INDEX文を実行することができる。"
+    ],
+    "answer": ["A", "E"],
+    "explanation": "정답: A, E\nA) 정답 — READ ONLY 테이블스페이스에서 DROP TABLE은 실행 가능합니다. DROP TABLE은 데이터 딕셔너리(SYSTEM 테이블스페이스)의 메타데이터만 변경하는 DDL이므로, READ ONLY 테이블스페이스의 데이터 파일에 직접 쓰기를 수행하지 않습니다.\n\nE) 정답 — DROP INDEX도 마찬가지로 데이터 딕셔너리의 메타데이터 변경만 수반하므로 READ ONLY 테이블스페이스에서 실행 가능합니다.\n\nB) 오답 — INSERT는 DML 문으로, 실제 데이터를 테이블스페이스의 데이터 블록에 기록해야 하므로 READ ONLY 테이블스페이스에서는 실행할 수 없습니다.\n\nC) 오답 — TRUNCATE TABLE은 DDL이지만 세그먼트의 데이터를 제거하고 HWM을 초기화하는 작업으로, READ ONLY 테이블스페이스의 데이터 파일에 쓰기가 필요하므로 실행할 수 없습니다.\n\nD) 오답 — CREATE INDEX는 새로운 인덱스 세그먼트를 생성하여 데이터 파일에 저장해야 하므로 READ ONLY 테이블스페이스에서는 실행할 수 없습니다.\n\n핵심 개념: READ ONLY 테이블스페이스에서는 데이터 파일에 직접 쓰기를 수행하지 않는 DDL(DROP TABLE, DROP INDEX 등)만 허용됩니다. 이러한 DDL은 SYSTEM 테이블스페이스의 데이터 딕셔너리만 변경합니다. DML(INSERT/UPDATE/DELETE)과 데이터 파일 변경이 필요한 DDL(CREATE INDEX, TRUNCATE)은 불가합니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_042",
+    "title": "表領域のREAD ONLY設定とバックアップについて正しく述べているものを選択してください。",
+    "options": [
+      "A) READ ONLYに変更された表領域は、変更後も定期的にバックアップを取得する必要がある。",
+      "B) READ ONLYへの変更時に自動的にチェックポイントが実行されるため、変更直後に1回バックアップを取得すれば以降のバックアップは不要である。",
+      "C) READ ONLYへの変更時にはチェックポイントは実行されないため、変更前と変更後の両方でバックアップが必要である。",
+      "D) READ ONLY表領域は自動的にバックアップされるため、DBAが明示的にバックアップを取得する必要はない。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 테이블스페이스를 READ ONLY로 변경할 때 Oracle은 자동으로 체크포인트를 수행하여 해당 테이블스페이스의 모든 더티 버퍼를 디스크에 기록합니다. READ ONLY 전환 후에는 데이터 변경이 발생하지 않으므로, 전환 직후 1회 백업만 수행하면 이후 반복적인 백업은 필요하지 않습니다.\n\nA) 오답 — READ ONLY 테이블스페이스는 데이터가 변경되지 않으므로 정기적인 반복 백업이 필요하지 않습니다. 전환 직후 1회 백업으로 충분합니다.\n\nC) 오답 — READ ONLY 전환 시 자동으로 체크포인트가 수행됩니다. 체크포인트가 실행되지 않는다는 설명은 잘못되었습니다.\n\nD) 오답 — READ ONLY 테이블스페이스라도 자동 백업 기능은 없습니다. DBA가 전환 직후 명시적으로 1회 백업을 수행해야 합니다. 이후에는 데이터 변경이 없으므로 추가 백업이 불필요합니다.\n\n핵심 개념: READ ONLY 전환 시 자동 체크포인트가 수행되므로, 전환 직후 1회 백업을 수행하면 이후 데이터가 변경되지 않아 반복 백업이 불필요합니다. 이는 백업 전략을 최적화하는 데 활용됩니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_043",
+    "title": "PERMANENT表領域、TEMPORARY表領域、UNDO表領域の3種類の表領域について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) ALTER DATABASE DEFAULT TABLESPACE文でデータベースのデフォルト永続表領域を変更でき、ALTER DATABASE DEFAULT TEMPORARY TABLESPACE文でデフォルト一時表領域を変更できる。",
+      "B) UNDO表領域の現在のアクティブな設定はUNDO_TABLESPACEパラメータで指定されるが、このパラメータはSPFILEでのみ変更可能であり、ALTER SYSTEM SET文による動的変更はできない。",
+      "C) TEMPORARY表領域はBIGFILE表領域として作成できるが、UNDO表領域はBIGFILE表領域として作成できない。",
+      "D) PERMANENT表領域はDATAFILEキーワードを使用し、TEMPORARY表領域もDATAFILEキーワードを使用してデータ・ファイルを指定する。",
+      "E) 3種類の表領域すべてがBIGFILE表領域として作成可能である。"
+    ],
+    "answer": ["A", "E"],
+    "explanation": "정답: A, E\nA) 정답 — ALTER DATABASE DEFAULT TABLESPACE 문으로 데이터베이스의 기본 영구 테이블스페이스를 변경할 수 있고, ALTER DATABASE DEFAULT TEMPORARY TABLESPACE 문으로 기본 임시 테이블스페이스를 변경할 수 있습니다. 이 설정은 새로 생성되는 사용자에게 적용됩니다.\n\nE) 정답 — PERMANENT, TEMPORARY, UNDO 세 가지 유형의 테이블스페이스 모두 BIGFILE 테이블스페이스로 생성할 수 있습니다. CREATE BIGFILE TABLESPACE, CREATE BIGFILE TEMPORARY TABLESPACE, CREATE BIGFILE UNDO TABLESPACE 구문이 모두 지원됩니다.\n\nB) 오답 — UNDO_TABLESPACE 파라미터는 ALTER SYSTEM SET 문으로 동적 변경이 가능합니다. SPFILE에서만 변경 가능하다는 설명은 잘못되었습니다. ALTER SYSTEM SET UNDO_TABLESPACE = 'UNDOTBS2' SCOPE=BOTH와 같이 실행하면 즉시 활성 UNDO 테이블스페이스가 전환됩니다.\n\nC) 오답 — UNDO 테이블스페이스도 BIGFILE로 생성 가능합니다. CREATE BIGFILE UNDO TABLESPACE 구문이 지원됩니다.\n\nD) 오답 — TEMPORARY 테이블스페이스는 DATAFILE이 아니라 TEMPFILE 키워드를 사용하여 임시 파일을 지정합니다. PERMANENT 테이블스페이스와 UNDO 테이블스페이스가 DATAFILE을 사용합니다.\n\n핵심 개념: Oracle의 3가지 테이블스페이스 유형(PERMANENT, TEMPORARY, UNDO)은 모두 BIGFILE로 생성 가능합니다. 각 유형의 기본 설정은 DEFAULT_TABLESPACE, DEFAULT_TEMPORARY_TABLESPACE, UNDO_TABLESPACE 파라미터로 관리됩니다. TEMPORARY 테이블스페이스는 DATAFILE이 아닌 TEMPFILE 키워드를 사용합니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_044",
+    "title": "UNDO表領域に関する操作について正しく述べているものを選択してください。",
+    "options": [
+      "A) CREATE TABLESPACE文のUNDOキーワードを省略して作成した永続(PERMANENT)表領域を、後からALTER文でUNDO表領域に変更することができる。",
+      "B) UNDO表領域はCREATE UNDO TABLESPACE文で明示的に作成する必要があり、PERMANENT表領域をUNDO用途に使用することはできない。",
+      "C) SYSTEM表領域とSYSAUX表領域をUNDO表領域として使用することが可能である。",
+      "D) 一つのデータベース・インスタンスで複数のUNDO表領域を同時にアクティブにすることが可能である。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — UNDO 테이블스페이스는 CREATE UNDO TABLESPACE 문으로 명시적으로 생성해야 합니다. 일반 PERMANENT 테이블스페이스를 UNDO 용도로 사용할 수 없으며, PERMANENT 테이블스페이스를 이후에 UNDO로 변환하는 것도 불가능합니다.\n\nA) 오답 — PERMANENT 테이블스페이스를 ALTER 문으로 UNDO 테이블스페이스로 변경할 수 없습니다. UNDO 테이블스페이스는 생성 시점에 CREATE UNDO TABLESPACE로 지정해야 합니다.\n\nC) 오답 — SYSTEM 테이블스페이스와 SYSAUX 테이블스페이스는 데이터 딕셔너리와 보조 구성요소를 저장하는 전용 테이블스페이스이므로, UNDO 용도로 사용할 수 없습니다.\n\nD) 오답 — 하나의 데이터베이스 인스턴스에서는 한 번에 하나의 UNDO 테이블스페이스만 활성(active) 상태로 사용할 수 있습니다. UNDO_TABLESPACE 파라미터로 지정된 하나의 UNDO 테이블스페이스만 활성입니다. 단, RAC 환경에서는 각 인스턴스가 서로 다른 UNDO 테이블스페이스를 사용합니다.\n\n핵심 개념: UNDO 테이블스페이스는 CREATE UNDO TABLESPACE 문으로 명시적으로 생성해야 하며, PERMANENT 테이블스페이스를 UNDO로 변환할 수 없습니다. 하나의 인스턴스에서는 UNDO_TABLESPACE 파라미터로 지정된 하나의 UNDO 테이블스페이스만 활성 상태입니다."
+  },
+  {
+    "chapter": "表領域およびデータファイルの管理",
+    "number": "C_06_045",
+    "title": "以下のシナリオについて正しく述べているものを選択してください。\n\nソースDB(標準ブロック・サイズ8KB)から16KBブロック・サイズの表領域をトランスポータブル表領域機能を使用してターゲットDB(標準ブロック・サイズ8KB)に移行しようとしています。",
+    "options": [
+      "A) ターゲットDBの標準ブロック・サイズが8KBであるため、16KBブロック・サイズの表領域をインポートすることはできない。",
+      "B) ターゲットDBでDB_16K_CACHE_SIZEパラメータを適切に設定すれば、16KBブロック・サイズの表領域をインポートできる。",
+      "C) ターゲットDBのDB_BLOCK_SIZEを16KBに変更すれば、インポートが可能になる。",
+      "D) トランスポータブル表領域機能では、ソースDBとターゲットDBのブロック・サイズが完全に一致している必要がある。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 비표준 블록 사이즈의 테이블스페이스를 트랜스포터블 테이블스페이스 기능으로 이전할 때, 대상 DB에 해당 블록 사이즈에 대응하는 DB_nK_CACHE_SIZE 파라미터를 설정해야 합니다. 16KB 블록 사이즈 테이블스페이스를 임포트하려면 대상 DB에서 ALTER SYSTEM SET DB_16K_CACHE_SIZE = 적절한크기로 설정하면 됩니다. 이 설정이 없으면 임포트 시 오류가 발생합니다.\n\nA) 오답 — 표준 블록 사이즈가 다르더라도 비표준 블록 사이즈에 대한 버퍼 캐시(DB_nK_CACHE_SIZE)를 설정하면 다른 블록 사이즈의 테이블스페이스를 사용할 수 있습니다. 하나의 데이터베이스에서 여러 블록 사이즈의 테이블스페이스를 혼합하여 사용하는 것이 가능합니다.\n\nC) 오답 — DB_BLOCK_SIZE는 데이터베이스 생성 시 설정되며 이후 변경할 수 없는 파라미터입니다. 비표준 블록 사이즈의 테이블스페이스를 사용하려면 DB_nK_CACHE_SIZE를 설정해야 합니다.\n\nD) 오답 — 트랜스포터블 테이블스페이스 기능은 소스 DB와 대상 DB의 블록 사이즈가 다르더라도 사용할 수 있습니다. 대상 DB에 해당 블록 사이즈에 대한 캐시 설정(DB_nK_CACHE_SIZE)만 있으면 됩니다.\n\n핵심 개념: 비표준 블록 사이즈 테이블스페이스를 트랜스포터블 테이블스페이스로 이전할 때, 대상 DB에 DB_nK_CACHE_SIZE 파라미터 설정이 필수입니다. DB_BLOCK_SIZE는 DB 생성 후 변경할 수 없으므로, 비표준 블록 사이즈는 전용 캐시(DB_nK_CACHE_SIZE)를 할당하여 지원합니다."
+  }
+]

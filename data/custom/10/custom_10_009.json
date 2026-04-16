@@ -1,0 +1,81 @@
+[
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_039",
+    "title": "マルチテナント環境におけるApplication Containerについて正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Application Containerは、CREATE PLUGGABLE DATABASE ... AS APPLICATION CONTAINER構文でApplication Rootを作成することで構成される。",
+      "B) Application Seedを作成する場合、CDB$ROOTに接続してCREATE PLUGGABLE DATABASE AS SEED構文を使用する。",
+      "C) Application Root内で定義された共通オブジェクトは、Application PDB作成時に自動的に反映されるため、ALTER PLUGGABLE DATABASE APPLICATION SYNCコマンドは不要である。",
+      "D) Application Containerは1つのCDB内に1つのみ作成可能であり、複数のApplication Containerを同時に運用することはできない。",
+      "E) Application Seedが存在しない場合でもApplication PDBを作成できるが、その場合はPDB$SEEDがテンプレートとして使用され、共通オブジェクトの同期が別途必要になる。"
+    ],
+    "answer": [
+      "A",
+      "E"
+    ],
+    "explanation": "정답: A, E\nA) 정답 — Application Container는 CREATE PLUGGABLE DATABASE ... AS APPLICATION CONTAINER 구문으로 Application Root를 생성하여 구성합니다. Application Root는 공통 애플리케이션 정의(스키마, 테이블, 데이터)를 저장하는 컨테이너이며, 이 안에 Application Seed와 Application PDB를 포함합니다.\n\nE) 정답 — Application Seed가 없는 경우에도 Application PDB를 생성할 수 있습니다. 이때 CDB$ROOT의 PDB$SEED가 기본 템플릿으로 사용되며, 생성 후 ALTER PLUGGABLE DATABASE APPLICATION ... SYNC 명령으로 Application Root의 공통 오브젝트를 동기화해야 합니다.\n\nB) 오답 — Application Seed를 생성하려면 CDB$ROOT가 아닌 Application Root에 접속한 상태에서 CREATE PLUGGABLE DATABASE AS SEED 구문을 실행해야 합니다. CDB$ROOT에서 이 구문을 실행하면 CDB 레벨의 PDB$SEED에 대한 작업이 되므로 Application Seed를 생성할 수 없습니다.\n\nC) 오답 — Application Seed가 존재하는 경우 Application PDB 생성 시 공통 오브젝트가 포함되지만, Application Root에서 애플리케이션이 업그레이드된 경우에는 기존 Application PDB에 ALTER PLUGGABLE DATABASE APPLICATION ... SYNC 명령으로 변경 사항을 전파해야 합니다. SYNC 명령이 완전히 불필요한 것은 아닙니다.\n\nD) 오답 — 1개의 CDB 내에 여러 Application Container를 생성할 수 있습니다. 각 Application Container는 독립적인 Application Root를 가지며, 서로 다른 애플리케이션을 관리하는 별도의 논리적 그룹으로 운영됩니다.\n\n핵심 개념: Application Container는 공통 애플리케이션 정의를 여러 Application PDB 간에 공유하기 위한 논리적 그룹입니다. Application Root에서 공통 오브젝트를 정의하고, Application Seed는 Application PDB 생성 시 템플릿 역할을 합니다. Application Seed가 없으면 PDB$SEED가 대체 사용되며, 이후 SYNC 명령으로 공통 오브젝트를 동기화해야 합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_040",
+    "title": "SaaS環境でApplication Containerを使用してテナントごとにPDBを提供する構成を検討しています。以下のSQL文を順番に実行しました。\n\nSQL> CREATE PLUGGABLE DATABASE app_root AS APPLICATION CONTAINER\n       ADMIN USER appadmin IDENTIFIED BY password\n       FILE_NAME_CONVERT = ('/pdbseed/', '/app_root/');\nSQL> ALTER PLUGGABLE DATABASE app_root OPEN;\nSQL> ALTER SESSION SET CONTAINER = app_root;\nSQL> CREATE PLUGGABLE DATABASE AS SEED\n       ADMIN USER seedadmin IDENTIFIED BY password\n       FILE_NAME_CONVERT = ('/app_root/', '/app_seed/');\nSQL> ALTER PLUGGABLE DATABASE app_root$SEED OPEN;\n\nこの操作に関する内容について正しく述べているものを選択してください。",
+    "options": [
+      "A) Application Seedの名前はDBAが任意に指定でき、上記のSQL文ではSEED名が指定されていないためエラーが発生する。",
+      "B) Application Seedが正常に作成された場合、app_root内でCREATE PLUGGABLE DATABASEを実行すると、Application Seedが自動的にテンプレートとして使用される。",
+      "C) Application SeedはApplication Root内に複数作成でき、テナントPDB作成時に使用するSeedを選択できる。",
+      "D) Application RootはREAD ONLY状態で運用され、Application Seedの作成時にもREAD ONLYのまま操作を行う。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — Application Seed가 존재하는 Application Root 내에서 CREATE PLUGGABLE DATABASE를 실행하면, Application Seed가 자동으로 템플릿으로 사용됩니다. 이를 통해 Application Root에 정의된 공통 오브젝트와 초기 데이터가 포함된 Application PDB가 생성되며, 별도의 동기화(SYNC) 작업 없이도 공통 오브젝트가 반영됩니다.\n\nA) 오답 — Application Seed는 CREATE PLUGGABLE DATABASE AS SEED 구문으로 생성하며, 이름은 자동으로 '<Application Root名>$SEED' 형식으로 부여됩니다. DBA가 임의의 이름을 지정하는 것이 아니므로 에러가 발생하지 않습니다.\n\nC) 오답 — Application Container당 Application Seed는 0개 또는 1개만 생성할 수 있습니다. 복수의 Application Seed를 생성하여 선택적으로 사용하는 것은 지원되지 않습니다.\n\nD) 오답 — Application Root는 READ WRITE 상태로 운영됩니다. Application Root에서 공통 애플리케이션 정의(스키마, 테이블 등)를 생성하고 관리해야 하므로 READ WRITE 모드가 필요합니다. 항상 READ ONLY로 유지되는 것은 PDB$SEED입니다.\n\n핵심 개념: Application Container에서 Application Seed는 Application Root당 0~1개 생성 가능하며, 이름은 '<Application Root名>$SEED' 형식으로 자동 부여됩니다. Application Seed가 존재하면 Application PDB 생성 시 자동으로 해당 Seed가 템플릿으로 사용되어 공통 오브젝트가 포함된 PDB가 효율적으로 프로비저닝됩니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_041",
+    "title": "Snapshot Copy PDBの動作特性について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Snapshot Copy PDBは、ソースPDBのデータ・ファイルを物理的にコピーせず、Copy-on-Write(CoW)メカニズムにより変更が発生したブロックのみを新しい領域にコピーする。",
+      "B) Snapshot Copy PDBの作成速度はソースPDBのデータ・サイズに比例して増加し、大規模データベースほど作成に時間がかかる。",
+      "C) Snapshot Copy PDBはREAD ONLYモードでのみオープン可能であり、データの変更操作は行えない。",
+      "D) Snapshot Copy PDBは作成直後のディスク使用量がほぼゼロであり、時間の経過とともに変更されたブロック数に比例してストレージ使用量が増加する。",
+      "E) Snapshot Copy PDBのソースPDBが削除されても、クローンPDBは独立して動作を継続する。"
+    ],
+    "answer": [
+      "A",
+      "D"
+    ],
+    "explanation": "정답: A, D\nA) 정답 — Snapshot Copy PDB는 Copy-on-Write(CoW) 메커니즘을 사용하여 소스 PDB의 데이터 파일을 물리적으로 복사하지 않습니다. 클론 PDB에서 읽기 작업 시 소스의 원본 블록을 참조하고, 쓰기 작업이 발생할 때만 해당 블록을 새로운 위치에 복사한 후 변경합니다.\n\nD) 정답 — Snapshot Copy PDB는 생성 직후 메타데이터만 존재하므로 디스크 사용량이 거의 없습니다. 이후 클론 PDB에서 데이터 변경이 발생할 때마다 해당 블록이 새 위치에 복사되므로, 변경된 블록 수에 비례하여 스토리지 사용량이 점진적으로 증가합니다.\n\nB) 오답 — Snapshot Copy PDB의 핵심 장점은 데이터 파일을 물리적으로 복사하지 않고 스냅샷만 생성하므로 생성 속도가 데이터 크기에 무관하게 거의 즉시 완료된다는 것입니다. 일반 PDB 클론과 달리 대규모 데이터베이스에서도 빠르게 생성됩니다.\n\nC) 오답 — Snapshot Copy PDB는 READ WRITE 모드로 오픈할 수 있으며, 데이터 변경 조작이 가능합니다. READ ONLY로만 오픈 가능한 것은 Refreshable Clone PDB입니다.\n\nE) 오답 — Snapshot Copy PDB는 소스 PDB의 데이터 파일에 대한 참조(Reference)를 기반으로 동작합니다. 소스 PDB의 데이터 파일이 삭제되면 클론 PDB도 영향을 받습니다.\n\n핵심 개념: Snapshot Copy PDB는 Copy-on-Write 메커니즘으로 데이터 파일의 물리적 복사 없이 즉시 클론을 생성합니다. 생성 직후 디스크 사용량은 거의 없으며, 변경된 블록만 추가 스토리지를 사용합니다. 단, 소스 PDB 데이터 파일에 의존하므로 소스 삭제 시 클론에 영향을 미칩니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_042",
+    "title": "テスト環境を迅速に構築するためにSnapshot Copy PDBの使用を検討しています。Snapshot Copy PDBの制約事項について正しく述べているものを選択してください。",
+    "options": [
+      "A) Snapshot Copy PDBはACFS(ASM Cluster File System)やDirect NFS(dNFS)などスナップショットをサポートするストレージでのみ使用可能である。",
+      "B) Snapshot Copy PDBはARCHIVELOGモードとLocal UNDOモードの両方が有効になっている環境でのみ作成できる。",
+      "C) Snapshot Copy PDBは作成後にソースPDBとは完全に独立するため、ソースPDBを別のCDBに移動しても影響はない。",
+      "D) Snapshot Copy PDBはCREATE PLUGGABLE DATABASE ... FROM ... REFRESH MODE SNAPSHOT構文で作成する。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Snapshot Copy PDB는 스토리지 레벨의 스냅샷 기능을 활용하므로, ACFS(ASM Cluster File System), Direct NFS(dNFS) 등 스냅샷을 지원하는 스토리지에서만 사용할 수 있습니다. 일반 파일 시스템 환경에서는 Snapshot Copy PDB를 생성할 수 없습니다.\n\nB) 오답 — ARCHIVELOG 모드와 Local UNDO 모드가 모두 필요한 것은 핫 클론(Hot Clone)의 전제 조건입니다. Snapshot Copy PDB는 스토리지 레벨의 스냅샷 기능에 의존하므로, 이 두 조건이 필수 요건은 아닙니다.\n\nC) 오답 — Snapshot Copy PDB는 소스 PDB의 데이터 파일에 대한 참조를 기반으로 동작하므로, 소스 PDB와 독립적이지 않습니다. 소스 PDB의 데이터 파일이 삭제되거나 이동되면 클론 PDB에 영향을 줍니다.\n\nD) 오답 — Snapshot Copy PDB의 올바른 생성 구문은 CREATE PLUGGABLE DATABASE ... FROM ... SNAPSHOT COPY입니다. REFRESH MODE SNAPSHOT이라는 구문은 존재하지 않으며, REFRESH MODE는 Refreshable Clone PDB에서 사용하는 절입니다.\n\n핵심 개념: Snapshot Copy PDB는 ACFS나 Direct NFS 등 스냅샷을 지원하는 스토리지 환경에서만 사용 가능하며, CREATE PLUGGABLE DATABASE ... SNAPSHOT COPY 구문으로 생성합니다. 핫 클론의 전제 조건(ARCHIVELOG + Local UNDO)과는 다르며, 소스 PDB 데이터 파일에 대한 의존성이 존재합니다."
+  },
+  {
+    "chapter": "PDBの作成および管理の表示",
+    "number": "C_10_043",
+    "title": "Application Container内でアプリケーションのアップグレードを実行した後の動作について正しく述べているものを選択してください。",
+    "options": [
+      "A) Application Rootでアプリケーションをアップグレードすると、すべてのApplication PDBに変更が即座に自動反映される。",
+      "B) Application PDBに変更を反映するには、各Application PDBでALTER PLUGGABLE DATABASE APPLICATION ... SYNC文を実行する必要がある。",
+      "C) Application Seedが存在する場合、Application Seedへの変更反映は不要であり、新規Application PDB作成時にApplication Rootから直接継承される。",
+      "D) アプリケーションのアップグレードはApplication PDBがOPEN状態でなくても実行可能であり、次回OPEN時に自動的に同期される。"
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "정답: B\nB) 정답 — Application Root에서 애플리케이션을 업그레이드(ALTER PLUGGABLE DATABASE APPLICATION ... BEGIN UPGRADE ~ END UPGRADE)한 후, 기존 Application PDB에 변경 사항을 반영하려면 각 Application PDB에서 ALTER PLUGGABLE DATABASE APPLICATION ... SYNC 문을 실행해야 합니다. 변경 사항이 자동으로 전파되지 않으며, DBA가 명시적으로 동기화를 수행해야 합니다.\n\nA) 오답 — Application Root에서 애플리케이션을 업그레이드해도 기존 Application PDB에 즉시 자동 반영되지 않습니다. 각 Application PDB에서 SYNC 명령을 실행하여 명시적으로 변경 사항을 전파해야 합니다.\n\nC) 오답 — Application Seed에도 SYNC를 수행하여 업그레이드 내용을 반영해야 합니다. Application Seed가 업그레이드되지 않은 상태에서 새 Application PDB를 생성하면, 구버전의 공통 오브젝트가 포함된 PDB가 생성되므로 추가 동기화가 필요합니다.\n\nD) 오답 — 애플리케이션의 업그레이드 자체는 Application Root에서 수행하며, Application PDB에 동기화하려면 해당 PDB가 OPEN 상태여야 합니다. PDB가 CLOSE 상태에서는 SYNC를 실행할 수 없으며, 다음 OPEN 시 자동 동기화되는 메커니즘은 없습니다.\n\n핵심 개념: Application Container에서 애플리케이션 업그레이드는 Application Root에서 BEGIN UPGRADE/END UPGRADE로 수행하며, 기존 Application PDB와 Application Seed에는 ALTER PLUGGABLE DATABASE APPLICATION ... SYNC 명령으로 명시적으로 변경 사항을 전파해야 합니다."
+  }
+]

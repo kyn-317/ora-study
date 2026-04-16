@@ -9,7 +9,9 @@
       "C) メンテナンス・ウィンドウに関連付けられたResource Planは、ウィンドウが閉じた後も次のウィンドウが開くまで維持される。",
       "D) Resource Managerの機能はメンテナンス・ウィンドウとは独立して動作するため、ウィンドウの開閉はResource Planに影響を与えない。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — 메인터넌스 윈도우가 열리면 해당 윈도우의 resource_plan 속성에 지정된 Resource Plan이 자동으로 활성화됩니다. 윈도우가 닫히면 이전에 활성화되어 있던 Resource Plan으로 자동 복원됩니다. 이 메커니즘을 통해 DBA의 수동 개입 없이 유지관리 시간대에 적절한 리소스 배분 정책이 자동 적용됩니다.\n\nB) 오답 — Resource Plan은 DBA가 수동으로 변경할 필요 없이, 메인터넌스 윈도우가 열릴 때 자동으로 전환됩니다. 이것이 메인터넌스 윈도우와 Resource Manager 연계의 핵심 기능입니다.\n\nC) 오답 — 메인터넌스 윈도우가 닫히면 Resource Plan은 이전 플랜으로 자동 복원됩니다. 윈도우의 Resource Plan이 다음 윈도우까지 유지되는 것이 아닙니다.\n\nD) 오답 — Resource Manager와 메인터넌스 윈도우는 독립적이 아니라 긴밀하게 연계되어 동작합니다. 윈도우의 resource_plan 속성을 통해 윈도우 열림/닫힘에 따라 Resource Plan이 자동으로 전환됩니다.\n\n핵심 개념: 메인터넌스 윈도우와 Resource Manager는 자동 유지관리 프레임워크의 핵심 결합 관계를 형성합니다. 윈도우가 열리면 resource_plan 속성에 지정된 플랜(기본값: DEFAULT_MAINTENANCE_PLAN)이 자동 활성화되고, 윈도우가 닫히면 이전 플랜으로 자동 복원됩니다."
   },
   {
@@ -23,7 +25,10 @@
       "D) 事前定義済みのメンテナンス・ウィンドウの属性は変更が許可されておらず、カスタム・ウィンドウのみ変更可能である。",
       "E) DBMS_SCHEDULER.ALTER_WINDOWプロシージャを使用して、すべてのウィンドウ属性を一括で変更する必要がある。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — DBMS_SCHEDULER.SET_ATTRIBUTE 프로시저를 사용하면 기존 메인터넌스 윈도우의 REPEAT_INTERVAL(시작 시간), DURATION(지속 시간), RESOURCE_PLAN 등의 속성을 개별적으로 변경할 수 있습니다.\n\nC) 정답 — 윈도우의 resource_plan 속성을 빈 문자열('')로 설정하면, 해당 윈도우가 열려도 Resource Plan이 전환되지 않고 현재 활성화된 플랜이 그대로 유지됩니다.\n\nB) 오답 — 메인터넌스 윈도우의 속성 변경을 위해 윈도우를 삭제하고 재생성할 필요가 없습니다. DBMS_SCHEDULER.SET_ATTRIBUTE를 사용하여 개별 속성을 직접 변경할 수 있습니다.\n\nD) 오답 — 사전 정의된 메인터넌스 윈도우(MONDAY_WINDOW 등)의 속성도 DBMS_SCHEDULER.SET_ATTRIBUTE를 통해 변경할 수 있습니다. 운영 환경에 맞게 시작 시간, 지속 시간 등을 자유롭게 조정할 수 있습니다.\n\nE) 오답 — DBMS_SCHEDULER.ALTER_WINDOW라는 프로시저는 존재하지 않습니다. 윈도우 속성 변경은 DBMS_SCHEDULER.SET_ATTRIBUTE를 사용하여 개별 속성 단위로 수행합니다.\n\n핵심 개념: 메인터넌스 윈도우의 속성은 DBMS_SCHEDULER.SET_ATTRIBUTE로 개별적으로 변경할 수 있으며, REPEAT_INTERVAL, DURATION, RESOURCE_PLAN 등이 주요 변경 대상입니다. resource_plan을 빈 문자열로 설정하면 해당 윈도우에서 Resource Plan 자동 전환을 비활성화할 수 있습니다."
   },
   {
@@ -36,7 +41,9 @@
       "C) V$AUTOTASK_STATUSビューを使用して、過去のすべてのメンテナンス・タスク実行結果をリアルタイムで確認できる。",
       "D) 自動化メンテナンス・タスクの実行履歴はV$AUTOTASK_HISTORYビューで確認でき、インスタンスが起動している間のみ保持される。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — DBA_AUTOTASK_CLIENT_HISTORY 뷰를 사용하면 각 메인터넌스 윈도우에서 실행된 클라이언트 태스크의 실행 상황을 확인할 수 있습니다. CLIENT_NAME, WINDOW_NAME, JOB_STATUS(SUCCEEDED/FAILED/STOPPED/NOT STARTED) 등의 정보가 포함되며, 최근 30일간의 실행 이력이 기록됩니다.\n\nB) 오답 — 자동 유지관리 태스크의 실행 이력은 알럿 로그에만 기록되는 것이 아닙니다. DBA_AUTOTASK_CLIENT_HISTORY, DBA_AUTOTASK_JOB_HISTORY 등의 데이터 딕셔너리 뷰를 통해 상세한 실행 이력을 확인할 수 있습니다.\n\nC) 오답 — V$AUTOTASK_STATUS라는 동적 성능 뷰는 존재하지 않습니다. AutoTask 관련 모니터링은 DBA_AUTOTASK_CLIENT, DBA_AUTOTASK_CLIENT_HISTORY 등의 딕셔너리 뷰를 사용합니다.\n\nD) 오답 — V$AUTOTASK_HISTORY라는 동적 성능 뷰는 존재하지 않습니다. 자동 유지관리 태스크의 실행 이력은 V$ 뷰가 아닌 DBA_AUTOTASK_CLIENT_HISTORY 등의 데이터 딕셔너리 뷰에 기록되며, 인스턴스 재시작과 무관하게 최근 30일간의 이력이 보존됩니다.\n\n핵심 개념: 자동 유지관리 태스크의 실행 이력은 DBA_AUTOTASK_CLIENT_HISTORY, DBA_AUTOTASK_JOB_HISTORY 등의 데이터 딕셔너리 뷰에 기록됩니다. JOB_STATUS 컬럼으로 SUCCEEDED(정상 완료), FAILED(오류 발생), STOPPED(윈도우 종료로 중단), NOT STARTED(시간 부족으로 미실행) 등의 실행 상태를 확인할 수 있습니다."
   },
   {
@@ -49,7 +56,9 @@
       "C) 自動化メンテナンス・タスクの動作はSTATISTICS_LEVELパラメータの設定値に依存しない。",
       "D) STATISTICS_LEVELパラメータをALLに設定した場合にのみ、3つすべての事前定義済みタスクが実行される。"
     ],
-    "answer": ["A"],
+    "answer": [
+      "A"
+    ],
     "explanation": "정답: A\nA) 정답 — STATISTICS_LEVEL 파라미터가 TYPICAL 이상(TYPICAL 또는 ALL)으로 설정되어 있어야 자동 유지관리 태스크(특히 auto optimizer stats collection)가 정상적으로 동작합니다. TYPICAL이 기본값입니다.\n\nB) 오답 — STATISTICS_LEVEL이 BASIC으로 설정되면 자동 통계 수집 등의 자동 유지관리 태스크가 정상적으로 동작하지 않습니다. BASIC 설정은 많은 자동화 기능을 비활성화합니다.\n\nC) 오답 — 자동 유지관리 태스크의 동작은 STATISTICS_LEVEL 파라미터에 의존합니다. 이 파라미터가 TYPICAL 이상으로 설정되어야 자동 통계 수집 등이 활성화됩니다.\n\nD) 오답 — STATISTICS_LEVEL을 ALL로 설정해야만 모든 태스크가 실행되는 것이 아닙니다. TYPICAL 설정으로도 3개의 사전 정의된 자동 유지관리 태스크가 모두 정상 실행됩니다. ALL은 추가적인 진단 통계를 수집하지만 자동 유지관리 태스크 실행에 필수적이지 않습니다.\n\n핵심 개념: STATISTICS_LEVEL 파라미터는 BASIC, TYPICAL, ALL 3가지 값을 가지며, 기본값은 TYPICAL입니다. 자동 유지관리 태스크가 정상 동작하려면 TYPICAL 이상으로 설정되어야 합니다. BASIC으로 설정하면 자동 통계 수집을 포함한 여러 자동화 기능이 비활성화됩니다."
   },
   {
@@ -63,7 +72,10 @@
       "D) メンテナンス・ウィンドウを手動で閉じるには、データベースを再起動する必要がある。",
       "E) DBMS_SCHEDULER.DISABLEで無効にしたメンテナンス・ウィンドウは、データベースを再起動しない限り再度有効にすることができない。"
     ],
-    "answer": ["A", "C"],
+    "answer": [
+      "A",
+      "C"
+    ],
     "explanation": "정답: A, C\nA) 정답 — DBMS_SCHEDULER.OPEN_WINDOW를 사용하면 예정된 스케줄 시간이 아니더라도 메인터넌스 윈도우를 수동으로 열 수 있습니다. 이를 통해 필요 시 유지관리 태스크를 즉시 실행할 수 있습니다.\n\nC) 정답 — DBMS_SCHEDULER.DISABLE을 사용하여 개별 메인터넌스 윈도우를 비활성화하면, 해당 윈도우의 예정된 시간대에 윈도우가 열리지 않으므로 자동 유지관리 태스크가 실행되지 않습니다.\n\nB) 오답 — 메인터넌스 윈도우는 사전 정의된 스케줄에 따른 자동 열기/닫기뿐만 아니라, DBMS_SCHEDULER.OPEN_WINDOW, CLOSE_WINDOW, EXTEND_WINDOW를 사용하여 수동으로도 제어할 수 있습니다.\n\nD) 오답 — 메인터넌스 윈도우를 수동으로 닫기 위해 데이터베이스를 재시작할 필요가 없습니다. DBMS_SCHEDULER.CLOSE_WINDOW를 사용하여 실행 중인 윈도우를 즉시 닫을 수 있습니다.\n\nE) 오답 — DBMS_SCHEDULER.DISABLE로 비활성화한 윈도우는 데이터베이스 재시작 없이 DBMS_SCHEDULER.ENABLE을 사용하여 즉시 다시 활성화할 수 있습니다.\n\n핵심 개념: 메인터넌스 윈도우는 DBMS_SCHEDULER 패키지를 통해 수동으로 제어할 수 있습니다. OPEN_WINDOW(수동 열기), CLOSE_WINDOW(수동 닫기), EXTEND_WINDOW(실행 시간 연장), DISABLE/ENABLE(윈도우 비활성화/활성화) 등의 프로시저를 사용하여 운영 상황에 맞게 유연하게 관리할 수 있습니다."
   }
 ]

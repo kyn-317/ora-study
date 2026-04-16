@@ -1,0 +1,69 @@
+[
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_021",
+    "title": "以下のtnspingコマンドの実行結果を確認してください。\n\n$ tnsping HRDB\n\nUsed EZCONNECT adapter to resolve the alias\nAttempting to contact (DESCRIPTION=(CONNECT_DATA=(SERVICE_NAME=HRDB))(ADDRESS=(PROTOCOL=TCP)(HOST=HRDB)(PORT=1521)))\nTNS-12514: TNS:listener does not currently know of service requested in connect descriptor\n\nこの結果について正しく述べているものを選択してください。",
+    "options": [
+      "A) tnsnames.oraにHRDBの定義が存在しないため、EZCONNECTアダプタにフォールバックして名前解決が行われた。",
+      "B) HRDBという名前のホストのポート1521でリスナーが実行されていないことを示している。",
+      "C) リスナーには到達できたが、HRDBというデータベース・サービスがリスナーに登録されていないことを示している。",
+      "D) sqlnet.oraのNAMES.DIRECTORY_PATHにEZCONNECTが含まれていないため、名前解決に失敗している。"
+    ],
+    "answer": ["C"],
+    "explanation": "정답: C\nC) 정답 — TNS-12514 오류는 \"listener does not currently know of service requested\"를 의미하며, 리스너에는 도달했지만 요청된 서비스(HRDB)가 리스너에 등록되어 있지 않음을 나타냅니다. 리스너 미실행 시에는 TNS-12541(no listener) 오류가 발생합니다.\n\nA) 오답 — EZCONNECT 어댑터가 사용된 것은 반드시 tnsnames.ora에 정의가 없어서 폴백된 것이 아닙니다. NAMES.DIRECTORY_PATH에서 EZCONNECT가 TNSNAMES보다 먼저 지정되어 있을 수도 있고, EZCONNECT만 지정되어 있을 수도 있습니다. 또한 EZCONNECT 어댑터는 별칭 문자열을 host[:port][/service] 형식으로 해석하므로, HRDB를 호스트명으로 해석하여 SERVICE_NAME=HRDB로 설정한 것입니다.\n\nB) 오답 — TNS-12514 오류는 리스너에 도달한 후 서비스를 찾지 못한 오류입니다. 리스너가 실행되지 않는 경우에는 TNS-12541(no listener) 오류가 발생합니다. 이 결과에서는 리스너까지의 연결은 성공한 상태입니다.\n\nD) 오답 — 출력에서 \"Used EZCONNECT adapter to resolve the alias\"라고 표시되어 있으므로, EZCONNECT 어댑터가 정상적으로 사용되었습니다. NAMES.DIRECTORY_PATH에 EZCONNECT가 포함되어 있지 않으면 이 어댑터가 사용될 수 없습니다.\n\n핵심 개념: tnsping 오류 코드로 장애 원인을 구분할 수 있습니다. TNS-12541은 리스너 미실행, TNS-12514는 리스너에 도달했으나 서비스 미등록, TNS-03505는 이름 해석 자체가 실패한 경우입니다. EZCONNECT 어댑터는 별칭을 호스트명으로 해석하여 자동으로 접속 디스크립터를 생성합니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_022",
+    "title": "Oracle 19c以降で導入されたEasy Connect Plus拡張構文について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Easy Connect Plus構文では、tcps://プレフィックスを使用してTLS/SSL暗号化接続を明示的に指定することができる。",
+      "B) Easy Connect Plus構文で複数のホストをカンマ区切りで指定した場合、指定されたホストに対して負荷分散(ロード・バランシング)が自動的に実行される。",
+      "C) Easy Connect Plus構文では?key=value形式でconnect_timeoutやwallet_locationなどの追加パラメータを接続文字列内に直接指定できる。",
+      "D) Easy Connect Plus構文を使用するにはsqlnet.oraのNAMES.DIRECTORY_PATHにEZCONNECT_PLUSを追加する必要がある。",
+      "E) Easy Connect Plus構文ではサーバー・タイプ(dedicated/shared/pooled)の指定はサポートされておらず、tnsnames.oraでのみ設定可能である。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — Easy Connect Plus 확장 구문에서는 tcps:// 프로토콜 접두사를 사용하여 TLS/SSL 암호화 접속을 명시적으로 지정할 수 있습니다. 예: sqlplus scott/tiger@\"tcps://dbserver:2484/orcl.example.com\"\n\nC) 정답 — Easy Connect Plus에서는 접속 문자열 끝에 ?key=value&key=value 형식으로 추가 파라미터를 직접 지정할 수 있습니다. connect_timeout(접속 제한 시간), retry_count(재시도 횟수), wallet_location(Wallet 경로) 등 다양한 파라미터를 설정할 수 있습니다.\n\nB) 오답 — Easy Connect Plus에서 다중 호스트를 콤마로 구분하여 지정하면, 첫 번째 호스트부터 순차적으로 접속을 시도하는 페일오버(Failover) 동작을 수행합니다. 로드 밸런싱이 아닌 순차적 전환 방식입니다.\n\nD) 오답 — Easy Connect Plus는 NAMES.DIRECTORY_PATH에 기존과 동일한 EZCONNECT를 지정하면 사용할 수 있습니다. EZCONNECT_PLUS라는 별도의 어댑터 이름은 존재하지 않습니다.\n\nE) 오답 — Easy Connect Plus 구문에서도 서버 타입을 지정할 수 있습니다. host/service:dedicated 또는 host/service:pooled와 같이 콜론 뒤에 서버 타입(dedicated, shared, pooled)을 지정할 수 있습니다.\n\n핵심 개념: Easy Connect Plus(Oracle 19c+)는 기존 Easy Connect의 한계를 극복하여 다중 호스트(Failover), TLS/SSL(tcps://), 타임아웃/Wallet 등 고급 접속 옵션을 접속 문자열 하나로 지정할 수 있는 확장 구문입니다. NAMES.DIRECTORY_PATH에는 기존의 EZCONNECT를 그대로 사용합니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_023",
+    "title": "lsnrctl servicesコマンドの出力について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) lsnrctl servicesは各サービスのハンドラ情報(DEDICATED、SHARED、Dispatcherなど)を表示し、接続がどの方式で処理されるかを確認できる。",
+      "B) lsnrctl servicesはlsnrctl statusの出力情報にサービスごとのハンドラ負荷情報（待機中の接続数、処理リクエスト数）を付加して表示する拡張コマンドである。",
+      "C) lsnrctl servicesの出力でハンドラのタイプがDEDICATEDと表示される場合、そのサービスへの接続は専用サーバー・プロセスによって処理される。",
+      "D) lsnrctl servicesはリスナーの起動時間やリスニング・エンドポイント情報を表示するが、ハンドラの詳細情報は表示しない。",
+      "E) lsnrctl servicesの出力でサービスの状態がUNKNOWNと表示される場合、そのサービスはDISPATCHERハンドラによって処理されていることを意味する。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — lsnrctl services 명령은 리스너에 등록된 각 서비스의 상세 정보를 표시하며, 핸들러 유형(DEDICATED, SHARED, Dispatcher 등)과 핸들러 수, 연결 거부 횟수 등을 확인할 수 있습니다. 이를 통해 접속이 어떤 방식(전용 서버, 공유 서버)으로 처리되는지 판단할 수 있습니다.\n\nC) 정답 — 핸들러 타입이 DEDICATED로 표시되면, 해당 서비스로의 접속은 전용 서버(Dedicated Server) 프로세스에 의해 처리됩니다. 전용 서버 모드에서는 클라이언트당 1개의 서버 프로세스가 생성되어 전담 처리합니다.\n\nB) 오답 — lsnrctl services는 lsnrctl status의 정보에 부하 정보를 추가한 확장 명령이 아닙니다. 두 명령은 서로 다른 범위의 정보를 표시합니다. services는 핸들러 유형(DEDICATED/SHARED/Dispatcher), 핸들러 수, 연결 거부 횟수 등 핸들러 수준의 상세 정보를 표시하며, status는 서비스 목록의 요약 정보와 리스너 기동 시간, 엔드포인트 등을 표시합니다. 또한 「待機中の接続数」「処理リクエスト数」는 lsnrctl services의 실제 출력 항목이 아닙니다.\n\nD) 오답 — lsnrctl services는 핸들러의 상세 정보를 표시하는 것이 주요 목적입니다. 리스너의 기동 시간이나 리스닝 엔드포인트 등의 기본 정보는 lsnrctl status 명령에서 확인합니다.\n\nE) 오답 — 서비스 상태가 UNKNOWN으로 표시되는 것은 정적 서비스 등록(listener.ora의 SID_LIST)을 통해 등록된 서비스를 의미합니다. DISPATCHER 핸들러에 의한 처리 여부와는 관련이 없습니다. 정적 등록에서는 인스턴스의 실제 상태를 리스너가 알 수 없으므로 UNKNOWN으로 표시됩니다.\n\n핵심 개념: lsnrctl services는 리스너에 등록된 서비스의 상세 정보(핸들러 유형, 핸들러 수, 연결 거부 횟수 등)를 표시하며, lsnrctl status보다 깊은 수준의 서비스 진단에 사용됩니다. 핸들러 타입(DEDICATED/SHARED/DISPATCHER)으로 접속 처리 방식을 판별할 수 있습니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_024",
+    "title": "Oracle Databaseの共有サーバー(Shared Server)構成について正しく述べているものを選択してください。",
+    "options": [
+      "A) 共有サーバー構成では、クライアントの接続要求はリスナーからDispatcherに転送され、複数のクライアント・セッションが共有サーバー・プロセスを共有して使用する。",
+      "B) 共有サーバー構成ではセッション・メモリがプロセスごとのPGA(Program Global Area)に割り当てられるため、専用サーバーよりもメモリ使用量が多くなる。",
+      "C) 共有サーバー構成を有効にするにはlistener.oraにSHARED_SERVERSパラメータを設定する必要がある。",
+      "D) 専用サーバー接続がデフォルトであるため、共有サーバー構成が有効であってもtnsnames.oraのSERVERキーワードにDEDICATEDを明示的に指定しなければ共有サーバーで接続される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — 공유 서버(Shared Server) 구성에서는 클라이언트의 접속 요청이 리스너로부터 Dispatcher에 전달됩니다. Dispatcher는 여러 클라이언트 세션의 요청을 수신하여 공유 서버 프로세스에 전달하고, 공유 서버 프로세스가 실제 SQL 처리를 수행합니다. 이를 통해 소수의 서버 프로세스로 다수의 클라이언트를 처리할 수 있습니다.\n\nB) 오답 — 공유 서버 구성에서는 세션 메모리가 프로세스별 PGA가 아닌 SGA의 Large Pool에 할당됩니다. 이로 인해 프로세스당 PGA를 별도로 할당하는 전용 서버보다 전체 메모리 사용량이 적어지는 것이 공유 서버의 장점입니다.\n\nC) 오답 — 공유 서버 구성을 활성화하려면 데이터베이스 초기화 파라미터인 SHARED_SERVERS와 DISPATCHERS 파라미터를 설정해야 합니다. 이 파라미터들은 listener.ora가 아닌 데이터베이스 인스턴스의 초기화 파라미터(spfile/pfile)에서 설정합니다.\n\nD) 오답 — 선택지 D는 전반부(デフォルトは専用サーバー接続)와 후반부(共有サーバーで接続される)가 논리적으로 모순됩니다. 또한 기술적으로, 공유 서버 구성이 활성화된(DISPATCHERS 파라미터가 설정된) 환경에서는 클라이언트가 SERVER 키워드를 명시하지 않으면 Dispatcher를 통해 공유 서버로 접속됩니다. 전용 서버 접속을 원하면 tnsnames.ora의 CONNECT_DATA에서 SERVER=DEDICATED를 명시적으로 지정해야 합니다. 공유 서버가 구성되지 않은 기본 환경에서는 전용 서버가 기본 접속 방식입니다.\n\n핵심 개념: 공유 서버(Shared Server) 구성은 SHARED_SERVERS와 DISPATCHERS 초기화 파라미터로 활성화하며, Dispatcher를 통해 여러 클라이언트 세션이 공유 서버 프로세스를 공유합니다. 세션 메모리는 SGA의 Large Pool에 할당되어 메모리 효율성이 높으며, 대량 동시 접속 환경에 적합합니다."
+  },
+  {
+    "chapter": "Oracle Net Servicesの構成",
+    "number": "C_04_025",
+    "title": "DRCP(Database Resident Connection Pooling)について正しく述べているものを選択してください。",
+    "options": [
+      "A) DRCPを使用する場合、クライアントの接続文字列(tnsnames.oraまたはEasy Connect)でSERVER=POOLEDを指定する必要がある。",
+      "B) DRCPは専用サーバー(Dedicated Server)モードの拡張機能であり、各クライアントに専用のサーバー・プロセスを割り当てつつ接続をプール化する。",
+      "C) DRCPの接続プールはOracle Databaseのインストール時にデフォルトで開始されるため、追加の起動操作は不要である。",
+      "D) DRCPはクライアント側のアプリケーション・サーバーに配置される接続プール機能であり、データベース側の構成は不要である。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — DRCP(Database Resident Connection Pooling)를 사용하려면 클라이언트의 접속 문자열에서 SERVER=POOLED를 지정해야 합니다. tnsnames.ora의 CONNECT_DATA 섹션에서 (SERVER=POOLED)로 설정하거나, Easy Connect Plus에서 host/service:pooled와 같이 지정합니다.\n\nB) 오답 — DRCP는 전용 서버 모드의 확장이 아닌, 데이터베이스 상주형 접속 풀링 방식입니다. DRCP에서는 서버 프로세스가 풀(Pool)에 공유되며, 클라이언트가 SQL을 실행할 때만 풀에서 서버 프로세스를 할당받고 작업이 끝나면 풀에 반환합니다. 전용 서버처럼 각 클라이언트에 고정 프로세스를 할당하지 않습니다.\n\nC) 오답 — DRCP의 접속 풀은 기본적으로 시작되지 않습니다. DBA가 DBMS_CONNECTION_POOL.START_POOL 프로시저를 실행하여 수동으로 풀을 시작해야 합니다. 풀 중지 시에는 DBMS_CONNECTION_POOL.STOP_POOL을 사용합니다.\n\nD) 오답 — DRCP는 이름에서 알 수 있듯이 \"Database Resident\"(데이터베이스 상주형) 접속 풀링이며, 데이터베이스 서버 측에서 동작합니다. 클라이언트 측의 애플리케이션 서버에 배치되는 것이 아니라, 데이터베이스 인스턴스 내에 풀이 생성되어 서버 프로세스를 공유 관리합니다.\n\n핵심 개념: DRCP(Database Resident Connection Pooling)는 데이터베이스 서버 측에서 서버 프로세스를 풀링하는 방식으로, DBMS_CONNECTION_POOL.START_POOL로 시작하고 클라이언트에서 SERVER=POOLED를 지정하여 사용합니다. 대량의 짧은 트랜잭션 환경에서 서버 프로세스 수를 절감하는 데 효과적입니다."
+  }
+]

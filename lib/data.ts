@@ -289,29 +289,43 @@ export async function getMockExamReservePool(): Promise<MockExamReservePool | nu
 // ── Mock Exam: resolve question IDs to actual questions ──
 
 /**
- * Question ID (e.g. "C_01_001") → chapter "01", within custom_01_XXX.json files.
+ * Question ID formats:
+ *   - Custom: "C_01_001" → chapter "01", loaded from data/custom/
+ *   - Example: "01_004"  → chapter "01", loaded from data/questions/
  * Returns all resolved questions for a given mock exam set.
  */
 export async function getMockExamQuestions(setId: number): Promise<QuizQuestion[]> {
-  const examSet = await readJson<MockExamSet>(path.join(MOCK_EXAM_DIR, `exam_set_${setId}.json`));
+  const paddedId = String(setId).padStart(2, '0');
+  const examSet = await readJson<MockExamSet>(path.join(MOCK_EXAM_DIR, `exam_set_${paddedId}.json`));
   if (!examSet) return [];
 
-  // Group question IDs by chapter
-  const byChapter = new Map<string, string[]>();
+  // Group question IDs by chapter and source type
+  const customByChapter = new Map<string, string[]>();
+  const examByChapter = new Map<string, string[]>();
   for (const qid of examSet.questions) {
-    const match = qid.match(/^C_(\d+)_(\d+)$/);
-    if (!match) continue;
-    const chapterId = match[1];
-    if (!byChapter.has(chapterId)) byChapter.set(chapterId, []);
-    byChapter.get(chapterId)!.push(qid);
+    const customMatch = qid.match(/^C_(\d+)_(\d+)$/);
+    if (customMatch) {
+      const chapterId = customMatch[1];
+      if (!customByChapter.has(chapterId)) customByChapter.set(chapterId, []);
+      customByChapter.get(chapterId)!.push(qid);
+      continue;
+    }
+    const examMatch = qid.match(/^(\d+)_(\d+)$/);
+    if (examMatch) {
+      const chapterId = examMatch[1];
+      if (!examByChapter.has(chapterId)) examByChapter.set(chapterId, []);
+      examByChapter.get(chapterId)!.push(qid);
+    }
   }
 
-  // Load all custom files in parallel and index by question number
+  // Load all question files in parallel and index by question number
   const questionMap = new Map<string, QuizQuestion>();
   const neededIds = new Set(examSet.questions);
 
   const fileReads: Promise<void>[] = [];
-  for (const [chapterId] of byChapter) {
+
+  // Load custom questions
+  for (const [chapterId] of customByChapter) {
     const chapterFiles = (manifest.custom as Record<string, string[]>)[chapterId];
     if (!chapterFiles) continue;
 
@@ -328,6 +342,23 @@ export async function getMockExamQuestions(setId: number): Promise<QuizQuestion[
       );
     }
   }
+
+  // Load example/exam questions
+  for (const [chapterId] of examByChapter) {
+    const target = (manifest.questions as string[]).find((f: string) => f.startsWith(`${chapterId}_`));
+    if (!target) continue;
+    fileReads.push(
+      readJson<QuizQuestion[]>(path.join(EXAM_DIR, `${target}.json`)).then(arr => {
+        if (!Array.isArray(arr)) return;
+        for (const q of arr) {
+          if (neededIds.has(q.number)) {
+            questionMap.set(q.number, q);
+          }
+        }
+      }),
+    );
+  }
+
   await Promise.all(fileReads);
 
   // Return in original exam set order
@@ -476,20 +507,29 @@ export async function refreshExamSummary(): Promise<void> {
 // ── Resolve Question IDs to QuizQuestion ──
 
 export async function resolveQuestions(questionIds: string[]): Promise<Map<string, QuizQuestion>> {
-  const byChapter = new Map<string, string[]>();
+  const customByChapter = new Map<string, string[]>();
+  const examByChapter = new Map<string, string[]>();
   for (const qid of questionIds) {
-    const match = qid.match(/^C_(\d+)_(\d+)$/);
-    if (!match) continue;
-    const chapterId = match[1];
-    if (!byChapter.has(chapterId)) byChapter.set(chapterId, []);
-    byChapter.get(chapterId)!.push(qid);
+    const customMatch = qid.match(/^C_(\d+)_(\d+)$/);
+    if (customMatch) {
+      const chapterId = customMatch[1];
+      if (!customByChapter.has(chapterId)) customByChapter.set(chapterId, []);
+      customByChapter.get(chapterId)!.push(qid);
+      continue;
+    }
+    const examMatch = qid.match(/^(\d+)_(\d+)$/);
+    if (examMatch) {
+      const chapterId = examMatch[1];
+      if (!examByChapter.has(chapterId)) examByChapter.set(chapterId, []);
+      examByChapter.get(chapterId)!.push(qid);
+    }
   }
 
   const questionMap = new Map<string, QuizQuestion>();
   const neededIds = new Set(questionIds);
 
   const fileReads: Promise<void>[] = [];
-  for (const [chapterId] of byChapter) {
+  for (const [chapterId] of customByChapter) {
     const chapterFiles = (manifest.custom as Record<string, string[]>)[chapterId];
     if (!chapterFiles) continue;
     for (const file of chapterFiles) {
@@ -504,6 +544,20 @@ export async function resolveQuestions(questionIds: string[]): Promise<Map<strin
         }),
       );
     }
+  }
+  for (const [chapterId] of examByChapter) {
+    const target = (manifest.questions as string[]).find((f: string) => f.startsWith(`${chapterId}_`));
+    if (!target) continue;
+    fileReads.push(
+      readJson<QuizQuestion[]>(path.join(EXAM_DIR, `${target}.json`)).then(arr => {
+        if (!Array.isArray(arr)) return;
+        for (const q of arr) {
+          if (neededIds.has(q.number)) {
+            questionMap.set(q.number, q);
+          }
+        }
+      }),
+    );
   }
   await Promise.all(fileReads);
   return questionMap;

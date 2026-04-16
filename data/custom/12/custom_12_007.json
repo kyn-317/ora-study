@@ -1,0 +1,29 @@
+[
+  {
+    "chapter": "自動メンテナンス",
+    "number": "C_12_031",
+    "title": "DBMS_SCHEDULERパッケージによるメンテナンス・ウィンドウの手動制御と、ウィンドウ優先順位(window_priority)による動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) DBMS_SCHEDULER.OPEN_WINDOWプロシージャを使用すると、スケジュールされた時間外でもメンテナンス・ウィンドウを手動で開くことができ、duration引数で開いている時間を指定する。",
+      "B) LOW優先順位のウィンドウが開いている状態でHIGH優先順位のウィンドウが開かれると、LOW優先順位のウィンドウは閉じられ、HIGH優先順位のウィンドウが終了した後にLOW優先順位のウィンドウは残り時間があれば再開される。",
+      "C) DBMS_SCHEDULER.CLOSE_WINDOWプロシージャでウィンドウを手動で閉じると、実行中のすべてのAutoTaskジョブは正常完了するまで待機してから終了する。",
+      "D) DBMS_SCHEDULER.EXTEND_WINDOWプロシージャは、まだ開始されていない将来のウィンドウのDURATIONを恒久的に変更するために使用する。",
+      "E) window_priorityはHIGH、MEDIUM、LOWの3段階であり、同じ優先順位のウィンドウが重なった場合は後から開いたウィンドウが優先される。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — DBMS_SCHEDULER.OPEN_WINDOW 프로시저를 사용하면 스케줄된 시간 외에도 메인터넌스 윈도우를 수동으로 열 수 있습니다. duration 인수로 윈도우가 열려 있을 시간을 지정하며, 이를 통해 긴급한 유지관리 작업을 임시로 실행할 수 있습니다.\n\nB) 정답 — 윈도우 간 우선순위(window_priority)에 따라 충돌이 처리됩니다. LOW 우선순위 윈도우가 열려 있는 상태에서 HIGH 우선순위 윈도우가 열리면, LOW 우선순위 윈도우가 닫히고 HIGH 우선순위 윈도우가 활성화됩니다. HIGH 우선순위 윈도우가 종료된 후, LOW 우선순위 윈도우에 남은 시간이 있으면 해당 윈도우가 재개됩니다.\n\nC) 오답 — DBMS_SCHEDULER.CLOSE_WINDOW로 윈도우를 수동으로 닫으면, 실행 중인 AutoTask 작업은 정상 완료를 기다리지 않고 중단됩니다. 윈도우가 닫히면 실행 중인 유지관리 작업에 중단 요청이 전송되며, DBA_AUTOTASK_CLIENT_HISTORY에서 JOB_STATUS가 STOPPED로 기록됩니다.\n\nD) 오답 — DBMS_SCHEDULER.EXTEND_WINDOW는 현재 실행 중인 윈도우의 지속 시간을 일시적으로 연장하는 프로시저이며, 미래의 윈도우 DURATION을 영구적으로 변경하는 용도가 아닙니다. DURATION을 영구적으로 변경하려면 DBMS_SCHEDULER.SET_ATTRIBUTE를 사용하여 윈도우의 DURATION 속성을 수정해야 합니다.\n\nE) 오답 — window_priority는 HIGH와 LOW의 2단계이며, MEDIUM은 존재하지 않습니다. 같은 우선순위의 윈도우가 동시에 열리려고 하면 먼저 열린 윈도우가 유지되며, 나중 윈도우는 대기합니다.\n\n핵심 개념: DBMS_SCHEDULER.OPEN_WINDOW/CLOSE_WINDOW/EXTEND_WINDOW로 메인터넌스 윈도우를 수동 제어할 수 있습니다. window_priority는 HIGH와 LOW의 2단계이며, HIGH 우선순위 윈도우가 LOW 우선순위 윈도우를 선점합니다. HIGH 윈도우 종료 후 LOW 윈도우에 남은 시간이 있으면 재개됩니다."
+  },
+  {
+    "chapter": "自動メンテナンス",
+    "number": "C_12_032",
+    "title": "マルチテナント環境におけるAutoTask(自動化メンテナンス・タスク)のCDB RootとPDBでの制御範囲について正しく述べているものを選択してください。",
+    "options": [
+      "A) CDB RootでDBMS_AUTO_TASK_ADMIN.DISABLEを実行するとすべてのPDBの自動化メンテナンス・タスクに影響し、PDBでDBMS_AUTO_TASK_ADMIN.DISABLEを実行するとそのPDBのみに影響する。",
+      "B) CDB RootでDBMS_AUTO_TASK_ADMIN.DISABLEを実行しても個々のPDBには影響せず、各PDBで個別に無効化する必要がある。",
+      "C) ENABLE_AUTOMATIC_MAINTENANCE_PDBパラメータはCDB Root専用のパラメータであり、PDBレベルでは設定できない。",
+      "D) PDBでDBMS_AUTO_TASK_ADMIN.DISABLEを実行すると、そのPDBだけでなくCDB Root全体の自動化メンテナンス・タスクも無効化される。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — CDB Root에서 DBMS_AUTO_TASK_ADMIN.DISABLE을 실행하면 모든 PDB의 자동 유지관리 태스크에 영향을 미칩니다. 반면, PDB에서 DBMS_AUTO_TASK_ADMIN.DISABLE을 실행하면 해당 PDB의 AutoTask만 비활성화되며, 다른 PDB나 CDB Root에는 영향을 미치지 않습니다. 이 2계층 제어 구조를 통해 CDB 전체 또는 개별 PDB 단위의 유연한 AutoTask 관리가 가능합니다.\n\nB) 오답 — CDB Root에서 DBMS_AUTO_TASK_ADMIN.DISABLE을 실행하면 모든 PDB에 영향을 미칩니다. CDB Root는 전체 CDB 환경에 대한 관리 권한을 가지므로, Root에서의 비활성화는 모든 PDB의 AutoTask에 적용됩니다.\n\nC) 오답 — ENABLE_AUTOMATIC_MAINTENANCE_PDB 파라미터는 PDB 레벨에서 자동 유지관리 태스크의 활성화 여부를 제어하는 파라미터입니다. CDB Root 전용이 아니며, PDB 레벨에서 이 파라미터를 FALSE로 설정하면 해당 PDB에서의 자동 유지관리 태스크가 비활성화됩니다.\n\nD) 오답 — PDB에서 DBMS_AUTO_TASK_ADMIN.DISABLE을 실행하면 해당 PDB에만 영향을 미치며, CDB Root나 다른 PDB의 AutoTask에는 영향을 미치지 않습니다. PDB는 자신의 범위 내에서만 AutoTask를 제어할 수 있습니다.\n\n핵심 개념: 멀티테넌트 환경에서 DBMS_AUTO_TASK_ADMIN의 제어 범위는 실행 위치에 따라 다릅니다. CDB Root에서 실행하면 모든 PDB에 영향, PDB에서 실행하면 해당 PDB에만 영향을 미칩니다. ENABLE_AUTOMATIC_MAINTENANCE_PDB 파라미터로 PDB 레벨의 AutoTask 활성화 여부를 별도로 제어할 수 있습니다."
+  }
+]
