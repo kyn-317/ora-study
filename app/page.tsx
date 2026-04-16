@@ -9,6 +9,29 @@ export default async function Home() {
       <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
         <h1 className="text-gradient" style={{ fontSize: '3rem', marginBottom: '1rem' }}>Oracle 1Z0-182 Study App</h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>Choose a chapter to begin your journey.</p>
+
+        <Link href="/search">
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginTop: '1.5rem',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '12px',
+            border: '1px solid var(--glass-border)',
+            background: 'var(--surface)',
+            color: 'var(--text-muted)',
+            fontSize: '1rem',
+            cursor: 'pointer',
+            transition: 'border-color 0.2s, box-shadow 0.2s',
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            학습자료 검색...
+          </div>
+        </Link>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
