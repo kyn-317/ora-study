@@ -36,18 +36,18 @@
   {
     "chapter": "ストレージの管理",
     "number": "C_07_008",
-    "title": "ローカル管理表領域のエクステント管理方式であるAUTOALLOCATEとUNIFORMについて正しく述べているものを選択してください。",
+    "title": "セグメントのHigh Water Mark(HWM)と空間利用の関係について正しく述べているものを選択してください。",
     "options": [
-      "A) AUTOALLOCATE方式では、エクステント・サイズが64KB→1MB→8MB→64MBのように段階的に増加し、Oracleが自動的にサイズを決定する。",
-      "B) UNIFORM方式ではデフォルトのエクステント・サイズが8MBであり、変更することはできない。",
-      "C) AUTOALLOCATE方式は一時表領域(TEMPORARY TABLESPACE)でのみ使用可能であり、永続表領域では使用できない。",
-      "D) UNIFORM方式は常にAUTOALLOCATE方式よりも空間効率が高く、すべての用途で推奨される。",
-      "E) ディクショナリ管理表領域でもAUTOALLOCATEおよびUNIFORM方式を使用することができる。"
+      "A) HWMはセグメント内で過去にデータが書き込まれた最高位置を示すブロック境界であり、Full Table ScanはHWMまでのブロックを読み取る。",
+      "B) HWMはSELECT文の実行ごとに再計算されるため、読み取り対象ブロック数はSELECT時点のデータ量に応じて動的に変化する。",
+      "C) INSERT操作では、HWMは必ず上方に移動するため、同じブロックを再利用するINSERTは存在しない。",
+      "D) DELETE文で大量のデータを削除すると、HWMは削除されたデータの量に応じて自動的に下方へ移動する。",
+      "E) HWMは常にセグメントの物理的な最終ブロック位置と一致しており、別個に管理されるメタデータは存在しない。"
     ],
     "answer": [
       "A"
     ],
-    "explanation": "정답: A\nA) 정답 — AUTOALLOCATE 방식에서는 Oracle이 익스텐트 크기를 자동으로 결정하며, 64KB → 1MB → 8MB → 64MB로 단계적으로 증가합니다. 이는 로컬 관리 테이블스페이스의 기본 익스텐트 관리 방식입니다.\n\nB) 오답 — UNIFORM 방식의 기본 익스텐트 크기는 1MB이며, CREATE TABLESPACE 문에서 SIZE 절을 사용하여 원하는 크기로 지정할 수 있습니다. 예: EXTENT MANAGEMENT LOCAL UNIFORM SIZE 5M.\n\nC) 오답 — AUTOALLOCATE 방식은 영구 테이블스페이스의 기본 익스텐트 관리 방식입니다. 일시 테이블스페이스에서만 사용되는 것이 아니라, 오히려 일시 테이블스페이스는 UNIFORM 방식이 권장됩니다.\n\nD) 오답 — UNIFORM 방식이 항상 더 효율적인 것은 아닙니다. AUTOALLOCATE는 세그먼트 크기에 따라 익스텐트 크기를 자동 조절하여 유연한 공간 관리가 가능하고, UNIFORM은 모든 익스텐트가 동일 크기이므로 일시 테이블스페이스나 크기가 비슷한 세그먼트가 많은 환경에 적합합니다.\n\nE) 오답 — AUTOALLOCATE와 UNIFORM은 로컬 관리 테이블스페이스(Locally Managed Tablespace)의 익스텐트 관리 방식입니다. 딕셔너리 관리 테이블스페이스(Dictionary Managed Tablespace)에서는 사용할 수 없으며, 딕셔너리 관리 방식은 별도의 메커니즘을 사용합니다.\n\n핵심 개념: 로컬 관리 테이블스페이스는 AUTOALLOCATE(기본, 단계적 크기 증가)와 UNIFORM(균등 크기, 기본 1MB) 두 가지 익스텐트 관리 방식을 제공합니다. AUTOALLOCATE는 다양한 크기의 세그먼트가 혼재하는 일반 테이블스페이스에 적합하고, UNIFORM은 크기가 비슷한 세그먼트나 일시 테이블스페이스에 적합합니다."
+    "explanation": "정답: A\nA) 정답 — HWM(High Water Mark)은 세그먼트 내에서 과거에 데이터가 기록된 최고 위치를 나타내는 블록 경계입니다. Full Table Scan은 세그먼트의 시작 블록부터 HWM까지의 모든 블록을 순차적으로 읽으므로, HWM의 위치가 Full Table Scan 성능에 직접적인 영향을 미칩니다.\n\nB) 오답 — HWM은 SELECT 실행 시점에 동적으로 재계산되는 값이 아니라, 세그먼트 헤더에 저장되는 영속적인 메타데이터 값입니다. INSERT 등 실제 데이터 쓰기 작업에 의해서만 위치가 변경되며, SELECT는 현재 HWM 값을 기반으로 읽기 범위를 결정합니다.\n\nC) 오답 — INSERT 시 항상 HWM이 상승하는 것은 아닙니다. HWM 아래 블록 중 여유 공간이 있는 블록(예: 이전 DELETE로 비워진 블록)이 존재하면 해당 블록이 먼저 재사용되어 HWM은 그대로 유지됩니다. 새 블록 할당이 필요한 경우에만 HWM이 상승합니다.\n\nD) 오답 — DELETE 문은 행 데이터를 제거하지만 HWM을 자동으로 하향시키지 않습니다. DELETE 후에도 HWM은 그대로 유지되므로, Full Table Scan은 비워진 블록까지 모두 읽게 되어 성능 개선 효과가 없습니다. HWM을 하향하려면 TRUNCATE, SHRINK SPACE, 또는 ALTER TABLE MOVE를 사용해야 합니다.\n\nE) 오답 — HWM은 세그먼트 헤더의 메타데이터로 별도 관리되는 값으로, 세그먼트의 물리적 최종 블록 위치와 반드시 일치하지 않습니다. 세그먼트에는 HWM 이후의 미사용 블록(미 형식화 블록 포함)이 존재할 수 있으며, 이러한 블록은 Full Table Scan 대상에서 제외됩니다.\n\n핵심 개념: HWM은 세그먼트 내 데이터 기록 이력의 최고 위치를 추적하는 경계선으로, Full Table Scan의 읽기 범위를 결정합니다. DELETE로는 하향되지 않으며, TRUNCATE(초기화)·SHRINK SPACE(하향)·ALTER TABLE MOVE(재구성)로만 위치를 변경할 수 있습니다. 이는 대량 DELETE 후 Full Table Scan 성능이 개선되지 않는 핵심 원인입니다."
   },
   {
     "chapter": "ストレージの管理",

@@ -47,5 +47,77 @@
     "デフォルト一時表領域の運用": 1
   },
   "total_custom": 55,
-  "last_number": "C_06_055"
+  "last_number": "C_06_055",
+  "forbidden_topics": [
+    "Shadow Copy 이중쓰기",
+    "ROWID 비트 인코딩(10비트 등)",
+    "Extent 할당 공식(AUTOALLOCATE 수치: 64K/1M/8M/64M 임계)"
+  ],
+  "original_coverage_map": {
+    "表領域の種類と特徴": [
+      "表領域の種類と特徴",
+      "一時表領域の管理",
+      "一時表領域グループ",
+      "表領域種類の総合比較",
+      "非標準ブロックサイズとトランスポータブル",
+      "BIGFILE表領域の作成とAUTOEXTEND",
+      "READ ONLY表領域の運用",
+      "READ ONLY表領域の運用(DDL・バックアップ)",
+      "表領域の状態管理",
+      "表領域のオフライン/オンライン操作",
+      "表領域のオフライン・モード比較",
+      "表領域のオフライン・モード比較(障害対応)",
+      "表領域の削除(DROP TABLESPACE)",
+      "OMF環境でのDROP TABLESPACE動作",
+      "表領域の削除とCASCADE CONSTRAINTS",
+      "CREATE TABLESPACE構文総合",
+      "デフォルト一時表領域の運用"
+    ],
+    "ブロック・サイズとメモリー管理": [
+      "ブロック・サイズとメモリー管理"
+    ],
+    "データ・ファイルの操作と管理": [
+      "データ・ファイルの操作と管理",
+      "データ・ファイルの自動拡張",
+      "表領域とデータ・ファイルの関係",
+      "Oracle Managed Files (OMF)",
+      "データ・ファイル満杯時のエラー対応",
+      "DBA_DATA_FILESビューの解釈",
+      "オンライン・データファイル移動の内部動作",
+      "DBA_TEMP_FILESとTEMPFILE管理",
+      "データ・ファイル障害時の内部動作",
+      "データ・ファイルのRESIZE",
+      "オフライン・データファイル移動手順",
+      "OMF+BIGFILE組合せ環境",
+      "V$DATAFILEビュー解釈"
+    ],
+    "データ・ブロックと行データ": [
+      "データ・ブロックと行データ",
+      "ROWID構造",
+      "エクステント管理の内部メカニズム",
+      "空間不足エラーとResumable Space Allocation",
+      "EXTENT MANAGEMENT LOCALとASSM",
+      "ASSM内部動作(ビットマップ管理)"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [
+      {
+        "topic": "ブロック・サイズとメモリー管理",
+        "mapped_custom_count": 2,
+        "custom_pct": 3.64,
+        "original_pct": 20.0,
+        "drift_pct": -16.36
+      }
+    ],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 4키 전부 매핑됨(진정한 gap 없음). Before 4 flagged → After 1 flagged. 表領域의 종류(27건·+9.09%)·データ・ファイル의 操作(18건·+12.73%)·データ・ブロック(7건·-7.27%)는 임계 해소. ブロック・サイズとメモリー管理은 2건만 남아 여전히 under-coverage. 표준/비표준 블록은 類似 주제인 '非標準ブロックサイズとトランスポータブル'로 별도 라벨되어 있으나 '종류와 특징' 범주에 분류(진단서 §2.1 05_01 s02 \"표준/비표준 블록 사이즈\"가 비표준 테이블스페이스 생성 맥락)."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P2",
+    "files": ["custom_06_003.json", "custom_06_005.json"],
+    "summary": "P2 배치2 — C_06_011 A선택지 ROWID 10비트 재할당 → 32TB 결과 중심 / C_06_024 A선택지 AUTOALLOCATE 수치 단계(64K/1M/8M/64M) 제거 → Oracle 자동 결정 원칙 중심. forbidden_topics 2번·3번 침범 해소"
+  }
 }

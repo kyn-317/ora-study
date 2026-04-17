@@ -23,5 +23,56 @@
     "インスタンス・リカバリとUNDO": 1
   },
   "total_custom": 31,
-  "last_number": "C_08_031"
+  "last_number": "C_08_031",
+  "forbidden_topics": [],
+  "original_coverage_map": {
+    "UNDOデータの状態管理": [
+      "UNDOデータの状態管理",
+      "UNDO_RETENTIONパラメータ",
+      "RETENTION GUARANTEE/NOGUARANTEE",
+      "ORA-01555(Snapshot Too Old)",
+      "ORA-01555 vs ORA-30036トラブルシューティング",
+      "V$UNDOSTAT UNDO容量算定"
+    ],
+    "UNDOデータの基礎": [
+      "UNDOデータの基礎",
+      "UNDO表領域の作成と切替",
+      "ロールバック内部処理",
+      "Flashback QueryとUNDO",
+      "インスタンス・リカバリとUNDO"
+    ],
+    "一時UNDO": [
+      "一時UNDO"
+    ],
+    "マルチテナントUNDO管理": [
+      "マルチテナントUNDO管理"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [
+      {
+        "topic": "UNDOデータの状態管理",
+        "mapped_custom_count": 15,
+        "custom_pct": 48.39,
+        "original_pct": 25.0,
+        "drift_pct": 23.39
+      },
+      {
+        "topic": "一時UNDO",
+        "mapped_custom_count": 3,
+        "custom_pct": 9.68,
+        "original_pct": 25.0,
+        "drift_pct": -15.32
+      }
+    ],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 4키 전부 매핑됨(진정한 gap 없음). Before 1 flagged → After 2 flagged 확장. 상태관리(15건·+23.39%·over)·一時UNDO(3건·-15.32%·under)가 임계 초과. 기초(9건·+4.03%)·멀티테넌트(4건·-12.10%)는 임계 해소. 상태관리 범주는 UNDO_RETENTION/GUARANTEE/ORA-01555/V$UNDOSTAT 등 운영 중심 6개 라벨로 집중되어 대규모 과잉 투자. 一時UNDO는 Oracle 12c+ 기능 제한 특성으로 1개 라벨만 유지(GTT 대상 제한적 범위)."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P2 batch3",
+    "files": ["custom_08_002", "custom_08_003"],
+    "summary": "P2 배치 3 — C_08_006(GUARANTEE 트레이드오프 내부 편중 → ORA-01555 억제 효과/ALTER TABLESPACE 설정 운영 결과)·C_08_013(Temporary UNDO 제한 상세 → 적용 대상 및 설정 범위 운영-개념) 앵글 하향. ch08 내부 동작 편중 개선 기여."
+  }
 }

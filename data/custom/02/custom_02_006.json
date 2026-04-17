@@ -17,19 +17,19 @@
   {
     "chapter": "Oracle提供のデータベース・ツールの採用",
     "number": "C_02_027",
-    "title": "RMANにおけるRESTOREコマンドとRECOVERコマンドの役割について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "RMANとSQL*Plusの役割の違いについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) RESTOREコマンドはバックアップからデータファイルを物理的に元の場所に復元する操作を行う。",
-      "B) RECOVERコマンドは復元されたデータファイルにアーカイブ・ログおよびREDOログを適用して最新の状態に回復する操作を行う。",
-      "C) RECOVERコマンドを実行した後にRESTOREコマンドを実行するのが正しいリカバリの手順である。",
-      "D) RESTOREコマンドはアーカイブ・ログの適用も同時に行うため、RECOVERコマンドを別途実行する必要はない。",
-      "E) RESTOREコマンドとRECOVERコマンドはどちらもデータベースがOPEN状態でのみ実行することができる。"
+      "A) RMANはバックアップおよびリカバリ専用のツールであり、日常的なSQL問合せやデータ操作(DML)はSQL*Plusを使用する。",
+      "B) SQL*PlusはRMANと同じくバックアップ・セットおよびイメージ・コピーの作成コマンドを備えているため、バックアップ作業をSQL*Plusで実行することも推奨されている。",
+      "C) RMANでもSQL*Plusでもデータベースの起動(STARTUP)および停止(SHUTDOWN)を実行することができる。",
+      "D) RMANはSQL*Plusと異なりSYSBACKUP権限でのみ接続可能であり、SYSDBA権限では接続できない。",
+      "E) SQL*PlusはRMANが提供するブロック破損の自動検出機能を代替するため、RMANを使用せずSQL*Plusだけでバックアップを管理できる。"
     ],
     "answer": [
       "A",
-      "B"
+      "C"
     ],
-    "explanation": "정답: A, B\nA) 정답 — RESTORE 명령은 RMAN 백업(백업 세트 또는 이미지 복사)으로부터 데이터 파일을 원래 위치(또는 지정된 위치)에 물리적으로 복원하는 작업을 수행합니다. 이 단계에서는 백업 시점의 데이터 파일이 디스크에 기록됩니다.\n\nB) 정답 — RECOVER 명령은 RESTORE로 복원된 데이터 파일에 아카이브 로그와 Online Redo Log를 순서대로 적용하여 장애 직전(완전 복구의 경우) 또는 지정 시점(불완전 복구의 경우)까지 데이터를 회복합니다. RESTORE → RECOVER → ALTER DATABASE OPEN이 표준 복구 절차입니다.\n\nC) 오답 — 올바른 복구 순서는 RESTORE(물리적 파일 복원) → RECOVER(Redo 적용)입니다. 데이터 파일이 먼저 복원되어야 Redo 로그를 적용할 수 있으므로, RECOVER를 먼저 실행하는 것은 올바른 절차가 아닙니다.\n\nD) 오답 — RESTORE와 RECOVER는 각각 다른 역할을 담당합니다. RESTORE는 백업 파일의 물리적 복원만 수행하며, 아카이브 로그 적용은 포함하지 않습니다. 아카이브 로그 및 Redo 로그 적용은 RECOVER 명령의 역할이므로, 완전한 복구를 위해서는 두 명령을 순서대로 실행해야 합니다.\n\nE) 오답 — 데이터베이스 전체 복구 시에는 MOUNT 상태에서 RESTORE와 RECOVER를 실행합니다. 개별 데이터 파일 복구의 경우에는 OPEN 상태에서도 수행할 수 있지만(해당 파일을 오프라인으로 전환), 데이터베이스 레벨의 복구는 MOUNT 상태가 필요합니다.\n\n핵심 개념: RMAN의 복구 절차는 RESTORE(백업에서 데이터 파일 물리 복원) → RECOVER(아카이브 로그 및 Redo 로그 적용으로 최신 상태 회복) → ALTER DATABASE OPEN의 순서로 수행됩니다. RESTORE는 파일 복원, RECOVER는 Redo 적용이라는 명확한 역할 구분이 있습니다."
+    "explanation": "정답: A, C\nA) 정답 — RMAN은 Oracle이 제공하는 백업 및 복구 전용 도구이며, SELECT/INSERT 등의 SQL 문 실행이나 사용자 관리 등 일반적인 데이터베이스 조작은 SQL*Plus로 수행합니다. 도구별로 담당 영역이 명확히 구분되어 있으며, 운영자는 목적에 맞는 도구를 선택하여 사용합니다.\n\nC) 정답 — RMAN과 SQL*Plus는 모두 STARTUP 및 SHUTDOWN 명령을 지원합니다. RMAN에서도 데이터베이스를 MOUNT/OPEN 상태로 전환할 수 있어, 복구 작업 중에 필요한 상태 전환을 SQL*Plus로 옮기지 않고 하나의 세션에서 처리할 수 있습니다.\n\nB) 오답 — SQL*Plus에는 RMAN의 BACKUP 명령에 해당하는 내장 백업 기능이 없습니다. 백업 세트 작성, 증분 백업, Unused Block Compression 등은 RMAN의 전용 기능이며, 백업 작업은 RMAN에서 수행하는 것이 Oracle 권장 방식입니다.\n\nD) 오답 — RMAN은 SYSDBA 권한 및 SYSBACKUP 권한 양쪽으로 접속할 수 있습니다. SYSBACKUP은 최소 권한 원칙에 따라 백업/복구에 필요한 권한만 부여한 전용 관리 권한으로, 둘 중 어느 권한으로도 RMAN을 이용할 수 있습니다.\n\nE) 오답 — SQL*Plus에는 RMAN이 제공하는 블록 손상 자동 감지·백업/복구 기능이 없습니다. SQL*Plus는 주로 SQL 실행과 데이터베이스 관리 명령 수행을 위한 도구이며, 백업/복구 목적의 기능은 RMAN이 담당합니다.\n\n핵심 개념: RMAN과 SQL*Plus는 Oracle이 제공하는 서로 다른 용도의 도구로, RMAN은 백업/복구 전용, SQL*Plus는 SQL 실행과 일반 관리 작업용입니다. 두 도구 모두 STARTUP/SHUTDOWN을 지원하지만, 백업 관련 기능은 RMAN에만 존재합니다. 도구별 역할 구분이 실버 시험의 핵심 출제 포인트입니다."
   },
   {
     "chapter": "Oracle提供のデータベース・ツールの採用",
@@ -68,16 +68,16 @@
   {
     "chapter": "Oracle提供のデータベース・ツールの採用",
     "number": "C_02_030",
-    "title": "RMANのVALIDATEコマンドによるブロック破損検査について正しく述べているものを選択してください。",
+    "title": "Oracleが提供する主要ツールの役割分担について正しく述べているものを選択してください。",
     "options": [
-      "A) VALIDATE DATABASEコマンドはバックアップを取得せずにデータファイルのブロック破損のみを検査する。",
-      "B) VALIDATE DATABASEコマンドで検出されたブロック破損の情報はALERT.LOGファイルにのみ記録され、データディクショナリ・ビューでは確認できない。",
-      "C) VALIDATEコマンドはデータベースがMOUNT状態でのみ実行可能であり、OPEN状態では使用できない。",
-      "D) VALIDATEコマンドで破損が検出された場合、RMANが自動的にブロックの修復を行う。"
+      "A) RMANはバックアップおよびリカバリ専用のツールであり、日常的なSQL実行や表領域作成などの一般的な管理作業はSQL*Plusを使用する。",
+      "B) DBCAはデータベース作成・削除・構成変更に加えて、リスナーの新規作成機能も標準で提供するため、NETCAを使用する必要はない。",
+      "C) SQL Developerはデータベースの起動(STARTUP)および停止(SHUTDOWN)を実行できるため、SQL*PlusやRMANの代替として使用できる。",
+      "D) Enterprise Manager Cloud ControlはデータベースのSQL問合せ実行専用のツールであり、ホストOSやミドルウェアの監視機能は提供されない。"
     ],
     "answer": [
       "A"
     ],
-    "explanation": "정답: A\nA) 정답 — VALIDATE DATABASE 명령은 백업을 수행하지 않고 데이터 파일의 블록 손상만을 검사하는 명령입니다. RMAN은 백업 수행 중에도 블록 손상을 자동으로 감지하지만, VALIDATE 명령을 사용하면 백업 없이 사전에 블록 무결성만 독립적으로 검증할 수 있습니다.\n\nB) 오답 — VALIDATE 명령으로 검출된 블록 손상 정보는 ALERT.LOG 파일에만 기록되는 것이 아니라, V$DATABASE_BLOCK_CORRUPTION 뷰에서도 확인할 수 있습니다. 이 뷰에서는 파일 번호(FILE#), 블록 번호(BLOCK#), 손상 유형(CORRUPTION_TYPE) 등의 상세 정보를 조회할 수 있으며, 이 정보를 기반으로 BLOCKRECOVER 명령으로 손상 블록을 복구할 수 있습니다.\n\nC) 오답 — VALIDATE 명령은 데이터베이스가 OPEN 상태에서도 실행할 수 있습니다. 운영 중인 데이터베이스에 대해 서비스 중단 없이 블록 손상 검사를 수행할 수 있어, 사전 점검에 유용합니다.\n\nD) 오답 — VALIDATE 명령은 블록 손상의 검사(감지)만 수행하며, 자동 수복은 하지 않습니다. 손상이 검출된 경우에는 DBA가 RMAN의 BLOCKRECOVER 명령 등을 사용하여 수동으로 복구 작업을 수행해야 합니다.\n\n핵심 개념: RMAN의 VALIDATE DATABASE 명령은 백업을 수행하지 않고 데이터 파일의 블록 손상만을 검사하는 전용 명령입니다. 검출된 손상 정보는 V$DATABASE_BLOCK_CORRUPTION 뷰에서 확인할 수 있으며, VALIDATE는 검사만 수행하고 자동 수복은 하지 않으므로 손상 복구는 별도로 BLOCKRECOVER 등으로 수행해야 합니다."
+    "explanation": "정답: A\nA) 정답 — RMAN은 백업 및 복구 전용 도구이며, 일상적인 SQL 실행·테이블스페이스 생성·사용자 관리 등은 SQL*Plus를 사용하는 것이 Oracle의 도구 역할 구분입니다. 각 도구는 담당 영역이 명확히 분리되어 있으며, 운영자는 목적에 맞게 도구를 선택합니다.\n\nB) 오답 — DBCA는 데이터베이스 생성/삭제/구성 변경을 담당하는 전용 도구이며, 리스너의 신규 생성은 DBCA의 역할 범위에 포함되지 않습니다. 리스너 생성 및 구성은 NETCA(Net Configuration Assistant) 또는 Net Manager(NETMGR)에서 수행합니다.\n\nC) 오답 — SQL Developer는 데이터베이스의 STARTUP/SHUTDOWN 기능을 제공하지 않습니다. 데이터베이스 기동/종료가 가능한 도구는 SQL*Plus, RMAN, Enterprise Manager Cloud Control이며, SQL Developer는 SQL 실행과 스키마 개발 지원에 특화된 GUI 도구입니다.\n\nD) 오답 — EM Cloud Control은 SQL 실행 전용 도구가 아니라, 데이터베이스뿐만 아니라 호스트 OS, 미들웨어, 애플리케이션 등 다양한 타겟을 중앙 집중식으로 관리·모니터링하는 통합 플랫폼입니다. Plug-in을 통해 관리 대상을 확장할 수 있습니다.\n\n핵심 개념: Oracle이 제공하는 주요 운영 도구는 각각 담당 영역이 명확히 구분됩니다. RMAN=백업/복구, SQL*Plus=SQL 실행과 일반 관리, DBCA=데이터베이스 생성/삭제, NETCA=리스너 구성, SQL Developer=SQL 개발 GUI, EM Cloud Control=통합 관리 플랫폼이라는 역할 매핑을 이해하는 것이 실버 시험의 핵심입니다."
   }
 ]

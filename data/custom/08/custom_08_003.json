@@ -34,17 +34,17 @@
   {
     "chapter": "UNDOの管理",
     "number": "C_08_013",
-    "title": "一時UNDO（Temporary UNDO）の制限事項および注意点について正しく述べているものを選択してください。",
+    "title": "一時UNDO（Temporary UNDO）の適用対象および設定範囲について正しく述べているものを選択してください。",
     "options": [
-      "A) 一時UNDOが有効な場合、グローバル一時表と永続表の両方を操作するトランザクションでは一時UNDOのみが生成される。",
-      "B) 一時UNDOのデータは一時表領域内のTemporary UNDOセグメントに格納され、ソートやハッシュ結合と同じ一時領域を共有する。",
-      "C) 一時UNDOを使用するとData Guard Standbyデータベースにも一時UNDOデータが自動的に転送される。",
-      "D) 一時UNDOが有効な場合、V$UNDOSTATビューでTemporary UNDOの使用統計を確認できる。"
+      "A) 一時UNDOはグローバル一時表(GTT)・プライベート一時表(PTT)・一時LOBなどの一時オブジェクトが対象であり、一般の永続表のDMLには適用されない。",
+      "B) 一時UNDOはCDBレベルでのみ設定可能であり、PDB単位では有効化/無効化ができない。",
+      "C) 一時UNDOが有効化されると、同一セッション内のすべてのDML操作(永続表含む)のUNDOが自動的にTemp表領域へ移動する。",
+      "D) 一時UNDOはData Pump Exportの処理中に一括で有効化されるため、TEMP_UNDO_ENABLEDパラメータを明示的に設定する必要はない。"
     ],
     "answer": [
-      "B"
+      "A"
     ],
-    "explanation": "정답: B\nB) 정답 — Temporary UNDO 데이터는 Temp 테이블스페이스 내에 Temporary Undo Segment로 저장됩니다. 정렬(Sort)이나 해시 조인(Hash Join) 작업과 동일한 Temp 공간을 공유하므로, 대량의 GTT 작업 시 Temp 테이블스페이스의 크기를 사전에 충분히 확보해야 합니다.\n\nA) 오답 — GTT와 영구 테이블을 모두 조작하는 혼합 트랜잭션(Mixed Transaction)에서는 GTT용 Temporary UNDO와 일반 UNDO가 동시에 생성됩니다. Temporary UNDO만 생성되는 것이 아닙니다.\n\nC) 오답 — Temporary UNDO는 Data Guard Standby 데이터베이스로 전파되지 않습니다. GTT 데이터는 세션/트랜잭션 범위의 일시적인 데이터이므로 인스턴스 복구 대상이 아니며, Redo 로그에도 기록되지 않습니다.\n\nD) 오답 — Temporary UNDO의 사용 통계는 V$UNDOSTAT가 아닌 V$TEMPUNDOSTAT 뷰에서 확인합니다. V$TEMPUNDOSTAT는 10분 간격으로 Temporary UNDO 블록 수, 트랜잭션 수, 최대 동시성 등의 통계를 제공합니다.\n\n핵심 개념: Temporary UNDO는 Temp 테이블스페이스 내 Temporary Undo Segment에 저장되며, Sort/Hash 작업과 공간을 공유합니다. 혼합 트랜잭션에서는 GTT용과 영구 테이블용 UNDO가 동시에 생성되고, Data Guard Standby로는 전파되지 않으며, 사용 통계는 V$TEMPUNDOSTAT 뷰로 모니터링합니다."
+    "explanation": "정답: A\nA) 정답 — Temporary UNDO의 적용 대상은 Global Temporary Table(GTT), Private Temporary Table(PTT, Oracle 18c 이후), 그리고 임시 LOB 등 일시적인 오브젝트입니다. 일반 영구 테이블에 대한 DML 작업은 기존 UNDO 테이블스페이스에서 처리되며, Temporary UNDO의 대상이 되지 않습니다. 따라서 GTT 작업이 많은 환경에서 선택적으로 이점을 얻는 기능입니다.\n\nB) 오답 — Temporary UNDO는 CDB 레벨뿐만 아니라 PDB 레벨, 세션 레벨에서도 TEMP_UNDO_ENABLED 파라미터로 설정할 수 있습니다. ALTER SESSION, ALTER SYSTEM 명령을 사용하여 동적으로 제어 가능하며, PDB 단위의 운영 최적화가 가능합니다.\n\nC) 오답 — Temporary UNDO가 활성화되어도 영구 테이블에 대한 DML의 UNDO는 여전히 일반 UNDO 테이블스페이스에 저장됩니다. GTT 등 일시 오브젝트의 UNDO만 Temp 테이블스페이스로 이동합니다. 모든 DML이 일괄적으로 Temp로 이동하는 것이 아닙니다.\n\nD) 오답 — Temporary UNDO의 활성화는 TEMP_UNDO_ENABLED 초기화 파라미터의 설정에 따라 결정됩니다. Data Pump Export 등 특정 작업에 의해 자동으로 활성화되는 동작은 아닙니다. Oracle 21c 이후에는 기본값이 TRUE로 설정됩니다.\n\n핵심 개념: Temporary UNDO는 GTT, PTT, 임시 LOB 등 일시적 오브젝트의 UNDO만을 Temp 테이블스페이스로 이동시키는 최적화 기능입니다. 영구 테이블의 DML에는 적용되지 않으며, CDB/PDB/세션 레벨에서 TEMP_UNDO_ENABLED 파라미터로 유연하게 제어할 수 있습니다."
   },
   {
     "chapter": "UNDOの管理",

@@ -2,19 +2,19 @@
   {
     "chapter": "UNDOの管理",
     "number": "C_08_006",
-    "title": "UNDO_RETENTIONパラメータとRETENTION GUARANTEE機能について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "RETENTION GUARANTEE設定の運用上の効果について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) UNDO_RETENTIONパラメータの基本値は900秒（15分）であり、ALTER SYSTEM文で動的に変更が可能である。",
-      "B) RETENTION GUARANTEEを設定すると、UNDO表領域の領域が不足した場合でもUNEXPIRED状態のUNDOエクステントは再利用されない。",
-      "C) RETENTION GUARANTEEの設定はALTER SYSTEM文を使用してインスタンス・レベルで行う。",
-      "D) UNDO_RETENTIONパラメータは静的パラメータであり、変更を適用するにはインスタンスの再起動が必要である。",
-      "E) RETENTION GUARANTEEを設定するとORA-01555エラーの発生を防止できるが、ORA-30036エラーの発生リスクには影響しない。"
+      "A) RETENTION GUARANTEEを設定すると、UNDO_RETENTION期間内のUNEXPIREDエクステントが保護されるため、ORA-01555(Snapshot Too Old)エラーの発生を抑制する効果が期待できる。",
+      "B) RETENTION GUARANTEEはALTER TABLESPACE文でUNDO表領域レベルに設定し、ALTER SYSTEM文でインスタンス全体に適用することはできない。",
+      "C) RETENTION GUARANTEEを設定すると、一時UNDOセグメントの使用量が削減され、Temp表領域の容量圧迫が自動的に解消される。",
+      "D) RETENTION GUARANTEEを設定した場合、UNDO_RETENTIONパラメータの値はAuto-Tuning機能により無視され常に0として扱われる。",
+      "E) RETENTION GUARANTEEを解除するにはALTER TABLESPACE文でRETENTION NOGUARANTEEを指定するか、UNDO表領域全体を削除する必要がある。"
     ],
     "answer": [
       "A",
       "B"
     ],
-    "explanation": "정답: A, B\nA) 정답 — UNDO_RETENTION 파라미터의 기본값은 900초(15분)입니다. ALTER SYSTEM SET UNDO_RETENTION = <값>; 명령으로 동적으로 변경할 수 있으며, 인스턴스 재시작 없이 즉시 적용됩니다.\n\nB) 정답 — RETENTION GUARANTEE를 설정하면 UNDO_RETENTION 기간 내의 UNEXPIRED 상태 UNDO Extent는 공간이 부족해도 절대 재사용되지 않습니다. 이로 인해 읽기 일관성과 Flashback Query의 안정성이 보장됩니다.\n\nC) 오답 — RETENTION GUARANTEE는 인스턴스 레벨이 아니라 UNDO 테이블스페이스 레벨에서 설정합니다. ALTER TABLESPACE <undo_ts> RETENTION GUARANTEE; 명령으로 설정합니다.\n\nD) 오답 — UNDO_RETENTION은 동적 파라미터입니다. ALTER SYSTEM 문으로 변경하면 즉시 적용되며 인스턴스 재시작이 필요하지 않습니다.\n\nE) 오답 — RETENTION GUARANTEE를 설정하면 UNEXPIRED UNDO가 보호되어 ORA-01555 위험은 줄어들지만, 공간 부족 시 새 트랜잭션이 ORA-30036 에러를 받을 위험이 증가합니다. 이 두 에러는 트레이드오프 관계입니다.\n\n핵심 개념: UNDO_RETENTION은 기본값 900초의 동적 파라미터이며, RETENTION GUARANTEE는 UNDO 테이블스페이스 레벨에서 설정하여 UNEXPIRED UNDO를 절대 보호합니다. 단, GUARANTEE 설정은 ORA-01555 위험을 줄이는 대신 ORA-30036 위험을 높이는 트레이드오프가 존재합니다."
+    "explanation": "정답: A, B\nA) 정답 — RETENTION GUARANTEE를 설정하면 UNDO_RETENTION 기간 내의 UNEXPIRED Extent가 공간 부족 시에도 절대 재사용되지 않으므로, 장기 실행 쿼리가 필요로 하는 UNDO 데이터가 보호됩니다. 이로 인해 ORA-01555(Snapshot Too Old) 에러의 발생을 억제하는 효과를 기대할 수 있습니다.\n\nB) 정답 — RETENTION GUARANTEE는 UNDO 테이블스페이스 레벨의 설정으로, ALTER TABLESPACE <undo_ts> RETENTION GUARANTEE; 명령을 사용합니다. ALTER SYSTEM 문으로 인스턴스 전체에 적용하는 것은 불가능합니다. 설정 범위는 항상 개별 UNDO 테이블스페이스 단위입니다.\n\nC) 오답 — RETENTION GUARANTEE는 일반 UNDO 테이블스페이스에 대한 설정이며, Temporary UNDO 세그먼트의 사용량과는 직접적인 관련이 없습니다. Temp 테이블스페이스의 용량 압박 해소는 TEMP_UNDO_ENABLED 파라미터나 Temp 테이블스페이스 확장으로 대응하는 별도 영역입니다.\n\nD) 오답 — RETENTION GUARANTEE 설정은 UNDO_RETENTION 값을 무시하지 않습니다. 오히려 UNDO_RETENTION 값으로 지정된 기간 동안 UNEXPIRED Extent를 보호하므로, 두 설정은 연계되어 동작합니다. Auto-Tuning 기능도 GUARANTEE 설정과는 독립적으로 동작합니다.\n\nE) 오답 — RETENTION GUARANTEE 해제는 ALTER TABLESPACE <undo_ts> RETENTION NOGUARANTEE; 명령으로 수행하며, UNDO 테이블스페이스를 삭제할 필요는 없습니다. 테이블스페이스 레벨 속성을 변경하는 작업이며 데이터 삭제와는 무관합니다.\n\n핵심 개념: RETENTION GUARANTEE는 UNDO 테이블스페이스 레벨 설정(ALTER TABLESPACE)으로 UNEXPIRED UNDO Extent를 공간 부족 시에도 보호하여 ORA-01555 에러를 억제하는 효과를 제공합니다. 단 일반 UNDO 관리 영역이므로 Temp 테이블스페이스의 용량 문제(일시 UNDO)와는 별도 영역입니다."
   },
   {
     "chapter": "UNDOの管理",

@@ -35,5 +35,90 @@
     "STS転送・参照管理": 1
   },
   "total_custom": 33,
-  "last_number": "C_13_033"
+  "last_number": "C_13_033",
+  "forbidden_topics": [
+    "Segment Advisor FS1-4 블록 분류(Free Space 등급)",
+    "히스토그램 4유형(Frequency/Top-Frequency/Height-Balanced/Hybrid)",
+    "Stale 10% 알고리즘(통계 재수집 트리거 임계)",
+    "DB Time 8분해(Wait Class 분해 표)",
+    "Finding 분류 표(Problem/Symptom/Information)",
+    "MMON 4단계 스케줄링",
+    "Benefit 계산식(ADDM Benefit 수식)"
+  ],
+  "original_coverage_map": {
+    "パフォーマンス管理および監視ツール": [
+      "V$ビュー",
+      "AWR",
+      "AWRレポート活用",
+      "AWRスナップショット管理コマンド",
+      "AWRレポートTop5解釈",
+      "AWRスナップショットデータ種類",
+      "AWRベースライン",
+      "ADR・アラートログ",
+      "ASH",
+      "監視インフラストラクチャ構成要素",
+      "MMONプロセス",
+      "STATISTICS_LEVELパラメータ"
+    ],
+    "パフォーマンス計画・チューニング": [
+      "パフォーマンス計画・チューニング"
+    ],
+    "各種アドバイザ": [
+      "各種アドバイザ",
+      "SQL Tuning Advisor",
+      "SQLアクセス・アドバイザ",
+      "オプティマイザ統計アドバイザ",
+      "SQLパフォーマンス・アナライザ",
+      "SQLアクセス・アドバイザ vs SQLチューニング・アドバイザ比較",
+      "SPA Trial類型・STS構成",
+      "SQLプロファイル・自動SQLチューニング",
+      "STS転送・参照管理",
+      "オプティマイザ統計"
+    ],
+    "ADDM": [
+      "ADDM",
+      "PDBレベルADDM"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [
+      {
+        "topic": "パフォーマンス管理および監視ツール",
+        "mapped_custom_count": 16,
+        "custom_pct": 48.48,
+        "original_pct": 25.0,
+        "drift_pct": 23.48
+      },
+      {
+        "topic": "パフォーマンス計画・チューニング",
+        "mapped_custom_count": 1,
+        "custom_pct": 3.03,
+        "original_pct": 25.0,
+        "drift_pct": -21.97
+      },
+      {
+        "topic": "各種アドバイザ",
+        "mapped_custom_count": 14,
+        "custom_pct": 42.42,
+        "original_pct": 25.0,
+        "drift_pct": 17.42
+      },
+      {
+        "topic": "ADDM",
+        "mapped_custom_count": 2,
+        "custom_pct": 6.06,
+        "original_pct": 25.0,
+        "drift_pct": -18.94
+      }
+    ],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 4키 전부 매핑됨(진정한 gap 없음). Before 4 flagged(모두 custom_pct=0/3.03/9.09/3.03%) → After 4 flagged. 매핑 후 양상이 달라짐: 監視ツール(16건·+23.48%)·各種アドバイザ(14건·+17.42%)는 과잉 투자로 전환, 計画・チューニング(1건)·ADDM(2건)은 상대적 under-coverage 유지. 33문항 확장 시 監視ツール·アドバイザ 세부 라벨 집중 투자가 구조적 원인."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P1_rewrite_batch3",
+    "files": ["custom_13_006.json", "custom_13_007.json"],
+    "summary": "P1 배치 3 (파일 2/3·3/3): custom_13_006·007 Gold 수준 전면 재작성(Silver 개요 복원). 옵티마이저 통계 어드바이저 내부 API(DBMS_STATS.REPORT_ADVISOR_TASK·AUTO_STATS_ADVISOR_TASK)·SPA execution_type 3종(EXPLAIN PLAN/TEST EXECUTE/COMPARE PERFORMANCE)·SELECT_WORKLOAD_REPOSITORY 테이블 함수·SQL 프로파일 force_match·ACCEPT_SQL_PROFILES·STS 전송 4단계(CREATE_STGTAB_SQLSET·PACK·UNPACK·ADD_SQLSET_REFERENCE)·GET_TASK_SCRIPT DDL/UNDO 제거. 8문항 주 매핑 라벨 모두 유지. forbidden_topics 7항목(Segment Advisor FS1-4/히스토그램 4유형/Stale 10%/DB Time 8분해/Finding 분류/MMON 4단계/Benefit 계산식) 전수 회피 확인. custom_topic_counts 변동 없음, 총합 33 유지. 배치 3로 ch13 P1 전체 완료."
+  }
 }

@@ -9,21 +9,59 @@
   },
   "custom_topic_counts": {
     "PDB生成": 2,
-    "PDBの切断と状態": 8,
+    "PDBの切断と状態": 6,
     "PDB初期化パラメータ": 3,
-    "PDBクローンおよび管理": 4,
-    "PDB状態管理（SAVE STATE）": 4,
+    "PDBクローンおよび管理": 8,
+    "PDB状態管理（SAVE STATE）": 5,
     "PDBオープンモード管理": 3,
     "PDB Lockdown Profile": 3,
     "CDB構造とコンテナ体系": 3,
     "共通ユーザーとローカルユーザー": 2,
     "Refreshable Clone PDB": 3,
-    "PDB関連ビューとモニタリング": 6,
+    "PDB関連ビューとモニタリング": 5,
     "PDBストレージ制限": 2,
     "Snapshot Copy PDB": 5,
     "PDB$SEED": 1,
-    "Application Container": 6
+    "Application Container": 4
   },
   "total_custom": 55,
-  "last_number": "C_10_055"
+  "last_number": "C_10_055",
+  "forbidden_topics": [],
+  "original_coverage_map": {
+    "PDB生成": [
+      "PDB生成",
+      "PDB$SEED",
+      "PDBストレージ制限",
+      "CDB構造とコンテナ体系",
+      "共通ユーザーとローカルユーザー",
+      "Application Container"
+    ],
+    "PDBの切断と状態": [
+      "PDBの切断と状態",
+      "PDB状態管理（SAVE STATE）",
+      "PDBオープンモード管理",
+      "PDB関連ビューとモニタリング"
+    ],
+    "PDB初期化パラメータ": [
+      "PDB初期化パラメータ",
+      "PDB Lockdown Profile"
+    ],
+    "PDBクローンおよび管理": [
+      "PDBクローンおよび管理",
+      "Refreshable Clone PDB",
+      "Snapshot Copy PDB"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 4키 전부 매핑됨(진정한 gap 없음). Before 2 flagged(PDB生成 -16.36% / PDBの切断 -29.09%) → After 0 flagged. 모든 topic이 임계(15%) 이내로 해소. PDB生成(25.45%/+5.45%)·PDBの切断と状態(34.55%/-5.45%)·PDB初期化パラメータ(10.91%/-9.09%)·PDBクローンおよび管理(29.09%/+9.09%). CDB 구조·공통 사용자·Application Container를 PDB生成 범주에, Lockdown Profile을 파라미터 범주에, Snapshot/Refreshable Clone을 クローン 범주에 분산 매핑한 결과 55문항 확장이 원본 비율(1:2:1:1)에 근사하게 수렴."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P1_rewrite_batch2",
+    "files": ["custom_10_010.json", "custom_10_011.json"],
+    "summary": "P1 배치 2 (파일 1/5·2/5): custom_10_010·011 Gold 수준 전면 재작성(Silver 개요 복원) 및 55문항 주 매핑 전수 재검증. Application Container 내부운용·Snapshot Copy CoW·Refreshable Clone SWITCHOVER·Lockdown Profile DISABLE STATEMENT OPTION ALL EXCEPT 세부 제거. custom_topic_counts 재집계 결과: PDBの切断と状態 8→6, PDBクローンおよび管理 5→8, PDB状態管理 4→5, PDB関連ビューとモニタリング 6→5, Application Container 5→4, 총합 55 유지."
+  }
 }

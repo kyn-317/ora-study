@@ -2,28 +2,76 @@
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_031",
-    "title": "DBMS_SCHEDULERパッケージによるメンテナンス・ウィンドウの手動制御と、ウィンドウ優先順位(window_priority)による動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "DBMS_SCHEDULERパッケージを利用したメンテナンス・ウィンドウの手動制御について正しく述べているものを選択してください。",
     "options": [
-      "A) DBMS_SCHEDULER.OPEN_WINDOWプロシージャを使用すると、スケジュールされた時間外でもメンテナンス・ウィンドウを手動で開くことができ、duration引数で開いている時間を指定する。",
-      "B) LOW優先順位のウィンドウが開いている状態でHIGH優先順位のウィンドウが開かれると、LOW優先順位のウィンドウは閉じられ、HIGH優先順位のウィンドウが終了した後にLOW優先順位のウィンドウは残り時間があれば再開される。",
-      "C) DBMS_SCHEDULER.CLOSE_WINDOWプロシージャでウィンドウを手動で閉じると、実行中のすべてのAutoTaskジョブは正常完了するまで待機してから終了する。",
-      "D) DBMS_SCHEDULER.EXTEND_WINDOWプロシージャは、まだ開始されていない将来のウィンドウのDURATIONを恒久的に変更するために使用する。",
-      "E) window_priorityはHIGH、MEDIUM、LOWの3段階であり、同じ優先順位のウィンドウが重なった場合は後から開いたウィンドウが優先される。"
+      "A) DBMS_SCHEDULER.OPEN_WINDOWプロシージャを使用すると、スケジュールされた時間外であってもメンテナンス・ウィンドウを手動で開くことができ、通常の自動スケジュールを補完する形で緊急の保守作業を実施できる。",
+      "B) メンテナンス・ウィンドウは自動スケジュールされた時刻にしか開けない設計となっており、DBAが手動で開閉する手段は提供されていない。",
+      "C) DBMS_SCHEDULERはジョブのスケジュールのみを扱うパッケージであり、メンテナンス・ウィンドウのOPEN/CLOSE操作は完全に別のパッケージでのみ行える。",
+      "D) メンテナンス・ウィンドウを手動でOPENするとスケジュールされていた次回のウィンドウ自動起動が恒久的に停止するため、自動化された保守処理が実行されなくなる。"
     ],
-    "answer": ["A", "B"],
-    "explanation": "정답: A, B\nA) 정답 — DBMS_SCHEDULER.OPEN_WINDOW 프로시저를 사용하면 스케줄된 시간 외에도 메인터넌스 윈도우를 수동으로 열 수 있습니다. duration 인수로 윈도우가 열려 있을 시간을 지정하며, 이를 통해 긴급한 유지관리 작업을 임시로 실행할 수 있습니다.\n\nB) 정답 — 윈도우 간 우선순위(window_priority)에 따라 충돌이 처리됩니다. LOW 우선순위 윈도우가 열려 있는 상태에서 HIGH 우선순위 윈도우가 열리면, LOW 우선순위 윈도우가 닫히고 HIGH 우선순위 윈도우가 활성화됩니다. HIGH 우선순위 윈도우가 종료된 후, LOW 우선순위 윈도우에 남은 시간이 있으면 해당 윈도우가 재개됩니다.\n\nC) 오답 — DBMS_SCHEDULER.CLOSE_WINDOW로 윈도우를 수동으로 닫으면, 실행 중인 AutoTask 작업은 정상 완료를 기다리지 않고 중단됩니다. 윈도우가 닫히면 실행 중인 유지관리 작업에 중단 요청이 전송되며, DBA_AUTOTASK_CLIENT_HISTORY에서 JOB_STATUS가 STOPPED로 기록됩니다.\n\nD) 오답 — DBMS_SCHEDULER.EXTEND_WINDOW는 현재 실행 중인 윈도우의 지속 시간을 일시적으로 연장하는 프로시저이며, 미래의 윈도우 DURATION을 영구적으로 변경하는 용도가 아닙니다. DURATION을 영구적으로 변경하려면 DBMS_SCHEDULER.SET_ATTRIBUTE를 사용하여 윈도우의 DURATION 속성을 수정해야 합니다.\n\nE) 오답 — window_priority는 HIGH와 LOW의 2단계이며, MEDIUM은 존재하지 않습니다. 같은 우선순위의 윈도우가 동시에 열리려고 하면 먼저 열린 윈도우가 유지되며, 나중 윈도우는 대기합니다.\n\n핵심 개념: DBMS_SCHEDULER.OPEN_WINDOW/CLOSE_WINDOW/EXTEND_WINDOW로 메인터넌스 윈도우를 수동 제어할 수 있습니다. window_priority는 HIGH와 LOW의 2단계이며, HIGH 우선순위 윈도우가 LOW 우선순위 윈도우를 선점합니다. HIGH 윈도우 종료 후 LOW 윈도우에 남은 시간이 있으면 재개됩니다."
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — DBMS_SCHEDULER.OPEN_WINDOW 프로시저를 사용하면 사전 스케줄된 시간 외에도 메인터넌스 윈도우를 수동으로 열 수 있습니다. 이는 긴급한 유지관리 작업을 임시로 실행해야 하는 상황에서 자동 스케줄을 보완하는 용도로 활용됩니다.\n\nB) 오답 — 메인터넌스 윈도우는 자동 스케줄 외에도 DBMS_SCHEDULER.OPEN_WINDOW/CLOSE_WINDOW 등으로 DBA가 수동 제어할 수 있도록 설계되어 있습니다. 수동 개입이 불가능하다는 설명은 사실이 아닙니다.\n\nC) 오답 — DBMS_SCHEDULER 패키지는 잡 스케줄링뿐만 아니라 Oracle Scheduler 오브젝트 전반(윈도우·윈도우 그룹 등)의 관리 기능을 제공합니다. 윈도우 제어가 완전히 별도 패키지로 분리되어 있지는 않습니다.\n\nD) 오답 — 수동 OPEN은 다음 자동 스케줄을 영구 정지시키지 않습니다. 수동으로 연 윈도우가 닫히면 이후 정해진 스케줄에 따라 자동 스케줄이 계속 동작합니다.\n\n핵심 개념: DBMS_SCHEDULER.OPEN_WINDOW/CLOSE_WINDOW 등의 프로시저로 메인터넌스 윈도우를 수동 제어할 수 있으며, 수동 제어는 자동 스케줄을 보완할 뿐 기본 스케줄을 영구 정지시키지 않습니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_032",
-    "title": "マルチテナント環境におけるAutoTask(自動化メンテナンス・タスク)のCDB RootとPDBでの制御範囲について正しく述べているものを選択してください。",
+    "title": "マルチテナント環境において、CDB$ROOTとPDBに接続した状態でDBMS_AUTO_TASK_ADMINの制御操作を実行した場合の影響範囲について正しく述べているものを選択してください。",
     "options": [
-      "A) CDB RootでDBMS_AUTO_TASK_ADMIN.DISABLEを実行するとすべてのPDBの自動化メンテナンス・タスクに影響し、PDBでDBMS_AUTO_TASK_ADMIN.DISABLEを実行するとそのPDBのみに影響する。",
-      "B) CDB RootでDBMS_AUTO_TASK_ADMIN.DISABLEを実行しても個々のPDBには影響せず、各PDBで個別に無効化する必要がある。",
-      "C) ENABLE_AUTOMATIC_MAINTENANCE_PDBパラメータはCDB Root専用のパラメータであり、PDBレベルでは設定できない。",
-      "D) PDBでDBMS_AUTO_TASK_ADMIN.DISABLEを実行すると、そのPDBだけでなくCDB Root全体の自動化メンテナンス・タスクも無効化される。"
+      "A) CDB$ROOTで実行した制御操作はCDB全体の自動メンテナンス・タスクに影響し、PDBで実行した制御操作はそのPDB内の自動メンテナンス・タスクのみに影響する。",
+      "B) CDB$ROOTでDBMS_AUTO_TASK_ADMINを実行しても個々のPDBには影響せず、自動メンテナンス・タスクの制御は常にPDBごとに個別で行う必要がある。",
+      "C) PDBで実行したDBMS_AUTO_TASK_ADMINの操作はCDB$ROOTと他のすべてのPDBにも影響するため、PDB単位の独立した制御はできない。",
+      "D) DBMS_AUTO_TASK_ADMINはCDB$ROOTからのみ利用可能であり、PDB内部では利用できない。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — CDB Root에서 DBMS_AUTO_TASK_ADMIN.DISABLE을 실행하면 모든 PDB의 자동 유지관리 태스크에 영향을 미칩니다. 반면, PDB에서 DBMS_AUTO_TASK_ADMIN.DISABLE을 실행하면 해당 PDB의 AutoTask만 비활성화되며, 다른 PDB나 CDB Root에는 영향을 미치지 않습니다. 이 2계층 제어 구조를 통해 CDB 전체 또는 개별 PDB 단위의 유연한 AutoTask 관리가 가능합니다.\n\nB) 오답 — CDB Root에서 DBMS_AUTO_TASK_ADMIN.DISABLE을 실행하면 모든 PDB에 영향을 미칩니다. CDB Root는 전체 CDB 환경에 대한 관리 권한을 가지므로, Root에서의 비활성화는 모든 PDB의 AutoTask에 적용됩니다.\n\nC) 오답 — ENABLE_AUTOMATIC_MAINTENANCE_PDB 파라미터는 PDB 레벨에서 자동 유지관리 태스크의 활성화 여부를 제어하는 파라미터입니다. CDB Root 전용이 아니며, PDB 레벨에서 이 파라미터를 FALSE로 설정하면 해당 PDB에서의 자동 유지관리 태스크가 비활성화됩니다.\n\nD) 오답 — PDB에서 DBMS_AUTO_TASK_ADMIN.DISABLE을 실행하면 해당 PDB에만 영향을 미치며, CDB Root나 다른 PDB의 AutoTask에는 영향을 미치지 않습니다. PDB는 자신의 범위 내에서만 AutoTask를 제어할 수 있습니다.\n\n핵심 개념: 멀티테넌트 환경에서 DBMS_AUTO_TASK_ADMIN의 제어 범위는 실행 위치에 따라 다릅니다. CDB Root에서 실행하면 모든 PDB에 영향, PDB에서 실행하면 해당 PDB에만 영향을 미칩니다. ENABLE_AUTOMATIC_MAINTENANCE_PDB 파라미터로 PDB 레벨의 AutoTask 활성화 여부를 별도로 제어할 수 있습니다."
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — DBMS_AUTO_TASK_ADMIN의 제어 범위는 실행 위치에 따라 달라집니다. CDB$ROOT에서 실행하면 CDB 전체(모든 PDB)의 자동 유지관리 태스크에 영향을 미치고, PDB에서 실행하면 해당 PDB 내의 태스크만 제어됩니다. 이를 통해 CDB 차원과 PDB 차원 각각의 필요에 맞는 유연한 제어가 가능합니다.\n\nB) 오답 — CDB$ROOT에서의 제어 조작은 모든 PDB에 영향을 미칩니다. CDB 차원에서 일괄 비활성화·활성화를 수행할 수 있는 설계입니다.\n\nC) 오답 — PDB 내에서 실행한 조작은 해당 PDB로 국한되며, 다른 PDB나 CDB$ROOT에는 영향을 미치지 않습니다. PDB 단위의 독립적 제어가 가능합니다.\n\nD) 오답 — DBMS_AUTO_TASK_ADMIN은 CDB$ROOT뿐 아니라 PDB 내부에서도 실행할 수 있으며, 실행 위치에 따라 제어 범위가 달라집니다.\n\n핵심 개념: DBMS_AUTO_TASK_ADMIN은 실행 위치에 따라 제어 범위가 결정됩니다. CDB$ROOT 실행은 전체 CDB에 영향, PDB 실행은 해당 PDB로 한정됩니다."
+  },
+  {
+    "chapter": "自動メンテナンス",
+    "number": "C_12_033",
+    "title": "Resource ManagerのPlan Directiveに設定されるSWITCH_TIMEパラメータの基本的な目的について正しく述べているものを選択してください。",
+    "options": [
+      "A) 長時間実行が予想されるSQLを実行しているセッションを別のConsumer Groupに自動的に切り替えることで、他のユーザーへのリソースへの影響を抑制することを目的とする。",
+      "B) SWITCH_TIMEはオラクル・データベース起動時のメモリ初期化時間を制限するためのパラメータであり、Resource Managerとは無関係である。",
+      "C) SWITCH_TIMEはセッションを無条件に切断するまでの時間を秒単位で指定するパラメータであり、切断後はセッションが自動的に再接続される。",
+      "D) SWITCH_TIMEはメンテナンス・ウィンドウの最大継続時間を設定するために使用し、Consumer Groupの切替えとは無関係である。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — SWITCH_TIME은 Plan Directive에서 \"장시간 실행될 것으로 예상되는 SQL을 실행 중인 세션\"을 다른 Consumer Group으로 자동 전환하기 위해 사용되는 파라미터입니다. 전환 후에는 해당 세션에 더 엄격한 리소스 정책이 적용되어 다른 사용자들의 성능에 미치는 영향을 억제합니다.\n\nB) 오답 — SWITCH_TIME은 Resource Manager의 Plan Directive 파라미터이며, 데이터베이스 기동 시 메모리 초기화 시간 제한과는 무관합니다.\n\nC) 오답 — SWITCH_TIME의 기본 동작은 세션을 무조건 절단하는 것이 아니라 다른 Consumer Group으로 전환하는 것입니다. 세션 절단은 별도의 지정값을 사용해야 가능하며 자동 재접속 기능은 포함되지 않습니다.\n\nD) 오답 — 메인터넌스 윈도우의 지속 시간은 DBMS_SCHEDULER의 윈도우 속성(DURATION 등)으로 설정하며, SWITCH_TIME과는 전혀 다른 개념입니다.\n\n핵심 개념: SWITCH_TIME은 Plan Directive에서 장시간 실행 예상 SQL을 수행하는 세션을 다른 Consumer Group으로 자동 전환하기 위한 파라미터입니다. 목적은 리소스를 과도하게 소비하는 세션이 다른 사용자에게 미치는 영향을 억제하는 것입니다."
+  },
+  {
+    "chapter": "自動メンテナンス",
+    "number": "C_12_034",
+    "title": "Resource Managerの活性化・非活性化とメンテナンス・ウィンドウとの基本的な関係について正しく述べているものを選択してください。",
+    "options": [
+      "A) メンテナンス・ウィンドウはOracle Schedulerの機能として独立して動作するため、Resource Managerを一時的に非活性化した状態でもウィンドウ自体は定刻に開始され、自動メンテナンス・タスクも実行される。",
+      "B) Resource Managerを非活性化するとメンテナンス・ウィンドウも自動的にすべて無効化されるため、自動メンテナンス・タスクは二度と実行されない。",
+      "C) メンテナンス・ウィンドウのスケジュールはResource Managerのresource_plan属性に完全に依存しているため、Resource Managerが非活性化されている間はウィンドウ自体が生成されない。",
+      "D) Resource Managerの活性化・非活性化は動的に変更できず、インスタンスの再起動とSPFILEの修正でのみ反映される。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — 메인터넌스 윈도우는 Oracle Scheduler의 오브젝트로서 Resource Manager와는 독립적으로 스케줄링됩니다. 따라서 Resource Manager가 일시적으로 비활성화된 상태여도 윈도우 자체는 정해진 시각에 열리고, AutoTask 프레임워크에 의해 자동 유지관리 태스크도 정상적으로 실행될 수 있습니다.\n\nB) 오답 — Resource Manager 비활성화가 메인터넌스 윈도우 자체를 무효화하지 않습니다. 윈도우는 Oracle Scheduler 관리 하에 독립적으로 동작하므로 계속 열리며, AutoTask 실행도 유지됩니다.\n\nC) 오답 — 윈도우 스케줄은 Scheduler 고유 스케줄에 따라 생성되며, Resource Manager의 활성화 여부와 무관합니다. resource_plan 속성은 윈도우가 열릴 때 어떤 Resource Plan을 활성화할지 지정하는 연계 정보에 불과합니다.\n\nD) 오답 — Resource Manager의 활성화·비활성화는 ALTER SYSTEM SET RESOURCE_MANAGER_PLAN 명령으로 동적 변경이 가능하며, 인스턴스 재시작이나 SPFILE 수정이 필수 조건이 아닙니다.\n\n핵심 개념: 메인터넌스 윈도우는 Oracle Scheduler의 오브젝트로 독립 동작하므로 Resource Manager 비활성화 상태에서도 윈도우는 정해진 시각에 열리고 AutoTask도 실행됩니다. 다만 Resource Manager가 유휴 상태이면 윈도우가 열리더라도 자동 Plan 전환이 이루어지지 않을 수 있습니다."
+  },
+  {
+    "chapter": "自動メンテナンス",
+    "number": "C_12_035",
+    "title": "Resource ManagerのResource Planにおいて、Consumer Group間のCPU配分を定義する一般的な仕組みについて正しく述べているものを選択してください。",
+    "options": [
+      "A) Resource Plan内でConsumer GroupごとにCPU配分のポリシー(比率や優先度)を指定するPlan Directiveを定義し、ワークロードの重要度に応じてCPUを優先的に割り当てる仕組みが提供されている。",
+      "B) Resource Plan内でConsumer Groupごとに割り当てられるCPU値はCPUコア数の絶対数のみで指定し、比率ベースの配分は利用できない。",
+      "C) Resource Plan内のCPU配分設定はConsumer Groupごとに個別設定できず、常にRresource Plan全体で単一のCPU値を割り当てる。",
+      "D) Resource ManagerはCPU配分制御の機能を持たず、CPUは常にオペレーティングシステムのプロセス・スケジューリングに任せるのが前提である。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Resource Plan 내에서 각 Consumer Group에 대해 CPU 배분 정책(비율 또는 우선도)을 지정하는 Plan Directive를 정의합니다. 이를 통해 중요한 워크로드(예: 온라인 트랜잭션) 그룹에 CPU를 우선적으로 배분하고, 부차적인 워크로드(예: 배치)에는 낮은 우선도를 부여하는 방식의 차등 리소스 관리가 가능합니다.\n\nB) 오답 — Resource Manager는 CPU 코어 수 절대값 지정만 지원하는 것이 아닙니다. 비율 기반 배분이 기본 방식이며, 그룹 간 상대적 우선도를 지정하여 유연한 리소스 관리가 가능합니다.\n\nC) 오답 — Plan Directive는 Consumer Group별로 개별 설정 가능합니다. 각 그룹에 서로 다른 CPU 정책을 적용하는 것이 Resource Plan의 기본 설계입니다.\n\nD) 오답 — Resource Manager는 CPU 배분 제어 기능을 핵심 역할로 제공합니다. OS 스케줄러에만 의존하는 구조가 아니라, Oracle 내부에서 Consumer Group 기반으로 CPU 사용을 제어합니다.\n\n핵심 개념: Resource Plan은 Consumer Group별 Plan Directive를 통해 CPU를 차등 배분합니다. 중요한 워크로드에 우선순위를 부여하고 비중요 워크로드를 제한하는 방식으로 Oracle 내부에서 리소스 관리를 수행합니다."
   }
 ]

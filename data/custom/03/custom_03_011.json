@@ -25,5 +25,46 @@
     ],
     "answer": ["D"],
     "explanation": "정답: D\nD) 정답 — SGA_TARGET은 동적 파라미터로 ALTER SYSTEM SET으로 즉시 변경 가능하며, SCOPE=BOTH로 메모리와 SPFILE에 동시 반영할 수 있다. SGA_TARGET을 0이 아닌 값으로 설정하면 SGA 내부 구성요소(Buffer Cache, Shared Pool 등)의 크기를 Oracle이 자동으로 조정하는 ASMM(Automatic Shared Memory Management)이 활성화된다.\n\nA) 오답 — DB_BLOCK_SIZE는 정적 파라미터이며 데이터베이스 생성 후 변경 불가인 것은 맞다. 그러나 이 선택지는 'SCOPE=SPFILEで設定しても再起動後にエラーとなる'라고 서술하고 있어, 마치 ALTER SYSTEM SET 명령 자체는 성공하지만 재기동 시 오류가 발생하는 것처럼 기술하고 있다. 실제로는 DB_BLOCK_SIZE는 데이터베이스 생성 시에 결정되며 이후 변경 자체가 의미 없는 파라미터이므로, 이 설명은 복구 절차로서 부정확하다.\n\nB) 오답 — PROCESSES는 정적 파라미터이다. ALTER SYSTEM SET PROCESSES=500 SCOPE=BOTH를 실행하면 ORA-02095 오류가 발생한다. 정적 파라미터는 SCOPE=SPFILE만 가능하며, 인스턴스 재기동 후에 적용된다.\n\nC) 오답 — OPEN_CURSORS는 동적 파라미터(ISSYS_MODIFIABLE=IMMEDIATE)이다. ALTER SYSTEM SET OPEN_CURSORS=500 SCOPE=BOTH로 인스턴스 재기동 없이 즉시 변경할 수 있다.\n\n핵심 개념: 초기화 파라미터는 동적(Dynamic)과 정적(Static)으로 분류되며, 정적 파라미터(PROCESSES, DB_BLOCK_SIZE 등)는 SCOPE=SPFILE로만 변경 가능하고 재기동이 필요하다. 동적 파라미터(SGA_TARGET, OPEN_CURSORS 등)는 SCOPE=BOTH로 즉시 반영 가능하다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_053",
+    "title": "V$PARAMETERビューのISSYS_MODIFIABLE列に関して正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) ISSYS_MODIFIABLE列の値がIMMEDIATEのパラメータは、ALTER SYSTEM SET文で変更すると即座にすべてのセッションに反映される。",
+      "B) ISSYS_MODIFIABLE列の値がDEFERREDのパラメータは、ALTER SYSTEM SET文で変更すると既存のセッションも含めてすべてのセッションに即座に反映される。",
+      "C) ISSYS_MODIFIABLE列の値がFALSEのパラメータは静的パラメータであり、SPFILE環境ではSCOPE=SPFILEでのみ変更が可能で、インスタンスの再起動後に反映される。",
+      "D) ISSYS_MODIFIABLE列の値がDEFERREDのパラメータは、ALTER SESSION SET文で変更することもできるため、現在のセッションに対して即座に適用が可能である。",
+      "E) ISSYS_MODIFIABLE列はSPFILE環境でのみ意味を持ち、PFILE環境ではすべてのパラメータがFALSEとして表示される。"
+    ],
+    "answer": ["A", "C"],
+    "explanation": "정답: A, C\nA) 정답 — V$PARAMETER의 ISSYS_MODIFIABLE 컬럼이 IMMEDIATE인 파라미터는 ALTER SYSTEM SET으로 변경하면 즉시 모든 세션에 반영된다. 메모리 내의 파라미터 값이 즉시 갱신되므로 현재 접속 중인 세션에도 변경이 적용된다.\n\nC) 정답 — ISSYS_MODIFIABLE=FALSE인 파라미터는 정적(Static) 파라미터로, 인스턴스 실행 중에 ALTER SYSTEM SET으로 메모리를 변경할 수 없다. SPFILE 환경에서는 SCOPE=SPFILE로만 SPFILE에 기록하고, 인스턴스 재기동 후에 적용된다. SCOPE=BOTH나 SCOPE=MEMORY를 지정하면 ORA-02095 오류가 발생한다.\n\nB) 오답 — ISSYS_MODIFIABLE=DEFERRED인 파라미터는 ALTER SYSTEM SET으로 변경해도 기존 세션에는 적용되지 않는다. 변경 이후 새로 생성되는 세션부터 새 값이 적용되는 방식이다.\n\nD) 오답 — ISSYS_MODIFIABLE 컬럼은 ALTER SYSTEM(시스템 레벨) 변경 가능 여부를 나타내며, ALTER SESSION(세션 레벨) 변경 가능 여부는 별도의 ISSES_MODIFIABLE 컬럼으로 확인한다. DEFERRED 파라미터가 반드시 ALTER SESSION으로 변경 가능한 것은 아니다.\n\nE) 오답 — ISSYS_MODIFIABLE 컬럼은 파라미터의 고유 속성을 나타내며, SPFILE/PFILE 환경에 관계없이 동일한 값을 표시한다. PFILE 환경에서도 동적 파라미터의 ISSYS_MODIFIABLE 값은 IMMEDIATE 또는 DEFERRED로 표시된다.\n\n핵심 개념: V$PARAMETER의 ISSYS_MODIFIABLE 컬럼은 ALTER SYSTEM에 의한 동적 변경 가능 여부를 IMMEDIATE(즉시 반영), DEFERRED(새 세션부터), FALSE(정적, 변경 불가)로 구분하며, 세션 레벨 변경 가능 여부는 ISSES_MODIFIABLE 컬럼으로 별도 확인한다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_054",
+    "title": "インスタンス・リカバリにおけるロールバック(Roll Back)フェーズの動作について正しく述べているものを選択してください。",
+    "options": [
+      "A) ロールバック・フェーズはデータベースがOPENする前に完了する必要があり、ロールバックが完了するまでユーザーはデータベースに接続できない。",
+      "B) ロールバック・フェーズはデータベースがOPENされた後にバックグラウンドで実行され、ユーザーがまだロールバックされていないデータにアクセスした場合はオンデマンドで即座にロールバックが処理される。",
+      "C) ロールバック・フェーズではオンラインREDOログの内容を使用して、コミットされていないトランザクションの変更を取り消す。",
+      "D) ロールバック・フェーズはDBWnプロセスが担当し、SMONプロセスはロール・フォワード・フェーズのみを担当する。"
+    ],
+    "answer": ["B"],
+    "explanation": "정답: B\nB) 정답 — 인스턴스 복구의 Roll Back(Transaction Recovery) 단계는 데이터베이스가 OPEN된 이후에 백그라운드에서 수행된다. 이를 통해 Roll Forward 완료 직후 빠르게 서비스를 재개할 수 있다. 사용자가 아직 롤백되지 않은 데이터에 접근하면 해당 블록의 롤백이 on-demand 방식으로 즉시 처리되므로 데이터 일관성이 보장된다.\n\nA) 오답 — Roll Back 단계는 데이터베이스 OPEN 전에 완료될 필요가 없다. Roll Forward가 완료되면 데이터베이스가 OPEN되고, Roll Back은 OPEN 후 백그라운드에서 수행된다. 이는 서비스 중단 시간을 최소화하기 위한 Oracle의 설계이다.\n\nC) 오답 — Roll Back 단계에서는 온라인 Redo 로그가 아닌 UNDO 데이터를 사용하여 커밋되지 않은 트랜잭션의 변경을 취소한다. 온라인 Redo 로그는 Roll Forward 단계에서 사용된다.\n\nD) 오답 — Roll Back 단계를 포함한 인스턴스 복구 전체 과정은 SMON(System Monitor) 프로세스가 담당한다. DBWn은 Dirty Buffer를 데이터 파일에 기록하는 프로세스이며, 인스턴스 복구 자체를 수행하지 않는다.\n\n핵심 개념: 인스턴스 복구의 Roll Back 단계는 SMON에 의해 데이터베이스 OPEN 후 백그라운드에서 수행되며, UNDO 데이터를 사용하여 미커밋 트랜잭션을 취소한다. 사용자가 미롤백 데이터에 접근 시 on-demand 즉시 롤백으로 데이터 일관성을 보장한다."
+  },
+  {
+    "chapter": "データベース・インスタンスの管理の説明",
+    "number": "C_03_055",
+    "title": "Oracleデータベースのチェックポイントの種類と動作について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) Full Checkpointはすべてのダーティ・バッファをデータ・ファイルに書き込むチェックポイントであり、正常停止(SHUTDOWN NORMAL/IMMEDIATE/TRANSACTIONAL)時やALTER SYSTEM CHECKPOINTコマンド実行時に発生する。",
+      "B) Incremental Checkpointはチェックポイント・キューから最も古いダーティ・バッファを継続的に書き込む方式であり、FAST_START_MTTR_TARGETパラメータによって頻度が自動制御される。",
+      "C) ログ・スイッチが発生するとFull Checkpointが実行されるため、ログ・スイッチの頻度を増やすことがインスタンス・リカバリ時間の短縮に最も効果的である。",
+      "D) Incremental Checkpointが発生すると、CKPTプロセスが直接ダーティ・バッファをデータ・ファイルに書き込み、書き込み完了後に制御ファイルのチェックポイントSCNを更新する。",
+      "E) SHUTDOWN ABORTを実行した場合でも、CKPTプロセスが最後のIncremental Checkpointの情報を制御ファイルに記録してからインスタンスが停止する。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — Full Checkpoint는 Buffer Cache의 모든 Dirty Buffer를 데이터 파일에 기록하는 체크포인트이다. SHUTDOWN NORMAL, IMMEDIATE, TRANSACTIONAL 등 정상 종료 시와 DBA가 ALTER SYSTEM CHECKPOINT 명령을 수동 실행할 때 발생한다.\n\nB) 정답 — Incremental Checkpoint는 Checkpoint Queue에서 가장 오래된 Dirty Buffer부터 지속적으로 조금씩 기록하는 방식이며, 현대 Oracle에서 가장 일반적인 체크포인트 방식이다. FAST_START_MTTR_TARGET 파라미터에 의해 체크포인트 빈도가 자동 조정되며, I/O를 분산시켜 성능 스파이크를 방지한다.\n\nC) 오답 — 로그 스위치 시 발생하는 것은 Thread Checkpoint이며, 모든 Dirty Buffer를 기록하는 Full Checkpoint와는 구분된다. Thread Checkpoint는 해당 Redo 스레드에 관련된 Dirty Buffer만 기록하는 부분 체크포인트이다. 또한 로그 스위치 빈도를 과도하게 높이면 체크포인트 부하가 증가하여 오히려 일상 운영 성능이 저하될 수 있다.\n\nD) 오답 — CKPT 프로세스는 직접 Dirty Buffer를 데이터 파일에 기록하지 않는다. CKPT는 체크포인트 이벤트를 조율(Coordinate)하고 제어 파일과 데이터 파일 헤더를 업데이트하는 역할을 하며, 실제 디스크 기록은 DBWn 프로세스가 수행한다.\n\nE) 오답 — SHUTDOWN ABORT는 체크포인트를 수행하지 않고 인스턴스를 즉시 종료한다. CKPT 프로세스가 정보를 기록할 시간 없이 프로세스가 강제 종료되므로, 다음 기동 시 인스턴스 복구가 필요하다.\n\n핵심 개념: Full Checkpoint는 정상 종료나 수동 명령 시 모든 Dirty Buffer를 기록하고, Incremental Checkpoint는 FAST_START_MTTR_TARGET에 의해 빈도가 제어되어 지속적으로 I/O를 분산시키는 현대적 체크포인트 방식이다. CKPT 프로세스는 조율 역할만 하며, 실제 기록은 DBWn이 수행한다."
   }
 ]

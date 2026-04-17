@@ -61,16 +61,14 @@
       ],
       "subsections": [
         {
-          "title": "온라인 이동의 내부 동작 과정 — 섀도 복사 메커니즘 (Shadow Copy Mechanism)",
-          "content": "ALTER DATABASE MOVE DATAFILE 명령의 내부 동작은 **섀도 복사(Shadow Copy) 메커니즘**을 기반으로 합니다. 이 메커니즘은 데이터 파일 이동 중에도 DML 작업을 중단하지 않고 계속 처리할 수 있도록 설계되었습니다.\n\n### 내부 동작 과정 (단계별)\n\n```\n1. 대상 위치에 섀도 파일(Shadow File) 생성\n   ↓\n2. 원본 데이터 파일의 블록을 섀도 파일로 순차 복사 시작\n   ↓\n3. 복사 중 발생하는 DML 변경 사항은 원본 + 섀도 파일 양쪽에 기록\n   (이중 쓰기 / Dual Write)\n   ↓\n4. 모든 블록 복사 완료\n   ↓\n5. 컨트롤 파일의 데이터 파일 경로를 새 위치로 갱신\n   (아주 짧은 순간 파일 잠금 발생)\n   ↓\n6. 원본 파일 삭제 (KEEP 옵션이 없는 경우)\n   ↓\n7. 이동 완료\n```\n\n### 이중 쓰기(Dual Write) 메커니즘\n\n복사가 진행되는 동안 해당 데이터 파일에 대한 DML 변경은 **원본 파일과 섀도 파일 양쪽에 동시에 기록**됩니다. 이를 통해 복사 완료 시점에 섀도 파일이 원본과 완전히 동일한 상태를 유지합니다.\n\n| 단계 | 읽기(SELECT) | 쓰기(DML) | 파일 상태 |\n|---|---|---|---|\n| **복사 시작 전** | 원본에서 읽기 | 원본에 쓰기 | 원본만 존재 |\n| **복사 진행 중** | 원본에서 읽기 | 원본 + 섀도 양쪽에 쓰기 | 원본 + 섀도 공존 |\n| **복사 완료 직후** | 섀도(새 파일)에서 읽기 | 섀도(새 파일)에 쓰기 | 경로 전환 완료 |\n| **원본 삭제 후** | 새 파일에서 읽기 | 새 파일에 쓰기 | 새 파일만 존재 |\n\n### 성능 영향\n\n- 복사 진행 중 **이중 쓰기로 인한 I/O 오버헤드** 발생 (약 10~20% 추가 I/O)\n- 대용량 데이터 파일 이동 시 충분한 I/O 대역폭 확보 필요\n- 복사 속도는 소스/대상 스토리지의 I/O 성능에 의존\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `V$SESSION_LONGOPS` | 데이터 파일 이동 작업의 진행 상태 모니터링 |\n| `V$DATAFILE` | 데이터 파일 현재 경로 및 상태 확인 |\n| `DBA_DATA_FILES` | 데이터 파일 상세 정보 조회 |\n| `V$COPY_CORRUPTION` | 복사 중 발견된 손상 블록 정보 |",
+          "title": "온라인 이동의 내부 동작 — 섀도 복사 (Shadow Copy)",
+          "content": "ALTER DATABASE MOVE DATAFILE 명령은 내부적으로 **섀도 복사(Shadow Copy)** 방식을 사용하여 서비스 중단 없이 데이터 파일을 이동합니다. 복사 완료 후 컨트롤 파일의 데이터 파일 경로가 새 위치로 갱신되며, KEEP 옵션이 없으면 원본 파일은 자동 삭제됩니다.\n\n> **실버 범위 밖**: 복사 중 이중 쓰기(Dual Write)의 블록 단위 동기화 알고리즘, 단계별 내부 타이밍, 잠금 미세 구간 등 세부 동작은 학습 범위 밖입니다. **결과 레벨**만 이해하면 충분합니다 — 즉 \"온라인 이동은 무중단, 완료 후 경로 갱신\".\n\n### 관련 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| `V$SESSION_LONGOPS` | 데이터 파일 이동 작업의 진행 상태 모니터링 |\n| `V$DATAFILE` | 데이터 파일 현재 경로 및 상태 확인 |\n| `DBA_DATA_FILES` | 데이터 파일 상세 정보 조회 |",
           "key_points": [
-            "섀도 복사(Shadow Copy) 메커니즘: 대상 위치에 섀도 파일을 생성하고 블록 단위로 순차 복사",
-            "복사 진행 중 이중 쓰기(Dual Write)로 원본과 섀도 파일 양쪽에 DML 변경 사항 기록",
-            "복사 완료 시 컨트롤 파일의 경로를 새 위치로 갱신하고, KEEP 옵션 없으면 원본 자동 삭제",
+            "ALTER DATABASE MOVE DATAFILE는 내부적으로 섀도 복사 방식이며, 완료 시 컨트롤 파일 경로가 새 위치로 갱신됨",
+            "KEEP 옵션이 없으면 이동 완료 후 원본 파일이 자동 삭제됨",
             "이동 중 DML(INSERT, UPDATE, DELETE) 및 SELECT 작업이 계속 가능하여 서비스 중단 불필요",
-            "이중 쓰기로 인해 약 10~20% 추가 I/O 오버헤드 발생 가능",
-            "V$SESSION_LONGOPS 뷰로 대용량 데이터 파일 이동의 진행 상태를 실시간 모니터링 가능",
-            "경로 전환 시 아주 짧은 순간의 파일 잠금(Lock)이 발생하지만 사실상 무중단"
+            "세부 동기화 알고리즘(이중 쓰기의 블록 단위 동작·잠금 구간)은 실버 범위 밖 — 결과만 이해하면 충분",
+            "V$SESSION_LONGOPS 뷰로 대용량 데이터 파일 이동의 진행 상태를 실시간 모니터링 가능"
           ],
           "visuals": [
             {
@@ -261,24 +259,23 @@
     {
       "sectionId": "s07",
       "title": "ROWID 구조 (ROWID Structure / ROWID 情報)",
-      "content": "**ROWID(Row Identifier)**는 Oracle Database에서 테이블 내 각 행(Row)의 **물리적 위치를 고유하게 식별하는 주소**입니다. ROWID는 데이터 파일, 블록, 블록 내 위치를 직접 가리키므로 **가장 빠른 행 접근 방법**을 제공합니다.\n\n## ROWID 구성 요소 (Extended ROWID)\n\nOracle 8 이후 사용되는 **확장 ROWID(Extended ROWID)**는 18자의 Base64 인코딩 문자열로, 다음 4가지 요소로 구성됩니다.\n\n## ROWID 구성 요소 상세\n\n| 구성 요소 | 길이 (Base64) | 설명 | DBMS_ROWID 함수 |\n|---|---|---|---|\n| **Data Object Number** | 6자리 | 세그먼트의 DATA_OBJECT_ID | ROWID_OBJECT(rowid) |\n| **Relative File Number** | 3자리 | 테이블스페이스 내 상대 파일 번호 | ROWID_RELATIVE_FNO(rowid) |\n| **Block Number** | 6자리 | 파일 내 블록 번호 | ROWID_BLOCK_NUMBER(rowid) |\n| **Row Number** | 3자리 | 블록 내 행 번호 (행 디렉토리 슬롯) | ROWID_ROW_NUMBER(rowid) |",
+      "content": "**ROWID(Row Identifier)**는 Oracle Database에서 테이블 내 각 행(Row)의 **물리적 위치를 고유하게 식별하는 주소**입니다. ROWID는 데이터 파일, 블록, 블록 내 위치를 직접 가리키므로 **가장 빠른 행 접근 방법**을 제공합니다.\n\n## ROWID 구성 요소 (Extended ROWID)\n\n| 구성 요소 | 설명 | DBMS_ROWID 함수 |\n|---|---|---|\n| **Data Object Number** | 세그먼트의 DATA_OBJECT_ID | ROWID_OBJECT(rowid) |\n| **Relative File Number** | 테이블스페이스 내 상대 파일 번호 | ROWID_RELATIVE_FNO(rowid) |\n| **Block Number** | 파일 내 블록 번호 | ROWID_BLOCK_NUMBER(rowid) |\n| **Row Number** | 블록 내 행 번호 (행 디렉토리 슬롯) | ROWID_ROW_NUMBER(rowid) |\n\n> **실버 범위 밖**: 18자 Base64 인코딩 구조, 각 구성요소의 비트/바이트 할당, Restricted vs Extended ROWID의 바이트 수·파일 수 제한 같은 **비트 인코딩 구조 세부**는 학습 범위 밖입니다. **구성 요소 4가지의 이름·역할**과 **Row Migration 시 ROWID 유지 여부** 수준만 이해하면 충분합니다.",
       "sqlExamplesIds": [
         "sql10",
         "sql11"
       ],
       "subsections": [
         {
-          "title": "ROWID의 내부 동작과 활용 (ROWID Internal Behavior and Usage)",
-          "content": "ROWID는 테이블의 **의사 컬럼(Pseudocolumn)**으로, 실제 테이블에 저장되지는 않지만 SELECT 문에서 조회할 수 있습니다. ROWID는 행의 물리적 주소를 직접 가리키므로 인덱스 스캔 후 테이블 접근 시 핵심적인 역할을 합니다.\n\n### ROWID 접근 메커니즘\n\n```\n인덱스 스캔 (Index Scan)\n  ↓ 인덱스 리프 노드에서 ROWID 획득\nROWID로 직접 블록 접근\n  ↓ Relative File Number → 데이터 파일 식별\n  ↓ Block Number → 블록 위치 계산\n  ↓ Row Number → 행 디렉토리에서 오프셋 조회\n행 데이터 반환\n```\n\n### ROWID와 데이터 파일 이동의 관계\n\n| 작업 | ROWID 변경 여부 | 이유 |\n|---|---|---|\n| **ALTER DATABASE MOVE DATAFILE** | 변경 없음 | Relative File Number가 동일 (테이블스페이스 내 상대 번호) |\n| **테이블 재구성 (ALTER TABLE MOVE)** | **변경됨** | 행이 새로운 블록에 재배치 |\n| **파티션 이동** | **변경됨** | 새로운 세그먼트에 행 재배치 |\n| **Online Table Redefinition** | **변경됨** | 새로운 테이블로 행 복사 |\n| **INSERT/DELETE** | 해당 행의 ROWID 변경 없음/소멸 | 행 수준의 변경 |\n| **행 마이그레이션** | 변경 없음 (원래 ROWID 유지) | 원래 위치에 포인터 남김 |\n\n### Restricted ROWID vs Extended ROWID\n\n| 구분 | Restricted ROWID (구버전) | Extended ROWID (8 이후) |\n|---|---|---|\n| **형식** | BBBBBBBB.RRRR.FFFF | OOOOOOFFFBBBBBBRRR |\n| **구성** | 블록.행.파일 | 객체번호+파일+블록+행 |\n| **길이** | 6바이트 | 10바이트 |\n| **파일 수 제한** | 1022개 | 4096개 (테이블스페이스당) |\n| **객체 식별** | 불가 | Data Object Number로 가능 |\n\n### ROWID의 특수 동작\n\n- **IOT(Index-Organized Table)**: 물리적 ROWID 대신 **논리적 ROWID(Logical ROWID)**를 사용하며, Primary Key 기반 주소\n- **외부 테이블(External Table)**: ROWID가 존재하지 않음\n- **뷰(View)**: 기반 테이블의 ROWID를 상속 (조인 뷰는 제외)\n\n### 관련 뷰 및 패키지\n\n| 뷰/패키지 | 설명 |\n|---|---|\n| `DBMS_ROWID` | ROWID 분석용 패키지 (ROWID_OBJECT, ROWID_RELATIVE_FNO, ROWID_BLOCK_NUMBER, ROWID_ROW_NUMBER) |\n| `DBA_OBJECTS` | DATA_OBJECT_ID 컬럼으로 세그먼트의 데이터 객체 번호 확인 |\n| `DBA_DATA_FILES` | RELATIVE_FNO 컬럼으로 상대 파일 번호 확인 |",
+          "title": "ROWID의 활용 (ROWID Usage)",
+          "content": "ROWID는 테이블의 **의사 컬럼(Pseudocolumn)**으로, 실제 테이블에 저장되지는 않지만 SELECT 문에서 조회할 수 있습니다. ROWID는 행의 물리적 주소를 직접 가리키므로 인덱스 스캔 후 테이블 접근 시 핵심적인 역할을 합니다.\n\n### ROWID와 주요 작업의 관계 (변경 여부)\n\n| 작업 | ROWID 변경 여부 | 비고 |\n|---|---|---|\n| **ALTER DATABASE MOVE DATAFILE** | 변경 없음 | 테이블스페이스 내 상대 파일 번호 유지 |\n| **ALTER TABLE MOVE** | **변경됨** | 행이 새로운 블록에 재배치 |\n| **파티션 이동 / Online Redefinition** | **변경됨** | 새 세그먼트로 재배치 |\n| **행 마이그레이션 (Row Migration)** | 변경 없음 (원래 ROWID 유지) | 원래 위치에 포인터만 남음 |\n\n### ROWID의 특수 동작\n\n- **IOT(Index-Organized Table)**: 물리적 ROWID 대신 **논리적 ROWID(Logical ROWID)**를 사용하며, Primary Key 기반 주소\n- **외부 테이블(External Table)**: ROWID가 존재하지 않음\n\n### 관련 뷰 및 패키지\n\n| 뷰/패키지 | 설명 |\n|---|---|\n| `DBMS_ROWID` | ROWID 분석용 패키지 (ROWID_OBJECT, ROWID_RELATIVE_FNO, ROWID_BLOCK_NUMBER, ROWID_ROW_NUMBER) |\n| `DBA_OBJECTS` | DATA_OBJECT_ID 컬럼으로 세그먼트의 데이터 객체 번호 확인 |\n| `DBA_DATA_FILES` | RELATIVE_FNO 컬럼으로 상대 파일 번호 확인 |",
           "key_points": [
             "ROWID는 의사 컬럼(Pseudocolumn)으로 테이블에 실제 저장되지 않지만 SELECT로 조회 가능",
             "인덱스 스캔 후 테이블 접근 시 ROWID를 통해 직접 블록을 찾아가므로 가장 빠른 접근 방법",
-            "ALTER DATABASE MOVE DATAFILE 시 ROWID는 변경되지 않음 (Relative File Number가 동일하므로)",
+            "ALTER DATABASE MOVE DATAFILE 시 ROWID는 변경되지 않음",
             "ALTER TABLE MOVE, 파티션 이동, Online Redefinition 시 ROWID가 변경됨 — 인덱스 재구축 필요",
             "행 마이그레이션 발생 시 원래 ROWID는 유지되며, 원래 위치에 새 블록을 가리키는 포인터가 남음",
-            "DBMS_ROWID 패키지로 ROWID를 Data Object Number, File Number, Block Number, Row Number로 분해 가능",
-            "IOT(Index-Organized Table)는 물리적 ROWID 대신 Primary Key 기반 논리적 ROWID 사용",
-            "Extended ROWID(10바이트)는 테이블스페이스당 최대 4096개 데이터 파일 지원"
+            "DBMS_ROWID 패키지로 ROWID를 구성요소 4가지(Object/File/Block/Row)로 분해 가능",
+            "IOT(Index-Organized Table)는 물리적 ROWID 대신 Primary Key 기반 논리적 ROWID 사용"
           ]
         }
       ],

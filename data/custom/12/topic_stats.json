@@ -22,11 +22,9 @@
     "Consumer Group詳細": 1,
     "マッピング規則": 2,
     "CDB/PDB Resource Manager": 2,
-    "Pending Area構成手順": 1,
+    "Pending Area構成手順": 2,
     "Consumer Group SWITCH制御": 1,
-    "マッピング優先順位": 1,
     "CDB I/Oレート制限": 1,
-    "CDB Default Directive管理": 1,
     "ウィンドウ手動制御・優先順位": 1,
     "AutoTask PDB制御範囲": 1,
     "SWITCH_TIME自動切替え": 1,
@@ -34,9 +32,71 @@
     "多段レベルCPU配分(MGMT)": 1,
     "V$RSRCモニタリングビュー": 1,
     "事前定義済みResource Plan比較": 1,
-    "Plan Directiveセッション制御": 1,
+    "Plan Directiveセッション制御": 2,
     "ウィンドウ終了・時間不足時動作": 1
   },
   "total_custom": 39,
-  "last_number": "C_12_039"
+  "last_number": "C_12_039",
+  "forbidden_topics": [],
+  "original_coverage_map": {
+    "事前定義済みタスク": [
+      "事前定義済みタスク",
+      "DBMS_AUTO_TASK_ADMIN制御",
+      "AutoTask実行履歴モニタリング",
+      "AutoTask全体無効化",
+      "DBA_AUTOTASK_WINDOW_CLIENTSビュー",
+      "統計未収集原因診断",
+      "AutoTask PDB制御範囲"
+    ],
+    "メンテナンス・ウィンドウとリソース管理": [
+      "メンテナンス・ウィンドウとリソース管理",
+      "ウィンドウ終了時タスク動作",
+      "ウィンドウ中重複処理",
+      "DEFAULT_MAINTENANCE_PLANリソース構造",
+      "ウィンドウ属性変更コマンド",
+      "Resource Plan自動切替",
+      "ウィンドウ作成手順",
+      "Consumer Group詳細",
+      "マッピング規則",
+      "CDB/PDB Resource Manager",
+      "Pending Area構成手順",
+      "Consumer Group SWITCH制御",
+      "CDB I/Oレート制限",
+      "ウィンドウ手動制御・優先順位",
+      "SWITCH_TIME自動切替え",
+      "Resource Manager活性化・FORCE",
+      "多段レベルCPU配分(MGMT)",
+      "V$RSRCモニタリングビュー",
+      "事前定義済みResource Plan比較",
+      "Plan Directiveセッション制御",
+      "ウィンドウ終了・時間不足時動作"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [
+      {
+        "topic": "事前定義済みタスク",
+        "mapped_custom_count": 9,
+        "custom_pct": 23.08,
+        "original_pct": 66.67,
+        "drift_pct": -43.59
+      },
+      {
+        "topic": "メンテナンス・ウィンドウとリソース管理",
+        "mapped_custom_count": 30,
+        "custom_pct": 76.92,
+        "original_pct": 33.33,
+        "drift_pct": 43.59
+      }
+    ],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 2키 모두 매핑됨(진정한 gap 없음). Before 2 flagged(両方 대규모 희석) → After 2 flagged. 매핑 후에도 ウィンドウ・リソース 범주가 30/39(76.92%)로 과잉 투자이고 事前定義済みタスク는 9/39(23.08%)로 상대적 under-coverage. 39문항 확장 시 Resource Manager·Plan Directive 세부 라벨 집중 투자가 구조적 원인. 원본 키가 2개뿐이고 비율이 2:1인 극단적 집중 구조가 확장에 불리."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P1_rewrite_batch3",
+    "files": ["custom_12_008.json"],
+    "summary": "P1 배치 3 (파일 1/3): custom_12_008 Gold 수준 전면 재작성(Silver 개요 복원). V$RSRC 뷰 컬럼명 세부·사전 정의 Resource Plan 3종 구체 비교·Plan Directive 4종 파라미터(ACTIVE_SESS_POOL_P1·MAX_IDLE_TIME·MAX_EST_EXEC_TIME·UNDO_POOL) 세부·JOB_STATUS 상태 코드·DBMS_SCHEDULER.EXTEND_WINDOW API 제거. 4문항 주 매핑 라벨 모두 유지(V$RSRCモニタリングビュー·事前定義済みResource Plan比較·Plan Directiveセッション制御·ウィンドウ終了・時間不足時動作). custom_topic_counts 변동 없음, 총합 39 유지. 배치 3로 ch12 P1 전체 완료."
+  }
 }

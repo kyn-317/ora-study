@@ -22,5 +22,55 @@
     "ARCHIVELOGモード管理": 2
   },
   "total_custom": 59,
-  "last_number": "C_03_059"
+  "last_number": "C_03_059",
+  "forbidden_topics": [],
+  "original_coverage_map": {
+    "起動・停止手順": [
+      "起動・停止手順",
+      "インスタンス・リカバリ",
+      "チェックポイント"
+    ],
+    "PDB管理": [
+      "PDB Lockdown Profile",
+      "マルチテナント+RAC"
+    ],
+    "V$/ディクショナリ・ビュー": [
+      "V$/ディクショナリ・ビュー"
+    ],
+    "ADR/ログ": [
+      "ADR/ログ"
+    ],
+    "初期化パラメータ": [
+      "初期化パラメータ",
+      "FRA(高速リカバリ領域)",
+      "ARCHIVELOGモード管理"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [
+      {
+        "topic": "ADR/ログ",
+        "mapped_custom_count": 2,
+        "custom_pct": 3.39,
+        "original_pct": 25.0,
+        "drift_pct": -21.61
+      },
+      {
+        "topic": "初期化パラメータ",
+        "mapped_custom_count": 22,
+        "custom_pct": 37.29,
+        "original_pct": 12.5,
+        "drift_pct": 24.79
+      }
+    ],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 5키 모두 매핑됨(진정한 gap 없음). Before 2 flagged → After 2 flagged(동일 2건). 起動・停止(29건·+11.65%)·PDB管理(2건·-9.11%)·V$ビュー(3건·-7.42%)는 임계 해소. ADR/ログ(2건)는 여전히 under-coverage이며 進단서 §2.3에서 ch13 분산권고에 따른 잔존. 初期化パラメータ(22건·+24.79%)는 FRA·ARCHIVELOG 포함 매핑 후 과잉 투자 확인. RAC基本アーキテクチャ(1건)는 원본 키 미대응으로 매핑 외."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P3",
+    "files": ["custom_03_002.json"],
+    "summary": "C_03_009 B선택지 '백그라운드 명명 형식' → '트레이스 파일 생성 경로 3가지'로 교체 (ch13 영역 제거)"
+  }
 }

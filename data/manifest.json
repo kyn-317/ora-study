@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-16T11:38:54.115Z",
+  "generatedAt": "2026-04-17T05:42:08.841Z",
   "study": {
     "00": [
       "00_00_전체흐름총정리"
@@ -89,7 +89,6 @@
       "custom_10_009",
       "custom_10_010",
       "custom_10_011",
-      "custom_10_012",
       "topic_stats"
     ],
     "11": [
@@ -100,8 +99,6 @@
       "custom_11_005",
       "custom_11_006",
       "custom_11_007",
-      "custom_11_008",
-      "custom_11_009",
       "topic_stats"
     ],
     "12": [
@@ -113,7 +110,6 @@
       "custom_12_006",
       "custom_12_007",
       "custom_12_008",
-      "custom_12_009",
       "topic_stats"
     ],
     "13": [
@@ -124,7 +120,6 @@
       "custom_13_005",
       "custom_13_006",
       "custom_13_007",
-      "custom_13_008",
       "topic_stats"
     ],
     "01": [
@@ -170,7 +165,6 @@
       "custom_03_010",
       "custom_03_011",
       "custom_03_012",
-      "custom_03_013",
       "topic_stats"
     ],
     "04": [
@@ -222,7 +216,6 @@
       "custom_07_009",
       "custom_07_010",
       "custom_07_011",
-      "custom_07_012",
       "topic_stats"
     ],
     "08": [
@@ -10448,24 +10441,6 @@
         "hasKeywordStudy": true
       }
     ],
-    "CLEAN_AUDIT_TRAIL": [
-      {
-        "studyId": "04_04",
-        "chapterId": "04",
-        "title": "감사 체계 (Auditing System)",
-        "fileName": "04_04_감사체계",
-        "hasKeywordStudy": true
-      }
-    ],
-    "SET_LAST_ARCHIVE_TIMESTAMP": [
-      {
-        "studyId": "04_04",
-        "chapterId": "04",
-        "title": "감사 체계 (Auditing System)",
-        "fileName": "04_04_감사체계",
-        "hasKeywordStudy": true
-      }
-    ],
     "SYSDBA 접속 감사": [
       {
         "studyId": "04_04",
@@ -10593,15 +10568,6 @@
       }
     ],
     "순수 통합 감사 (Pure Unified Auditing)": [
-      {
-        "studyId": "04_04",
-        "chapterId": "04",
-        "title": "감사 체계 (Auditing System)",
-        "fileName": "04_04_감사체계",
-        "hasKeywordStudy": true
-      }
-    ],
-    "CREATE_PURGE_JOB": [
       {
         "studyId": "04_04",
         "chapterId": "04",

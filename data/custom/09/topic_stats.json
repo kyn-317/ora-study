@@ -28,14 +28,68 @@
     "SQL*Loader（Express Mode）": 1,
     "SQL*Loader（Express Mode詳細）": 1,
     "Data Pump（EXCLUDE/INCLUDEフィルタ）": 2,
-    "Data Pump（NETWORK_LINK/FLASHBACK_TIME）": 1,
+    "Data Pump（NETWORK_LINK 運用要件）": 1,
     "SQL*Loader（Express Modeエラー制御）": 1,
     "Data Pump（INCLUDEフィルタ単独使用）": 1,
     "Data Pump（対話型モード命令）": 1,
     "Data Pump（NETWORK_LINKシナリオ）": 1,
     "Data Pump（CONTENTパラメータ）": 1,
-    "Data Pump（FLASHBACK_SCN vs FLASHBACK_TIME）": 1
+    "Data Pump（CONTENT/EXCLUDEパラメータ）": 1
   },
   "total_custom": 31,
-  "last_number": "C_09_031"
+  "last_number": "C_09_031",
+  "forbidden_topics": [
+    "MCP/Worker 아키텍처(Data Pump 내부 프로세스)",
+    "FLASHBACK_SCN/FLASHBACK_TIME 시점 일관성 내부 메커니즘",
+    "COMPRESSION 세부 옵션(알고리즘·내부 플래그)",
+    "ENCRYPTION 세부 옵션(키 관리·알고리즘 내부)"
+  ],
+  "original_coverage_map": {
+    "外部表": [
+      "外部表アクセス・ドライバ",
+      "外部表（ORACLE_DATAPUMPアンロード）",
+      "外部表（ディレクトリ・オブジェクトとドライバ特性）"
+    ],
+    "Data Pump Importパラメータ": [
+      "Data Pump Import（REMAP機能）",
+      "Data Pump Import（TABLE_EXISTS_ACTION詳細）"
+    ],
+    "Data Pump対話型モード": [
+      "Data Pump（対話型モード命令）"
+    ],
+    "SQL*Loaderモード": [
+      "SQL*Loader（Conventional vs Direct Path）",
+      "SQL*Loader（ロード方式とインデックス）",
+      "SQL*Loader（Express Mode）",
+      "SQL*Loader（Express Modeエラー制御）",
+      "SQL*Loader（Express Mode詳細）"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [
+      {
+        "topic": "外部表",
+        "mapped_custom_count": 3,
+        "custom_pct": 9.68,
+        "original_pct": 25.0,
+        "drift_pct": -15.32
+      },
+      {
+        "topic": "Data Pump対話型モード",
+        "mapped_custom_count": 1,
+        "custom_pct": 3.23,
+        "original_pct": 25.0,
+        "drift_pct": -21.77
+      }
+    ],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 4키 전부 custom 세부 라벨로 커버됨을 반영. Before 4 flagged → After 2 flagged. Data Pump Importパラメータ(4건 매핑)·SQL*Loaderモード(5건 매핑)은 임계 해소. 外部表(3건)·対話型モード(1건)은 상대적 부족(구조적 under-coverage) 상태 유지."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P2 batch3",
+    "files": ["custom_09_005"],
+    "summary": "P2 배치 3 — C_09_025 NETWORK_LINK+FLASHBACK_TIME 복수 조합 → NETWORK_LINK 단독(기본 의미 + DIRECTORY 필수) 간소화. FLASHBACK_TIME 언급 완전 제거하여 ch09 forbidden_topics #11 경계 해소. P1(C_09_031)과 일관된 정책."
+  }
 }

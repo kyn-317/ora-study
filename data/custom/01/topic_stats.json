@@ -15,5 +15,52 @@
     "プロセス間相互作用": 9
   },
   "total_custom": 85,
-  "last_number": "C_01_085"
+  "last_number": "C_01_085",
+  "forbidden_topics": [
+    "LRU Touch Count 메커니즘",
+    "SGA Granule 계산 공식",
+    "비표준 블록 사이즈 파라미터 상세(DB_nK_CACHE_SIZE)",
+    "Shared Server 큐 디스패치 내부(Request/Response Queue, Circuit)",
+    "DRCP 내부 풀 관리",
+    "UGA 위치 이동 상세(Dedicated↔Shared 전환)"
+  ],
+  "original_coverage_map": {
+    "メモリー構造": [
+      "メモリー構造"
+    ],
+    "バックグラウンド・プロセス": [
+      "バックグラウンド・プロセス",
+      "プロセス構造(接続とセッション)",
+      "プロセス間相互作用"
+    ],
+    "CDB/PDB・マルチテナント": []
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [
+      {
+        "topic": "バックグラウンド・プロセス",
+        "mapped_custom_count": 31,
+        "custom_pct": 36.47,
+        "original_pct": 20.0,
+        "drift_pct": 16.47
+      },
+      {
+        "topic": "CDB/PDB・マルチテナント",
+        "mapped_custom_count": 0,
+        "custom_pct": 0.0,
+        "original_pct": 40.0,
+        "drift_pct": -40.0,
+        "note": "진정한 gap — ch01 customq에는 CDB/PDB 주제가 부재. ch10에서 55문항으로 커버 중. questions_json 01_002가 멀티테넌트 공유자원을 묻지만 customq는 아키텍처 전반으로만 확장되어 원본 키와 매칭 불가."
+      }
+    ],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 3키 중 2키 매핑 성립, 1키(CDB/PDB)는 진정한 gap. Before 1 flagged(CDB/PDB만) → After 2 flagged. メモリー構造(43건·+10.59%)은 임계 해소, バックグラウンド・プロセス는 プロセス 계열 포함 31건(+16.47%)으로 과잉 투자로 전환. 物理/論理ストレージ構造(총 11건)는 원본 키 부재의 ch06 이동권고 잔존 주제로 매핑 대상 외."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P1",
+    "files": ["custom_01_007", "custom_01_013", "custom_01_014"],
+    "summary": "P1 재작성 배치 1 - ch01 3파일 전체 교체 재작성 (Fixed SGA 내부 구조·MMON 분업·UGA 이동·Shared Server 큐·DRCP 관리 상세 제거)"
+  }
 }

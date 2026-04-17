@@ -2,82 +2,76 @@
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_049",
-    "title": "マルチテナント環境でPDBの状態を確認するために以下の3つのクエリを実行しました。\n\nSQL> SELECT pdb_name, status FROM cdb_pdbs;\n\nPDB_NAME          STATUS\n----------------- ----------\nPDB$SEED          NORMAL\nPDB_HR            NORMAL\nPDB_FIN           NORMAL\n\nSQL> SELECT name, open_mode FROM v$pdbs;\n\nNAME              OPEN_MODE\n----------------- ----------\nPDB$SEED          READ ONLY\nPDB_HR            READ WRITE\nPDB_FIN           MOUNTED\n\nSQL> SELECT con_name, state FROM dba_pdb_saved_states;\n\nCON_NAME          STATE\n----------------- ----------\nPDB_HR            OPEN\n\nこれらの実行結果に基づいて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "マルチテナント環境においてPDB関連のビューを利用して状態を確認するときの一般的な考え方について正しく述べているものを選択してください。",
     "options": [
-      "A) PDB_HRはSAVE STATEが設定されているため、CDB再起動後にREAD WRITEモードで自動的にオープンされる。",
-      "B) PDB_FINはDBA_PDB_SAVED_STATESに表示されていないため、CDB再起動後もREAD WRITEモードで自動的にオープンされる。",
-      "C) PDB_FINはCDB_PDBSのSTATUSがNORMALであるため、ALTER PLUGGABLE DATABASE PDB_FIN OPENを実行すれば使用可能になる。",
-      "D) DBA_PDB_SAVED_STATESビューのSTATE列はPDBの現在のオープン・モードをリアルタイムで表示する。",
-      "E) PDB_HRのSAVE STATE設定を解除するにはALTER PLUGGABLE DATABASE PDB_HR CLOSEを実行する必要があり、DISCARD STATEコマンドは存在しない。"
+      "A) CDB_PDBSはCDB$ROOTに登録されているPDBのメタ情報を一覧できるビューであり、各PDBのディクショナリ上の状態(NORMAL、UNPLUGGEDなど)を確認するのに利用される。",
+      "B) V$PDBSは物理的に削除されたPDBの履歴を一覧するビューであり、現在のPDBの状態確認には使用されない。",
+      "C) CDB_PDBSはPDB内部からしか参照できないビューであり、CDB$ROOTに接続した状態では検索できない。",
+      "D) V$PDBSはCDB$ROOTに接続した場合にのみ利用可能であり、PDB内部に接続して実行するとエラーが発生する。"
     ],
     "answer": [
-      "A",
-      "C"
+      "A"
     ],
-    "explanation": "정답: A, C\nA) 정답 — DBA_PDB_SAVED_STATES 뷰에 PDB_HR이 STATE=OPEN으로 저장되어 있으므로, CDB 재시작 시 PDB_HR은 자동으로 READ WRITE 모드로 오픈됩니다. SAVE STATE는 PDB의 오픈 모드를 CDB$ROOT의 데이터 딕셔너리에 영구 저장하여, CDB 재시작 후 해당 모드로 자동 복원하는 메커니즘입니다.\n\nC) 정답 — CDB_PDBS의 STATUS가 NORMAL이면 PDB가 CDB에 정상적으로 등록된 상태입니다. V$PDBS에서 OPEN_MODE가 MOUNTED인 PDB_FIN은 닫혀 있지만, ALTER PLUGGABLE DATABASE PDB_FIN OPEN을 실행하면 READ WRITE 모드로 오픈되어 사용 가능합니다.\n\nB) 오답 — DBA_PDB_SAVED_STATES에 표시되지 않는 PDB_FIN은 SAVE STATE가 설정되어 있지 않습니다. 따라서 CDB 재시작 시 MOUNTED 상태로 유지되며, 자동으로 오픈되지 않습니다.\n\nD) 오답 — DBA_PDB_SAVED_STATES 뷰는 SAVE STATE로 저장된 오픈 모드 정보를 표시하며, PDB의 현재 실시간 오픈 모드를 보여주는 것이 아닙니다. 현재 오픈 모드의 실시간 확인은 V$PDBS의 OPEN_MODE 열을 사용합니다.\n\nE) 오답 — SAVE STATE 설정을 해제하기 위한 전용 명령은 ALTER PLUGGABLE DATABASE ... DISCARD STATE입니다. PDB를 CLOSE하는 것은 현재 세션의 오픈 모드를 변경하는 것이며, DBA_PDB_SAVED_STATES에 저장된 자동 오픈 설정을 삭제하지 않습니다. DISCARD STATE 명령은 존재하며, OPEN 또는 MOUNTED 상태 모두에서 실행할 수 있습니다.\n\n핵심 개념: PDB 상태 모니터링에서 CDB_PDBS의 STATUS는 딕셔너리 수준 상태(NORMAL, UNPLUGGED), V$PDBS의 OPEN_MODE는 실시간 오픈 모드(READ WRITE, READ ONLY, MOUNTED), DBA_PDB_SAVED_STATES는 SAVE STATE로 저장된 자동 오픈 설정을 각각 나타냅니다. 세 뷰를 조합하여 PDB의 등록 상태, 현재 모드, 재시작 시 동작을 종합적으로 판단합니다."
+    "explanation": "정답: A\nA) 정답 — CDB_PDBS는 CDB$ROOT에 등록되어 있는 PDB들의 메타 정보(이름·컨테이너 ID·생성/재구성 상태)를 일람할 수 있는 딕셔너리 뷰입니다. PDB의 딕셔너리 상태 값(NORMAL·UNPLUGGED 등)은 이 뷰의 STATUS 컬럼으로 확인합니다.\n\nB) 오답 — V$PDBS는 현재 CDB에 구성된 PDB들의 실시간 오픈 모드(READ WRITE·READ ONLY·MOUNTED 등)를 확인하는 동적 성능 뷰입니다. 물리적으로 삭제된 PDB의 이력을 보여주는 뷰가 아닙니다.\n\nC) 오답 — CDB_PDBS는 CDB$ROOT에서 조회할 때 전체 PDB 정보를 확인할 수 있으며, PDB 내부에서는 해당 PDB 자신의 정보만 보이도록 필터링됩니다. PDB 내부 전용 뷰가 아닙니다.\n\nD) 오답 — V$PDBS는 CDB$ROOT에서도 PDB 내부에서도 조회 가능합니다. CDB$ROOT에서 전체 PDB의 오픈 모드를 확인할 수 있으며, PDB 내부에서는 해당 PDB 자신의 상태를 확인합니다.\n\n핵심 개념: CDB_PDBS는 PDB의 딕셔너리 메타 정보(등록 상태), V$PDBS는 실시간 오픈 모드를 각각 확인하는 데 사용합니다. PDB 상태 파악 시 두 뷰를 조합하여 등록 상태와 현재 모드를 함께 판단하는 것이 일반적입니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_050",
-    "title": "マルチテナント環境におけるCDB_接頭辞のビューとDBA_接頭辞のビューの違いについて正しく述べているものを選択してください。",
+    "title": "SAVE STATE機能と、CDB再起動後のPDBの自動オープン動作について正しく述べているものを選択してください。",
     "options": [
-      "A) CDB$ROOTに接続してCDB_TABLESビューを問い合わせると、CDB$ROOT内のテーブルのみが表示され、各PDB内のテーブルは表示されない。",
-      "B) PDBに接続してCDB_TABLESビューを問い合わせると、そのPDB内のテーブルのみが表示され、他のPDBやCDB$ROOTのテーブルは表示されない。",
-      "C) CDB$ROOTに接続してDBA_TABLESビューを問い合わせると、CDB内のすべてのPDBのテーブルがCON_ID列とともに統合表示される。",
-      "D) PDBに接続してDBA_TABLESビューを問い合わせると、CDB内のすべてのPDBのテーブルがCON_ID列とともに統合表示される。"
+      "A) ALTER PLUGGABLE DATABASE ... SAVE STATEを実行しておくと、CDBを再起動した後もそのPDBが保存された直前のオープン・モード(例: READ WRITE)で自動的にオープンされる。",
+      "B) SAVE STATEを実行したPDBは、CDB再起動後に常にREAD ONLYモードで自動オープンされる。",
+      "C) SAVE STATEを実行していないPDBは、CDB再起動後にREAD WRITEで自動オープンされるのがデフォルト動作である。",
+      "D) SAVE STATEはPDBのデータ・ファイルを別名でバックアップする機能であり、オープン・モードとは無関係である。"
     ],
     "answer": [
-      "B"
+      "A"
     ],
-    "explanation": "정답: B\nB) 정답 — PDB에 접속한 상태에서 CDB_ 접두사 뷰를 조회하면, 해당 PDB 내의 데이터만 표시됩니다. CDB_ 뷰는 CDB$ROOT에서 조회할 때만 모든 컨테이너의 데이터를 통합 표시하며, PDB에서 조회하면 DBA_ 뷰와 동일한 범위(현재 PDB만)로 제한됩니다.\n\nA) 오답 — CDB$ROOT에서 CDB_ 접두사 뷰를 조회하면 CDB$ROOT뿐만 아니라 모든 PDB의 데이터가 CON_ID 컬럼과 함께 통합 표시됩니다. CDB$ROOT 내의 데이터만 표시되는 것이 아닙니다.\n\nC) 오답 — CDB$ROOT에서 DBA_ 접두사 뷰를 조회하면 CDB$ROOT(현재 접속한 컨테이너)의 데이터만 표시됩니다. 모든 PDB의 데이터를 통합 조회하려면 CDB_ 접두사 뷰를 사용해야 합니다. DBA_ 뷰는 항상 현재 접속한 컨테이너의 데이터만 반환합니다.\n\nD) 오답 — PDB에서 DBA_ 접두사 뷰를 조회하면 해당 PDB 내의 데이터만 표시됩니다. DBA_ 뷰는 접속 위치와 관계없이 항상 현재 컨테이너 범위로 제한되며, 다른 PDB나 CDB$ROOT의 데이터는 포함하지 않습니다.\n\n핵심 개념: CDB_ 접두사 뷰는 CDB$ROOT에서 조회할 때 모든 컨테이너(CDB$ROOT + 모든 PDB)의 데이터를 CON_ID 컬럼과 함께 통합 표시합니다. 반면 DBA_ 접두사 뷰는 접속 위치에 관계없이 현재 컨테이너의 데이터만 표시합니다. PDB에서 CDB_ 뷰를 조회하면 DBA_ 뷰와 동일하게 해당 PDB 데이터만 반환됩니다."
+    "explanation": "정답: A\nA) 정답 — ALTER PLUGGABLE DATABASE ... SAVE STATE를 실행하면, 현재 PDB의 오픈 모드가 CDB$ROOT의 딕셔너리에 저장됩니다. CDB를 재시작하면 이 저장된 모드에 따라 해당 PDB가 자동으로 오픈됩니다(예: READ WRITE 상태에서 SAVE STATE를 실행했다면 재시작 후에도 READ WRITE로 오픈).\n\nB) 오답 — SAVE STATE는 현재의 오픈 모드를 저장하는 기능이며, 언제나 READ ONLY로 오픈되도록 하는 기능이 아닙니다. 저장 시점의 오픈 모드가 재시작 후에 복원됩니다.\n\nC) 오답 — SAVE STATE가 실행되지 않은 PDB는 CDB 재시작 후 기본적으로 MOUNTED 상태로 남습니다. 자동으로 READ WRITE로 오픈되지 않으며, 필요 시 수동 OPEN이 필요합니다.\n\nD) 오답 — SAVE STATE는 PDB의 오픈 모드 설정을 저장하는 기능이며, 데이터 파일 백업 기능이 아닙니다. 이 기능은 CDB 재시작 자동화를 목적으로 설계되었습니다.\n\n핵심 개념: SAVE STATE는 PDB의 현재 오픈 모드를 영구 저장하여 CDB 재시작 후 자동 복원하는 기능입니다. SAVE STATE가 없는 PDB는 재시작 후 MOUNTED 상태로 남으며, 운영 관점에서 자동 오픈이 필요한 PDB에 대해 SAVE STATE를 실행하는 것이 일반적입니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_051",
-    "title": "Refreshable Clone PDBのSWITCHOVER機能について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "Refreshable Clone PDBの基本的な特徴について正しく述べているものを選択してください。",
     "options": [
-      "A) SWITCHOVERを実行すると、ソースPDBがRefreshable Cloneに変わり、クローンPDBが新しいソースPDBとしてREAD WRITEモードで運用可能になる。",
-      "B) SWITCHOVER実行後も同期化接続は維持され、同期化の方向が反転するため、再度SWITCHOVERを実行して元の役割に戻すことが可能である。",
-      "C) SWITCHOVERはクローンPDBをREAD WRITEモードに変換するが、ソースPDBは通常のPDBとして引き続き運用されるため、両方のPDBで同時にデータ変更が可能になる。",
-      "D) SWITCHOVERを実行する前に、ソースPDBをMOUNTED状態に変更して活動中のトランザクションを終了させる必要がある。",
-      "E) SWITCHOVERはREFRESH MODE NONEへの変更と同様に、ソースPDBとクローンPDBの同期化接続を完全に解除してそれぞれ独立したPDBとして運用する。"
+      "A) Refreshable Clone PDBはソースPDBと定期的に同期することを前提としたクローンであり、同期を維持している間は通常READ ONLYモードでオープンして利用する。",
+      "B) Refreshable Clone PDBはソースPDBから一度クローンされた後は二度と同期されない一回限りのクローンであり、同期機能は持たない。",
+      "C) Refreshable Clone PDBは同期中もREAD WRITEモードでオープンでき、同期対象でありながらテスト用のデータ変更も許容される。",
+      "D) Refreshable Clone PDBはソースPDBがNOARCHIVELOGモードのときのみ作成できる特殊なクローン機能である。"
     ],
     "answer": [
-      "A",
-      "B"
+      "A"
     ],
-    "explanation": "정답: A, B\nA) 정답 — SWITCHOVER를 실행하면 소스 PDB와 Refreshable Clone PDB의 역할이 교환됩니다. 기존 소스 PDB가 Refreshable Clone(READ ONLY)으로 전환되고, 기존 클론 PDB가 새로운 소스 PDB로 승격되어 READ WRITE 모드로 운용할 수 있게 됩니다.\n\nB) 정답 — SWITCHOVER 후에도 동기화 연결은 해제되지 않고 유지되며, 동기화 방향만 반대로 전환됩니다. 따라서 필요 시 재 SWITCHOVER를 실행하여 원래 역할로 복원할 수 있습니다. 이 특성 덕분에 DR(재해 복구)이나 롤링 업그레이드 시나리오에서 유연하게 활용됩니다.\n\nC) 오답 — SWITCHOVER 후 소스 PDB는 Refreshable Clone으로 전환되어 READ ONLY 모드로만 오픈됩니다. 양쪽 PDB에서 동시에 데이터를 변경하는 것은 불가능합니다. 항상 한쪽만 READ WRITE(소스), 다른 쪽은 READ ONLY(클론)입니다.\n\nD) 오답 — SWITCHOVER 실행 전 소스 PDB는 READ WRITE 모드 상태여야 하며, 활성 트랜잭션이 없어야 합니다. 소스 PDB를 MOUNTED 상태로 변경하는 것이 아니라, 클론 PDB 측에서 최종 REFRESH를 수행한 후 SWITCHOVER를 실행합니다.\n\nE) 오답 — SWITCHOVER는 동기화 연결을 유지한 채 역할만 교환하는 기능입니다. 동기화 연결을 완전히 해제하여 독립 PDB로 전환하는 것은 REFRESH MODE NONE 변경입니다. SWITCHOVER와 REFRESH MODE NONE은 동기화 연결 유지 여부에서 근본적으로 다릅니다.\n\n핵심 개념: Refreshable Clone PDB의 SWITCHOVER는 소스 PDB와 클론 PDB의 역할을 교환하면서 동기화 연결을 유지하는 기능입니다. SWITCHOVER 후 동기화 방향이 반전되며, 재 SWITCHOVER로 원래 역할 복원이 가능합니다. 이는 동기화 연결을 완전히 해제하는 REFRESH MODE NONE 전환과 구별됩니다."
+    "explanation": "정답: A\nA) 정답 — Refreshable Clone PDB는 소스 PDB의 변경 사항을 주기적(또는 요청 시)으로 적용받는 클론입니다. 리프레시 관계를 유지하는 동안에는 일반적으로 READ ONLY 모드로 오픈하여 보고서·참조 등의 용도로 활용합니다. 이렇게 해야 소스와 일관된 상태를 유지할 수 있습니다.\n\nB) 오답 — Refreshable Clone의 핵심 특징이 바로 \"주기 리프레시\"입니다. 일회성 클론은 Full Clone(Local Clone)이나 Snapshot Copy PDB에 해당합니다.\n\nC) 오답 — Refreshable Clone PDB는 리프레시 관계를 유지한 상태로 READ WRITE 오픈할 수 없습니다. READ WRITE로 사용하려면 리프레시 관계를 해제(REFRESH MODE NONE)해야 하며, 이후에는 독립된 일반 PDB로만 운용됩니다.\n\nD) 오답 — Refreshable Clone PDB는 소스 PDB가 ARCHIVELOG 모드로 운영되고 있어야 합니다. NOARCHIVELOG에서는 소스의 Redo 정보가 보존되지 않아 리프레시에 이용할 수 없습니다.\n\n핵심 개념: Refreshable Clone PDB는 주기 리프레시 + READ ONLY 운용을 전제로 하는 클론 방식이며, 소스 PDB는 ARCHIVELOG 모드여야 합니다. READ WRITE가 필요한 경우에는 리프레시 관계를 해제하고 독립 PDB로 전환합니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_052",
-    "title": "Refreshable Clone PDBのリフレッシュ（同期化）処理中のソースPDBへの影響について正しく述べているものを選択してください。",
+    "title": "Refreshable Clone PDBのリフレッシュ(同期)中にソースPDBとクローンPDBに与える影響について正しく述べているものを選択してください。",
     "options": [
-      "A) リフレッシュ処理中、ソースPDBのRedoデータが転送されて適用されるため、ソースPDBではDML操作が一時的にブロックされる。",
-      "B) リフレッシュ処理中、クローンPDBはCLOSE（MOUNTED）状態に遷移して接続が不可能になるが、ソースPDBは通常のREAD WRITE操作を継続できる。",
-      "C) リフレッシュ処理はソースPDBのアーカイブ・ログを利用するため、ソースPDBがNOARCHIVELOGモードでもリフレッシュを実行できる。",
-      "D) リフレッシュ処理中、ソースPDBが自動的にREAD ONLYモードに切り替わり、リフレッシュ完了後にREAD WRITEモードに自動復帰する。"
+      "A) リフレッシュ中はクローンPDBが一時的にクローズ(MOUNTED)状態となり利用者の接続はブロックされるが、ソースPDBは通常のREAD WRITE運用をそのまま継続できる。",
+      "B) リフレッシュ中はソースPDBとクローンPDBの両方がREAD ONLYに強制されるため、アプリケーションのDML処理がすべて停止する。",
+      "C) リフレッシュ中はソースPDBがSHUTDOWN状態になる必要があり、アプリケーションのダウンタイムが不可避である。",
+      "D) リフレッシュ中はクローンPDBがREAD WRITEモードのまま同期を受け取るため、ユーザーセッションに影響を与えない。"
     ],
     "answer": [
-      "B"
+      "A"
     ],
-    "explanation": "정답: B\nB) 정답 — 리프레시 처리 중 클론 PDB는 CLOSE(MOUNTED) 상태로 전환되어 사용자 접속이 불가능해지지만, 소스 PDB는 아무런 영향을 받지 않고 READ WRITE 모드에서 정상적인 운영을 계속합니다. 리프레시는 소스 PDB에서 생성된 Redo 데이터(아카이브 로그)를 전송받아 클론 PDB에 적용하는 비동기적 프로세스이므로, 소스 PDB의 동작에 직접적인 잠금이나 제한을 가하지 않습니다.\n\nA) 오답 — 리프레시 처리 중 소스 PDB의 DML 작업이 블로킹되지 않습니다. 소스 PDB는 리프레시와 독립적으로 정상 운영을 계속하며, Redo 데이터는 이미 생성된 아카이브 로그를 기반으로 전송됩니다.\n\nC) 오답 — Refreshable Clone PDB는 소스 PDB의 아카이브 로그를 이용하여 동기화를 수행하므로, 소스 PDB가 반드시 ARCHIVELOG 모드에서 운영되어야 합니다. NOARCHIVELOG 모드에서는 Redo 데이터가 보존되지 않아 리프레시를 수행할 수 없습니다.\n\nD) 오답 — 리프레시 처리 중 소스 PDB는 READ ONLY로 자동 전환되지 않습니다. 소스 PDB는 계속 READ WRITE 모드를 유지하며, 모드 변경 없이 정상 운영됩니다. READ ONLY 전환이 필요한 것은 콜드 클론(로컬 클론) 시 소스 PDB를 준비하는 경우입니다.\n\n핵심 개념: Refreshable Clone PDB의 리프레시 처리 시 클론 PDB는 CLOSE 상태로 전환되어 Redo 데이터를 적용하지만, 소스 PDB는 READ WRITE 모드에서 정상 운영을 계속합니다. 리프레시는 아카이브 로그를 기반으로 한 비동기적 프로세스이므로 소스 PDB에 잠금이나 모드 변경을 가하지 않습니다. 소스 PDB는 반드시 ARCHIVELOG 모드여야 합니다."
+    "explanation": "정답: A\nA) 정답 — 리프레시 처리는 클론 PDB가 일시적으로 CLOSE(MOUNTED) 상태로 전환된 후 소스 PDB의 Redo(아카이브 로그) 기반 변경 사항을 적용받는 방식으로 진행됩니다. 그 동안 클론 PDB에는 사용자 접속이 차단되지만, 소스 PDB는 영향 없이 정상적인 READ WRITE 운영을 계속할 수 있습니다.\n\nB) 오답 — 리프레시 중 양쪽 PDB가 READ ONLY로 강제되는 것이 아닙니다. 소스 PDB는 READ WRITE를 유지하며, 클론 PDB만 CLOSE로 전환되어 변경을 적용합니다.\n\nC) 오답 — 리프레시 처리에 소스 PDB의 SHUTDOWN이 요구되지 않습니다. 소스는 정상 운영되는 상태에서 Redo가 자연스럽게 생성되며, 그것을 기반으로 클론을 동기화합니다.\n\nD) 오답 — 리프레시 중 클론 PDB는 READ WRITE 상태가 아닌 CLOSE(MOUNTED) 상태로 전환됩니다. 따라서 사용자 접속이 제한되며, 이는 Refreshable Clone의 본질적 제약입니다.\n\n핵심 개념: Refreshable Clone 리프레시 중 클론 PDB는 CLOSE(MOUNTED) 상태가 되어 사용자 접속이 차단되지만, 소스 PDB는 영향을 받지 않고 정상 운영을 계속합니다. 운영 시 클론 측 접속 가능 시간대를 고려한 리프레시 스케줄링이 필요합니다."
   },
   {
     "chapter": "PDBの作成および管理の表示",
     "number": "C_10_053",
-    "title": "PDB Lockdown Profileで特定の操作を制限するシナリオについて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "PDB Lockdown Profileの基本的な利用シナリオについて正しく述べているものを選択してください。",
     "options": [
-      "A) PDB管理者がUTL_HTTPパッケージを使用して外部Webサービスにアクセスすることを防止するには、Lockdown ProfileでDISABLE FEATURE = ('NETWORK_ACCESS')の規則を設定する。",
-      "B) PDB管理者がALTER SYSTEM SET文で特定のパラメータを変更することを制限しつつ、一部のパラメータ変更を許可するには、DISABLE STATEMENTとENABLE STATEMENTを組み合わせて設定する。",
-      "C) Lockdown Profileの規則にDISABLE FEATURE = ('OS_ACCESS')を設定すると、PDB内のすべてのSELECT文の実行がブロックされる。",
-      "D) Lockdown ProfileのDISABLE OPTION = ('PARTITIONING')を設定すると、PDB内の既存パーティション表のデータも即座に削除される。",
-      "E) PDB管理者がCDB$ROOTに接続してLockdown Profileの規則を変更し、自分のPDBの制限を緩和することができる。"
+      "A) Lockdown Profileを利用するとPDBレベルで特定の機能やALTER SYSTEMの操作、データベース・オプションの使用などを一括で制限でき、主にマルチテナント環境のセキュリティ強化やSaaS運用のためにCDB管理者が設定する。",
+      "B) Lockdown ProfileはPDB内の一般ユーザーが自分で設定でき、CDB$ROOTに接続せずに各PDB内で自由に作成できる。",
+      "C) Lockdown ProfileはPDB内のユーザーアカウント単位でのみ適用可能であり、PDB全体に適用することはできない。",
+      "D) Lockdown Profileの設定はCDBインスタンスの再起動が必須であり、動的に反映することはできない。"
     ],
     "answer": [
-      "A",
-      "B"
+      "A"
     ],
-    "explanation": "정답: A, B\nA) 정답 — Lockdown Profile에서 DISABLE FEATURE = ('NETWORK_ACCESS')를 설정하면, UTL_HTTP, UTL_TCP, UTL_SMTP 등 네트워크 관련 유틸리티 패키지의 사용이 차단됩니다. 이를 통해 PDB에서 외부 네트워크로의 통신을 제한하여 보안을 강화할 수 있습니다.\n\nB) 정답 — DISABLE STATEMENT = ('ALTER SYSTEM') CLAUSE = ('SET')로 ALTER SYSTEM SET 문을 전체적으로 제한한 후, OPTION ALL EXCEPT 절을 사용하여 특정 파라미터(예: cursor_sharing, optimizer_mode)의 변경만 허용할 수 있습니다. DISABLE STATEMENT와 ENABLE STATEMENT를 조합하여 세밀한 권한 제어가 가능합니다.\n\nC) 오답 — DISABLE FEATURE = ('OS_ACCESS')는 UTL_FILE, DBMS_SCHEDULER의 외부 작업 실행 등 OS 레벨의 파일/명령 접근을 차단하는 규칙입니다. SELECT 문의 실행과는 무관하며, SQL 쿼리 실행을 차단하는 기능이 아닙니다.\n\nD) 오답 — DISABLE OPTION = ('PARTITIONING')은 PDB에서 Partitioning 옵션의 사용을 제한하여 새로운 파티션 테이블 생성 등을 차단하지만, 기존에 이미 생성된 파티션 테이블의 데이터를 삭제하지는 않습니다. 기존 데이터는 그대로 유지됩니다.\n\nE) 오답 — PDB 관리자는 CDB$ROOT에 접속하여 Lockdown Profile을 변경할 수 없습니다. Lockdown Profile의 생성, 수정, 삭제는 CDB 관리자(SYS 등)만 CDB$ROOT에서 수행할 수 있으며, PDB 관리자는 자신의 PDB에 할당된 Lockdown Profile을 변경하거나 해제할 권한이 없습니다.\n\n핵심 개념: PDB Lockdown Profile은 DISABLE FEATURE로 네트워크/OS 접근을, DISABLE STATEMENT로 ALTER SYSTEM 등 특정 SQL 문을, DISABLE OPTION으로 데이터베이스 옵션 사용을 각각 제한합니다. DISABLE STATEMENT와 ENABLE STATEMENT를 조합하면 특정 파라미터 변경만 선택적으로 허용하는 세밀한 제어가 가능합니다. Lockdown Profile은 CDB 관리자만 CDB$ROOT에서 관리할 수 있습니다."
+    "explanation": "정답: A\nA) 정답 — Lockdown Profile은 PDB 레벨에서 특정 기능(NETWORK_ACCESS 등), ALTER SYSTEM 작업, 데이터베이스 옵션 사용 등을 일괄 제한할 수 있는 기능입니다. 멀티테넌트 환경에서 각 PDB가 자의적으로 위험한 작업을 수행하지 못하도록 제한하는 용도로 활용되며, 주로 SaaS 환경의 보안·규정 준수 강화를 목적으로 CDB 관리자가 설정합니다.\n\nB) 오답 — Lockdown Profile은 CDB$ROOT에서 CDB 관리자(SYS 등)가 생성·관리하는 오브젝트이며, PDB 내 일반 사용자가 자유롭게 만들 수 있는 것이 아닙니다. PDB 사용자가 이를 바꿀 수 있다면 제한 자체의 의미가 없어지기 때문입니다.\n\nC) 오답 — Lockdown Profile은 PDB 전체에 적용되는 정책입니다. 특정 PDB에 어떤 Lockdown Profile을 적용할지 CDB 관리자가 지정하며, 사용자 계정 단위로 적용되는 것이 아닙니다.\n\nD) 오답 — Lockdown Profile은 동적으로 반영할 수 있습니다. PDB_LOCKDOWN 파라미터를 통해 적용 대상 프로파일을 지정하며, CDB 인스턴스 재시작이 필수 조건이 아닙니다.\n\n핵심 개념: Lockdown Profile은 CDB 관리자가 CDB$ROOT에서 관리하는 PDB 레벨 제한 기능이며, 특정 기능·ALTER SYSTEM 작업·DB 옵션 사용을 제한하여 멀티테넌트 환경의 보안·규정 준수를 강화합니다. PDB 전체에 적용되며 동적 반영이 가능합니다."
   }
 ]

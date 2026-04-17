@@ -62,5 +62,22 @@
       "C"
     ],
     "explanation": "정답: A, C\nA) 정답 — Segment Advisor의 권고에 따라 ROW MOVEMENT를 활성화한 후 SHRINK SPACE를 실행하는 것은 공간 회수의 표준 운영 절차입니다. SHRINK SPACE의 전제조건인 ROW MOVEMENT ENABLE을 먼저 수행해야 하며, 이후 SHRINK SPACE로 데이터를 재배치하고 HWM을 하향시켜 공간을 회수합니다.\n\nC) 정답 — Auto Segment Advisor는 자동 유지보수 태스크로 유지보수 윈도우(Maintenance Window) 내에서 자동 실행됩니다. 분석 결과는 DBA_ADVISOR_FINDINGS 뷰에서 확인할 수 있으며, 구체적인 권장 조치의 상세 내용은 DBA_ADVISOR_RECOMMENDATIONS와 DBA_ADVISOR_ACTIONS 뷰에서 확인할 수 있습니다.\n\nB) 오답 — Segment Advisor는 공간 낭비를 분석하고 축소를 '권고'할 뿐, SHRINK SPACE를 자동으로 실행하지 않습니다. 실제 축소 작업은 DBA가 권고를 검토한 후 수동으로 수행해야 합니다.\n\nD) 오답 — Segment Advisor가 제시하는 삭감량(estimated savings)은 추정치이며, 실제 SHRINK SPACE 실행 후 회수되는 공간은 추정치와 다를 수 있습니다. 분석 시점과 실행 시점 사이에 DML이 발생하면 상태가 변경될 수 있기 때문입니다.\n\nE) 오답 — Segment Advisor가 SHRINK SPACE를 권고한 경우 그에 따라 SHRINK SPACE를 실행하면 됩니다. ALTER TABLE MOVE도 대안이 될 수 있지만, '반드시 MOVE만 사용해야 한다'는 것은 사실이 아닙니다. SHRINK SPACE와 ALTER TABLE MOVE는 각각 장단점이 있으며, 상황에 맞게 선택합니다.\n\n핵심 개념: Segment Advisor는 유지보수 윈도우에서 자동 실행되어 공간 낭비 세그먼트를 식별하고 SHRINK 권고를 제공합니다. 권고 확인은 DBA_ADVISOR_FINDINGS와 DBA_ADVISOR_RECOMMENDATIONS 뷰를 사용하며, 실제 축소 작업은 DBA가 수동으로 수행해야 합니다."
+  },
+  {
+    "chapter": "パフォーマンスの概要",
+    "number": "C_13_025",
+    "title": "SQLアクセス・アドバイザに関して正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) SQLアクセス・アドバイザはDBMS_ADVISORパッケージを使用してタスクを作成・実行し、SQL Tuning Set(STS)をワークロード・ソースとして使用できる。",
+      "B) SQLアクセス・アドバイザのANALYSIS_SCOPEパラメータのデフォルト値はINDEX,MVであり、インデックスおよびマテリアライズド・ビューの推奨事項が生成される。",
+      "C) SQLアクセス・アドバイザは個別のSQL文を対象としたアドバイザであり、ワークロード全体の分析は行えない。",
+      "D) SQLアクセス・アドバイザはDBMS_SQLTUNEパッケージを使用して実行し、SQLプロファイルの生成を推奨する。",
+      "E) SQLアクセス・アドバイザは推奨事項のレポートのみ生成でき、推奨事項を実装するためのDDLスクリプトの自動生成はサポートしていない。"
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "정답: A, B\nA) 정답 — SQL 액세스 어드바이저는 DBMS_ADVISOR 패키지를 사용하여 태스크를 생성(CREATE_TASK)하고 실행(EXECUTE_TASK)합니다. advisor_name을 'SQL Access Advisor'로 지정하며, ADD_STS_REF 프로시저로 SQL Tuning Set(STS)을 워크로드 소스로 연결할 수 있습니다.\n\nB) 정답 — ANALYSIS_SCOPE 파라미터의 기본값은 INDEX,MV이며, 인덱스와 구체화 뷰(Materialized View)에 대한 권고 사항이 생성됩니다. 필요에 따라 TABLE, PARTITION 등을 추가하여 분석 범위를 확장할 수 있습니다.\n\nC) 오답 — SQL 액세스 어드바이저는 개별 SQL이 아닌 전체 SQL 워크로드를 분석하여 스키마 구조(인덱스, MV, 파티셔닝)의 최적화를 권고하는 어드바이저입니다. 개별 SQL 분석은 SQL 튜닝 어드바이저의 역할입니다.\n\nD) 오답 — SQL 액세스 어드바이저는 DBMS_SQLTUNE이 아닌 DBMS_ADVISOR 패키지를 사용합니다. DBMS_SQLTUNE은 SQL 튜닝 어드바이저 전용 패키지이며, SQL 프로파일 생성 권고도 SQL 튜닝 어드바이저의 기능입니다.\n\nE) 오답 — SQL 액세스 어드바이저는 GET_TASK_SCRIPT 함수를 통해 권고 사항을 구현하기 위한 DDL 스크립트(IMPLEMENTATION 스크립트)와 변경을 되돌리기 위한 UNDO 스크립트를 자동으로 생성할 수 있습니다.\n\n핵심 개념: SQL 액세스 어드바이저는 DBMS_ADVISOR 패키지를 사용하여 SQL 워크로드 전체를 분석하고, 인덱스/MV/파티셔닝 등의 액세스 구조 최적화를 권고합니다. ANALYSIS_SCOPE(기본값: INDEX,MV)로 분석 범위를 설정하며, GET_TASK_SCRIPT로 구현 DDL 스크립트를 자동 생성할 수 있습니다."
   }
 ]

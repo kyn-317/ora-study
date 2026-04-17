@@ -66,18 +66,18 @@
   {
     "chapter": "データの移動",
     "number": "C_09_025",
-    "title": "Data Pump ImportのNETWORK_LINKパラメータとFLASHBACK_TIMEパラメータについて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "Data Pump ImportのNETWORK_LINKパラメータの使用について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
       "A) NETWORK_LINKパラメータを使用すると、ダンプ・ファイルを生成せずにデータベース・リンク経由でソース・データベースから直接データをインポートすることができる。",
       "B) NETWORK_LINKを使用したインポートでは、REMAP_SCHEMAやEXCLUDEなどの変換パラメータを併用することはできない。",
-      "C) FLASHBACK_TIMEパラメータはData Pump Exportで指定でき、Undo情報を利用して指定時刻時点の一貫性のあるデータをエクスポートする。",
-      "D) FLASHBACK_TIMEパラメータを使用する場合、対象のテーブルが事前にFLASHBACK ARCHIVEに登録されている必要がある。",
-      "E) NETWORK_LINKを使用したインポートでは、DIRECTORYパラメータは不要であり指定することはできない。"
+      "C) NETWORK_LINKを使用してダンプ・ファイルを生成しない場合でも、ログ・ファイル(LOGFILE)の保存先としてDIRECTORYパラメータの指定が必要である。",
+      "D) NETWORK_LINKを使用する場合、ソース・データベースの表を変更するDML操作がインポート中に許可されるため、テーブル定義の変更も自動的に反映される。",
+      "E) NETWORK_LINKパラメータはData Pump Export(expdp)専用であり、Import(impdp)では使用できない。"
     ],
     "answer": [
       "A",
       "C"
     ],
-    "explanation": "정답: A, C\nA) 정답 — NETWORK_LINK 파라미터를 사용하면 덤프 파일을 생성하지 않고, 데이터베이스 링크(DB Link)를 통해 소스 데이터베이스에서 직접 데이터를 Import할 수 있습니다. 소스 DB에 대한 DB Link를 대상 DB에서 생성하고, impdp 명령에서 NETWORK_LINK=dblink_name 형태로 지정합니다. 중간 파일이 불필요하며 Import 시점의 최신 데이터를 가져올 수 있다는 장점이 있습니다.\n\nC) 정답 — FLASHBACK_TIME 파라미터를 Data Pump Export에서 지정하면, Undo 정보를 활용하여 지정된 시간 시점의 일관된(Consistent) 데이터를 Export합니다. Export 수행 중 소스 테이블에 대한 DML이 발생하더라도 지정 시점 기준의 데이터를 추출하므로, UNDO 경합을 줄이고 데이터 일관성을 확보할 수 있습니다.\n\nB) 오답 — NETWORK_LINK를 사용한 Import에서도 REMAP_SCHEMA, REMAP_TABLESPACE, EXCLUDE, INCLUDE 등 모든 변환 파라미터를 함께 사용할 수 있습니다. 예를 들어 NETWORK_LINK=source_link REMAP_SCHEMA=HR:NEW_HR EXCLUDE=STATISTICS와 같이 조합하여 사용합니다.\n\nD) 오답 — FLASHBACK_TIME은 Undo 정보를 활용하는 기능으로, 테이블이 FLASHBACK ARCHIVE에 등록되어 있을 필요는 없습니다. Undo Retention 기간 내의 시점이면 사용 가능합니다. FLASHBACK ARCHIVE는 장기간 이력 추적을 위한 별도의 기능입니다.\n\nE) 오답 — NETWORK_LINK를 사용한 Import에서도 DIRECTORY 파라미터는 필요합니다. 덤프 파일은 사용하지 않지만, 로그 파일(LOGFILE)을 저장하기 위한 디렉토리 객체가 필요하기 때문입니다.\n\n핵심 개념: NETWORK_LINK는 DB Link를 통해 덤프 파일 없이 직접 Import하는 기능으로, 모든 변환 파라미터(REMAP, EXCLUDE 등)와 함께 사용 가능합니다. 단 로그 파일용 DIRECTORY는 여전히 필요합니다. FLASHBACK_TIME은 Undo 정보를 활용하여 특정 시점 기준의 일관된 Export를 보장하며, FLASHBACK ARCHIVE 등록은 필요하지 않습니다."
+    "explanation": "정답: A, C\nA) 정답 — NETWORK_LINK 파라미터를 사용하면 덤프 파일을 생성하지 않고, 데이터베이스 링크(DB Link)를 통해 소스 데이터베이스에서 직접 데이터를 Import할 수 있습니다. 소스 DB에 대한 DB Link를 대상 DB에서 생성하고, impdp 명령에서 NETWORK_LINK=dblink_name 형태로 지정합니다. 중간 파일이 불필요하며 Import 시점의 최신 데이터를 가져올 수 있다는 장점이 있습니다.\n\nC) 정답 — NETWORK_LINK를 사용하여 덤프 파일을 생성하지 않는 경우에도 로그 파일(LOGFILE)의 저장 위치로 DIRECTORY 오브젝트 지정이 필요합니다. Data Pump의 로그 파일 생성은 NETWORK 모드 여부와 무관하게 항상 수행되므로, DIRECTORY 파라미터 및 READ/WRITE 권한이 필수 전제조건입니다.\n\nB) 오답 — NETWORK_LINK를 사용한 Import에서도 REMAP_SCHEMA, REMAP_TABLESPACE, EXCLUDE, INCLUDE 등 모든 변환 파라미터를 함께 사용할 수 있습니다. 예를 들어 NETWORK_LINK=source_link REMAP_SCHEMA=HR:NEW_HR EXCLUDE=STATISTICS와 같이 조합하여 사용합니다.\n\nD) 오답 — NETWORK_LINK 사용 중에도 Data Pump는 Undo 정보를 활용하여 일관성 있는 데이터를 가져오며, Import 중 소스의 DML 변경이 자동으로 재반영되는 것은 아닙니다. Import는 일관된 시점 기준으로 수행됩니다.\n\nE) 오답 — NETWORK_LINK는 Data Pump Import(impdp)에서 사용하는 파라미터입니다. Export(expdp)에서도 NETWORK_LINK가 사용될 수 있으나, 일반적으로 \"덤프 파일 없이 직접 Import\" 용도로 impdp에서 활용됩니다.\n\n핵심 개념: NETWORK_LINK는 DB Link를 통해 덤프 파일 없이 직접 Import하는 기능이며, REMAP·EXCLUDE 등 변환 파라미터와 조합 가능합니다. 단 로그 파일 저장을 위한 DIRECTORY 오브젝트는 반드시 필요하므로, Data Pump 실행 전제조건인 Directory 객체와 권한 구성은 NETWORK_LINK 환경에서도 생략할 수 없습니다."
   }
 ]

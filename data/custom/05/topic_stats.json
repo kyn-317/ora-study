@@ -35,5 +35,54 @@
     "PUBLICに付与された権限と保安リスク": 1
   },
   "total_custom": 52,
-  "last_number": "C_05_052"
+  "last_number": "C_05_052",
+  "forbidden_topics": [],
+  "original_coverage_map": {
+    "テーブルスペース割当て制限(QUOTA)": [
+      "テーブルスペース割当て制限(QUOTA)",
+      "CREATE USER構文(QUOTA/TABLESPACE)"
+    ],
+    "共通ユーザーとローカル・ユーザー": [
+      "共通ユーザーとローカル・ユーザー",
+      "Schema-Onlyアカウント",
+      "デフォルト・アカウント・セキュリティ",
+      "CONTAINER=ALL/CURRENT権限範囲",
+      "共通ユーザー権限付与時のCONTAINERデフォルト値"
+    ],
+    "ユーザー認証": [
+      "ユーザー認証",
+      "OS認証",
+      "OS認証とパスワードファイル(REMOTE_LOGIN_PASSWORDFILE)",
+      "ユーザー認証方式比較(4種類)",
+      "パスワードファイル(orapwd)管理",
+      "CREATE SESSION権限とログイン"
+    ],
+    "システム権限とオブジェクト権限(ADMIN/GRANT OPTION)": [
+      "システム権限とオブジェクト権限(ADMIN/GRANT OPTION)",
+      "権限階層(直接権限vsロール権限)",
+      "GRANT/REVOKE連鎖効果(多重ユーザー)",
+      "ADMIN OPTIONとGRANT OPTIONの取消し差異",
+      "PUBLICに付与された権限と保安リスク"
+    ],
+    "ロール管理": [
+      "ロール管理",
+      "共通ロールとローカル・ロール",
+      "Secure Application Role"
+    ],
+    "権限分析(DBMS_PRIVILEGE_CAPTURE)": [
+      "権限分析(DBMS_PRIVILEGE_CAPTURE)"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 6키 전부 매핑됨(진정한 gap 없음). Before 0 flagged → After 0 flagged 유지. QUOTA(2건·-10.44%)·공통/로컬유저(11건·+6.87%)·유저인증(12건·+8.79%)·시스템/객체권한(16건·+2.20%)·롤관리(8건·+1.10%)·권한분석(3건·-8.52%) 모든 topic이 임계(15%) 이내. 52문항 확장이 원본 가중치(1:1:1:2:1:1)에 근사 수렴. ch11에 이관된 프로파일 주제(원본 05_006)는 mapping에서 제외."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P2",
+    "files": ["custom_05_008.json", "custom_05_010.json"],
+    "summary": "P2 배치2 — C_05_038 Definer's Rights 컴파일 단계 → 사실 확인 수준 / C_05_040 SYSAUTH$/OBJAUTH$ 비교 → 결과 중심 A+B 재편성 / C_05_046 내부 딕셔너리 관리 → REVOKE 연쇄 취소 결과 중심"
+  }
 }

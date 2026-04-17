@@ -1,19 +1,32 @@
 [
   {
     "chapter": "監査の概要",
-    "number": "C_11_030",
-    "title": "次のファイングレイン監査(FGA)ポリシーがHR.EMPLOYEES表に対して作成されています。\n\nBEGIN\n  DBMS_FGA.ADD_POLICY(\n    object_schema   => 'HR',\n    object_name     => 'EMPLOYEES',\n    policy_name     => 'FGA_SALARY_AUDIT',\n    audit_condition => 'DEPARTMENT_ID = 10',\n    audit_column    => 'SALARY, COMMISSION_PCT',\n    enable          => TRUE,\n    statement_types => 'SELECT',\n    audit_column_opts => DBMS_FGA.ALL_COLUMNS\n  );\nEND;\n/\n\nこのポリシーが有効な状態で、次のSQL文のうち監査レコードが生成されるものを選択してください。なお、HR.EMPLOYEES表にはDEPARTMENT_ID = 10のデータが存在するものとします(2つ選択してください)。\n\nSQL文A: SELECT employee_id, salary, commission_pct FROM hr.employees WHERE department_id = 10;\nSQL文B: SELECT employee_id, salary FROM hr.employees WHERE department_id = 10;\nSQL文C: SELECT employee_id, salary, commission_pct FROM hr.employees WHERE department_id = 20;\nSQL文D: SELECT employee_id, commission_pct FROM hr.employees WHERE department_id = 10;\nSQL文E: SELECT employee_id, salary, commission_pct FROM hr.employees;",
+    "number": "C_11_031",
+    "title": "DBMS_PRIVILEGE_CAPTUREパッケージのキャプチャ・タイプおよびキャプチャ対象の制限事項について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SQL文Aのみ監査レコードが生成される。SQL文Aはaudit_conditionとaudit_column条件の両方を満たしている。",
-      "B) SQL文Bも監査レコードが生成される。audit_column_optsがALL_COLUMNSであってもSALARY列だけのアクセスで監査が発動する。",
-      "C) SQL文Cは監査レコードが生成されない。audit_conditionで指定されたDEPARTMENT_ID = 10の条件を満たさないためである。",
-      "D) SQL文Dも監査レコードが生成される。COMMISSION_PCT列へのアクセスがあるため、audit_column条件を満たしている。",
-      "E) SQL文Eは監査レコードが生成される。audit_conditionで指定されたDEPARTMENT_ID = 10の行がテーブルに存在すれば、条件に該当する行が返される場合に監査が発動する。"
+      "A) ROLE型のキャプチャを作成する際には、rolesパラメータに分析対象の役割をROLE_NAME_LISTとして指定し、指定した役割に付与された権限の使用状況を分析できる。",
+      "B) CONTEXT型のキャプチャではSYS_CONTEXT条件を指定して特定のモジュールやアプリケーションからの権限使用のみを選択的にキャプチャできるが、同時に有効化できるCONTEXT型キャプチャは1つのみである。",
+      "C) オブジェクト所有者が自分のスキーマ・オブジェクトにアクセスする場合は、暗黙的な権限による操作であるため権限キャプチャの対象とならない。",
+      "D) DATABASE型のキャプチャではキャプチャ期間中に新しく作成されたユーザーの権限使用は分析対象に含まれず、キャプチャ開始時点で存在したユーザーのみが対象となる。",
+      "E) DROP_CAPTUREプロシージャでキャプチャ・ポリシーを削除しても、GENERATE_RESULTで生成済みの結果データは永続的に保持される。"
     ],
     "answer": [
       "A",
-      "E"
+      "C"
     ],
-    "explanation": "정답: A, E\nA) 정답 — SQL문A는 DEPARTMENT_ID = 10 조건으로 audit_condition을 충족하며, SALARY와 COMMISSION_PCT 두 열 모두에 접근하므로 ALL_COLUMNS 조건도 충족합니다. 따라서 감사 레코드가 생성됩니다.\n\nE) 정답 — SQL문E는 WHERE 절에 DEPARTMENT_ID = 10을 명시하지 않았지만, 테이블 전체를 조회하므로 DEPARTMENT_ID = 10인 행도 반환 대상에 포함됩니다. audit_condition은 반환되는 행이 조건을 충족하는지를 평가하므로, 해당 행이 존재하면 감사가 발동됩니다. 또한 SALARY와 COMMISSION_PCT 두 열 모두에 접근하므로 ALL_COLUMNS 조건도 충족합니다.\n\nB) 오답 — SQL문B는 audit_condition(DEPARTMENT_ID = 10)은 충족하지만, audit_column_opts가 ALL_COLUMNS로 설정되어 있어 SALARY와 COMMISSION_PCT 두 열 모두에 접근해야 감사가 발동됩니다. SALARY 열만 접근하고 COMMISSION_PCT 열에는 접근하지 않으므로 감사 레코드가 생성되지 않습니다.\n\nC) 오답 — SQL문C는 DEPARTMENT_ID = 20인 행만 조회하므로 audit_condition(DEPARTMENT_ID = 10)을 충족하는 행이 반환되지 않아 감사가 발동되지 않습니다. 선택지의 설명 자체는 기술적으로 정확하지만, 감사 레코드가 생성되지 않으므로 이 문제의 정답에 해당하지 않습니다.\n\nD) 오답 — SQL문D는 audit_condition(DEPARTMENT_ID = 10)은 충족하지만, COMMISSION_PCT 열만 접근하고 SALARY 열에는 접근하지 않습니다. audit_column_opts가 ALL_COLUMNS이므로 지정된 모든 감사 대상 열(SALARY, COMMISSION_PCT)에 접근해야 하며, 하나만 접근하면 감사가 발동되지 않습니다.\n\n핵심 개념: FGA의 ALL_COLUMNS 옵션은 audit_column에 지정된 모든 열에 접근해야만 감사가 발동되는 엄격한 조건입니다. 또한 audit_condition은 SQL 문의 WHERE 절이 아닌, 실제 반환되는 행이 조건을 충족하는지를 평가합니다. 따라서 WHERE 절 없이 전체 테이블을 조회해도, 조건에 해당하는 행이 존재하면 감사가 발동됩니다."
+    "explanation": "정답: A, C\nA) 정답 — ROLE 유형의 캡처를 생성할 때는 roles 파라미터에 분석 대상 역할을 ROLE_NAME_LIST로 지정합니다. 이를 통해 특정 역할(예: DBA, RESOURCE)에 부여된 권한이 실제로 사용되는지 분석하여 역할별 권한 최적화에 활용할 수 있습니다.\n\nC) 정답 — 객체 소유자가 자신의 스키마 객체에 접근할 때는 별도의 객체 권한이 필요하지 않으며, 암묵적(Implicit)으로 모든 객체 권한을 보유합니다. 권한 분석은 명시적으로 부여받은 권한(시스템 권한, 객체 권한, 롤)의 사용 여부만 추적하므로, 자기 소유 객체에 대한 접근은 캡처 대상이 아닙니다.\n\nB) 오답 — CONTEXT 유형의 캡처는 SYS_CONTEXT 조건을 지정하여 선택적으로 캡처할 수 있는 것은 맞지만, 동시에 하나만 활성화할 수 있다는 제한은 DATABASE 유형에만 해당됩니다. ROLE, CONTEXT, ROLE_AND_CONTEXT 유형은 동시에 여러 개 활성화할 수 있습니다.\n\nD) 오답 — DATABASE 유형의 캡처는 캡처 기간 동안 ORACLE_MAINTAINED='Y'인 계정을 제외한 모든 사용자의 권한 사용을 추적합니다. 캡처 활성화 이후에 새로 생성된 사용자도 ORACLE_MAINTAINED='N'이면 분석 대상에 포함됩니다.\n\nE) 오답 — DROP_CAPTURE 프로시저로 캡처 정책을 삭제하면 관련 캡처 데이터도 함께 삭제됩니다. GENERATE_RESULT로 생성된 결과 데이터가 영속적으로 보존되는 것이 아니므로, 결과가 필요한 경우 정책 삭제 전에 별도로 보관해야 합니다.\n\n핵심 개념: DBMS_PRIVILEGE_CAPTURE의 캡처 유형 중 DATABASE 유형만 동시에 하나로 제한되며, ROLE/CONTEXT/ROLE_AND_CONTEXT 유형은 동시에 여러 개 활성화 가능합니다. 객체 소유자의 자기 스키마 객체 접근은 암묵적 권한이므로 캡처 대상에서 제외되며, DROP_CAPTURE 실행 시 관련 캡처 데이터도 함께 삭제됩니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_032",
+    "title": "DBMS_AUDIT_MGMTパッケージを使用した統合監査トレイルの管理手順について正しく述べているものを選択してください。",
+    "options": [
+      "A) CLEAN_AUDIT_TRAILプロシージャを実行する前に、SET_LAST_ARCHIVE_TIMESTAMPプロシージャでアーカイブ完了時点を設定する必要がある。",
+      "B) CLEAN_AUDIT_TRAILプロシージャは、UNIFIED_AUDIT_TRAIL内のすべての監査レコードを無条件に削除する。",
+      "C) CREATE_PURGE_JOBプロシージャで自動クリーンアップ・ジョブを作成するには、DBAロールのみで十分であり、AUDIT_ADMINロールは不要である。",
+      "D) SET_LAST_ARCHIVE_TIMESTAMPプロシージャで設定した時点より後の監査レコードがCLEAN_AUDIT_TRAILの削除対象となる。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — DBMS_AUDIT_MGMT.CLEAN_AUDIT_TRAIL 프로시저를 실행하기 전에, SET_LAST_ARCHIVE_TIMESTAMP 프로시저로 아카이브가 완료된 마지막 시점을 먼저 설정해야 합니다. CLEAN_AUDIT_TRAIL은 이 타임스탬프 이전의 레코드만 삭제하므로, 아카이브되지 않은 데이터의 손실을 방지하는 안전장치 역할을 합니다.\n\nB) 오답 — CLEAN_AUDIT_TRAIL은 모든 레코드를 무조건 삭제하는 것이 아니라, SET_LAST_ARCHIVE_TIMESTAMP로 설정된 아카이브 완료 시점 이전의 감사 레코드만 삭제합니다. 이를 통해 아카이브되지 않은 최신 감사 데이터를 보호합니다.\n\nC) 오답 — DBMS_AUDIT_MGMT 패키지의 실행에는 AUDIT_ADMIN 롤이 필요합니다. 통합 감사에서는 감사 관리 기능이 DBA 롤에서 분리되어 있으므로, DBA 롤만으로는 감사 트레일 관리 작업을 수행할 수 없습니다.\n\nD) 오답 — SET_LAST_ARCHIVE_TIMESTAMP로 설정한 시점 이전의 감사 레코드가 CLEAN_AUDIT_TRAIL의 삭제 대상입니다. 해당 시점 이후의 레코드는 아직 아카이브가 완료되지 않은 것으로 간주되어 삭제 대상에서 제외됩니다.\n\n핵심 개념: DBMS_AUDIT_MGMT를 사용한 감사 트레일 정리 절차는 SET_LAST_ARCHIVE_TIMESTAMP(아카이브 완료 시점 설정) → CLEAN_AUDIT_TRAIL(해당 시점 이전 레코드 삭제) 순서로 수행하며, 이 패키지의 실행에는 AUDIT_ADMIN 롤이 필요합니다. CREATE_PURGE_JOB으로 자동 정리 스케줄을 설정할 수도 있습니다."
   }
 ]

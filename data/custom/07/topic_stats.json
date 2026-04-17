@@ -9,12 +9,11 @@
     "索引UNUSABLE状態": 1
   },
   "custom_topic_counts": {
-    "HWM(最高水位標)": 4,
+    "HWM(最高水位標)": 5,
     "データ圧縮": 2,
     "セグメント縮小": 3,
     "Direct-Path Insert": 1,
     "再開可能領域割当て": 2,
-    "エクステント管理(AUTOALLOCATE/UNIFORM)": 1,
     "遅延セグメント作成": 1,
     "行移行・行連鎖": 2,
     "PCTFREE": 1,
@@ -40,5 +39,73 @@
     "Direct-Path Insert(NOLOGGING・Extent Invalidation)": 1
   },
   "total_custom": 55,
-  "last_number": "C_07_055"
+  "last_number": "C_07_055",
+  "forbidden_topics": [],
+  "original_coverage_map": {
+    "再開可能領域割当て": [
+      "再開可能領域割当て"
+    ],
+    "データ圧縮": [
+      "データ圧縮",
+      "データ圧縮(運用シナリオ)",
+      "Direct-Path Insert",
+      "Direct-Path Insert(パラレル・索引UNUSABLE)",
+      "Direct-Path Insert(NOLOGGING・Extent Invalidation)",
+      "NOLOGGING/FORCE LOGGING",
+      "NOLOGGING/Data Guard運用"
+    ],
+    "セグメント縮小": [
+      "セグメント縮小",
+      "HWM(最高水位標)",
+      "SHRINK SPACE COMPACT",
+      "SHRINK vs MOVE総合比較",
+      "ALTER TABLE MOVE/MOVE ONLINE",
+      "Low HWM/High HWM(ASSM)",
+      "ASSM/MSSM領域管理",
+      "ASSM/MSSM比較(Freelist競合・変更不可)",
+      "行移行・行連鎖",
+      "行移行診断・解決手順",
+      "PCTFREE",
+      "LOBセグメント管理",
+      "DBA_SEGMENTS領域分析",
+      "DBA_SEGMENTS/DBA_EXTENTS解析",
+      "AUTOALLOCATE/UNIFORM選択シナリオ"
+    ],
+    "遅延セグメント作成": [
+      "遅延セグメント作成",
+      "遅延セグメント管理・MATERIALIZE"
+    ],
+    "索引UNUSABLE状態": [
+      "索引UNUSABLE/INVISIBLE状態",
+      "索引REBUILD/COALESCE",
+      "索引管理(運用シナリオ)"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [
+      {
+        "topic": "再開可能領域割当て",
+        "mapped_custom_count": 2,
+        "custom_pct": 3.64,
+        "original_pct": 20.0,
+        "drift_pct": -16.36
+      },
+      {
+        "topic": "セグメント縮小",
+        "mapped_custom_count": 32,
+        "custom_pct": 58.18,
+        "original_pct": 20.0,
+        "drift_pct": 38.18
+      }
+    ],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 5키 전부 매핑됨(진정한 gap 없음). Before 4 flagged → After 2 flagged. データ圧縮(11건·0%)·遅延セグメント(3건·-14.55%)·索引UNUSABLE(7건·-7.27%)는 임계 해소. 再開可能領域(2건)은 상대적 under-coverage 유지. セグメント縮小은 HWM·SHRINK·MOVE·ASSM/MSSM·행移行·LOB 등 광범위 포함(32건·+38.18%)으로 대규모 과잉 투자."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P2",
+    "files": ["custom_07_002.json"],
+    "summary": "P2 배치2 — C_07_008 AUTOALLOCATE/UNIFORM (ch06 경계) → HWM 결과 관점 (ch07 고유) 앵글 변경. custom_07_002 파일 내 C_07_006(TRUNCATE/DELETE HWM)과 상보 관계 형성"
+  }
 }

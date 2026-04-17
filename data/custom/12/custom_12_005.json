@@ -2,80 +2,78 @@
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_021",
-    "title": "Oracle DatabaseのResource Managerにおける事前定義済みのConsumer Groupについて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "Oracle DatabaseのResource Managerにおける事前定義済みConsumer Groupの役割について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) SYS_GROUPはSYSおよびSYSTEMユーザーのセッションに割り当てられ、最上位のリソースが保証される。",
-      "B) OTHER_GROUPSはマッピング規則に一致しないすべてのセッションのデフォルト・グループであり、Resource Planに含めるかどうかはDBAが任意に決定する。",
-      "C) MAINTENANCE_CONSUMER_GROUPは自動メンテナンス・タスクが使用するグループであり、メンテナンス・ウィンドウが開いている間にAutoTaskフレームワークのジョブが実行される。",
-      "D) DEFAULT_CONSUMER_GROUPはSYSユーザー専用のConsumer Groupであり、一般ユーザーには割り当てられない。",
-      "E) BATCH_GROUPはResource Managerの起動時に自動的にすべてのバッチ・ジョブに割り当てられるため、マッピング規則を定義する必要がない。"
-    ],
-    "answer": [
-      "A",
-      "C"
-    ],
-    "explanation": "정답: A, C\nA) 정답 — SYS_GROUP은 SYS 및 SYSTEM 사용자의 세션에 할당되며, 최상위 리소스가 보장됩니다. SYS_GROUP에 대한 Plan Directive를 삭제하거나 낮은 리소스를 할당할 수 없습니다.\n\nC) 정답 — MAINTENANCE_CONSUMER_GROUP은 자동 유지관리 태스크가 사용하는 Consumer Group입니다. 메인터넌스 윈도우가 열리면 AutoTask 프레임워크가 이 그룹의 세션으로 유지관리 Job을 실행하며, DEFAULT_MAINTENANCE_PLAN에서 중간 수준의 리소스가 할당됩니다.\n\nB) 오답 — OTHER_GROUPS는 매핑 규칙에 의해 분류되지 않은 모든 세션의 기본 그룹이지만, DBA가 포함 여부를 임의로 결정하는 것이 아닙니다. 모든 Resource Plan은 반드시 OTHER_GROUPS에 대한 Plan Directive를 포함해야 합니다.\n\nD) 오답 — DEFAULT_CONSUMER_GROUP은 SYS 사용자 전용이 아닙니다. 명시적 매핑이 없는 일반 세션의 기본 초기 Consumer Group이며, 매핑 규칙에 일치하지 않는 세션이 이 그룹에 할당됩니다.\n\nE) 오답 — BATCH_GROUP은 배치 작업용으로 사전 정의된 Consumer Group이지만, 자동으로 모든 배치 작업에 할당되는 것이 아닙니다. DBA가 매핑 규칙을 통해 명시적으로 세션을 이 그룹에 매핑해야 합니다.\n\n핵심 개념: Oracle Database는 SYS_GROUP, OTHER_GROUPS, DEFAULT_CONSUMER_GROUP, MAINTENANCE_CONSUMER_GROUP 등의 사전 정의된 Consumer Group을 제공합니다. 모든 Resource Plan은 반드시 OTHER_GROUPS에 대한 Plan Directive를 포함해야 하며, SYS_GROUP에는 최상위 리소스가 보장됩니다."
-  },
-  {
-    "chapter": "自動メンテナンス",
-    "number": "C_12_022",
-    "title": "Resource ManagerのConsumer Groupマッピング規則について正しく述べているものを選択してください。",
-    "options": [
-      "A) マッピング規則は接続属性(ORACLE_USER、SERVICE_NAME、CLIENT_PROGRAMなど)に基づいてセッションのConsumer Groupを決定し、一致する規則が複数ある場合は最も高い優先順位(低い番号)の規則が選択される。",
-      "B) マッピング規則はデータベース起動時にのみ評価され、セッションの接続後にConsumer Groupが変更されることはない。",
-      "C) マッピング規則の優先順位は変更できないため、ORACLE_USERが常にすべてのマッピング属性の中で最も高い優先順位で評価される。",
-      "D) マッピング規則に一致するセッションがない場合、セッションはSYS_GROUPにデフォルトで割り当てられる。"
-    ],
-    "answer": [
-      "A"
-    ],
-    "explanation": "정답: A\nA) 정답 — 매핑 규칙은 ORACLE_USER, SERVICE_NAME, CLIENT_PROGRAM, CLIENT_MACHINE, MODULE_NAME 등의 접속 속성을 기반으로 세션의 Consumer Group을 결정합니다. 세션 접속 시 모든 매핑 규칙을 평가하고, 일치하는 규칙 중 가장 높은 우선순위(낮은 번호)의 규칙이 선택됩니다. 매핑 규칙은 DBMS_RESOURCE_MANAGER.SET_CONSUMER_GROUP_MAPPING 프로시저로 생성합니다.\n\nB) 오답 — 매핑 규칙은 데이터베이스 기동 시에만 평가되는 것이 아닙니다. 세션 접속 시 초기 Consumer Group이 결정된 후에도, SWITCH_TIME 조건 충족 시 다른 Consumer Group으로 자동 전환되거나, DBA가 DBMS_RESOURCE_MANAGER.SWITCH_CONSUMER_GROUP_FOR_SESS로 수동 전환할 수 있습니다.\n\nC) 오답 — 매핑 속성의 기본 우선순위에서 ORACLE_USER의 우선순위는 3이며, ORACLE_FUNCTION(우선순위 2)이 더 높습니다. 또한 DBA_RSRC_MAPPING_PRIORITY를 통해 매핑 우선순위 설정을 확인하고 조정할 수 있습니다.\n\nD) 오답 — 매핑 규칙에 일치하는 세션이 없는 경우 SYS_GROUP이 아닌 DEFAULT_CONSUMER_GROUP에 할당됩니다. SYS_GROUP은 SYS 및 SYSTEM 사용자 전용 그룹입니다.\n\n핵심 개념: Consumer Group 매핑 규칙은 ORACLE_USER, SERVICE_NAME, CLIENT_PROGRAM 등의 접속 속성과 우선순위 번호로 세션의 초기 Consumer Group을 자동 결정합니다. 일치하는 규칙이 없으면 DEFAULT_CONSUMER_GROUP에 할당되며, 런타임 시 SWITCH_TIME 등의 조건에 의해 동적으로 그룹 전환이 가능합니다."
-  },
-  {
-    "chapter": "自動メンテナンス",
-    "number": "C_12_023",
-    "title": "マルチテナント環境におけるCDB Resource Planについて正しく述べているものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) CDB Resource PlanはCDB Root(CDB$ROOT)で定義され、Plan Directiveの対象はConsumer Groupではなく各PDBである。",
-      "B) CDB Resource Planのsharesパラメータは各PDBのCPU配分の相対的な重みを定義し、アイドル状態のPDBのCPUは他のPDBに自動的に再配分される。",
-      "C) CDB Resource Planが有効な場合、PDB内部のResource Planは使用できないため、PDB内のConsumer Group間のリソース配分は制御できない。",
-      "D) CDB Resource PlanのPlan DirectiveはConsumer Group単位で定義され、CDB全体のすべてのConsumer Groupに対してリソースを直接割り当てる。",
-      "E) CDB Resource Planは各PDB内部で個別に定義する必要があり、CDB Rootでは定義できない。"
+      "A) SYS_GROUpはSYS/SYSTEMユーザーのセッションに割り当てられるConsumer Groupであり、Resource Plan下でも管理作業のリソースが優先的に確保される。",
+      "B) OTHER_GROUPSはマッピング規則のいずれにも該当しないセッションのデフォルト・グループであり、すべてのResource PlanはOTHER_GROUPSに対するPlan Directiveを含まなければならない。",
+      "C) MAINTENANCE_CONSUMER_GROUPはアプリケーションのOLTPトランザクション用に割り当てられるConsumer Groupであり、自動メンテナンス・タスクには利用されない。",
+      "D) DEFAULT_CONSUMER_GROUPはSYSユーザー専用に固定されており、一般ユーザーのセッションには割り当てられない。",
+      "E) BATCH_GROUPはOracle Scheduler経由で投入されたすべてのバッチ・ジョブに無条件で割り当てられるため、マッピング規則を別途定義する必要がない。"
     ],
     "answer": [
       "A",
       "B"
     ],
-    "explanation": "정답: A, B\nA) 정답 — CDB Resource Plan은 CDB Root(CDB$ROOT)에서 정의되며, 멀티테넌트 환경에서 각 PDB에 대한 리소스 배분 정책을 설정합니다. 일반 Resource Plan과 달리 Plan Directive의 대상이 Consumer Group이 아닌 PDB(Pluggable Database)입니다. DBMS_RESOURCE_MANAGER.CREATE_CDB_PLAN 프로시저로 생성합니다.\n\nB) 정답 — CDB Resource Plan의 shares 파라미터는 PDB 간 CPU 배분의 상대적 가중치를 정의합니다. 예를 들어, PDB1(shares=3), PDB2(shares=2), PDB3(shares=1)인 경우, 각각 50%, 33%, 17%의 CPU가 보장됩니다. 아이들 상태의 PDB가 사용하지 않는 CPU는 다른 PDB에 자동으로 재배분됩니다.\n\nC) 오답 — CDB Resource Plan이 활성화되어 있어도 PDB 내부에서 일반 Resource Plan을 사용할 수 있습니다. CDB 플랜과 PDB 플랜이 2계층으로 동작하여, CDB 플랜으로 PDB 간 배분을 제어하고, PDB 내부 플랜으로 Consumer Group 간 배분을 제어하는 세밀한 리소스 관리가 가능합니다.\n\nD) 오답 — CDB Resource Plan의 Plan Directive는 Consumer Group 단위가 아닌 PDB 단위로 정의됩니다. Consumer Group 단위의 리소스 할당은 각 PDB 내부의 일반 Resource Plan에서 수행됩니다.\n\nE) 오답 — CDB Resource Plan은 각 PDB 내부가 아닌 CDB Root에서 정의합니다. PDB 내부에서는 일반 Resource Plan을 사용하여 Consumer Group 간 리소스를 배분합니다.\n\n핵심 개념: 멀티테넌트 환경에서 Resource Manager는 CDB 레벨과 PDB 레벨의 2계층으로 동작합니다. CDB Resource Plan은 CDB Root에서 정의되어 PDB 간 리소스(shares, utilization_limit, I/O 등)를 배분하고, PDB Resource Plan은 PDB 내부에서 Consumer Group 간 리소스를 배분합니다."
+    "explanation": "정답: A, B\nA) 정답 — SYS_GROUP은 SYS 및 SYSTEM 사용자의 세션에 할당되는 사전 정의 Consumer Group입니다. Resource Plan이 활성화된 상태에서도 DBA의 관리 작업이 리소스 부족으로 지연되지 않도록 우선적으로 리소스가 확보되는 그룹입니다.\n\nB) 정답 — OTHER_GROUPS는 어떤 매핑 규칙에도 해당하지 않는 세션들이 배치되는 기본 Consumer Group입니다. Resource Plan을 생성할 때는 반드시 OTHER_GROUPS에 대한 Plan Directive를 포함해야 하며, 그렇지 않으면 유효한 플랜으로 인정되지 않습니다.\n\nC) 오답 — MAINTENANCE_CONSUMER_GROUP은 자동 유지관리 태스크(AutoTask)가 실행될 때 사용되는 Consumer Group입니다. OLTP 트랜잭션용 그룹이 아니며, DEFAULT_MAINTENANCE_PLAN에서 유지관리 작업에 리소스를 할당하기 위해 사용됩니다.\n\nD) 오답 — DEFAULT_CONSUMER_GROUP은 SYS 사용자 전용이 아닙니다. 명시적 매핑이 없는 일반 세션이 초기 할당되는 기본 그룹이며, DBA가 일반적인 세션의 기본 Consumer Group으로 지정할 수도 있습니다.\n\nE) 오답 — BATCH_GROUP은 사전 정의된 Consumer Group 중 하나이지만, Oracle Scheduler 경유 작업에 자동 할당되지 않습니다. DBA가 매핑 규칙으로 지정된 세션이 이 그룹에 배치됩니다.\n\n핵심 개념: Resource Manager에는 SYS_GROUP, OTHER_GROUPS, DEFAULT_CONSUMER_GROUP, MAINTENANCE_CONSUMER_GROUP 등의 사전 정의 Consumer Group이 있으며, 모든 Resource Plan은 OTHER_GROUPS에 대한 Plan Directive를 반드시 포함해야 합니다. SYS_GROUP에는 DBA의 관리 작업이 보장되도록 우선 리소스가 확보됩니다."
+  },
+  {
+    "chapter": "自動メンテナンス",
+    "number": "C_12_022",
+    "title": "Resource ManagerにおけるConsumer Groupマッピング規則の一般的な目的について正しく述べているものを選択してください。",
+    "options": [
+      "A) マッピング規則はORACLE_USERやSERVICE_NAMEなどの接続属性に基づいて、セッションに対する初期のConsumer Groupを自動的に決定するために利用される。",
+      "B) マッピング規則はセッション確立後にはまったく評価されないため、接続後にConsumer Groupが変更されることはない。",
+      "C) マッピング規則はPL/SQLプログラムの処理時間そのものを制限するための機能であり、Resource ManagerのCPU配分とは関連しない。",
+      "D) マッピング規則に一致するセッションが存在しない場合、そのセッションはSYS_GROUPにデフォルトで割り当てられる。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Consumer Group 매핑 규칙은 ORACLE_USER, SERVICE_NAME 등의 접속 속성을 기준으로 세션이 접속될 때 자동으로 초기 Consumer Group을 결정합니다. 이를 통해 워크로드 종류(관리 작업·OLTP·배치 등)에 맞는 리소스 정책을 세션 단위로 자동 적용할 수 있습니다.\n\nB) 오답 — 매핑 규칙은 세션 확립 시점에 초기 할당을 위해 평가되지만, 이후에도 SWITCH_TIME 조건이나 DBA의 명시 요청에 따라 Consumer Group이 변경될 수 있습니다. 세션 확립 이후 완전히 평가되지 않는다는 설명은 사실이 아닙니다.\n\nC) 오답 — 매핑 규칙은 PL/SQL 처리 시간을 직접 제한하는 기능이 아닙니다. Resource Manager의 CPU 배분·세션 제어 기능과 연계되어 동작하며, 매핑 규칙 자체는 어떤 Consumer Group에 세션을 배치할지를 결정하는 정책입니다.\n\nD) 오답 — 매핑 규칙에 일치하는 세션이 없는 경우 SYS_GROUP이 아니라 DEFAULT_CONSUMER_GROUP에 할당됩니다. SYS_GROUP은 SYS·SYSTEM 사용자 전용 그룹입니다.\n\n핵심 개념: Consumer Group 매핑 규칙은 세션의 접속 속성을 기준으로 초기 Consumer Group을 자동 결정하여 워크로드별 리소스 정책 적용을 간편화합니다. 매핑되지 않은 세션은 DEFAULT_CONSUMER_GROUP에 배치됩니다."
+  },
+  {
+    "chapter": "自動メンテナンス",
+    "number": "C_12_023",
+    "title": "マルチテナント環境におけるCDB Resource PlanとPDB内のResource Planの役割分担について正しく述べているものを選択してください。",
+    "options": [
+      "A) CDB Resource PlanはCDB$ROOTで定義され複数PDB間のリソース配分を制御し、PDB内部のResource PlanはそのPDB内のConsumer Group間のリソース配分を制御する。",
+      "B) CDB Resource Planが活性化されている間はPDB内のResource Planをまったく利用できず、PDB内のConsumer Groupはリソース制御から除外される。",
+      "C) CDB Resource PlanはPDB内部で定義するものであり、CDB$ROOTでは作成できない。",
+      "D) PDB内部のResource PlanはCDB Resource Planと同一のオブジェクトであり、CDB$ROOTで定義すると自動的にすべてのPDBに同じ設定が反映される。"
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — 멀티테넌트 환경의 Resource Manager는 2계층 구조로 동작합니다. CDB Resource Plan은 CDB$ROOT에서 정의되어 여러 PDB 간의 리소스 배분을 제어하고, 각 PDB 내부의 Resource Plan은 해당 PDB 내의 Consumer Group 간 리소스 배분을 제어합니다. 두 계층이 함께 동작하여 CDB 차원과 PDB 차원의 리소스 관리를 가능하게 합니다.\n\nB) 오답 — CDB Resource Plan이 활성화된 상태에서도 PDB 내부의 Resource Plan은 정상 동작합니다. CDB 플랜은 PDB 간 배분을, PDB 플랜은 PDB 내 Consumer Group 배분을 각각 담당하여 2계층 제어가 이루어집니다.\n\nC) 오답 — CDB Resource Plan은 PDB 내부가 아닌 CDB$ROOT에서 정의합니다. PDB 간 배분 정책은 CDB 수준에서 통합 관리되어야 하기 때문입니다.\n\nD) 오답 — PDB 내부의 Resource Plan과 CDB Resource Plan은 같은 오브젝트가 아닙니다. CDB 플랜은 PDB 단위 리소스 배분을, PDB 플랜은 Consumer Group 단위 리소스 배분을 각각 제어합니다. CDB$ROOT에서 정의한다고 해서 모든 PDB에 동일 Plan이 자동 생성되지 않습니다.\n\n핵심 개념: CDB Resource Plan(CDB$ROOT 정의, PDB 간 배분)과 PDB Resource Plan(PDB 내 정의, Consumer Group 간 배분)은 2계층 구조로 협동 동작합니다. 각 계층은 서로 다른 레벨의 리소스 관리를 담당하며, 두 플랜은 동시에 유효할 수 있습니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_024",
-    "title": "次のCDB Resource Planの設定を確認してください。\n\nCDB Resource Plan: MY_CDB_PLAN\n- PDB1: shares=3, utilization_limit=80\n- PDB2: shares=2, utilization_limit=60\n- Default Directive: shares=1, utilization_limit=40\n\nPDB3はMY_CDB_PLANに個別のPlan Directiveが定義されていません。この構成について正しく述べているものを選択してください。",
+    "title": "CDB Resource PlanのDefault Directiveの役割について正しく述べているものを選択してください。",
     "options": [
-      "A) PDB3にはDefault Directiveが適用され、shares=1でCPU配分を受けるが、CPU使用率の上限は40%に制限される。",
-      "B) PDB3には個別のPlan Directiveが定義されていないため、CPU使用の上限なく他のPDBと均等にリソースが配分される。",
-      "C) PDB3はPlan Directiveが存在しないためResource Managerの制御を受けず、無制限にCPUを使用できる。",
-      "D) PDB3にはPlan Directiveが定義されていないため、CDB Resource Planが有効な間はCPUの使用が完全にブロックされる。"
+      "A) CDB Resource Planに個別のPlan Directiveが明示されていないPDBに対して自動的に適用されるPlan Directiveであり、新規にプラグインされたPDBにも既定で適用される。",
+      "B) CDB Resource Planに個別のPlan Directiveが明示されていないPDBは、Resource Managerの制御対象から完全に除外され、CPUを無制限に使用できる。",
+      "C) Default DirectiveはPDB管理者が各PDB内部で個別に設定するDirectiveであり、CDB$ROOTでは扱えない。",
+      "D) Default DirectiveはCDB$ROOTに対するDirectiveであり、PDB単位のリソース制御とは無関係である。"
     ],
     "answer": [
       "A"
     ],
-    "explanation": "정답: A\nA) 정답 — CDB Resource Plan에서 명시적 Plan Directive가 없는 PDB에는 Default Directive의 설정이 자동으로 적용됩니다. PDB3에는 개별 Directive가 정의되어 있지 않으므로, Default Directive에 따라 shares=1로 CPU 배분을 받으며(총 shares 6 중 1/6 ≒ 약 17%의 상대적 비율), utilization_limit=40%로 CPU 사용 상한이 제한됩니다.\n\nB) 오답 — 개별 Plan Directive가 없는 PDB는 무제한으로 균등 배분을 받는 것이 아닙니다. Default Directive의 설정이 적용되어, 해당 Directive에 정의된 shares와 utilization_limit의 제약을 받습니다.\n\nC) 오답 — Plan Directive가 없는 PDB가 Resource Manager의 제어를 받지 않는 것이 아닙니다. CDB Resource Plan이 활성화되어 있으면, 명시적 Directive가 없는 PDB에는 Default Directive가 자동으로 적용됩니다.\n\nD) 오답 — Plan Directive가 없는 PDB의 CPU 사용이 완전히 차단되는 것이 아닙니다. Default Directive에 의해 리소스가 할당됩니다. CPU 사용을 완전히 차단하려면 utilization_limit=0으로 명시적으로 설정해야 합니다.\n\n핵심 개념: CDB Resource Plan에서 명시적 Plan Directive가 없는 PDB에는 DBMS_RESOURCE_MANAGER.UPDATE_CDB_DEFAULT_DIRECTIVE로 설정한 Default Directive가 자동으로 적용됩니다. PDB 플러그인 시에도 해당 PDB의 Directive가 없으면 Default Directive가 자동 적용되므로, Default Directive를 적절히 설정하는 것이 중요합니다."
+    "explanation": "정답: A\nA) 정답 — CDB Resource Plan의 Default Directive는 명시적 Plan Directive가 없는 PDB에 대해 자동으로 적용되는 기본 정책입니다. 새로 CDB에 플러그인된 PDB(아직 개별 Directive가 없는 PDB)에도 이 Default Directive가 기본으로 적용되어 리소스 제어 공백이 발생하지 않도록 합니다.\n\nB) 오답 — 개별 Directive가 없는 PDB가 CPU를 무제한 사용하는 것이 아닙니다. Default Directive가 자동 적용되어 일정한 리소스 제한 내에서 운용됩니다.\n\nC) 오답 — Default Directive는 CDB Resource Plan의 일부이며, CDB$ROOT에서 관리합니다. PDB 관리자가 자체적으로 설정하는 것이 아닙니다.\n\nD) 오답 — Default Directive는 CDB$ROOT 자체가 아니라 \"개별 Directive가 없는 PDB\"에 적용되는 기본 정책입니다. PDB 단위의 리소스 제어와 밀접하게 관련됩니다.\n\n핵심 개념: CDB Resource Plan의 Default Directive는 명시적 Plan Directive가 없는 PDB(기존 및 신규 플러그인 PDB)에 자동 적용되는 기본 리소스 제어 정책으로, Directive 누락으로 인한 리소스 제어 공백을 방지합니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_025",
-    "title": "あるDBAがResource Managerのマッピング規則を使用してHRユーザーのセッションをINTERACTIVE_GROUPというConsumer Groupに自動的に割り当てたいと考えています。この設定に関して正しく述べているものを選択してください。",
+    "title": "Resource Managerの構成(Plan、Consumer Group、Plan Directive、マッピング規則)を変更する際に、Pending Areaメカニズムが利用されている主な目的について正しく述べているものを選択してください。",
     "options": [
-      "A) DBMS_RESOURCE_MANAGER.SET_CONSUMER_GROUP_MAPPINGプロシージャを使用し、attribute属性にDBMS_RESOURCE_MANAGER.ORACLE_USER、value属性に'HR'、consumer_group属性に'INTERACTIVE_GROUP'を指定する。この操作はPending Area内で実行する必要がある。",
-      "B) ALTER USER HR SET RESOURCE_CONSUMER_GROUP = 'INTERACTIVE_GROUP'コマンドを使用して、HRユーザーのConsumer Groupをマッピングする。",
-      "C) DBMS_RESOURCE_MANAGER.SET_CONSUMER_GROUP_MAPPINGプロシージャはPending Areaを必要とせず、実行と同時にマッピング規則が即座に反映される。",
-      "D) マッピング規則はセッション接続時にのみ評価されるが、HRユーザーがConsumer Groupを手動で切り替える場合、特別な権限は不要である。"
+      "A) 複数の変更(Plan・Consumer Group・Plan Directive・マッピング規則の作成や更新)を一括で準備・検証してから一度に反映することで、設定の一貫性を保証するため。",
+      "B) Pending AreaはDBAが個人で変更を試しに適用する専用の領域であり、設定の一貫性やトランザクション的な反映には関係しない。",
+      "C) Pending AreaはPDBでは利用できず、CDB$ROOTでしか使用できないため、マルチテナント環境のRresource Manager変更はすべてCDB$ROOTで行う必要がある。",
+      "D) Pending Areaに格納された変更は明示的な適用操作なしに、データ・ディクショナリに即時反映される。"
     ],
     "answer": [
       "A"
     ],
-    "explanation": "정답: A\nA) 정답 — Consumer Group 매핑 규칙을 생성하려면 DBMS_RESOURCE_MANAGER.SET_CONSUMER_GROUP_MAPPING 프로시저를 사용합니다. attribute에 DBMS_RESOURCE_MANAGER.ORACLE_USER, value에 'HR', consumer_group에 'INTERACTIVE_GROUP'을 지정합니다. Resource Manager의 모든 설정 변경은 Pending Area 메커니즘 내에서 수행되어야 하며, CREATE_PENDING_AREA → 설정 정의 → SUBMIT_PENDING_AREA의 순서로 진행합니다.\n\nB) 오답 — ALTER USER 문으로 RESOURCE_CONSUMER_GROUP을 직접 설정하는 구문은 존재하지 않습니다. 사용자의 초기 Consumer Group을 설정하려면 DBMS_RESOURCE_MANAGER.SET_INITIAL_CONSUMER_GROUP 프로시저를 사용합니다. 매핑 규칙에 의한 자동 할당은 SET_CONSUMER_GROUP_MAPPING으로 설정합니다.\n\nC) 오답 — SET_CONSUMER_GROUP_MAPPING은 Pending Area 없이 즉시 반영되는 것이 아닙니다. Resource Manager의 모든 설정 변경은 Pending Area 메커니즘을 통해 관리되므로, CREATE_PENDING_AREA로 Pending Area를 생성한 후 작업을 수행하고, SUBMIT_PENDING_AREA로 적용하거나 CLEAR_PENDING_AREA로 취소해야 합니다.\n\nD) 오답 — 사용자가 특정 Consumer Group으로 수동 전환하려면 해당 그룹에 대한 SWITCH 권한이 필요합니다. DBMS_RESOURCE_MANAGER_PRIVS.GRANT_SWITCH_CONSUMER_GROUP 프로시저를 사용하여 특정 사용자에게 Consumer Group 전환 권한을 부여해야 합니다.\n\n핵심 개념: Consumer Group 매핑 규칙은 DBMS_RESOURCE_MANAGER.SET_CONSUMER_GROUP_MAPPING으로 생성하며, Pending Area 메커니즘(CREATE_PENDING_AREA → 정의 → SUBMIT_PENDING_AREA) 내에서 실행해야 합니다. 사용자가 Consumer Group을 수동 전환하려면 DBMS_RESOURCE_MANAGER_PRIVS.GRANT_SWITCH_CONSUMER_GROUP으로 부여되는 SWITCH 권한이 필요합니다."
+    "explanation": "정답: A\nA) 정답 — Resource Manager 구성 변경은 Pending Area라는 임시 작업 영역에서 준비·검증 후 한꺼번에 반영되는 메커니즘을 사용합니다. 이는 Plan·Consumer Group·Plan Directive·매핑 규칙 등 서로 연관된 설정들을 일괄 처리하여, 일부만 반영되어 설정이 불완전한 상태로 남는 것을 방지하고 일관성을 보장하기 위한 설계입니다.\n\nB) 오답 — Pending Area는 DBA의 \"개인 실험용\" 영역이 아니라 Resource Manager 설정 변경의 공식적 절차에 사용되는 트랜잭션성 작업 영역입니다. 일관성·원자성 보장이 핵심 목적입니다.\n\nC) 오답 — Pending Area는 PDB에서도 이용할 수 있습니다. PDB 내 Resource Plan 변경은 해당 PDB에서 Pending Area를 열어 수행하며, CDB$ROOT 전용 기능이 아닙니다.\n\nD) 오답 — Pending Area에 저장된 변경 사항은 명시적인 적용 절차(SUBMIT) 없이는 데이터 딕셔너리에 반영되지 않습니다. 준비·검증·반영 절차를 거쳐야 실제 유효해집니다.\n\n핵심 개념: Pending Area는 Resource Manager 설정 변경을 준비·검증 후 일괄 반영하기 위한 트랜잭션성 작업 영역입니다. 일관된 설정을 적용하고, 부분 반영으로 인한 구성 불일치를 방지하는 것이 핵심 목적입니다."
   }
 ]

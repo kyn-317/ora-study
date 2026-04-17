@@ -2,68 +2,76 @@
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_026",
-    "title": "Resource Managerの構成要素(Resource Plan、Consumer Group、Plan Directive)を新規に作成する際のPending Areaメカニズムについて正しく述べているものを選択してください。",
+    "title": "Resource Managerの設定(Resource Plan・Consumer Group・Plan Directive)を新規に作成する一般的な流れについて正しく述べているものを選択してください。",
     "options": [
-      "A) DBMS_RESOURCE_MANAGER.CREATE_PENDING_AREAでPending Areaを作成した後、CREATE_PLAN、CREATE_CONSUMER_GROUP、CREATE_PLAN_DIRECTIVEで設定を定義し、VALIDATE_PENDING_AREAで検証してからSUBMIT_PENDING_AREAで変更を適用する。エラー発生時はCLEAR_PENDING_AREAで変更を取り消すことができる。",
-      "B) CREATE_PLAN、CREATE_CONSUMER_GROUP、CREATE_PLAN_DIRECTIVEを実行すると変更が即座にデータ・ディクショナリに反映されるため、Pending Areaの作成やSUBMIT操作は不要である。",
-      "C) Pending Areaを使用せずにResource Planを作成する場合、ALTER SYSTEM SET RESOURCE_MANAGER_PLANコマンドでプラン名を指定するだけで自動的にプランが生成される。",
-      "D) VALIDATE_PENDING_AREAを実行すれば自動的にSUBMIT_PENDING_AREAも実行されるため、明示的なSUBMIT操作は不要である。"
+      "A) 関連する変更をPending Areaで準備してから一括で反映する流れであり、部分適用を避けて設定の一貫性を保つように設計されている。",
+      "B) 作成処理はALTER SYSTEM SET RESOURCE_MANAGER_PLANコマンドのみで完結するため、他の専用プロシージャや事前準備は一切必要ない。",
+      "C) Plan DirectiveはCREATE_PLAN_DIRECTIVEを実行した時点でデータ・ディクショナリに即座に反映されるため、後続の操作を行わなくてもすぐに有効になる。",
+      "D) Resource Managerの構成変更は事前の検証機能を持たないため、誤った設定を適用してもそれを検出する手段はない。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — Resource Manager의 모든 설정 변경은 Pending Area라는 임시 작업 영역에서 수행됩니다. 절차는 다음과 같습니다:\n1. DBMS_RESOURCE_MANAGER.CREATE_PENDING_AREA — Pending Area 생성\n2. CREATE_PLAN / CREATE_CONSUMER_GROUP / CREATE_PLAN_DIRECTIVE — 설정 정의\n3. DBMS_RESOURCE_MANAGER.VALIDATE_PENDING_AREA — 유효성 검증\n4. DBMS_RESOURCE_MANAGER.SUBMIT_PENDING_AREA — 변경 사항 적용\n오류 발생 시 CLEAR_PENDING_AREA로 모든 변경을 취소할 수 있습니다. 이 메커니즘은 트랜잭션처럼 설정 변경의 일관성을 보장합니다.\n\nB) 오답 — CREATE_PLAN, CREATE_CONSUMER_GROUP, CREATE_PLAN_DIRECTIVE는 실행 즉시 데이터 딕셔너리에 반영되지 않습니다. 반드시 먼저 CREATE_PENDING_AREA로 Pending Area를 생성한 후 작업을 수행하고, SUBMIT_PENDING_AREA로 적용해야 합니다.\n\nC) 오답 — ALTER SYSTEM SET RESOURCE_MANAGER_PLAN은 이미 생성된 Resource Plan을 활성화하는 명령이며, 새로운 플랜을 자동으로 생성하는 기능이 아닙니다. 플랜 생성은 반드시 Pending Area 내에서 CREATE_PLAN 프로시저를 사용해야 합니다.\n\nD) 오답 — VALIDATE_PENDING_AREA와 SUBMIT_PENDING_AREA는 별개의 독립적인 프로시저입니다. VALIDATE_PENDING_AREA는 Pending Area 내의 설정이 유효한지 검증만 수행하며, SUBMIT_PENDING_AREA를 자동으로 실행하지 않습니다. 검증 후 반드시 명시적으로 SUBMIT_PENDING_AREA를 호출해야 변경 사항이 데이터 딕셔너리에 반영됩니다.\n\n핵심 개념: Resource Manager의 설정 변경은 Pending Area 메커니즘(CREATE_PENDING_AREA → 정의 → VALIDATE_PENDING_AREA → SUBMIT_PENDING_AREA)을 통해 트랜잭션처럼 관리됩니다. 모든 변경이 검증되고 한꺼번에 적용되므로 불완전한 설정이 적용되는 것을 방지합니다."
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Resource Manager의 설정 변경은 Pending Area에 관련 변경 사항을 먼저 준비한 뒤 일괄 반영하는 방식으로 이루어집니다. 이를 통해 부분 반영으로 인한 설정 불일치를 방지하고, 관련 변경들이 원자적으로 적용되어 일관성이 유지되도록 설계되어 있습니다.\n\nB) 오답 — ALTER SYSTEM SET RESOURCE_MANAGER_PLAN은 이미 생성된 Resource Plan을 활성화하기 위한 명령이며, 새로운 Plan·Consumer Group·Plan Directive를 생성하는 기능이 아닙니다. 생성 작업에는 DBMS_RESOURCE_MANAGER의 프로시저들과 Pending Area 메커니즘이 사용됩니다.\n\nC) 오답 — CREATE_PLAN_DIRECTIVE 실행만으로 데이터 딕셔너리에 즉시 반영되지 않습니다. Pending Area를 통한 일괄 반영 단계를 거쳐야 유효화됩니다.\n\nD) 오답 — Resource Manager는 Pending Area 내에서 검증 절차를 통해 설정의 유효성을 사전에 확인할 수 있습니다. 설정 오류(필수 OTHER_GROUPS 누락 등)를 반영 전에 감지할 수 있도록 설계되어 있습니다.\n\n핵심 개념: Resource Manager 설정은 Pending Area에서 준비·검증·일괄 반영하는 흐름으로 관리되어 설정의 일관성과 원자성을 보장합니다. ALTER SYSTEM SET RESOURCE_MANAGER_PLAN은 생성이 아니라 활성화 명령이므로 구분해야 합니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_027",
-    "title": "あるDBAが、長時間実行中のユーザーセッションを別のConsumer Groupに手動で切り替える必要があります。Consumer Groupの手動切り替えに関して正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "長時間実行中のユーザーセッションを別のConsumer Groupに手動で切り替えたい場合の一般的な方法について正しく述べているものを選択してください。",
     "options": [
-      "A) DBAはDBMS_RESOURCE_MANAGER.SWITCH_CONSUMER_GROUP_FOR_SESSプロシージャを使用して、特定のセッションのConsumer Groupを手動で切り替えることができる。",
-      "B) ユーザーが自分のセッションのConsumer Groupを切り替えるには、DBMS_RESOURCE_MANAGER_PRIVS.GRANT_SWITCH_CONSUMER_GROUPで対象グループへのSWITCH権限が事前に付与されている必要がある。",
-      "C) Consumer Groupの手動切り替えはALTER USER SET RESOURCE_CONSUMER_GROUPコマンドで行い、切り替え対象のConsumer Groupに対する特別な権限は不要である。",
-      "D) SWITCH_CONSUMER_GROUP_FOR_SESSはDBAの自分のセッションのみ切り替え可能であり、他のユーザーのセッションを切り替えることはできない。",
-      "E) Consumer Groupの手動切り替えにはGRANT RESOURCE権限のみが必要であり、個別のConsumer Group単位での権限付与はサポートされていない。"
+      "A) DBAはResource Managerが提供する専用のプロシージャを使って特定セッションのConsumer Groupを手動で切り替えることができ、切替えによって以降そのセッションには別の Resource Plan Directiveが適用される。",
+      "B) Consumer Groupの手動切替えはALTER USER SET RESOURCE_CONSUMER_GROUPコマンドで行い、対象セッションを一度切断しなくても自動的に反映される。",
+      "C) セッション単位のConsumer Group切替えはDBAでも不可能であり、セッションを強制的に切断し再接続させる以外の方法がない。",
+      "D) 手動切替え後もそのセッションには元のConsumer GroupのPlan Directiveが適用され続けるため、リソース制御上の意味はない。"
     ],
-    "answer": ["A", "B"],
-    "explanation": "정답: A, B\nA) 정답 — DBMS_RESOURCE_MANAGER.SWITCH_CONSUMER_GROUP_FOR_SESS 프로시저를 사용하면 DBA가 특정 세션의 Consumer Group을 수동으로 전환할 수 있습니다. 이를 통해 장시간 실행 중인 세션을 즉시 다른 리소스 정책이 적용되는 그룹으로 이동시킬 수 있습니다.\n\nB) 정답 — 사용자가 자신의 세션의 Consumer Group을 전환하려면, 대상 Consumer Group에 대한 SWITCH 권한이 필요합니다. 이 권한은 DBMS_RESOURCE_MANAGER_PRIVS.GRANT_SWITCH_CONSUMER_GROUP 프로시저를 사용하여 부여합니다.\n\nC) 오답 — ALTER USER SET RESOURCE_CONSUMER_GROUP이라는 구문은 존재하지 않습니다. 사용자의 초기 Consumer Group을 설정하려면 DBMS_RESOURCE_MANAGER.SET_INITIAL_CONSUMER_GROUP 프로시저를 사용하며, 런타임 세션 전환은 SWITCH_CONSUMER_GROUP_FOR_SESS를 사용합니다. 또한 전환 시 대상 그룹에 대한 SWITCH 권한이 필요합니다.\n\nD) 오답 — SWITCH_CONSUMER_GROUP_FOR_SESS는 DBA 자신의 세션뿐만 아니라, 다른 사용자의 세션도 전환할 수 있습니다. 세션 ID(SID)와 시리얼 번호를 지정하여 특정 세션의 Consumer Group을 전환합니다.\n\nE) 오답 — Consumer Group 전환 권한은 GRANT RESOURCE 권한과는 별개입니다. DBMS_RESOURCE_MANAGER_PRIVS.GRANT_SWITCH_CONSUMER_GROUP 프로시저를 사용하여 개별 Consumer Group 단위로 세밀하게 권한을 부여할 수 있습니다.\n\n핵심 개념: DBA는 DBMS_RESOURCE_MANAGER.SWITCH_CONSUMER_GROUP_FOR_SESS로 특정 세션의 Consumer Group을 수동 전환할 수 있으며, 일반 사용자가 전환하려면 DBMS_RESOURCE_MANAGER_PRIVS.GRANT_SWITCH_CONSUMER_GROUP으로 대상 그룹에 대한 SWITCH 권한이 사전에 부여되어야 합니다."
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — DBA는 Resource Manager가 제공하는 전용 프로시저를 사용해 특정 세션의 Consumer Group을 수동으로 전환할 수 있습니다. 전환 후에는 해당 세션에 새로운 그룹의 Plan Directive가 적용되므로, 장시간 실행되거나 리소스를 과도하게 소비하는 세션에 대한 개별 조정이 가능합니다.\n\nB) 오답 — ALTER USER SET RESOURCE_CONSUMER_GROUP이라는 구문은 존재하지 않습니다. Consumer Group의 수동 전환은 DBMS_RESOURCE_MANAGER의 전용 프로시저로 수행되는 운영 작업입니다.\n\nC) 오답 — 세션 재접속 없이도 DBA는 특정 세션의 Consumer Group을 수동 전환할 수 있습니다. 재접속이 유일한 방법이라는 설명은 사실이 아닙니다.\n\nD) 오답 — 수동 전환 후에는 새 Consumer Group의 Plan Directive가 해당 세션에 적용됩니다. 원래 Directive가 계속 적용된다면 전환의 의미가 없으므로, 실제 동작은 새 그룹의 정책을 따릅니다.\n\n핵심 개념: Consumer Group의 수동 전환은 Resource Manager의 전용 프로시저로 수행되며, 전환 후에는 새 그룹의 Plan Directive가 해당 세션에 적용됩니다. 세션 재접속 없이 운영 중에 개별 세션의 리소스 정책을 조정할 수 있는 관리 수단입니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_028",
-    "title": "Resource Managerのマッピング規則において、あるセッションがORACLE_USER属性では「BATCH_GROUP」に、SERVICE_NAME属性では「INTERACTIVE_GROUP」にマッピングされるよう設定されています。このセッションが接続した場合の動作について正しく述べているものを選択してください。",
+    "title": "Resource ManagerにおけるConsumer Groupマッピング規則の評価とデフォルト動作について正しく述べているものを選択してください。",
     "options": [
-      "A) デフォルトの優先順位ではORACLE_USER(優先順位3)がSERVICE_NAME(優先順位5)より高いため、そのセッションはBATCH_GROUPに割り当てられる。",
-      "B) デフォルトの優先順位ではSERVICE_NAMEがORACLE_USERより高いため、そのセッションはINTERACTIVE_GROUPに割り当てられる。",
-      "C) 複数のマッピング規則が一致する場合、セッションはDEFAULT_CONSUMER_GROUPに割り当てられ、個別のマッピング規則は無視される。",
-      "D) 複数のマッピング規則が一致する場合はORA-56706エラーが発生するため、DBAは重複しないようにマッピング規則を設計する必要がある。"
+      "A) 複数のマッピング規則が同時に一致するセッションでは、事前に定義された優先度に従ってどの規則を適用するかが決まり、どの規則にも一致しなかったセッションはDEFAULT_CONSUMER_GROUPに割り当てられる。",
+      "B) 複数のマッピング規則が同時に一致する場合は常にORA-56706エラーが発生し、セッションは確立できない。",
+      "C) 複数のマッピング規則が同時に一致する場合はセッションの接続順にいずれかの規則がランダムに選ばれ、DBAは結果を制御できない。",
+      "D) どのマッピング規則にも一致しなかったセッションはOracleのエラーとなり接続できないため、必ず一致する規則を用意する必要がある。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — 매핑 속성에는 기본 우선순위 번호가 할당되어 있으며, 낮은 번호가 높은 우선순위를 의미합니다. ORACLE_USER의 기본 우선순위는 3이고 SERVICE_NAME의 기본 우선순위는 5이므로, ORACLE_USER가 더 높은 우선순위를 가집니다. 따라서 해당 세션은 ORACLE_USER 매핑 규칙에 따라 BATCH_GROUP에 할당됩니다.\n\nB) 오답 — SERVICE_NAME의 기본 우선순위(5)는 ORACLE_USER의 기본 우선순위(3)보다 낮습니다. 우선순위 번호가 낮을수록 우선순위가 높으므로, ORACLE_USER가 SERVICE_NAME보다 먼저 평가됩니다.\n\nC) 오답 — 여러 매핑 규칙이 일치하는 경우 DEFAULT_CONSUMER_GROUP에 할당되는 것이 아니라, 가장 높은 우선순위(가장 낮은 번호)를 가진 규칙이 선택됩니다. DEFAULT_CONSUMER_GROUP은 어떤 매핑 규칙에도 일치하지 않는 세션에 할당됩니다.\n\nD) 오답 — 여러 매핑 규칙이 일치해도 에러가 발생하지 않습니다. Oracle은 일치하는 규칙들 중 가장 높은 우선순위의 규칙을 자동으로 선택하므로, 복수의 매핑 규칙이 존재해도 정상적으로 처리됩니다. DBA_RSRC_MAPPING_PRIORITY 뷰에서 각 매핑 속성의 우선순위를 확인할 수 있습니다.\n\n핵심 개념: Consumer Group 매핑 규칙은 우선순위 번호에 따라 평가되며, 낮은 번호가 높은 우선순위를 의미합니다. 기본 우선순위는 ORACLE_FUNCTION(2) > ORACLE_USER(3) > SERVICE_NAME(5) > CLIENT_OS_USER(6) > CLIENT_PROGRAM(7) 순입니다. 여러 규칙이 일치할 경우 가장 높은 우선순위의 규칙이 선택됩니다."
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Consumer Group 매핑 규칙은 사전 정의된 우선순위에 따라 평가됩니다. 여러 규칙이 동시에 일치하는 세션의 경우, 우선순위에 따라 하나의 규칙이 선택됩니다. 그리고 어떤 규칙에도 일치하지 않는 세션은 DEFAULT_CONSUMER_GROUP에 할당되어 리소스 제어 하에 들어가게 됩니다.\n\nB) 오답 — 여러 매핑 규칙이 동시에 일치해도 ORA-56706 에러가 발생하지 않습니다. Oracle은 사전 정의된 우선순위에 따라 하나의 규칙을 자동 선택합니다.\n\nC) 오답 — 여러 규칙 중 적용 규칙은 무작위가 아닌 우선순위 기반으로 결정됩니다. DBA는 매핑 규칙 설계 시 이 우선순위를 고려할 수 있습니다.\n\nD) 오답 — 어떤 규칙에도 일치하지 않는 세션은 접속 에러가 되지 않고 DEFAULT_CONSUMER_GROUP에 할당됩니다. 이렇게 함으로써 모든 세션이 어떤 Consumer Group에 속하도록 보장합니다.\n\n핵심 개념: 매핑 규칙은 사전 정의된 우선순위에 따라 평가되어 여러 규칙이 일치할 때 하나가 선택됩니다. 매핑 규칙 없음 세션은 DEFAULT_CONSUMER_GROUP에 기본 배치되어, 모든 세션이 어떤 그룹에 소속되도록 보장합니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_029",
-    "title": "CDB Resource PlanにおけるPDB単位のリソース制御パラメータについて正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "マルチテナント環境におけるCDB Resource PlanのPDB単位のリソース制御の目的について正しく述べているものを選択してください。",
     "options": [
-      "A) CREATE_CDB_PLAN_DIRECTIVEのsharesパラメータはPDB間のCPU配分の相対的な重みを定義し、utilization_limitパラメータはそのPDBが使用できる最大CPU比率(%)の上限を設定する。",
-      "B) CREATE_CDB_PLAN_DIRECTIVEのmax_iopsおよびmax_mbpsパラメータにより、PDB単位で秒あたりのI/O要求数やI/Oスループットを制限することができる。",
-      "C) CDB Resource PlanのsharesパラメータとPDB内部のResource PlanのMGMT_P1パラメータは同じ機能であり、互換的に使用できる。",
-      "D) max_iopsを0に設定すると、そのPDBからのすべてのI/O操作がブロックされ、PDBが事実上停止する。",
-      "E) CDB Resource PlanではPDB単位のCPU制限にutilization_limitのみが使用され、sharesパラメータはCDB Resource Planには存在しない。"
+      "A) CDB Resource Planを利用するとPDB単位でCPUやI/Oなどのリソース配分・上限を制御でき、あるPDBが他のPDBのリソースを一方的に消費するのを防ぐことができる。",
+      "B) CDB Resource Planが提供する制御はストレージ容量の制限のみであり、CPUやI/Oの配分は制御できない。",
+      "C) CDB Resource Planは各PDBにおけるSGAサイズを個別に指定するための機能であり、CPU・I/O配分とは無関係である。",
+      "D) CDB Resource PlanはCDB全体のUNDO表領域サイズを制御するための設定であり、PDB単位のリソース制御とは無関係である。"
     ],
-    "answer": ["A", "B"],
-    "explanation": "정답: A, B\nA) 정답 — CDB Resource Plan의 CREATE_CDB_PLAN_DIRECTIVE에서 shares 파라미터는 PDB 간 CPU 배분의 상대적 가중치를 정의합니다. 예를 들어 PDB1(shares=3), PDB2(shares=2)인 경우 3:2의 비율로 CPU가 배분됩니다. utilization_limit은 해당 PDB가 사용할 수 있는 최대 CPU 비율(%)의 절대 상한을 설정합니다.\n\nB) 정답 — max_iops(초당 최대 I/O 요청 수)와 max_mbps(초당 최대 I/O 처리량, MB 단위)를 통해 PDB 단위의 I/O Rate Limiting이 가능합니다. Oracle 26ai에서 PDB 레벨의 I/O Rate Limiting이 더욱 세밀하게 제어 가능해졌으며, CDB Resource Plan에서 PDB별 CPU/IO/병렬 처리 제한이 통합 관리됩니다.\n\nC) 오답 — shares와 MGMT_P1은 서로 다른 기능입니다. shares는 CDB Resource Plan에서 PDB 간의 상대적 CPU 가중치를 정의하는 파라미터이고, MGMT_P1은 일반(PDB 내부) Resource Plan에서 Consumer Group 간의 CPU 배분 비율(%)을 정의하는 파라미터입니다. 제어 대상과 레벨이 다르므로 호환적으로 사용할 수 없습니다.\n\nD) 오답 — max_iops를 0으로 설정하면 I/O가 차단되는 것이 아니라 무제한(제한 없음)을 의미합니다. PDB의 I/O를 완전히 차단하는 기능은 이 파라미터의 목적이 아닙니다.\n\nE) 오답 — CDB Resource Plan에는 shares 파라미터가 존재합니다. shares(상대적 가중치)와 utilization_limit(절대 상한)을 함께 사용하여, PDB 간의 CPU 배분 비율과 각 PDB의 최대 사용량을 동시에 제어할 수 있습니다.\n\n핵심 개념: CDB Resource Plan의 CREATE_CDB_PLAN_DIRECTIVE에서는 shares(CPU 상대적 가중치), utilization_limit(CPU 최대 비율), max_iops(I/O 요청 수 제한), max_mbps(I/O 처리량 제한) 등의 파라미터로 PDB 단위의 리소스를 종합적으로 제어합니다. max_iops/max_mbps를 0으로 설정하면 제한 없음(무제한)을 의미합니다."
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — CDB Resource Plan은 PDB 단위로 CPU·I/O 등의 리소스 배분과 상한을 제어하기 위한 기능입니다. 멀티테넌트 환경에서 특정 PDB가 인스턴스 리소스를 과점하여 다른 PDB의 성능을 저하시키는 \"Noisy Neighbor\" 현상을 방지하는 것이 주요 목적입니다.\n\nB) 오답 — CDB Resource Plan은 CPU·I/O(초당 요청 수·처리량 등)에 대한 제어를 포함합니다. 스토리지 용량 제한은 PDB의 STORAGE 절 등 별도 메커니즘이며, CDB Resource Plan 고유 기능이 아닙니다.\n\nC) 오답 — SGA 크기는 별도의 초기화 파라미터(SGA_TARGET 등)로 제어하며, CDB Resource Plan과는 다른 기능입니다.\n\nD) 오답 — CDB Resource Plan은 UNDO 테이블스페이스 크기 제어와는 무관합니다. Local UNDO·Shared UNDO 설정이나 UNDO 테이블스페이스 관리 기능과는 별개의 리소스 관리 기능입니다.\n\n핵심 개념: CDB Resource Plan은 PDB 단위의 CPU·I/O 리소스 배분·상한을 제어하여 PDB 간 리소스 경쟁을 완화합니다. 스토리지 용량·SGA 크기·UNDO 관리와는 다른 독립적인 기능 영역입니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_030",
-    "title": "CDB Resource PlanにおけるDefault Directiveの動作と、UPDATE_CDB_DEFAULT_DIRECTIVEプロシージャの役割について正しく述べているものを選択してください。",
+    "title": "Resource ManagerのPlan Directiveが提供する基本的な機能について正しく述べているものを選択してください。",
     "options": [
-      "A) 新規PDBがCDBにプラグインされた際に、CDB Resource Planにそのpdb用の個別Plan Directiveが定義されていない場合、Default Directiveの設定(shares、utilization_limitなど)が自動的に適用される。",
-      "B) 新規PDBがCDBにプラグインされた際に個別Plan Directiveが存在しない場合、そのPDBはResource Managerの制御を受けず、CPUやI/Oを無制限に使用できる。",
-      "C) UPDATE_CDB_DEFAULT_DIRECTIVEで変更した内容は既存のPDBにのみ影響し、今後プラグインされる新規PDBには適用されない。",
-      "D) CDB Resource Planに個別Plan Directiveが定義されていないPDBは、sharesが0として扱われるためCPU使用が完全にブロックされる。"
+      "A) Plan DirectiveはConsumer Groupごとに、CPU配分比率などのリソース管理ポリシーを割り当てるための設定であり、ワークロードの種類に応じて優先度や上限を調整する用途で使用される。",
+      "B) Plan Directiveは個々のSQL文のパース結果をキャッシュするための機能であり、リソース管理とは無関係である。",
+      "C) Plan DirectiveはALTER SYSTEM SET RESOURCE_MANAGER_PLANの別名であり、プランの活性化・非活性化のみを行う機能である。",
+      "D) Plan DirectiveはUNDO表領域の大きさを指定する構文であり、Resource Planで定義されるリソースとは別の領域を管理する。"
     ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — CDB Resource Plan에서 명시적 Plan Directive가 없는 PDB에는 Default Directive의 설정이 자동으로 적용됩니다. 신규 PDB가 CDB에 플러그인될 때 해당 PDB에 대한 개별 Directive가 정의되어 있지 않으면, DBMS_RESOURCE_MANAGER.UPDATE_CDB_DEFAULT_DIRECTIVE로 설정된 Default Directive의 shares, utilization_limit 등이 자동으로 적용됩니다. 따라서 Default Directive를 적절히 설정해두면 신규 PDB 추가 시에도 리소스 제어가 자동으로 이루어집니다.\n\nB) 오답 — 개별 Plan Directive가 없는 PDB가 무제한으로 리소스를 사용할 수 있는 것이 아닙니다. CDB Resource Plan이 활성화되어 있으면, 명시적 Directive가 없는 PDB에는 Default Directive가 자동으로 적용되어 해당 Directive의 shares 및 utilization_limit 제약을 받습니다.\n\nC) 오답 — UPDATE_CDB_DEFAULT_DIRECTIVE로 변경한 Default Directive는 기존 PDB뿐만 아니라 향후 플러그인되는 신규 PDB에도 적용됩니다. 명시적 Directive가 없는 모든 PDB(기존 및 신규)가 Default Directive의 설정을 따릅니다.\n\nD) 오답 — 개별 Plan Directive가 없는 PDB의 shares가 0으로 처리되어 CPU가 차단되는 것이 아닙니다. Default Directive에서 정의된 shares 값(기본값 1)이 적용되며, utilization_limit도 Default Directive의 설정에 따라 결정됩니다. shares가 0이면 다른 PDB의 유휴 CPU를 받지 못하는 것이지, CPU 사용이 완전히 차단되는 것은 아닙니다.\n\n핵심 개념: CDB Resource Plan의 Default Directive는 명시적 Plan Directive가 없는 모든 PDB에 자동 적용되는 기본 리소스 정책입니다. DBMS_RESOURCE_MANAGER.UPDATE_CDB_DEFAULT_DIRECTIVE로 shares, utilization_limit 등을 설정하면, 기존 PDB와 향후 플러그인되는 신규 PDB 모두에 적용됩니다. 이를 통해 Directive 미설정 PDB의 리소스 사용을 사전에 제어할 수 있습니다."
+    "answer": [
+      "A"
+    ],
+    "explanation": "정답: A\nA) 정답 — Plan Directive는 Resource Plan 내에서 각 Consumer Group에 대한 리소스 관리 정책(예: CPU 배분 비율, 병렬 처리 제한 등)을 지정하는 설정입니다. 이를 통해 워크로드별 우선순위와 상한이 관리되어 중요 작업이 리소스를 안정적으로 확보할 수 있습니다.\n\nB) 오답 — SQL 파싱 결과 캐싱은 Shared Pool의 라이브러리 캐시 기능이며, Plan Directive와는 완전히 별개의 영역입니다.\n\nC) 오답 — ALTER SYSTEM SET RESOURCE_MANAGER_PLAN은 Resource Plan을 활성화·비활성화하는 명령이며, Plan Directive와는 다른 개념입니다. Plan Directive는 Plan 내부의 구성 요소입니다.\n\nD) 오답 — Plan Directive는 UNDO 테이블스페이스 크기 설정 구문이 아닙니다. UNDO 관리와 Resource Manager의 Plan Directive는 관리 영역이 다릅니다.\n\n핵심 개념: Plan Directive는 Resource Plan 내에서 Consumer Group별 리소스 관리 정책을 지정하는 구성 요소로, 워크로드별 우선순위와 상한을 정하여 리소스 경쟁을 관리합니다."
   }
 ]

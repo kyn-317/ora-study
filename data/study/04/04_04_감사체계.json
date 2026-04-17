@@ -44,7 +44,6 @@
       "content": "통합 감사(Unified Auditing)는 Oracle 12c부터 도입된 단일화된 감사 프레임워크로, 기존의 여러 감사 방식(DB 감사, OS 감사, XML 감사, FGA 등)을 **하나의 감사 트레일**로 통합합니다. Oracle 26ai에서는 통합 감사가 **기본(Default)** 감사 방식이며, 정책 기반(Policy-Based) 접근으로 감사 대상을 유연하게 정의할 수 있습니다.\n\n## 통합 감사 vs 전통적 감사 비교\n\n| 항목 | 통합 감사 (Unified) | 전통적 감사 (Traditional) |\n|---|---|---|\n| **도입 버전** | Oracle 12c~ | Oracle 10g 이전~ |\n| **감사 트레일** | 단일 (UNIFIED_AUDIT_TRAIL) | 분산 (DB, OS, XML 별도) |\n| **정책 기반** | CREATE AUDIT POLICY로 정책 정의 | AUDIT 문으로 개별 지정 |\n| **성능** | SGA 큐 기반 비동기 기록 (우수) | 동기 기록 (상대적 부하) |\n| **관리** | AUDIT_ADMIN / AUDIT_VIEWER 롤 | DBA 롤 또는 AUDIT SYSTEM |\n| **SYS 감사** | 통합 트레일에 포함 가능 | 별도 OS 파일에만 기록 |\n| **조건부 감사** | WHEN 절로 조건 지정 가능 | 제한적 |\n\n## AUDSYS 스키마\n\nAUDSYS는 통합 감사 트레일 데이터를 저장하는 전용 내부 스키마입니다.\n\n| 항목 | 설명 |\n|---|---|\n| **소유 객체** | AUD$UNIFIED 테이블 (감사 레코드 저장) |\n| **테이블스페이스** | AUDSYS 데이터는 SYSAUX 테이블스페이스에 저장 (변경 가능) |\n| **접근 제한** | 직접 로그인 불가, UNIFIED_AUDIT_TRAIL 뷰를 통해서만 조회 |\n| **보호** | DROP, ALTER 불가 (Oracle 내부 보호) |\n\n## 혼합 모드 vs 순수 통합 감사 모드\n\n| 모드 | 설명 | 확인 방법 |\n|---|---|---|\n| **혼합 모드 (Mixed Mode)** | 전통적 감사와 통합 감사가 공존. 기본 설치 시 이 모드 | V$OPTION에서 'Unified Auditing' = FALSE |\n| **순수 통합 감사 모드 (Pure)** | 오직 통합 감사만 동작. 전통적 감사 비활성화 | V$OPTION에서 'Unified Auditing' = TRUE |\n\n순수 통합 감사 모드로 전환하려면 Oracle 바이너리를 재링크(relink)해야 합니다:\n\n```bash\n# 순수 통합 감사 모드 전환 (Linux)\ncd $ORACLE_HOME/rdbms/lib\nmake -f ins_rdbms.mk uniaud_on ioracle ORACLE_HOME=$ORACLE_HOME\n```",
       "sqlExamplesIds": [
         "sql01",
-        "sql02",
         "sql03",
         "sql04",
         "sql05"
@@ -52,11 +51,11 @@
       "subsections": [
         {
           "title": "감사 정책 생성 및 관리 (Creating and Managing Audit Policies)",
-          "content": "통합 감사 정책은 CREATE AUDIT POLICY 문으로 생성합니다. 하나의 정책에 여러 감사 대상(권한, 액션, 롤)을 포함할 수 있으며, 조건(WHEN 절)을 지정하여 특정 상황에서만 감사가 동작하도록 설정할 수 있습니다. 정책을 생성한 후에는 반드시 AUDIT POLICY 문으로 활성화해야 실제 감사가 수행됩니다.\n\n### 감사 정책 유형\n\n| 정책 유형 | 설명 | 예시 |\n|---|---|---|\n| **권한 감사 (Privilege Auditing)** | 시스템 권한 사용 시 감사 | PRIVILEGES CREATE TABLE, DROP ANY TABLE |\n| **액션 감사 (Action Auditing)** | 특정 SQL 동작 수행 시 감사 | ACTIONS DELETE ON hr.employees |\n| **롤 감사 (Role Auditing)** | 특정 롤에 포함된 모든 권한 사용 시 감사 | ROLES dba, resource |\n| **컴포넌트 감사 (Component Auditing)** | Oracle Label Security, RMAN 등 컴포넌트 활동 감사 | ACTIONS COMPONENT=DATAPUMP EXPORT |\n\n### 감사 정책 DDL 문법\n\n```sql\n-- 기본 문법\nCREATE AUDIT POLICY policy_name\n  { PRIVILEGES privilege1 [, privilege2 ...] }\n  { ACTIONS action1 [ON schema.object] [, action2 ...] }\n  { ROLES role1 [, role2 ...] }\n  [WHEN 'condition' EVALUATE PER {STATEMENT | SESSION | INSTANCE}]\n  [CONTAINER = {CURRENT | ALL}];\n\n-- 정책 수정\nALTER AUDIT POLICY policy_name\n  ADD PRIVILEGES privilege1\n  DROP ACTIONS action1;\n\n-- 정책 삭제\nDROP AUDIT POLICY policy_name;\n```\n\n### 감사 정책 활성화/비활성화\n\n```sql\n-- 모든 사용자에게 적용\nAUDIT POLICY policy_name;\n\n-- 특정 사용자에게만 적용\nAUDIT POLICY policy_name BY user1, user2;\n\n-- 특정 사용자를 제외하고 적용\nAUDIT POLICY policy_name EXCEPT user1;\n\n-- 비활성화\nNOAUDIT POLICY policy_name;\nNOAUDIT POLICY policy_name BY user1;\n```\n\n### WHEN 절을 사용한 조건부 감사\n\nWHEN 절을 사용하면 특정 조건에서만 감사가 수행되어 감사 데이터의 양을 줄이고 성능 영향을 최소화할 수 있습니다.\n\n| EVALUATE PER 옵션 | 설명 |\n|---|---|\n| **STATEMENT** | 각 SQL 문 실행 시마다 조건 평가 |\n| **SESSION** | 세션 시작 시 한 번만 조건 평가 |\n| **INSTANCE** | 인스턴스 수준에서 조건 평가 |\n\n사용 가능한 조건 함수: SYS_CONTEXT('USERENV', 'IP_ADDRESS'), SYS_CONTEXT('USERENV', 'SESSION_USER'), SYS_CONTEXT('USERENV', 'CLIENT_PROGRAM_NAME') 등.",
+          "content": "통합 감사 정책은 CREATE AUDIT POLICY 문으로 생성합니다. 하나의 정책에 여러 감사 대상(권한, 액션, 롤)을 포함할 수 있으며, WHEN 절로 조건부 감사를 지정할 수도 있습니다(상세 조건식 작성은 실버 범위 밖). 정책을 생성한 후에는 반드시 AUDIT POLICY 문으로 활성화해야 실제 감사가 수행됩니다.\n\n### 감사 정책 유형\n\n| 정책 유형 | 설명 | 예시 |\n|---|---|---|\n| **권한 감사 (Privilege Auditing)** | 시스템 권한 사용 시 감사 | PRIVILEGES CREATE TABLE, DROP ANY TABLE |\n| **액션 감사 (Action Auditing)** | 특정 SQL 동작 수행 시 감사 | ACTIONS DELETE ON hr.employees |\n| **롤 감사 (Role Auditing)** | 특정 롤에 포함된 모든 권한 사용 시 감사 | ROLES dba, resource |\n| **컴포넌트 감사 (Component Auditing)** | Oracle Label Security, RMAN 등 컴포넌트 활동 감사 | ACTIONS COMPONENT=DATAPUMP EXPORT |\n\n### 감사 정책 DDL 문법\n\n```sql\n-- 기본 문법\nCREATE AUDIT POLICY policy_name\n  { PRIVILEGES privilege1 [, privilege2 ...] }\n  { ACTIONS action1 [ON schema.object] [, action2 ...] }\n  { ROLES role1 [, role2 ...] }\n  [CONTAINER = {CURRENT | ALL}];\n\n-- 정책 수정\nALTER AUDIT POLICY policy_name\n  ADD PRIVILEGES privilege1\n  DROP ACTIONS action1;\n\n-- 정책 삭제\nDROP AUDIT POLICY policy_name;\n```\n\n### 감사 정책 활성화/비활성화\n\n```sql\n-- 모든 사용자에게 적용\nAUDIT POLICY policy_name;\n\n-- 특정 사용자에게만 적용\nAUDIT POLICY policy_name BY user1, user2;\n\n-- 특정 사용자를 제외하고 적용\nAUDIT POLICY policy_name EXCEPT user1;\n\n-- 비활성화\nNOAUDIT POLICY policy_name;\nNOAUDIT POLICY policy_name BY user1;\n```",
           "key_points": [
             "CREATE AUDIT POLICY로 정책 생성 후 반드시 AUDIT POLICY로 활성화해야 실제 감사 수행",
             "하나의 정책에 PRIVILEGES, ACTIONS, ROLES를 조합하여 복합 감사 조건 정의 가능",
-            "WHEN 절과 EVALUATE PER 옵션으로 조건부 감사를 설정하여 감사 데이터 양과 성능 영향 최소화",
+            "WHEN 절로 조건부 감사 지정 가능 (존재 여부만 인지; 세부 조건식은 실버 범위 밖)",
             "AUDIT POLICY ... BY user로 특정 사용자에게만, EXCEPT로 특정 사용자를 제외하고 적용 가능",
             "ALTER AUDIT POLICY로 기존 정책에 ADD/DROP으로 감사 대상 추가/제거 가능",
             "CONTAINER = ALL로 CDB 전체에 공통 감사 정책 적용 가능 (멀티테넌트 환경)"
@@ -87,14 +86,11 @@
         },
         {
           "title": "감사 트레일 관리 (Audit Trail Management with DBMS_AUDIT_MGMT)",
-          "content": "통합 감사 트레일은 시간이 지남에 따라 크기가 증가하므로, DBMS_AUDIT_MGMT 패키지를 사용하여 주기적으로 관리해야 합니다. 이 패키지는 감사 트레일의 아카이브 타임스탬프 설정, 정리(Purge), 저장 위치 변경 등의 기능을 제공합니다.\n\n### DBMS_AUDIT_MGMT 주요 프로시저\n\n| 프로시저 | 설명 |\n|---|---|\n| **SET_LAST_ARCHIVE_TIMESTAMP** | 아카이브가 완료된 마지막 시점 지정 (이 시점 이전 레코드만 정리 가능) |\n| **CLEAN_AUDIT_TRAIL** | 아카이브 타임스탬프 이전의 감사 레코드 삭제 |\n| **SET_AUDIT_TRAIL_PROPERTY** | 감사 트레일 속성 변경 (저장 위치, 크기 제한 등) |\n| **SET_AUDIT_TRAIL_LOCATION** | 감사 트레일 테이블스페이스 변경 |\n| **CREATE_PURGE_JOB** | 자동 정리 스케줄러 작업 생성 |\n| **DROP_PURGE_JOB** | 자동 정리 작업 삭제 |\n| **IS_CLEANUP_INITIALIZED** | 정리 초기화 여부 확인 |\n| **INIT_CLEANUP** | 감사 트레일 정리 초기화 |\n\n### 감사 트레일 정리 절차\n\n```\n1. SET_LAST_ARCHIVE_TIMESTAMP로 아카이브 완료 시점 설정\n    ↓\n2. CLEAN_AUDIT_TRAIL로 해당 시점 이전 레코드 삭제\n    ↓\n3. (선택) CREATE_PURGE_JOB으로 자동 정리 스케줄 설정\n```\n\n### 감사 트레일 저장 위치 관리\n\n기본적으로 통합 감사 트레일은 SYSAUX 테이블스페이스에 저장됩니다. 감사 데이터가 대량으로 발생하는 환경에서는 전용 테이블스페이스로 이동하는 것이 권장됩니다.\n\n| 관련 뷰 | 설명 |\n|---|---|\n| **DBA_AUDIT_MGMT_CLEANUP_JOBS** | 자동 정리 작업 목록 |\n| **DBA_AUDIT_MGMT_CLEAN_EVENTS** | 정리 작업 실행 이력 |\n| **DBA_AUDIT_MGMT_LAST_ARCH_TS** | 설정된 마지막 아카이브 타임스탬프 |",
+          "content": "통합 감사 트레일은 시간이 지남에 따라 크기가 증가하므로, **DBMS_AUDIT_MGMT 패키지**를 사용하여 주기적으로 정리·아카이브·저장 위치 이동을 수행할 수 있습니다. 이 패키지 사용 자체가 **강제 감사 대상**이므로 감사 트레일의 무결성이 보장됩니다. 상세 프로시저/파라미터 시그니처는 실버 범위 밖입니다.\n\n통합 감사 트레일의 **기본 저장 위치는 SYSAUX 테이블스페이스**이며, 감사 데이터가 대량으로 발생하는 환경에서는 전용 테이블스페이스로 이동하는 것이 권장됩니다.",
           "key_points": [
-            "DBMS_AUDIT_MGMT.SET_LAST_ARCHIVE_TIMESTAMP으로 아카이브 완료 시점을 먼저 설정해야 CLEAN_AUDIT_TRAIL 실행 가능",
-            "CLEAN_AUDIT_TRAIL은 아카이브 타임스탬프 이전의 감사 레코드만 삭제하여 데이터 손실 방지",
-            "CREATE_PURGE_JOB으로 자동 정리 스케줄러 작업을 생성하여 주기적 감사 트레일 관리 가능",
-            "통합 감사 트레일 기본 저장 위치는 SYSAUX 테이블스페이스이며, SET_AUDIT_TRAIL_LOCATION으로 전용 테이블스페이스로 이동 가능",
-            "DBMS_AUDIT_MGMT 패키지 사용 자체가 강제 감사 대상이므로, 패키지 사용 이력이 자동으로 기록됨",
-            "DBA_AUDIT_MGMT_CLEANUP_JOBS 뷰로 자동 정리 작업의 상태와 스케줄을 확인 가능"
+            "DBMS_AUDIT_MGMT는 감사 트레일 정리·아카이브·저장 위치 관리용 패키지 (세부 프로시저는 실버 범위 밖)",
+            "통합 감사 트레일 기본 저장 위치는 SYSAUX 테이블스페이스이며 전용 테이블스페이스로 이동 가능",
+            "DBMS_AUDIT_MGMT 패키지 사용 자체가 강제 감사 대상이므로, 사용 이력이 자동으로 기록됨"
           ]
         }
       ],
@@ -113,9 +109,7 @@
       "sectionId": "s03",
       "title": "강제 감사 (Mandatory Auditing)",
       "content": "강제 감사(Mandatory Auditing)는 감사 설정 여부와 관계없이 **항상 기록되는** 감사 항목입니다. 이 항목들은 NOAUDIT 문이나 감사 정책 비활성화로도 비활성화할 수 없으며, 데이터베이스 보안의 최소 감사 기준선(Baseline)을 제공합니다.\n\n## 강제 감사 대상 항목\n\n| 강제 감사 항목 | 설명 |\n|---|---|\n| **SYSDBA/SYSOPER 접속** | AS SYSDBA 또는 AS SYSOPER로의 모든 접속(성공/실패) |\n| **데이터베이스 기동 (STARTUP)** | 데이터베이스 인스턴스 기동 이벤트 |\n| **데이터베이스 종료 (SHUTDOWN)** | 데이터베이스 인스턴스 종료 이벤트 |\n| **DBMS_AUDIT_MGMT 패키지 사용** | 감사 트레일 관리 패키지의 모든 프로시저 호출 |\n\n## 강제 감사 레코드 저장 위치\n\n| 모드 | 저장 위치 |\n|---|---|\n| **순수 통합 감사 모드** | UNIFIED_AUDIT_TRAIL (AUDSYS 스키마) |\n| **혼합 모드** | OS 감사 파일 ($ORACLE_BASE/audit/ 또는 Windows 이벤트 로그) |\n| **데이터베이스 미기동 시** | OS 감사 파일 (DB 기동 전이므로 DB 내 기록 불가) |\n\n## 강제 감사의 존재 이유\n\n강제 감사는 다음과 같은 상황을 방지하기 위해 설계되었습니다:\n\n1. **감사 우회 방지**: 관리자 권한 접속 기록을 삭제하거나 감사를 비활성화하여 추적을 피하는 행위 방지\n2. **감사 트레일 무결성 보호**: DBMS_AUDIT_MGMT 사용 기록을 남겨, 감사 트레일 자체의 조작 시도 추적\n3. **기동/종료 추적**: 비인가 기동/종료로 인한 서비스 중단 탐지",
-      "sqlExamplesIds": [
-        "sql06"
-      ],
+      "sqlExamplesIds": [],
       "subsections": [
         {
           "title": "강제 감사 항목 상세 및 저장 메커니즘 (Mandatory Audit Items and Storage Mechanism)",
@@ -208,12 +202,6 @@
       "description": "CREATE AUDIT POLICY 문으로 통합 감사 정책을 생성합니다. PRIVILEGES 절로 시스템 권한 사용을, ACTIONS 절로 특정 객체에 대한 DML을, ROLES 절로 특정 롤에 포함된 모든 권한 사용을 감사 대상으로 지정합니다."
     },
     {
-      "sqlExamplesId": "sql02",
-      "title": "조건부 감사 정책 생성 (WHEN 절)",
-      "sql": "-- IP 주소 기반 조건부 감사 정책\nCREATE AUDIT POLICY pol_external_access\n  PRIVILEGES SELECT ANY TABLE\n  ACTIONS SELECT ON hr.employees\n  WHEN 'SYS_CONTEXT(''USERENV'', ''IP_ADDRESS'') NOT IN (''192.168.1.0'', ''10.0.0.0'')'\n  EVALUATE PER SESSION;",
-      "description": "WHEN 절을 사용하여 특정 조건(예: 외부 IP에서의 접속)에서만 감사가 수행되도록 조건부 감사 정책을 생성합니다. EVALUATE PER SESSION은 세션 시작 시 한 번만 조건을 평가합니다."
-    },
-    {
       "sqlExamplesId": "sql03",
       "title": "감사 정책 활성화/비활성화 (AUDIT / NOAUDIT POLICY)",
       "sql": "-- 모든 사용자에게 감사 정책 적용\nAUDIT POLICY pol_priv_audit;\n\n-- 특정 사용자에게만 적용\nAUDIT POLICY pol_priv_audit BY hr, scott;\n\n-- 특정 사용자 제외\nAUDIT POLICY pol_external_access EXCEPT sys, system;\n\n-- 정책 비활성화\nNOAUDIT POLICY pol_priv_audit;\nNOAUDIT POLICY pol_priv_audit BY hr;\n\n-- 활성화된 정책 확인\nSELECT policy_name, enabled_option, entity_name, entity_type\nFROM   audit_unified_enabled_policies\nORDER BY policy_name;",
@@ -230,12 +218,6 @@
       "title": "감사 정책 메타데이터 조회",
       "sql": "-- 정의된 모든 감사 정책 확인\nSELECT policy_name, audit_option, audit_option_type,\n       object_schema, object_name, object_type\nFROM   audit_unified_policies\nORDER BY policy_name;\n\n-- 활성화된 정책과 적용 대상 확인\nSELECT policy_name, enabled_option, entity_name,\n       entity_type, success, failure\nFROM   audit_unified_enabled_policies\nORDER BY policy_name;\n\n-- 통합 감사 모드 확인 (Pure vs Mixed)\nSELECT parameter, value\nFROM   v$option\nWHERE  parameter = 'Unified Auditing';",
       "description": "AUDIT_UNIFIED_POLICIES 뷰로 정의된 감사 정책의 상세 내용을, AUDIT_UNIFIED_ENABLED_POLICIES 뷰로 활성화된 정책과 적용 대상을 확인합니다. V$OPTION으로 순수/혼합 통합 감사 모드를 확인합니다."
-    },
-    {
-      "sqlExamplesId": "sql06",
-      "title": "DBMS_AUDIT_MGMT를 사용한 감사 트레일 관리",
-      "sql": "-- 1. 아카이브 타임스탬프 설정 (7일 이전 데이터 정리 준비)\nBEGIN\n  DBMS_AUDIT_MGMT.SET_LAST_ARCHIVE_TIMESTAMP(\n    audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,\n    last_archive_time => SYSTIMESTAMP - INTERVAL '7' DAY\n  );\nEND;\n/\n\n-- 2. 감사 트레일 정리 (아카이브 타임스탬프 이전 레코드 삭제)\nBEGIN\n  DBMS_AUDIT_MGMT.CLEAN_AUDIT_TRAIL(\n    audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,\n    use_last_arch_timestamp => TRUE\n  );\nEND;\n/\n\n-- 3. 자동 정리 작업 생성 (매일 실행)\nBEGIN\n  DBMS_AUDIT_MGMT.CREATE_PURGE_JOB(\n    audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,\n    audit_trail_purge_interval => 24,  -- 시간 단위 (24시간마다)\n    audit_trail_purge_name => 'DAILY_AUDIT_PURGE',\n    use_last_arch_timestamp => TRUE\n  );\nEND;\n/\n\n-- 감사 트레일 테이블스페이스 이동\nBEGIN\n  DBMS_AUDIT_MGMT.SET_AUDIT_TRAIL_LOCATION(\n    audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,\n    audit_trail_location_value => 'AUDIT_TS'\n  );\nEND;\n/",
-      "description": "DBMS_AUDIT_MGMT 패키지를 사용하여 감사 트레일을 관리합니다. SET_LAST_ARCHIVE_TIMESTAMP로 아카이브 시점을 설정하고, CLEAN_AUDIT_TRAIL로 정리하며, CREATE_PURGE_JOB으로 자동 정리 작업을 생성합니다."
     },
     {
       "sqlExamplesId": "sql07",
@@ -276,8 +258,6 @@
     "파인 그레인 감사 (Fine-Grained Auditing, FGA)",
     "DBMS_FGA.ADD_POLICY",
     "DBMS_AUDIT_MGMT",
-    "CLEAN_AUDIT_TRAIL",
-    "SET_LAST_ARCHIVE_TIMESTAMP",
     "ORA_SECURECONFIG",
     "ORA_LOGON_FAILURES",
     "SYSDBA 접속 감사",
@@ -294,7 +274,6 @@
     "액션 감사 (Action Auditing)",
     "롤 감사 (Role Auditing)",
     "혼합 모드 (Mixed Mode)",
-    "순수 통합 감사 (Pure Unified Auditing)",
-    "CREATE_PURGE_JOB"
+    "순수 통합 감사 (Pure Unified Auditing)"
   ]
 }

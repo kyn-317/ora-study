@@ -4,7 +4,7 @@
     "number": "C_06_011",
     "title": "Oracle AI DatabaseのBIGFILE表領域について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) BIGFILE表領域はROWIDのファイル番号ビット(10ビット)をブロック番号に再割当てすることで、単一データ・ファイルで最大約42億ブロックまで使用できる。",
+      "A) BIGFILE表領域は単一データ・ファイルで大容量のデータを管理できる構造であり、8KBブロック環境では1データ・ファイルで最大約32TBまで格納することが可能である。",
       "B) BIGFILE表領域ではALTER TABLESPACE ... RESIZEコマンドを使用して表領域レベルでサイズを直接変更することが可能である。",
       "C) BIGFILE表領域はデータ・ファイルが1つに限定されるため、ALTER TABLESPACE ... ADD DATAFILEコマンドでデータ・ファイルを追加してからRESIZEする必要がある。",
       "D) BIGFILE表領域を作成した場合、SMALLFILE表領域に後から変更することが可能である。",
@@ -14,7 +14,7 @@
       "A",
       "B"
     ],
-    "explanation": "정답: A, B\nA) 정답 — BIGFILE 테이블스페이스는 ROWID에서 파일 번호에 할당되던 10비트를 블록 번호에 재할당하여, 블록 번호가 32비트로 확장됩니다. 이를 통해 단일 데이터 파일에서 최대 약 42억(2^32)개의 블록을 사용할 수 있으며, 8KB 블록 기준 약 32TB까지 지원합니다.\n\nB) 정답 — BIGFILE 테이블스페이스는 데이터 파일이 정확히 1개이므로, ALTER TABLESPACE ... RESIZE 명령으로 테이블스페이스 레벨에서 직접 크기를 변경할 수 있습니다. SMALLFILE에서는 이 명령을 사용할 수 없고 ALTER DATABASE DATAFILE ... RESIZE로 파일 단위 관리가 필요합니다.\n\nC) 오답 — BIGFILE 테이블스페이스에서는 ADD DATAFILE 명령을 사용할 수 없습니다. 데이터 파일은 정확히 1개만 허용되며, 크기 변경은 ALTER TABLESPACE ... RESIZE로 직접 수행합니다.\n\nD) 오답 — 테이블스페이스 생성 후 BIGFILE에서 SMALLFILE로, 또는 SMALLFILE에서 BIGFILE로 유형을 변경하는 것은 불가능합니다. 테이블스페이스 유형은 생성 시 결정되며 변경할 수 없습니다.\n\nE) 오답 — BIGFILE 테이블스페이스는 ASM 환경에서 사용할 수 있으며, 오히려 ASM + OMF 환경에서 가장 효과적으로 사용됩니다. ASM이 AU 단위로 스트라이핑하여 단일 파일이라도 다중 디스크에 I/O를 분산시킵니다.\n\n핵심 개념: BIGFILE 테이블스페이스는 ROWID의 파일 번호 비트를 블록 번호에 재할당하여 단일 데이터 파일로 대용량 저장을 지원하며, ALTER TABLESPACE 레벨에서 RESIZE와 AUTOEXTEND 설정이 가능합니다. ASM + OMF 환경에서의 사용이 권장됩니다."
+    "explanation": "정답: A, B\nA) 정답 — BIGFILE 테이블스페이스는 단일 데이터 파일만을 사용하여 대용량 데이터를 관리하는 구조입니다. 8KB 블록 환경에서 하나의 데이터 파일이 최대 약 32TB까지 저장할 수 있으며, 이는 SMALLFILE(단일 데이터 파일 최대 약 32GB)보다 훨씬 큰 용량을 단일 파일로 처리할 수 있는 것이 특징입니다.\n\nB) 정답 — BIGFILE 테이블스페이스는 데이터 파일이 정확히 1개이므로, ALTER TABLESPACE ... RESIZE 명령으로 테이블스페이스 레벨에서 직접 크기를 변경할 수 있습니다. SMALLFILE에서는 이 명령을 사용할 수 없고 ALTER DATABASE DATAFILE ... RESIZE로 파일 단위 관리가 필요합니다.\n\nC) 오답 — BIGFILE 테이블스페이스에서는 ADD DATAFILE 명령을 사용할 수 없습니다. 데이터 파일은 정확히 1개만 허용되며, 크기 변경은 ALTER TABLESPACE ... RESIZE로 직접 수행합니다.\n\nD) 오답 — 테이블스페이스 생성 후 BIGFILE에서 SMALLFILE로, 또는 SMALLFILE에서 BIGFILE로 유형을 변경하는 것은 불가능합니다. 테이블스페이스 유형은 생성 시 결정되며 변경할 수 없습니다.\n\nE) 오답 — BIGFILE 테이블스페이스는 ASM 환경에서 사용할 수 있으며, 오히려 ASM + OMF 환경에서 가장 효과적으로 사용됩니다. ASM이 AU 단위로 스트라이핑하여 단일 파일이라도 다중 디스크에 I/O를 분산시킵니다.\n\n핵심 개념: BIGFILE 테이블스페이스는 단일 데이터 파일로 대용량 저장을 지원하는 테이블스페이스 유형입니다. 8KB 블록 환경에서 최대 약 32TB를 단일 파일로 관리할 수 있으며, ALTER TABLESPACE 레벨에서 RESIZE·AUTOEXTEND 설정이 가능합니다. ASM + OMF 환경에서의 사용이 권장됩니다."
   },
   {
     "chapter": "表領域およびデータファイルの管理",

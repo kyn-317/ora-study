@@ -17,5 +17,36 @@
     "ツール横断比較": 3
   },
   "total_custom": 31,
-  "last_number": "C_02_031"
+  "last_number": "C_02_031",
+  "forbidden_topics": [],
+  "original_coverage_map": {
+    "DBCA": [
+      "DBCA"
+    ],
+    "SQL*Plus": [
+      "SQL*Plus",
+      "ツール横断比較"
+    ],
+    "RMAN": [
+      "RMAN"
+    ],
+    "Enterprise Manager Cloud Control": [
+      "Enterprise Manager Cloud Control"
+    ],
+    "SQL Developer": [
+      "SQL Developer"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 5키 전부 매핑됨(진정한 gap 없음). Before 0 flagged → After 0 flagged 유지. DBCA(6건·+2.69%)·SQL*Plus(10건 포함 ツール横断比較 3건·-1.08%)·RMAN(7건·+5.91%)·EM Cloud Control(6건·+2.69%)·SQL Developer(2건·-10.22%) 모든 topic이 임계(15%) 이내. 31문항 확장이 원본 가중치(1:2:1:1:1)에 근사 수렴. ツール横断비교(3건)는 SQL*Plus 범주로 매핑 — revision_log P2 배치1에서 RMAN vs SQL*Plus 도구 역할 비교로 재구성된 맥락상 SQL*Plus(조정 셸 도구)가 주 귀속점."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "P2",
+    "files": ["custom_02_002.json", "custom_02_006.json"],
+    "summary": "P2 배치1 — C_02_008·027·030 RMAN 백업/복구 세부를 도구 역할 관점으로 교체 (Level 0/1·Backup Set vs Image Copy·RESTORE/RECOVER·VALIDATE+V$DATABASE_BLOCK_CORRUPTION 제거)"
+  }
 }

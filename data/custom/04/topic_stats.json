@@ -38,5 +38,57 @@
     "接続障害診断(ORAエラー)": 1
   },
   "total_custom": 30,
-  "last_number": "C_04_030"
+  "last_number": "C_04_030",
+  "forbidden_topics": [],
+  "original_coverage_map": {
+    "tnsping診断": [
+      "tnsping診断",
+      "接続障害診断(ORAエラー)"
+    ],
+    "ネットワーク構成ツール": [
+      "ネットワーク構成ツール",
+      "リスナー制御(lsnrctl)",
+      "lsnrctl status出力解釈",
+      "lsnrctl services出力解釈",
+      "listener.ora構成",
+      "TNS_ADMIN環境変数"
+    ],
+    "マルチテナント環境のリスナー": [
+      "マルチテナント環境のリスナー",
+      "動的・静的サービス登録",
+      "SERVICE_NAMESパラメータ",
+      "共有サーバー構成",
+      "DRCP(接続プーリング)",
+      "リスナー・セキュリティ",
+      "接続処理方式(Redirect/Hand-off)",
+      "接続処理のフロー"
+    ],
+    "簡易接続ネーミング": [
+      "簡易接続ネーミング",
+      "ローカル・ネーミング(tnsnames.ora)",
+      "ネーミング・メソッド比較",
+      "接続ディスクリプタ(CONNECT_DATA)",
+      "Easy Connect Plus拡張構文"
+    ],
+    "データベース・リンク": [
+      "データベース・リンク",
+      "データベース・リンク接続方式",
+      "データベース・リンク作成構文",
+      "GLOBAL_NAMESパラメータ",
+      "GLOBAL_NAMESシナリオ",
+      "マルチテナントDBリンク"
+    ]
+  },
+  "topic_drift_alert": {
+    "drift_threshold_pct": 15,
+    "last_checked": "2026-04-17",
+    "flagged_topics": [],
+    "recheck_note": "2026-04-17 original_coverage_map 재매핑 기반 보정 drift 계산 적용. 원본 5키 전부 매핑됨(진정한 gap 없음). Before 3 flagged → After 0 flagged. 모든 topic이 임계(15%) 이내로 해소. tnsping(3/30·-10.0%)·ネットワーク構成(6/30·0%)·マルチテナントリスナー(8/30·+6.67%)·簡易接続(6/30·0%)·DB링크(7/30·+3.33%). 30문항 확장이 원본 비율(1:1:1:1:1)에 근사 수렴하여 가장 균형잡힌 챕터."
+  },
+  "last_revision": {
+    "date": "2026-04-17",
+    "phase": "schema_extension",
+    "files": [],
+    "summary": "A+B+C+D 비중관리 인프라 구축 — forbidden_topics/topic_drift_alert/last_revision 필드 추가"
+  }
 }

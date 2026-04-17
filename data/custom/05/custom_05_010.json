@@ -2,16 +2,16 @@
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
     "number": "C_05_046",
-    "title": "WITH ADMIN OPTIONで付与されたシステム権限と、WITH GRANT OPTIONで付与されたオブジェクト権限について、Oracle内部のデータ・ディクショナリでの管理方法の違いに関して正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "WITH ADMIN OPTIONで付与されたシステム権限と、WITH GRANT OPTIONで付与されたオブジェクト権限について、REVOKE時の連鎖取消しの発生有無に関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) WITH GRANT OPTIONで付与されたオブジェクト権限はOBJAUTH$テーブルにGRANTOR#（付与者番号）が記録されるため、REVOKE時に付与チェーンをたどって連鎖取消しを実行できる。",
-      "B) WITH ADMIN OPTIONで付与されたシステム権限はSYSAUTH$テーブルに付与者（Grantor）情報が記録されるため、REVOKE時に付与チェーンをたどることが可能である。",
-      "C) DBA_TAB_PRIVSビューのGRANTABLEおよびGRANTOR列を通じて、オブジェクト権限のGRANT OPTION付与状況と付与者を確認できる。",
-      "D) DBA_SYS_PRIVSビューのGRANTOR列を通じて、システム権限の付与者を追跡することが可能である。",
-      "E) WITH ADMIN OPTIONとWITH GRANT OPTIONは共にOBJAUTH$テーブルで管理されるため、内部的な管理方法に違いはない。"
+      "A) WITH GRANT OPTIONで付与されたオブジェクト権限は、上位の付与者からREVOKEすると付与チェーンをたどって下位ユーザーの権限まで自動的に連鎖取消しが発生する。",
+      "B) WITH ADMIN OPTIONで付与されたシステム権限は、上位の付与者からREVOKEしても下位ユーザーの権限は自動的には取り消されず、各ユーザーが独立して権限を保持し続ける。",
+      "C) WITH ADMIN OPTIONとWITH GRANT OPTIONのいずれも、REVOKE時の連鎖取消し動作は同一であり、付与チェーンの全下位ユーザーの権限が自動的に取り消される。",
+      "D) WITH GRANT OPTIONで付与されたオブジェクト権限のREVOKEで連鎖取消しを発生させるには、REVOKE文に明示的にCASCADE CONSTRAINTS句を指定する必要がある。",
+      "E) WITH ADMIN OPTIONのREVOKEでは、下位ユーザーの権限のみが自動的に取り消されるが、その下位ユーザーが他のユーザーに付与した権限は影響を受けない。"
     ],
-    "answer": ["A", "C"],
-    "explanation": "정답: A, C\nA) 정답 — WITH GRANT OPTION으로 부여된 객체 권한은 Oracle 내부의 OBJAUTH$ 딕셔너리 테이블에 GRANTOR#(부여자 번호) 컬럼이 기록됩니다. REVOKE 실행 시 Oracle은 이 부여자 정보를 기반으로 부여 체인을 재귀적으로 추적하여, 해당 부여자로부터 파생된 모든 하위 권한을 자동으로 취소(연쇄 취소)합니다.\n\nC) 정답 — DBA_TAB_PRIVS 뷰는 GRANTABLE 컬럼(YES/NO)으로 GRANT OPTION 부여 여부를, GRANTOR 컬럼으로 권한 부여자를 확인할 수 있습니다. 이를 통해 객체 권한의 부여 체인을 관리자가 추적할 수 있습니다.\n\nB) 오답 — SYSAUTH$ 테이블에는 부여자(Grantor) 정보가 기록되지 않습니다. 시스템 권한은 단순히 해당 사용자에게 권한이 부여되었는지 여부만 저장하므로, REVOKE 시 부여 체인을 추적할 수 없어 연쇄 취소가 발생하지 않습니다.\n\nD) 오답 — DBA_SYS_PRIVS 뷰에는 GRANTOR 컬럼이 존재하지 않습니다. 이 뷰에는 GRANTEE, PRIVILEGE, ADMIN_OPTION, COMMON, INHERITED 등의 컬럼이 있으며, 누가 권한을 부여했는지는 추적할 수 없습니다.\n\nE) 오답 — WITH ADMIN OPTION의 시스템 권한은 SYSAUTH$ 테이블에서, WITH GRANT OPTION의 객체 권한은 OBJAUTH$ 테이블에서 각각 별도로 관리됩니다. 두 테이블의 구조와 부여자 추적 방식이 근본적으로 다릅니다.\n\n핵심 개념: Oracle은 시스템 권한(SYSAUTH$)과 객체 권한(OBJAUTH$)을 별도의 딕셔너리 테이블에서 관리합니다. OBJAUTH$에는 GRANTOR# 컬럼이 있어 부여 체인을 추적할 수 있으므로 연쇄 취소가 가능하지만, SYSAUTH$에는 부여자 정보가 없어 연쇄 취소가 불가능합니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — WITH GRANT OPTION으로 부여된 객체 권한은 상위 부여자로부터 REVOKE 시, 해당 부여자로부터 파생된 부여 체인 전체에 대해 자동으로 연쇄 취소(Cascade Revoke)가 발생합니다. 별도의 CASCADE 절 지정 없이 객체 권한 REVOKE의 기본 동작으로 하위 사용자 권한까지 모두 취소됩니다.\n\nB) 정답 — WITH ADMIN OPTION으로 부여된 시스템 권한은 상위 부여자로부터 REVOKE되어도 하위 사용자의 권한은 자동으로 취소되지 않습니다. 각 사용자는 독립적으로 권한을 보유하므로, 필요 시 관리자가 각 하위 사용자의 권한을 개별적으로 REVOKE해야 합니다. 이것이 ADMIN OPTION과 GRANT OPTION의 REVOKE 동작에서 가장 큰 차이점입니다.\n\nC) 오답 — WITH ADMIN OPTION(시스템 권한)과 WITH GRANT OPTION(객체 권한)의 REVOKE 동작은 명확히 다릅니다. ADMIN OPTION은 비연쇄 취소(No Cascade), GRANT OPTION은 자동 연쇄 취소(Cascade Revoke)가 발생한다는 점이 핵심 차이입니다.\n\nD) 오답 — WITH GRANT OPTION으로 부여된 객체 권한의 REVOKE는 CASCADE CONSTRAINTS 절 없이도 연쇄 취소가 기본 동작으로 발생합니다. CASCADE CONSTRAINTS는 REFERENCES 권한을 REVOKE할 때 참조 무결성 제약을 함께 삭제하는 목적의 절이며, 권한 연쇄 취소 동작을 제어하는 절이 아닙니다.\n\nE) 오답 — WITH ADMIN OPTION의 REVOKE는 REVOKE 대상 사용자의 권한만 제거합니다. 그 사용자가 이미 다른 사용자에게 부여한 권한에는 영향을 주지 않으며, 하위 사용자 권한이 자동으로 취소되지도 않습니다. 지문은 연쇄 취소 동작이 존재한다는 전제부터 부정확합니다.\n\n핵심 개념: WITH GRANT OPTION(객체 권한)의 REVOKE는 별도 CASCADE 절 없이도 부여 체인 전체에 자동으로 연쇄 취소가 발생하지만, WITH ADMIN OPTION(시스템 권한)의 REVOKE는 하위 사용자 권한에 영향을 주지 않아 개별 REVOKE가 필요합니다. 이 결과 차이를 실무 관점에서 이해하는 것이 핵심입니다."
   },
   {
     "chapter": "ユーザー、ロールおよび権限の管理",

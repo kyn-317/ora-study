@@ -62,5 +62,22 @@
       "B"
     ],
     "explanation": "정답: B\nB) 정답 — FAILED_LOGIN_ATTEMPTS와 PASSWORD_LOCK_TIME은 비밀번호 관리 파라미터입니다. 비밀번호 관리 파라미터는 RESOURCE_LIMIT 초기화 파라미터의 설정과 무관하게 항상 적용됩니다. 3회 연속 로그인 실패로 계정이 잠기며(LOCKED(TIMED) 상태), PASSWORD_LOCK_TIME이 1/24일(=1시간)로 설정되어 있으므로 1시간 경과 후 자동으로 잠금이 해제됩니다.\n\nA) 오답 — RESOURCE_LIMIT=FALSE는 CPU_PER_SESSION, CONNECT_TIME 등 자원 제한 파라미터에만 영향을 미칩니다. 비밀번호 관리 파라미터(FAILED_LOGIN_ATTEMPTS, PASSWORD_LOCK_TIME 등)는 RESOURCE_LIMIT 설정과 무관하게 항상 적용됩니다.\n\nC) 오답 — FAILED_LOGIN_ATTEMPTS는 비밀번호 관리 파라미터이지 자원 제한 파라미터가 아닙니다. 따라서 RESOURCE_LIMIT=FALSE여도 계정 잠금은 정상적으로 발생합니다.\n\nD) 오답 — PASSWORD_LOCK_TIME이 설정되어 있으면 지정된 기간(이 경우 1시간) 경과 후 자동으로 잠금이 해제됩니다. 관리자가 수동으로 ALTER USER test_user ACCOUNT UNLOCK을 실행할 필요 없이 자동 해제됩니다.\n\n핵심 개념: 프로파일의 비밀번호 관리 파라미터(FAILED_LOGIN_ATTEMPTS, PASSWORD_LOCK_TIME, PASSWORD_LIFE_TIME 등)는 RESOURCE_LIMIT 파라미터와 무관하게 항상 적용됩니다. RESOURCE_LIMIT=TRUE가 필요한 것은 CPU_PER_SESSION, CONNECT_TIME, IDLE_TIME 등의 자원 제한 파라미터뿐입니다."
+  },
+  {
+    "chapter": "監査の概要",
+    "number": "C_11_025",
+    "title": "DBMS_PRIVILEGE_CAPTUREパッケージを使用した権限分析について正しく述べているものを選択してください(2つ選択してください)。",
+    "options": [
+      "A) CREATE_CAPTUREプロシージャで権限分析ポリシーを作成した後、ENABLE_CAPTUREで有効化し、分析期間終了後にDISABLE_CAPTUREで停止する。結果を確認するにはGENERATE_RESULTを実行する必要がある。",
+      "B) DATABASE型のキャプチャでは、SYSやSYSTEMなどのOracle保守アカウント(ORACLE_MAINTAINED='Y')を含むすべてのユーザーの権限使用状況をキャプチャできる。",
+      "C) GENERATE_RESULTプロシージャを実行すると、DBA_USED_PRIVSおよびDBA_UNUSED_PRIVSビューにキャプチャデータに基づく分析結果が表示される。",
+      "D) DATABASE型のキャプチャは同時に複数有効化でき、異なる分析目的で並行して使用できる。",
+      "E) 権限分析のキャプチャを有効化すると、データベースのパフォーマンスに約20-30%のオーバーヘッドが発生するため、本番環境での使用は推奨されない。"
+    ],
+    "answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "정답: A, C\nA) 정답 — DBMS_PRIVILEGE_CAPTURE를 사용한 권한 분석 워크플로우는 CREATE_CAPTURE(정책 생성) → ENABLE_CAPTURE(활성화) → 워크로드 실행 기간 → DISABLE_CAPTURE(비활성화) → GENERATE_RESULT(결과 생성)의 순서로 진행됩니다. GENERATE_RESULT를 호출해야만 결과 뷰에 데이터가 표시됩니다.\n\nC) 정답 — GENERATE_RESULT 프로시저를 실행하면 캡처된 데이터를 기반으로 DBA_USED_PRIVS(사용된 권한)와 DBA_UNUSED_PRIVS(미사용 권한) 뷰에 분석 결과가 생성됩니다.\n\nB) 오답 — DATABASE 유형의 캡처라 해도 ORACLE_MAINTAINED='Y'인 Oracle 유지 관리 계정(SYS, SYSTEM 등)의 권한 사용은 자동으로 제외됩니다. Oracle 내부 동작에 의한 권한 사용은 사용자 권한 분석과 무관하므로 노이즈 제거를 위해 제외됩니다.\n\nD) 오답 — DATABASE 유형의 캡처는 동시에 하나만 활성화할 수 있습니다. 단, ROLE, CONTEXT, ROLE_AND_CONTEXT 유형은 동시에 여러 개 활성화할 수 있습니다.\n\nE) 오답 — 캡처 활성화 시 성능 오버헤드는 일반적으로 1-3%로 미미합니다. 따라서 본번 환경에서도 충분히 사용할 수 있습니다.\n\n핵심 개념: DBMS_PRIVILEGE_CAPTURE는 CREATE_CAPTURE → ENABLE_CAPTURE → DISABLE_CAPTURE → GENERATE_RESULT의 4단계 워크플로우로 운영되며, GENERATE_RESULT를 호출해야 DBA_USED_PRIVS/DBA_UNUSED_PRIVS 뷰에 결과가 표시됩니다. DATABASE 유형 캡처는 동시에 하나만 활성화 가능하고, Oracle 유지 관리 계정은 자동 제외됩니다."
   }
 ]

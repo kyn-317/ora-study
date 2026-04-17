@@ -1,69 +1,56 @@
 [
   {
     "chapter": "自動メンテナンス",
-    "number": "C_12_033",
-    "title": "Resource ManagerのPlan Directiveに設定可能なSWITCH_TIMEとSWITCH_GROUPパラメータによるConsumer Groupの自動切替えについて正しく述べているものを選択してください(2つ選択してください)。",
-    "options": [
-      "A) SWITCH_TIMEに指定した秒数を超えてSQL文を実行し続けるセッションは、SWITCH_GROUPに指定されたConsumer Groupに自動的に切り替えられる。",
-      "B) SWITCH_FOR_CALLパラメータをTRUEに設定すると、自動切替え後にTop-Level Callが完了した時点でセッションは元のConsumer Groupに自動的に復帰する。",
-      "C) SWITCH_TIMEの設定値はセッション全体の累計実行時間に基づいて評価されるため、個々のSQL文の実行時間は考慮されない。",
-      "D) SWITCH_GROUPに'CANCEL_SQL'を指定すると、そのセッション自体が即座に切断され、再接続が必要となる。",
-      "E) SWITCH_TIMEによる自動切替えはDBAが手動で実行する必要があり、Resource Managerが自動的に実行することはない。"
-    ],
-    "answer": ["A", "B"],
-    "explanation": "정답: A, B\nA) 정답 — Plan Directive의 SWITCH_TIME 파라미터에 지정한 초 수를 초과하여 SQL문을 실행하는 세션은 SWITCH_GROUP에 지정된 Consumer Group으로 자동 전환됩니다. 이를 통해 장시간 실행되는 SQL문이 시스템 리소스를 독점하는 것을 방지합니다. DBRM 백그라운드 프로세스가 실시간으로 이를 감시하고 집행합니다.\n\nB) 정답 — SWITCH_FOR_CALL 파라미터를 TRUE로 설정하면, SWITCH_TIME 초과로 다른 Consumer Group으로 전환된 세션이 현재 Top-Level Call(SQL 실행)이 완료된 시점에 원래의 Consumer Group으로 자동 복귀합니다. FALSE(기본값)인 경우에는 전환된 상태가 유지됩니다.\n\nC) 오답 — SWITCH_TIME은 개별 SQL문(또는 호출) 단위의 실행 시간을 기준으로 평가됩니다. 세션 전체의 누적 실행 시간이 아니라, 하나의 SQL문이 지정된 시간을 초과하면 Consumer Group 전환이 발생합니다. 별도로 SWITCH_TIME_IN_CALL 파라미터는 단일 호출 내에서의 실행 시간을 기준으로 전환합니다.\n\nD) 오답 — SWITCH_GROUP에 'CANCEL_SQL'을 지정하면 SWITCH_TIME을 초과한 SQL문이 취소(종료)되지만, 세션 자체가 절단되는 것이 아닙니다. 세션을 종료하려면 'KILL_SESSION'을 지정해야 합니다.\n\nE) 오답 — SWITCH_TIME에 의한 Consumer Group 전환은 Resource Manager의 DBRM 프로세스에 의해 자동으로 실행됩니다. DBA가 수동으로 전환을 실행할 필요가 없으며, Plan Directive에 설정만 해두면 자동으로 동작합니다.\n\n핵심 개념: Plan Directive의 SWITCH_TIME은 개별 SQL 실행 시간 기반으로 Consumer Group을 자동 전환하며, SWITCH_GROUP에 그룹 이름, 'CANCEL_SQL'(SQL 취소), 'KILL_SESSION'(세션 종료)을 지정할 수 있습니다. SWITCH_FOR_CALL=TRUE이면 호출 완료 후 원래 그룹으로 자동 복귀합니다."
-  },
-  {
-    "chapter": "自動メンテナンス",
-    "number": "C_12_034",
-    "title": "Resource Managerの活性化・非活性化とメンテナンス・ウィンドウの自動プラン切替えとの関係について正しく述べているものを選択してください。",
-    "options": [
-      "A) ALTER SYSTEM SET RESOURCE_MANAGER_PLAN = '' で Resource Managerを非活性化した場合、次のメンテナンス・ウィンドウが開くとウィンドウのresource_plan属性に指定されたResource Planが自動的に再活性化される。",
-      "B) ALTER SYSTEM SET RESOURCE_MANAGER_PLAN = '' FORCE で Resource Managerを非活性化した場合も、メンテナンス・ウィンドウによる自動プラン切替えは正常に動作する。",
-      "C) Resource Managerの活性化・非活性化はSPFILEの変更でのみ可能であり、ALTER SYSTEMコマンドでは動的に変更できない。",
-      "D) Resource Managerを非活性化するとメンテナンス・ウィンドウ自体も無効化されるため、自動化メンテナンス・タスクも実行されなくなる。"
-    ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — ALTER SYSTEM SET RESOURCE_MANAGER_PLAN = ''으로 Resource Manager를 비활성화한 경우, 다음 메인터넌스 윈도우가 열릴 때 해당 윈도우의 resource_plan 속성에 지정된 Resource Plan(기본값: DEFAULT_MAINTENANCE_PLAN)이 자동으로 재활성화됩니다. 이는 FORCE 옵션 없이 비활성화한 경우에 해당합니다.\n\nB) 오답 — ALTER SYSTEM SET RESOURCE_MANAGER_PLAN = '' FORCE로 비활성화한 경우, 메인터넌스 윈도우에 의한 자동 플랜 전환도 차단됩니다. FORCE 옵션은 Resource Manager의 모든 자동 전환(윈도우에 의한 전환 포함)을 무시하므로, 윈도우가 열려도 Resource Plan이 활성화되지 않습니다.\n\nC) 오답 — Resource Manager의 활성화/비활성화는 ALTER SYSTEM SET RESOURCE_MANAGER_PLAN 명령으로 동적으로 변경할 수 있습니다. SPFILE 수정이 필수가 아니며, 인스턴스 재시작 없이 즉시 적용됩니다.\n\nD) 오답 — Resource Manager를 비활성화해도 메인터넌스 윈도우 자체는 무효화되지 않습니다. 윈도우는 Oracle Scheduler의 객체로 독립적으로 동작하며, Resource Manager가 비활성화된 상태에서도 윈도우가 열리면 AutoTask 프레임워크에 의해 자동 유지관리 태스크가 실행될 수 있습니다.\n\n핵심 개념: Resource Manager 비활성화 시 FORCE 옵션 유무가 메인터넌스 윈도우 동작에 결정적 차이를 만듭니다. FORCE 없이 비활성화하면 다음 윈도우에서 자동 재활성화되지만, FORCE로 비활성화하면 윈도우에 의한 자동 전환까지 모두 차단됩니다."
-  },
-  {
-    "chapter": "自動メンテナンス",
-    "number": "C_12_035",
-    "title": "Resource ManagerのPlan DirectiveにおけるMGMT_P1パラメータによるCPU配分メカニズムについて正しく述べているものを選択してください。",
-    "options": [
-      "A) MGMT_P1はConsumer Group間のCPU配分比率(%)を定義し、各グループのMGMT_P1値の合計は100になる必要がある。Level 1で未使用のCPUがある場合、その分はLevel 2以降のMGMT_P2~P8に設定されたグループに流れる。",
-      "B) MGMT_P1の値はCPUコア数の絶対値を指定するものであり、パーセンテージではない。",
-      "C) MGMT_P1~P8の多段レベルCPU配分では、下位レベル(P8)で割り当てられたCPUが優先的に使用され、上位レベル(P1)のグループには残りのCPUが配分される。",
-      "D) MGMT_P1はすべてのConsumer Groupに同じ値を設定する必要があり、グループ間で異なる値を指定することはできない。"
-    ],
-    "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — MGMT_P1은 Consumer Group 간의 CPU 배분 비율(%)을 정의하며, 모든 그룹의 MGMT_P1 값 합계가 100이 되어야 합니다. Level 1(MGMT_P1)에서 할당된 CPU를 사용하지 않는 그룹이 있으면, 그 미사용 CPU는 Level 2(MGMT_P2)에 설정된 그룹으로 흘러내립니다(Cascade). 이 메커니즘으로 최대 8단계(P1~P8)까지 CPU 배분의 계층적 우선순위를 설정할 수 있습니다.\n\nB) 오답 — MGMT_P1은 CPU 코어 수의 절대값이 아니라 백분율(%)입니다. 예를 들어 MGMT_P1=70은 Level 1에서 해당 그룹에 CPU의 70%를 할당한다는 의미입니다.\n\nC) 오답 — 다중 레벨 CPU 배분에서는 상위 레벨(P1)이 먼저 평가되고, 상위 레벨에서 미사용된 CPU만 하위 레벨(P2 이하)로 흘러내립니다. 하위 레벨이 우선되는 것이 아니라 상위 레벨이 우선됩니다.\n\nD) 오답 — MGMT_P1은 Consumer Group별로 다른 값을 지정할 수 있으며, 이것이 CPU 배분의 핵심입니다. 예를 들어 OLTP_GROUP에 70%, REPORT_GROUP에 20%, OTHER_GROUPS에 10%를 각각 설정하여 워크로드에 맞는 CPU 배분이 가능합니다.\n\n핵심 개념: Resource Manager의 Plan Directive에서 MGMT_P1~P8은 8단계 다중 레벨 CPU 배분을 지원합니다. Level 1(MGMT_P1)에서 할당된 CPU 중 미사용분이 Level 2(MGMT_P2)로 흘러내리는 Cascade 구조로, 상위 레벨의 Consumer Group에 우선적으로 CPU가 보장됩니다."
-  },
-  {
-    "chapter": "自動メンテナンス",
     "number": "C_12_036",
-    "title": "Resource Managerに関連する動的パフォーマンス・ビュー(V$ビュー)の用途について正しく述べているものを選択してください(2つ選択してください)。",
+    "title": "Resource Managerのモニタリングに使用される動的パフォーマンス・ビュー（V$ビュー）の一般的な用途について正しく述べているものを選択してください（2つ選択してください）。",
     "options": [
-      "A) V$RSRC_PLANビューでは、現在活性化されているResource Planの情報を確認でき、IS_TOP_PLANカラムやWINDOW_NAMEカラムでどのメンテナンス・ウィンドウによって活性化されたかを判別できる。",
-      "B) V$RSRC_CONSUMER_GROUPビューでは、各Consumer Groupの現在のリソース使用状況(アクティブ・セッション数、CPU消費時間、CPU待機時間、I/Oサービス時間など)をリアルタイムで確認できる。",
-      "C) V$RSRC_PLAN_HISTORYビューには過去24時間分のResource Plan切替え履歴のみが保持され、それ以前の履歴はAWRに自動転送されて削除される。",
-      "D) V$RSRC_PDBビューはPDB内部のConsumer Group間のリソース使用統計を表示するためのビューであり、CDB Resource PlanのPDB間リソース配分には使用できない。",
-      "E) V$RSRC_PLANビューはResource Planが非活性化されている場合でも、最後に使用されたResource Planの情報を保持し続ける。"
+      "A) V$RSRC_PLANビューを参照することで、現在どのResource Planが活性化されているかを確認できる。",
+      "B) V$RSRC_CONSUMER_GROUPビューを参照することで、Consumer Groupごとの現在のリソース使用状況をモニタリングできる。",
+      "C) Resource Managerのモニタリング用V$ビューはResource Managerが活性化されていないデータベースでは提供されず、活性化前には参照できない。",
+      "D) V$ビューは静的データ・ディクショナリ・ビューであり、インスタンスが停止した状態でも過去の履歴を永続的に保持する。",
+      "E) Resource Managerの状況把握はDBA_で始まる静的ビューのみで可能であり、V$ビューはResource Managerには存在しない。"
     ],
     "answer": ["A", "B"],
-    "explanation": "정답: A, B\nA) 정답 — V$RSRC_PLAN 뷰는 현재 활성화된 Resource Plan의 정보를 제공합니다. IS_TOP_PLAN 컬럼으로 최상위 플랜 여부를 확인할 수 있고, WINDOW_NAME 컬럼으로 해당 플랜이 어떤 메인터넌스 윈도우에 의해 활성화되었는지 판별할 수 있습니다. CPU_MANAGED, INSTANCE_CAGING, PARALLEL_SERVER_LIMIT 등의 추가 정보도 제공합니다.\n\nB) 정답 — V$RSRC_CONSUMER_GROUP 뷰는 각 Consumer Group의 실시간 리소스 사용 현황을 제공합니다. ACTIVE_SESSIONS(활성 세션 수), QUEUED_SESSIONS(대기 세션 수), CPU_CONSUMED_TIME(CPU 소비 시간), CPU_WAIT_TIME(CPU 대기 시간), IO_SERVICE_TIME(I/O 서비스 시간), CURRENT_PGA_ALLOCATED(현재 PGA 할당량) 등의 통계를 실시간으로 확인할 수 있습니다.\n\nC) 오답 — V$RSRC_PLAN_HISTORY 뷰는 과거 24시간분만 보관하는 것이 아닙니다. 이 뷰는 V$ 동적 성능 뷰이므로 인스턴스 메모리 기반으로 Resource Plan 전환 이력(전환 시간, 이전/이후 플랜, 전환 원인 등)을 유지하며, 인스턴스 재시작 시 초기화됩니다. 24시간 한정이나 AWR 자동 전송/삭제 메커니즘은 존재하지 않습니다.\n\nD) 오답 — V$RSRC_PDB 뷰는 CDB 레벨에서 각 PDB의 리소스 사용 통계(CPU 사용/대기 시간, IOPS, MBPS 등)를 표시하는 뷰입니다. PDB 내부의 Consumer Group 간 통계가 아니라, CDB Resource Plan에 의한 PDB 간 리소스 배분 현황을 모니터링하는 용도로 사용됩니다.\n\nE) 오답 — V$RSRC_PLAN 뷰는 현재 활성화된 Resource Plan의 정보를 표시합니다. Resource Manager가 비활성화되면(RESOURCE_MANAGER_PLAN = '') 이 뷰에서 IS_TOP_PLAN='TRUE'인 행이 INTERNAL_PLAN으로 변경되며, 이전에 사용한 플랜 정보가 유지되지 않습니다.\n\n핵심 개념: Resource Manager 모니터링의 핵심 뷰는 V$RSRC_PLAN(현재 활성 플랜 및 활성화 원인), V$RSRC_CONSUMER_GROUP(그룹별 실시간 리소스 사용), V$RSRC_PLAN_HISTORY(플랜 전환 이력), V$RSRC_PDB(PDB별 리소스 사용)입니다. 이들을 통해 리소스 배분의 적절성을 실시간으로 평가하고 이력을 추적할 수 있습니다."
+    "explanation": "정답: A, B\nA) 정답 — V$RSRC_PLAN 뷰는 현재 활성화되어 있는 Resource Plan 정보를 제공하는 동적 성능 뷰입니다. DBA는 이 뷰를 통해 현재 어떤 Resource Plan이 적용 중인지를 확인할 수 있으며, Resource Manager 모니터링의 기본 출발점으로 사용됩니다.\n\nB) 정답 — V$RSRC_CONSUMER_GROUP 뷰는 각 Consumer Group의 현재 리소스 사용 현황을 제공하는 뷰입니다. Consumer Group 단위로 세션이 어떻게 리소스를 사용하고 있는지를 실시간으로 파악하여 리소스 배분의 적절성을 평가할 수 있습니다.\n\nC) 오답 — Resource Manager 관련 V$ 뷰는 데이터베이스 기본 기능으로 상시 제공됩니다. Resource Manager가 활성화되지 않은 상태에서도 뷰 자체는 조회 가능하며, 활성화 여부에 따라 결과 내용이 달라질 뿐입니다.\n\nD) 오답 — V$ 뷰는 인스턴스 메모리 기반의 동적 성능 뷰입니다. 인스턴스가 정지하면 내용이 초기화되므로, 인스턴스 정지 상태에서 과거 정보를 영구적으로 유지하는 것은 V$ 뷰가 아닙니다. 영구 보존이 필요한 정보는 AWR·감사 로그·DBA_ 딕셔너리 등에서 관리합니다.\n\nE) 오답 — Resource Manager는 DBA_ 계열 정적 뷰(구성 정보 조회)와 V$ 계열 동적 뷰(실시간 모니터링)을 함께 제공합니다. 양자는 용도가 다르며 V$ 뷰의 존재 자체를 부정하는 설명은 잘못되었습니다.\n\n핵심 개념: Resource Manager의 모니터링은 V$RSRC_PLAN(현재 활성 플랜 확인), V$RSRC_CONSUMER_GROUP(그룹별 리소스 사용 현황) 등의 동적 성능 뷰로 수행합니다. V$ 뷰는 실시간 상태를 제공하며, 구성 자체를 확인하려면 DBA_ 계열 정적 뷰를 병행하여 사용합니다."
   },
   {
     "chapter": "自動メンテナンス",
     "number": "C_12_037",
-    "title": "Oracle Databaseに事前定義されたResource Plan(DEFAULT_PLAN、DEFAULT_MAINTENANCE_PLAN、INTERNAL_PLAN)の特徴について正しく述べているものを選択してください。",
+    "title": "Oracle Databaseがあらかじめ提供するResource Planの一般的な特徴について正しく述べているものを選択してください。",
     "options": [
-      "A) DEFAULT_PLANは通常運用時に使用される基本Resource Planであり、SYS_GROUPに高い優先度を設定し、OTHER_GROUPSに残りのリソースを配分する。",
-      "B) DEFAULT_MAINTENANCE_PLANはDBAが手動で作成する必要があるプランであり、データベース作成時には存在しない。",
-      "C) INTERNAL_PLANはResource Managerが活性化された状態で最も高い優先度で動作するプランであり、すべてのConsumer Groupに均等にリソースを配分する。",
-      "D) すべてのResource Planには必ずOTHER_GROUPSに対するPlan Directiveを含める必要はなく、特定のConsumer Groupのみを対象にしたプランを作成できる。"
+      "A) Oracle Databaseは、通常運用時に使用できる基本Resource Planや、メンテナンス・ウィンドウ期間中のリソース管理に用いられるResource Planなど、事前定義済みのResource Planをいくつか用意している。",
+      "B) 事前定義済みのResource Planは、データベース作成時には存在せず、DBAがCREATE_PLAN/CREATE_PLAN_DIRECTIVEで個別に定義する必要がある。",
+      "C) 事前定義済みのResource Planは、DBAによる変更・削除が一切できない完全に固定された構成であり、PDBでも同一構成で適用される。",
+      "D) 事前定義済みのResource Planは、OTHER_GROUPSへのPlan Directiveを省略してもよい例外として扱われる。"
     ],
     "answer": ["A"],
-    "explanation": "정답: A\nA) 정답 — DEFAULT_PLAN은 통상 운용 시 사용되는 기본 Resource Plan으로, SYS_GROUP에 높은 우선순위를 설정하고 OTHER_GROUPS에 나머지 리소스를 배분합니다. 데이터베이스 생성 시 자동으로 생성됩니다.\n\nB) 오답 — DEFAULT_MAINTENANCE_PLAN은 DBA가 수동으로 생성하는 것이 아니라, 데이터베이스 생성 시 자동으로 생성되는 사전 정의된 Resource Plan입니다. 모든 메인터넌스 윈도우의 기본 resource_plan 속성으로 설정되어 있으며, SYS_GROUP에 최고 우선순위, MAINTENANCE_CONSUMER_GROUP에 중간 수준의 리소스를 할당합니다.\n\nC) 오답 — INTERNAL_PLAN은 Resource Manager가 비활성화된 상태(RESOURCE_MANAGER_PLAN = '')에서 사용되는 내부 플랜입니다. Resource Manager가 활성화된 상태에서 최고 우선순위로 동작하는 것이 아니며, 사실상 리소스 제어를 하지 않는 상태를 나타냅니다.\n\nD) 오답 — 모든 Resource Plan은 반드시 OTHER_GROUPS에 대한 Plan Directive를 포함해야 합니다. OTHER_GROUPS는 매핑 규칙에 의해 분류되지 않은 모든 세션의 기본 그룹이므로, 이에 대한 Directive가 없으면 Resource Plan의 유효성 검증(VALIDATE_PENDING_AREA)에서 오류가 발생합니다.\n\n핵심 개념: Oracle Database는 DEFAULT_PLAN(통상 운용), DEFAULT_MAINTENANCE_PLAN(유지관리 윈도우), INTERNAL_PLAN(RM 비활성화 시) 등의 사전 정의된 Resource Plan을 제공합니다. 모든 Resource Plan은 반드시 OTHER_GROUPS에 대한 Plan Directive를 포함해야 하며, 이는 VALIDATE_PENDING_AREA에서 검증됩니다."
+    "explanation": "정답: A\nA) 정답 — Oracle Database는 통상 운용 시 사용 가능한 기본 Resource Plan과 메인터넌스 윈도우 기간 중의 리소스 관리에 사용되는 Resource Plan 등 사전 정의된 Resource Plan을 데이터베이스 생성 시점에 제공합니다. DBA는 요구사항에 따라 이를 그대로 사용하거나 커스텀 Resource Plan을 추가로 작성할 수 있습니다.\n\nB) 오답 — 사전 정의된 Resource Plan은 데이터베이스 생성 시점에 자동으로 생성되어 있습니다. DBA가 CREATE_PLAN/CREATE_PLAN_DIRECTIVE를 사용해 처음부터 만들어야만 존재하는 것은 아닙니다.\n\nC) 오답 — 사전 정의된 Resource Plan 자체는 Oracle이 기본 제공하는 구성이지만, 완전히 고정되어 절대 변경 불가능하다는 설명은 과합니다. 운영 환경에서는 일반적으로 커스텀 Resource Plan을 추가하여 사용자 정책을 반영합니다. 또한 CDB와 PDB는 각각 별도의 Resource Plan을 가지며 구성이 다를 수 있습니다.\n\nD) 오답 — 모든 Resource Plan은 OTHER_GROUPS에 대한 Plan Directive를 반드시 포함해야 합니다. 이는 사전 정의 플랜이라고 해서 예외가 되지 않습니다. OTHER_GROUPS에 매칭되지 않는 세션의 기본 처리를 정의하기 위한 필수 구성요소입니다.\n\n핵심 개념: Oracle Database는 통상 운용용·메인터넌스 윈도우용 등 사전 정의된 Resource Plan을 제공합니다. 이들은 데이터베이스 생성 시 함께 작성되며, 필요 시 커스텀 Resource Plan을 추가할 수 있습니다. 모든 Resource Plan에는 OTHER_GROUPS에 대한 Plan Directive가 필수로 포함되어야 합니다."
+  },
+  {
+    "chapter": "自動メンテナンス",
+    "number": "C_12_038",
+    "title": "Resource ManagerのPlan Directiveで指定できるリソース制御の基本的な機能について正しく述べているものを選択してください。",
+    "options": [
+      "A) Plan Directiveでは、Consumer Groupに対してCPU配分や並列処理の利用、セッションのプール制御など、複数のリソース側面に関する基本的な制御を指定できる。",
+      "B) Plan Directiveで指定できるリソース制御はCPU配分のみであり、並列実行やセッション・プール、アイドル・セッションの制御はPlan Directiveではなく初期化パラメータで設定する。",
+      "C) Plan Directiveは必ず1つのConsumer Groupにつき1種類のリソース制御のみを指定でき、複数の種類を同時に指定することはできない。",
+      "D) Plan DirectiveはResource Plan全体に対して1つだけ作成でき、Consumer Groupごとに個別のDirectiveを作成することはできない。"
+    ],
+    "answer": ["A"],
+    "explanation": "정답: A\nA) 정답 — Plan Directive는 Resource Plan과 Consumer Group을 연결하여, 해당 Consumer Group에 대해 CPU 배분·병렬 실행 활용·세션 풀 제어 등 여러 리소스 측면의 기본 제어를 동시에 지정할 수 있습니다. 이를 통해 Consumer Group별로 통합된 리소스 정책을 부여합니다.\n\nB) 오답 — Plan Directive는 CPU 배분뿐 아니라 병렬 실행 관련 제어, 활성 세션 풀 제어, 유휴 세션 제어 등 다양한 리소스 제어를 지원합니다. 이들은 모두 Plan Directive 수준에서 설정되며 초기화 파라미터와는 별개로 Resource Manager가 담당하는 영역입니다.\n\nC) 오답 — Plan Directive는 하나의 Consumer Group에 대해 여러 종류의 제어(CPU·병렬·세션 등)를 함께 지정할 수 있습니다. 한 종류만 설정 가능하다는 제약은 존재하지 않습니다.\n\nD) 오답 — Plan Directive는 Resource Plan과 Consumer Group 조합 단위로 작성됩니다. 즉, 하나의 Resource Plan 안에는 각 Consumer Group마다 별도의 Plan Directive가 존재하며, Resource Plan 전체에 하나만 작성되는 것이 아닙니다.\n\n핵심 개념: Plan Directive는 Resource Plan과 Consumer Group을 매핑하여 CPU 배분·병렬 처리·세션 풀 등 다양한 기본 리소스 제어를 Consumer Group별로 통합 지정할 수 있는 단위입니다. 하나의 Resource Plan 안에는 각 Consumer Group마다 Plan Directive가 존재합니다."
+  },
+  {
+    "chapter": "自動メンテナンス",
+    "number": "C_12_039",
+    "title": "自動化メンテナンス・タスクの実行中にメンテナンス・ウィンドウが閉じた場合のAutoTaskフレームワークの一般的な動作について正しく述べているものを選択してください（2つ選択してください）。",
+    "options": [
+      "A) メンテナンス・ウィンドウが閉じた時点で実行中の自動化メンテナンス・タスクは中断される可能性があり、完了できなかった作業は次のメンテナンス・ウィンドウで再開・再スケジュールされる。",
+      "B) AutoTaskフレームワークの実行履歴は、DBA_AUTOTASK_CLIENT_HISTORYなどの専用ビューから確認でき、タスクの完了・中断・未実行などの状態を把握できる。",
+      "C) メンテナンス・ウィンドウの時間内にすべてのタスクを完了できない場合、AutoTaskフレームワークはウィンドウの終了時刻を自動的に延長して全タスクを完了させる。",
+      "D) ウィンドウ終了時に実行中のタスクは一切中断されず、ウィンドウ終了後もバックグラウンドで必ず最後まで実行される。",
+      "E) 自動化メンテナンス・タスクは一度実行されなかった場合は自動で再スケジュールされず、DBAが手動で必ず再実行する必要がある。"
+    ],
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — 메인터넌스 윈도우가 닫히면 실행 중이던 자동화 유지관리 태스크는 중단될 수 있으며, 완료하지 못한 작업은 다음 메인터넌스 윈도우에서 재개·재스케줄됩니다. AutoTask 프레임워크는 윈도우 기반으로 동작하므로 미완료 작업의 이월이 기본 동작입니다.\n\nB) 정답 — AutoTask 프레임워크의 실행 이력은 DBA_AUTOTASK_CLIENT_HISTORY 등의 전용 뷰에서 확인할 수 있으며, 태스크의 완료·중단·미실행 상태를 파악하는 데 사용됩니다. 이를 통해 DBA는 자동화 작업의 실행 상황을 점검합니다.\n\nC) 오답 — AutoTask 프레임워크는 메인터넌스 윈도우의 종료 시각을 자동으로 연장하지 않습니다. 윈도우의 지속 시간(duration) 속성에 따라 윈도우가 닫히며, 미완료 작업은 다음 윈도우에서 처리됩니다. 윈도우 연장이 필요하다면 DBA가 Scheduler 기능을 통해 명시적으로 수행해야 합니다.\n\nD) 오답 — 윈도우가 닫힌 시점에도 실행 중인 모든 태스크가 항상 완료된다는 설명은 잘못되었습니다. 윈도우 종료 시 실행 중 작업은 중단될 수 있으며, 그에 따라 미완료 부분은 다음 윈도우로 이월됩니다.\n\nE) 오답 — 자동화 메인터넌스 태스크는 실행되지 못한 경우에도 AutoTask 프레임워크에 의해 다음 메인터넌스 윈도우에서 자동으로 재스케줄됩니다. DBA가 수동으로만 재실행할 수 있는 구조가 아닙니다.\n\n핵심 개념: 메인터넌스 윈도우 종료 시 실행 중이던 AutoTask는 중단될 수 있으며 미완료 작업은 다음 윈도우에서 재개됩니다. 실행 이력은 DBA_AUTOTASK_CLIENT_HISTORY 뷰 등으로 파악할 수 있으며, AutoTask는 윈도우를 자동 연장하지 않고 미완료 작업을 자동 재스케줄하는 기본 동작을 가집니다."
   }
 ]

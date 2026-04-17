@@ -30,14 +30,14 @@
     "number": "C_05_038",
     "title": "管理者が以下のようにdev_userに権限を設定しました。\n\nSQL> CREATE ROLE data_role;\nSQL> GRANT SELECT ON hr.employees TO data_role;\nSQL> GRANT data_role TO dev_user;\nSQL> GRANT CREATE PROCEDURE TO dev_user;\n\ndev_userが以下のPL/SQLプロシージャを作成しました。\n\nCREATE OR REPLACE PROCEDURE get_emp_count AS\n  v_count NUMBER;\nBEGIN\n  SELECT COUNT(*) INTO v_count FROM hr.employees;\n  DBMS_OUTPUT.PUT_LINE(v_count);\nEND;\n\nこのプロシージャの作成結果について正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) プロシージャのコンパイルは成功するが、実行時にhr.employeesに対するSELECT権限がロール経由でしか付与されていないためORA-00942エラーが発生する。",
-      "B) プロシージャのコンパイル自体が失敗し、警告付きで作成される。これはDefiner's Rightsモデルではロールを通じた権限が無視されるためである。",
-      "C) AUTHID CURRENT_USER句を追加してInvoker's Rightsプロシージャに変更すれば、ロール経由のSELECT権限でもプロシージャの作成と実行の両方が成功する。",
+      "A) AUTHID句を指定していないため、このプロシージャはInvoker's Rightsモデルとして作成され、実行時に実行者のロール権限(data_role)が適用されて正常に動作する。",
+      "B) AUTHID句を指定していないため、このプロシージャはDefiner's Rightsモデルで作成され、定義者のロール経由で付与されたSELECT権限は無視されるため、プロシージャの作成は成功しない。",
+      "C) AUTHID CURRENT_USER句を追加してInvoker's Rightsプロシージャに変更すれば、ロール経由のSELECT権限だけでプロシージャの作成と実行の両方が問題なく成功する。",
       "D) hr.employeesに対するSELECT権限をdev_userに直接付与すれば、プロシージャの作成と実行が正常に行われる。",
-      "E) このプロシージャはAUTHID句を指定していないため、Invoker's Rightsモデルが適用され、実行者のロール権限で動作する。"
+      "E) Definer's RightsモデルではPUBLICに付与されたロール経由の権限のみ有効であり、個別ユーザーに付与されたロール経由の権限は常に無視される。"
     ],
     "answer": ["B", "D"],
-    "explanation": "정답: B, D\nB) 정답 — PL/SQL 프로시저를 AUTHID 절 없이 생성하면 기본적으로 Definer's Rights(정의자 권한) 모델이 적용됩니다. Definer's Rights에서는 롤을 통해 부여된 권한이 무시되므로, hr.employees에 대한 SELECT 권한이 롤(data_role) 경유로만 존재하면 컴파일 시 해당 테이블을 인식하지 못합니다. 프로시저는 경고(Warning) 상태로 생성되며 INVALID 상태가 됩니다.\n\nD) 정답 — hr.employees에 대한 SELECT 권한을 GRANT SELECT ON hr.employees TO dev_user; 로 직접 부여하면, Definer's Rights 프로시저에서도 해당 권한이 유효합니다. 이를 통해 프로시저의 컴파일과 실행이 모두 정상적으로 수행됩니다.\n\nA) 오답 — Definer's Rights 프로시저에서 참조 테이블에 대한 권한이 롤 경유로만 있는 경우, 실행 시가 아니라 컴파일 단계에서 이미 실패합니다. 컴파일러가 정적 SQL의 참조 객체를 해석할 때 롤 권한이 무시되므로, ORA-00942(table or view does not exist) 오류는 컴파일 시점에 발생합니다.\n\nC) 오답 — AUTHID CURRENT_USER를 지정하면 Invoker's Rights 모델이 적용되어 실행 시 실행자의 롤 권한이 사용됩니다. 그러나 컴파일 시에는 여전히 정의자의 직접 권한이 필요하므로, 롤 경유 권한만으로는 컴파일이 경고 상태로 완료될 수 있습니다. 실행자가 직접 권한 또는 활성 롤 권한을 보유하고 있으면 실행은 가능하지만, 컴파일 문제가 먼저 해결되어야 합니다.\n\nE) 오답 — AUTHID 절을 생략한 PL/SQL 프로시저는 Invoker's Rights가 아닌 Definer's Rights가 기본 적용됩니다. Definer's Rights에서는 정의자(프로시저 소유자)에게 직접 부여된 권한만 유효하며, 롤 기반 권한은 무시됩니다.\n\n핵심 개념: PL/SQL에서 AUTHID 절을 생략하면 Definer's Rights(기본값)가 적용되며, 이 모드에서는 롤을 통해 부여된 권한이 무시됩니다. 프로시저 내에서 참조하는 객체에 대한 권한은 프로시저 소유자에게 직접 부여되어야 하며, 롤 경유 권한만 있으면 컴파일 시점에서 실패합니다."
+    "explanation": "정답: B, D\nB) 정답 — PL/SQL 프로시저를 AUTHID 절 없이 생성하면 기본적으로 Definer's Rights(정의자 권한) 모델이 적용됩니다. Definer's Rights에서는 롤을 통해 부여된 권한이 무시되므로, hr.employees에 대한 SELECT 권한이 롤(data_role) 경유로만 존재하면 프로시저가 정상적으로 작성되지 않습니다. 이는 Definer's Rights의 기본 동작으로, 정의자에게 직접 부여된 권한만 유효하게 적용되기 때문입니다.\n\nD) 정답 — hr.employees에 대한 SELECT 권한을 GRANT SELECT ON hr.employees TO dev_user; 로 직접 부여하면, Definer's Rights 프로시저에서도 해당 권한이 유효합니다. 이를 통해 프로시저의 작성과 실행이 모두 정상적으로 수행됩니다.\n\nA) 오답 — AUTHID 절을 생략한 PL/SQL 프로시저는 Invoker's Rights가 아닌 Definer's Rights가 기본 적용됩니다. Definer's Rights에서는 정의자에게 직접 부여된 권한만 유효하므로, 롤 경유 권한만으로는 프로시저가 정상 작성되지 않습니다.\n\nC) 오답 — AUTHID CURRENT_USER를 지정하면 Invoker's Rights 모델이 적용되어 실행 시 실행자의 활성 롤 권한이 사용됩니다. 그러나 Invoker's Rights라고 해도 정적 SQL 참조 객체의 권한 검증에는 직접 권한이 필요한 경우가 있어, 롤 경유 권한만으로 모든 상황에서 문제없이 작성·실행된다고 단정할 수 없습니다.\n\nE) 오답 — PUBLIC 롤 경유인지 개별 롤 경유인지와 관계없이, Definer's Rights 모델에서는 롤을 통해 간접적으로 부여된 권한이 모두 무시됩니다. PUBLIC에 부여된 권한이라도 롤을 경유한 것이라면 Definer's Rights에서는 유효하지 않습니다.\n\n핵심 개념: PL/SQL에서 AUTHID 절을 생략하면 Definer's Rights(기본값)가 적용되며, 이 모드에서는 롤을 통해 부여된 권한이 무시됩니다. 프로시저 내에서 참조하는 객체에 대한 권한은 정의자(프로시저 소유자)에게 직접 부여되어야 합니다."
   },
   {
     "chapter": "ユーザー、ロールおよび権限の管理",
@@ -57,13 +57,13 @@
     "number": "C_05_040",
     "title": "同じ権限付与チェーンのシナリオにおいて、WITH ADMIN OPTIONとWITH GRANT OPTIONのREVOKE動作の違いについて正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) WITH ADMIN OPTIONで付与されたシステム権限をREVOKEすると、OracleはSYSAUTH$ディクショナリ・テーブルで付与者（Grantor）情報を追跡しているが、パフォーマンス上の理由から連鎖取消しを行わない設計となっている。",
-      "B) WITH GRANT OPTIONで付与されたオブジェクト権限をREVOKEすると、OBJAUTH$ディクショナリ・テーブルのGRANTOR情報に基づいて連鎖取消しが発生し、付与チェーンの全下位ユーザーの権限が取り消される。",
-      "C) WITH ADMIN OPTIONとWITH GRANT OPTIONのいずれも、REVOKE時の連鎖取消しの動作は同一であり、付与チェーンの全下位ユーザーの権限が取り消される。",
-      "D) WITH GRANT OPTIONの連鎖取消しはデータ・ディクショナリの内部構造に関係なく、すべてのオブジェクト権限をスキャンして取り消すため処理に時間がかかる。",
-      "E) WITH ADMIN OPTIONで付与されたシステム権限のREVOKE時に連鎖取消しが発生しないのは、SYSAUTH$ディクショナリ・テーブルに付与者(Grantor)情報が記録されていないためである。"
+      "A) WITH ADMIN OPTIONで付与されたシステム権限を上位の付与者からREVOKEした場合、その付与者から派生した下位ユーザーの権限は自動的には取り消されず、各ユーザーが個別に権限を保持し続ける。",
+      "B) WITH GRANT OPTIONで付与されたオブジェクト権限を上位の付与者からREVOKEした場合、付与チェーンに沿って下位ユーザーの権限まで自動的に連鎖取消しが発生する。",
+      "C) WITH ADMIN OPTIONとWITH GRANT OPTIONのいずれも、REVOKE時の連鎖取消し動作は同一であり、付与チェーンの全下位ユーザーの権限が自動的に取り消される。",
+      "D) WITH GRANT OPTIONのREVOKEで連鎖取消しを発生させるには、REVOKE文に明示的にCASCADE句を指定する必要がある。",
+      "E) WITH ADMIN OPTIONのシステム権限をREVOKEすると、下位ユーザーの権限は失われるが、下位ユーザーが他のユーザーに付与した権限はそのまま残る。"
     ],
-    "answer": ["B", "E"],
-    "explanation": "정답: B, E\nB) 정답 — WITH GRANT OPTION으로 부여된 객체 권한을 REVOKE하면, Oracle은 OBJAUTH$ 딕셔너리 테이블에 저장된 GRANTOR#(부여자 번호) 컬럼을 기반으로 부여 체인을 재귀적으로 추적하여 연쇄 취소를 수행합니다. 이에 따라 부여 체인의 모든 하위 사용자 권한이 자동으로 취소됩니다.\n\nE) 정답 — WITH ADMIN OPTION의 시스템 권한은 SYSAUTH$ 딕셔너리 테이블에 저장되며, 이 테이블에는 부여자(Grantor) 정보가 기록되지 않습니다. 따라서 REVOKE 시 부여 체인을 추적할 수 없어 연쇄 취소가 발생하지 않습니다. 이것이 ADMIN OPTION과 GRANT OPTION의 REVOKE 동작 차이의 근본적인 내부 원리입니다.\n\nA) 오답 — SYSAUTH$ 딕셔너리 테이블에는 부여자(Grantor) 정보가 기록되지 않습니다. 따라서 SYSAUTH$에서 부여자 정보를 추적하고 있다는 전제 자체가 틀렸습니다. 연쇄 취소가 발생하지 않는 이유는 퍼포먼스상의 이유가 아니라, 부여자 정보 자체가 존재하지 않아 부여 체인을 추적할 수 없기 때문입니다.\n\nC) 오답 — WITH ADMIN OPTION과 WITH GRANT OPTION의 REVOKE 동작은 동일하지 않습니다. ADMIN OPTION은 비연쇄 취소(No Cascade), GRANT OPTION은 연쇄 취소(Cascade Revoke)가 발생합니다. 이는 내부적으로 SYSAUTH$와 OBJAUTH$의 구조 차이에 기인합니다.\n\nD) 오답 — WITH GRANT OPTION의 연쇄 취소는 모든 객체 권한을 무차별적으로 스캔하는 것이 아니라, OBJAUTH$의 GRANTOR# 컬럼을 통해 부여 체인만을 효율적으로 추적합니다. 부여 체인에 속하지 않는 권한은 영향을 받지 않습니다.\n\n핵심 개념: WITH ADMIN OPTION(시스템 권한, SYSAUTH$)은 부여자를 추적하지 않아 비연쇄 취소가 발생하고, WITH GRANT OPTION(객체 권한, OBJAUTH$)은 GRANTOR 컬럼으로 부여자를 추적하여 연쇄 취소가 발생합니다. 이 내부 딕셔너리 구조의 차이가 두 옵션의 REVOKE 동작 차이의 근본 원인입니다."
+    "answer": ["A", "B"],
+    "explanation": "정답: A, B\nA) 정답 — WITH ADMIN OPTION으로 부여된 시스템 권한은 상위 부여자로부터 REVOKE되어도, 그 부여자로부터 파생된 하위 사용자의 권한은 자동으로 취소되지 않습니다. 각 사용자는 독립적으로 권한을 보유하게 되므로, 필요하다면 관리자가 각 하위 사용자의 권한을 개별적으로 REVOKE해야 합니다.\n\nB) 정답 — WITH GRANT OPTION으로 부여된 객체 권한은 상위 부여자로부터 REVOKE 시, 해당 부여자로부터 파생된 부여 체인 전체에 대해 자동으로 연쇄 취소(Cascade Revoke)가 발생합니다. 별도의 CASCADE 절 지정 없이 객체 권한 REVOKE의 기본 동작으로 하위 사용자 권한까지 모두 취소됩니다.\n\nC) 오답 — WITH ADMIN OPTION(시스템 권한)과 WITH GRANT OPTION(객체 권한)의 REVOKE 동작은 명확히 다릅니다. ADMIN OPTION은 비연쇄 취소(No Cascade), GRANT OPTION은 자동 연쇄 취소(Cascade Revoke)가 발생한다는 점이 핵심 차이입니다.\n\nD) 오답 — WITH GRANT OPTION으로 부여된 객체 권한의 REVOKE는 CASCADE 절 없이도 연쇄 취소가 기본 동작으로 발생합니다. 별도로 명시적 CASCADE 옵션을 지정할 필요가 없습니다.\n\nE) 오답 — WITH ADMIN OPTION의 REVOKE는 직접 REVOKE 대상 사용자의 권한만 제거하며, 그 사용자가 보유하고 있던 권한 자체를 '잃게' 만듭니다. 그 사용자가 이미 다른 사용자에게 부여한 권한은 영향을 받지 않고 그대로 남습니다. 지문의 \"하위 사용자 권한이 사라지고 그 다음 하위의 권한만 남는다\"는 기술은 부정확합니다.\n\n핵심 개념: WITH ADMIN OPTION(시스템 권한)의 REVOKE는 비연쇄 취소이며 하위 사용자의 권한이 유지됩니다. WITH GRANT OPTION(객체 권한)의 REVOKE는 자동으로 부여 체인 전체에 연쇄 취소가 발생하며, 별도 CASCADE 절이 불필요합니다. 이 두 옵션의 REVOKE 동작 차이를 결과 관점에서 이해하는 것이 실무 운영의 핵심입니다."
   }
 ]

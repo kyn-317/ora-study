@@ -12,7 +12,7 @@
     "answer": [
       "D"
     ],
-    "explanation": "정답: D\nD) 정답 — 객체 소유자가 자신의 스키마 객체에 접근하는 경우, 별도의 객체 권한(Object Privilege)이 필요하지 않으므로 권한 캡처 대상이 되지 않습니다. 권한 분석은 명시적으로 부여받은 권한(시스템 권한, 객체 권한, 롤)의 사용 여부만 추적합니다.\n\nA) 오답 — DATABASE 유형의 캡처라 하더라도 ORACLE_MAINTAINED='Y'인 Oracle 유지 관리 계정(SYS, SYSTEM 등)의 권한 사용은 자동으로 제외됩니다. Oracle 내부 동작에 의한 권한 사용은 사용자 권한 분석과 무관하므로 노이즈 제거 목적으로 제외합니다.\n\nB) 오답 — DBA_USED_PRIVS 등의 결과 뷰에 데이터가 표시되려면 GENERATE_RESULT 프로시저를 반드시 호출해야 합니다. 캡처를 활성화하여 데이터를 수집한 후, GENERATE_RESULT를 호출해야 결과 뷰에 분석 데이터가 생성됩니다.\n\nC) 오답 — DATABASE 유형의 캡처는 동시에 하나만 활성화할 수 있습니다. 다만 ROLE, CONTEXT, ROLE_AND_CONTEXT 유형의 캡처는 동시에 여러 개를 활성화할 수 있습니다.\n\n핵심 개념: DBMS_PRIVILEGE_CAPTURE의 DATABASE 유형 캡처는 Oracle 유지 관리 계정(ORACLE_MAINTAINED='Y')을 자동 제외하며, 객체 소유자의 자기 스키마 접근은 암묵적 권한이므로 캡처 대상이 아닙니다. GENERATE_RESULT 호출 후에만 결과 뷰에 데이터가 표시됩니다."
+    "explanation": "정답: D\nD) 정답 — 객체 소유자가 자신의 스키마 객체에 접근하는 경우, 별도의 객체 권한(Object Privilege)이 필요하지 않으므로 권한 캡처 대상이 되지 않습니다. 권한 분석은 명시적으로 부여받은 권한(시스템 권한, 객체 권한, 롤)의 사용 여부만 추적합니다.\n\nA) 오답 — DATABASE 유형의 캡처라 하더라도 SYS·SYSTEM 등 Oracle 내부 계정은 권한 분석 대상에서 자동으로 제외됩니다. Oracle 내부 동작에 의한 권한 사용은 사용자 권한 분석과 무관하므로 노이즈 제거를 위해 제외되며, 운영자가 일일이 설정할 필요는 없습니다.\n\nB) 오답 — DBA_USED_PRIVS 등의 결과 뷰에 데이터가 표시되려면 GENERATE_RESULT 프로시저를 반드시 호출해야 합니다. 캡처를 활성화하여 데이터를 수집한 후, GENERATE_RESULT를 호출해야 결과 뷰에 분석 데이터가 생성됩니다.\n\nC) 오답 — DATABASE 유형의 캡처는 동시에 하나만 활성화할 수 있습니다. 다만 ROLE, CONTEXT, ROLE_AND_CONTEXT 유형의 캡처는 동시에 여러 개를 활성화할 수 있습니다.\n\n핵심 개념: DBMS_PRIVILEGE_CAPTURE의 DATABASE 유형 캡처는 SYS·SYSTEM 등 Oracle 내부 계정을 자동으로 제외하며, 객체 소유자의 자기 스키마 접근은 암묵적 권한이므로 캡처 대상이 아닙니다. 결과 뷰에 데이터가 표시되려면 GENERATE_RESULT 호출이 필요합니다."
   },
   {
     "chapter": "ユーザー、ロールおよび権限の管理",

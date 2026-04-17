@@ -2,18 +2,18 @@
   {
     "chapter": "データの移動",
     "number": "C_09_031",
-    "title": "Data Pump ExportのFLASHBACK_SCNパラメータとFLASHBACK_TIMEパラメータに関して正しい内容を述べているものを選択してください(2つ選択してください)。",
+    "title": "Data Pump Exportのパラメータ指定に関して正しく述べているものを選択してください(2つ選択してください)。",
     "options": [
-      "A) FLASHBACK_SCNはSCN番号を数値で直接指定し、FLASHBACK_TIMEはタイムスタンプを文字列で指定するが、どちらもUndo情報を利用して指定時点の一貫性のあるデータをエクスポートする。",
-      "B) FLASHBACK_SCNとFLASHBACK_TIMEは同一のexpdpコマンド内で同時に指定することができ、両方指定した場合はFLASHBACK_TIMEが優先される。",
-      "C) FLASHBACK_SCNを使用するためには、対象テーブルが事前にFLASHBACK ARCHIVEに登録されている必要がある。",
-      "D) FLASHBACK_TIMEを指定しない場合、Export中にソース・テーブルに対してDMLが発生すると、テーブルごとにExport開始時点のSCNが使用されるため、テーブル間のデータ一貫性が保証されない場合がある。",
-      "E) FLASHBACK_SCNとFLASHBACK_TIMEはData Pump Import(impdp)で使用するパラメータであり、Export(expdp)では使用できない。"
+      "A) CONTENT=METADATA_ONLYを指定すると、テーブル構造や制約などのメタデータのみがエクスポートされ、実データはエクスポートされない。",
+      "B) EXCLUDEパラメータは、エクスポート対象から特定のオブジェクト・タイプ(例: INDEX, GRANT, TRIGGERなど)を除外するために使用される。",
+      "C) FLASHBACK_TIMEとFLASHBACK_SCNは、1つのexpdpコマンド内で同時に併記することが推奨される組合せであり、両方を指定した場合はFLASHBACK_TIMEの値が優先される。",
+      "D) Data Pump Exportにおけるログ・ファイル(LOGFILE)は、DIRECTORYパラメータで指定したディレクトリ・オブジェクト以外の場所に自動生成される。",
+      "E) DUMPFILEパラメータは、ファイル名にOSの絶対パス(例: /u01/backup/exp.dmp)を直接指定することで、DIRECTORYパラメータを省略することができる。"
     ],
     "answer": [
       "A",
-      "D"
+      "B"
     ],
-    "explanation": "정답: A, D\nA) 정답 — FLASHBACK_SCN은 SCN 번호를 숫자로 직접 지정(예: FLASHBACK_SCN=12345678)하고, FLASHBACK_TIME은 타임스탬프를 문자열로 지정(예: FLASHBACK_TIME=\"TO_TIMESTAMP('2026-04-16 09:00:00','YYYY-MM-DD HH24:MI:SS')\")합니다. 두 파라미터 모두 Oracle의 Undo 정보를 활용하여 지정 시점의 일관성 있는 데이터 스냅샷을 Export합니다.\n\nD) 정답 — FLASHBACK_TIME 또는 FLASHBACK_SCN을 지정하지 않으면, 각 테이블별로 Export 시작 시점의 SCN이 사용됩니다. 대규모 Export에서 테이블 처리 시간이 다르면 각 테이블의 기준 시점이 달라져, 테이블 간 데이터 일관성이 보장되지 않을 수 있습니다. 일관성 있는 Export를 위해 두 파라미터 중 하나를 지정하는 것이 권장됩니다.\n\nB) 오답 — FLASHBACK_SCN과 FLASHBACK_TIME은 동일한 expdp 명령에서 동시에 사용할 수 없습니다. 두 파라미터는 상호 배타적이므로, 어느 한쪽만 지정해야 합니다. 동시에 지정하면 에러가 발생합니다.\n\nC) 오답 — FLASHBACK_SCN(및 FLASHBACK_TIME)은 Undo 정보를 활용하는 기능이므로, FLASHBACK ARCHIVE에 테이블을 등록할 필요가 없습니다. Undo Retention 기간 내의 시점이면 사용 가능합니다. FLASHBACK ARCHIVE(Total Recall)는 장기간 이력 추적을 위한 별도의 기능입니다.\n\nE) 오답 — FLASHBACK_SCN과 FLASHBACK_TIME은 Data Pump Export(expdp)에서 사용하는 파라미터입니다. Export 시 특정 시점 기준의 일관된 데이터를 추출하기 위해 사용되며, Import(impdp)에서는 사용하지 않습니다.\n\n핵심 개념: FLASHBACK_SCN(숫자 지정)과 FLASHBACK_TIME(타임스탬프 지정)은 상호 배타적이며, 둘 다 Undo 정보를 활용하여 특정 시점의 일관된 데이터를 Export합니다. FLASHBACK ARCHIVE 등록은 불필요하며, 지정하지 않으면 테이블 간 데이터 일관성이 보장되지 않을 수 있습니다."
+    "explanation": "정답: A, B\nA) 정답 — CONTENT 파라미터는 ALL(기본값, 메타데이터+데이터), DATA_ONLY(데이터만), METADATA_ONLY(메타데이터만)의 3가지 값을 가집니다. CONTENT=METADATA_ONLY를 지정하면 테이블 구조(DDL), 인덱스 정의, 제약 조건, 트리거 정의 등의 메타데이터만 덤프 파일에 포함되고, 행 데이터는 제외됩니다. 스키마 구조만 다른 환경에 복제하고 싶을 때 활용됩니다.\n\nB) 정답 — EXCLUDE 파라미터는 Export 대상 중 특정 오브젝트 타입을 제외하는 데 사용됩니다. 예를 들어 EXCLUDE=INDEX는 모든 인덱스를 제외하고, EXCLUDE=GRANT는 권한 부여 정보를 제외합니다. 특정 이름 패턴을 조건으로 지정할 수도 있으며(EXCLUDE=TABLE:\"LIKE 'TEMP_%'\" 등), 반대로 특정 오브젝트만 포함하려면 INCLUDE 파라미터를 사용합니다.\n\nC) 오답 — FLASHBACK_TIME과 FLASHBACK_SCN은 상호 배타적이며, 동일한 expdp 명령에서 동시에 지정할 수 없습니다. 두 파라미터 중 한쪽만 사용해야 하며, 동시 지정 시 오류가 발생합니다. 또한 시험에서는 두 파라미터의 존재와 시점 지정용이라는 수준의 인지가 출제되며, 내부 우선순위 규칙은 운영에서 사용하지 않습니다.\n\nD) 오답 — Data Pump Export의 LOGFILE은 기본적으로 DIRECTORY 파라미터로 지정된 디렉토리 오브젝트가 가리키는 위치에 생성됩니다. 별도 위치를 지정하려면 LOGFILE=DIR_NAME:filename 형식으로 다른 디렉토리 오브젝트를 지정해야 합니다. OS 경로에 자동 생성되는 것이 아닙니다.\n\nE) 오답 — DUMPFILE 파라미터에는 OS 절대 경로를 직접 지정할 수 없으며, 반드시 데이터베이스의 DIRECTORY 오브젝트를 통해 파일 위치를 특정해야 합니다. DIRECTORY 오브젝트는 SYS 소유의 DB 오브젝트로서 OS 경로와 매핑되며, 사용자에게 READ/WRITE 권한을 부여하여 접근을 제어합니다. Data Pump는 서버 측 I/O 기반이므로 OS 경로 직접 지정은 지원되지 않습니다.\n\n핵심 개념: Data Pump Export의 CONTENT 파라미터는 ALL/DATA_ONLY/METADATA_ONLY로 덤프 범위를 제어하고, EXCLUDE/INCLUDE 파라미터로 특정 오브젝트 타입을 필터링합니다. DUMPFILE과 LOGFILE은 반드시 DIRECTORY 오브젝트를 경유하며, OS 절대 경로 직접 지정은 지원되지 않습니다."
   }
 ]
