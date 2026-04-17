@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { QuizQuestion } from '../../../../lib/data';
+import { shuffleQuestionOptions, seededRandom } from '../../../../lib/shuffle';
 
 function formatQuestionText(q: QuizQuestion): string {
   const lines = [q.number, q.title, '', ...q.options];
@@ -27,6 +28,10 @@ function getStorageKey(prefix: string, chapterId: string, setId: string) {
   return `${prefix}_${chapterId}_${setId}`;
 }
 
+function generateSeed(): number {
+  return (Date.now() ^ Math.floor(Math.random() * 2147483647)) % 2147483647 || 1;
+}
+
 export default function QuizClient({ questions, chapterId, setId, backHref, storagePrefix = 'quiz', showExplanation = true, keywordIndex }: QuizClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
@@ -34,6 +39,15 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
   const [score, setScore] = useState(0);
   const [mode, setMode] = useState<'taking' | 'review'>('taking');
   const [restored, setRestored] = useState(false);
+  const [shuffleSeed, setShuffleSeed] = useState<number | null>(null);
+
+  // seed 기반으로 결정론적 셔플 — 새로고침/재방문해도 같은 배치 유지
+  const shuffledQuestions = useMemo(() => {
+    if (shuffleSeed === null) return questions;
+    return questions.map((q, i) =>
+      shuffleQuestionOptions(q, seededRandom(shuffleSeed + i + 1)),
+    );
+  }, [questions, shuffleSeed]);
 
   // Copy feedback state
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -183,22 +197,28 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
         setSubmitted(data.submitted ?? {});
         setScore(data.score ?? 0);
         setMode(data.mode ?? 'taking');
+        // seed 없는 구버전 저장본은 셔플 없이 복원(답안 letter 매칭 유지)
+        setShuffleSeed(typeof data.shuffleSeed === 'number' ? data.shuffleSeed : null);
+      } else {
+        setShuffleSeed(generateSeed());
       }
-    } catch { /* ignore */ }
+    } catch {
+      setShuffleSeed(generateSeed());
+    }
     setRestored(true);
-  }, [chapterId, setId]);
+  }, [chapterId, setId, storagePrefix]);
 
   // Save to localStorage
   useEffect(() => {
     if (!restored) return;
     try {
       localStorage.setItem(getStorageKey(storagePrefix, chapterId, setId), JSON.stringify({
-        currentIndex, answers, submitted, score, mode,
+        currentIndex, answers, submitted, score, mode, shuffleSeed,
       }));
     } catch { /* ignore */ }
-  }, [currentIndex, answers, submitted, score, mode, restored, chapterId, setId]);
+  }, [currentIndex, answers, submitted, score, mode, shuffleSeed, restored, chapterId, setId, storagePrefix]);
 
-  const question = questions[currentIndex];
+  const question = shuffledQuestions[currentIndex];
   const isMultiSelect = question?.answer.length > 1;
   const selectedAnswers = answers[currentIndex] ?? [];
   const isSubmitted = submitted[currentIndex] ?? false;
@@ -239,10 +259,10 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
   }, [selectedAnswers, question, currentIndex]);
 
   const handleNext = useCallback(() => {
-    if (currentIndex < questions.length - 1) {
+    if (currentIndex < shuffledQuestions.length - 1) {
       setCurrentIndex(prev => prev + 1);
     }
-  }, [currentIndex, questions.length]);
+  }, [currentIndex, shuffledQuestions.length]);
 
   const handlePrev = useCallback(() => {
     if (currentIndex > 0) {
@@ -260,6 +280,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     setSubmitted({});
     setScore(0);
     setMode('taking');
+    setShuffleSeed(generateSeed());
     try {
       localStorage.removeItem(getStorageKey(storagePrefix, chapterId, setId));
     } catch { /* ignore */ }
@@ -272,7 +293,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     return match ? match[1] : '';
   };
 
-  const allSubmitted = questions.every((_, i) => submitted[i]);
+  const allSubmitted = shuffledQuestions.every((_, i) => submitted[i]);
 
   if (!restored) return null;
 
@@ -339,7 +360,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
 
   // ===== REVIEW MODE =====
   if (mode === 'review') {
-    const percentage = Math.round((score / questions.length) * 100);
+    const percentage = Math.round((score / shuffledQuestions.length) * 100);
 
     const reviewContent = (
       <div style={{ flex: '1 1 0%', minWidth: 0, padding: '4rem 2rem', maxWidth: showStudyPanel ? 'none' : '900px', margin: showStudyPanel ? '0' : '0 auto' }}>
@@ -357,7 +378,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
         }}>
           <div style={{ fontSize: '4rem', fontWeight: 700, marginBottom: '0.5rem' }}>
             <span style={{ color: percentage >= 70 ? '#059669' : '#DC2626' }}>{score}</span>
-            <span style={{ color: 'var(--text-muted)', fontSize: '2rem' }}> / {questions.length}</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '2rem' }}> / {shuffledQuestions.length}</span>
           </div>
           <div style={{ fontSize: '1.5rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
             {percentage}%
@@ -390,7 +411,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
 
         {/* Question Review */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          {questions.map((q, idx) => {
+          {shuffledQuestions.map((q, idx) => {
             const userAns = answers[idx] ?? [];
             const isCorrect =
               userAns.length === q.answer.length &&
@@ -495,7 +516,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Score: <span style={{ color: '#059669', fontWeight: 700 }}>{score}</span> / {questions.length}
+            Score: <span style={{ color: '#059669', fontWeight: 700 }}>{score}</span> / {shuffledQuestions.length}
           </span>
         </div>
       </div>
@@ -504,17 +525,17 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
       <div className="quiz-progress-bar" style={{ marginBottom: '2rem' }}>
         <div
           className="quiz-progress-bar-fill"
-          style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
+          style={{ width: `${((currentIndex + 1) / shuffledQuestions.length) * 100}%` }}
         />
       </div>
 
       {/* Question Number Navigation */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-        {questions.map((_, idx) => {
+        {shuffledQuestions.map((_, idx) => {
           const isDone = submitted[idx];
           const isCurrent = idx === currentIndex;
           const userAns = answers[idx] ?? [];
-          const q = questions[idx];
+          const q = shuffledQuestions[idx];
           const isCorrect = isDone &&
             userAns.length === q.answer.length &&
             [...userAns].sort().every((v, i) => v === [...q.answer].sort()[i]);
@@ -694,7 +715,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
             </button>
           )}
 
-          {isSubmitted && currentIndex < questions.length - 1 && (
+          {isSubmitted && currentIndex < shuffledQuestions.length - 1 && (
             <button
               onClick={handleNext}
               style={{
@@ -711,7 +732,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
             </button>
           )}
 
-          {isSubmitted && currentIndex === questions.length - 1 && allSubmitted && (
+          {isSubmitted && currentIndex === shuffledQuestions.length - 1 && allSubmitted && (
             <button
               onClick={handleFinish}
               style={{
@@ -731,16 +752,16 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
 
         <button
           onClick={handleNext}
-          disabled={currentIndex === questions.length - 1}
+          disabled={currentIndex === shuffledQuestions.length - 1}
           style={{
             padding: '0.75rem 1.5rem',
             borderRadius: '10px',
             border: '1px solid var(--glass-border)',
             background: 'var(--glass-bg)',
-            color: currentIndex === questions.length - 1 ? 'var(--text-muted)' : 'var(--foreground)',
-            cursor: currentIndex === questions.length - 1 ? 'not-allowed' : 'pointer',
+            color: currentIndex === shuffledQuestions.length - 1 ? 'var(--text-muted)' : 'var(--foreground)',
+            cursor: currentIndex === shuffledQuestions.length - 1 ? 'not-allowed' : 'pointer',
             fontWeight: 600,
-            opacity: currentIndex === questions.length - 1 ? 0.5 : 1,
+            opacity: currentIndex === shuffledQuestions.length - 1 ? 0.5 : 1,
           }}
         >
           Next
