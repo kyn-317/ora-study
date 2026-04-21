@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,107 +16,107 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">PDB Unplug/Plug In Process — XML vs PDB Archive</text>
 
   <!-- Unplug Process -->
-  <text x="400" y="78" text-anchor="middle" class="label" fill="#F59E0B">Unplug 프로세스 (PDB 분리)</text>
+  <text x="400" y="78" text-anchor="middle" class="label" fill="#8a5a10">Unplug 프로세스 (PDB 분리)</text>
 
   <!-- Step flow -->
-  <rect x="40" y="90" width="130" height="45" class="box" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="1.5"/>
-  <text x="105" y="108" text-anchor="middle" class="sublabel" fill="#10B981">PDB OPEN</text>
+  <rect x="40" y="90" width="130" height="45" class="box" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="105" y="108" text-anchor="middle" class="sublabel" fill="#2f6a1c">PDB OPEN</text>
   <text x="105" y="125" text-anchor="middle" class="small">(READ WRITE)</text>
 
-  <line x1="170" y1="112" x2="185" y2="112" stroke="#94A3B8" stroke-width="1.5"/>
-  <polygon points="183,107 193,112 183,117" fill="#94A3B8"/>
+  <line x1="170" y1="112" x2="185" y2="112" stroke="#787368" stroke-width="1.5"/>
+  <polygon points="183,107 193,112 183,117" fill="#787368"/>
 
-  <rect x="193" y="90" width="130" height="45" class="box" fill="#F43F5E" opacity="0.15" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="258" y="108" text-anchor="middle" class="sublabel" fill="#F43F5E">CLOSE</text>
+  <rect x="193" y="90" width="130" height="45" class="box" fill="#be123c" opacity="0.15" stroke="#be123c" stroke-width="1.5"/>
+  <text x="258" y="108" text-anchor="middle" class="sublabel" fill="#be123c">CLOSE</text>
   <text x="258" y="125" text-anchor="middle" class="code">CLOSE IMMEDIATE</text>
 
-  <line x1="323" y1="112" x2="338" y2="112" stroke="#94A3B8" stroke-width="1.5"/>
-  <polygon points="336,107 346,112 336,117" fill="#94A3B8"/>
+  <line x1="323" y1="112" x2="338" y2="112" stroke="#787368" stroke-width="1.5"/>
+  <polygon points="336,107 346,112 336,117" fill="#787368"/>
 
-  <rect x="346" y="90" width="130" height="45" class="box" fill="#F59E0B" opacity="0.15" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="411" y="108" text-anchor="middle" class="sublabel" fill="#F59E0B">UNPLUG</text>
+  <rect x="346" y="90" width="130" height="45" class="box" fill="#8a5a10" opacity="0.15" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="411" y="108" text-anchor="middle" class="sublabel" fill="#8a5a10">UNPLUG</text>
   <text x="411" y="125" text-anchor="middle" class="code">UNPLUG INTO ...</text>
 
-  <line x1="476" y1="112" x2="491" y2="112" stroke="#94A3B8" stroke-width="1.5"/>
-  <polygon points="489,107 499,112 489,117" fill="#94A3B8"/>
+  <line x1="476" y1="112" x2="491" y2="112" stroke="#787368" stroke-width="1.5"/>
+  <polygon points="489,107 499,112 489,117" fill="#787368"/>
 
-  <rect x="499" y="90" width="130" height="45" class="box" fill="#F43F5E" opacity="0.12" stroke="#F43F5E" stroke-width="1"/>
-  <text x="564" y="108" text-anchor="middle" class="sublabel" fill="#F43F5E">UNPLUGGED</text>
+  <rect x="499" y="90" width="130" height="45" class="box" fill="#be123c" opacity="0.12" stroke="#be123c" stroke-width="1"/>
+  <text x="564" y="108" text-anchor="middle" class="sublabel" fill="#be123c">UNPLUGGED</text>
   <text x="564" y="125" text-anchor="middle" class="small">OPEN 불가</text>
 
-  <line x1="629" y1="112" x2="644" y2="112" stroke="#94A3B8" stroke-width="1.5"/>
-  <polygon points="642,107 652,112 642,117" fill="#94A3B8"/>
+  <line x1="629" y1="112" x2="644" y2="112" stroke="#787368" stroke-width="1.5"/>
+  <polygon points="642,107 652,112 642,117" fill="#787368"/>
 
-  <rect x="652" y="90" width="110" height="45" class="box" fill="#F43F5E" opacity="0.08" stroke="#F43F5E" stroke-width="1" stroke-dasharray="3,3"/>
-  <text x="707" y="108" text-anchor="middle" class="sublabel" fill="#F43F5E">DROP</text>
+  <rect x="652" y="90" width="110" height="45" class="box" fill="#be123c" opacity="0.08" stroke="#be123c" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="707" y="108" text-anchor="middle" class="sublabel" fill="#be123c">DROP</text>
   <text x="707" y="125" text-anchor="middle" class="small">KEEP DATAFILES</text>
 
   <!-- XML vs PDB Archive Comparison -->
   <text x="400" y="165" text-anchor="middle" class="label">Unplug 출력 형식: XML vs PDB Archive</text>
 
   <!-- XML Method -->
-  <rect x="40" y="180" width="350" height="170" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
-  <rect x="40" y="180" width="350" height="28" rx="8" ry="8" fill="#3B82F6" opacity="0.15"/>
-  <text x="215" y="200" text-anchor="middle" class="label" fill="#3B82F6">XML 메타데이터 (.xml)</text>
+  <rect x="40" y="180" width="350" height="170" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
+  <rect x="40" y="180" width="350" height="28" rx="8" ry="8" fill="#2456a8" opacity="0.15"/>
+  <text x="215" y="200" text-anchor="middle" class="label" fill="#2456a8">XML 메타데이터 (.xml)</text>
 
   <text x="55" y="225" class="code">UNPLUG INTO '/path/pdb.xml';</text>
-  <text x="55" y="248" class="small" fill="#3B82F6">XML 파일: 메타데이터만 (경로, TS 정보)</text>
+  <text x="55" y="248" class="small" fill="#2456a8">XML 파일: 메타데이터만 (경로, TS 정보)</text>
   <text x="55" y="265" class="small">데이터 파일: 원래 위치에 유지</text>
-  <text x="55" y="282" class="small" fill="#10B981">생성 속도: 빠름 (메타데이터만)</text>
-  <text x="55" y="299" class="small" fill="#10B981">추가 디스크: 거의 없음</text>
+  <text x="55" y="282" class="small" fill="#2f6a1c">생성 속도: 빠름 (메타데이터만)</text>
+  <text x="55" y="299" class="small" fill="#2f6a1c">추가 디스크: 거의 없음</text>
   <text x="55" y="316" class="small">이동 시: XML + 데이터 파일 모두 복사 필요</text>
-  <text x="55" y="338" class="small" fill="#F59E0B">적합: 동일 서버, 공유 스토리지</text>
+  <text x="55" y="338" class="small" fill="#8a5a10">적합: 동일 서버, 공유 스토리지</text>
 
   <!-- PDB Archive Method -->
-  <rect x="410" y="180" width="350" height="170" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
-  <rect x="410" y="180" width="350" height="28" rx="8" ry="8" fill="#F59E0B" opacity="0.15"/>
-  <text x="585" y="200" text-anchor="middle" class="label" fill="#F59E0B">단일 아카이브 (.pdb)</text>
+  <rect x="410" y="180" width="350" height="170" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="2"/>
+  <rect x="410" y="180" width="350" height="28" rx="8" ry="8" fill="#8a5a10" opacity="0.15"/>
+  <text x="585" y="200" text-anchor="middle" class="label" fill="#8a5a10">단일 아카이브 (.pdb)</text>
 
   <text x="425" y="225" class="code">UNPLUG INTO '/path/pdb.pdb';</text>
-  <text x="425" y="248" class="small" fill="#F59E0B">.pdb 파일: 메타데이터 + 데이터 파일 통합</text>
+  <text x="425" y="248" class="small" fill="#8a5a10">.pdb 파일: 메타데이터 + 데이터 파일 통합</text>
   <text x="425" y="265" class="small">내부적으로 ZIP 형식 사용</text>
-  <text x="425" y="282" class="small" fill="#F43F5E">생성 속도: 느림 (데이터 복사+압축)</text>
-  <text x="425" y="299" class="small" fill="#F43F5E">추가 디스크: 데이터 크기만큼</text>
+  <text x="425" y="282" class="small" fill="#be123c">생성 속도: 느림 (데이터 복사+압축)</text>
+  <text x="425" y="299" class="small" fill="#be123c">추가 디스크: 데이터 크기만큼</text>
   <text x="425" y="316" class="small">이동 시: .pdb 파일 1개만 복사</text>
-  <text x="425" y="338" class="small" fill="#F59E0B">적합: 원격 서버 이동, 배포 (26ai 권장)</text>
+  <text x="425" y="338" class="small" fill="#8a5a10">적합: 원격 서버 이동, 배포 (26ai 권장)</text>
 
   <!-- Plug In Process -->
-  <text x="400" y="380" text-anchor="middle" class="label" fill="#10B981">Plug In 프로세스 (PDB 연결)</text>
+  <text x="400" y="380" text-anchor="middle" class="label" fill="#2f6a1c">Plug In 프로세스 (PDB 연결)</text>
 
-  <rect x="40" y="395" width="145" height="45" class="box" fill="#3B82F6" opacity="0.15" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="112" y="413" text-anchor="middle" class="sublabel" fill="#3B82F6">호환성 검사</text>
+  <rect x="40" y="395" width="145" height="45" class="box" fill="#2456a8" opacity="0.15" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="112" y="413" text-anchor="middle" class="sublabel" fill="#2456a8">호환성 검사</text>
   <text x="112" y="430" text-anchor="middle" class="code">DBMS_PDB</text>
 
-  <line x1="185" y1="417" x2="200" y2="417" stroke="#94A3B8" stroke-width="1.5"/>
-  <polygon points="198,412 208,417 198,422" fill="#94A3B8"/>
+  <line x1="185" y1="417" x2="200" y2="417" stroke="#787368" stroke-width="1.5"/>
+  <polygon points="198,412 208,417 198,422" fill="#787368"/>
 
-  <rect x="208" y="395" width="145" height="45" class="box" fill="#F59E0B" opacity="0.15" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="280" y="413" text-anchor="middle" class="sublabel" fill="#F59E0B">CREATE PDB</text>
+  <rect x="208" y="395" width="145" height="45" class="box" fill="#8a5a10" opacity="0.15" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="280" y="413" text-anchor="middle" class="sublabel" fill="#8a5a10">CREATE PDB</text>
   <text x="280" y="430" text-anchor="middle" class="code">USING '...'</text>
 
-  <line x1="353" y1="417" x2="368" y2="417" stroke="#94A3B8" stroke-width="1.5"/>
-  <polygon points="366,412 376,417 366,422" fill="#94A3B8"/>
+  <line x1="353" y1="417" x2="368" y2="417" stroke="#787368" stroke-width="1.5"/>
+  <polygon points="366,412 376,417 366,422" fill="#787368"/>
 
-  <rect x="376" y="395" width="100" height="45" class="box" fill="#F43F5E" opacity="0.12" stroke="#F43F5E" stroke-width="1"/>
-  <text x="426" y="413" text-anchor="middle" class="sublabel" fill="#F43F5E">MOUNTED</text>
+  <rect x="376" y="395" width="100" height="45" class="box" fill="#be123c" opacity="0.12" stroke="#be123c" stroke-width="1"/>
+  <text x="426" y="413" text-anchor="middle" class="sublabel" fill="#be123c">MOUNTED</text>
   <text x="426" y="430" text-anchor="middle" class="small">NEW 상태</text>
 
-  <line x1="476" y1="417" x2="491" y2="417" stroke="#94A3B8" stroke-width="1.5"/>
-  <polygon points="489,412 499,417 489,422" fill="#94A3B8"/>
+  <line x1="476" y1="417" x2="491" y2="417" stroke="#787368" stroke-width="1.5"/>
+  <polygon points="489,412 499,417 489,422" fill="#787368"/>
 
-  <rect x="499" y="395" width="100" height="45" class="box" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="1.5"/>
-  <text x="549" y="413" text-anchor="middle" class="sublabel" fill="#10B981">OPEN</text>
+  <rect x="499" y="395" width="100" height="45" class="box" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="549" y="413" text-anchor="middle" class="sublabel" fill="#2f6a1c">OPEN</text>
   <text x="549" y="430" text-anchor="middle" class="small">딕셔너리 동기화</text>
 
-  <line x1="599" y1="417" x2="614" y2="417" stroke="#94A3B8" stroke-width="1.5"/>
-  <polygon points="612,412 622,417 612,422" fill="#94A3B8"/>
+  <line x1="599" y1="417" x2="614" y2="417" stroke="#787368" stroke-width="1.5"/>
+  <polygon points="612,412 622,417 612,422" fill="#787368"/>
 
-  <rect x="622" y="395" width="140" height="45" class="box" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="1"/>
-  <text x="692" y="413" text-anchor="middle" class="sublabel" fill="#10B981">Violations 확인</text>
+  <rect x="622" y="395" width="140" height="45" class="box" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="692" y="413" text-anchor="middle" class="sublabel" fill="#2f6a1c">Violations 확인</text>
   <text x="692" y="430" text-anchor="middle" class="code">PDB_PLUG_IN_VIOLATIONS</text>
 
   <!-- Note -->
   <text x="400" y="468" text-anchor="middle" class="small">호환성 검사: 버전, 캐릭터셋, Endian, 컴포넌트, 패치, COMPATIBLE 파라미터</text>
   <text x="400" y="485" text-anchor="middle" class="code">ERROR → Plug In 차단 (해결 필수) | WARNING → 오픈 후 자동 해결 가능</text>
-  <text x="400" y="505" text-anchor="middle" class="small" fill="#F59E0B">Oracle 26ai: PDB_PLUG_IN_VIOLATIONS에 AUTO_FIXABLE 컬럼 추가</text>
+  <text x="400" y="505" text-anchor="middle" class="small" fill="#8a5a10">Oracle 26ai: PDB_PLUG_IN_VIOLATIONS에 AUTO_FIXABLE 컬럼 추가</text>
 </svg>

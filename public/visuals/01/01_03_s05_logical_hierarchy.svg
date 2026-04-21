@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,109 +16,109 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">Tablespace → Segment → Extent → Data Block Hierarchy</text>
 
   <!-- Layer 1: Tablespace -->
-  <rect x="40" y="70" width="720" height="485" class="box" fill="rgba(16,185,129,0.06)" stroke="#10B981" stroke-width="2"/>
-  <text x="60" y="95" class="label" fill="#10B981">테이블스페이스 (Tablespace)</text>
+  <rect x="40" y="70" width="720" height="485" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="2"/>
+  <text x="60" y="95" class="label" fill="#2f6a1c">테이블스페이스 (Tablespace)</text>
   <text x="60" y="113" class="small">최상위 논리적 저장 단위 — 1개 이상의 데이터 파일로 구성</text>
 
   <!-- Tablespace types -->
-  <rect x="440" y="78" width="75" height="20" rx="10" ry="10" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="0.6"/>
-  <text x="477" y="92" text-anchor="middle" class="small" fill="#10B981">Permanent</text>
-  <rect x="522" y="78" width="75" height="20" rx="10" ry="10" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="0.6"/>
-  <text x="559" y="92" text-anchor="middle" class="small" fill="#F59E0B">Temporary</text>
-  <rect x="604" y="78" width="55" height="20" rx="10" ry="10" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="0.6"/>
-  <text x="631" y="92" text-anchor="middle" class="small" fill="#6F6BEA">UNDO</text>
+  <rect x="440" y="78" width="75" height="20" rx="10" ry="10" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="0.6"/>
+  <text x="477" y="92" text-anchor="middle" class="small" fill="#2f6a1c">Permanent</text>
+  <rect x="522" y="78" width="75" height="20" rx="10" ry="10" fill="#f0ddb3" stroke="#8a5a10" stroke-width="0.6"/>
+  <text x="559" y="92" text-anchor="middle" class="small" fill="#8a5a10">Temporary</text>
+  <rect x="604" y="78" width="55" height="20" rx="10" ry="10" fill="#d8cfe5" stroke="#4a2e78" stroke-width="0.6"/>
+  <text x="631" y="92" text-anchor="middle" class="small" fill="#4a2e78">UNDO</text>
 
   <!-- Layer 2: Segments (two segments side by side) -->
   <!-- Segment 1: Table Segment -->
-  <rect x="65" y="130" width="335" height="330" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="85" y="155" class="label" fill="#3B82F6">세그먼트 (Segment) — Table</text>
+  <rect x="65" y="130" width="335" height="330" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="85" y="155" class="label" fill="#2456a8">세그먼트 (Segment) — Table</text>
   <text x="85" y="173" class="small">테이블 데이터가 저장되는 논리적 공간</text>
 
   <!-- Segment 2: Index Segment -->
-  <rect x="420" y="130" width="325" height="180" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="440" y="155" class="label" fill="#3B82F6">세그먼트 (Segment) — Index</text>
+  <rect x="420" y="130" width="325" height="180" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="440" y="155" class="label" fill="#2456a8">세그먼트 (Segment) — Index</text>
   <text x="440" y="173" class="small">인덱스 데이터가 저장되는 논리적 공간</text>
 
   <!-- Layer 3: Extents inside Table Segment -->
   <!-- Extent 1 -->
-  <rect x="85" y="190" width="295" height="110" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.2"/>
-  <text x="105" y="212" class="label" fill="#F59E0B">익스텐트 1 (Extent)</text>
+  <rect x="85" y="190" width="295" height="110" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.2"/>
+  <text x="105" y="212" class="label" fill="#8a5a10">익스텐트 1 (Extent)</text>
   <text x="105" y="228" class="small">연속 블록의 집합 — 단일 데이터 파일 내 존재</text>
 
   <!-- Data Blocks inside Extent 1 -->
-  <rect x="100" y="240" width="48" height="45" rx="4" ry="4" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="124" y="258" text-anchor="middle" class="small" fill="#6F6BEA">Block</text>
+  <rect x="100" y="240" width="48" height="45" rx="4" ry="4" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
+  <text x="124" y="258" text-anchor="middle" class="small" fill="#4a2e78">Block</text>
   <text x="124" y="275" text-anchor="middle" class="code">8KB</text>
 
-  <rect x="155" y="240" width="48" height="45" rx="4" ry="4" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="179" y="258" text-anchor="middle" class="small" fill="#6F6BEA">Block</text>
+  <rect x="155" y="240" width="48" height="45" rx="4" ry="4" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
+  <text x="179" y="258" text-anchor="middle" class="small" fill="#4a2e78">Block</text>
   <text x="179" y="275" text-anchor="middle" class="code">8KB</text>
 
-  <rect x="210" y="240" width="48" height="45" rx="4" ry="4" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="234" y="258" text-anchor="middle" class="small" fill="#6F6BEA">Block</text>
+  <rect x="210" y="240" width="48" height="45" rx="4" ry="4" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
+  <text x="234" y="258" text-anchor="middle" class="small" fill="#4a2e78">Block</text>
   <text x="234" y="275" text-anchor="middle" class="code">8KB</text>
 
-  <rect x="265" y="240" width="48" height="45" rx="4" ry="4" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="289" y="258" text-anchor="middle" class="small" fill="#6F6BEA">Block</text>
+  <rect x="265" y="240" width="48" height="45" rx="4" ry="4" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
+  <text x="289" y="258" text-anchor="middle" class="small" fill="#4a2e78">Block</text>
   <text x="289" y="275" text-anchor="middle" class="code">8KB</text>
 
-  <rect x="320" y="240" width="48" height="45" rx="4" ry="4" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="344" y="258" text-anchor="middle" class="small" fill="#6F6BEA">Block</text>
+  <rect x="320" y="240" width="48" height="45" rx="4" ry="4" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
+  <text x="344" y="258" text-anchor="middle" class="small" fill="#4a2e78">Block</text>
   <text x="344" y="275" text-anchor="middle" class="code">8KB</text>
 
   <!-- Extent 2 -->
-  <rect x="85" y="315" width="295" height="55" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.2"/>
-  <text x="105" y="337" class="label" fill="#F59E0B">익스텐트 2 (Extent)</text>
+  <rect x="85" y="315" width="295" height="55" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.2"/>
+  <text x="105" y="337" class="label" fill="#8a5a10">익스텐트 2 (Extent)</text>
   <text x="250" y="358" class="small">Block | Block | Block | Block | Block | ...</text>
 
   <!-- Extent 3 -->
-  <rect x="85" y="385" width="295" height="55" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <text x="105" y="407" class="label" fill="#F59E0B">익스텐트 N (Extent)</text>
-  <text x="250" y="420" class="small" fill="#F59E0B">공간 부족 시 새 익스텐트 자동 할당</text>
+  <rect x="85" y="385" width="295" height="55" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <text x="105" y="407" class="label" fill="#8a5a10">익스텐트 N (Extent)</text>
+  <text x="250" y="420" class="small" fill="#8a5a10">공간 부족 시 새 익스텐트 자동 할당</text>
 
   <!-- Extents inside Index Segment -->
-  <rect x="440" y="190" width="285" height="50" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.2"/>
-  <text x="460" y="212" class="label" fill="#F59E0B">익스텐트 1</text>
+  <rect x="440" y="190" width="285" height="50" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.2"/>
+  <text x="460" y="212" class="label" fill="#8a5a10">익스텐트 1</text>
   <text x="460" y="228" class="small">Block | Block | Block | Block</text>
 
-  <rect x="440" y="250" width="285" height="50" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <text x="460" y="272" class="label" fill="#F59E0B">익스텐트 N</text>
+  <rect x="440" y="250" width="285" height="50" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <text x="460" y="272" class="label" fill="#8a5a10">익스텐트 N</text>
   <text x="460" y="288" class="small">Block | Block | Block | Block</text>
 
   <!-- Data File mapping at bottom -->
-  <rect x="420" y="330" width="325" height="125" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
-  <text x="582" y="355" text-anchor="middle" class="label" fill="#94A3B8">물리적 매핑 (Physical Mapping)</text>
+  <rect x="420" y="330" width="325" height="125" class="box" fill="rgba(42,42,42,0.03)" stroke="#f3efe4" stroke-width="1"/>
+  <text x="582" y="355" text-anchor="middle" class="label" fill="#787368">물리적 매핑 (Physical Mapping)</text>
 
-  <rect x="440" y="370" width="130" height="32" rx="4" ry="4" fill="rgba(111,107,234,0.1)" stroke="#6F6BEA" stroke-width="0.8"/>
+  <rect x="440" y="370" width="130" height="32" rx="4" ry="4" fill="#d8cfe5" stroke="#4a2e78" stroke-width="0.8"/>
   <text x="505" y="390" text-anchor="middle" class="code">datafile_01.dbf</text>
 
-  <rect x="590" y="370" width="130" height="32" rx="4" ry="4" fill="rgba(111,107,234,0.1)" stroke="#6F6BEA" stroke-width="0.8"/>
+  <rect x="590" y="370" width="130" height="32" rx="4" ry="4" fill="#d8cfe5" stroke="#4a2e78" stroke-width="0.8"/>
   <text x="655" y="390" text-anchor="middle" class="code">datafile_02.dbf</text>
 
   <text x="582" y="430" text-anchor="middle" class="small">세그먼트의 익스텐트는 여러 데이터 파일에</text>
   <text x="582" y="445" text-anchor="middle" class="small">걸쳐 존재할 수 있음</text>
 
   <!-- Bottom info: Extent size progression -->
-  <rect x="40" y="475" width="720" height="75" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="40" y="475" width="720" height="75" class="box" fill="rgba(42,42,42,0.03)" stroke="#f3efe4" stroke-width="1"/>
   <text x="400" y="498" text-anchor="middle" class="label">AUTOALLOCATE 익스텐트 크기 자동 증가</text>
 
-  <rect x="80" y="510" width="80" height="28" rx="4" ry="4" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="0.8"/>
-  <text x="120" y="528" text-anchor="middle" class="sublabel" fill="#10B981">64KB</text>
+  <rect x="80" y="510" width="80" height="28" rx="4" ry="4" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="0.8"/>
+  <text x="120" y="528" text-anchor="middle" class="sublabel" fill="#2f6a1c">64KB</text>
 
-  <text x="175" y="528" text-anchor="middle" class="small" fill="#3B82F6">→</text>
+  <text x="175" y="528" text-anchor="middle" class="small" fill="#2456a8">→</text>
 
-  <rect x="190" y="510" width="90" height="28" rx="4" ry="4" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="0.8"/>
-  <text x="235" y="528" text-anchor="middle" class="sublabel" fill="#3B82F6">1MB</text>
+  <rect x="190" y="510" width="90" height="28" rx="4" ry="4" fill="#dee5f5" stroke="#2456a8" stroke-width="0.8"/>
+  <text x="235" y="528" text-anchor="middle" class="sublabel" fill="#2456a8">1MB</text>
 
-  <text x="295" y="528" text-anchor="middle" class="small" fill="#F59E0B">→</text>
+  <text x="295" y="528" text-anchor="middle" class="small" fill="#8a5a10">→</text>
 
-  <rect x="310" y="510" width="90" height="28" rx="4" ry="4" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="0.8"/>
-  <text x="355" y="528" text-anchor="middle" class="sublabel" fill="#F59E0B">8MB</text>
+  <rect x="310" y="510" width="90" height="28" rx="4" ry="4" fill="#f0ddb3" stroke="#8a5a10" stroke-width="0.8"/>
+  <text x="355" y="528" text-anchor="middle" class="sublabel" fill="#8a5a10">8MB</text>
 
-  <text x="415" y="528" text-anchor="middle" class="small" fill="#F43F5E">→</text>
+  <text x="415" y="528" text-anchor="middle" class="small" fill="#be123c">→</text>
 
-  <rect x="430" y="510" width="90" height="28" rx="4" ry="4" fill="rgba(243,63,94,0.12)" stroke="#F43F5E" stroke-width="0.8"/>
-  <text x="475" y="528" text-anchor="middle" class="sublabel" fill="#F43F5E">64MB</text>
+  <rect x="430" y="510" width="90" height="28" rx="4" ry="4" fill="#f5d0d0" stroke="#be123c" stroke-width="0.8"/>
+  <text x="475" y="528" text-anchor="middle" class="sublabel" fill="#be123c">64MB</text>
 
   <text x="600" y="525" class="small">UNIFORM: 모든 익스텐트 동일 크기</text>
   <text x="600" y="540" class="small">(임시 테이블스페이스에 권장)</text>

@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -14,50 +15,50 @@
   <text x="400" y="52" class="subtitle" text-anchor="middle">사용자별 테이블스페이스 저장 공간 제한 메커니즘</text>
 
   <!-- User -->
-  <rect x="300" y="70" width="200" height="40" class="box" fill="#6F6BEA" stroke="none"/>
-  <text x="400" y="95" class="label" text-anchor="middle" fill="#FFF">사용자 (app_user)</text>
+  <rect x="300" y="70" width="200" height="40" class="box" fill="#4a2e78" stroke="none"/>
+  <text x="400" y="95" class="label" text-anchor="middle" fill="#1a1a1a">사용자 (app_user)</text>
 
   <!-- Lines to tablespaces -->
-  <line x1="340" y1="110" x2="150" y2="145" stroke="#3B82F6" stroke-width="1.5"/>
-  <line x1="400" y1="110" x2="400" y2="145" stroke="#10B981" stroke-width="1.5"/>
-  <line x1="460" y1="110" x2="650" y2="145" stroke="#F59E0B" stroke-width="1.5"/>
+  <line x1="340" y1="110" x2="150" y2="145" stroke="#2456a8" stroke-width="1.5"/>
+  <line x1="400" y1="110" x2="400" y2="145" stroke="#2f6a1c" stroke-width="1.5"/>
+  <line x1="460" y1="110" x2="650" y2="145" stroke="#8a5a10" stroke-width="1.5"/>
 
   <!-- TS USERS -->
-  <rect x="50" y="145" width="200" height="75" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="50" y="145" width="200" height="75" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="1.5"/>
   <text x="150" y="165" class="label" text-anchor="middle">USERS</text>
   <text x="150" y="185" class="code" text-anchor="middle">QUOTA 100M ON users</text>
-  <rect x="70" y="195" width="80" height="14" rx="3" fill="#3B82F6" opacity="0.4"/>
-  <rect x="70" y="195" width="40" height="14" rx="3" fill="#3B82F6" opacity="0.8"/>
+  <rect x="70" y="195" width="80" height="14" rx="3" fill="#2456a8" opacity="0.4"/>
+  <rect x="70" y="195" width="40" height="14" rx="3" fill="#2456a8" opacity="0.8"/>
   <text x="165" y="206" class="small">40M / 100M 사용</text>
 
   <!-- TS APP_DATA -->
-  <rect x="280" y="145" width="240" height="75" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
+  <rect x="280" y="145" width="240" height="75" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1.5"/>
   <text x="400" y="165" class="label" text-anchor="middle">APP_DATA</text>
   <text x="400" y="185" class="code" text-anchor="middle">QUOTA UNLIMITED ON app_data</text>
-  <rect x="300" y="195" width="140" height="14" rx="3" fill="#10B981" opacity="0.4"/>
-  <rect x="300" y="195" width="90" height="14" rx="3" fill="#10B981" opacity="0.8"/>
+  <rect x="300" y="195" width="140" height="14" rx="3" fill="#2f6a1c" opacity="0.4"/>
+  <rect x="300" y="195" width="90" height="14" rx="3" fill="#2f6a1c" opacity="0.8"/>
   <text x="460" y="206" class="small">무제한</text>
 
   <!-- TS OLD -->
-  <rect x="550" y="145" width="200" height="75" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1.5"/>
+  <rect x="550" y="145" width="200" height="75" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="1.5"/>
   <text x="650" y="165" class="label" text-anchor="middle">OLD_TS</text>
   <text x="650" y="185" class="code" text-anchor="middle">QUOTA 0 ON old_ts</text>
   <text x="650" y="206" class="small" text-anchor="middle">새 객체 생성 불가</text>
   <text x="650" y="216" class="small" text-anchor="middle">기존 객체는 유지</text>
 
   <!-- UNLIMITED TABLESPACE privilege -->
-  <rect x="30" y="240" width="740" height="60" class="box" fill="#F43F5E" opacity="0.1" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="50" y="260" class="label" fill="#F43F5E">UNLIMITED TABLESPACE 시스템 권한</text>
+  <rect x="30" y="240" width="740" height="60" class="box" fill="#be123c" opacity="0.1" stroke="#be123c" stroke-width="1.5"/>
+  <text x="50" y="260" class="label" fill="#be123c">UNLIMITED TABLESPACE 시스템 권한</text>
   <text x="50" y="280" class="small">부여 시: 모든 영구 TS 무제한 (개별 쿼터 무시) | REVOKE 시: 이전 개별 쿼터 다시 적용</text>
   <text x="50" y="293" class="small">RESOURCE 역할: Oracle 12c 이후 UNLIMITED TABLESPACE 포함 안 됨 → 별도 쿼터 설정 필요</text>
 
   <!-- Quota applicable segments -->
-  <rect x="30" y="315" width="360" height="50" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="30" y="315" width="360" height="50" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
   <text x="50" y="335" class="sublabel">쿼터 적용: 테이블, 인덱스, LOB, 클러스터, MView</text>
-  <text x="50" y="352" class="sublabel" fill="#F43F5E">쿼터 미적용: 임시(Temp), UNDO 테이블스페이스</text>
+  <text x="50" y="352" class="sublabel" fill="#be123c">쿼터 미적용: 임시(Temp), UNDO 테이블스페이스</text>
 
   <!-- DBA_TS_QUOTAS -->
-  <rect x="410" y="315" width="360" height="50" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="410" y="315" width="360" height="50" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
   <text x="430" y="335" class="code">DBA_TS_QUOTAS</text>
   <text x="550" y="335" class="small">BYTES, MAX_BYTES 조회</text>
   <text x="430" y="352" class="small">MAX_BYTES = -1 은 UNLIMITED</text>

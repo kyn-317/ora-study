@@ -13,7 +13,9 @@
     {
       "sectionId": "s01",
       "title": "초기화 파라미터 파일 개요 (Parameter File Overview)",
-      "sqlExamplesIds": ["sql01"],
+      "sqlExamplesIds": [
+        "sql01"
+      ],
       "content": "Oracle 인스턴스가 기동(STARTUP)될 때, 인스턴스의 동작 방식을 결정하는 **초기화 파라미터(Initialization Parameters)**를 읽어들이는 파일이 초기화 파라미터 파일입니다. 이 파일은 메모리 크기, 프로세스 수, 파일 위치 등 인스턴스의 거의 모든 설정을 제어합니다.\n\nOracle은 두 가지 유형의 초기화 파라미터 파일을 지원합니다:\n\n| 구분 | PFILE (텍스트 파라미터 파일) | SPFILE (서버 파라미터 파일) |\n|---|---|---|\n| **파일 형식** | 텍스트 (사람이 읽을 수 있음) | 바이너리 (직접 편집 불가) |\n| **기본 파일명** | `init<SID>.ora` | `spfile<SID>.ora` |\n| **위치** | `$ORACLE_HOME/dbs` (Linux) / `$ORACLE_HOME\\database` (Windows) | 동일 |\n| **편집 방법** | 텍스트 에디터로 직접 편집 | `ALTER SYSTEM` 명령으로만 변경 |\n| **영구 반영** | 파일 직접 편집 후 재기동 | `ALTER SYSTEM ... SCOPE=SPFILE/BOTH` |\n| **동적 변경** | 메모리만 변경 가능 (파일 반영 불가) | 메모리 + 파일 동시 반영 가능 |\n| **백업** | 일반 파일 복사 | `CREATE PFILE FROM SPFILE`로 백업 가능 |\n| **Oracle 권장** | 비권장 (레거시) | **권장** |\n\n### 파라미터 파일 검색 순서\n\n인스턴스 기동 시 Oracle은 다음 순서로 파라미터 파일을 검색합니다:\n\n1. `spfile<SID>.ora` — SID 특정 SPFILE\n2. `spfile.ora` — 기본 SPFILE\n3. `init<SID>.ora` — SID 특정 PFILE\n\n`STARTUP PFILE='경로'`로 명시적으로 PFILE을 지정할 수 있습니다. 단, **SPFILE을 명시적으로 지정하는 STARTUP 옵션은 없습니다** — SPFILE의 위치를 변경하려면 PFILE 내에 `SPFILE` 파라미터로 경로를 지정합니다.\n\n```\n# init.ora 내에서 SPFILE 위치 지정\nSPFILE = '/u01/app/oracle/dbs/spfileORCL.ora'\n```",
       "subsections": [],
       "visuals": [
@@ -30,7 +32,10 @@
     {
       "sectionId": "s02",
       "title": "PFILE — 텍스트 파라미터 파일 (Text Initialization Parameter File)",
-      "sqlExamplesIds": ["sql02", "sql03"],
+      "sqlExamplesIds": [
+        "sql02",
+        "sql03"
+      ],
       "content": "PFILE(Parameter File)은 `init<SID>.ora` 형식의 **텍스트 파일**로, 사람이 직접 읽고 편집할 수 있는 초기화 파라미터 파일입니다. Oracle의 초기 버전부터 사용되어 온 전통적인 방식입니다.",
       "subsections": [
         {
@@ -60,18 +65,22 @@
       "visuals": [
         {
           "id": "v8",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A([\"<b>파라미터 파일 선택</b>\"]):::amber\n  A --> B{\"SPFILE 존재?<br/>spfile&lt;SID&gt;.ora\"}\n  B -- \"존재\" --> C[\"<b>SPFILE 사용 (권장)</b><br/>spfile&lt;SID&gt;.ora (바이너리)\"]:::green\n  C --> C1[\"ALTER SYSTEM으로 영구 반영<br/>SCOPE=BOTH / SCOPE=SPFILE\"]:::green\n  B -- \"없음\" --> D[\"<b>PFILE 사용 (레거시)</b><br/>init&lt;SID&gt;.ora (텍스트)\"]:::blue\n  D --> D1[\"텍스트 에디터로 직접 편집\"]:::blue\n  D1 --> D2[\"변경 후 인스턴스 재기동 필요\"]:::blue\n  D --> E[\"<b>PFILE → SPFILE 전환</b><br/>CREATE SPFILE FROM PFILE\"]:::amber\n  E --> F{\"기존 SPFILE 존재?\"}\n  F -- \"존재\" --> G[\"기존 파일 이동 또는 삭제\"]:::red\n  G --> H[\"CREATE SPFILE FROM PFILE 실행\"]:::green\n  F -- \"없음\" --> H\n  H --> C\n  A --> I[\"<b>STARTUP PFILE='경로'</b><br/>명시적 PFILE 지정 가능\"]:::amber\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "PFILE vs SPFILE 선택 흐름: SPFILE 존재 여부에 따른 사용 방식, PFILE에서 SPFILE 전환 절차(CREATE SPFILE FROM PFILE), 명시적 PFILE 지정(STARTUP PFILE=)",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_05_s02_v8_mermaid.svg"
         }
       ]
     },
     {
       "sectionId": "s03",
       "title": "SPFILE — 서버 파라미터 파일 (Server Parameter File)",
-      "sqlExamplesIds": ["sql04", "sql05", "sql06"],
+      "sqlExamplesIds": [
+        "sql04",
+        "sql05",
+        "sql06"
+      ],
       "content": "SPFILE(Server Parameter File)은 `spfile<SID>.ora` 형식의 **바이너리 파일**로, Oracle이 직접 관리하는 초기화 파라미터 파일입니다. Oracle 9i에서 도입되었으며, **Oracle이 공식적으로 권장하는 파라미터 파일**입니다.\n\nSPFILE의 가장 큰 장점은 `ALTER SYSTEM` 명령으로 파라미터를 변경할 때 **파일에도 영구적으로 반영**할 수 있다는 것입니다. 이로써 인스턴스 재기동 후에도 변경 사항이 유지됩니다.",
       "subsections": [
         {
@@ -115,7 +124,10 @@
     {
       "sectionId": "s04",
       "title": "초기화 파라미터의 분류 (Parameter Classification)",
-      "sqlExamplesIds": ["sql07", "sql08"],
+      "sqlExamplesIds": [
+        "sql07",
+        "sql08"
+      ],
       "content": "Oracle의 초기화 파라미터는 **수백 개**에 달하며, 여러 기준으로 분류할 수 있습니다. 시험에서 자주 출제되는 분류 기준을 정리합니다.",
       "subsections": [
         {
@@ -169,7 +181,10 @@
     {
       "sectionId": "s05",
       "title": "주요 초기화 파라미터 상세 (Key Initialization Parameters)",
-      "sqlExamplesIds": ["sql09", "sql10"],
+      "sqlExamplesIds": [
+        "sql09",
+        "sql10"
+      ],
       "content": "시험 및 실무에서 중요한 초기화 파라미터들을 기능별로 분류하여 상세히 설명합니다.",
       "subsections": [
         {
@@ -220,7 +235,10 @@
     {
       "sectionId": "s06",
       "title": "멀티테넌트 환경에서의 파라미터 관리 (Parameters in Multitenant)",
-      "sqlExamplesIds": ["sql11", "sql12"],
+      "sqlExamplesIds": [
+        "sql11",
+        "sql12"
+      ],
       "content": "CDB/PDB 멀티테넌트 환경에서는 파라미터가 **CDB 레벨**과 **PDB 레벨**로 분리되어 관리됩니다. 모든 파라미터가 PDB 레벨에서 변경 가능한 것은 아닙니다.",
       "subsections": [
         {
@@ -250,7 +268,11 @@
     {
       "sectionId": "s07",
       "title": "파라미터 조회 및 모니터링 (Parameter Views and Monitoring)",
-      "sqlExamplesIds": ["sql13", "sql14", "sql15"],
+      "sqlExamplesIds": [
+        "sql13",
+        "sql14",
+        "sql15"
+      ],
       "content": "초기화 파라미터의 현재 값, 기본값 여부, 변경 이력 등을 조회하기 위한 뷰들을 정리합니다.\n\n### 파라미터 관련 동적 성능 뷰\n\n| 뷰 | 설명 |\n|---|---|\n| **V$PARAMETER** | 현재 세션에서 유효한 파라미터 값 |\n| **V$SYSTEM_PARAMETER** | 시스템 레벨에서 설정된 파라미터 값 |\n| **V$SPPARAMETER** | SPFILE에 기록된 파라미터 값 |\n| **V$PARAMETER2** | 다중 값 파라미터를 행 단위로 분리하여 표시 |\n| **V$SYSTEM_PARAMETER2** | V$SYSTEM_PARAMETER의 다중 값 분리 버전 |\n| **V$OBSOLETE_PARAMETER** | 폐기(Obsolete)된 파라미터 목록 |\n\n### V$PARAMETER vs V$SPPARAMETER\n\n| 구분 | V$PARAMETER | V$SPPARAMETER |\n|---|---|---|\n| **표시 대상** | 현재 메모리에서 유효한 값 | SPFILE에 기록된 값 |\n| **SCOPE=MEMORY 반영** | O (즉시 반영) | X |\n| **SCOPE=SPFILE 반영** | X (다음 기동까지 미반영) | O (즉시 반영) |\n| **SCOPE=BOTH 반영** | O | O |\n| **미설정 파라미터** | Oracle 기본값 표시 | `ISSPECIFIED = 'FALSE'` |\n\n### SQL*Plus SHOW 명령\n\n```sql\n-- 특정 파라미터 확인\nSHOW PARAMETER sga_target;\n\n-- 이름에 'memory'가 포함된 파라미터 검색\nSHOW PARAMETER memory;\n\n-- SPFILE 경로 확인\nSHOW PARAMETER spfile;\n\n-- 모든 파라미터 표시\nSHOW PARAMETER;\n```\n\n`SHOW PARAMETER`는 파라미터 이름의 **부분 일치(Substring Match)** 검색을 지원합니다. 예를 들어 `SHOW PARAMETER memory`는 이름에 `memory`가 포함된 모든 파라미터를 표시합니다.",
       "subsections": [
         {

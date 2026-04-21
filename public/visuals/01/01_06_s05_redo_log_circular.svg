@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,70 +16,70 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">그룹/멤버 구조, 로그 스위치, 아카이빙 흐름</text>
 
   <!-- Left: Group/Member Structure -->
-  <rect x="30" y="70" width="350" height="220" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
-  <text x="205" y="92" text-anchor="middle" class="label" fill="#6F6BEA">그룹/멤버 구조 Group/Member</text>
+  <rect x="30" y="70" width="350" height="220" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" class="box"/>
+  <text x="205" y="92" text-anchor="middle" class="label" fill="#4a2e78">그룹/멤버 구조 Group/Member</text>
 
   <!-- Group 1 -->
-  <rect x="50" y="105" width="310" height="50" fill="#2A2B3D" stroke="#10B981" stroke-width="1.5" class="box"/>
-  <text x="65" y="122" class="sublabel" fill="#10B981">Group 1</text>
-  <text x="130" y="122" class="small" fill="#10B981">CURRENT</text>
-  <rect x="65" y="130" width="130" height="18" fill="#10B981" fill-opacity="0.15" rx="4"/>
+  <rect x="50" y="105" width="310" height="50" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1.5" class="box"/>
+  <text x="65" y="122" class="sublabel" fill="#2f6a1c">Group 1</text>
+  <text x="130" y="122" class="small" fill="#2f6a1c">CURRENT</text>
+  <rect x="65" y="130" width="130" height="18" fill="#2f6a1c" fill-opacity="0.15" rx="4"/>
   <text x="130" y="143" text-anchor="middle" class="code">/disk1/redo01a.log</text>
-  <rect x="210" y="130" width="130" height="18" fill="#10B981" fill-opacity="0.15" rx="4"/>
+  <rect x="210" y="130" width="130" height="18" fill="#2f6a1c" fill-opacity="0.15" rx="4"/>
   <text x="275" y="143" text-anchor="middle" class="code">/disk2/redo01b.log</text>
 
   <!-- Group 2 -->
-  <rect x="50" y="162" width="310" height="50" fill="#2A2B3D" stroke="#94A3B8" stroke-width="1" class="box"/>
+  <rect x="50" y="162" width="310" height="50" fill="#f3efe4" stroke="#787368" stroke-width="1" class="box"/>
   <text x="65" y="179" class="sublabel">Group 2</text>
   <text x="130" y="179" class="small">INACTIVE</text>
-  <rect x="65" y="187" width="130" height="18" fill="#94A3B8" fill-opacity="0.1" rx="4"/>
+  <rect x="65" y="187" width="130" height="18" fill="#787368" fill-opacity="0.1" rx="4"/>
   <text x="130" y="200" text-anchor="middle" class="code">/disk1/redo02a.log</text>
-  <rect x="210" y="187" width="130" height="18" fill="#94A3B8" fill-opacity="0.1" rx="4"/>
+  <rect x="210" y="187" width="130" height="18" fill="#787368" fill-opacity="0.1" rx="4"/>
   <text x="275" y="200" text-anchor="middle" class="code">/disk2/redo02b.log</text>
 
   <!-- Group 3 -->
-  <rect x="50" y="219" width="310" height="50" fill="#2A2B3D" stroke="#F59E0B" stroke-width="1" class="box"/>
-  <text x="65" y="236" class="sublabel" fill="#F59E0B">Group 3</text>
-  <text x="130" y="236" class="small" fill="#F59E0B">ACTIVE</text>
-  <rect x="65" y="244" width="130" height="18" fill="#F59E0B" fill-opacity="0.1" rx="4"/>
+  <rect x="50" y="219" width="310" height="50" fill="#f3efe4" stroke="#8a5a10" stroke-width="1" class="box"/>
+  <text x="65" y="236" class="sublabel" fill="#8a5a10">Group 3</text>
+  <text x="130" y="236" class="small" fill="#8a5a10">ACTIVE</text>
+  <rect x="65" y="244" width="130" height="18" fill="#8a5a10" fill-opacity="0.1" rx="4"/>
   <text x="130" y="257" text-anchor="middle" class="code">/disk1/redo03a.log</text>
-  <rect x="210" y="244" width="130" height="18" fill="#F59E0B" fill-opacity="0.1" rx="4"/>
+  <rect x="210" y="244" width="130" height="18" fill="#8a5a10" fill-opacity="0.1" rx="4"/>
   <text x="275" y="257" text-anchor="middle" class="code">/disk2/redo03b.log</text>
 
   <!-- Right: Circular diagram -->
-  <rect x="400" y="70" width="370" height="220" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
-  <text x="585" y="92" text-anchor="middle" class="label" fill="#6F6BEA">순환 사용 Circular Usage</text>
+  <rect x="400" y="70" width="370" height="220" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" class="box"/>
+  <text x="585" y="92" text-anchor="middle" class="label" fill="#4a2e78">순환 사용 Circular Usage</text>
 
   <!-- Circular arrows and groups -->
   <!-- Group circles -->
-  <circle cx="585" cy="190" r="70" fill="none" stroke="#2A2B3D" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <circle cx="585" cy="190" r="70" fill="none" stroke="#f3efe4" stroke-width="1.5" stroke-dasharray="8,4"/>
 
   <!-- G1 at top -->
-  <circle cx="585" cy="120" r="28" fill="#10B981" fill-opacity="0.15" stroke="#10B981" stroke-width="1.5"/>
-  <text x="585" y="117" text-anchor="middle" class="sublabel" fill="#10B981">G1</text>
-  <text x="585" y="132" text-anchor="middle" class="small" fill="#10B981">CURRENT</text>
+  <circle cx="585" cy="120" r="28" fill="#2f6a1c" fill-opacity="0.15" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="585" y="117" text-anchor="middle" class="sublabel" fill="#2f6a1c">G1</text>
+  <text x="585" y="132" text-anchor="middle" class="small" fill="#2f6a1c">CURRENT</text>
 
   <!-- G2 at bottom-right -->
-  <circle cx="646" cy="225" r="28" fill="#94A3B8" fill-opacity="0.1" stroke="#94A3B8" stroke-width="1"/>
+  <circle cx="646" cy="225" r="28" fill="#787368" fill-opacity="0.1" stroke="#787368" stroke-width="1"/>
   <text x="646" y="222" text-anchor="middle" class="sublabel">G2</text>
   <text x="646" y="237" text-anchor="middle" class="small">INACTIVE</text>
 
   <!-- G3 at bottom-left -->
-  <circle cx="524" cy="225" r="28" fill="#F59E0B" fill-opacity="0.1" stroke="#F59E0B" stroke-width="1"/>
-  <text x="524" y="222" text-anchor="middle" class="sublabel" fill="#F59E0B">G3</text>
-  <text x="524" y="237" text-anchor="middle" class="small" fill="#F59E0B">ACTIVE</text>
+  <circle cx="524" cy="225" r="28" fill="#8a5a10" fill-opacity="0.1" stroke="#8a5a10" stroke-width="1"/>
+  <text x="524" y="222" text-anchor="middle" class="sublabel" fill="#8a5a10">G3</text>
+  <text x="524" y="237" text-anchor="middle" class="small" fill="#8a5a10">ACTIVE</text>
 
   <!-- Arrow G1 -> G2 -->
-  <path d="M 608,140 Q 650,165 645,195" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
-  <polygon points="642,193 648,193 645,199" fill="#E2E8F0"/>
+  <path d="M 608,140 Q 650,165 645,195" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+  <polygon points="642,193 648,193 645,199" fill="#1a1a1a"/>
 
   <!-- Arrow G2 -> G3 -->
-  <path d="M 620,240 Q 585,260 552,240" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
-  <polygon points="554,243 554,237 548,240" fill="#E2E8F0"/>
+  <path d="M 620,240 Q 585,260 552,240" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+  <polygon points="554,243 554,237 548,240" fill="#1a1a1a"/>
 
   <!-- Arrow G3 -> G1 -->
-  <path d="M 525,195 Q 540,160 562,140" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
-  <polygon points="560,143 564,137 558,137" fill="#E2E8F0"/>
+  <path d="M 525,195 Q 540,160 562,140" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+  <polygon points="560,143 564,137 558,137" fill="#1a1a1a"/>
 
   <!-- LGWR label in center -->
   <text x="585" y="188" text-anchor="middle" class="code">LGWR</text>
@@ -88,24 +89,24 @@
   <text x="690" y="183" class="small">→ 다음 그룹</text>
 
   <!-- Status Legend -->
-  <rect x="30" y="305" width="740" height="55" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
+  <rect x="30" y="305" width="740" height="55" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" class="box"/>
   <text x="50" y="325" class="label">Redo Log 그룹 상태 Status</text>
 
-  <circle cx="55" cy="345" r="5" fill="#10B981"/>
+  <circle cx="55" cy="345" r="5" fill="#2f6a1c"/>
   <text x="68" y="349" class="small">CURRENT: LGWR 기록 중</text>
 
-  <circle cx="245" cy="345" r="5" fill="#F59E0B"/>
+  <circle cx="245" cy="345" r="5" fill="#8a5a10"/>
   <text x="258" y="349" class="small">ACTIVE: 복구에 필요 (체크포인트 미완료)</text>
 
-  <circle cx="510" cy="345" r="5" fill="#94A3B8"/>
+  <circle cx="510" cy="345" r="5" fill="#787368"/>
   <text x="523" y="349" class="small">INACTIVE: 재사용 가능</text>
 
-  <circle cx="680" cy="345" r="5" fill="#2A2B3D" stroke="#94A3B8" stroke-width="1"/>
+  <circle cx="680" cy="345" r="5" fill="#f3efe4" stroke="#787368" stroke-width="1"/>
   <text x="693" y="349" class="small">UNUSED</text>
 
   <!-- LGWR Write Conditions -->
-  <rect x="30" y="375" width="365" height="130" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1" class="box"/>
-  <text x="212" y="397" text-anchor="middle" class="label" fill="#3B82F6">LGWR 기록 조건 Write Triggers</text>
+  <rect x="30" y="375" width="365" height="130" fill="#f3efe4" stroke="#2456a8" stroke-width="1" class="box"/>
+  <text x="212" y="397" text-anchor="middle" class="label" fill="#2456a8">LGWR 기록 조건 Write Triggers</text>
   <text x="50" y="418" class="code">COMMIT 발생 시</text>
   <text x="245" y="418" class="small">동기식 즉시 기록</text>
   <text x="50" y="436" class="code">Redo Buffer 1/3 이상 사용</text>
@@ -118,28 +119,28 @@
   <text x="245" y="490" class="small">잔여 내용 기록</text>
 
   <!-- Archiving flow -->
-  <rect x="405" y="375" width="365" height="130" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1" class="box"/>
-  <text x="587" y="397" text-anchor="middle" class="label" fill="#F59E0B">아카이빙 흐름 Archive Flow</text>
+  <rect x="405" y="375" width="365" height="130" fill="#f3efe4" stroke="#8a5a10" stroke-width="1" class="box"/>
+  <text x="587" y="397" text-anchor="middle" class="label" fill="#8a5a10">아카이빙 흐름 Archive Flow</text>
 
   <!-- Flow diagram -->
-  <rect x="425" y="410" width="100" height="35" fill="#2A2B3D" stroke="#10B981" stroke-width="1" class="box"/>
+  <rect x="425" y="410" width="100" height="35" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1" class="box"/>
   <text x="475" y="432" text-anchor="middle" class="sublabel">Online Redo</text>
 
-  <line x1="525" y1="427" x2="555" y2="427" stroke="#F59E0B" stroke-width="1.5"/>
-  <polygon points="553,423 553,431 559,427" fill="#F59E0B"/>
-  <text x="540" y="420" text-anchor="middle" class="small" fill="#F59E0B">ARCn</text>
+  <line x1="525" y1="427" x2="555" y2="427" stroke="#8a5a10" stroke-width="1.5"/>
+  <polygon points="553,423 553,431 559,427" fill="#8a5a10"/>
+  <text x="540" y="420" text-anchor="middle" class="small" fill="#8a5a10">ARCn</text>
 
-  <rect x="560" y="410" width="100" height="35" fill="#2A2B3D" stroke="#F59E0B" stroke-width="1" class="box"/>
-  <text x="610" y="432" text-anchor="middle" class="sublabel" fill="#F59E0B">Archive Log</text>
+  <rect x="560" y="410" width="100" height="35" fill="#f3efe4" stroke="#8a5a10" stroke-width="1" class="box"/>
+  <text x="610" y="432" text-anchor="middle" class="sublabel" fill="#8a5a10">Archive Log</text>
 
-  <line x1="610" y1="445" x2="610" y2="460" stroke="#F59E0B" stroke-width="1"/>
-  <polygon points="607,458 613,458 610,464" fill="#F59E0B"/>
+  <line x1="610" y1="445" x2="610" y2="460" stroke="#8a5a10" stroke-width="1"/>
+  <polygon points="607,458 613,458 610,464" fill="#8a5a10"/>
 
-  <rect x="560" y="465" width="100" height="28" fill="#2A2B3D" stroke="#6F6BEA" stroke-width="1" class="box"/>
-  <text x="610" y="484" text-anchor="middle" class="sublabel" fill="#6F6BEA">FRA</text>
+  <rect x="560" y="465" width="100" height="28" fill="#f3efe4" stroke="#4a2e78" stroke-width="1" class="box"/>
+  <text x="610" y="484" text-anchor="middle" class="sublabel" fill="#4a2e78">FRA</text>
 
   <text x="425" y="470" class="small">ARCHIVELOG 모드에서</text>
   <text x="425" y="484" class="small">로그 스위치 시 자동</text>
   <text x="425" y="498" class="small">아카이브 미완료 시</text>
-  <text x="425" y="510" class="small" fill="#F43F5E">Redo Log 재사용 불가</text>
+  <text x="425" y="510" class="small" fill="#be123c">Redo Log 재사용 불가</text>
 </svg>

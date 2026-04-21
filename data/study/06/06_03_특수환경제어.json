@@ -173,12 +173,12 @@
       "visuals": [
         {
           "id": "v05",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>Shared UNDO 모드</b><br/>CDB$ROOT에 1개의 UNDO 테이블스페이스\"]:::amber\n  A --> P1[\"<b>PDB1</b><br/>UNDO 테이블스페이스 없음\"]:::blue\n  A --> P2[\"<b>PDB2</b><br/>UNDO 테이블스페이스 없음\"]:::blue\n  A --> P3[\"<b>CDB\\$ROOT</b><br/>UNDOTBS1 공유\"]:::amber\n  B[\"<b>Local UNDO 모드</b><br/>각 PDB가 독립적인 UNDO 테이블스페이스 보유\"]:::green\n  B --> Q1[\"<b>PDB1</b><br/>UNDOTBS_PDB1\"]:::green\n  B --> Q2[\"<b>PDB2</b><br/>UNDOTBS_PDB2\"]:::green\n  B --> Q3[\"<b>CDB\\$ROOT</b><br/>UNDOTBS_ROOT\"]:::green\n  A -. \"Oracle 21c+ 기본<br/>Hot Clone·Relocate·Flashback PDB 지원\" .-> B\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "Shared UNDO(CDB$ROOT 단일 공유) vs Local UNDO(각 PDB 독립 보유) 아키텍처 비교",
           "placement": "before-content",
           "width": "100%",
-          "sectionId": "s04"
+          "sectionId": "s04",
+          "src": "/visuals/06/06_03_s04_v05_mermaid.svg"
         }
       ]
     },
@@ -233,11 +233,11 @@
       "visuals": [
         {
           "id": "v7",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>PDB 생성</b><br/>Local UNDO 모드\"]:::amber\n  A --> B[\"<b>UNDO 테이블스페이스 자동 생성</b><br/>PDB 내 독립 테이블스페이스\"]:::blue\n  B --> C[\"<b>UNDO_TABLESPACE 독립 설정</b><br/>PDB 레벨에서 전환 가능\"]:::blue\n  C --> D[\"<b>UNDO_RETENTION 독립 설정</b><br/>PDB별 워크로드 맞춤 조정\"]:::blue\n  D --> E[\"<b>PDB 이동 시</b><br/>UNDO 테이블스페이스 함께 이동\"]:::green\n  D --> F[\"<b>Hot Clone / Relocate 지원</b>\"]:::green\n  D --> G[\"<b>Flashback PDB 지원</b>\"]:::green\n  D --> H[\"<b>UNDO 공간 완전 격리</b><br/>PDB 간 경합 방지\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "로컬 UNDO 모드: PDB 생성부터 독립 UNDO 관리 및 지원 기능까지의 흐름",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/06/06_03_s05_v7_mermaid.svg"
         }
       ]
     },
@@ -298,12 +298,12 @@
         },
         {
           "id": "v06",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>현재 UNDO 모드 확인</b><br/>DATABASE_PROPERTIES 조회\"]:::blue\n  A --> B[\"<b>CDB 종료</b><br/>SHUTDOWN IMMEDIATE\"]:::red\n  B --> C[\"<b>UPGRADE 모드로 시작</b><br/>STARTUP UPGRADE\"]:::amber\n  C --> D[\"<b>Local UNDO 활성화</b><br/>ALTER DATABASE LOCAL UNDO ON\"]:::amber\n  D --> E[\"<b>모든 PDB UPGRADE 모드 OPEN</b><br/>ALTER PLUGGABLE DATABASE ALL OPEN UPGRADE\"]:::amber\n  E --> F[\"<b>CDB 재시작</b><br/>SHUTDOWN IMMEDIATE → STARTUP\"]:::red\n  F --> G[\"<b>모든 PDB OPEN</b><br/>ALTER PLUGGABLE DATABASE ALL OPEN\"]:::green\n  G --> H[\"<b>전환 확인</b><br/>LOCAL_UNDO_ENABLED = TRUE\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "Shared → Local UNDO 모드 전환 절차: STARTUP UPGRADE → ALTER DATABASE LOCAL UNDO ON → 재시작",
           "placement": "before-content",
           "width": "100%",
-          "sectionId": "s06"
+          "sectionId": "s06",
+          "src": "/visuals/06/06_03_s06_v06_mermaid.svg"
         }
       ]
     },
@@ -334,11 +334,11 @@
       "visuals": [
         {
           "id": "v8",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>UNDO 뷰 조회</b><br/>조회 위치 선택\"]:::amber\n  A --> B[\"<b>CDB$ROOT에서 조회</b>\"]:::blue\n  A --> C[\"<b>PDB 내에서 조회</b>\"]:::green\n  B --> D[\"<b>Shared UNDO</b><br/>V$UNDOSTAT: CDB 전체 통계\"]:::blue\n  B --> E[\"<b>Local UNDO</b><br/>V$UNDOSTAT: CDB$ROOT 통계만\"]:::blue\n  B --> F[\"<b>CDB_UNDO_EXTENTS</b><br/>모든 PDB 통합 조회(CON_ID)\"]:::blue\n  C --> G[\"<b>Shared UNDO</b><br/>V$UNDOSTAT: CDB 전체 통계<br/>(PDB별 구분 어려움)\"]:::red\n  C --> H[\"<b>Local UNDO</b><br/>V$UNDOSTAT: 해당 PDB 통계만\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "UNDO 뷰 조회 결과: 조회 위치(CDB$ROOT vs PDB)와 UNDO 모드(Shared vs Local)에 따른 차이",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/06/06_03_s07_v8_mermaid.svg"
         }
       ]
     }

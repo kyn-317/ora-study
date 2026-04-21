@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -14,17 +15,17 @@
   <text x="400" y="52" class="subtitle" text-anchor="middle">CDB/PDB 환경에서 CONTAINER 절을 통한 롤 범위 제어</text>
 
   <!-- CDB Container -->
-  <rect x="30" y="70" width="740" height="310" rx="12" ry="12" fill="none" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="6"/>
-  <text x="55" y="90" class="label" fill="#6F6BEA">CDB</text>
+  <rect x="30" y="70" width="740" height="310" rx="12" ry="12" fill="none" stroke="#4a2e78" stroke-width="2" stroke-dasharray="6"/>
+  <text x="55" y="90" class="label" fill="#4a2e78">CDB</text>
 
   <!-- CDB$ROOT -->
-  <rect x="50" y="100" width="700" height="80" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="70" y="120" class="label" fill="#F59E0B">CDB$ROOT</text>
+  <rect x="50" y="100" width="700" height="80" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="70" y="120" class="label" fill="#8a5a10">CDB$ROOT</text>
 
-  <rect x="200" y="110" width="110" height="30" class="box" fill="#3B82F6" opacity="0.3" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="200" y="110" width="110" height="30" class="box" fill="#2456a8" opacity="0.3" stroke="#2456a8" stroke-width="1"/>
   <text x="255" y="130" class="code" text-anchor="middle">C##app_role</text>
 
-  <rect x="330" y="110" width="130" height="30" class="box" fill="#3B82F6" opacity="0.3" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="330" y="110" width="130" height="30" class="box" fill="#2456a8" opacity="0.3" stroke="#2456a8" stroke-width="1"/>
   <text x="395" y="130" class="code" text-anchor="middle">C##audit_viewer</text>
 
   <text x="490" y="128" class="small">공통 롤: C## 접두사 필수</text>
@@ -32,24 +33,24 @@
   <text x="70" y="165" class="small">CONTAINER=ALL: 모든 컨테이너에서 인식 | CONTAINER=CURRENT: CDB$ROOT에서만 유효</text>
 
   <!-- Arrows down -->
-  <line x1="255" y1="140" x2="155" y2="195" stroke="#3B82F6" stroke-width="1" stroke-dasharray="3"/>
-  <line x1="255" y1="140" x2="400" y2="195" stroke="#3B82F6" stroke-width="1" stroke-dasharray="3"/>
-  <line x1="255" y1="140" x2="650" y2="195" stroke="#3B82F6" stroke-width="1" stroke-dasharray="3"/>
+  <line x1="255" y1="140" x2="155" y2="195" stroke="#2456a8" stroke-width="1" stroke-dasharray="3"/>
+  <line x1="255" y1="140" x2="400" y2="195" stroke="#2456a8" stroke-width="1" stroke-dasharray="3"/>
+  <line x1="255" y1="140" x2="650" y2="195" stroke="#2456a8" stroke-width="1" stroke-dasharray="3"/>
 
   <!-- PDB1 -->
-  <rect x="50" y="195" width="220" height="170" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
-  <rect x="50" y="195" width="220" height="25" rx="8" ry="8" fill="#10B981" opacity="0.8"/>
-  <text x="160" y="213" class="label" text-anchor="middle" fill="#FFF">PDB1 (sales_pdb)</text>
+  <rect x="50" y="195" width="220" height="170" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1.5"/>
+  <rect x="50" y="195" width="220" height="25" rx="8" ry="8" fill="#2f6a1c" opacity="0.8"/>
+  <text x="160" y="213" class="label" text-anchor="middle" fill="#1a1a1a">PDB1 (sales_pdb)</text>
 
   <!-- Common role in PDB1 -->
-  <rect x="65" y="230" width="90" height="25" class="box" fill="#3B82F6" opacity="0.2" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="65" y="230" width="90" height="25" class="box" fill="#2456a8" opacity="0.2" stroke="#2456a8" stroke-width="1"/>
   <text x="110" y="247" class="code" text-anchor="middle" font-size="10">C##app_role</text>
 
   <!-- Local roles in PDB1 -->
-  <rect x="165" y="230" width="90" height="25" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1"/>
+  <rect x="165" y="230" width="90" height="25" class="box" fill="#be123c" opacity="0.2" stroke="#be123c" stroke-width="1"/>
   <text x="210" y="247" class="code" text-anchor="middle" font-size="10">sales_analyst</text>
 
-  <rect x="65" y="262" width="90" height="25" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1"/>
+  <rect x="65" y="262" width="90" height="25" class="box" fill="#be123c" opacity="0.2" stroke="#be123c" stroke-width="1"/>
   <text x="110" y="279" class="code" text-anchor="middle" font-size="10">sales_mgr</text>
 
   <text x="65" y="305" class="small">로컬 롤: 접두사 없음</text>
@@ -58,14 +59,14 @@
   <text x="65" y="350" class="small">동일 이름 다른 PDB 가능</text>
 
   <!-- PDB2 -->
-  <rect x="290" y="195" width="220" height="170" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
-  <rect x="290" y="195" width="220" height="25" rx="8" ry="8" fill="#10B981" opacity="0.8"/>
-  <text x="400" y="213" class="label" text-anchor="middle" fill="#FFF">PDB2 (hr_pdb)</text>
+  <rect x="290" y="195" width="220" height="170" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1.5"/>
+  <rect x="290" y="195" width="220" height="25" rx="8" ry="8" fill="#2f6a1c" opacity="0.8"/>
+  <text x="400" y="213" class="label" text-anchor="middle" fill="#1a1a1a">PDB2 (hr_pdb)</text>
 
-  <rect x="305" y="230" width="90" height="25" class="box" fill="#3B82F6" opacity="0.2" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="305" y="230" width="90" height="25" class="box" fill="#2456a8" opacity="0.2" stroke="#2456a8" stroke-width="1"/>
   <text x="350" y="247" class="code" text-anchor="middle" font-size="10">C##app_role</text>
 
-  <rect x="405" y="230" width="90" height="25" class="box" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1"/>
+  <rect x="405" y="230" width="90" height="25" class="box" fill="#be123c" opacity="0.2" stroke="#be123c" stroke-width="1"/>
   <text x="450" y="247" class="code" text-anchor="middle" font-size="10">hr_analyst</text>
 
   <text x="305" y="278" class="sublabel">공통 사용자에 로컬 롤 부여:</text>
@@ -76,11 +77,11 @@
   <text x="305" y="358" class="small">공통 부여(Commonly): 모든 컨테이너</text>
 
   <!-- PDB3 -->
-  <rect x="530" y="195" width="210" height="170" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
-  <rect x="530" y="195" width="210" height="25" rx="8" ry="8" fill="#10B981" opacity="0.8"/>
-  <text x="635" y="213" class="label" text-anchor="middle" fill="#FFF">PDB3</text>
+  <rect x="530" y="195" width="210" height="170" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1.5"/>
+  <rect x="530" y="195" width="210" height="25" rx="8" ry="8" fill="#2f6a1c" opacity="0.8"/>
+  <text x="635" y="213" class="label" text-anchor="middle" fill="#1a1a1a">PDB3</text>
 
-  <rect x="545" y="230" width="90" height="25" class="box" fill="#3B82F6" opacity="0.2" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="545" y="230" width="90" height="25" class="box" fill="#2456a8" opacity="0.2" stroke="#2456a8" stroke-width="1"/>
   <text x="590" y="247" class="code" text-anchor="middle" font-size="10">C##app_role</text>
 
   <text x="545" y="278" class="small">공통 롤이라도 개별 권한이</text>
@@ -93,10 +94,10 @@
   <text x="635" y="355" class="small">현재 컨테이너</text>
 
   <!-- Legend -->
-  <rect x="30" y="390" width="740" height="25" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
-  <rect x="50" y="396" width="14" height="14" rx="2" fill="#3B82F6" opacity="0.5"/>
+  <rect x="30" y="390" width="740" height="25" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
+  <rect x="50" y="396" width="14" height="14" rx="2" fill="#2456a8" opacity="0.5"/>
   <text x="72" y="407" class="small">공통 롤 (C## 접두사, CDB$ROOT에서 생성)</text>
-  <rect x="310" y="396" width="14" height="14" rx="2" fill="#F43F5E" opacity="0.5"/>
+  <rect x="310" y="396" width="14" height="14" rx="2" fill="#be123c" opacity="0.5"/>
   <text x="332" y="407" class="small">로컬 롤 (접두사 없음, PDB에서 생성)</text>
   <text x="560" y="407" class="code">COMMON_USER_PREFIX: C##</text>
 </svg>

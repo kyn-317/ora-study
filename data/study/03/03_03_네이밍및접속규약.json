@@ -276,11 +276,11 @@
       "visuals": [
         {
           "id": "v06",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>서비스 이름 구성</b><br/>DB_NAME + DB_DOMAIN\"]:::amber\n  A --> B[\"<b>기본 서비스</b><br/>DB_NAME.DB_DOMAIN<br/>(예: orcl.example.com)\"]:::blue\n  A --> C[\"<b>사용자 정의 서비스</b><br/>DBMS_SERVICE.CREATE_SERVICE\"]:::blue\n  A --> D[\"<b>PDB 서비스</b><br/>PDB 이름과 동일 (자동 생성)\"]:::blue\n  A --> E[\"<b>CDB 서비스</b><br/>CDB 생성 시 자동\"]:::blue\n  B --> F[\"<b>SERVICE_NAMES 파라미터</b><br/>리스너 등록 서비스 목록\"]:::green\n  C --> F\n  D --> F\n  E --> F\n  F --> G[\"<b>LREG 프로세스</b><br/>60초마다 리스너에 자동 등록\"]:::amber\n  G --> H[\"<b>리스너 등록 완료</b><br/>클라이언트 접속 가능\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "데이터베이스 서비스 이름 구성 요소 — 기본/사용자 정의/PDB/CDB 서비스 유형과 리스너 등록 흐름",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/03/03_03_s06_v06_mermaid.svg"
         }
       ]
     },
@@ -309,11 +309,11 @@
       "visuals": [
         {
           "id": "v7",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>sqlnet.ora</b><br/>Oracle Net 클라이언트/서버 프로파일\"]:::amber\n  A --> B[\"<b>네이밍</b><br/>NAMES.DIRECTORY_PATH<br/>NAMES.DEFAULT_DOMAIN\"]:::blue\n  A --> C[\"<b>인증</b><br/>SQLNET.AUTHENTICATION_SERVICES\"]:::blue\n  A --> D[\"<b>암호화</b><br/>SQLNET.ENCRYPTION_SERVER<br/>SQLNET.ENCRYPTION_TYPES_CLIENT\"]:::blue\n  A --> E[\"<b>타임아웃</b><br/>SQLNET.INBOUND_CONNECT_TIMEOUT<br/>SQLNET.EXPIRE_TIME\"]:::blue\n  A --> F[\"<b>보안 (Wallet / TLS)</b><br/>WALLET_LOCATION<br/>SSL_CLIENT_AUTHENTICATION\"]:::blue\n  D --> G{\"<b>암호화 네고시에이션</b>\"}:::amber\n  G --> G1[\"<b>REQUIRED + REQUIRED</b><br/>암호화 적용\"]:::green\n  G --> G2[\"<b>REQUIRED + REJECTED</b><br/>접속 실패\"]:::red\n  G --> G3[\"<b>ACCEPTED + ACCEPTED</b><br/>비암호화\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "sqlnet.ora 주요 파라미터 5개 분류(네이밍/인증/암호화/타임아웃/보안)와 암호화 레벨 네고시에이션 결과",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/03/03_03_s07_v7_mermaid.svg"
         }
       ]
     }

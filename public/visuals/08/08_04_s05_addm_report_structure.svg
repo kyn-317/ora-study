@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" fill="none">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .subtitle { font-size: 12px; fill: #787368; }
     .label { font-size: 13px; font-weight: 600; }
-    .desc { font-size: 11px; fill: #94A3B8; }
+    .desc { font-size: 11px; fill: #787368; }
     .mono { font-family: 'Consolas', monospace; font-size: 11px; }
     .box { rx: 8; ry: 8; }
   </style>
@@ -13,71 +14,71 @@
   <text x="400" y="52" text-anchor="middle" class="subtitle">ADDM Report Generation Methods and Structure</text>
 
   <!-- Generation Methods -->
-  <rect x="30" y="75" width="355" height="150" fill="#1E1F2E" stroke="#3B82F6" stroke-width="2" class="box"/>
-  <text x="207" y="98" text-anchor="middle" class="label" fill="#3B82F6">보고서 생성 방법</text>
+  <rect x="30" y="75" width="355" height="150" fill="#f3efe4" stroke="#2456a8" stroke-width="2" class="box"/>
+  <text x="207" y="98" text-anchor="middle" class="label" fill="#2456a8">보고서 생성 방법</text>
 
-  <rect x="50" y="110" width="315" height="24" rx="4" fill="#3B82F6" opacity="0.1"/>
-  <text x="60" y="126" class="mono" fill="#3B82F6">addmrpt.sql</text>
+  <rect x="50" y="110" width="315" height="24" rx="4" fill="#2456a8" opacity="0.1"/>
+  <text x="60" y="126" class="mono" fill="#2456a8">addmrpt.sql</text>
   <text x="200" y="126" class="desc">SQL*Plus 대화형 스크립트</text>
 
-  <rect x="50" y="140" width="315" height="24" rx="4" fill="#F59E0B" opacity="0.1"/>
-  <text x="60" y="156" class="mono" fill="#F59E0B">DBMS_ADDM.ANALYZE_DB</text>
+  <rect x="50" y="140" width="315" height="24" rx="4" fill="#8a5a10" opacity="0.1"/>
+  <text x="60" y="156" class="mono" fill="#8a5a10">DBMS_ADDM.ANALYZE_DB</text>
   <text x="250" y="156" class="desc">PL/SQL 패키지</text>
 
-  <rect x="50" y="170" width="315" height="24" rx="4" fill="#10B981" opacity="0.1"/>
-  <text x="60" y="186" class="mono" fill="#10B981">DBMS_ADVISOR.GET_TASK_REPORT</text>
+  <rect x="50" y="170" width="315" height="24" rx="4" fill="#2f6a1c" opacity="0.1"/>
+  <text x="60" y="186" class="mono" fill="#2f6a1c">DBMS_ADVISOR.GET_TASK_REPORT</text>
   <text x="310" y="186" class="desc">TEXT/HTML/XML</text>
 
-  <rect x="50" y="200" width="315" height="24" rx="4" fill="#6F6BEA" opacity="0.1"/>
-  <text x="60" y="216" class="mono" fill="#6F6BEA">Enterprise Manager</text>
+  <rect x="50" y="200" width="315" height="24" rx="4" fill="#4a2e78" opacity="0.1"/>
+  <text x="60" y="216" class="mono" fill="#4a2e78">Enterprise Manager</text>
   <text x="230" y="216" class="desc">GUI 그래픽 보고서</text>
 
   <!-- Report Structure -->
-  <rect x="415" y="75" width="355" height="150" fill="#1E1F2E" stroke="#F59E0B" stroke-width="2" class="box"/>
-  <text x="592" y="98" text-anchor="middle" class="label" fill="#F59E0B">보고서 구조 (Report Sections)</text>
+  <rect x="415" y="75" width="355" height="150" fill="#f3efe4" stroke="#8a5a10" stroke-width="2" class="box"/>
+  <text x="592" y="98" text-anchor="middle" class="label" fill="#8a5a10">보고서 구조 (Report Sections)</text>
 
-  <rect x="435" y="108" width="25" height="16" rx="3" fill="#F59E0B" opacity="0.3"/>
-  <text x="447" y="120" text-anchor="middle" class="mono" fill="#E2E8F0">1</text>
+  <rect x="435" y="108" width="25" height="16" rx="3" fill="#8a5a10" opacity="0.3"/>
+  <text x="447" y="120" text-anchor="middle" class="mono" fill="#1a1a1a">1</text>
   <text x="470" y="120" class="desc">Header — DB 정보, 분석 기간</text>
 
-  <rect x="435" y="128" width="25" height="16" rx="3" fill="#F59E0B" opacity="0.4"/>
-  <text x="447" y="140" text-anchor="middle" class="mono" fill="#E2E8F0">2</text>
+  <rect x="435" y="128" width="25" height="16" rx="3" fill="#8a5a10" opacity="0.4"/>
+  <text x="447" y="140" text-anchor="middle" class="mono" fill="#1a1a1a">2</text>
   <text x="470" y="140" class="desc">Summary — DB Time 요약, Finding 목록</text>
 
-  <rect x="435" y="148" width="25" height="16" rx="3" fill="#F59E0B" opacity="0.5"/>
-  <text x="447" y="160" text-anchor="middle" class="mono" fill="#E2E8F0">3</text>
+  <rect x="435" y="148" width="25" height="16" rx="3" fill="#8a5a10" opacity="0.5"/>
+  <text x="447" y="160" text-anchor="middle" class="mono" fill="#1a1a1a">3</text>
   <text x="470" y="160" class="desc">Findings — 상세 설명, 영향도(%)</text>
 
-  <rect x="435" y="168" width="25" height="16" rx="3" fill="#F59E0B" opacity="0.6"/>
-  <text x="447" y="180" text-anchor="middle" class="mono" fill="#E2E8F0">4</text>
+  <rect x="435" y="168" width="25" height="16" rx="3" fill="#8a5a10" opacity="0.6"/>
+  <text x="447" y="180" text-anchor="middle" class="mono" fill="#1a1a1a">4</text>
   <text x="470" y="180" class="desc">Recommendations — Action, Benefit</text>
 
-  <rect x="435" y="188" width="25" height="16" rx="3" fill="#F59E0B" opacity="0.7"/>
-  <text x="447" y="200" text-anchor="middle" class="mono" fill="#E2E8F0">5</text>
+  <rect x="435" y="188" width="25" height="16" rx="3" fill="#8a5a10" opacity="0.7"/>
+  <text x="447" y="200" text-anchor="middle" class="mono" fill="#1a1a1a">5</text>
   <text x="470" y="200" class="desc">Additional Info — Wait Class, SQL 통계</text>
 
   <!-- Manual ADDM Steps -->
-  <rect x="30" y="250" width="740" height="80" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="1.5" class="box"/>
-  <text x="400" y="273" text-anchor="middle" class="label" fill="#6F6BEA">수동 ADDM 분석 5단계 (DBMS_ADVISOR)</text>
+  <rect x="30" y="250" width="740" height="80" fill="#f3efe4" stroke="#4a2e78" stroke-width="1.5" class="box"/>
+  <text x="400" y="273" text-anchor="middle" class="label" fill="#4a2e78">수동 ADDM 분석 5단계 (DBMS_ADVISOR)</text>
 
-  <rect x="50" y="288" width="115" height="30" rx="6" fill="#6F6BEA" opacity="0.15"/>
-  <text x="107" y="307" text-anchor="middle" class="mono" fill="#6F6BEA">CREATE_TASK</text>
+  <rect x="50" y="288" width="115" height="30" rx="6" fill="#4a2e78" opacity="0.15"/>
+  <text x="107" y="307" text-anchor="middle" class="mono" fill="#4a2e78">CREATE_TASK</text>
   <text x="175" y="307" class="desc">→</text>
-  <rect x="185" y="288" width="115" height="30" rx="6" fill="#3B82F6" opacity="0.15"/>
-  <text x="242" y="307" text-anchor="middle" class="mono" fill="#3B82F6">SET_PARAM</text>
+  <rect x="185" y="288" width="115" height="30" rx="6" fill="#2456a8" opacity="0.15"/>
+  <text x="242" y="307" text-anchor="middle" class="mono" fill="#2456a8">SET_PARAM</text>
   <text x="310" y="307" class="desc">→</text>
-  <rect x="320" y="288" width="115" height="30" rx="6" fill="#F59E0B" opacity="0.15"/>
-  <text x="377" y="307" text-anchor="middle" class="mono" fill="#F59E0B">EXECUTE_TASK</text>
+  <rect x="320" y="288" width="115" height="30" rx="6" fill="#8a5a10" opacity="0.15"/>
+  <text x="377" y="307" text-anchor="middle" class="mono" fill="#8a5a10">EXECUTE_TASK</text>
   <text x="445" y="307" class="desc">→</text>
-  <rect x="455" y="288" width="115" height="30" rx="6" fill="#10B981" opacity="0.15"/>
-  <text x="512" y="307" text-anchor="middle" class="mono" fill="#10B981">GET_REPORT</text>
+  <rect x="455" y="288" width="115" height="30" rx="6" fill="#2f6a1c" opacity="0.15"/>
+  <text x="512" y="307" text-anchor="middle" class="mono" fill="#2f6a1c">GET_REPORT</text>
   <text x="580" y="307" class="desc">→</text>
-  <rect x="590" y="288" width="115" height="30" rx="6" fill="#F43F5E" opacity="0.15"/>
-  <text x="647" y="307" text-anchor="middle" class="mono" fill="#F43F5E">DELETE_TASK</text>
+  <rect x="590" y="288" width="115" height="30" rx="6" fill="#be123c" opacity="0.15"/>
+  <text x="647" y="307" text-anchor="middle" class="mono" fill="#be123c">DELETE_TASK</text>
 
   <!-- Real-Time ADDM comparison -->
-  <rect x="30" y="348" width="740" height="60" fill="#1E1F2E" stroke="#F43F5E" stroke-width="1" class="box"/>
-  <text x="400" y="371" text-anchor="middle" class="label" fill="#F43F5E">일반 ADDM vs Real-Time ADDM</text>
+  <rect x="30" y="348" width="740" height="60" fill="#f3efe4" stroke="#be123c" stroke-width="1" class="box"/>
+  <text x="400" y="371" text-anchor="middle" class="label" fill="#be123c">일반 ADDM vs Real-Time ADDM</text>
   <text x="50" y="393" class="desc">일반 ADDM: AWR 스냅샷(디스크) 기반 사후 분석 → 정기 진단 용도 / 스냅샷 필요</text>
   <text x="50" y="405" class="desc">Real-Time ADDM: SGA 메모리 기반 실시간 분석 → 긴급 성능 문제, DB Hang 상태에서도 분석 가능 (Oracle 26ai 확장)</text>
 </svg>

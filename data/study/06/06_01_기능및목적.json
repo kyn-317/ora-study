@@ -28,12 +28,12 @@
         },
         {
           "id": "v08",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>UNDO 테이블스페이스</b><br/>UNDO Tablespace\"]:::blue\n  A --> B[\"<b>UNDO 세그먼트</b><br/>UNDO Segment\"]\n  B:::blue\n  B --> C[\"<b>Extent</b>\"]\n  C:::amber\n  C --> D[\"<b>UNDO 블록</b><br/>UNDO Block\"]\n  D:::amber\n  D --> E[\"<b>UNDO 레코드</b><br/>Before Image\"]\n  E:::green\n  A --> F[\"<b>읽기 일관성</b><br/>Read Consistency\"]:::green\n  A --> G[\"<b>트랜잭션 롤백</b><br/>Transaction Rollback\"]:::amber\n  A --> H[\"<b>Flashback 기능</b><br/>Flashback\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "UNDO 구성요소 계층: UNDO 테이블스페이스 → 세그먼트 → Extent → 블록 → 레코드 및 3대 핵심 기능",
           "placement": "before-content",
           "width": "100%",
-          "sectionId": "s01"
+          "sectionId": "s01",
+          "src": "/visuals/06/06_01_s01_v08_mermaid.svg"
         }
       ]
     },
@@ -166,12 +166,12 @@
         },
         {
           "id": "v09",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>쿼리 시작</b><br/>Query SCN 기록\"]:::blue\n  A --> B{\"Block SCN<br/>vs Query SCN\"}\n  B:::amber\n  B -- \"Block SCN ≤ Query SCN\" --> C[\"<b>Current Block 그대로 읽음</b><br/>변경이 쿼리 전 커밋\"]:::green\n  B -- \"Block SCN > Query SCN\" --> D[\"<b>Current Block 복사본 생성</b><br/>Clone\"]:::red\n  D --> E[\"<b>ITL에서 UBA 참조</b><br/>UNDO 레코드 위치 확인\"]:::amber\n  E --> F[\"<b>UNDO 레코드를 역순 적용</b><br/>Before Image 복원\"]:::amber\n  F --> G{\"복원된 Block SCN<br/>≤ Query SCN?\"}\n  G:::amber\n  G -- \"아니오\" --> F\n  G -- \"예\" --> H[\"<b>CR 블록 완성</b><br/>Consistent Read Block\"]:::green\n  H --> I[\"<b>데이터 반환</b>\"]:::blue\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "CR 블록 생성 흐름: Query SCN vs Block SCN 비교 → UNDO 레코드 역순 적용 → Consistent Read Block 완성",
           "placement": "before-content",
           "width": "100%",
-          "sectionId": "s05"
+          "sectionId": "s05",
+          "src": "/visuals/06/06_01_s05_v09_mermaid.svg"
         }
       ]
     },
@@ -209,12 +209,12 @@
         },
         {
           "id": "v10",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>ROLLBACK 명령</b>\"]:::red\n  A --> B[\"<b>마지막 UNDO 레코드 찾기</b><br/>UBA 체인 이용\"]:::amber\n  B --> C[\"<b>Before Image를 역순으로 적용</b><br/>데이터 블록 복원\"]:::amber\n  C --> D[\"<b>롤백 작업도 Redo 로그에 기록</b>\"]:::blue\n  D --> E{\"모든 UNDO 레코드<br/>적용 완료?\"}\n  E:::amber\n  E -- \"아니오\" --> C\n  E -- \"예\" --> F[\"<b>트랜잭션 테이블 상태 변경</b><br/>COMMITTED(롤백 완료)\"]:::green\n  F --> G[\"<b>UNDO 공간 재사용 가능</b>\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "트랜잭션 롤백 내부 흐름: UNDO 레코드 역순 적용 → Redo 기록 → 트랜잭션 테이블 완료 처리",
           "placement": "before-content",
           "width": "100%",
-          "sectionId": "s06"
+          "sectionId": "s06",
+          "src": "/visuals/06/06_01_s06_v10_mermaid.svg"
         }
       ]
     },

@@ -1,26 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 11px; fill: #94A3B8; }
+    .subtitle { font-size: 11px; fill: #787368; }
     .phase-label { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
     .ch-num { font-size: 16px; font-weight: 800; }
     .ch-title { font-size: 11.5px; font-weight: 600; }
-    .ch-detail { font-size: 10px; fill: #CBD5E1; }
-    .badge { font-size: 9.5px; font-weight: 700; fill: #1E1E2E; }
-    .step-num { font-size: 11px; font-weight: 700; fill: #1E1E2E; }
-    .reason { font-size: 9.5px; fill: #94A3B8; font-style: italic; }
+    .ch-detail { font-size: 10px; fill: #4a4a46; }
+    .badge { font-size: 9.5px; font-weight: 700; fill: #1a1a1a; }
+    .step-num { font-size: 11px; font-weight: 700; fill: #1a1a1a; }
+    .reason { font-size: 9.5px; fill: #787368; font-style: italic; }
     .box { rx: 10; ry: 10; stroke-width: 1.8; }
     .phase-box { rx: 12; ry: 12; stroke-width: 1; stroke-dasharray: 6 3; }
-    .arrow-main { stroke: #6F6BEA; stroke-width: 2.5; fill: none; marker-end: url(#arr3); }
-    .arrow-dep { stroke: #F59E0B; stroke-width: 1.5; fill: none; marker-end: url(#arr3y); stroke-dasharray: 5 3; }
+    .arrow-main { stroke: #4a2e78; stroke-width: 2.5; fill: none; marker-end: url(#arr3); }
+    .arrow-dep { stroke: #8a5a10; stroke-width: 1.5; fill: none; marker-end: url(#arr3y); stroke-dasharray: 5 3; }
   </style>
   <defs>
     <marker id="arr3" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a2e78" />
     </marker>
     <marker id="arr3y" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#F59E0B" />
+      <polygon points="0 0, 8 3, 0 6" fill="#8a5a10" />
     </marker>
   </defs>
 
@@ -29,39 +30,39 @@
   <text x="450" y="48" text-anchor="middle" class="subtitle">Recommended Study Order with Dependencies</text>
 
   <!-- Phase labels (top bar) -->
-  <rect x="20" y="62" width="200" height="24" rx="4" fill="#6F6BEA" opacity="0.2"/>
-  <text x="120" y="79" text-anchor="middle" class="phase-label" fill="#A5B4FC">Phase 1: 기초 아키텍처</text>
+  <rect x="20" y="62" width="200" height="24" rx="4" fill="#4a2e78" opacity="0.2"/>
+  <text x="120" y="79" text-anchor="middle" class="phase-label" fill="#4a2e78">Phase 1: 기초 아키텍처</text>
 
-  <rect x="240" y="62" width="200" height="24" rx="4" fill="#3B82F6" opacity="0.2"/>
-  <text x="340" y="79" text-anchor="middle" class="phase-label" fill="#93C5FD">Phase 2: 운영 기반</text>
+  <rect x="240" y="62" width="200" height="24" rx="4" fill="#2456a8" opacity="0.2"/>
+  <text x="340" y="79" text-anchor="middle" class="phase-label" fill="#2456a8">Phase 2: 운영 기반</text>
 
-  <rect x="460" y="62" width="200" height="24" rx="4" fill="#F59E0B" opacity="0.2"/>
-  <text x="560" y="79" text-anchor="middle" class="phase-label" fill="#FCD34D">Phase 3: 심화 운영</text>
+  <rect x="460" y="62" width="200" height="24" rx="4" fill="#8a5a10" opacity="0.2"/>
+  <text x="560" y="79" text-anchor="middle" class="phase-label" fill="#8a5a10">Phase 3: 심화 운영</text>
 
-  <rect x="680" y="62" width="200" height="24" rx="4" fill="#10B981" opacity="0.2"/>
-  <text x="780" y="79" text-anchor="middle" class="phase-label" fill="#6EE7B7">Phase 4: 활용</text>
+  <rect x="680" y="62" width="200" height="24" rx="4" fill="#2f6a1c" opacity="0.2"/>
+  <text x="780" y="79" text-anchor="middle" class="phase-label" fill="#2f6a1c">Phase 4: 활용</text>
 
   <!-- Phase 1 boxes -->
   <!-- Ch01 -->
-  <rect x="40" y="105" width="165" height="110" class="box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" />
-  <circle cx="58" cy="120" r="11" fill="#6F6BEA"/>
+  <rect x="40" y="105" width="165" height="110" class="box" fill="#d8cfe5" stroke="#4a2e78" />
+  <circle cx="58" cy="120" r="11" fill="#4a2e78"/>
   <text x="58" y="124" text-anchor="middle" class="step-num">1</text>
   <text x="75" y="124" class="ch-title">Ch01 아키텍처</text>
   <text x="50" y="144" class="ch-detail">메모리 · 프로세스 · 저장구조</text>
   <text x="50" y="158" class="ch-detail">기동/종료 · 파라미터 · 복구</text>
-  <rect x="50" y="172" width="145" height="18" rx="4" fill="rgba(111,107,234,0.25)" stroke="#6F6BEA" stroke-width="0.5"/>
+  <rect x="50" y="172" width="145" height="18" rx="4" fill="#d8cfe5" stroke="#4a2e78" stroke-width="0.5"/>
   <text x="122" y="184" text-anchor="middle" class="reason">모든 챕터의 전제 지식</text>
-  <rect x="50" y="195" width="50" height="14" rx="7" fill="#EF4444" opacity="0.85"/>
+  <rect x="50" y="195" width="50" height="14" rx="7" fill="#be123c" opacity="0.85"/>
   <text x="75" y="205" text-anchor="middle" class="badge">필수 선행</text>
 
   <!-- Ch02 -->
-  <rect x="40" y="235" width="165" height="100" class="box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" />
-  <circle cx="58" cy="250" r="11" fill="#6F6BEA"/>
+  <rect x="40" y="235" width="165" height="100" class="box" fill="#d8cfe5" stroke="#4a2e78" />
+  <circle cx="58" cy="250" r="11" fill="#4a2e78"/>
   <text x="58" y="254" text-anchor="middle" class="step-num">2</text>
   <text x="75" y="254" class="ch-title">Ch02 멀티테넌트</text>
   <text x="50" y="274" class="ch-detail">CDB/PDB 구조 · 생성 · 관리</text>
   <text x="50" y="288" class="ch-detail">파라미터 · 클론 · Unplug/Plug</text>
-  <rect x="50" y="302" width="145" height="18" rx="4" fill="rgba(111,107,234,0.25)" stroke="#6F6BEA" stroke-width="0.5"/>
+  <rect x="50" y="302" width="145" height="18" rx="4" fill="#d8cfe5" stroke="#4a2e78" stroke-width="0.5"/>
   <text x="122" y="314" text-anchor="middle" class="reason">26ai는 CDB 전용 환경</text>
 
   <!-- Arrow Ch01 → Ch02 -->
@@ -69,23 +70,23 @@
 
   <!-- Phase 2 boxes -->
   <!-- Ch03 -->
-  <rect x="258" y="105" width="165" height="100" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" />
-  <circle cx="276" cy="120" r="11" fill="#3B82F6"/>
+  <rect x="258" y="105" width="165" height="100" class="box" fill="#dee5f5" stroke="#2456a8" />
+  <circle cx="276" cy="120" r="11" fill="#2456a8"/>
   <text x="276" y="124" text-anchor="middle" class="step-num">3</text>
   <text x="293" y="124" class="ch-title">Ch03 관리 툴/네트워크</text>
   <text x="268" y="144" class="ch-detail">DBCA · SQL*Plus · EM · RMAN</text>
   <text x="268" y="158" class="ch-detail">리스너 · 접속 · DB Link</text>
-  <rect x="268" y="172" width="145" height="18" rx="4" fill="rgba(59,130,246,0.25)" stroke="#3B82F6" stroke-width="0.5"/>
+  <rect x="268" y="172" width="145" height="18" rx="4" fill="#dee5f5" stroke="#2456a8" stroke-width="0.5"/>
   <text x="340" y="184" text-anchor="middle" class="reason">실습과 운영의 기반 도구</text>
 
   <!-- Ch04 -->
-  <rect x="258" y="235" width="165" height="100" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" />
-  <circle cx="276" cy="250" r="11" fill="#3B82F6"/>
+  <rect x="258" y="235" width="165" height="100" class="box" fill="#dee5f5" stroke="#2456a8" />
+  <circle cx="276" cy="250" r="11" fill="#2456a8"/>
   <text x="276" y="254" text-anchor="middle" class="step-num">4</text>
   <text x="293" y="254" class="ch-title">Ch04 보안/권한/감사</text>
   <text x="268" y="274" class="ch-detail">사용자 · 인증 · 권한 · 롤</text>
   <text x="268" y="288" class="ch-detail">프로파일 · 감사 · Privilege Capture</text>
-  <rect x="268" y="302" width="145" height="18" rx="4" fill="rgba(59,130,246,0.25)" stroke="#3B82F6" stroke-width="0.5"/>
+  <rect x="268" y="302" width="145" height="18" rx="4" fill="#dee5f5" stroke="#2456a8" stroke-width="0.5"/>
   <text x="340" y="314" text-anchor="middle" class="reason">모든 운영 작업의 전제</text>
 
   <!-- Arrows Ph1 → Ph2 -->
@@ -94,23 +95,23 @@
 
   <!-- Phase 3 boxes -->
   <!-- Ch05 -->
-  <rect x="478" y="105" width="165" height="100" class="box" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" />
-  <circle cx="496" cy="120" r="11" fill="#F59E0B"/>
+  <rect x="478" y="105" width="165" height="100" class="box" fill="#f0ddb3" stroke="#8a5a10" />
+  <circle cx="496" cy="120" r="11" fill="#8a5a10"/>
   <text x="496" y="124" text-anchor="middle" class="step-num">5</text>
   <text x="513" y="124" class="ch-title">Ch05 스토리지</text>
   <text x="488" y="144" class="ch-detail">테이블스페이스 · 블록 · 공간관리</text>
   <text x="488" y="158" class="ch-detail">Resumable · Shrink · 압축</text>
-  <rect x="488" y="172" width="145" height="18" rx="4" fill="rgba(245,158,11,0.25)" stroke="#F59E0B" stroke-width="0.5"/>
+  <rect x="488" y="172" width="145" height="18" rx="4" fill="#f0ddb3" stroke="#8a5a10" stroke-width="0.5"/>
   <text x="560" y="184" text-anchor="middle" class="reason">Ch01 저장구조의 심화</text>
 
   <!-- Ch06 -->
-  <rect x="478" y="235" width="165" height="100" class="box" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" />
-  <circle cx="496" cy="250" r="11" fill="#F59E0B"/>
+  <rect x="478" y="235" width="165" height="100" class="box" fill="#f0ddb3" stroke="#8a5a10" />
+  <circle cx="496" cy="250" r="11" fill="#8a5a10"/>
   <text x="496" y="254" text-anchor="middle" class="step-num">6</text>
   <text x="513" y="254" class="ch-title">Ch06 UNDO 제어</text>
   <text x="488" y="274" class="ch-detail">읽기 일관성 · 상태 전이</text>
   <text x="488" y="288" class="ch-detail">Temp UNDO · Local UNDO</text>
-  <rect x="488" y="302" width="145" height="18" rx="4" fill="rgba(245,158,11,0.25)" stroke="#F59E0B" stroke-width="0.5"/>
+  <rect x="488" y="302" width="145" height="18" rx="4" fill="#f0ddb3" stroke="#8a5a10" stroke-width="0.5"/>
   <text x="560" y="314" text-anchor="middle" class="reason">Ch01 UNDO 개념의 심화</text>
 
   <!-- Arrows Ph2 → Ph3 -->
@@ -119,25 +120,25 @@
 
   <!-- Phase 4 boxes -->
   <!-- Ch07 -->
-  <rect x="698" y="105" width="165" height="100" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" />
-  <circle cx="716" cy="120" r="11" fill="#10B981"/>
+  <rect x="698" y="105" width="165" height="100" class="box" fill="#cfe1b8" stroke="#2f6a1c" />
+  <circle cx="716" cy="120" r="11" fill="#2f6a1c"/>
   <text x="716" y="124" text-anchor="middle" class="step-num">7</text>
   <text x="733" y="124" class="ch-title">Ch07 데이터 이동</text>
   <text x="708" y="144" class="ch-detail">External Table · SQL*Loader</text>
   <text x="708" y="158" class="ch-detail">Data Pump (expdp/impdp)</text>
-  <rect x="708" y="172" width="145" height="18" rx="4" fill="rgba(16,185,129,0.25)" stroke="#10B981" stroke-width="0.5"/>
+  <rect x="708" y="172" width="145" height="18" rx="4" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="0.5"/>
   <text x="780" y="184" text-anchor="middle" class="reason">스토리지+네트워크 활용</text>
 
   <!-- Ch08 -->
-  <rect x="698" y="235" width="165" height="100" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" />
-  <circle cx="716" cy="250" r="11" fill="#10B981"/>
+  <rect x="698" y="235" width="165" height="100" class="box" fill="#cfe1b8" stroke="#2f6a1c" />
+  <circle cx="716" cy="250" r="11" fill="#2f6a1c"/>
   <text x="716" y="254" text-anchor="middle" class="step-num">8</text>
   <text x="733" y="254" class="ch-title">Ch08 성능/자동 관리</text>
   <text x="708" y="274" class="ch-detail">AWR · ADDM · 어드바이저</text>
   <text x="708" y="288" class="ch-detail">AutoTask · Resource Manager</text>
-  <rect x="708" y="302" width="145" height="18" rx="4" fill="rgba(16,185,129,0.25)" stroke="#10B981" stroke-width="0.5"/>
+  <rect x="708" y="302" width="145" height="18" rx="4" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="0.5"/>
   <text x="780" y="314" text-anchor="middle" class="reason">모든 챕터의 집대성</text>
-  <rect x="738" y="326" width="82" height="14" rx="7" fill="#10B981" opacity="0.85"/>
+  <rect x="738" y="326" width="82" height="14" rx="7" fill="#2f6a1c" opacity="0.85"/>
   <text x="779" y="336" text-anchor="middle" class="badge">최종 통합 학습</text>
 
   <!-- Arrows Ph3 → Ph4 -->
@@ -153,12 +154,12 @@
   <path d="M 170,145 Q 450,40 730,235" class="arrow-dep"/>
 
   <!-- Legend -->
-  <rect x="30" y="370" width="840" height="72" rx="10" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
-  <text x="50" y="392" font-size="12" font-weight="600" fill="#E2E8F0">범례 (Legend)</text>
-  <line x1="50" y1="412" x2="90" y2="412" stroke="#6F6BEA" stroke-width="2.5" marker-end="url(#arr3)"/>
-  <text x="100" y="416" font-size="10.5" fill="#CBD5E1">학습 순서 (Study Order)</text>
-  <line x1="250" y1="412" x2="290" y2="412" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr3y)"/>
-  <text x="300" y="416" font-size="10.5" fill="#CBD5E1">핵심 의존 관계 (Key Dependencies)</text>
-  <text x="540" y="416" font-size="10.5" fill="#94A3B8">* Ch01은 Ch02~Ch08 모든 챕터의 필수 선행 지식</text>
-  <text x="540" y="432" font-size="10.5" fill="#94A3B8">* Ch08은 Ch01~Ch07의 개념을 통합적으로 활용하는 최종 학습 단계</text>
+  <rect x="30" y="370" width="840" height="72" rx="10" fill="rgba(42,42,42,0.03)" stroke="#f3efe4" stroke-width="1"/>
+  <text x="50" y="392" font-size="12" font-weight="600" fill="#1a1a1a">범례 (Legend)</text>
+  <line x1="50" y1="412" x2="90" y2="412" stroke="#4a2e78" stroke-width="2.5" marker-end="url(#arr3)"/>
+  <text x="100" y="416" font-size="10.5" fill="#4a4a46">학습 순서 (Study Order)</text>
+  <line x1="250" y1="412" x2="290" y2="412" stroke="#8a5a10" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr3y)"/>
+  <text x="300" y="416" font-size="10.5" fill="#4a4a46">핵심 의존 관계 (Key Dependencies)</text>
+  <text x="540" y="416" font-size="10.5" fill="#787368">* Ch01은 Ch02~Ch08 모든 챕터의 필수 선행 지식</text>
+  <text x="540" y="432" font-size="10.5" fill="#787368">* Ch08은 Ch01~Ch07의 개념을 통합적으로 활용하는 최종 학습 단계</text>
 </svg>

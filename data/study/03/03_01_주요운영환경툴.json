@@ -273,11 +273,11 @@
       "visuals": [
         {
           "id": "v6",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>SQL Developer 접속</b><br/>JDBC Thin Driver\"]:::amber\n  A --> B{\"<b>접속 유형 선택</b>\"}:::blue\n  B --> C[\"<b>Basic</b><br/>호스트명 / 포트<br/>SID 또는 Service Name\"]:::green\n  B --> D[\"<b>TNS</b><br/>tnsnames.ora<br/>TNS 항목 선택\"]:::green\n  B --> E[\"<b>Advanced</b><br/>JDBC URL 직접 입력\"]:::green\n  B --> F[\"<b>SSH</b><br/>SSH 터널링 보안 접속\"]:::green\n  B --> G[\"<b>Cloud Wallet</b><br/>Oracle Cloud 접속\"]:::green\n  C --> H[\"<b>접속 완료</b><br/>SQL 워크시트 / Object Browser\"]:::amber\n  D --> H\n  E --> H\n  F --> H\n  G --> H\n  H --> I[\"<b>가능</b><br/>SQL/PL/SQL 실행<br/>실행 계획 (F10)<br/>객체 관리\"]:::green\n  H --> J[\"<b>불가</b><br/>DB 기동/종료<br/>STARTUP / SHUTDOWN\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "SQL Developer 접속 유형 선택 흐름 — Basic/TNS/Advanced/SSH/Cloud Wallet과 가능/불가 기능 구분",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/03/03_01_s06_v6_mermaid.svg"
         }
       ]
     }

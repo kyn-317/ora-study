@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" fill="none">
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
-    .title { font-size: 18px; font-weight: 700; fill: #6F6BEA; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
+    .title { font-size: 18px; font-weight: 700; fill: #4a2e78; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 13px; font-weight: 600; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .small { font-size: 11px; fill: #787368; }
     .mono { font-family: 'Consolas', monospace; font-size: 11px; }
   </style>
 
@@ -12,93 +12,93 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">Space Reuse Priority: Expired → Free → AutoExtend → Unexpired Steal → Error</text>
 
   <!-- NOGUARANTEE flow (left) -->
-  <rect x="30" y="65" width="355" height="400" rx="10" fill="#0F1019" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="207" y="88" text-anchor="middle" class="label" fill="#F59E0B">NOGUARANTEE 모드 (기본)</text>
+  <rect x="30" y="65" width="355" height="400" rx="10" fill="#faf8f3" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="207" y="88" text-anchor="middle" class="label" fill="#8a5a10">NOGUARANTEE 모드 (기본)</text>
 
   <!-- Step 1 -->
-  <rect x="55" y="100" width="305" height="48" rx="6" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="1.5"/>
-  <text x="70" y="120" class="label" fill="#10B981">1순위</text>
+  <rect x="55" y="100" width="305" height="48" rx="6" fill="#2f6a1c" fill-opacity="0.12" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="70" y="120" class="label" fill="#2f6a1c">1순위</text>
   <text x="140" y="120" class="small">EXPIRED Extent 재사용</text>
-  <text x="140" y="138" text-anchor="start" class="mono" fill="#10B981">만료된 UNDO 공간 우선 사용</text>
+  <text x="140" y="138" text-anchor="start" class="mono" fill="#2f6a1c">만료된 UNDO 공간 우선 사용</text>
 
-  <path d="M207 148 L207 158" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#as)"/>
-  <text x="230" y="156" class="small" fill="#94A3B8">부족 시↓</text>
+  <path d="M207 148 L207 158" stroke="#787368" stroke-width="1.5" marker-end="url(#as)"/>
+  <text x="230" y="156" class="small" fill="#787368">부족 시↓</text>
 
   <!-- Step 2 -->
-  <rect x="55" y="162" width="305" height="48" rx="6" fill="#3B82F6" fill-opacity="0.12" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="70" y="182" class="label" fill="#3B82F6">2순위</text>
+  <rect x="55" y="162" width="305" height="48" rx="6" fill="#2456a8" fill-opacity="0.12" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="70" y="182" class="label" fill="#2456a8">2순위</text>
   <text x="140" y="182" class="small">Free Space에서 새 Extent 할당</text>
-  <text x="140" y="200" text-anchor="start" class="mono" fill="#3B82F6">UNDO Tablespace 미사용 공간</text>
+  <text x="140" y="200" text-anchor="start" class="mono" fill="#2456a8">UNDO Tablespace 미사용 공간</text>
 
-  <path d="M207 210 L207 220" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#as)"/>
+  <path d="M207 210 L207 220" stroke="#787368" stroke-width="1.5" marker-end="url(#as)"/>
 
   <!-- Step 3 -->
-  <rect x="55" y="224" width="305" height="48" rx="6" fill="#6F6BEA" fill-opacity="0.12" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="70" y="244" class="label" fill="#6F6BEA">3순위</text>
+  <rect x="55" y="224" width="305" height="48" rx="6" fill="#4a2e78" fill-opacity="0.12" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="70" y="244" class="label" fill="#4a2e78">3순위</text>
   <text x="140" y="244" class="small">데이터 파일 자동 확장</text>
-  <text x="140" y="262" text-anchor="start" class="mono" fill="#6F6BEA">AUTOEXTEND ON → MAXSIZE까지</text>
+  <text x="140" y="262" text-anchor="start" class="mono" fill="#4a2e78">AUTOEXTEND ON → MAXSIZE까지</text>
 
-  <path d="M207 272 L207 282" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#as)"/>
+  <path d="M207 272 L207 282" stroke="#787368" stroke-width="1.5" marker-end="url(#as)"/>
 
   <!-- Step 4 -->
-  <rect x="55" y="286" width="305" height="58" rx="6" fill="#F59E0B" fill-opacity="0.12" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="70" y="306" class="label" fill="#F59E0B">4순위</text>
+  <rect x="55" y="286" width="305" height="58" rx="6" fill="#8a5a10" fill-opacity="0.12" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="70" y="306" class="label" fill="#8a5a10">4순위</text>
   <text x="140" y="306" class="small">UNEXPIRED → EXPIRED 강제 전환</text>
-  <text x="140" y="324" text-anchor="start" class="mono" fill="#F59E0B">Unexpired Steal (가장 오래된 것부터)</text>
-  <text x="140" y="338" text-anchor="start" class="small" fill="#F43F5E">→ ORA-01555 위험 증가!</text>
+  <text x="140" y="324" text-anchor="start" class="mono" fill="#8a5a10">Unexpired Steal (가장 오래된 것부터)</text>
+  <text x="140" y="338" text-anchor="start" class="small" fill="#be123c">→ ORA-01555 위험 증가!</text>
 
-  <path d="M207 344 L207 354" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#as)"/>
+  <path d="M207 344 L207 354" stroke="#787368" stroke-width="1.5" marker-end="url(#as)"/>
 
   <!-- Step 5 -->
-  <rect x="55" y="358" width="305" height="48" rx="6" fill="#F43F5E" fill-opacity="0.15" stroke="#F43F5E" stroke-width="2"/>
-  <text x="70" y="378" class="label" fill="#F43F5E">5순위</text>
-  <text x="140" y="378" class="small" fill="#F43F5E">ORA-30036 에러 발생</text>
-  <text x="140" y="396" text-anchor="start" class="mono" fill="#F43F5E">모든 공간 확보 수단 소진</text>
+  <rect x="55" y="358" width="305" height="48" rx="6" fill="#be123c" fill-opacity="0.15" stroke="#be123c" stroke-width="2"/>
+  <text x="70" y="378" class="label" fill="#be123c">5순위</text>
+  <text x="140" y="378" class="small" fill="#be123c">ORA-30036 에러 발생</text>
+  <text x="140" y="396" text-anchor="start" class="mono" fill="#be123c">모든 공간 확보 수단 소진</text>
 
   <!-- GUARANTEE flow (right) -->
-  <rect x="415" y="65" width="355" height="400" rx="10" fill="#0F1019" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="592" y="88" text-anchor="middle" class="label" fill="#6F6BEA">GUARANTEE 모드</text>
+  <rect x="415" y="65" width="355" height="400" rx="10" fill="#faf8f3" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="592" y="88" text-anchor="middle" class="label" fill="#4a2e78">GUARANTEE 모드</text>
 
   <!-- Step 1 -->
-  <rect x="440" y="100" width="305" height="48" rx="6" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="1.5"/>
-  <text x="455" y="120" class="label" fill="#10B981">1순위</text>
+  <rect x="440" y="100" width="305" height="48" rx="6" fill="#2f6a1c" fill-opacity="0.12" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="455" y="120" class="label" fill="#2f6a1c">1순위</text>
   <text x="525" y="120" class="small">EXPIRED Extent 재사용</text>
-  <text x="525" y="138" text-anchor="start" class="mono" fill="#10B981">동일</text>
+  <text x="525" y="138" text-anchor="start" class="mono" fill="#2f6a1c">동일</text>
 
-  <path d="M592 148 L592 158" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#as)"/>
+  <path d="M592 148 L592 158" stroke="#787368" stroke-width="1.5" marker-end="url(#as)"/>
 
   <!-- Step 2 -->
-  <rect x="440" y="162" width="305" height="48" rx="6" fill="#3B82F6" fill-opacity="0.12" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="455" y="182" class="label" fill="#3B82F6">2순위</text>
+  <rect x="440" y="162" width="305" height="48" rx="6" fill="#2456a8" fill-opacity="0.12" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="455" y="182" class="label" fill="#2456a8">2순위</text>
   <text x="525" y="182" class="small">Free Space에서 새 Extent 할당</text>
-  <text x="525" y="200" text-anchor="start" class="mono" fill="#3B82F6">동일</text>
+  <text x="525" y="200" text-anchor="start" class="mono" fill="#2456a8">동일</text>
 
-  <path d="M592 210 L592 220" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#as)"/>
+  <path d="M592 210 L592 220" stroke="#787368" stroke-width="1.5" marker-end="url(#as)"/>
 
   <!-- Step 3 -->
-  <rect x="440" y="224" width="305" height="48" rx="6" fill="#6F6BEA" fill-opacity="0.12" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="455" y="244" class="label" fill="#6F6BEA">3순위</text>
+  <rect x="440" y="224" width="305" height="48" rx="6" fill="#4a2e78" fill-opacity="0.12" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="455" y="244" class="label" fill="#4a2e78">3순위</text>
   <text x="525" y="244" class="small">데이터 파일 자동 확장</text>
-  <text x="525" y="262" text-anchor="start" class="mono" fill="#6F6BEA">동일</text>
+  <text x="525" y="262" text-anchor="start" class="mono" fill="#4a2e78">동일</text>
 
-  <path d="M592 272 L592 282" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#as)"/>
+  <path d="M592 272 L592 282" stroke="#787368" stroke-width="1.5" marker-end="url(#as)"/>
 
   <!-- SKIPPED Step 4 -->
-  <rect x="440" y="286" width="305" height="58" rx="6" fill="#2A2B3D" fill-opacity="0.3" stroke="#2A2B3D" stroke-width="1.5" stroke-dasharray="5,3"/>
-  <text x="455" y="310" class="label" fill="#94A3B8">건너뜀</text>
-  <text x="525" y="310" class="small" fill="#94A3B8">UNEXPIRED 강제 전환 없음!</text>
-  <text x="525" y="328" text-anchor="start" class="small" fill="#6F6BEA">UNEXPIRED Extent 절대 보호</text>
-  <text x="525" y="340" text-anchor="start" class="small" fill="#10B981">→ ORA-01555 위험 감소</text>
+  <rect x="440" y="286" width="305" height="58" rx="6" fill="#f3efe4" fill-opacity="0.3" stroke="#f3efe4" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="455" y="310" class="label" fill="#787368">건너뜀</text>
+  <text x="525" y="310" class="small" fill="#787368">UNEXPIRED 강제 전환 없음!</text>
+  <text x="525" y="328" text-anchor="start" class="small" fill="#4a2e78">UNEXPIRED Extent 절대 보호</text>
+  <text x="525" y="340" text-anchor="start" class="small" fill="#2f6a1c">→ ORA-01555 위험 감소</text>
 
-  <path d="M592 344 L592 354" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#as)"/>
+  <path d="M592 344 L592 354" stroke="#787368" stroke-width="1.5" marker-end="url(#as)"/>
 
   <!-- Step 5 (immediate) -->
-  <rect x="440" y="358" width="305" height="48" rx="6" fill="#F43F5E" fill-opacity="0.15" stroke="#F43F5E" stroke-width="2"/>
-  <text x="455" y="378" class="label" fill="#F43F5E">즉시</text>
-  <text x="520" y="378" class="small" fill="#F43F5E">ORA-30036 에러 발생</text>
-  <text x="520" y="396" text-anchor="start" class="mono" fill="#F43F5E">DML 트랜잭션 실패!</text>
+  <rect x="440" y="358" width="305" height="48" rx="6" fill="#be123c" fill-opacity="0.15" stroke="#be123c" stroke-width="2"/>
+  <text x="455" y="378" class="label" fill="#be123c">즉시</text>
+  <text x="520" y="378" class="small" fill="#be123c">ORA-30036 에러 발생</text>
+  <text x="520" y="396" text-anchor="start" class="mono" fill="#be123c">DML 트랜잭션 실패!</text>
 
   <defs>
-    <marker id="as" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#94A3B8"/></marker>
+    <marker id="as" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#787368"/></marker>
   </defs>
 </svg>

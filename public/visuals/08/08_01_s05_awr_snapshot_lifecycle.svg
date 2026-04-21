@@ -1,17 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" fill="none">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .subtitle { font-size: 12px; fill: #787368; }
     .label { font-size: 13px; font-weight: 600; }
-    .desc { font-size: 11px; fill: #94A3B8; }
+    .desc { font-size: 11px; fill: #787368; }
     .mono { font-family: 'Consolas', monospace; font-size: 11px; }
     .box { rx: 8; ry: 8; }
-    .arrow { stroke: #6F6BEA; stroke-width: 2; marker-end: url(#ah); }
+    .arrow { stroke: #4a2e78; stroke-width: 2; marker-end: url(#ah); }
   </style>
   <defs>
     <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#4a2e78"/>
     </marker>
   </defs>
 
@@ -19,74 +20,74 @@
   <text x="400" y="52" text-anchor="middle" class="subtitle">AWR Snapshot Collection and Utilization Flow</text>
 
   <!-- MMON Process -->
-  <rect x="30" y="80" width="150" height="80" fill="#6F6BEA" fill-opacity="0.15" stroke="#6F6BEA" stroke-width="2" class="box"/>
-  <text x="105" y="105" text-anchor="middle" class="label" fill="#6F6BEA">MMON</text>
+  <rect x="30" y="80" width="150" height="80" fill="#4a2e78" fill-opacity="0.15" stroke="#4a2e78" stroke-width="2" class="box"/>
+  <text x="105" y="105" text-anchor="middle" class="label" fill="#4a2e78">MMON</text>
   <text x="105" y="122" text-anchor="middle" class="desc">Manageability</text>
   <text x="105" y="136" text-anchor="middle" class="desc">Monitor Process</text>
-  <text x="105" y="155" text-anchor="middle" class="mono" fill="#6F6BEA">기본 1시간 간격</text>
+  <text x="105" y="155" text-anchor="middle" class="mono" fill="#4a2e78">기본 1시간 간격</text>
 
   <!-- Arrow to V$ -->
   <line x1="180" y1="100" x2="220" y2="100" class="arrow"/>
 
   <!-- V$ Views (Source) -->
-  <rect x="220" y="75" width="160" height="90" fill="#1E1F2E" stroke="#3B82F6" stroke-width="2" class="box"/>
-  <text x="300" y="100" text-anchor="middle" class="label" fill="#3B82F6">V$ Views (SGA)</text>
-  <text x="240" y="120" class="mono" fill="#3B82F6">V$SYSSTAT</text>
-  <text x="240" y="135" class="mono" fill="#3B82F6">V$SQL</text>
-  <text x="240" y="150" class="mono" fill="#3B82F6">V$SESSION_EVENT</text>
+  <rect x="220" y="75" width="160" height="90" fill="#f3efe4" stroke="#2456a8" stroke-width="2" class="box"/>
+  <text x="300" y="100" text-anchor="middle" class="label" fill="#2456a8">V$ Views (SGA)</text>
+  <text x="240" y="120" class="mono" fill="#2456a8">V$SYSSTAT</text>
+  <text x="240" y="135" class="mono" fill="#2456a8">V$SQL</text>
+  <text x="240" y="150" class="mono" fill="#2456a8">V$SESSION_EVENT</text>
 
   <!-- Arrow to AWR -->
   <line x1="380" y1="120" x2="430" y2="120" class="arrow"/>
   <text x="405" y="112" text-anchor="middle" class="desc">스냅샷</text>
 
   <!-- AWR Repository -->
-  <rect x="430" y="70" width="340" height="100" fill="#1E1F2E" stroke="#F59E0B" stroke-width="2" class="box"/>
-  <text x="600" y="95" text-anchor="middle" class="label" fill="#F59E0B">AWR Repository (SYSAUX)</text>
-  <text x="450" y="118" class="mono" fill="#F59E0B">WRM$_ 메타데이터 테이블</text>
-  <text x="450" y="135" class="mono" fill="#F59E0B">WRH$_ 이력 통계 테이블</text>
-  <text x="450" y="152" class="mono" fill="#F59E0B">DBA_HIST_* 뷰로 조회</text>
+  <rect x="430" y="70" width="340" height="100" fill="#f3efe4" stroke="#8a5a10" stroke-width="2" class="box"/>
+  <text x="600" y="95" text-anchor="middle" class="label" fill="#8a5a10">AWR Repository (SYSAUX)</text>
+  <text x="450" y="118" class="mono" fill="#8a5a10">WRM$_ 메타데이터 테이블</text>
+  <text x="450" y="135" class="mono" fill="#8a5a10">WRH$_ 이력 통계 테이블</text>
+  <text x="450" y="152" class="mono" fill="#8a5a10">DBA_HIST_* 뷰로 조회</text>
 
   <!-- Timeline visualization -->
-  <rect x="30" y="195" width="740" height="100" fill="#1E1F2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
+  <rect x="30" y="195" width="740" height="100" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" class="box"/>
   <text x="400" y="218" text-anchor="middle" class="label">AWR 스냅샷 타임라인 (기본 설정)</text>
   
   <!-- Timeline line -->
-  <line x1="60" y1="255" x2="740" y2="255" stroke="#2A2B3D" stroke-width="2"/>
+  <line x1="60" y1="255" x2="740" y2="255" stroke="#f3efe4" stroke-width="2"/>
   
   <!-- Snapshots -->
-  <circle cx="120" cy="255" r="6" fill="#6F6BEA"/>
-  <text x="120" y="245" text-anchor="middle" class="mono" fill="#6F6BEA">S1</text>
+  <circle cx="120" cy="255" r="6" fill="#4a2e78"/>
+  <text x="120" y="245" text-anchor="middle" class="mono" fill="#4a2e78">S1</text>
   <text x="120" y="275" text-anchor="middle" class="desc">00:00</text>
   
-  <circle cx="240" cy="255" r="6" fill="#6F6BEA"/>
-  <text x="240" y="245" text-anchor="middle" class="mono" fill="#6F6BEA">S2</text>
+  <circle cx="240" cy="255" r="6" fill="#4a2e78"/>
+  <text x="240" y="245" text-anchor="middle" class="mono" fill="#4a2e78">S2</text>
   <text x="240" y="275" text-anchor="middle" class="desc">01:00</text>
   
-  <circle cx="360" cy="255" r="6" fill="#6F6BEA"/>
-  <text x="360" y="245" text-anchor="middle" class="mono" fill="#6F6BEA">S3</text>
+  <circle cx="360" cy="255" r="6" fill="#4a2e78"/>
+  <text x="360" y="245" text-anchor="middle" class="mono" fill="#4a2e78">S3</text>
   <text x="360" y="275" text-anchor="middle" class="desc">02:00</text>
   
-  <circle cx="480" cy="255" r="6" fill="#6F6BEA"/>
-  <text x="480" y="245" text-anchor="middle" class="mono" fill="#6F6BEA">S4</text>
+  <circle cx="480" cy="255" r="6" fill="#4a2e78"/>
+  <text x="480" y="245" text-anchor="middle" class="mono" fill="#4a2e78">S4</text>
   <text x="480" y="275" text-anchor="middle" class="desc">03:00</text>
   
-  <circle cx="600" cy="255" r="6" fill="#6F6BEA"/>
-  <text x="600" y="245" text-anchor="middle" class="mono" fill="#6F6BEA">S5</text>
+  <circle cx="600" cy="255" r="6" fill="#4a2e78"/>
+  <text x="600" y="245" text-anchor="middle" class="mono" fill="#4a2e78">S5</text>
   <text x="600" y="275" text-anchor="middle" class="desc">04:00</text>
   
-  <circle cx="720" cy="255" r="6" fill="#6F6BEA"/>
-  <text x="720" y="245" text-anchor="middle" class="mono" fill="#6F6BEA">S6</text>
+  <circle cx="720" cy="255" r="6" fill="#4a2e78"/>
+  <text x="720" y="245" text-anchor="middle" class="mono" fill="#4a2e78">S6</text>
   <text x="720" y="275" text-anchor="middle" class="desc">05:00</text>
 
   <!-- ADDM analysis bracket -->
-  <line x1="240" y1="232" x2="360" y2="232" stroke="#F43F5E" stroke-width="2"/>
-  <line x1="240" y1="232" x2="240" y2="238" stroke="#F43F5E" stroke-width="2"/>
-  <line x1="360" y1="232" x2="360" y2="238" stroke="#F43F5E" stroke-width="2"/>
-  <text x="300" y="228" text-anchor="middle" class="desc" fill="#F43F5E">ADDM 자동 분석</text>
+  <line x1="240" y1="232" x2="360" y2="232" stroke="#be123c" stroke-width="2"/>
+  <line x1="240" y1="232" x2="240" y2="238" stroke="#be123c" stroke-width="2"/>
+  <line x1="360" y1="232" x2="360" y2="238" stroke="#be123c" stroke-width="2"/>
+  <text x="300" y="228" text-anchor="middle" class="desc" fill="#be123c">ADDM 자동 분석</text>
 
   <!-- Output section -->
-  <rect x="30" y="310" width="355" height="155" fill="#1E1F2E" stroke="#F59E0B" stroke-width="1.5" class="box"/>
-  <text x="207" y="335" text-anchor="middle" class="label" fill="#F59E0B">AWR 설정 파라미터</text>
+  <rect x="30" y="310" width="355" height="155" fill="#f3efe4" stroke="#8a5a10" stroke-width="1.5" class="box"/>
+  <text x="207" y="335" text-anchor="middle" class="label" fill="#8a5a10">AWR 설정 파라미터</text>
   <text x="50" y="360" class="mono">SNAP_INTERVAL</text>
   <text x="200" y="360" class="desc">기본 1시간 (3600초)</text>
   <text x="50" y="380" class="mono">RETENTION</text>
@@ -98,18 +99,18 @@
   <text x="50" y="455" class="desc">  .CREATE_SNAPSHOT으로 수동 생성</text>
 
   <!-- AWR Reports -->
-  <rect x="415" y="310" width="355" height="155" fill="#1E1F2E" stroke="#10B981" stroke-width="1.5" class="box"/>
-  <text x="592" y="335" text-anchor="middle" class="label" fill="#10B981">AWR 활용 (Reports & Analysis)</text>
-  <rect x="435" y="348" width="130" height="24" rx="4" fill="#10B981" opacity="0.1"/>
-  <text x="500" y="365" text-anchor="middle" class="mono" fill="#10B981">AWR Report</text>
+  <rect x="415" y="310" width="355" height="155" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1.5" class="box"/>
+  <text x="592" y="335" text-anchor="middle" class="label" fill="#2f6a1c">AWR 활용 (Reports & Analysis)</text>
+  <rect x="435" y="348" width="130" height="24" rx="4" fill="#2f6a1c" opacity="0.1"/>
+  <text x="500" y="365" text-anchor="middle" class="mono" fill="#2f6a1c">AWR Report</text>
   <text x="575" y="365" class="desc">awrrpt.sql (TEXT/HTML)</text>
-  <rect x="435" y="378" width="130" height="24" rx="4" fill="#F43F5E" opacity="0.1"/>
-  <text x="500" y="395" text-anchor="middle" class="mono" fill="#F43F5E">ADDM</text>
+  <rect x="435" y="378" width="130" height="24" rx="4" fill="#be123c" opacity="0.1"/>
+  <text x="500" y="395" text-anchor="middle" class="mono" fill="#be123c">ADDM</text>
   <text x="575" y="395" class="desc">addmrpt.sql 자동 분석</text>
-  <rect x="435" y="408" width="130" height="24" rx="4" fill="#3B82F6" opacity="0.1"/>
-  <text x="500" y="425" text-anchor="middle" class="mono" fill="#3B82F6">ASH Report</text>
+  <rect x="435" y="408" width="130" height="24" rx="4" fill="#2456a8" opacity="0.1"/>
+  <text x="500" y="425" text-anchor="middle" class="mono" fill="#2456a8">ASH Report</text>
   <text x="575" y="425" class="desc">ashrpt.sql 세션 이력</text>
-  <rect x="435" y="438" width="130" height="24" rx="4" fill="#6F6BEA" opacity="0.1"/>
-  <text x="500" y="455" text-anchor="middle" class="mono" fill="#6F6BEA">Baseline</text>
+  <rect x="435" y="438" width="130" height="24" rx="4" fill="#4a2e78" opacity="0.1"/>
+  <text x="500" y="455" text-anchor="middle" class="mono" fill="#4a2e78">Baseline</text>
   <text x="575" y="455" class="desc">정상 시 기준선 설정</text>
 </svg>

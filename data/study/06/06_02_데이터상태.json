@@ -28,12 +28,12 @@
         },
         {
           "id": "v06",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>ACTIVE</b><br/>활성 트랜잭션 사용 중<br/>덮어쓰기 절대 불가\"]:::red\n  A -- \"트랜잭션 COMMIT / ROLLBACK\" --> B[\"<b>UNEXPIRED</b><br/>트랜잭션 완료<br/>UNDO_RETENTION 기간 이내<br/>공간 부족 시 재사용 가능(NOGUARANTEE)\"]\n  B:::amber\n  B -- \"UNDO_RETENTION 기간 경과\" --> C[\"<b>EXPIRED</b><br/>보존 기간 초과<br/>자유롭게 재사용 가능\"]\n  C:::green\n  C -- \"새 트랜잭션에 재할당\" --> A\n  B -- \"공간 부족 + NOGUARANTEE<br/>강제 전환\" --> C\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "UNDO Extent 상태 전이: ACTIVE → UNEXPIRED → EXPIRED 및 NOGUARANTEE 강제 전환 경로",
           "placement": "before-content",
           "width": "100%",
-          "sectionId": "s01"
+          "sectionId": "s01",
+          "src": "/visuals/06/06_02_s01_v06_mermaid.svg"
         }
       ]
     },

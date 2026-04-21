@@ -56,11 +56,11 @@
       "visuals": [
         {
           "id": "v03",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>DBA</b><br/>CREATE ANY DIRECTORY 권한\"]:::amber\n  B[\"<b>CREATE OR REPLACE DIRECTORY</b><br/>논리적 이름 → OS 경로 매핑\"]:::blue\n  C[\"<b>OS 디렉터리 존재 여부 확인</b><br/>Oracle 프로세스 읽기/쓰기 권한 필요\"]:::red\n  D[\"<b>GRANT READ, WRITE</b><br/>ON DIRECTORY → 사용자에게 부여\"]:::green\n  E[\"<b>DATA_PUMP_DIR</b><br/>Oracle 설치 시 기본 생성\"]:::amber\n  F[\"<b>expdp / impdp</b><br/>DIRECTORY 파라미터로 참조\"]:::blue\n  A -->|\"Directory Object 생성\"| B\n  B --> C\n  C -->|\"검증 통과\"| D\n  E -->|\"기본 Directory 사용 가능\"| F\n  D --> F\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "Directory Object 생성 및 권한 부여 흐름 — CREATE DIRECTORY로 OS 경로 매핑 후 GRANT READ/WRITE 부여, 기본 DATA_PUMP_DIR 또는 사용자 정의 Directory를 expdp/impdp에서 참조",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/07/07_03_s02_v03_mermaid.svg"
         }
       ],
       "subsections": [
@@ -126,11 +126,11 @@
       "visuals": [
         {
           "id": "v04",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>impdp 실행</b><br/>덤프 파일 로드\"]:::amber\n  B{\"<b>TABLE_EXISTS_ACTION</b><br/>대상 테이블 존재 여부\"}:::blue\n  C[\"<b>SKIP</b><br/>테이블 건너뜀<br/>(기본값, 데이터 미적재)\"]:::red\n  D[\"<b>APPEND</b><br/>기존 데이터 유지<br/>새 데이터 추가\"]:::green\n  E[\"<b>TRUNCATE</b><br/>기존 데이터 삭제 후<br/>Import (구조 유지)\"]:::amber\n  F[\"<b>REPLACE</b><br/>테이블 DROP+재생성<br/>후 Import\"]:::red\n  G[\"<b>REMAP_SCHEMA /<br/>REMAP_TABLESPACE</b><br/>스키마·테이블스페이스 리매핑\"]:::blue\n  H[\"<b>Import 완료</b>\"]:::green\n  A --> B\n  B -->|\"SKIP\"| C\n  B -->|\"APPEND\"| D\n  B -->|\"TRUNCATE\"| E\n  B -->|\"REPLACE\"| F\n  C --> H\n  D --> G\n  E --> G\n  F --> G\n  G --> H\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "impdp TABLE_EXISTS_ACTION 분기 — SKIP(건너뜀)/APPEND(추가)/TRUNCATE(삭제 후 적재)/REPLACE(DROP+재생성) 4가지 동작과 REMAP 적용 흐름",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/07/07_03_s04_v04_mermaid.svg"
         }
       ],
       "subsections": [

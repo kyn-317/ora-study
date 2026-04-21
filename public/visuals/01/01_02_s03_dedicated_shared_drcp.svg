@@ -1,24 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 700">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
   <defs>
     <marker id="arrP" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#4a2e78"/>
     </marker>
     <marker id="arrB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#3B82F6"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#2456a8"/>
     </marker>
     <marker id="arrG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#10B981"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#2f6a1c"/>
     </marker>
   </defs>
 
@@ -27,164 +28,164 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">서버 연결 모드 비교 (Connection Mode Comparison)</text>
 
   <!-- === Dedicated Server === -->
-  <rect x="20" y="70" width="240" height="290" class="box" fill="rgba(107,107,234,0.05)" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="140" y="95" text-anchor="middle" class="label" fill="#6F6BEA">Dedicated Server</text>
+  <rect x="20" y="70" width="240" height="290" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="140" y="95" text-anchor="middle" class="label" fill="#4a2e78">Dedicated Server</text>
   <text x="140" y="112" text-anchor="middle" class="small">전용 서버 모드 (1:1)</text>
 
   <!-- Users -->
-  <rect x="35" y="125" width="80" height="28" class="box" fill="rgba(107,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="35" y="125" width="80" height="28" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
   <text x="75" y="143" text-anchor="middle" class="sublabel">User 1</text>
-  <rect x="35" y="165" width="80" height="28" class="box" fill="rgba(107,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="35" y="165" width="80" height="28" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
   <text x="75" y="183" text-anchor="middle" class="sublabel">User 2</text>
-  <rect x="35" y="205" width="80" height="28" class="box" fill="rgba(107,107,234,0.15)" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="35" y="205" width="80" height="28" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
   <text x="75" y="223" text-anchor="middle" class="sublabel">User 3</text>
 
   <!-- Server Processes -->
-  <rect x="160" y="125" width="85" height="28" class="box" fill="rgba(107,107,234,0.2)" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="160" y="125" width="85" height="28" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
   <text x="202" y="143" text-anchor="middle" class="code">Server 1</text>
-  <rect x="160" y="165" width="85" height="28" class="box" fill="rgba(107,107,234,0.2)" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="160" y="165" width="85" height="28" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
   <text x="202" y="183" text-anchor="middle" class="code">Server 2</text>
-  <rect x="160" y="205" width="85" height="28" class="box" fill="rgba(107,107,234,0.2)" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="160" y="205" width="85" height="28" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
   <text x="202" y="223" text-anchor="middle" class="code">Server 3</text>
 
   <!-- 1:1 arrows -->
-  <line x1="115" y1="139" x2="158" y2="139" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#arrP)"/>
-  <line x1="115" y1="179" x2="158" y2="179" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#arrP)"/>
-  <line x1="115" y1="219" x2="158" y2="219" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#arrP)"/>
+  <line x1="115" y1="139" x2="158" y2="139" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#arrP)"/>
+  <line x1="115" y1="179" x2="158" y2="179" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#arrP)"/>
+  <line x1="115" y1="219" x2="158" y2="219" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#arrP)"/>
 
   <!-- Memory layout -->
-  <rect x="35" y="250" width="210" height="100" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1"/>
+  <rect x="35" y="250" width="210" height="100" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1"/>
   <text x="140" y="270" text-anchor="middle" class="sublabel">메모리 구조 (Memory)</text>
   <text x="140" y="290" text-anchor="middle" class="code">PGA = UGA + SQL Work Area</text>
   <text x="140" y="310" text-anchor="middle" class="small">UGA가 PGA 내부에 위치</text>
   <text x="140" y="330" text-anchor="middle" class="small">유휴 시에도 프로세스 유지</text>
 
   <!-- === Shared Server === -->
-  <rect x="280" y="70" width="240" height="290" class="box" fill="rgba(59,130,246,0.05)" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="400" y="95" text-anchor="middle" class="label" fill="#3B82F6">Shared Server</text>
+  <rect x="280" y="70" width="240" height="290" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="400" y="95" text-anchor="middle" class="label" fill="#2456a8">Shared Server</text>
   <text x="400" y="112" text-anchor="middle" class="small">공유 서버 모드 (N:M)</text>
 
   <!-- Users -->
-  <rect x="290" y="125" width="65" height="28" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="290" y="125" width="65" height="28" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1"/>
   <text x="322" y="143" text-anchor="middle" class="sublabel">User 1</text>
-  <rect x="290" y="165" width="65" height="28" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="290" y="165" width="65" height="28" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1"/>
   <text x="322" y="183" text-anchor="middle" class="sublabel">User 2</text>
-  <rect x="290" y="205" width="65" height="28" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="290" y="205" width="65" height="28" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1"/>
   <text x="322" y="223" text-anchor="middle" class="sublabel">User 3</text>
 
   <!-- Dispatcher -->
-  <rect x="375" y="155" width="75" height="55" class="box" fill="rgba(59,130,246,0.25)" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="375" y="155" width="75" height="55" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5"/>
   <text x="412" y="178" text-anchor="middle" class="sublabel">Dispatcher</text>
   <text x="412" y="198" text-anchor="middle" class="small">디스패처</text>
 
   <!-- Lines to dispatcher -->
-  <line x1="355" y1="139" x2="375" y2="170" stroke="#3B82F6" stroke-width="1" marker-end="url(#arrB)"/>
-  <line x1="355" y1="179" x2="375" y2="183" stroke="#3B82F6" stroke-width="1" marker-end="url(#arrB)"/>
-  <line x1="355" y1="219" x2="375" y2="195" stroke="#3B82F6" stroke-width="1" marker-end="url(#arrB)"/>
+  <line x1="355" y1="139" x2="375" y2="170" stroke="#2456a8" stroke-width="1" marker-end="url(#arrB)"/>
+  <line x1="355" y1="179" x2="375" y2="183" stroke="#2456a8" stroke-width="1" marker-end="url(#arrB)"/>
+  <line x1="355" y1="219" x2="375" y2="195" stroke="#2456a8" stroke-width="1" marker-end="url(#arrB)"/>
 
   <!-- Request Queue -->
-  <rect x="460" y="140" width="50" height="85" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1"/>
+  <rect x="460" y="140" width="50" height="85" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1"/>
   <text x="485" y="165" text-anchor="middle" class="small" transform="rotate(-90 485 180)">Queue</text>
 
-  <line x1="450" y1="183" x2="460" y2="183" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arrB)"/>
+  <line x1="450" y1="183" x2="460" y2="183" stroke="#8a5a10" stroke-width="1.5" marker-end="url(#arrB)"/>
 
   <!-- Shared Servers -->
-  <rect x="290" y="250" width="210" height="100" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1"/>
+  <rect x="290" y="250" width="210" height="100" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1"/>
   <text x="395" y="270" text-anchor="middle" class="sublabel">메모리 구조 (Memory)</text>
   <text x="395" y="290" text-anchor="middle" class="code">UGA → SGA (Large Pool)</text>
   <text x="395" y="310" text-anchor="middle" class="small">PGA에는 SQL Work Area만</text>
-  <text x="395" y="330" text-anchor="middle" class="small" fill="#F43F5E">SGA 크기 증가 필요!</text>
+  <text x="395" y="330" text-anchor="middle" class="small" fill="#be123c">SGA 크기 증가 필요!</text>
 
   <!-- === DRCP === -->
-  <rect x="540" y="70" width="240" height="290" class="box" fill="rgba(16,185,129,0.05)" stroke="#10B981" stroke-width="1.5"/>
-  <text x="660" y="95" text-anchor="middle" class="label" fill="#10B981">DRCP</text>
+  <rect x="540" y="70" width="240" height="290" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="660" y="95" text-anchor="middle" class="label" fill="#2f6a1c">DRCP</text>
   <text x="660" y="112" text-anchor="middle" class="small">Connection Pooling</text>
 
   <!-- Users -->
-  <rect x="555" y="125" width="65" height="28" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <rect x="555" y="125" width="65" height="28" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1"/>
   <text x="587" y="143" text-anchor="middle" class="sublabel">User 1</text>
-  <rect x="555" y="160" width="65" height="28" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <rect x="555" y="160" width="65" height="28" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1"/>
   <text x="587" y="178" text-anchor="middle" class="sublabel">User 2</text>
-  <rect x="555" y="195" width="65" height="28" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1"/>
+  <rect x="555" y="195" width="65" height="28" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1"/>
   <text x="587" y="213" text-anchor="middle" class="sublabel">User 3</text>
 
   <!-- Pool -->
-  <rect x="650" y="130" width="120" height="110" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5"/>
+  <rect x="650" y="130" width="120" height="110" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.5"/>
   <text x="710" y="150" text-anchor="middle" class="sublabel">Server Pool</text>
-  <rect x="660" y="158" width="45" height="22" class="box" fill="rgba(16,185,129,0.2)" stroke="#10B981" stroke-width="1"/>
+  <rect x="660" y="158" width="45" height="22" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1"/>
   <text x="682" y="173" text-anchor="middle" class="small">Srv1</text>
-  <rect x="715" y="158" width="45" height="22" class="box" fill="rgba(16,185,129,0.2)" stroke="#10B981" stroke-width="1"/>
+  <rect x="715" y="158" width="45" height="22" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1"/>
   <text x="737" y="173" text-anchor="middle" class="small">Srv2</text>
-  <rect x="660" y="190" width="45" height="22" class="box" fill="rgba(16,185,129,0.2)" stroke="#10B981" stroke-width="1"/>
+  <rect x="660" y="190" width="45" height="22" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1"/>
   <text x="682" y="205" text-anchor="middle" class="small">Srv3</text>
-  <rect x="715" y="190" width="45" height="22" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="737" y="205" text-anchor="middle" class="small" fill="#94A3B8">Idle</text>
+  <rect x="715" y="190" width="45" height="22" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="737" y="205" text-anchor="middle" class="small" fill="#787368">Idle</text>
 
   <!-- Arrows to pool -->
-  <line x1="620" y1="139" x2="650" y2="168" stroke="#10B981" stroke-width="1" marker-end="url(#arrG)"/>
-  <line x1="620" y1="174" x2="650" y2="174" stroke="#10B981" stroke-width="1" marker-end="url(#arrG)"/>
-  <line x1="620" y1="209" x2="650" y2="200" stroke="#10B981" stroke-width="1" marker-end="url(#arrG)"/>
+  <line x1="620" y1="139" x2="650" y2="168" stroke="#2f6a1c" stroke-width="1" marker-end="url(#arrG)"/>
+  <line x1="620" y1="174" x2="650" y2="174" stroke="#2f6a1c" stroke-width="1" marker-end="url(#arrG)"/>
+  <line x1="620" y1="209" x2="650" y2="200" stroke="#2f6a1c" stroke-width="1" marker-end="url(#arrG)"/>
 
   <!-- DRCP Memory -->
-  <rect x="555" y="250" width="210" height="100" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1"/>
+  <rect x="555" y="250" width="210" height="100" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1"/>
   <text x="660" y="270" text-anchor="middle" class="sublabel">메모리 구조 (Memory)</text>
   <text x="660" y="290" text-anchor="middle" class="code">PGA = UGA + SQL Work Area</text>
   <text x="660" y="310" text-anchor="middle" class="small">Dedicated와 동일한 메모리 구조</text>
-  <text x="660" y="330" text-anchor="middle" class="small" fill="#10B981">유휴 시 풀로 반환!</text>
+  <text x="660" y="330" text-anchor="middle" class="small" fill="#2f6a1c">유휴 시 풀로 반환!</text>
 
   <!-- Comparison Table -->
-  <rect x="20" y="385" width="760" height="305" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1.5"/>
+  <rect x="20" y="385" width="760" height="305" class="box" fill="rgba(42,42,42,0.03)" stroke="#f3efe4" stroke-width="1.5"/>
   <text x="400" y="412" text-anchor="middle" class="label">비교 요약 (Comparison Summary)</text>
 
   <!-- Table Header -->
-  <line x1="40" y1="425" x2="760" y2="425" stroke="#2A2B3D" stroke-width="1"/>
+  <line x1="40" y1="425" x2="760" y2="425" stroke="#f3efe4" stroke-width="1"/>
   <text x="130" y="445" text-anchor="middle" class="sublabel">항목</text>
-  <text x="310" y="445" text-anchor="middle" class="sublabel" fill="#6F6BEA">Dedicated</text>
-  <text x="490" y="445" text-anchor="middle" class="sublabel" fill="#3B82F6">Shared</text>
-  <text x="670" y="445" text-anchor="middle" class="sublabel" fill="#10B981">DRCP</text>
-  <line x1="40" y1="455" x2="760" y2="455" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="310" y="445" text-anchor="middle" class="sublabel" fill="#4a2e78">Dedicated</text>
+  <text x="490" y="445" text-anchor="middle" class="sublabel" fill="#2456a8">Shared</text>
+  <text x="670" y="445" text-anchor="middle" class="sublabel" fill="#2f6a1c">DRCP</text>
+  <line x1="40" y1="455" x2="760" y2="455" stroke="#f3efe4" stroke-width="1"/>
 
   <!-- Row 1 -->
   <text x="50" y="478" class="small">프로세스 할당</text>
   <text x="310" y="478" text-anchor="middle" class="small">세션당 전용</text>
   <text x="490" y="478" text-anchor="middle" class="small">공유 (큐 기반)</text>
   <text x="670" y="478" text-anchor="middle" class="small">풀에서 동적 할당</text>
-  <line x1="40" y1="488" x2="760" y2="488" stroke="#2A2B3D" stroke-width="0.5"/>
+  <line x1="40" y1="488" x2="760" y2="488" stroke="#f3efe4" stroke-width="0.5"/>
 
   <!-- Row 2 -->
   <text x="50" y="508" class="small">UGA 위치</text>
   <text x="310" y="508" text-anchor="middle" class="code">PGA</text>
   <text x="490" y="508" text-anchor="middle" class="code">SGA</text>
   <text x="670" y="508" text-anchor="middle" class="code">PGA</text>
-  <line x1="40" y1="518" x2="760" y2="518" stroke="#2A2B3D" stroke-width="0.5"/>
+  <line x1="40" y1="518" x2="760" y2="518" stroke="#f3efe4" stroke-width="0.5"/>
 
   <!-- Row 3 -->
   <text x="50" y="538" class="small">유휴 시 프로세스</text>
-  <text x="310" y="538" text-anchor="middle" class="small" fill="#F43F5E">점유 유지</text>
+  <text x="310" y="538" text-anchor="middle" class="small" fill="#be123c">점유 유지</text>
   <text x="490" y="538" text-anchor="middle" class="small">공유 서버 유지</text>
-  <text x="670" y="538" text-anchor="middle" class="small" fill="#10B981">풀로 반환</text>
-  <line x1="40" y1="548" x2="760" y2="548" stroke="#2A2B3D" stroke-width="0.5"/>
+  <text x="670" y="538" text-anchor="middle" class="small" fill="#2f6a1c">풀로 반환</text>
+  <line x1="40" y1="548" x2="760" y2="548" stroke="#f3efe4" stroke-width="0.5"/>
 
   <!-- Row 4 -->
   <text x="50" y="568" class="small">확장성</text>
-  <text x="310" y="568" text-anchor="middle" class="small" fill="#F43F5E">낮음</text>
-  <text x="490" y="568" text-anchor="middle" class="small" fill="#10B981">높음</text>
-  <text x="670" y="568" text-anchor="middle" class="small" fill="#10B981">높음</text>
-  <line x1="40" y1="578" x2="760" y2="578" stroke="#2A2B3D" stroke-width="0.5"/>
+  <text x="310" y="568" text-anchor="middle" class="small" fill="#be123c">낮음</text>
+  <text x="490" y="568" text-anchor="middle" class="small" fill="#2f6a1c">높음</text>
+  <text x="670" y="568" text-anchor="middle" class="small" fill="#2f6a1c">높음</text>
+  <line x1="40" y1="578" x2="760" y2="578" stroke="#f3efe4" stroke-width="0.5"/>
 
   <!-- Row 5 -->
   <text x="50" y="598" class="small">응답 시간</text>
-  <text x="310" y="598" text-anchor="middle" class="small" fill="#10B981">빠름</text>
-  <text x="490" y="598" text-anchor="middle" class="small" fill="#F43F5E">큐 대기 가능</text>
-  <text x="670" y="598" text-anchor="middle" class="small" fill="#10B981">Dedicated 유사</text>
-  <line x1="40" y1="608" x2="760" y2="608" stroke="#2A2B3D" stroke-width="0.5"/>
+  <text x="310" y="598" text-anchor="middle" class="small" fill="#2f6a1c">빠름</text>
+  <text x="490" y="598" text-anchor="middle" class="small" fill="#be123c">큐 대기 가능</text>
+  <text x="670" y="598" text-anchor="middle" class="small" fill="#2f6a1c">Dedicated 유사</text>
+  <line x1="40" y1="608" x2="760" y2="608" stroke="#f3efe4" stroke-width="0.5"/>
 
   <!-- Row 6 -->
   <text x="50" y="628" class="small">관리 작업</text>
-  <text x="310" y="628" text-anchor="middle" class="small" fill="#10B981">SYSDBA 가능</text>
-  <text x="490" y="628" text-anchor="middle" class="small" fill="#F43F5E">SYSDBA 불가</text>
+  <text x="310" y="628" text-anchor="middle" class="small" fill="#2f6a1c">SYSDBA 가능</text>
+  <text x="490" y="628" text-anchor="middle" class="small" fill="#be123c">SYSDBA 불가</text>
   <text x="670" y="628" text-anchor="middle" class="small">풀 설정 필요</text>
-  <line x1="40" y1="638" x2="760" y2="638" stroke="#2A2B3D" stroke-width="0.5"/>
+  <line x1="40" y1="638" x2="760" y2="638" stroke="#f3efe4" stroke-width="0.5"/>
 
   <!-- Row 7 -->
   <text x="50" y="658" class="small">접속 설정</text>
@@ -193,7 +194,7 @@
   <text x="670" y="658" text-anchor="middle" class="code">SERVER=POOLED</text>
 
   <!-- Vertical separators -->
-  <line x1="220" y1="425" x2="220" y2="675" stroke="#2A2B3D" stroke-width="0.5"/>
-  <line x1="400" y1="425" x2="400" y2="675" stroke="#2A2B3D" stroke-width="0.5"/>
-  <line x1="580" y1="425" x2="580" y2="675" stroke="#2A2B3D" stroke-width="0.5"/>
+  <line x1="220" y1="425" x2="220" y2="675" stroke="#f3efe4" stroke-width="0.5"/>
+  <line x1="400" y1="425" x2="400" y2="675" stroke="#f3efe4" stroke-width="0.5"/>
+  <line x1="580" y1="425" x2="580" y2="675" stroke="#f3efe4" stroke-width="0.5"/>
 </svg>

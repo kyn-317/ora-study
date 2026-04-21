@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -14,38 +15,38 @@
   <text x="400" y="50" class="subtitle" text-anchor="middle">구성 도구 - 제어 도구 - 진단 도구의 역할과 관계</text>
 
   <!-- Phase labels -->
-  <rect x="40" y="75" width="220" height="35" rx="6" ry="6" fill="#6F6BEA" opacity="0.3" stroke="#6F6BEA"/>
-  <text x="150" y="97" class="label" text-anchor="middle" fill="#6F6BEA">구성 단계 (Configuration)</text>
+  <rect x="40" y="75" width="220" height="35" rx="6" ry="6" fill="#4a2e78" opacity="0.3" stroke="#4a2e78"/>
+  <text x="150" y="97" class="label" text-anchor="middle" fill="#4a2e78">구성 단계 (Configuration)</text>
 
-  <rect x="290" y="75" width="220" height="35" rx="6" ry="6" fill="#3B82F6" opacity="0.3" stroke="#3B82F6"/>
-  <text x="400" y="97" class="label" text-anchor="middle" fill="#3B82F6">운영 단계 (Operation)</text>
+  <rect x="290" y="75" width="220" height="35" rx="6" ry="6" fill="#2456a8" opacity="0.3" stroke="#2456a8"/>
+  <text x="400" y="97" class="label" text-anchor="middle" fill="#2456a8">운영 단계 (Operation)</text>
 
-  <rect x="540" y="75" width="220" height="35" rx="6" ry="6" fill="#10B981" opacity="0.3" stroke="#10B981"/>
-  <text x="650" y="97" class="label" text-anchor="middle" fill="#10B981">진단 단계 (Diagnostic)</text>
+  <rect x="540" y="75" width="220" height="35" rx="6" ry="6" fill="#2f6a1c" opacity="0.3" stroke="#2f6a1c"/>
+  <text x="650" y="97" class="label" text-anchor="middle" fill="#2f6a1c">진단 단계 (Diagnostic)</text>
 
   <!-- NETCA -->
-  <rect x="40" y="125" width="105" height="100" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
-  <text x="92" y="148" class="label" text-anchor="middle" fill="#6F6BEA">NETCA</text>
+  <rect x="40" y="125" width="105" height="100" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
+  <text x="92" y="148" class="label" text-anchor="middle" fill="#4a2e78">NETCA</text>
   <text x="92" y="166" class="small" text-anchor="middle">GUI 마법사</text>
   <text x="92" y="182" class="small" text-anchor="middle">리스너 구성</text>
   <text x="92" y="198" class="small" text-anchor="middle">네이밍 구성</text>
   <text x="92" y="214" class="small" text-anchor="middle">디렉토리 구성</text>
 
   <!-- NETMGR -->
-  <rect x="155" y="125" width="105" height="100" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
-  <text x="207" y="148" class="label" text-anchor="middle" fill="#6F6BEA">NETMGR</text>
+  <rect x="155" y="125" width="105" height="100" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
+  <text x="207" y="148" class="label" text-anchor="middle" fill="#4a2e78">NETMGR</text>
   <text x="207" y="166" class="small" text-anchor="middle">GUI 편집기</text>
   <text x="207" y="182" class="small" text-anchor="middle">고급 설정</text>
   <text x="207" y="198" class="small" text-anchor="middle">프로파일 편집</text>
   <text x="207" y="214" class="small" text-anchor="middle">GUI 전용</text>
 
   <!-- Arrows -->
-  <line x1="260" y1="175" x2="295" y2="175" stroke="#E2E8F0" stroke-width="2"/>
-  <polygon points="293,172 300,175 293,178" fill="#E2E8F0"/>
+  <line x1="260" y1="175" x2="295" y2="175" stroke="#1a1a1a" stroke-width="2"/>
+  <polygon points="293,172 300,175 293,178" fill="#1a1a1a"/>
 
   <!-- lsnrctl -->
-  <rect x="300" y="125" width="200" height="100" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
-  <text x="400" y="148" class="label" text-anchor="middle" fill="#3B82F6">lsnrctl</text>
+  <rect x="300" y="125" width="200" height="100" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
+  <text x="400" y="148" class="label" text-anchor="middle" fill="#2456a8">lsnrctl</text>
   <text x="400" y="166" class="sublabel" text-anchor="middle">리스너 제어 유틸리티</text>
   <text x="340" y="186" class="code">START</text>
   <text x="400" y="186" class="code">STOP</text>
@@ -54,12 +55,12 @@
   <text x="420" y="204" class="code">SERVICES</text>
 
   <!-- Arrow -->
-  <line x1="500" y1="175" x2="545" y2="175" stroke="#E2E8F0" stroke-width="2"/>
-  <polygon points="543,172 550,175 543,178" fill="#E2E8F0"/>
+  <line x1="500" y1="175" x2="545" y2="175" stroke="#1a1a1a" stroke-width="2"/>
+  <polygon points="543,172 550,175 543,178" fill="#1a1a1a"/>
 
   <!-- tnsping -->
-  <rect x="550" y="125" width="200" height="100" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
-  <text x="650" y="148" class="label" text-anchor="middle" fill="#10B981">tnsping</text>
+  <rect x="550" y="125" width="200" height="100" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
+  <text x="650" y="148" class="label" text-anchor="middle" fill="#2f6a1c">tnsping</text>
   <text x="650" y="166" class="sublabel" text-anchor="middle">연결 진단 도구</text>
   <text x="650" y="186" class="small" text-anchor="middle">리스너 도달 가능성 테스트</text>
   <text x="650" y="204" class="small" text-anchor="middle">응답 시간 측정</text>
@@ -67,7 +68,7 @@
 
   <!-- Config files -->
   <text x="150" y="252" class="label" text-anchor="middle">생성/편집하는 구성 파일</text>
-  <rect x="40" y="260" width="220" height="65" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="40" y="260" width="220" height="65" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="1"/>
   <text x="55" y="280" class="code">listener.ora</text>
   <text x="155" y="280" class="small">리스너 구성</text>
   <text x="55" y="298" class="code">tnsnames.ora</text>
@@ -76,33 +77,33 @@
   <text x="145" y="316" class="small">프로파일 설정</text>
 
   <!-- "Cannot do" section - Exam points -->
-  <text x="400" y="352" class="label" text-anchor="middle" fill="#F43F5E">각 도구가 할 수 없는 것 (시험 출제 포인트)</text>
+  <text x="400" y="352" class="label" text-anchor="middle" fill="#be123c">각 도구가 할 수 없는 것 (시험 출제 포인트)</text>
 
-  <rect x="30" y="365" width="175" height="95" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="117" y="385" class="label" text-anchor="middle" fill="#3B82F6" font-size="12">lsnrctl</text>
-  <text x="45" y="403" class="small" fill="#F43F5E">X tnsnames.ora 구성</text>
-  <text x="45" y="420" class="small" fill="#F43F5E">X 클라이언트 네이밍</text>
+  <rect x="30" y="365" width="175" height="95" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="1.5"/>
+  <text x="117" y="385" class="label" text-anchor="middle" fill="#2456a8" font-size="12">lsnrctl</text>
+  <text x="45" y="403" class="small" fill="#be123c">X tnsnames.ora 구성</text>
+  <text x="45" y="420" class="small" fill="#be123c">X 클라이언트 네이밍</text>
   <text x="45" y="437" class="small">리스너 프로세스만 제어</text>
   <text x="45" y="452" class="small">구성 파일 편집 불가</text>
 
-  <rect x="220" y="365" width="175" height="95" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="307" y="385" class="label" text-anchor="middle" fill="#6F6BEA" font-size="12">NETCA / NETMGR</text>
-  <text x="235" y="403" class="small" fill="#F43F5E">X 리스너 시작/중지</text>
-  <text x="235" y="420" class="small" fill="#F43F5E">X 런타임 제어</text>
+  <rect x="220" y="365" width="175" height="95" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="1.5"/>
+  <text x="307" y="385" class="label" text-anchor="middle" fill="#4a2e78" font-size="12">NETCA / NETMGR</text>
+  <text x="235" y="403" class="small" fill="#be123c">X 리스너 시작/중지</text>
+  <text x="235" y="420" class="small" fill="#be123c">X 런타임 제어</text>
   <text x="235" y="437" class="small">구성 파일 편집만 담당</text>
   <text x="235" y="452" class="small">NETMGR: Silent 모드 없음</text>
 
-  <rect x="410" y="365" width="175" height="95" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="497" y="385" class="label" text-anchor="middle" fill="#10B981" font-size="12">tnsping</text>
-  <text x="425" y="403" class="small" fill="#F43F5E">X DB 기동 여부 확인</text>
-  <text x="425" y="420" class="small" fill="#F43F5E">X 서비스 등록 확인</text>
-  <text x="425" y="437" class="small" fill="#F43F5E">X 사용자 인증 검증</text>
+  <rect x="410" y="365" width="175" height="95" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="1.5"/>
+  <text x="497" y="385" class="label" text-anchor="middle" fill="#2f6a1c" font-size="12">tnsping</text>
+  <text x="425" y="403" class="small" fill="#be123c">X DB 기동 여부 확인</text>
+  <text x="425" y="420" class="small" fill="#be123c">X 서비스 등록 확인</text>
+  <text x="425" y="437" class="small" fill="#be123c">X 사용자 인증 검증</text>
   <text x="425" y="452" class="small">리스너 도달만 확인</text>
 
-  <rect x="600" y="365" width="175" height="95" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="687" y="385" class="label" text-anchor="middle" fill="#6F6BEA" font-size="12">DBCA</text>
-  <text x="615" y="403" class="small" fill="#F43F5E">X 리스너 생성/구성</text>
-  <text x="615" y="420" class="small" fill="#F43F5E">X tnsnames.ora 편집</text>
-  <text x="615" y="437" class="small" fill="#F43F5E">X sqlnet.ora 편집</text>
+  <rect x="600" y="365" width="175" height="95" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="1.5"/>
+  <text x="687" y="385" class="label" text-anchor="middle" fill="#4a2e78" font-size="12">DBCA</text>
+  <text x="615" y="403" class="small" fill="#be123c">X 리스너 생성/구성</text>
+  <text x="615" y="420" class="small" fill="#be123c">X tnsnames.ora 편집</text>
+  <text x="615" y="437" class="small" fill="#be123c">X sqlnet.ora 편집</text>
   <text x="615" y="452" class="small">DB 생성/관리 전용</text>
 </svg>

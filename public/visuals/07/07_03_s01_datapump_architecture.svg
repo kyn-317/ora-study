@@ -1,24 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
-    .arrow-line { stroke: #6F6BEA; stroke-width: 2; fill: none; }
+    .arrow-line { stroke: #4a2e78; stroke-width: 2; fill: none; }
   </style>
   <defs>
     <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a2e78" />
     </marker>
     <marker id="ah-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2456a8" />
     </marker>
     <marker id="ah-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2f6a1c" />
     </marker>
   </defs>
 
@@ -27,8 +28,8 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">서버 측(Server-Side) 고속 데이터/메타데이터 이동 아키텍처</text>
 
   <!-- Client Layer -->
-  <rect x="240" y="70" width="320" height="55" class="box" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="400" y="92" text-anchor="middle" class="label" fill="#3B82F6">Client (클라이언트)</text>
+  <rect x="240" y="70" width="320" height="55" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
+  <text x="400" y="92" text-anchor="middle" class="label" fill="#2456a8">Client (클라이언트)</text>
   <text x="310" y="112" text-anchor="middle" class="code">expdp (Export)</text>
   <text x="490" y="112" text-anchor="middle" class="code">impdp (Import)</text>
 
@@ -37,77 +38,77 @@
   <text x="480" y="142" class="small">DBMS_DATAPUMP API 호출</text>
 
   <!-- Server Layer -->
-  <rect x="30" y="150" width="740" height="340" class="box" fill="none" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="8,4" />
-  <text x="50" y="172" class="label" fill="#6F6BEA">Oracle Database Server (서버 측)</text>
+  <rect x="30" y="150" width="740" height="340" class="box" fill="none" stroke="#4a2e78" stroke-width="2" stroke-dasharray="8,4" />
+  <text x="50" y="172" class="label" fill="#4a2e78">Oracle Database Server (서버 측)</text>
 
   <!-- Master Control Process -->
-  <rect x="250" y="185" width="300" height="60" class="box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="2" />
-  <text x="400" y="210" text-anchor="middle" class="label" fill="#6F6BEA">Master Control Process (MCP)</text>
+  <rect x="250" y="185" width="300" height="60" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="2" />
+  <text x="400" y="210" text-anchor="middle" class="label" fill="#4a2e78">Master Control Process (MCP)</text>
   <text x="400" y="230" text-anchor="middle" class="small">작업 전체 조율, 상태 관리</text>
 
   <!-- Master Table (Left) -->
-  <rect x="50" y="190" width="170" height="50" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5" />
-  <text x="135" y="212" text-anchor="middle" class="sublabel" fill="#F59E0B">Master Table</text>
+  <rect x="50" y="190" width="170" height="50" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5" />
+  <text x="135" y="212" text-anchor="middle" class="sublabel" fill="#8a5a10">Master Table</text>
   <text x="135" y="230" text-anchor="middle" class="small">작업 상태/재시작 정보</text>
 
   <line x1="220" y1="215" x2="248" y2="215" class="arrow-line" marker-end="url(#ah)" />
 
   <!-- DBMS_METADATA (Right) -->
-  <rect x="580" y="190" width="170" height="50" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5" />
-  <text x="665" y="212" text-anchor="middle" class="sublabel" fill="#10B981">DBMS_METADATA</text>
+  <rect x="580" y="190" width="170" height="50" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.5" />
+  <text x="665" y="212" text-anchor="middle" class="sublabel" fill="#2f6a1c">DBMS_METADATA</text>
   <text x="665" y="230" text-anchor="middle" class="small">DDL 추출/변환 (XML)</text>
 
-  <line x1="550" y1="215" x2="578" y2="215" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#ah-green)" />
+  <line x1="550" y1="215" x2="578" y2="215" stroke="#2f6a1c" stroke-width="2" fill="none" marker-end="url(#ah-green)" />
 
   <!-- Worker Processes -->
   <text x="400" y="275" text-anchor="middle" class="sublabel">PARALLEL 수만큼 Worker 생성</text>
 
-  <rect x="80" y="290" width="180" height="55" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="170" y="312" text-anchor="middle" class="sublabel" fill="#3B82F6">Worker Process 1</text>
+  <rect x="80" y="290" width="180" height="55" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
+  <text x="170" y="312" text-anchor="middle" class="sublabel" fill="#2456a8">Worker Process 1</text>
   <text x="170" y="332" text-anchor="middle" class="code">Direct Path API</text>
 
-  <rect x="310" y="290" width="180" height="55" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="400" y="312" text-anchor="middle" class="sublabel" fill="#3B82F6">Worker Process 2</text>
+  <rect x="310" y="290" width="180" height="55" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
+  <text x="400" y="312" text-anchor="middle" class="sublabel" fill="#2456a8">Worker Process 2</text>
   <text x="400" y="332" text-anchor="middle" class="code">Direct Path API</text>
 
-  <rect x="540" y="290" width="180" height="55" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="630" y="312" text-anchor="middle" class="sublabel" fill="#3B82F6">Worker Process N</text>
+  <rect x="540" y="290" width="180" height="55" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
+  <text x="630" y="312" text-anchor="middle" class="sublabel" fill="#2456a8">Worker Process N</text>
   <text x="630" y="332" text-anchor="middle" class="code">Direct Path API</text>
 
   <!-- Arrows from MCP to Workers -->
-  <line x1="330" y1="245" x2="170" y2="288" stroke="#3B82F6" stroke-width="1.5" fill="none" marker-end="url(#ah-blue)" />
-  <line x1="400" y1="245" x2="400" y2="288" stroke="#3B82F6" stroke-width="1.5" fill="none" marker-end="url(#ah-blue)" />
-  <line x1="470" y1="245" x2="630" y2="288" stroke="#3B82F6" stroke-width="1.5" fill="none" marker-end="url(#ah-blue)" />
+  <line x1="330" y1="245" x2="170" y2="288" stroke="#2456a8" stroke-width="1.5" fill="none" marker-end="url(#ah-blue)" />
+  <line x1="400" y1="245" x2="400" y2="288" stroke="#2456a8" stroke-width="1.5" fill="none" marker-end="url(#ah-blue)" />
+  <line x1="470" y1="245" x2="630" y2="288" stroke="#2456a8" stroke-width="1.5" fill="none" marker-end="url(#ah-blue)" />
 
   <!-- Data Flow to Dump Files -->
   <text x="400" y="375" text-anchor="middle" class="sublabel">데이터 + 메타데이터 기록</text>
 
   <!-- Dump Files -->
-  <rect x="50" y="390" width="200" height="80" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1.5" />
-  <text x="150" y="415" text-anchor="middle" class="label" fill="#F59E0B">Dump Files (.dmp)</text>
+  <rect x="50" y="390" width="200" height="80" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5" />
+  <text x="150" y="415" text-anchor="middle" class="label" fill="#8a5a10">Dump Files (.dmp)</text>
   <text x="150" y="435" text-anchor="middle" class="code">DUMPFILE=exp_%U.dmp</text>
   <text x="150" y="455" text-anchor="middle" class="small">%U로 자동 번호 부여</text>
 
   <!-- Log File -->
-  <rect x="290" y="390" width="160" height="80" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1" />
-  <text x="370" y="415" text-anchor="middle" class="sublabel" fill="#10B981">Log File</text>
+  <rect x="290" y="390" width="160" height="80" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1" />
+  <text x="370" y="415" text-anchor="middle" class="sublabel" fill="#2f6a1c">Log File</text>
   <text x="370" y="435" text-anchor="middle" class="code">LOGFILE=exp.log</text>
   <text x="370" y="455" text-anchor="middle" class="small">실행 결과 기록</text>
 
   <!-- Directory Object -->
-  <rect x="490" y="390" width="270" height="80" class="box" fill="rgba(111,107,234,0.08)" stroke="#6F6BEA" stroke-width="1" />
-  <text x="625" y="412" text-anchor="middle" class="sublabel" fill="#6F6BEA">Directory Object 필수</text>
+  <rect x="490" y="390" width="270" height="80" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1" />
+  <text x="625" y="412" text-anchor="middle" class="sublabel" fill="#4a2e78">Directory Object 필수</text>
   <text x="625" y="432" text-anchor="middle" class="code">DIRECTORY=dp_dir</text>
   <text x="625" y="452" text-anchor="middle" class="small">서버 OS 경로만 사용 가능</text>
   <text x="625" y="467" text-anchor="middle" class="small">기본: DATA_PUMP_DIR</text>
 
   <!-- Arrows from Workers to Dump -->
-  <line x1="170" y1="345" x2="150" y2="388" stroke="#F59E0B" stroke-width="1.5" fill="none" marker-end="url(#ah)" />
-  <line x1="400" y1="345" x2="370" y2="388" stroke="#10B981" stroke-width="1.5" fill="none" marker-end="url(#ah-green)" />
+  <line x1="170" y1="345" x2="150" y2="388" stroke="#8a5a10" stroke-width="1.5" fill="none" marker-end="url(#ah)" />
+  <line x1="400" y1="345" x2="370" y2="388" stroke="#2f6a1c" stroke-width="1.5" fill="none" marker-end="url(#ah-green)" />
 
   <!-- Key differences box -->
-  <rect x="30" y="490" width="740" height="120" class="box" fill="rgba(42,43,61,0.4)" stroke="#2A2B3D" stroke-width="1" />
-  <text x="50" y="515" class="label" fill="#6F6BEA">Data Pump vs 기존 exp/imp 핵심 차이</text>
+  <rect x="30" y="490" width="740" height="120" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" />
+  <text x="50" y="515" class="label" fill="#4a2e78">Data Pump vs 기존 exp/imp 핵심 차이</text>
   <text x="50" y="540" class="sublabel">서버 측 실행 (Direct Path API)  |  PARALLEL Workers 지원  |  작업 재시작 가능 (Master Table)</text>
   <text x="50" y="560" class="sublabel">대화형 모드 (Ctrl+C)  |  NETWORK_LINK DB 간 직접 Import  |  REMAP_SCHEMA/TABLESPACE</text>
   <text x="50" y="580" class="sublabel">ENCRYPTION 암호화  |  COMPRESSION 압축  |  EXCLUDE/INCLUDE 세밀한 필터링</text>

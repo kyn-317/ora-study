@@ -53,11 +53,11 @@
       "visuals": [
         {
           "id": "v04",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>Maintenance Window</b><br/>월~금 22:00·토~일 06:00\"]:::amber\n  B[\"<b>AutoTask Framework</b><br/>MAINTENANCE_WINDOW_GROUP\"]:::blue\n  C[\"<b>auto optimizer stats collection</b><br/>옵티마이저 통계 자동 수집<br/>우선순위: HIGH\"]:::green\n  D[\"<b>sql tuning advisor</b><br/>SQL 프로파일 자동 생성·적용<br/>우선순위: MEDIUM\"]:::green\n  E[\"<b>auto space advisor</b><br/>세그먼트 공간 분석·권고<br/>우선순위: MEDIUM\"]:::green\n  F[\"<b>Resource Plan 자동 활성화</b><br/>resource_plan 속성 연동\"]:::amber\n  A --> B\n  A --> F\n  B --> C\n  B --> D\n  B --> E\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "자동화 기반 태스크 구조 — Maintenance Window → AutoTask → 3종 자동 태스크",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/08/08_00_s03_v04_mermaid.svg"
         }
       ],
       "subsections": []
@@ -70,11 +70,11 @@
       "visuals": [
         {
           "id": "v05",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>DBMS_ADVISOR</b><br/>공통 인터페이스\"]:::amber\n  B[\"<b>CREATE_TASK</b>\"]:::blue\n  C[\"<b>SET_TASK_PARAMETER</b>\"]:::blue\n  D[\"<b>EXECUTE_TASK</b>\"]:::blue\n  E[\"<b>GET_TASK_REPORT</b>\"]:::blue\n  F[\"<b>세그먼트 어드바이저</b><br/>공간 낭비 식별·회수\"]:::green\n  G[\"<b>SQL 튜닝 어드바이저</b><br/>개별 SQL 최적화\"]:::green\n  H[\"<b>SQL 액세스 어드바이저</b><br/>스키마 구조 최적화\"]:::green\n  I[\"<b>옵티마이저 통계 어드바이저</b><br/>통계 수집 전략 진단\"]:::green\n  J[\"<b>SQL 퍼포먼스 애널라이저</b><br/>변경 전후 성능 비교\"]:::green\n  A --> B --> C --> D --> E\n  A --> F\n  A --> G\n  A --> H\n  A --> I\n  A --> J\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "어드바이저 프레임워크 — DBMS_ADVISOR 공통 워크플로우와 5대 어드바이저",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/08/08_00_s04_v05_mermaid.svg"
         }
       ],
       "subsections": []
@@ -87,11 +87,11 @@
       "visuals": [
         {
           "id": "v06",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>AWR Snapshot</b><br/>MMON 프로세스\"]:::blue\n  B[\"<b>ADDM 자동 분석 트리거</b><br/>매 스냅샷 후 자동 실행\"]:::amber\n  C[\"<b>DB Time 분해</b><br/>CPU Time + Wait Time\"]:::amber\n  D[\"<b>Finding</b><br/>Problem·Symptom·Information\"]:::red\n  E[\"<b>Recommendation</b><br/>Hardware·Configuration<br/>Schema·Application\"]:::green\n  F[\"<b>Action + Benefit</b><br/>구체적 조치·예상 DB Time 절약량\"]:::green\n  A --> B --> C --> D --> E --> F\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "ADDM 분석 흐름 — AWR 스냅샷에서 DB Time 분해·Finding·Recommendation·Action까지",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/08/08_00_s05_v06_mermaid.svg"
         }
       ],
       "subsections": []

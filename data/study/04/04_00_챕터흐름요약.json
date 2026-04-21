@@ -36,11 +36,11 @@
       "visuals": [
         {
           "id": "v04",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>접속 시도</b>\"]:::amber\n  A --> B{\"<b>인증 주체</b>\"}\n  B -->|\"데이터베이스\"| C[\"<b>패스워드 인증</b><br/>일반 사용자 접속\"]:::blue\n  B -->|\"운영체제\"| D[\"<b>OS 인증</b><br/>로컬 관리자 접속\"]:::blue\n  B -->|\"패스워드 파일 또는 OS\"| E[\"<b>특권 인증</b><br/>SYSDBA/SYSOPER 접속\"]:::red\n  B -->|\"OS 또는 네트워크 서비스\"| F[\"<b>외부 인증</b><br/>SSO, Kerberos\"]:::green\n  B -->|\"디렉토리 서비스 (LDAP)\"| G[\"<b>글로벌 인증</b><br/>중앙 집중 인증\"]:::green\n  C --> H[\"<b>접속 허용</b><br/>권한 확인 단계로 이동\"]:::amber\n  D --> H\n  E --> H\n  F --> H\n  G --> H\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "Oracle 5가지 인증 방식 분기 흐름 — 인증 주체에 따른 패스워드/OS/특권/외부/글로벌 인증 선택 경로",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/04/04_00_s02_v04_mermaid.svg"
         }
       ],
       "subsections": []
@@ -70,11 +70,11 @@
       "visuals": [
         {
           "id": "v05",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>CREATE_CAPTURE</b><br/>Create Policy\"]:::amber\n  A --> B[\"<b>ENABLE_CAPTURE</b><br/>Start Capture\"]:::blue\n  B --> C[\"<b>Run Workload</b><br/>Normal Work\"]:::green\n  C --> D[\"<b>DISABLE_CAPTURE</b><br/>Stop Capture\"]:::blue\n  D --> E[\"<b>GENERATE_RESULT</b><br/>Generate Result\"]:::amber\n  E --> F[\"<b>DBA_USED_PRIVS</b><br/>실제 사용 권한 조회\"]:::green\n  E --> G[\"<b>DBA_UNUSED_PRIVS</b><br/>미사용 권한 조회\"]:::red\n  G --> H[\"<b>REVOKE</b><br/>미사용 권한 취소\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "DBMS_PRIVILEGE_CAPTURE 5단계 워크플로우 — 정책 생성부터 미사용 권한 취소까지",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/04/04_00_s04_v05_mermaid.svg"
         }
       ],
       "subsections": []
@@ -87,11 +87,11 @@
       "visuals": [
         {
           "id": "v06",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>CREATE AUDIT POLICY</b>\"]:::amber\n  A --> B[\"<b>AUDIT POLICY (Enable)</b>\"]:::amber\n  B --> C[\"<b>User Activity</b>\"]:::blue\n  C --> D[\"<b>Audit Policy Evaluation</b>\"]:::blue\n  D --> E[\"<b>Write to SGA Audit Buffer</b>\"]:::green\n  E --> F[\"<b>Flush to AUDSYS.AUD$UNIFIED</b>\"]:::green\n  F --> G[\"<b>Query via UNIFIED_AUDIT_TRAIL View</b>\"]:::amber\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "통합 감사 아키텍처 — 정책 생성부터 SGA 버퍼 기록·AUDSYS 저장·UNIFIED_AUDIT_TRAIL 조회까지",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/04/04_00_s05_v06_mermaid.svg"
         }
       ],
       "subsections": []
@@ -116,24 +116,55 @@
   ],
   "sql_examples": [],
   "keywords": [
-    "사용자 (User)", "스키마 (Schema)", "인증 (Authentication)",
-    "로컬 사용자 (Local User)", "공통 사용자 (Common User)", "C## 접두사",
-    "SYS", "SYSDBA", "SYSOPER", "Schema-Only Account",
-    "패스워드 인증", "OS 인증", "특권 인증", "orapwd",
-    "시스템 권한 (System Privilege)", "객체 권한 (Object Privilege)",
-    "GRANT", "REVOKE", "WITH ADMIN OPTION", "WITH GRANT OPTION",
-    "연쇄 취소 (Cascade Revoke)", "롤 (Role)",
-    "공통 롤 (Common Role)", "로컬 롤 (Local Role)",
-    "CONTAINER=ALL", "Secure Application Role",
-    "DBMS_PRIVILEGE_CAPTURE", "DBA_USED_PRIVS", "DBA_UNUSED_PRIVS",
+    "사용자 (User)",
+    "스키마 (Schema)",
+    "인증 (Authentication)",
+    "로컬 사용자 (Local User)",
+    "공통 사용자 (Common User)",
+    "C## 접두사",
+    "SYS",
+    "SYSDBA",
+    "SYSOPER",
+    "Schema-Only Account",
+    "패스워드 인증",
+    "OS 인증",
+    "특권 인증",
+    "orapwd",
+    "시스템 권한 (System Privilege)",
+    "객체 권한 (Object Privilege)",
+    "GRANT",
+    "REVOKE",
+    "WITH ADMIN OPTION",
+    "WITH GRANT OPTION",
+    "연쇄 취소 (Cascade Revoke)",
+    "롤 (Role)",
+    "공통 롤 (Common Role)",
+    "로컬 롤 (Local Role)",
+    "CONTAINER=ALL",
+    "Secure Application Role",
+    "DBMS_PRIVILEGE_CAPTURE",
+    "DBA_USED_PRIVS",
+    "DBA_UNUSED_PRIVS",
     "PROFILE",
-    "PASSWORD_LIFE_TIME", "FAILED_LOGIN_ATTEMPTS", "PASSWORD_VERIFY_FUNCTION",
-    "INACTIVE_ACCOUNT_TIME", "QUOTA", "UNLIMITED TABLESPACE",
-    "통합 감사 (Unified Auditing)", "UNIFIED_AUDIT_TRAIL", "AUDSYS",
+    "PASSWORD_LIFE_TIME",
+    "FAILED_LOGIN_ATTEMPTS",
+    "PASSWORD_VERIFY_FUNCTION",
+    "INACTIVE_ACCOUNT_TIME",
+    "QUOTA",
+    "UNLIMITED TABLESPACE",
+    "통합 감사 (Unified Auditing)",
+    "UNIFIED_AUDIT_TRAIL",
+    "AUDSYS",
     "강제 감사 (Mandatory Auditing)",
-    "파인 그레인 감사 (FGA)", "DBMS_FGA", "DBMS_AUDIT_MGMT",
-    "ORA_SECURECONFIG", "ORA_LOGON_FAILURES",
-    "DBA_SYS_PRIVS", "DBA_TAB_PRIVS",
-    "DBA_USERS", "DBA_PROFILES", "멀티테넌트"
+    "파인 그레인 감사 (FGA)",
+    "DBMS_FGA",
+    "DBMS_AUDIT_MGMT",
+    "ORA_SECURECONFIG",
+    "ORA_LOGON_FAILURES",
+    "DBA_SYS_PRIVS",
+    "DBA_TAB_PRIVS",
+    "DBA_USERS",
+    "DBA_PROFILES",
+    "멀티테넌트"
   ]
 }

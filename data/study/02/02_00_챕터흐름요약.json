@@ -53,11 +53,11 @@
       "visuals": [
         {
           "id": "v04",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>PDB 생성 시작</b><br/>CDB$ROOT 공통 사용자로 접속\"]:::amber\n  B{\"생성 방법 선택\"}:::amber\n  C[\"<b>PDB$SEED에서 생성</b><br/>새로운 빈 PDB\"]:::blue\n  D[\"<b>기존 PDB 클론</b><br/>동일 데이터 복제\"]:::blue\n  E[\"<b>PDB Plugging</b><br/>XML + 데이터 파일 이전\"]:::blue\n  F[\"<b>Non-CDB 변환</b><br/>멀티테넌트 전환\"]:::blue\n  G[\"<b>CREATE PLUGGABLE DATABASE</b><br/>ADMIN USER · FILE_NAME_CONVERT\"]:::green\n  H[\"<b>MOUNTED 상태로 생성</b><br/>STATUS = NEW\"]:::green\n  I[\"<b>ALTER PLUGGABLE DATABASE OPEN</b><br/>최초 오픈 시 딕셔너리 완성\"]:::green\n  J[\"<b>SAVE STATE (선택)</b><br/>CDB 재시작 시 자동 복원\"]:::green\n  K[\"<b>Application Container</b><br/>Application Seed 활용 가능\"]:::blue\n\n  A --> B\n  B --> C\n  B --> D\n  B --> E\n  B --> F\n  C --> G\n  D --> G\n  E --> G\n  F --> G\n  G --> H\n  H --> I\n  I --> J\n  C -.-> K\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "PDB 생성 4가지 방법과 공통 프로세스 흐름 — 생성 방법 선택부터 SAVE STATE까지",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/02/02_00_s03_v04_mermaid.svg"
         }
       ],
       "subsections": []
@@ -70,11 +70,11 @@
       "visuals": [
         {
           "id": "v05",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>PDB 오픈 모드</b>\"]:::amber\n  B[\"<b>READ WRITE</b><br/>모든 DML/DDL<br/>운영 환경 기본 모드\"]:::green\n  C[\"<b>READ ONLY</b><br/>SELECT만 허용<br/>보고서·Standby\"]:::blue\n  D[\"<b>MOUNTED</b><br/>관리 작업만<br/>CDB 시작 후 기본 상태\"]:::amber\n\n  A --> B\n  A --> C\n  A --> D\n\n  E[\"<b>CDB 재시작 시 PDB 자동 오픈 방법</b>\"]:::amber\n  F[\"<b>SAVE STATE</b><br/>PDB별 상태 저장<br/>(권장)\"]:::green\n  G[\"<b>AFTER STARTUP 트리거</b><br/>CDB 레벨 일괄 오픈<br/>(대안)\"]:::blue\n  H[\"<b>수동 오픈</b><br/>DBA가 직접 실행<br/>(비권장)\"]:::red\n\n  E --> F\n  E --> G\n  E --> H\n\n  I[\"<b>Unplug / Plug In 단계</b>\"]:::amber\n  J[\"<b>Unplug</b><br/>PDB CLOSE<br/>XML 또는 .pdb 아카이브\"]:::blue\n  K[\"<b>호환성 검사</b><br/>DBMS_PDB.CHECK_PLUG_COMPATIBILITY\"]:::blue\n  L[\"<b>Plug In</b><br/>CREATE PLUGGABLE DATABASE<br/>... USING '...'\"]:::green\n  M[\"<b>PDB_PLUG_IN_VIOLATIONS</b><br/>위반 사항 확인\"]:::blue\n\n  I --> J --> K --> L --> M\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "PDB 오픈 모드 3가지, CDB 재시작 시 자동 오픈 3가지 방법, Unplug/Plug In 4단계 흐름",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/02/02_00_s04_v05_mermaid.svg"
         }
       ],
       "subsections": []
@@ -87,11 +87,11 @@
       "visuals": [
         {
           "id": "v06",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>파라미터 우선순위</b>\"]:::amber\n  B[\"<b>1st: ALTER SESSION SET</b><br/>세션 레벨\"]:::green\n  C[\"<b>2nd: PDB-Level ALTER SYSTEM SET</b><br/>PDB 명시적 설정\"]:::blue\n  D[\"<b>3rd: CDB Root ALTER SYSTEM SET</b><br/>CDB 루트 기본값\"]:::amber\n  E[\"<b>4th: Oracle Default</b><br/>Oracle 내장 기본값\"]:::red\n  F[\"<b>CONTAINER=ALL로 변경 시</b><br/>PDB 명시적 설정이 있으면<br/>덮어쓰지 않음\"]:::red\n\n  A --> B --> C --> D --> E\n  D -.-> F\n\n  G[\"<b>PDB 복제 방법 선택</b>\"]:::amber\n  H[\"<b>로컬 클론</b><br/>동일 CDB · 1회성\"]:::blue\n  I[\"<b>원격 클론</b><br/>다른 CDB · DB Link · 1회성\"]:::blue\n  J[\"<b>Refreshable Clone</b><br/>주기적 동기화\"]:::green\n  K[\"<b>Snapshot Copy</b><br/>Copy-on-Write · 즉시\"]:::green\n  L[\"<b>PDB Relocate</b><br/>무중단 이관 · 이관 후 삭제\"]:::blue\n\n  G --> H\n  G --> I\n  G --> J\n  G --> K\n  G --> L\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "PDB 파라미터 우선순위 4계층과 PDB 복제 5가지 방법 분기 흐름",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/02/02_00_s05_v06_mermaid.svg"
         }
       ],
       "subsections": []
@@ -116,24 +116,55 @@
   ],
   "sql_examples": [],
   "keywords": [
-    "CDB (Container Database)", "PDB (Pluggable Database)", "CDB$ROOT", "PDB$SEED",
-    "멀티테넌트 (Multitenant)", "CON_ID", "MAX_PDBS",
-    "Common User (C##)", "Local User", "Metadata Link", "Object Link",
-    "Application Container", "Local Undo Mode", "CDB Resource Plan",
-    "CREATE PLUGGABLE DATABASE", "ADMIN USER", "FILE_NAME_CONVERT",
+    "CDB (Container Database)",
+    "PDB (Pluggable Database)",
+    "CDB$ROOT",
+    "PDB$SEED",
+    "멀티테넌트 (Multitenant)",
+    "CON_ID",
+    "MAX_PDBS",
+    "Common User (C##)",
+    "Local User",
+    "Metadata Link",
+    "Object Link",
+    "Application Container",
+    "Local Undo Mode",
+    "CDB Resource Plan",
+    "CREATE PLUGGABLE DATABASE",
+    "ADMIN USER",
+    "FILE_NAME_CONVERT",
     "Oracle Managed Files (OMF)",
-    "SAVE STATE", "DISCARD STATE",
-    "READ WRITE", "READ ONLY", "MOUNTED",
-    "ALTER PLUGGABLE DATABASE", "CLOSE IMMEDIATE",
-    "Unplug", "Plug In", ".pdb Archive",
-    "DBMS_PDB.CHECK_PLUG_COMPATIBILITY", "PDB_PLUG_IN_VIOLATIONS",
+    "SAVE STATE",
+    "DISCARD STATE",
+    "READ WRITE",
+    "READ ONLY",
+    "MOUNTED",
+    "ALTER PLUGGABLE DATABASE",
+    "CLOSE IMMEDIATE",
+    "Unplug",
+    "Plug In",
+    ".pdb Archive",
+    "DBMS_PDB.CHECK_PLUG_COMPATIBILITY",
+    "PDB_PLUG_IN_VIOLATIONS",
     "DROP PLUGGABLE DATABASE",
-    "ISPDB_MODIFIABLE", "CONTAINER=CURRENT", "CONTAINER=ALL",
-    "ALTER SYSTEM SET", "ALTER SYSTEM RESET",
-    "PDB Lockdown Profile", "PDB_LOCKDOWN",
-    "Local Clone", "Remote Clone", "Refreshable Clone PDB",
-    "Snapshot Copy PDB", "PDB Relocate", "SWITCHOVER",
-    "V$PDBS", "V$CONTAINERS", "DBA_PDBS",
-    "DBCA", "RAC", "CDB Fleet Management"
+    "ISPDB_MODIFIABLE",
+    "CONTAINER=CURRENT",
+    "CONTAINER=ALL",
+    "ALTER SYSTEM SET",
+    "ALTER SYSTEM RESET",
+    "PDB Lockdown Profile",
+    "PDB_LOCKDOWN",
+    "Local Clone",
+    "Remote Clone",
+    "Refreshable Clone PDB",
+    "Snapshot Copy PDB",
+    "PDB Relocate",
+    "SWITCHOVER",
+    "V$PDBS",
+    "V$CONTAINERS",
+    "DBA_PDBS",
+    "DBCA",
+    "RAC",
+    "CDB Fleet Management"
   ]
 }

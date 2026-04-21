@@ -1,17 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" fill="none">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .subtitle { font-size: 12px; fill: #787368; }
     .label { font-size: 13px; font-weight: 600; }
-    .desc { font-size: 11px; fill: #94A3B8; }
+    .desc { font-size: 11px; fill: #787368; }
     .mono { font-family: 'Consolas', monospace; font-size: 10px; }
     .box { rx: 8; ry: 8; }
-    .arrow { stroke: #6F6BEA; stroke-width: 1.5; marker-end: url(#ah6); }
+    .arrow { stroke: #4a2e78; stroke-width: 1.5; marker-end: url(#ah6); }
   </style>
   <defs>
     <marker id="ah6" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#4a2e78"/>
     </marker>
   </defs>
 
@@ -19,8 +20,8 @@
   <text x="400" y="52" text-anchor="middle" class="subtitle">SQL Tuning Advisor Analysis Types and Workflow</text>
 
   <!-- Input Sources -->
-  <rect x="30" y="75" width="160" height="100" fill="#1E1F2E" stroke="#3B82F6" stroke-width="2" class="box"/>
-  <text x="110" y="98" text-anchor="middle" class="label" fill="#3B82F6">입력 소스</text>
+  <rect x="30" y="75" width="160" height="100" fill="#f3efe4" stroke="#2456a8" stroke-width="2" class="box"/>
+  <text x="110" y="98" text-anchor="middle" class="label" fill="#2456a8">입력 소스</text>
   <text x="45" y="120" class="desc">SQL_ID (커서 캐시)</text>
   <text x="45" y="138" class="desc">SQL_ID (AWR)</text>
   <text x="45" y="156" class="desc">SQL Tuning Set (STS)</text>
@@ -30,74 +31,74 @@
   <line x1="190" y1="125" x2="230" y2="125" class="arrow"/>
 
   <!-- SQL Tuning Advisor Center -->
-  <rect x="230" y="70" width="340" height="110" fill="#1E1F2E" stroke="#F59E0B" stroke-width="2" class="box"/>
-  <text x="400" y="93" text-anchor="middle" class="label" fill="#F59E0B">SQL Tuning Advisor (DBMS_SQLTUNE)</text>
+  <rect x="230" y="70" width="340" height="110" fill="#f3efe4" stroke="#8a5a10" stroke-width="2" class="box"/>
+  <text x="400" y="93" text-anchor="middle" class="label" fill="#8a5a10">SQL Tuning Advisor (DBMS_SQLTUNE)</text>
   <text x="400" y="112" text-anchor="middle" class="desc">자동 튜닝 옵티마이저 (Automatic Tuning Optimizer)</text>
   
-  <text x="245" y="135" class="mono" fill="#F59E0B">1. CREATE_TUNING_TASK (scope: COMPREHENSIVE/LIMITED)</text>
-  <text x="245" y="150" class="mono" fill="#F59E0B">2. EXECUTE_TUNING_TASK</text>
-  <text x="245" y="165" class="mono" fill="#F59E0B">3. REPORT_TUNING_TASK (TEXT/HTML/XML)</text>
+  <text x="245" y="135" class="mono" fill="#8a5a10">1. CREATE_TUNING_TASK (scope: COMPREHENSIVE/LIMITED)</text>
+  <text x="245" y="150" class="mono" fill="#8a5a10">2. EXECUTE_TUNING_TASK</text>
+  <text x="245" y="165" class="mono" fill="#8a5a10">3. REPORT_TUNING_TASK (TEXT/HTML/XML)</text>
 
   <!-- Auto Task -->
-  <rect x="600" y="75" width="170" height="100" fill="#1E1F2E" stroke="#10B981" stroke-width="1.5" class="box"/>
-  <text x="685" y="98" text-anchor="middle" class="label" fill="#10B981">자동 실행</text>
-  <text x="615" y="120" class="mono" fill="#10B981">SYS_AUTO_SQL_</text>
-  <text x="615" y="135" class="mono" fill="#10B981">TUNING_TASK</text>
+  <rect x="600" y="75" width="170" height="100" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1.5" class="box"/>
+  <text x="685" y="98" text-anchor="middle" class="label" fill="#2f6a1c">자동 실행</text>
+  <text x="615" y="120" class="mono" fill="#2f6a1c">SYS_AUTO_SQL_</text>
+  <text x="615" y="135" class="mono" fill="#2f6a1c">TUNING_TASK</text>
   <text x="615" y="155" class="desc">유지 관리 윈도우 내</text>
   <text x="615" y="170" class="desc">고부하 SQL 자동 선별</text>
 
-  <line x1="570" y1="125" x2="600" y2="125" stroke="#10B981" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="570" y1="125" x2="600" y2="125" stroke="#2f6a1c" stroke-width="1.5" stroke-dasharray="4,3"/>
 
   <!-- 4 Analysis Types -->
   <text x="400" y="208" text-anchor="middle" class="label">4가지 분석 유형 (Analysis Types)</text>
 
-  <rect x="30" y="220" width="170" height="90" fill="#1E1F2E" stroke="#F43F5E" stroke-width="2" class="box"/>
-  <rect x="30" y="220" width="170" height="24" fill="#F43F5E" fill-opacity="0.15" rx="8" ry="8"/>
-  <text x="115" y="238" text-anchor="middle" class="mono" fill="#F43F5E">통계 분석</text>
+  <rect x="30" y="220" width="170" height="90" fill="#f3efe4" stroke="#be123c" stroke-width="2" class="box"/>
+  <rect x="30" y="220" width="170" height="24" fill="#be123c" fill-opacity="0.15" rx="8" ry="8"/>
+  <text x="115" y="238" text-anchor="middle" class="mono" fill="#be123c">통계 분석</text>
   <text x="45" y="262" class="desc">Statistics Analysis</text>
   <text x="45" y="280" class="desc">통계 노후화/누락 확인</text>
   <text x="45" y="296" class="desc">→ 통계 수집 권고</text>
 
-  <rect x="220" y="220" width="170" height="90" fill="#1E1F2E" stroke="#F59E0B" stroke-width="2" class="box"/>
-  <rect x="220" y="220" width="170" height="24" fill="#F59E0B" fill-opacity="0.15" rx="8" ry="8"/>
-  <text x="305" y="238" text-anchor="middle" class="mono" fill="#F59E0B">SQL 프로파일링</text>
+  <rect x="220" y="220" width="170" height="90" fill="#f3efe4" stroke="#8a5a10" stroke-width="2" class="box"/>
+  <rect x="220" y="220" width="170" height="24" fill="#8a5a10" fill-opacity="0.15" rx="8" ry="8"/>
+  <text x="305" y="238" text-anchor="middle" class="mono" fill="#8a5a10">SQL 프로파일링</text>
   <text x="235" y="262" class="desc">SQL Profiling</text>
   <text x="235" y="280" class="desc">추가 정보 수집하여</text>
   <text x="235" y="296" class="desc">→ SQL Profile 생성</text>
 
-  <rect x="410" y="220" width="170" height="90" fill="#1E1F2E" stroke="#3B82F6" stroke-width="2" class="box"/>
-  <rect x="410" y="220" width="170" height="24" fill="#3B82F6" fill-opacity="0.15" rx="8" ry="8"/>
-  <text x="495" y="238" text-anchor="middle" class="mono" fill="#3B82F6">액세스 경로 분석</text>
+  <rect x="410" y="220" width="170" height="90" fill="#f3efe4" stroke="#2456a8" stroke-width="2" class="box"/>
+  <rect x="410" y="220" width="170" height="24" fill="#2456a8" fill-opacity="0.15" rx="8" ry="8"/>
+  <text x="495" y="238" text-anchor="middle" class="mono" fill="#2456a8">액세스 경로 분석</text>
   <text x="425" y="262" class="desc">Access Path Analysis</text>
   <text x="425" y="280" class="desc">인덱스 효과 분석</text>
   <text x="425" y="296" class="desc">→ 인덱스 생성 권고</text>
 
-  <rect x="600" y="220" width="170" height="90" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="2" class="box"/>
-  <rect x="600" y="220" width="170" height="24" fill="#6F6BEA" fill-opacity="0.15" rx="8" ry="8"/>
-  <text x="685" y="238" text-anchor="middle" class="mono" fill="#6F6BEA">SQL 구조 분석</text>
+  <rect x="600" y="220" width="170" height="90" fill="#f3efe4" stroke="#4a2e78" stroke-width="2" class="box"/>
+  <rect x="600" y="220" width="170" height="24" fill="#4a2e78" fill-opacity="0.15" rx="8" ry="8"/>
+  <text x="685" y="238" text-anchor="middle" class="mono" fill="#4a2e78">SQL 구조 분석</text>
   <text x="615" y="262" class="desc">SQL Structure Analysis</text>
   <text x="615" y="280" class="desc">SQL 안티패턴 감지</text>
   <text x="615" y="296" class="desc">→ SQL 문 수정 권고</text>
 
   <!-- SQL Profile Details -->
-  <rect x="30" y="335" width="740" height="80" fill="#1E1F2E" stroke="#F59E0B" stroke-width="1.5" class="box"/>
-  <text x="400" y="358" text-anchor="middle" class="label" fill="#F59E0B">SQL Profile 핵심 특성</text>
+  <rect x="30" y="335" width="740" height="80" fill="#f3efe4" stroke="#8a5a10" stroke-width="1.5" class="box"/>
+  <text x="400" y="358" text-anchor="middle" class="label" fill="#8a5a10">SQL Profile 핵심 특성</text>
   <text x="50" y="380" class="desc">정의: SQL 문에 대한 보조 통계 정보 집합으로 옵티마이저 비용 추정을 보정 (실행 계획을 고정하지 않음)</text>
   <text x="50" y="398" class="desc">저장: 데이터 딕셔너리 (SQLOBJ$) / 바인딩: SQL 시그니처(해시) 매칭 / force_match=TRUE 시 리터럴 값 다른 유사 SQL에도 적용</text>
 
   <!-- STS Section -->
-  <rect x="30" y="435" width="740" height="75" fill="#1E1F2E" stroke="#3B82F6" stroke-width="1" class="box"/>
-  <text x="400" y="458" text-anchor="middle" class="label" fill="#3B82F6">SQL Tuning Set (STS) 전송 프로세스</text>
+  <rect x="30" y="435" width="740" height="75" fill="#f3efe4" stroke="#2456a8" stroke-width="1" class="box"/>
+  <text x="400" y="458" text-anchor="middle" class="label" fill="#2456a8">SQL Tuning Set (STS) 전송 프로세스</text>
   
-  <rect x="50" y="468" width="130" height="28" rx="4" fill="#3B82F6" opacity="0.15"/>
-  <text x="115" y="487" text-anchor="middle" class="mono" fill="#3B82F6">CREATE_STGTAB</text>
+  <rect x="50" y="468" width="130" height="28" rx="4" fill="#2456a8" opacity="0.15"/>
+  <text x="115" y="487" text-anchor="middle" class="mono" fill="#2456a8">CREATE_STGTAB</text>
   <text x="190" y="487" class="desc">→</text>
-  <rect x="200" y="468" width="130" height="28" rx="4" fill="#F59E0B" opacity="0.15"/>
-  <text x="265" y="487" text-anchor="middle" class="mono" fill="#F59E0B">PACK_STGTAB</text>
+  <rect x="200" y="468" width="130" height="28" rx="4" fill="#8a5a10" opacity="0.15"/>
+  <text x="265" y="487" text-anchor="middle" class="mono" fill="#8a5a10">PACK_STGTAB</text>
   <text x="340" y="487" class="desc">→</text>
-  <rect x="350" y="468" width="130" height="28" rx="4" fill="#10B981" opacity="0.15"/>
-  <text x="415" y="487" text-anchor="middle" class="mono" fill="#10B981">Data Pump 전송</text>
+  <rect x="350" y="468" width="130" height="28" rx="4" fill="#2f6a1c" opacity="0.15"/>
+  <text x="415" y="487" text-anchor="middle" class="mono" fill="#2f6a1c">Data Pump 전송</text>
   <text x="490" y="487" class="desc">→</text>
-  <rect x="500" y="468" width="130" height="28" rx="4" fill="#6F6BEA" opacity="0.15"/>
-  <text x="565" y="487" text-anchor="middle" class="mono" fill="#6F6BEA">UNPACK_STGTAB</text>
+  <rect x="500" y="468" width="130" height="28" rx="4" fill="#4a2e78" opacity="0.15"/>
+  <text x="565" y="487" text-anchor="middle" class="mono" fill="#4a2e78">UNPACK_STGTAB</text>
 </svg>

@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,85 +16,85 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">Snapshot Copy Architecture — 물리적 복사 없이 즉시 클론 생성</text>
 
   <!-- Source PDB Data Blocks -->
-  <rect x="40" y="75" width="720" height="100" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
-  <text x="400" y="97" text-anchor="middle" class="label" fill="#10B981">소스 PDB 데이터 파일 (원본 블록)</text>
+  <rect x="40" y="75" width="720" height="100" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
+  <text x="400" y="97" text-anchor="middle" class="label" fill="#2f6a1c">소스 PDB 데이터 파일 (원본 블록)</text>
 
-  <rect x="60" y="108" width="85" height="55" rx="4" ry="4" fill="#10B981" opacity="0.12" stroke="#10B981" stroke-width="1"/>
-  <text x="102" y="130" text-anchor="middle" class="sublabel" fill="#10B981">Block 1</text>
+  <rect x="60" y="108" width="85" height="55" rx="4" ry="4" fill="#2f6a1c" opacity="0.12" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="102" y="130" text-anchor="middle" class="sublabel" fill="#2f6a1c">Block 1</text>
   <text x="102" y="150" text-anchor="middle" class="small">원본</text>
 
-  <rect x="155" y="108" width="85" height="55" rx="4" ry="4" fill="#10B981" opacity="0.12" stroke="#10B981" stroke-width="1"/>
-  <text x="197" y="130" text-anchor="middle" class="sublabel" fill="#10B981">Block 2</text>
+  <rect x="155" y="108" width="85" height="55" rx="4" ry="4" fill="#2f6a1c" opacity="0.12" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="197" y="130" text-anchor="middle" class="sublabel" fill="#2f6a1c">Block 2</text>
   <text x="197" y="150" text-anchor="middle" class="small">원본</text>
 
-  <rect x="250" y="108" width="85" height="55" rx="4" ry="4" fill="#10B981" opacity="0.12" stroke="#10B981" stroke-width="1"/>
-  <text x="292" y="130" text-anchor="middle" class="sublabel" fill="#10B981">Block 3</text>
+  <rect x="250" y="108" width="85" height="55" rx="4" ry="4" fill="#2f6a1c" opacity="0.12" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="292" y="130" text-anchor="middle" class="sublabel" fill="#2f6a1c">Block 3</text>
   <text x="292" y="150" text-anchor="middle" class="small">원본</text>
 
-  <rect x="345" y="108" width="85" height="55" rx="4" ry="4" fill="#10B981" opacity="0.12" stroke="#10B981" stroke-width="1"/>
-  <text x="387" y="130" text-anchor="middle" class="sublabel" fill="#10B981">Block 4</text>
+  <rect x="345" y="108" width="85" height="55" rx="4" ry="4" fill="#2f6a1c" opacity="0.12" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="387" y="130" text-anchor="middle" class="sublabel" fill="#2f6a1c">Block 4</text>
   <text x="387" y="150" text-anchor="middle" class="small">원본</text>
 
-  <rect x="440" y="108" width="85" height="55" rx="4" ry="4" fill="#10B981" opacity="0.12" stroke="#10B981" stroke-width="1"/>
-  <text x="482" y="130" text-anchor="middle" class="sublabel" fill="#10B981">Block 5</text>
+  <rect x="440" y="108" width="85" height="55" rx="4" ry="4" fill="#2f6a1c" opacity="0.12" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="482" y="130" text-anchor="middle" class="sublabel" fill="#2f6a1c">Block 5</text>
   <text x="482" y="150" text-anchor="middle" class="small">원본</text>
 
   <text x="610" y="135" text-anchor="middle" class="small">...</text>
 
-  <rect x="640" y="108" width="100" height="55" rx="4" ry="4" fill="#10B981" opacity="0.12" stroke="#10B981" stroke-width="1"/>
-  <text x="690" y="130" text-anchor="middle" class="sublabel" fill="#10B981">Block N</text>
+  <rect x="640" y="108" width="100" height="55" rx="4" ry="4" fill="#2f6a1c" opacity="0.12" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="690" y="130" text-anchor="middle" class="sublabel" fill="#2f6a1c">Block N</text>
   <text x="690" y="150" text-anchor="middle" class="small">원본</text>
 
   <!-- Reference arrows -->
-  <line x1="102" y1="175" x2="102" y2="210" stroke="#3B82F6" stroke-width="1" stroke-dasharray="3,3"/>
-  <text x="102" y="200" text-anchor="middle" class="small" fill="#3B82F6">참조</text>
-  <line x1="197" y1="175" x2="197" y2="210" stroke="#3B82F6" stroke-width="1" stroke-dasharray="3,3"/>
-  <line x1="387" y1="175" x2="387" y2="210" stroke="#3B82F6" stroke-width="1" stroke-dasharray="3,3"/>
-  <line x1="482" y1="175" x2="482" y2="210" stroke="#3B82F6" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="102" y1="175" x2="102" y2="210" stroke="#2456a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="102" y="200" text-anchor="middle" class="small" fill="#2456a8">참조</text>
+  <line x1="197" y1="175" x2="197" y2="210" stroke="#2456a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="387" y1="175" x2="387" y2="210" stroke="#2456a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="482" y1="175" x2="482" y2="210" stroke="#2456a8" stroke-width="1" stroke-dasharray="3,3"/>
 
   <!-- CoW arrow for Block 3 -->
-  <line x1="292" y1="175" x2="292" y2="210" stroke="#F59E0B" stroke-width="2"/>
-  <polygon points="287,208 292,218 297,208" fill="#F59E0B"/>
-  <text x="292" y="200" text-anchor="middle" class="small" fill="#F59E0B">CoW</text>
+  <line x1="292" y1="175" x2="292" y2="210" stroke="#8a5a10" stroke-width="2"/>
+  <polygon points="287,208 292,218 297,208" fill="#8a5a10"/>
+  <text x="292" y="200" text-anchor="middle" class="small" fill="#8a5a10">CoW</text>
 
   <!-- Snapshot Clone PDB -->
-  <rect x="40" y="220" width="720" height="100" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
-  <text x="400" y="242" text-anchor="middle" class="label" fill="#6F6BEA">Snapshot Copy PDB (클론)</text>
+  <rect x="40" y="220" width="720" height="100" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
+  <text x="400" y="242" text-anchor="middle" class="label" fill="#4a2e78">Snapshot Copy PDB (클론)</text>
 
-  <rect x="60" y="255" width="85" height="55" rx="4" ry="4" fill="#3B82F6" opacity="0.1" stroke="#3B82F6" stroke-width="0.5" stroke-dasharray="3,2"/>
-  <text x="102" y="277" text-anchor="middle" class="small" fill="#3B82F6">Block 1</text>
-  <text x="102" y="297" text-anchor="middle" class="small" fill="#3B82F6">소스 참조</text>
+  <rect x="60" y="255" width="85" height="55" rx="4" ry="4" fill="#2456a8" opacity="0.1" stroke="#2456a8" stroke-width="0.5" stroke-dasharray="3,2"/>
+  <text x="102" y="277" text-anchor="middle" class="small" fill="#2456a8">Block 1</text>
+  <text x="102" y="297" text-anchor="middle" class="small" fill="#2456a8">소스 참조</text>
 
-  <rect x="155" y="255" width="85" height="55" rx="4" ry="4" fill="#3B82F6" opacity="0.1" stroke="#3B82F6" stroke-width="0.5" stroke-dasharray="3,2"/>
-  <text x="197" y="277" text-anchor="middle" class="small" fill="#3B82F6">Block 2</text>
-  <text x="197" y="297" text-anchor="middle" class="small" fill="#3B82F6">소스 참조</text>
+  <rect x="155" y="255" width="85" height="55" rx="4" ry="4" fill="#2456a8" opacity="0.1" stroke="#2456a8" stroke-width="0.5" stroke-dasharray="3,2"/>
+  <text x="197" y="277" text-anchor="middle" class="small" fill="#2456a8">Block 2</text>
+  <text x="197" y="297" text-anchor="middle" class="small" fill="#2456a8">소스 참조</text>
 
-  <rect x="250" y="255" width="85" height="55" rx="4" ry="4" fill="#F59E0B" opacity="0.2" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="292" y="277" text-anchor="middle" class="small" fill="#F59E0B">Block 3</text>
-  <text x="292" y="297" text-anchor="middle" class="small" fill="#F59E0B">복사본 (변경)</text>
+  <rect x="250" y="255" width="85" height="55" rx="4" ry="4" fill="#8a5a10" opacity="0.2" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="292" y="277" text-anchor="middle" class="small" fill="#8a5a10">Block 3</text>
+  <text x="292" y="297" text-anchor="middle" class="small" fill="#8a5a10">복사본 (변경)</text>
 
-  <rect x="345" y="255" width="85" height="55" rx="4" ry="4" fill="#3B82F6" opacity="0.1" stroke="#3B82F6" stroke-width="0.5" stroke-dasharray="3,2"/>
-  <text x="387" y="277" text-anchor="middle" class="small" fill="#3B82F6">Block 4</text>
-  <text x="387" y="297" text-anchor="middle" class="small" fill="#3B82F6">소스 참조</text>
+  <rect x="345" y="255" width="85" height="55" rx="4" ry="4" fill="#2456a8" opacity="0.1" stroke="#2456a8" stroke-width="0.5" stroke-dasharray="3,2"/>
+  <text x="387" y="277" text-anchor="middle" class="small" fill="#2456a8">Block 4</text>
+  <text x="387" y="297" text-anchor="middle" class="small" fill="#2456a8">소스 참조</text>
 
-  <rect x="440" y="255" width="85" height="55" rx="4" ry="4" fill="#3B82F6" opacity="0.1" stroke="#3B82F6" stroke-width="0.5" stroke-dasharray="3,2"/>
-  <text x="482" y="277" text-anchor="middle" class="small" fill="#3B82F6">Block 5</text>
-  <text x="482" y="297" text-anchor="middle" class="small" fill="#3B82F6">소스 참조</text>
+  <rect x="440" y="255" width="85" height="55" rx="4" ry="4" fill="#2456a8" opacity="0.1" stroke="#2456a8" stroke-width="0.5" stroke-dasharray="3,2"/>
+  <text x="482" y="277" text-anchor="middle" class="small" fill="#2456a8">Block 5</text>
+  <text x="482" y="297" text-anchor="middle" class="small" fill="#2456a8">소스 참조</text>
 
   <text x="610" y="285" text-anchor="middle" class="small">...</text>
 
-  <rect x="640" y="255" width="100" height="55" rx="4" ry="4" fill="#3B82F6" opacity="0.1" stroke="#3B82F6" stroke-width="0.5" stroke-dasharray="3,2"/>
-  <text x="690" y="277" text-anchor="middle" class="small" fill="#3B82F6">Block N</text>
-  <text x="690" y="297" text-anchor="middle" class="small" fill="#3B82F6">소스 참조</text>
+  <rect x="640" y="255" width="100" height="55" rx="4" ry="4" fill="#2456a8" opacity="0.1" stroke="#2456a8" stroke-width="0.5" stroke-dasharray="3,2"/>
+  <text x="690" y="277" text-anchor="middle" class="small" fill="#2456a8">Block N</text>
+  <text x="690" y="297" text-anchor="middle" class="small" fill="#2456a8">소스 참조</text>
 
   <!-- Key characteristics -->
-  <rect x="40" y="335" width="350" height="55" class="box" fill="#2A2B3D" stroke="#10B981" stroke-width="1"/>
-  <text x="215" y="355" text-anchor="middle" class="sublabel" fill="#10B981">장점</text>
-  <text x="55" y="373" class="small" fill="#10B981">생성 즉시 (데이터 크기 무관)</text>
-  <text x="55" y="385" class="small" fill="#10B981">초기 디스크 사용: 거의 없음 (변경분만 증가)</text>
+  <rect x="40" y="335" width="350" height="55" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="215" y="355" text-anchor="middle" class="sublabel" fill="#2f6a1c">장점</text>
+  <text x="55" y="373" class="small" fill="#2f6a1c">생성 즉시 (데이터 크기 무관)</text>
+  <text x="55" y="385" class="small" fill="#2f6a1c">초기 디스크 사용: 거의 없음 (변경분만 증가)</text>
 
-  <rect x="410" y="335" width="350" height="55" class="box" fill="#2A2B3D" stroke="#F43F5E" stroke-width="1"/>
-  <text x="585" y="355" text-anchor="middle" class="sublabel" fill="#F43F5E">제약</text>
-  <text x="425" y="373" class="small" fill="#F43F5E">ACFS/dNFS/스냅샷 스토리지 필수</text>
-  <text x="425" y="385" class="small" fill="#F43F5E">소스 PDB 삭제 시 클론에 영향</text>
+  <rect x="410" y="335" width="350" height="55" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="1"/>
+  <text x="585" y="355" text-anchor="middle" class="sublabel" fill="#be123c">제약</text>
+  <text x="425" y="373" class="small" fill="#be123c">ACFS/dNFS/스냅샷 스토리지 필수</text>
+  <text x="425" y="385" class="small" fill="#be123c">소스 PDB 삭제 시 클론에 영향</text>
 </svg>

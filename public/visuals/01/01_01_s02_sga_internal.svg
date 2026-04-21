@@ -1,17 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 595">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
   <defs>
     <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a2e78" />
     </marker>
   </defs>
 
@@ -20,32 +21,32 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">각 구성요소의 역할과 Granule 기반 메모리 할당 구조</text>
 
   <!-- SGA Boundary -->
-  <rect x="30" y="65" width="740" height="515" class="box" fill="rgba(111,107,234,0.05)" stroke="#6F6BEA" stroke-width="2" />
-  <text x="50" y="88" class="label" fill="#6F6BEA">SGA (System Global Area)</text>
+  <rect x="30" y="65" width="740" height="515" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="2" />
+  <text x="50" y="88" class="label" fill="#4a2e78">SGA (System Global Area)</text>
   <text x="680" y="88" text-anchor="end" class="code">SGA_TARGET / SGA_MAX_SIZE</text>
 
   <!-- Row 1: Core components (필수) -->
   <text x="50" y="115" class="small">필수 구성요소 (Core Components)</text>
 
   <!-- Database Buffer Cache -->
-  <rect x="40" y="125" width="230" height="100" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="155" y="148" text-anchor="middle" class="label" fill="#3B82F6">Database Buffer Cache</text>
+  <rect x="40" y="125" width="230" height="100" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
+  <text x="155" y="148" text-anchor="middle" class="label" fill="#2456a8">Database Buffer Cache</text>
   <text x="155" y="166" text-anchor="middle" class="sublabel">데이터 블록 캐싱</text>
   <text x="155" y="183" text-anchor="middle" class="small">LRU + Touch Count 관리</text>
   <text x="155" y="200" text-anchor="middle" class="small">Default / Keep / Recycle Pool</text>
   <text x="155" y="217" text-anchor="middle" class="code">DB_CACHE_SIZE</text>
 
   <!-- Shared Pool -->
-  <rect x="285" y="125" width="230" height="100" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="400" y="148" text-anchor="middle" class="label" fill="#3B82F6">Shared Pool (공유 풀)</text>
+  <rect x="285" y="125" width="230" height="100" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
+  <text x="400" y="148" text-anchor="middle" class="label" fill="#2456a8">Shared Pool (공유 풀)</text>
   <text x="400" y="166" text-anchor="middle" class="sublabel">SQL 파싱 결과 + 딕셔너리 캐싱</text>
   <text x="400" y="183" text-anchor="middle" class="small">Library Cache / Data Dict Cache</text>
   <text x="400" y="200" text-anchor="middle" class="small">Reserved Pool / Result Cache</text>
   <text x="400" y="217" text-anchor="middle" class="code">SHARED_POOL_SIZE</text>
 
   <!-- Redo Log Buffer -->
-  <rect x="530" y="125" width="230" height="100" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="645" y="148" text-anchor="middle" class="label" fill="#3B82F6">Redo Log Buffer</text>
+  <rect x="530" y="125" width="230" height="100" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
+  <text x="645" y="148" text-anchor="middle" class="label" fill="#2456a8">Redo Log Buffer</text>
   <text x="645" y="166" text-anchor="middle" class="sublabel">변경 사항(Redo Entry) 임시 저장</text>
   <text x="645" y="183" text-anchor="middle" class="small">Circular Buffer (순환 버퍼)</text>
   <text x="645" y="200" text-anchor="middle" class="small">LGWR → Online Redo Log</text>
@@ -55,55 +56,55 @@
   <text x="50" y="250" class="small">선택 구성요소 (Optional Components)</text>
 
   <!-- Large Pool -->
-  <rect x="40" y="260" width="170" height="85" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1" />
-  <text x="125" y="283" text-anchor="middle" class="sublabel" fill="#F59E0B">Large Pool</text>
+  <rect x="40" y="260" width="170" height="85" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" />
+  <text x="125" y="283" text-anchor="middle" class="sublabel" fill="#8a5a10">Large Pool</text>
   <text x="125" y="300" text-anchor="middle" class="small">RMAN, Shared Server</text>
   <text x="125" y="315" text-anchor="middle" class="small">Parallel Execution</text>
   <text x="125" y="335" text-anchor="middle" class="code">LARGE_POOL_SIZE</text>
 
   <!-- Java Pool -->
-  <rect x="220" y="260" width="145" height="85" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1" />
-  <text x="292" y="283" text-anchor="middle" class="sublabel" fill="#F59E0B">Java Pool</text>
+  <rect x="220" y="260" width="145" height="85" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" />
+  <text x="292" y="283" text-anchor="middle" class="sublabel" fill="#8a5a10">Java Pool</text>
   <text x="292" y="300" text-anchor="middle" class="small">JVM 코드/데이터</text>
   <text x="292" y="335" text-anchor="middle" class="code">JAVA_POOL_SIZE</text>
 
   <!-- Streams Pool -->
-  <rect x="375" y="260" width="145" height="85" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1" />
-  <text x="447" y="283" text-anchor="middle" class="sublabel" fill="#F59E0B">Streams Pool</text>
+  <rect x="375" y="260" width="145" height="85" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" />
+  <text x="447" y="283" text-anchor="middle" class="sublabel" fill="#8a5a10">Streams Pool</text>
   <text x="447" y="300" text-anchor="middle" class="small">Streams, AQ, GoldenGate</text>
   <text x="447" y="335" text-anchor="middle" class="code">STREAMS_POOL_SIZE</text>
 
   <!-- In-Memory Area -->
-  <rect x="530" y="260" width="110" height="85" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1" />
-  <text x="585" y="283" text-anchor="middle" class="sublabel" fill="#F59E0B">In-Memory</text>
+  <rect x="530" y="260" width="110" height="85" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" />
+  <text x="585" y="283" text-anchor="middle" class="sublabel" fill="#8a5a10">In-Memory</text>
   <text x="585" y="300" text-anchor="middle" class="small">컬럼 기반 저장</text>
   <text x="585" y="335" text-anchor="middle" class="code">INMEMORY_SIZE</text>
 
   <!-- Result Cache -->
-  <rect x="650" y="260" width="110" height="85" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1" />
-  <text x="705" y="283" text-anchor="middle" class="sublabel" fill="#F59E0B">Result Cache</text>
+  <rect x="650" y="260" width="110" height="85" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" />
+  <text x="705" y="283" text-anchor="middle" class="sublabel" fill="#8a5a10">Result Cache</text>
   <text x="705" y="300" text-anchor="middle" class="small">쿼리 결과 캐싱</text>
   <text x="705" y="330" text-anchor="middle" class="code">RESULT_CACHE</text>
   <text x="705" y="341" text-anchor="middle" class="code">_MAX_SIZE</text>
 
   <!-- Fixed SGA -->
-  <rect x="40" y="360" width="720" height="40" class="box" fill="rgba(255,255,255,0.03)" stroke="#475569" stroke-width="1" />
+  <rect x="40" y="360" width="720" height="40" class="box" fill="rgba(42,42,42,0.03)" stroke="#787368" stroke-width="1" />
   <text x="400" y="383" text-anchor="middle" class="sublabel">Fixed SGA — 내부 하우스키핑 (래치, 락, 포인터) | 고정 크기, 파라미터 없음</text>
 
   <!-- Granule Section -->
-  <rect x="40" y="415" width="720" height="120" class="box" fill="rgba(111,107,234,0.05)" stroke="#2A2B3D" stroke-width="1" />
-  <text x="60" y="438" class="label" fill="#6F6BEA">SGA Granule (메모리 할당 단위)</text>
+  <rect x="40" y="415" width="720" height="120" class="box" fill="#d8cfe5" stroke="#f3efe4" stroke-width="1" />
+  <text x="60" y="438" class="label" fill="#4a2e78">SGA Granule (메모리 할당 단위)</text>
 
   <!-- Granule blocks visualization -->
-  <rect x="60" y="450" width="60" height="30" rx="4" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1" />
+  <rect x="60" y="450" width="60" height="30" rx="4" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
   <text x="90" y="470" text-anchor="middle" class="small">4MB</text>
-  <rect x="130" y="450" width="60" height="30" rx="4" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1" />
+  <rect x="130" y="450" width="60" height="30" rx="4" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
   <text x="160" y="470" text-anchor="middle" class="small">16MB</text>
-  <rect x="200" y="450" width="60" height="30" rx="4" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1" />
+  <rect x="200" y="450" width="60" height="30" rx="4" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
   <text x="230" y="470" text-anchor="middle" class="small">32MB</text>
-  <rect x="270" y="450" width="60" height="30" rx="4" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1" />
+  <rect x="270" y="450" width="60" height="30" rx="4" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
   <text x="300" y="470" text-anchor="middle" class="small">64MB</text>
-  <rect x="340" y="450" width="60" height="30" rx="4" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1" />
+  <rect x="340" y="450" width="60" height="30" rx="4" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
   <text x="370" y="470" text-anchor="middle" class="small">128MB+</text>
 
   <text x="60" y="500" class="small">&lt;1GB</text>
@@ -118,10 +119,10 @@
   <text x="460" y="520" class="small">에서 Granule 크기 확인 가능</text>
 
   <!-- Legend -->
-  <rect x="40" y="560" width="12" height="12" rx="2" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1" />
+  <rect x="40" y="560" width="12" height="12" rx="2" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
   <text x="58" y="571" class="small">필수 (Core)</text>
-  <rect x="140" y="560" width="12" height="12" rx="2" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1" />
+  <rect x="140" y="560" width="12" height="12" rx="2" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" />
   <text x="158" y="571" class="small">선택 (Optional)</text>
-  <rect x="260" y="560" width="12" height="12" rx="2" fill="rgba(255,255,255,0.03)" stroke="#475569" stroke-width="1" />
+  <rect x="260" y="560" width="12" height="12" rx="2" fill="rgba(42,42,42,0.03)" stroke="#787368" stroke-width="1" />
   <text x="278" y="571" class="small">고정 (Fixed)</text>
 </svg>

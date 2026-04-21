@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -14,128 +15,128 @@
   <text x="400" y="50" class="subtitle" text-anchor="middle">12단계 마법사(Wizard) 진행 과정</text>
 
   <!-- Steps flow - Left column -->
-  <rect x="30" y="70" width="170" height="44" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="30" y="70" width="170" height="44" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
   <text x="40" y="88" class="code">Step 1</text>
   <text x="40" y="103" class="sublabel">작업 선택 (Operation)</text>
 
-  <line x1="200" y1="92" x2="220" y2="92" stroke="#6F6BEA" stroke-width="1.5"/>
-  <polygon points="218,89 225,92 218,95" fill="#6F6BEA"/>
+  <line x1="200" y1="92" x2="220" y2="92" stroke="#4a2e78" stroke-width="1.5"/>
+  <polygon points="218,89 225,92 218,95" fill="#4a2e78"/>
 
-  <rect x="225" y="70" width="170" height="44" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="225" y="70" width="170" height="44" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
   <text x="235" y="88" class="code">Step 2</text>
   <text x="235" y="103" class="sublabel">생성 모드 선택</text>
 
-  <line x1="395" y1="92" x2="415" y2="92" stroke="#6F6BEA" stroke-width="1.5"/>
-  <polygon points="413,89 420,92 413,95" fill="#6F6BEA"/>
+  <line x1="395" y1="92" x2="415" y2="92" stroke="#4a2e78" stroke-width="1.5"/>
+  <polygon points="413,89 420,92 413,95" fill="#4a2e78"/>
 
-  <rect x="420" y="70" width="170" height="44" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="420" y="70" width="170" height="44" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
   <text x="430" y="88" class="code">Step 3</text>
   <text x="430" y="103" class="sublabel">DB 유형 (CDB 여부)</text>
 
-  <line x1="590" y1="92" x2="610" y2="92" stroke="#6F6BEA" stroke-width="1.5"/>
-  <polygon points="608,89 615,92 608,95" fill="#6F6BEA"/>
+  <line x1="590" y1="92" x2="610" y2="92" stroke="#4a2e78" stroke-width="1.5"/>
+  <polygon points="608,89 615,92 608,95" fill="#4a2e78"/>
 
-  <rect x="615" y="70" width="160" height="44" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="615" y="70" width="160" height="44" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
   <text x="625" y="88" class="code">Step 4</text>
   <text x="625" y="103" class="sublabel">템플릿 선택</text>
 
   <!-- Arrow down -->
-  <line x1="695" y1="114" x2="695" y2="134" stroke="#6F6BEA" stroke-width="1.5"/>
-  <polygon points="692,132 695,139 698,132" fill="#6F6BEA"/>
+  <line x1="695" y1="114" x2="695" y2="134" stroke="#4a2e78" stroke-width="1.5"/>
+  <polygon points="692,132 695,139 698,132" fill="#4a2e78"/>
 
   <!-- Row 2 - Right to Left -->
-  <rect x="615" y="140" width="160" height="44" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="615" y="140" width="160" height="44" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
   <text x="625" y="158" class="code">Step 5</text>
   <text x="625" y="173" class="sublabel">DB 식별 정보 (SID)</text>
 
-  <line x1="615" y1="162" x2="595" y2="162" stroke="#3B82F6" stroke-width="1.5"/>
-  <polygon points="597,165 590,162 597,159" fill="#3B82F6"/>
+  <line x1="615" y1="162" x2="595" y2="162" stroke="#2456a8" stroke-width="1.5"/>
+  <polygon points="597,165 590,162 597,159" fill="#2456a8"/>
 
-  <rect x="420" y="140" width="170" height="44" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="420" y="140" width="170" height="44" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
   <text x="430" y="158" class="code">Step 6</text>
   <text x="430" y="173" class="sublabel">저장 옵션 (ASM/FS)</text>
 
-  <line x1="420" y1="162" x2="400" y2="162" stroke="#3B82F6" stroke-width="1.5"/>
-  <polygon points="402,165 395,162 402,159" fill="#3B82F6"/>
+  <line x1="420" y1="162" x2="400" y2="162" stroke="#2456a8" stroke-width="1.5"/>
+  <polygon points="402,165 395,162 402,159" fill="#2456a8"/>
 
-  <rect x="225" y="140" width="170" height="44" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="2"/>
+  <rect x="225" y="140" width="170" height="44" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="2"/>
   <text x="235" y="158" class="code">Step 7</text>
-  <text x="235" y="173" class="sublabel" fill="#F43F5E">네트워크 구성 *</text>
+  <text x="235" y="173" class="sublabel" fill="#be123c">네트워크 구성 *</text>
 
-  <line x1="225" y1="162" x2="205" y2="162" stroke="#3B82F6" stroke-width="1.5"/>
-  <polygon points="207,165 200,162 207,159" fill="#3B82F6"/>
+  <line x1="225" y1="162" x2="205" y2="162" stroke="#2456a8" stroke-width="1.5"/>
+  <polygon points="207,165 200,162 207,159" fill="#2456a8"/>
 
-  <rect x="30" y="140" width="170" height="44" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="30" y="140" width="170" height="44" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
   <text x="40" y="158" class="code">Step 8</text>
   <text x="40" y="173" class="sublabel">보안 옵션 (Vault)</text>
 
   <!-- Arrow down -->
-  <line x1="115" y1="184" x2="115" y2="204" stroke="#3B82F6" stroke-width="1.5"/>
-  <polygon points="112,202 115,209 118,202" fill="#3B82F6"/>
+  <line x1="115" y1="184" x2="115" y2="204" stroke="#2456a8" stroke-width="1.5"/>
+  <polygon points="112,202 115,209 118,202" fill="#2456a8"/>
 
   <!-- Row 3 -->
-  <rect x="30" y="210" width="170" height="44" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="30" y="210" width="170" height="44" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
   <text x="40" y="228" class="code">Step 9</text>
   <text x="40" y="243" class="sublabel">메모리/문자셋 설정</text>
 
-  <line x1="200" y1="232" x2="220" y2="232" stroke="#10B981" stroke-width="1.5"/>
-  <polygon points="218,229 225,232 218,235" fill="#10B981"/>
+  <line x1="200" y1="232" x2="220" y2="232" stroke="#2f6a1c" stroke-width="1.5"/>
+  <polygon points="218,229 225,232 218,235" fill="#2f6a1c"/>
 
-  <rect x="225" y="210" width="170" height="44" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="225" y="210" width="170" height="44" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
   <text x="235" y="228" class="code">Step 10</text>
   <text x="235" y="243" class="sublabel">EM 등록 여부</text>
 
-  <line x1="395" y1="232" x2="415" y2="232" stroke="#10B981" stroke-width="1.5"/>
-  <polygon points="413,229 420,232 413,235" fill="#10B981"/>
+  <line x1="395" y1="232" x2="415" y2="232" stroke="#2f6a1c" stroke-width="1.5"/>
+  <polygon points="413,229 420,232 413,235" fill="#2f6a1c"/>
 
-  <rect x="420" y="210" width="170" height="44" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="420" y="210" width="170" height="44" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
   <text x="430" y="228" class="code">Step 11</text>
   <text x="430" y="243" class="sublabel">관리자 패스워드</text>
 
-  <line x1="590" y1="232" x2="610" y2="232" stroke="#10B981" stroke-width="1.5"/>
-  <polygon points="608,229 615,232 608,235" fill="#10B981"/>
+  <line x1="590" y1="232" x2="610" y2="232" stroke="#2f6a1c" stroke-width="1.5"/>
+  <polygon points="608,229 615,232 608,235" fill="#2f6a1c"/>
 
-  <rect x="615" y="210" width="160" height="44" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="615" y="210" width="160" height="44" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
   <text x="625" y="228" class="code">Step 12</text>
   <text x="625" y="243" class="sublabel">요약 및 생성 시작</text>
 
   <!-- Warning box for Step 7 -->
-  <rect x="225" y="275" width="340" height="60" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="5,3"/>
-  <text x="240" y="295" class="label" fill="#F43F5E" font-size="12">* Step 7 주의 (시험 출제 포인트)</text>
+  <rect x="225" y="275" width="340" height="60" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="240" y="295" class="label" fill="#be123c" font-size="12">* Step 7 주의 (시험 출제 포인트)</text>
   <text x="240" y="312" class="small">리스너를 '선택'하는 단계이지, 새 리스너를 '생성'하지 않음</text>
   <text x="240" y="326" class="small">리스너 생성 = NETCA / NETMGR 담당</text>
 
   <!-- DBCA Role boundary -->
-  <rect x="30" y="350" width="350" height="110" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="45" y="372" class="label" fill="#6F6BEA">DBCA 역할 범위</text>
+  <rect x="30" y="350" width="350" height="110" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="1"/>
+  <text x="45" y="372" class="label" fill="#4a2e78">DBCA 역할 범위</text>
   <text x="55" y="392" class="sublabel">DB 생성/삭제/구성</text>
   <text x="55" y="410" class="sublabel">PDB 생성/삭제</text>
   <text x="55" y="428" class="sublabel">템플릿 관리</text>
   <text x="55" y="446" class="sublabel">초기화 파라미터 변경</text>
-  <text x="230" y="392" class="small" fill="#10B981">O</text>
-  <text x="230" y="410" class="small" fill="#10B981">O</text>
-  <text x="230" y="428" class="small" fill="#10B981">O</text>
-  <text x="230" y="446" class="small" fill="#10B981">O</text>
+  <text x="230" y="392" class="small" fill="#2f6a1c">O</text>
+  <text x="230" y="410" class="small" fill="#2f6a1c">O</text>
+  <text x="230" y="428" class="small" fill="#2f6a1c">O</text>
+  <text x="230" y="446" class="small" fill="#2f6a1c">O</text>
 
-  <rect x="410" y="350" width="365" height="110" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1"/>
-  <text x="425" y="372" class="label" fill="#F43F5E">DBCA 범위 밖 (NETCA/NETMGR)</text>
+  <rect x="410" y="350" width="365" height="110" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="1"/>
+  <text x="425" y="372" class="label" fill="#be123c">DBCA 범위 밖 (NETCA/NETMGR)</text>
   <text x="435" y="392" class="sublabel">리스너 생성/구성</text>
   <text x="435" y="410" class="sublabel">tnsnames.ora 구성</text>
   <text x="435" y="428" class="sublabel">sqlnet.ora 구성</text>
   <text x="435" y="446" class="sublabel">네이밍 메서드 설정</text>
-  <text x="650" y="392" class="small" fill="#F43F5E">X</text>
-  <text x="650" y="410" class="small" fill="#F43F5E">X</text>
-  <text x="650" y="428" class="small" fill="#F43F5E">X</text>
-  <text x="650" y="446" class="small" fill="#F43F5E">X</text>
+  <text x="650" y="392" class="small" fill="#be123c">X</text>
+  <text x="650" y="410" class="small" fill="#be123c">X</text>
+  <text x="650" y="428" class="small" fill="#be123c">X</text>
+  <text x="650" y="446" class="small" fill="#be123c">X</text>
 
   <!-- Templates comparison -->
-  <rect x="30" y="475" width="745" height="80" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="30" y="475" width="745" height="80" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
   <text x="50" y="497" class="label">템플릿 유형 비교</text>
-  <rect x="50" y="508" width="120" height="30" rx="4" ry="4" fill="#6F6BEA" opacity="0.2" stroke="#6F6BEA"/>
+  <rect x="50" y="508" width="120" height="30" rx="4" ry="4" fill="#4a2e78" opacity="0.2" stroke="#4a2e78"/>
   <text x="110" y="527" class="sublabel" text-anchor="middle">Seed (.dbc)</text>
   <text x="190" y="527" class="small">데이터 파일 포함, 빠른 생성</text>
 
-  <rect x="400" y="508" width="140" height="30" rx="4" ry="4" fill="#3B82F6" opacity="0.2" stroke="#3B82F6"/>
+  <rect x="400" y="508" width="140" height="30" rx="4" ry="4" fill="#2456a8" opacity="0.2" stroke="#2456a8"/>
   <text x="470" y="527" class="sublabel" text-anchor="middle">Non-Seed (.dbt)</text>
   <text x="560" y="527" class="small">구성만, 완전 새 생성</text>
 

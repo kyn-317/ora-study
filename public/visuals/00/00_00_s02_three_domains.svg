@@ -1,20 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 11px; fill: #94A3B8; }
+    .subtitle { font-size: 11px; fill: #787368; }
     .domain-title { font-size: 15px; font-weight: 700; }
-    .domain-sub { font-size: 11px; fill: #94A3B8; }
+    .domain-sub { font-size: 11px; fill: #787368; }
     .ch-label { font-size: 12px; font-weight: 600; }
-    .ch-detail { font-size: 10.5px; fill: #CBD5E1; }
-    .badge { font-size: 10px; font-weight: 700; fill: #1E1E2E; }
+    .ch-detail { font-size: 10.5px; fill: #4a4a46; }
+    .badge { font-size: 10px; font-weight: 700; fill: #1a1a1a; }
     .box { rx: 8; ry: 8; stroke-width: 1.2; }
     .domain-box { rx: 14; ry: 14; stroke-width: 2; }
-    .analogy { font-size: 10px; fill: #A5B4FC; font-style: italic; }
+    .analogy { font-size: 10px; fill: #4a2e78; font-style: italic; }
   </style>
   <defs>
     <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA" />
+      <polygon points="0 0, 8 3, 0 6" fill="#4a2e78" />
     </marker>
   </defs>
 
@@ -23,15 +24,15 @@
   <text x="450" y="50" text-anchor="middle" class="subtitle">Three Learning Domains</text>
 
   <!-- Domain 1: 구조와 아키텍처 -->
-  <rect x="20" y="70" width="270" height="470" class="domain-box" fill="rgba(111,107,234,0.06)" stroke="#6F6BEA" />
-  <rect x="40" y="82" width="16" height="16" rx="8" fill="#6F6BEA" />
-  <text x="65" y="95" class="domain-title" fill="#A5B4FC">영역 1: 구조와 아키텍처</text>
+  <rect x="20" y="70" width="270" height="470" class="domain-box" fill="#d8cfe5" stroke="#4a2e78" />
+  <rect x="40" y="82" width="16" height="16" rx="8" fill="#4a2e78" />
+  <text x="65" y="95" class="domain-title" fill="#4a2e78">영역 1: 구조와 아키텍처</text>
   <text x="40" y="114" class="domain-sub">"Oracle DB는 어떻게 생겼는가?"</text>
   <text x="40" y="130" class="analogy">비유: 건물의 설계도</text>
 
   <!-- Ch01 in Domain 1 -->
-  <rect x="35" y="148" width="240" height="170" class="box" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-opacity="0.6"/>
-  <rect x="48" y="160" width="28" height="20" rx="4" fill="#6F6BEA" />
+  <rect x="35" y="148" width="240" height="170" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-opacity="0.6"/>
+  <rect x="48" y="160" width="28" height="20" rx="4" fill="#4a2e78" />
   <text x="62" y="174" text-anchor="middle" class="badge">01</text>
   <text x="84" y="174" class="ch-label">아키텍처 및 인스턴스</text>
   <text x="48" y="196" class="ch-detail">01_01 메모리 구조 (SGA/PGA)</text>
@@ -40,94 +41,94 @@
   <text x="48" y="244" class="ch-detail">01_04 인스턴스 기동/종료</text>
   <text x="48" y="260" class="ch-detail">01_05 초기화 파라미터</text>
   <text x="48" y="276" class="ch-detail">01_06 복구 기초</text>
-  <rect x="218" y="292" width="48" height="16" rx="8" fill="#6F6BEA" opacity="0.7"/>
+  <rect x="218" y="292" width="48" height="16" rx="8" fill="#4a2e78" opacity="0.7"/>
   <text x="242" y="304" text-anchor="middle" class="badge">6 단원</text>
 
   <!-- Ch02 in Domain 1 -->
-  <rect x="35" y="332" width="240" height="130" class="box" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-opacity="0.6"/>
-  <rect x="48" y="344" width="28" height="20" rx="4" fill="#6F6BEA" />
+  <rect x="35" y="332" width="240" height="130" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-opacity="0.6"/>
+  <rect x="48" y="344" width="28" height="20" rx="4" fill="#4a2e78" />
   <text x="62" y="358" text-anchor="middle" class="badge">02</text>
   <text x="84" y="358" class="ch-label">멀티테넌트 (CDB/PDB)</text>
   <text x="48" y="380" class="ch-detail">02_01 CDB/PDB 구조 및 토대</text>
   <text x="48" y="396" class="ch-detail">02_02 PDB 생성 및 템플릿</text>
   <text x="48" y="412" class="ch-detail">02_03 PDB 상태 관리 및 분리</text>
   <text x="48" y="428" class="ch-detail">02_04 파라미터 및 복제 관리</text>
-  <rect x="218" y="436" width="48" height="16" rx="8" fill="#6F6BEA" opacity="0.7"/>
+  <rect x="218" y="436" width="48" height="16" rx="8" fill="#4a2e78" opacity="0.7"/>
   <text x="242" y="448" text-anchor="middle" class="badge">4 단원</text>
-  <text x="155" y="520" text-anchor="middle" font-size="12" font-weight="600" fill="#A5B4FC">10 단원</text>
+  <text x="155" y="520" text-anchor="middle" font-size="12" font-weight="600" fill="#4a2e78">10 단원</text>
 
   <!-- Domain 2: 운영과 관리 -->
-  <rect x="315" y="70" width="270" height="470" class="domain-box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" />
-  <rect x="335" y="82" width="16" height="16" rx="8" fill="#3B82F6" />
-  <text x="360" y="95" class="domain-title" fill="#93C5FD">영역 2: 운영과 관리</text>
+  <rect x="315" y="70" width="270" height="470" class="domain-box" fill="#dee5f5" stroke="#2456a8" />
+  <rect x="335" y="82" width="16" height="16" rx="8" fill="#2456a8" />
+  <text x="360" y="95" class="domain-title" fill="#2456a8">영역 2: 운영과 관리</text>
   <text x="335" y="114" class="domain-sub">"Oracle DB를 어떻게 운영하는가?"</text>
   <text x="335" y="130" class="analogy">비유: 건물의 관리/보안</text>
 
   <!-- Ch03 -->
-  <rect x="330" y="148" width="240" height="88" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-opacity="0.6"/>
-  <rect x="343" y="158" width="28" height="20" rx="4" fill="#3B82F6" />
+  <rect x="330" y="148" width="240" height="88" class="box" fill="#dee5f5" stroke="#2456a8" stroke-opacity="0.6"/>
+  <rect x="343" y="158" width="28" height="20" rx="4" fill="#2456a8" />
   <text x="357" y="172" text-anchor="middle" class="badge">03</text>
   <text x="379" y="172" class="ch-label">관리 툴 및 네트워크</text>
   <text x="343" y="192" class="ch-detail">DBCA · SQL*Plus · EM · 리스너 · 접속 · DB Link</text>
-  <rect x="513" y="210" width="48" height="16" rx="8" fill="#3B82F6" opacity="0.7"/>
+  <rect x="513" y="210" width="48" height="16" rx="8" fill="#2456a8" opacity="0.7"/>
   <text x="537" y="222" text-anchor="middle" class="badge">4 단원</text>
 
   <!-- Ch04 -->
-  <rect x="330" y="248" width="240" height="88" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-opacity="0.6"/>
-  <rect x="343" y="258" width="28" height="20" rx="4" fill="#3B82F6" />
+  <rect x="330" y="248" width="240" height="88" class="box" fill="#dee5f5" stroke="#2456a8" stroke-opacity="0.6"/>
+  <rect x="343" y="258" width="28" height="20" rx="4" fill="#2456a8" />
   <text x="357" y="272" text-anchor="middle" class="badge">04</text>
   <text x="379" y="272" class="ch-label">보안, 권한 및 감사</text>
   <text x="343" y="292" class="ch-detail">사용자/인증 · 권한/롤 · 프로파일 · 감사</text>
-  <rect x="513" y="310" width="48" height="16" rx="8" fill="#3B82F6" opacity="0.7"/>
+  <rect x="513" y="310" width="48" height="16" rx="8" fill="#2456a8" opacity="0.7"/>
   <text x="537" y="322" text-anchor="middle" class="badge">4 단원</text>
 
   <!-- Ch05 -->
-  <rect x="330" y="348" width="240" height="88" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-opacity="0.6"/>
-  <rect x="343" y="358" width="28" height="20" rx="4" fill="#F59E0B" />
+  <rect x="330" y="348" width="240" height="88" class="box" fill="#dee5f5" stroke="#2456a8" stroke-opacity="0.6"/>
+  <rect x="343" y="358" width="28" height="20" rx="4" fill="#8a5a10" />
   <text x="357" y="372" text-anchor="middle" class="badge">05</text>
   <text x="379" y="372" class="ch-label">스토리지 최적화</text>
   <text x="343" y="392" class="ch-detail">테이블스페이스 · 블록 · Resumable · Shrink · 압축</text>
-  <rect x="513" y="410" width="48" height="16" rx="8" fill="#F59E0B" opacity="0.7"/>
+  <rect x="513" y="410" width="48" height="16" rx="8" fill="#8a5a10" opacity="0.7"/>
   <text x="537" y="422" text-anchor="middle" class="badge">4 단원</text>
 
   <!-- Ch06 -->
-  <rect x="330" y="448" width="240" height="72" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-opacity="0.6"/>
-  <rect x="343" y="458" width="28" height="20" rx="4" fill="#F59E0B" />
+  <rect x="330" y="448" width="240" height="72" class="box" fill="#dee5f5" stroke="#2456a8" stroke-opacity="0.6"/>
+  <rect x="343" y="458" width="28" height="20" rx="4" fill="#8a5a10" />
   <text x="357" y="472" text-anchor="middle" class="badge">06</text>
   <text x="379" y="472" class="ch-label">UNDO 제어</text>
   <text x="343" y="492" class="ch-detail">읽기 일관성 · 롤백 · Flashback · Local UNDO</text>
-  <rect x="513" y="496" width="48" height="16" rx="8" fill="#F59E0B" opacity="0.7"/>
+  <rect x="513" y="496" width="48" height="16" rx="8" fill="#8a5a10" opacity="0.7"/>
   <text x="537" y="508" text-anchor="middle" class="badge">3 단원</text>
-  <text x="450" y="535" text-anchor="middle" font-size="12" font-weight="600" fill="#93C5FD">15 단원</text>
+  <text x="450" y="535" text-anchor="middle" font-size="12" font-weight="600" fill="#2456a8">15 단원</text>
 
   <!-- Domain 3: 데이터 이동과 성능 -->
-  <rect x="610" y="70" width="270" height="470" class="domain-box" fill="rgba(16,185,129,0.06)" stroke="#10B981" />
-  <rect x="630" y="82" width="16" height="16" rx="8" fill="#10B981" />
-  <text x="655" y="95" class="domain-title" fill="#6EE7B7">영역 3: 데이터 이동과 성능</text>
+  <rect x="610" y="70" width="270" height="470" class="domain-box" fill="#cfe1b8" stroke="#2f6a1c" />
+  <rect x="630" y="82" width="16" height="16" rx="8" fill="#2f6a1c" />
+  <text x="655" y="95" class="domain-title" fill="#2f6a1c">영역 3: 데이터 이동과 성능</text>
   <text x="630" y="114" class="domain-sub">"데이터를 어떻게 다루고 성능을 유지하는가?"</text>
   <text x="630" y="130" class="analogy">비유: 건물의 물류/에너지</text>
 
   <!-- Ch07 -->
-  <rect x="625" y="148" width="240" height="170" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-opacity="0.6"/>
-  <rect x="638" y="160" width="28" height="20" rx="4" fill="#10B981" />
+  <rect x="625" y="148" width="240" height="170" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-opacity="0.6"/>
+  <rect x="638" y="160" width="28" height="20" rx="4" fill="#2f6a1c" />
   <text x="652" y="174" text-anchor="middle" class="badge">07</text>
   <text x="674" y="174" class="ch-label">데이터 이동</text>
   <text x="638" y="196" class="ch-detail">07_01 External Table (외부 파일 조작)</text>
   <text x="638" y="212" class="ch-detail">07_02 SQL*Loader (대량 로드)</text>
   <text x="638" y="228" class="ch-detail">07_03 Data Pump (expdp/impdp)</text>
-  <rect x="808" y="292" width="48" height="16" rx="8" fill="#10B981" opacity="0.7"/>
+  <rect x="808" y="292" width="48" height="16" rx="8" fill="#2f6a1c" opacity="0.7"/>
   <text x="832" y="304" text-anchor="middle" class="badge">3 단원</text>
 
   <!-- Ch08 -->
-  <rect x="625" y="332" width="240" height="188" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-opacity="0.6"/>
-  <rect x="638" y="344" width="28" height="20" rx="4" fill="#10B981" />
+  <rect x="625" y="332" width="240" height="188" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-opacity="0.6"/>
+  <rect x="638" y="344" width="28" height="20" rx="4" fill="#2f6a1c" />
   <text x="652" y="358" text-anchor="middle" class="badge">08</text>
   <text x="674" y="358" class="ch-label">성능 모니터링/자동 관리</text>
   <text x="638" y="380" class="ch-detail">08_01 기본 모니터링 (AWR/V$/ADR)</text>
   <text x="638" y="396" class="ch-detail">08_02 자동화 태스크 (AutoTask/RM)</text>
   <text x="638" y="412" class="ch-detail">08_03 문제 해결 어드바이저</text>
   <text x="638" y="428" class="ch-detail">08_04 ADDM 진단 모니터</text>
-  <rect x="808" y="496" width="48" height="16" rx="8" fill="#10B981" opacity="0.7"/>
+  <rect x="808" y="496" width="48" height="16" rx="8" fill="#2f6a1c" opacity="0.7"/>
   <text x="832" y="508" text-anchor="middle" class="badge">4 단원</text>
-  <text x="745" y="535" text-anchor="middle" font-size="12" font-weight="600" fill="#6EE7B7">7 단원</text>
+  <text x="745" y="535" text-anchor="middle" font-size="12" font-weight="600" fill="#2f6a1c">7 단원</text>
 </svg>

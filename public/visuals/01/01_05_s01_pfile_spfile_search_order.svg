@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,9 +16,9 @@
   <text x="400" y="50" class="subtitle" text-anchor="middle">Parameter File Comparison and Search Order</text>
 
   <!-- PFILE Box -->
-  <rect x="40" y="70" width="340" height="240" class="box" fill="none" stroke="#3B82F6" stroke-width="2"/>
-  <rect x="40" y="70" width="340" height="36" rx="8" ry="0" fill="#3B82F6" fill-opacity="0.2"/>
-  <text x="210" y="94" class="label" text-anchor="middle" fill="#3B82F6">PFILE (텍스트 파라미터 파일)</text>
+  <rect x="40" y="70" width="340" height="240" class="box" fill="none" stroke="#2456a8" stroke-width="2"/>
+  <rect x="42" y="72" width="336" height="34" rx="6" ry="6" fill="#2456a8" fill-opacity="0.2"/>
+  <text x="210" y="94" class="label" text-anchor="middle" fill="#2456a8">PFILE (텍스트 파라미터 파일)</text>
   <text x="210" y="112" class="small" text-anchor="middle">Text Initialization Parameter File</text>
 
   <text x="60" y="140" class="code">init&lt;SID&gt;.ora</text>
@@ -27,12 +28,12 @@
   <text x="60" y="222" class="sublabel">영구 반영: 파일 수정 + 재기동</text>
   <text x="60" y="242" class="sublabel">백업: 일반 파일 복사</text>
   <text x="60" y="268" class="small">상태: 비권장 (레거시)</text>
-  <rect x="56" y="255" width="140" height="20" rx="4" ry="4" fill="#F43F5E" fill-opacity="0.15" stroke="#F43F5E" stroke-width="1"/>
+  <rect x="56" y="255" width="140" height="20" rx="4" ry="4" fill="#be123c" fill-opacity="0.15" stroke="#be123c" stroke-width="1"/>
 
   <!-- SPFILE Box -->
-  <rect x="420" y="70" width="340" height="240" class="box" fill="none" stroke="#10B981" stroke-width="2"/>
-  <rect x="420" y="70" width="340" height="36" rx="8" ry="0" fill="#10B981" fill-opacity="0.2"/>
-  <text x="590" y="94" class="label" text-anchor="middle" fill="#10B981">SPFILE (서버 파라미터 파일)</text>
+  <rect x="420" y="70" width="340" height="240" class="box" fill="none" stroke="#2f6a1c" stroke-width="2"/>
+  <rect x="422" y="72" width="336" height="34" rx="6" ry="6" fill="#2f6a1c" fill-opacity="0.2"/>
+  <text x="590" y="94" class="label" text-anchor="middle" fill="#2f6a1c">SPFILE (서버 파라미터 파일)</text>
   <text x="590" y="112" class="small" text-anchor="middle">Server Parameter File</text>
 
   <text x="440" y="140" class="code">spfile&lt;SID&gt;.ora</text>
@@ -41,24 +42,24 @@
   <text x="440" y="202" class="sublabel">동적 변경: 메모리 + 파일 동시 반영</text>
   <text x="440" y="222" class="sublabel">영구 반영: SCOPE=SPFILE / BOTH</text>
   <text x="440" y="242" class="sublabel">백업: CREATE PFILE / RMAN</text>
-  <text x="440" y="268" class="small" fill="#10B981">상태: Oracle 권장</text>
-  <rect x="436" y="255" width="140" height="20" rx="4" ry="4" fill="#10B981" fill-opacity="0.15" stroke="#10B981" stroke-width="1"/>
+  <text x="440" y="268" class="small" fill="#2f6a1c">상태: Oracle 권장</text>
+  <rect x="436" y="255" width="140" height="20" rx="4" ry="4" fill="#2f6a1c" fill-opacity="0.15" stroke="#2f6a1c" stroke-width="1"/>
 
   <!-- Conversion Arrows -->
   <defs>
     <marker id="arrowRight" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6" fill="#F59E0B"/>
+      <path d="M0,0 L8,3 L0,6" fill="#8a5a10"/>
     </marker>
     <marker id="arrowLeft" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
-      <path d="M8,0 L0,3 L8,6" fill="#F59E0B"/>
+      <path d="M8,0 L0,3 L8,6" fill="#8a5a10"/>
     </marker>
   </defs>
 
-  <line x1="380" y1="165" x2="420" y2="165" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arrowRight)"/>
+  <line x1="380" y1="165" x2="420" y2="165" stroke="#8a5a10" stroke-width="1.5" marker-end="url(#arrowRight)"/>
   <text x="400" y="158" class="code" text-anchor="middle" font-size="9">CREATE SPFILE</text>
   <text x="400" y="148" class="code" text-anchor="middle" font-size="9">FROM PFILE</text>
 
-  <line x1="420" y1="195" x2="380" y2="195" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arrowLeft)"/>
+  <line x1="420" y1="195" x2="380" y2="195" stroke="#8a5a10" stroke-width="1.5" marker-end="url(#arrowLeft)"/>
   <text x="400" y="213" class="code" text-anchor="middle" font-size="9">CREATE PFILE</text>
   <text x="400" y="223" class="code" text-anchor="middle" font-size="9">FROM SPFILE</text>
 
@@ -67,44 +68,44 @@
   <text x="400" y="370" class="small" text-anchor="middle">$ORACLE_HOME/dbs (Linux) | $ORACLE_HOME\database (Windows)</text>
 
   <!-- Step 1 -->
-  <rect x="100" y="390" width="200" height="55" class="box" fill="none" stroke="#6F6BEA" stroke-width="2"/>
-  <rect x="70" y="400" width="30" height="30" rx="15" ry="15" fill="#6F6BEA"/>
-  <text x="85" y="420" text-anchor="middle" font-size="14" font-weight="700" fill="#E2E8F0">1</text>
+  <rect x="100" y="390" width="200" height="55" class="box" fill="none" stroke="#4a2e78" stroke-width="2"/>
+  <rect x="70" y="400" width="30" height="30" rx="15" ry="15" fill="#4a2e78"/>
+  <text x="85" y="420" text-anchor="middle" font-size="14" font-weight="700" fill="#1a1a1a">1</text>
   <text x="200" y="413" class="code" text-anchor="middle">spfile&lt;SID&gt;.ora</text>
   <text x="200" y="433" class="small" text-anchor="middle">SID-specific SPFILE</text>
 
   <!-- Arrow 1->2 -->
-  <line x1="300" y1="418" x2="340" y2="418" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4" marker-end="url(#arrowRight)"/>
+  <line x1="300" y1="418" x2="340" y2="418" stroke="#787368" stroke-width="1.5" stroke-dasharray="4" marker-end="url(#arrowRight)"/>
   <text x="320" y="410" class="small" text-anchor="middle">없으면</text>
 
   <!-- Step 2 -->
-  <rect x="340" y="390" width="200" height="55" class="box" fill="none" stroke="#3B82F6" stroke-width="2"/>
-  <rect x="310" y="400" width="30" height="30" rx="15" ry="15" fill="#3B82F6"/>
-  <text x="325" y="420" text-anchor="middle" font-size="14" font-weight="700" fill="#E2E8F0">2</text>
+  <rect x="340" y="390" width="200" height="55" class="box" fill="none" stroke="#2456a8" stroke-width="2"/>
+  <rect x="310" y="400" width="30" height="30" rx="15" ry="15" fill="#2456a8"/>
+  <text x="325" y="420" text-anchor="middle" font-size="14" font-weight="700" fill="#1a1a1a">2</text>
   <text x="440" y="413" class="code" text-anchor="middle">spfile.ora</text>
   <text x="440" y="433" class="small" text-anchor="middle">Default SPFILE</text>
 
   <!-- Arrow 2->3 -->
-  <line x1="540" y1="418" x2="580" y2="418" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4" marker-end="url(#arrowRight)"/>
+  <line x1="540" y1="418" x2="580" y2="418" stroke="#787368" stroke-width="1.5" stroke-dasharray="4" marker-end="url(#arrowRight)"/>
   <text x="560" y="410" class="small" text-anchor="middle">없으면</text>
 
   <!-- Step 3 -->
-  <rect x="580" y="390" width="200" height="55" class="box" fill="none" stroke="#F59E0B" stroke-width="2"/>
-  <rect x="550" y="400" width="30" height="30" rx="15" ry="15" fill="#F59E0B"/>
-  <text x="565" y="420" text-anchor="middle" font-size="14" font-weight="700" fill="#1E1E2E">3</text>
+  <rect x="580" y="390" width="200" height="55" class="box" fill="none" stroke="#8a5a10" stroke-width="2"/>
+  <rect x="550" y="400" width="30" height="30" rx="15" ry="15" fill="#8a5a10"/>
+  <text x="565" y="420" text-anchor="middle" font-size="14" font-weight="700" fill="#1a1a1a">3</text>
   <text x="680" y="413" class="code" text-anchor="middle">init&lt;SID&gt;.ora</text>
   <text x="680" y="433" class="small" text-anchor="middle">SID-specific PFILE</text>
 
   <!-- Note about explicit PFILE -->
-  <rect x="140" y="470" width="520" height="60" class="box" fill="#2A2B3D" stroke="#6F6BEA" stroke-width="1" stroke-dasharray="5"/>
+  <rect x="140" y="470" width="520" height="60" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="1" stroke-dasharray="5"/>
   <text x="400" y="493" class="sublabel" text-anchor="middle">STARTUP PFILE='경로' 로 명시적 지정 가능</text>
   <text x="400" y="513" class="small" text-anchor="middle">SPFILE은 명시적 지정 불가 -- PFILE 내에 SPFILE 파라미터로 경로 지정</text>
 
   <!-- Legend -->
-  <rect x="200" y="555" width="12" height="12" rx="2" ry="2" fill="#10B981" fill-opacity="0.3" stroke="#10B981" stroke-width="1"/>
+  <rect x="200" y="555" width="12" height="12" rx="2" ry="2" fill="#2f6a1c" fill-opacity="0.3" stroke="#2f6a1c" stroke-width="1"/>
   <text x="218" y="566" class="small">Oracle 권장</text>
-  <rect x="320" y="555" width="12" height="12" rx="2" ry="2" fill="#F43F5E" fill-opacity="0.3" stroke="#F43F5E" stroke-width="1"/>
+  <rect x="320" y="555" width="12" height="12" rx="2" ry="2" fill="#be123c" fill-opacity="0.3" stroke="#be123c" stroke-width="1"/>
   <text x="338" y="566" class="small">비권장 (레거시)</text>
-  <rect x="440" y="555" width="12" height="12" rx="2" ry="2" fill="#F59E0B" fill-opacity="0.3" stroke="#F59E0B" stroke-width="1"/>
+  <rect x="440" y="555" width="12" height="12" rx="2" ry="2" fill="#8a5a10" fill-opacity="0.3" stroke="#8a5a10" stroke-width="1"/>
   <text x="458" y="566" class="small">변환 명령</text>
 </svg>

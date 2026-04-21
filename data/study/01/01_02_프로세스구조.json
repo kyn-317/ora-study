@@ -40,11 +40,11 @@
       "visuals": [
         {
           "id": "v9",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  UP[\"<b>사용자 프로세스 (User Process)</b><br/>클라이언트 머신에서 실행<br/>SQL*Plus, JDBC 드라이버, OCI 애플리케이션 등\"]:::amber\n  UP -->|\"Oracle Net (접속 요청)\"| LIS[\"<b>리스너 (Listener)</b><br/>접속 요청 수신 → 서버 프로세스 할당\"]:::blue\n  LIS --> SP[\"<b>서버 프로세스 (Server Process)</b><br/>데이터베이스 서버에서 실행<br/>SQL 파싱 · 실행 · 결과 반환 담당\"]:::green\n  SP <-->|\"공유 접근\"| SGA[\"<b>SGA (공유 메모리)</b><br/>Buffer Cache / Shared Pool / Redo Log Buffer\"]:::blue\n  SP -->|\"전용 메모리\"| PGA[\"<b>PGA (프로세스 전용 메모리)</b><br/>SQL Work Area / Private SQL Area / Session Memory\"]:::green\n  SGA <--> BGP[\"<b>백그라운드 프로세스</b><br/>DBWn / LGWR / CKPT / SMON / PMON 등\"]:::amber\n  note1[\"SGA에 직접 접근 불가<br/>반드시 서버 프로세스를 경유\"]:::red\n  UP -.-> note1\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "사용자 프로세스와 서버 프로세스의 협력 관계 — 리스너를 통한 접속, SGA 공유 접근, PGA 전용 메모리, 백그라운드 프로세스 연결",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_02_s02_v9_mermaid.svg"
         }
       ],
       "subsections": [
@@ -90,11 +90,11 @@
             },
             {
               "id": "v8",
-              "type": "mermaid",
-              "mermaidCode": "flowchart TD\n  A[\"<b>클라이언트 애플리케이션 실행</b><br/>사용자 프로세스 생성\"]:::amber\n  A --> B[\"<b>Oracle Database에 접속 요청</b><br/>Connection Request\"]:::blue\n  B --> C[\"<b>리스너가 접속 요청 수신</b><br/>서버 프로세스 할당\"]:::blue\n  C --> D[\"<b>통신 채널 수립</b><br/>사용자-서버 프로세스 연결\"]:::green\n  D --> E[\"<b>SQL 실행 요청 / 결과 수신 반복</b><br/>Oracle Net 프로토콜\"]:::green\n  E --> F{\"접속 해제?\"}\n  F -- \"Disconnect\" --> G[\"<b>세션 종료</b><br/>서버 프로세스 해제\"]:::red\n  F -- \"계속\" --> E\n  G --> H[\"<b>연결 없는 세션 (DRCP)</b><br/>세션 유지, 물리적 연결은 풀로 반환\"]:::amber\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+              "type": "svg",
               "caption": "사용자 프로세스 생명주기: 애플리케이션 실행부터 접속 요청, 리스너 처리, 통신 채널 수립, SQL 실행, 세션 종료(및 DRCP 연결 반환)까지의 흐름",
               "placement": "before-content",
-              "width": "100%"
+              "width": "100%",
+              "src": "/visuals/01/01_02_root_v8_mermaid.svg"
             }
           ]
         }
@@ -265,11 +265,11 @@
       "visuals": [
         {
           "id": "v10",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  OBG[\"<b>기타 주요 백그라운드 프로세스</b><br/>특정 기능 활성화 시 자동 시작\"]:::amber\n  OBG --> ARC[\"<b>ARCn (Archiver)</b><br/>ARCHIVELOG 모드에서 Log Switch 후<br/>가득 찬 온라인 Redo Log를 아카이브 목적지에 복사\"]:::blue\n  OBG --> MMON[\"<b>MMON / MMNL</b><br/>MMON: AWR 스냅샷 수집 · ADDM 분석 · 임계값 경고<br/>MMNL: ASH 데이터를 메모리에서 디스크로 플러시\"]:::green\n  OBG --> RECO[\"<b>RECO (Recoverer)</b><br/>분산 트랜잭션(2-Phase Commit)에서<br/>In-Doubt 트랜잭션을 자동 해결\"]:::blue\n  OBG --> CJQ[\"<b>CJQ0 + Jnnn</b><br/>CJQ0: 예약된 작업 시점 모니터링<br/>Jnnn: 실제 작업(PL/SQL 블록 등) 실행\"]:::green\n  ARC --> ARCH_NOTE[\"ARCHIVELOG 모드 필수<br/>미디어 복구 활성화\"]:::amber\n  MMON --> AWR_NOTE[\"AWR 데이터 → SYSAUX 테이블스페이스\"]:::amber\n  CJQ --> JQP[\"JOB_QUEUE_PROCESSES 파라미터로<br/>동시 실행 슬레이브 수 제어\"]:::amber\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "기타 주요 백그라운드 프로세스 — ARCn(아카이버), MMON/MMNL(관리 모니터), RECO(분산 트랜잭션 복구), CJQ0+Jnnn(작업 스케줄러)의 역할 분류도",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_02_s05_v10_mermaid.svg"
         }
       ],
       "subsections": [

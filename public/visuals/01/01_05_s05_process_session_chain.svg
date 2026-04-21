@@ -1,18 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
   <defs>
     <marker id="arrR2" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
-      <path d="M0,0 L10,4 L0,8" fill="#6F6BEA"/>
+      <path d="M0,0 L10,4 L0,8" fill="#4a2e78"/>
     </marker>
   </defs>
 
@@ -21,36 +22,36 @@
   <text x="400" y="50" class="subtitle" text-anchor="middle">Process-Session-Transaction Derivation Chain</text>
 
   <!-- PROCESSES -->
-  <rect x="50" y="80" width="200" height="90" class="box" fill="#6F6BEA" fill-opacity="0.1" stroke="#6F6BEA" stroke-width="2"/>
-  <text x="150" y="108" class="label" text-anchor="middle" fill="#6F6BEA">PROCESSES</text>
+  <rect x="50" y="80" width="200" height="90" class="box" fill="#4a2e78" fill-opacity="0.1" stroke="#4a2e78" stroke-width="2"/>
+  <text x="150" y="108" class="label" text-anchor="middle" fill="#4a2e78">PROCESSES</text>
   <text x="150" y="128" class="sublabel" text-anchor="middle">최대 동시 OS 프로세스 수</text>
   <text x="150" y="148" class="small" text-anchor="middle">기본값: 300 (정적)</text>
-  <text x="150" y="163" class="small" text-anchor="middle" fill="#F59E0B">DBA가 직접 설정</text>
+  <text x="150" y="163" class="small" text-anchor="middle" fill="#8a5a10">DBA가 직접 설정</text>
 
   <!-- Arrow 1 -->
-  <line x1="250" y1="125" x2="310" y2="125" stroke="#6F6BEA" stroke-width="2" marker-end="url(#arrR2)"/>
+  <line x1="250" y1="125" x2="310" y2="125" stroke="#4a2e78" stroke-width="2" marker-end="url(#arrR2)"/>
   <text x="280" y="116" class="code" text-anchor="middle" font-size="10">x 1.5 + 22</text>
 
   <!-- SESSIONS -->
-  <rect x="310" y="80" width="200" height="90" class="box" fill="#3B82F6" fill-opacity="0.1" stroke="#3B82F6" stroke-width="2"/>
-  <text x="410" y="108" class="label" text-anchor="middle" fill="#3B82F6">SESSIONS</text>
+  <rect x="310" y="80" width="200" height="90" class="box" fill="#2456a8" fill-opacity="0.1" stroke="#2456a8" stroke-width="2"/>
+  <text x="410" y="108" class="label" text-anchor="middle" fill="#2456a8">SESSIONS</text>
   <text x="410" y="128" class="sublabel" text-anchor="middle">최대 동시 세션 수</text>
   <text x="410" y="148" class="code" text-anchor="middle">= (1.5 x PROCESSES) + 22</text>
   <text x="410" y="163" class="small" text-anchor="middle">자동 계산 (정적)</text>
 
   <!-- Arrow 2 -->
-  <line x1="510" y1="125" x2="570" y2="125" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrR2)"/>
+  <line x1="510" y1="125" x2="570" y2="125" stroke="#2456a8" stroke-width="2" marker-end="url(#arrR2)"/>
   <text x="540" y="116" class="code" text-anchor="middle" font-size="10">x 1.1</text>
 
   <!-- TRANSACTIONS -->
-  <rect x="570" y="80" width="200" height="90" class="box" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="2"/>
-  <text x="670" y="108" class="label" text-anchor="middle" fill="#10B981">TRANSACTIONS</text>
+  <rect x="570" y="80" width="200" height="90" class="box" fill="#2f6a1c" fill-opacity="0.1" stroke="#2f6a1c" stroke-width="2"/>
+  <text x="670" y="108" class="label" text-anchor="middle" fill="#2f6a1c">TRANSACTIONS</text>
   <text x="670" y="128" class="sublabel" text-anchor="middle">최대 동시 트랜잭션 수</text>
   <text x="670" y="148" class="code" text-anchor="middle">= 1.1 x SESSIONS</text>
   <text x="670" y="163" class="small" text-anchor="middle">자동 계산 (정적)</text>
 
   <!-- Example calculation -->
-  <rect x="100" y="200" width="600" height="80" class="box" fill="#2A2B3D" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="100" y="200" width="600" height="80" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
   <text x="400" y="224" class="sublabel" text-anchor="middle">예시: PROCESSES = 300 으로 설정하면</text>
   <text x="400" y="248" class="code" text-anchor="middle" font-size="13">PROCESSES=300  -->  SESSIONS=(1.5x300)+22=472  -->  TRANSACTIONS=1.1x472=519</text>
   <text x="400" y="268" class="small" text-anchor="middle">SESSIONS를 명시적으로 설정하면 자동 계산을 무시함</text>

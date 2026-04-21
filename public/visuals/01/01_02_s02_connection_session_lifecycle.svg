@@ -1,27 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
   <defs>
     <marker id="aPurple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA"/>
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a2e78"/>
     </marker>
     <marker id="aBlue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6"/>
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2456a8"/>
     </marker>
     <marker id="aGreen" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981"/>
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2f6a1c"/>
     </marker>
     <marker id="aYellow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B"/>
+      <polygon points="0 0, 10 3.5, 0 7" fill="#8a5a10"/>
     </marker>
   </defs>
 
@@ -30,70 +31,70 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">Connection and Session Lifecycle</text>
 
   <!-- Step 1 -->
-  <rect x="40" y="80" width="160" height="50" class="box" fill="rgba(107,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="120" y="100" text-anchor="middle" class="label" fill="#6F6BEA">1. 앱 실행</text>
+  <rect x="40" y="80" width="160" height="50" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="120" y="100" text-anchor="middle" class="label" fill="#4a2e78">1. 앱 실행</text>
   <text x="120" y="118" text-anchor="middle" class="small">User Process 생성</text>
 
-  <line x1="200" y1="105" x2="240" y2="105" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#aPurple)"/>
+  <line x1="200" y1="105" x2="240" y2="105" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#aPurple)"/>
 
   <!-- Step 2 -->
-  <rect x="240" y="80" width="160" height="50" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="320" y="100" text-anchor="middle" class="label" fill="#3B82F6">2. 접속 요청</text>
+  <rect x="240" y="80" width="160" height="50" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="320" y="100" text-anchor="middle" class="label" fill="#2456a8">2. 접속 요청</text>
   <text x="320" y="118" text-anchor="middle" class="small">Connection Request</text>
 
-  <line x1="400" y1="105" x2="440" y2="105" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#aBlue)"/>
+  <line x1="400" y1="105" x2="440" y2="105" stroke="#2456a8" stroke-width="1.5" marker-end="url(#aBlue)"/>
 
   <!-- Step 3 -->
-  <rect x="440" y="80" width="160" height="50" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1.5"/>
-  <text x="520" y="100" text-anchor="middle" class="label" fill="#10B981">3. 리스너 수신</text>
+  <rect x="440" y="80" width="160" height="50" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="520" y="100" text-anchor="middle" class="label" fill="#2f6a1c">3. 리스너 수신</text>
   <text x="520" y="118" text-anchor="middle" class="small">Listener Receives</text>
 
-  <line x1="600" y1="105" x2="640" y2="105" stroke="#10B981" stroke-width="1.5" marker-end="url(#aGreen)"/>
+  <line x1="600" y1="105" x2="640" y2="105" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#aGreen)"/>
 
   <!-- Step 4 -->
-  <rect x="640" y="80" width="140" height="50" class="box" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="710" y="100" text-anchor="middle" class="label" fill="#F59E0B">4. 서버 할당</text>
+  <rect x="640" y="80" width="140" height="50" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="710" y="100" text-anchor="middle" class="label" fill="#8a5a10">4. 서버 할당</text>
   <text x="710" y="118" text-anchor="middle" class="small">Server Process Fork</text>
 
   <!-- Down arrow from step 4 -->
-  <line x1="710" y1="130" x2="710" y2="170" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#aYellow)"/>
+  <line x1="710" y1="130" x2="710" y2="170" stroke="#8a5a10" stroke-width="1.5" marker-end="url(#aYellow)"/>
 
   <!-- Connection Established -->
-  <rect x="40" y="170" width="730" height="75" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="6,3"/>
-  <text x="400" y="192" text-anchor="middle" class="label" fill="#3B82F6">Connection 수립 (물리적 통신 경로 / Physical Communication Path)</text>
+  <rect x="40" y="170" width="730" height="75" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="400" y="192" text-anchor="middle" class="label" fill="#2456a8">Connection 수립 (물리적 통신 경로 / Physical Communication Path)</text>
 
-  <rect x="60" y="205" width="200" height="30" class="box" fill="rgba(107,107,234,0.12)" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="60" y="205" width="200" height="30" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1"/>
   <text x="160" y="224" text-anchor="middle" class="sublabel">User Process</text>
 
-  <line x1="260" y1="220" x2="500" y2="220" stroke="#3B82F6" stroke-width="2" stroke-dasharray="8,4"/>
+  <line x1="260" y1="220" x2="500" y2="220" stroke="#2456a8" stroke-width="2" stroke-dasharray="8,4"/>
   <text x="380" y="213" text-anchor="middle" class="code">Oracle Net (TCP/IP / IPC)</text>
 
-  <rect x="500" y="205" width="200" height="30" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1"/>
+  <rect x="500" y="205" width="200" height="30" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1"/>
   <text x="600" y="224" text-anchor="middle" class="sublabel">Server Process</text>
 
   <!-- Down arrow -->
-  <line x1="400" y1="245" x2="400" y2="275" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#aBlue)"/>
+  <line x1="400" y1="245" x2="400" y2="275" stroke="#787368" stroke-width="1.5" marker-end="url(#aBlue)"/>
   <text x="420" y="265" class="small">인증 (Authentication)</text>
 
   <!-- Session Established -->
-  <rect x="40" y="275" width="730" height="70" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="400" y="298" text-anchor="middle" class="label" fill="#F59E0B">Session 생성 (논리적 사용자 상태 / Logical User State)</text>
+  <rect x="40" y="275" width="730" height="70" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="400" y="298" text-anchor="middle" class="label" fill="#8a5a10">Session 생성 (논리적 사용자 상태 / Logical User State)</text>
   <text x="400" y="318" text-anchor="middle" class="code">SID + Serial# 로 고유 식별</text>
   <text x="400" y="335" text-anchor="middle" class="small">V$SESSION 에서 조회 가능</text>
 
   <!-- Comparison Table -->
-  <rect x="40" y="370" width="350" height="140" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="215" y="395" text-anchor="middle" class="label" fill="#3B82F6">Connection (연결)</text>
-  <line x1="60" y1="405" x2="370" y2="405" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="40" y="370" width="350" height="140" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="215" y="395" text-anchor="middle" class="label" fill="#2456a8">Connection (연결)</text>
+  <line x1="60" y1="405" x2="370" y2="405" stroke="#f3efe4" stroke-width="1"/>
   <text x="60" y="425" class="sublabel">성격: 물리적 통신 경로</text>
   <text x="60" y="445" class="sublabel">생성: 네트워크 연결 수립 시</text>
   <text x="60" y="465" class="sublabel">관계: 1 Connection : 0~N Session</text>
   <text x="60" y="485" class="sublabel">조회: V$CONNECTION</text>
   <text x="60" y="505" class="code">로컬=IPC / 원격=TCP/IP</text>
 
-  <rect x="410" y="370" width="360" height="140" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="590" y="395" text-anchor="middle" class="label" fill="#F59E0B">Session (세션)</text>
-  <line x1="430" y1="405" x2="750" y2="405" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="410" y="370" width="360" height="140" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="590" y="395" text-anchor="middle" class="label" fill="#8a5a10">Session (세션)</text>
+  <line x1="430" y1="405" x2="750" y2="405" stroke="#f3efe4" stroke-width="1"/>
   <text x="430" y="425" class="sublabel">성격: 논리적 사용자 상태</text>
   <text x="430" y="445" class="sublabel">생성: 사용자 인증 완료 시</text>
   <text x="430" y="465" class="sublabel">식별: SID + Serial# 조합</text>

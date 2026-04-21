@@ -31,7 +31,11 @@
     {
       "sectionId": "s02",
       "title": "컨트롤 파일 (Control File)",
-      "sqlExamplesIds": ["sql01", "sql02", "sql03"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02",
+        "sql03"
+      ],
       "content": "컨트롤 파일은 Oracle Database의 **물리적 구조 정보를 기록하는 바이너리 파일**입니다. 데이터베이스의 무결성과 일관성을 유지하기 위한 핵심 메타데이터를 포함하며, 데이터베이스가 MOUNT 단계에서 읽어들이는 첫 번째 파일입니다.",
       "subsections": [
         {
@@ -72,7 +76,12 @@
     {
       "sectionId": "s03",
       "title": "온라인 Redo Log 파일 (Online Redo Log Files)",
-      "sqlExamplesIds": ["sql04", "sql05", "sql06", "sql07"],
+      "sqlExamplesIds": [
+        "sql04",
+        "sql05",
+        "sql06",
+        "sql07"
+      ],
       "content": "온라인 Redo Log 파일은 데이터베이스에 가해진 **모든 변경 사항(Redo Data)**을 기록하는 물리적 파일입니다. 장애 발생 시 데이터 복구의 근본적인 기반이 되며, Oracle의 복구 메커니즘에서 가장 중요한 구성요소 중 하나입니다.",
       "subsections": [
         {
@@ -127,7 +136,11 @@
     {
       "sectionId": "s04",
       "title": "데이터 파일 (Data Files)",
-      "sqlExamplesIds": ["sql08", "sql09", "sql10"],
+      "sqlExamplesIds": [
+        "sql08",
+        "sql09",
+        "sql10"
+      ],
       "content": "데이터 파일은 테이블, 인덱스 등 **실제 사용자 데이터와 시스템 데이터를 물리적으로 저장**하는 파일입니다. Oracle Database에서 가장 핵심적인 물리적 저장 구조이며, 논리적 저장 구조인 테이블스페이스와 직접 매핑됩니다.",
       "subsections": [
         {
@@ -157,18 +170,23 @@
       "visuals": [
         {
           "id": "v7",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>데이터 파일</b><br/>테이블스페이스의 물리적 저장 단위\"]:::amber\n  A --> B{\"파일 이동 필요?\"}\n  B -- \"Oracle 12c+\" --> C[\"<b>ALTER DATABASE MOVE DATAFILE</b><br/>온라인 상태에서 이동\"]:::green\n  C --> C1[\"원본 파일 → 새 위치로 복사\"]:::green\n  C1 --> C2[\"컨트롤 파일의 경로 정보 갱신\"]:::green\n  C2 --> C3[\"원본 파일 삭제<br/>(KEEP 옵션 시 유지)\"]:::green\n  B -- \"12c 미만\" --> D[\"<b>테이블스페이스 오프라인</b>\"]:::blue\n  D --> D1[\"OS 레벨에서 파일 복사\"]:::blue\n  D1 --> D2[\"ALTER TABLESPACE RENAME DATAFILE\"]:::blue\n  D2 --> D3[\"테이블스페이스 온라인\"]:::blue\n  A --> E{\"상태 전환 필요?\"}\n  E -- \"오프라인\" --> F[\"<b>DATAFILE OFFLINE</b><br/>해당 파일 접근 불가\"]:::red\n  F --> G[\"미디어 복구 수행 후\"]:::red\n  G --> H[\"<b>DATAFILE ONLINE</b><br/>다시 사용 가능 상태\"]:::green\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "데이터 파일 관리 흐름: Oracle 12c+ 온라인 이동(MOVE DATAFILE)과 구버전 오프라인 이동 절차, 온라인/오프라인 상태 전환 흐름",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_03_s04_v7_mermaid.svg"
         }
       ]
     },
     {
       "sectionId": "s05",
       "title": "논리적 저장 구조 (Logical Storage Structures)",
-      "sqlExamplesIds": ["sql11", "sql12", "sql13", "sql14"],
+      "sqlExamplesIds": [
+        "sql11",
+        "sql12",
+        "sql13",
+        "sql14"
+      ],
       "content": "Oracle의 논리적 저장 구조는 물리적 파일과 독립적으로 데이터를 **계층적으로 조직화**하는 추상적 구조입니다. 가장 큰 단위인 **테이블스페이스**부터 가장 작은 단위인 **데이터 블록**까지 4단계 계층을 형성합니다.",
       "subsections": [
         {
@@ -243,7 +261,14 @@
     {
       "sectionId": "s06",
       "title": "UNDO 테이블스페이스 (UNDO Tablespace)",
-      "sqlExamplesIds": ["sql15", "sql16", "sql17", "sql18", "sql19", "sql20"],
+      "sqlExamplesIds": [
+        "sql15",
+        "sql16",
+        "sql17",
+        "sql18",
+        "sql19",
+        "sql20"
+      ],
       "content": "UNDO 테이블스페이스는 **UNDO 데이터(변경 전 이미지)**를 저장하는 특수한 테이블스페이스입니다. 트랜잭션 롤백, 읽기 일관성 보장, 인스턴스 복구 등 Oracle의 핵심 메커니즘에서 사용됩니다.",
       "subsections": [
         {
@@ -420,34 +445,101 @@
     }
   ],
   "keywords": [
-    "Control File", "컨트롤 파일", "CONTROL_FILES",
-    "Online Redo Log", "온라인 Redo Log", "Redo Log Group", "Redo Log Member",
-    "Log Switch", "로그 스위치", "ARCHIVELOG", "NOARCHIVELOG", "ARCn",
-    "LGWR", "CKPT", "Data File", "데이터 파일",
-    "Temp File", "임시 파일", "AUTOEXTEND",
-    "Tablespace", "테이블스페이스", "SYSTEM", "SYSAUX", "UNDOTBS",
-    "SMALLFILE", "BIGFILE", "Locally Managed", "Dictionary Managed",
-    "AUTOALLOCATE", "UNIFORM",
-    "Segment", "세그먼트", "Deferred Segment Creation", "DEFERRED_SEGMENT_CREATION",
-    "Extent", "익스텐트", "Data Block", "데이터 블록",
-    "DB_BLOCK_SIZE", "PCTFREE", "PCTUSED",
-    "ASSM", "Automatic Segment Space Management", "MSSM",
-    "Row Migration", "행 마이그레이션",
-    "ITL", "Interested Transaction List",
-    "UNDO Tablespace", "UNDO_MANAGEMENT", "UNDO_TABLESPACE", "UNDO_RETENTION",
-    "RETENTION GUARANTEE", "RETENTION NOGUARANTEE",
-    "ACTIVE", "UNEXPIRED", "EXPIRED",
-    "ORA-01555", "Snapshot Too Old",
-    "Read Consistency", "읽기 일관성", "CR Copy",
-    "Transaction Rollback", "트랜잭션 롤백",
-    "Instance Recovery", "인스턴스 복구",
-    "Flashback", "Roll Forward", "Roll Back",
-    "Multiplexing", "다중화", "SCN", "System Change Number",
-    "DBID", "V$CONTROLFILE", "V$LOG", "V$LOGFILE", "V$LOG_HISTORY",
-    "DBA_DATA_FILES", "DBA_TEMP_FILES", "DBA_TABLESPACES",
-    "DBA_SEGMENTS", "DBA_EXTENTS", "DBA_FREE_SPACE", "DBA_UNDO_EXTENTS",
-    "ALTER DATABASE MOVE DATAFILE", "HWM", "Write-Ahead Logging",
-    "Shared UNDO", "Local UNDO", "LOCAL_UNDO_ENABLED", "CDB", "PDB",
-    "PDB Flashback", "Point-in-Time Recovery", "PITR"
+    "Control File",
+    "컨트롤 파일",
+    "CONTROL_FILES",
+    "Online Redo Log",
+    "온라인 Redo Log",
+    "Redo Log Group",
+    "Redo Log Member",
+    "Log Switch",
+    "로그 스위치",
+    "ARCHIVELOG",
+    "NOARCHIVELOG",
+    "ARCn",
+    "LGWR",
+    "CKPT",
+    "Data File",
+    "데이터 파일",
+    "Temp File",
+    "임시 파일",
+    "AUTOEXTEND",
+    "Tablespace",
+    "테이블스페이스",
+    "SYSTEM",
+    "SYSAUX",
+    "UNDOTBS",
+    "SMALLFILE",
+    "BIGFILE",
+    "Locally Managed",
+    "Dictionary Managed",
+    "AUTOALLOCATE",
+    "UNIFORM",
+    "Segment",
+    "세그먼트",
+    "Deferred Segment Creation",
+    "DEFERRED_SEGMENT_CREATION",
+    "Extent",
+    "익스텐트",
+    "Data Block",
+    "데이터 블록",
+    "DB_BLOCK_SIZE",
+    "PCTFREE",
+    "PCTUSED",
+    "ASSM",
+    "Automatic Segment Space Management",
+    "MSSM",
+    "Row Migration",
+    "행 마이그레이션",
+    "ITL",
+    "Interested Transaction List",
+    "UNDO Tablespace",
+    "UNDO_MANAGEMENT",
+    "UNDO_TABLESPACE",
+    "UNDO_RETENTION",
+    "RETENTION GUARANTEE",
+    "RETENTION NOGUARANTEE",
+    "ACTIVE",
+    "UNEXPIRED",
+    "EXPIRED",
+    "ORA-01555",
+    "Snapshot Too Old",
+    "Read Consistency",
+    "읽기 일관성",
+    "CR Copy",
+    "Transaction Rollback",
+    "트랜잭션 롤백",
+    "Instance Recovery",
+    "인스턴스 복구",
+    "Flashback",
+    "Roll Forward",
+    "Roll Back",
+    "Multiplexing",
+    "다중화",
+    "SCN",
+    "System Change Number",
+    "DBID",
+    "V$CONTROLFILE",
+    "V$LOG",
+    "V$LOGFILE",
+    "V$LOG_HISTORY",
+    "DBA_DATA_FILES",
+    "DBA_TEMP_FILES",
+    "DBA_TABLESPACES",
+    "DBA_SEGMENTS",
+    "DBA_EXTENTS",
+    "DBA_FREE_SPACE",
+    "DBA_UNDO_EXTENTS",
+    "ALTER DATABASE MOVE DATAFILE",
+    "HWM",
+    "Write-Ahead Logging",
+    "Shared UNDO",
+    "Local UNDO",
+    "LOCAL_UNDO_ENABLED",
+    "CDB",
+    "PDB",
+    "PDB Flashback",
+    "Point-in-Time Recovery",
+    "PITR"
   ]
 }

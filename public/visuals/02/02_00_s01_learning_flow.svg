@@ -1,33 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .subtitle { font-size: 12px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 11px; fill: #94A3B8; }
-    .desc { font-size: 11px; fill: #CBD5E1; }
-    .code { font-family: monospace; font-size: 13px; fill: #F59E0B; }
-    .axis-label { font-size: 13px; font-weight: 700; fill: #F59E0B; }
-    .axis-desc { font-size: 11px; fill: #94A3B8; }
-    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 10; }
-    .box-primary { fill: rgba(111,107,234,0.15); stroke: #6F6BEA; stroke-width: 2; rx: 10; }
-    .box-secondary { fill: rgba(59,130,246,0.1); stroke: #3B82F6; stroke-width: 2; rx: 10; }
-    .arrow { stroke: #6F6BEA; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead); }
-    .arrow-thin { stroke: #3B82F6; stroke-width: 1.5; fill: none; stroke-dasharray: 6,3; }
-    .badge { font-size: 10px; font-weight: 700; fill: #1E1E2E; }
-    .step-num { font-size: 22px; font-weight: 800; fill: #6F6BEA; }
+    .sublabel { font-size: 11px; fill: #787368; }
+    .desc { font-size: 11px; fill: #4a4a46; }
+    .code { font-family: monospace; font-size: 13px; fill: #8a5a10; }
+    .axis-label { font-size: 13px; font-weight: 700; fill: #8a5a10; }
+    .axis-desc { font-size: 11px; fill: #787368; }
+    .box { fill: rgba(42,42,42,0.05); stroke: #f3efe4; stroke-width: 1.5; rx: 10; }
+    .box-primary { fill: #d8cfe5; stroke: #4a2e78; stroke-width: 2; rx: 10; }
+    .box-secondary { fill: #dee5f5; stroke: #2456a8; stroke-width: 2; rx: 10; }
+    .arrow { stroke: #4a2e78; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead); }
+    .arrow-thin { stroke: #2456a8; stroke-width: 1.5; fill: none; stroke-dasharray: 6,3; }
+    .badge { font-size: 10px; font-weight: 700; fill: #1a1a1a; }
+    .step-num { font-size: 22px; font-weight: 800; fill: #4a2e78; }
   </style>
   <defs>
     <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a2e78" />
     </marker>
     <linearGradient id="axisGrad1" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#6F6BEA" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#6F6BEA" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#4a2e78" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#4a2e78" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="axisGrad2" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#2456a8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#2456a8" stop-opacity="0"/>
     </linearGradient>
   </defs>
 
@@ -36,12 +37,12 @@
   <text x="400" y="55" text-anchor="middle" class="subtitle">멀티테넌트 아키텍처 — 4개 단원의 학습 경로와 핵심 축</text>
 
   <!-- Axis 1: Architecture + Creation -->
-  <rect x="30" y="80" width="360" height="30" rx="5" fill="url(#axisGrad1)" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="30" y="80" width="360" height="30" rx="5" fill="url(#axisGrad1)" stroke="#4a2e78" stroke-width="1"/>
   <text x="210" y="100" text-anchor="middle" class="axis-label">축 1: 아키텍처 + 생성 (Architecture + Creation)</text>
 
   <!-- Axis 2: Operation + Management -->
-  <rect x="410" y="80" width="360" height="30" rx="5" fill="url(#axisGrad2)" stroke="#3B82F6" stroke-width="1"/>
-  <text x="590" y="100" text-anchor="middle" class="axis-label" style="fill:#3B82F6">축 2: 운영 + 관리 (Operation + Management)</text>
+  <rect x="410" y="80" width="360" height="30" rx="5" fill="url(#axisGrad2)" stroke="#2456a8" stroke-width="1"/>
+  <text x="590" y="100" text-anchor="middle" class="axis-label" style="fill:#2456a8">축 2: 운영 + 관리 (Operation + Management)</text>
 
   <!-- Step 1: 02_01 -->
   <text x="130" y="155" text-anchor="middle" class="step-num">1</text>
@@ -49,7 +50,7 @@
   <text x="130" y="190" text-anchor="middle" class="label">02_01</text>
   <text x="130" y="208" text-anchor="middle" class="label">구조 및 토대</text>
   <text x="130" y="226" text-anchor="middle" class="sublabel">Architecture Foundation</text>
-  <line x1="60" y1="238" x2="200" y2="238" stroke="#2A2B3D" stroke-width="1"/>
+  <line x1="60" y1="238" x2="200" y2="238" stroke="#f3efe4" stroke-width="1"/>
   <text x="130" y="256" text-anchor="middle" class="desc">CDB/PDB 구조</text>
   <text x="130" y="271" text-anchor="middle" class="desc">공통/로컬 객체 분리</text>
   <text x="130" y="286" text-anchor="middle" class="desc">메모리·프로세스 공유</text>
@@ -60,7 +61,7 @@
   <text x="340" y="190" text-anchor="middle" class="label">02_02</text>
   <text x="340" y="208" text-anchor="middle" class="label">PDB 생성 및 템플릿</text>
   <text x="340" y="226" text-anchor="middle" class="sublabel">PDB Creation &amp; Templates</text>
-  <line x1="270" y1="238" x2="410" y2="238" stroke="#2A2B3D" stroke-width="1"/>
+  <line x1="270" y1="238" x2="410" y2="238" stroke="#f3efe4" stroke-width="1"/>
   <text x="340" y="256" text-anchor="middle" class="desc">PDB$SEED에서 생성</text>
   <text x="340" y="271" text-anchor="middle" class="desc">파일 관리 (OMF)</text>
   <text x="340" y="286" text-anchor="middle" class="desc">Application Container</text>
@@ -71,7 +72,7 @@
   <text x="550" y="190" text-anchor="middle" class="label">02_03</text>
   <text x="550" y="208" text-anchor="middle" class="label">PDB 상태 관리 및 분리</text>
   <text x="550" y="226" text-anchor="middle" class="sublabel">State Management &amp; Unplugging</text>
-  <line x1="480" y1="238" x2="620" y2="238" stroke="#2A2B3D" stroke-width="1"/>
+  <line x1="480" y1="238" x2="620" y2="238" stroke="#f3efe4" stroke-width="1"/>
   <text x="550" y="256" text-anchor="middle" class="desc">오픈 모드 전환</text>
   <text x="550" y="271" text-anchor="middle" class="desc">SAVE STATE</text>
   <text x="550" y="286" text-anchor="middle" class="desc">Unplug / Plug In</text>
@@ -83,13 +84,13 @@
   <text x="550" y="350" text-anchor="middle" class="label">02_04</text>
   <text x="550" y="368" text-anchor="middle" class="label">파라미터 및 복제 관리</text>
   <text x="550" y="386" text-anchor="middle" class="sublabel">Parameters &amp; Cloning</text>
-  <line x1="480" y1="398" x2="620" y2="398" stroke="#2A2B3D" stroke-width="1"/>
+  <line x1="480" y1="398" x2="620" y2="398" stroke="#f3efe4" stroke-width="1"/>
   <text x="550" y="416" text-anchor="middle" class="desc">PDB별 파라미터 설정</text>
   <text x="550" y="431" text-anchor="middle" class="desc">Lockdown Profile</text>
   <text x="550" y="446" text-anchor="middle" class="desc">클론 (Local/Remote/Refresh)</text>
 
   <!-- Relocate step 4 number -->
-  <rect x="530" y="315" width="40" height="25" rx="12" fill="#6F6BEA"/>
+  <rect x="530" y="315" width="40" height="25" rx="12" fill="#4a2e78"/>
   <text x="550" y="333" text-anchor="middle" class="badge" style="font-size:14px;">4</text>
   <!-- Remove misplaced step number by covering -->
   <rect x="110" y="320" width="40" height="25" fill="transparent"/>
@@ -104,8 +105,8 @@
 
   <!-- Summary box at bottom -->
   <rect x="40" y="340" width="380" height="105" class="box" rx="10"/>
-  <text x="230" y="365" text-anchor="middle" class="label" style="fill:#F59E0B;">핵심 학습 포인트 (Key Takeaway)</text>
-  <line x1="60" y1="375" x2="400" y2="375" stroke="#2A2B3D" stroke-width="1"/>
+  <text x="230" y="365" text-anchor="middle" class="label" style="fill:#8a5a10;">핵심 학습 포인트 (Key Takeaway)</text>
+  <line x1="60" y1="375" x2="400" y2="375" stroke="#f3efe4" stroke-width="1"/>
   <text x="60" y="395" class="desc" style="font-size:12px;">&#x2022; 구조를 먼저 이해하고 (뼈대) → 만들고 → 운영하고 → 복제한다</text>
   <text x="60" y="415" class="desc" style="font-size:12px;">&#x2022; 축1(구조+생성)이 축2(운영+관리)의 전제 조건</text>
   <text x="60" y="435" class="desc" style="font-size:12px;">&#x2022; 모든 단원이 CDB 아키텍처(02_01) 위에서 동작</text>
@@ -115,6 +116,6 @@
   <text x="142" y="320" class="sublabel" style="font-size:10px;">기반</text>
 
   <!-- Oracle 26ai badge -->
-  <rect x="620" y="475" width="160" height="28" rx="14" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="1"/>
-  <text x="700" y="494" text-anchor="middle" class="desc" style="fill:#F59E0B; font-size:12px; font-weight:600;">Oracle 26ai 기준</text>
+  <rect x="620" y="475" width="160" height="28" rx="14" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1"/>
+  <text x="700" y="494" text-anchor="middle" class="desc" style="fill:#8a5a10; font-size:12px; font-weight:600;">Oracle 26ai 기준</text>
 </svg>

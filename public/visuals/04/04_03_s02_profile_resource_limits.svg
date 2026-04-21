@@ -1,34 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
-    .imp { font-size: 12px; fill: #F43F5E; font-weight: 600; }
+    .imp { font-size: 12px; fill: #be123c; font-weight: 600; }
   </style>
 
   <text x="400" y="32" class="title" text-anchor="middle">프로파일을 통한 자원 제한 (Resource Limits via PROFILE)</text>
   <text x="400" y="52" class="subtitle" text-anchor="middle">자원 제한 + 비밀번호 관리를 하나의 프로파일로 통합 관리</text>
 
   <!-- Profile Structure -->
-  <rect x="250" y="70" width="300" height="45" class="box" fill="#6F6BEA" stroke="none"/>
-  <text x="400" y="88" class="label" text-anchor="middle" fill="#FFF">PROFILE (프로파일)</text>
-  <text x="400" y="105" class="small" text-anchor="middle" fill="#E2E8F0">각 사용자는 반드시 하나의 프로파일 할당</text>
+  <rect x="250" y="70" width="300" height="45" class="box" fill="#4a2e78" stroke="none"/>
+  <text x="400" y="88" class="label" text-anchor="middle" fill="#1a1a1a">PROFILE (프로파일)</text>
+  <text x="400" y="105" class="small" text-anchor="middle" fill="#1a1a1a">각 사용자는 반드시 하나의 프로파일 할당</text>
 
   <!-- Two branches -->
-  <line x1="330" y1="115" x2="200" y2="145" stroke="#3B82F6" stroke-width="1.5"/>
-  <line x1="470" y1="115" x2="600" y2="145" stroke="#10B981" stroke-width="1.5"/>
+  <line x1="330" y1="115" x2="200" y2="145" stroke="#2456a8" stroke-width="1.5"/>
+  <line x1="470" y1="115" x2="600" y2="145" stroke="#2f6a1c" stroke-width="1.5"/>
 
   <!-- Resource Limits -->
-  <rect x="30" y="145" width="360" height="280" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
-  <rect x="30" y="145" width="360" height="28" rx="8" ry="8" fill="#3B82F6"/>
-  <text x="210" y="164" class="label" text-anchor="middle" fill="#FFF">자원 제한 (Resource Limits)</text>
+  <rect x="30" y="145" width="360" height="280" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
+  <rect x="30" y="145" width="360" height="28" rx="8" ry="8" fill="#2456a8"/>
+  <text x="210" y="164" class="label" text-anchor="middle" fill="#1a1a1a">자원 제한 (Resource Limits)</text>
 
-  <rect x="50" y="185" width="320" height="25" class="box" fill="#F43F5E" opacity="0.15" stroke="#F43F5E" stroke-width="1"/>
+  <rect x="50" y="185" width="320" height="25" class="box" fill="#be123c" opacity="0.15" stroke="#be123c" stroke-width="1"/>
   <text x="210" y="202" class="imp" text-anchor="middle">RESOURCE_LIMIT = TRUE 필수!</text>
 
   <text x="50" y="230" class="sublabel">세션 레벨 (초과 시 세션 종료):</text>
@@ -53,12 +54,12 @@
   <text x="170" y="412" class="small">Shared Server에서만 적용</text>
 
   <!-- Password Management -->
-  <rect x="410" y="145" width="360" height="280" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
-  <rect x="410" y="145" width="360" height="28" rx="8" ry="8" fill="#10B981"/>
-  <text x="590" y="164" class="label" text-anchor="middle" fill="#FFF">비밀번호 관리 (Password Mgmt)</text>
+  <rect x="410" y="145" width="360" height="280" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
+  <rect x="410" y="145" width="360" height="28" rx="8" ry="8" fill="#2f6a1c"/>
+  <text x="590" y="164" class="label" text-anchor="middle" fill="#1a1a1a">비밀번호 관리 (Password Mgmt)</text>
 
-  <rect x="430" y="185" width="320" height="25" class="box" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="1"/>
-  <text x="590" y="202" class="sublabel" text-anchor="middle" fill="#10B981">RESOURCE_LIMIT 무관, 항상 적용!</text>
+  <rect x="430" y="185" width="320" height="25" class="box" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="590" y="202" class="sublabel" text-anchor="middle" fill="#2f6a1c">RESOURCE_LIMIT 무관, 항상 적용!</text>
 
   <text x="430" y="230" class="code">PASSWORD_LIFE_TIME</text>
   <text x="610" y="230" class="small">유효 기간 180일</text>
@@ -81,7 +82,7 @@
   <text x="430" y="402" class="small">양쪽 조건 모두 충족 필요</text>
 
   <!-- Bottom notes -->
-  <rect x="30" y="440" width="740" height="50" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="30" y="440" width="740" height="50" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
   <text x="50" y="458" class="sublabel">DEFAULT 프로파일: 모든 파라미터 UNLIMITED | DROP PROFILE CASCADE: 사용자를 DEFAULT로 전환 후 삭제</text>
   <text x="50" y="478" class="code">DBA_PROFILES</text>
   <text x="155" y="478" class="small">프로파일 조회</text>

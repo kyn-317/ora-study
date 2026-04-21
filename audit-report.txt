@@ -1,0 +1,129 @@
+
+▸ public\visuals\01\01_01_s02_sql_parse_flow.svg — 9 issue(s)
+  [arrow-head-dangling] 9
+    · (400,110)→(400,130)
+    · (400,180)→(400,200)
+    · (490,228)→(560,228)
+    · (400,250)→(400,270)
+    · (290,315)→(180,315)
+    · (112,340)→(112,528)
+    · … 3 more
+
+▸ public\visuals\01\01_03_s06_undo_flow.svg — 8 issue(s)
+  [arrow-head-dangling] 8
+    · (200,102)→(250,102)
+    · (460,102)→(510,102)
+    · (400,220)→(200,280)
+    · (400,220)→(600,280)
+    · (275,445)→(335,445)
+    · (500,445)→(540,445)
+    · … 2 more
+
+▸ public\visuals\03\03_00_s04_connection_architecture.svg — 6 issue(s)
+  [arrow-head-dangling] 6
+    · (210,105)→(270,105)
+    · (510,138)→(570,138)
+    · (670,205)→(670,250)
+    · (500,300)→(530,300)
+    · (640,340)→(640,360)
+    · (560,392)→(270,392)
+
+▸ public\visuals\01\01_01_s04_memory_mgmt_comparison.svg — 4 issue(s)
+  [arrow-head-dangling] 4
+    · (170,473)→(170,468)
+    · (260,498)→(370,498)
+    · (475,473)→(475,468)
+    · (565,498)→(635,498)
+
+▸ public\visuals\01\01_01_s02_buffer_cache_lru.svg — 3 issue(s)
+  [arrow-head-dangling] 3
+    · (155,135)→(165,135)
+    · (620,135)→(635,135)
+    · (585,355)→(585,375)
+
+▸ public\visuals\01\01_01_s02_redo_log_buffer.svg — 3 issue(s)
+  [arrow-head-dangling] 3
+    · (150,142)→(210,142)
+    · (170,475)→(200,475)
+    · (345,475)→(375,475)
+
+▸ public\visuals\01\01_03_s02_controlfile_multiplex.svg — 3 issue(s)
+  [arrow-head-dangling] 3
+    · (310,140)→(150,195)
+    · (400,140)→(400,195)
+    · (490,140)→(650,195)
+
+▸ public\visuals\01\01_05_s06_multitenant_param_inherit.svg — 3 issue(s)
+  [arrow-head-dangling] 3
+    · (400,200)→(200,260)
+    · (400,200)→(400,260)
+    · (400,200)→(600,260)
+
+▸ public\visuals\04\04_02_s01_privilege_hierarchy.svg — 3 issue(s)
+  [arrow-head-dangling] 3
+    · (140,325)→(140,360)
+    · (400,325)→(400,360)
+    · (660,325)→(660,360)
+
+▸ public\visuals\04\04_03_s03_password_management.svg — 3 issue(s)
+  [arrow-head-dangling] 3
+    · (80,143)→(120,143)
+    · (160,143)→(260,143)
+    · (365,143)→(385,143)
+
+▸ public\visuals\05\05_04_s01_optimization_overview.svg — 3 issue(s)
+  [arrow-head-dangling] 3
+    · (200,135)→(225,135)
+    · (400,135)→(425,135)
+    · (600,135)→(625,135)
+
+▸ public\visuals\05\05_04_s04_row_migration_chaining.svg — 3 issue(s)
+  [arrow-head-dangling] 3
+    · (190,182)→(225,182)
+    · (535,182)→(560,182)
+    · (665,182)→(690,182)
+
+▸ public\visuals\00\00_00_s03_study_roadmap.svg — 2 issue(s)
+  [arrow-head-dangling] 2
+    · (50,412)→(90,412)
+    · (250,412)→(290,412)
+
+▸ public\visuals\03\03_00_s01_learning_flow.svg — 2 issue(s)
+  [arrow-head-dangling] 2
+    · (360,180)→(430,180)
+    · (360,340)→(430,340)
+
+▸ public\visuals\04\04_01_s06_privileged_auth_flow.svg — 2 issue(s)
+  [arrow-head-dangling] 2
+    · (400,110)→(400,140)
+    · (600,180)→(600,220)
+
+▸ public\visuals\07\07_02_s05_error_handling_log.svg — 2 issue(s)
+  [arrow-head-dangling] 2
+    · (400,110)→(400,130)
+    · (400,210)→(400,240)
+
+▸ public\visuals\01\01_01_s03_uga_location.svg — 1 issue(s)
+  [arrow-head-dangling] 1
+    · (135,142)→(160,142)
+
+▸ public\visuals\01\01_02_s01_process_architecture.svg — 1 issue(s)
+  [arrow-head-dangling] 1
+    · (250,135)→(330,135)
+
+▸ public\visuals\01\01_02_s06_select_query_flow.svg — 1 issue(s)
+  [arrow-head-dangling] 1
+    · (420,370)→(95,370)
+
+▸ public\visuals\05\05_01_s01_logical_storage_hierarchy.svg — 1 issue(s)
+  [arrow-head-dangling] 1
+    · (400,114)→(400,140)
+
+▸ public\visuals\05\05_03_s02_resumable_config_priority.svg — 1 issue(s)
+  [arrow-head-dangling] 1
+    · (430,130)→(385,130)
+
+── summary ──
+  scanned files:    194
+  flagged files:    21
+  total issues:     64

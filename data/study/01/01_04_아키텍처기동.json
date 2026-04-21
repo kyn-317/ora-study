@@ -52,11 +52,11 @@
       "visuals": [
         {
           "id": "v8",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A([\"<b>STARTUP 실행 전 체크리스트</b>\"]):::amber\n  A --> B[\"<b>1. 권한 확인</b><br/>SYSDBA 또는 SYSOPER 권한 필요\"]\n  B --> C{\"인증 방식\"}\n  C -- \"로컬\" --> C1[\"<b>OS 인증</b><br/>OSDBA/OSOPER 그룹<br/>/ AS SYSDBA\"]:::green\n  C -- \"원격\" --> C2[\"<b>Password File 인증</b><br/>orapwd 유틸리티로 생성\"]:::blue\n  A --> D[\"<b>2. 파라미터 파일 확인</b><br/>spfile&lt;SID&gt;.ora 또는 init&lt;SID&gt;.ora\"]\n  D --> D1{\"파라미터 파일 검색 순서\"}\n  D1 --> D2[\"1순위: spfile&lt;SID&gt;.ora (SPFILE)\"]:::blue\n  D2 --> D3[\"2순위: init&lt;SID&gt;.ora (PFILE)\"]:::blue\n  D3 --> D4[\"명시 지정: STARTUP PFILE='경로'\"]:::blue\n  A --> E[\"<b>3. 비밀번호 파일 확인 (원격 접속 시)</b><br/>REMOTE_LOGIN_PASSWORDFILE 파라미터\"]\n  E --> E1[\"EXCLUSIVE: 단일 인스턴스, 사용자 추가 가능\"]:::green\n  E --> E2[\"SHARED: RAC 공유, 사용자 추가 불가\"]:::amber\n  E --> E3[\"NONE: 원격 특권 접속 불가\"]:::red\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "기동 사전 조건 체크리스트: 필요 권한(SYSDBA/SYSOPER), 인증 방식(OS/Password File), 파라미터 파일 검색 순서, 비밀번호 파일 모드(EXCLUSIVE/SHARED/NONE)",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_04_s02_v8_mermaid.svg"
         }
       ]
     },
@@ -124,11 +124,11 @@
         },
         {
           "id": "v07",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  CLOSED[\"<b>SHUTDOWN</b><br/>파일 접근 불가\"]:::red\n  NOMOUNT[\"<b>NOMOUNT</b><br/>SGA + 프로세스 기동<br/>파라미터 파일 읽음\"]:::amber\n  MOUNT[\"<b>MOUNT</b><br/>컨트롤 파일 열림<br/>관리 작업 가능\"]:::amber\n  OPEN[\"<b>OPEN</b><br/>데이터파일 + Redo 열림<br/>일반 사용자 접속 가능\"]:::green\n\n  CLOSED -->|\"STARTUP NOMOUNT\"| NOMOUNT\n  NOMOUNT -->|\"ALTER DATABASE MOUNT\"| MOUNT\n  MOUNT -->|\"ALTER DATABASE OPEN\"| OPEN\n  OPEN -.->|\"SHUTDOWN\"| CLOSED\n  MOUNT -.->|\"SHUTDOWN\"| CLOSED\n  NOMOUNT -.->|\"SHUTDOWN\"| CLOSED\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "인스턴스 기동/종료 상태 전이 — SHUTDOWN → NOMOUNT → MOUNT → OPEN",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_04_s03_v07_mermaid.svg"
         }
       ]
     },
@@ -257,11 +257,11 @@
       "visuals": [
         {
           "id": "v9",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  NM[\"<b>NOMOUNT 이상</b>\"]:::amber\n  MT[\"<b>MOUNT 이상</b>\"]:::blue\n  OP[\"<b>OPEN (CDB)</b>\"]:::green\n  NM --> V1[\"<b>V$INSTANCE</b><br/>인스턴스 상태(STATUS)<br/>기동 시각(STARTUP_TIME) · 호스트명 · 버전\"]:::amber\n  NM --> V2[\"<b>V$PARAMETER</b><br/>현재 설정된 초기화 파라미터 값\"]:::amber\n  NM --> V3[\"<b>V$SPPARAMETER</b><br/>SPFILE에 설정된 파라미터 값\"]:::amber\n  NM --> V4[\"<b>V$DIAG_INFO</b><br/>ADR 경로 정보\"]:::amber\n  MT --> V5[\"<b>V$DATABASE</b><br/>데이터베이스 이름 · OPEN_MODE · DBID · 로그 모드\"]:::blue\n  MT --> V6[\"<b>V$RECOVER_FILE</b><br/>복구가 필요한 데이터 파일 목록\"]:::blue\n  MT --> V7[\"<b>V$LOG</b><br/>온라인 Redo Log 그룹 상태\"]:::blue\n  OP --> V8[\"<b>V$PDBS</b><br/>PDB별 상태 · OPEN_MODE · RESTRICTED 여부\"]:::green\n  OP --> V9[\"<b>DBA_PDB_SAVED_STATES</b><br/>PDB의 SAVE STATE 설정 정보\"]:::green\n  OP --> V10[\"<b>V$CONTAINERS</b><br/>CDB$ROOT · PDB$SEED · 사용자 PDB 정보\"]:::green\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "기동 단계별 조회 가능한 주요 뷰 — NOMOUNT 이상(V$INSTANCE·V$PARAMETER 등), MOUNT 이상(V$DATABASE·V$LOG 등), OPEN(V$PDBS·V$CONTAINERS 등)",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_04_s06_v9_mermaid.svg"
         }
       ],
       "subsections": [
@@ -367,11 +367,11 @@
       "visuals": [
         {
           "id": "v10",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  N1[\"<b>Node 1</b><br/>Instance 1<br/>(SGA + Processes)\"]:::amber\n  N2[\"<b>Node 2</b><br/>Instance 2<br/>(SGA + Processes)\"]:::amber\n  IC[\"<b>Interconnect</b><br/>Cache Fusion — 노드 간 블록 전송\"]:::blue\n  N1 <-->|\"인터커넥트\"| IC\n  N2 <-->|\"인터커넥트\"| IC\n  IC --> CDB[\"<b>CDB (공유 스토리지 / ASM)</b>\"]:::green\n  CDB --> ROOT[\"<b>CDB$ROOT</b><br/>CON_ID=1 · 공통 메타데이터\"]:::green\n  CDB --> SEED[\"<b>PDB$SEED</b><br/>CON_ID=2 · READ ONLY · 새 PDB 템플릿\"]:::green\n  CDB --> PDB1[\"<b>PDB1</b><br/>CON_ID=3 이상\"]:::green\n  CDB --> PDBN[\"<b>PDBn</b><br/>PDB 수 제한 없음\"]:::green\n  PDB1 -->|\"Preferred: 인스턴스1<br/>Available: 인스턴스2\"| SVC[\"<b>PDB 서비스 매핑</b><br/>srvctl로 노드별 워크로드 분산\"]:::blue\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "멀티테넌트 + RAC 조합 — 각 노드의 인스턴스가 인터커넥트(Cache Fusion)를 통해 하나의 CDB(CDB$ROOT·PDB$SEED·사용자 PDB)를 공유하고 PDB 서비스를 노드별로 매핑",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_04_s09_v10_mermaid.svg"
         }
       ],
       "subsections": [

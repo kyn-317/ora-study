@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -14,43 +15,43 @@
   <text x="400" y="50" class="subtitle" text-anchor="middle">tnsnames.ora 없이 접속 문자열로 직접 연결</text>
 
   <!-- Basic syntax -->
-  <rect x="50" y="70" width="700" height="55" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="50" y="70" width="700" height="55" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
   <text x="80" y="92" class="sublabel">기본 구문:</text>
   <text x="80" y="112" class="code" font-size="14">[//]host[:port][/service_name]</text>
   <text x="500" y="92" class="small">NAMES.DIRECTORY_PATH에 EZCONNECT 필요</text>
 
   <!-- Syntax breakdown -->
-  <rect x="50" y="140" width="700" height="70" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="80" y="162" class="label" fill="#3B82F6" font-size="12">구문 분해 (Syntax Breakdown)</text>
+  <rect x="50" y="140" width="700" height="70" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="80" y="162" class="label" fill="#2456a8" font-size="12">구문 분해 (Syntax Breakdown)</text>
 
   <text x="80" y="185" class="code" font-size="15">sqlplus  scott/tiger@dbserver01  :  1521  /  orcl.example.com</text>
 
   <!-- Annotations with lines -->
-  <line x1="240" y1="192" x2="240" y2="205" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="240" y="215" class="small" text-anchor="middle" fill="#6F6BEA">host (필수)</text>
+  <line x1="240" y1="192" x2="240" y2="205" stroke="#4a2e78" stroke-width="1"/>
+  <text x="240" y="215" class="small" text-anchor="middle" fill="#4a2e78">host (필수)</text>
 
-  <line x1="365" y1="192" x2="365" y2="205" stroke="#F59E0B" stroke-width="1"/>
-  <text x="365" y="215" class="small" text-anchor="middle" fill="#F59E0B">port (기본 1521)</text>
+  <line x1="365" y1="192" x2="365" y2="205" stroke="#8a5a10" stroke-width="1"/>
+  <text x="365" y="215" class="small" text-anchor="middle" fill="#8a5a10">port (기본 1521)</text>
 
-  <line x1="520" y1="192" x2="520" y2="205" stroke="#10B981" stroke-width="1"/>
-  <text x="520" y="215" class="small" text-anchor="middle" fill="#10B981">service_name</text>
+  <line x1="520" y1="192" x2="520" y2="205" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="520" y="215" class="small" text-anchor="middle" fill="#2f6a1c">service_name</text>
 
   <!-- Examples -->
   <text x="400" y="245" class="label" text-anchor="middle">사용 예시</text>
 
-  <rect x="50" y="258" width="340" height="100" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1"/>
-  <text x="65" y="278" class="sublabel" fill="#10B981">기본 사용법</text>
+  <rect x="50" y="258" width="340" height="100" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="65" y="278" class="sublabel" fill="#2f6a1c">기본 사용법</text>
   <text x="65" y="298" class="code">sqlplus user/pwd@host:1521/svc</text>
   <text x="65" y="316" class="code">sqlplus user/pwd@host/svc</text>
   <text x="65" y="334" class="code">tnsping host:1521/svc</text>
   <text x="65" y="350" class="small">포트 생략 시 기본 1521 사용</text>
 
-  <rect x="410" y="258" width="340" height="100" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1"/>
-  <text x="425" y="278" class="sublabel" fill="#F59E0B">Easy Connect Plus (Oracle 26ai)</text>
+  <rect x="410" y="258" width="340" height="100" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="1"/>
+  <text x="425" y="278" class="sublabel" fill="#8a5a10">Easy Connect Plus (Oracle 26ai)</text>
   <text x="425" y="298" class="code">host1,host2:1521/svc?connect_timeout=10</text>
   <text x="425" y="316" class="code">host:1521/svc?transport_connect_timeout=3</text>
   <text x="425" y="334" class="small">다중 호스트, 타임아웃, LB 옵션 지원</text>
-  <text x="425" y="350" class="small" fill="#F59E0B">TLS 인증서 경로 직접 지정 가능</text>
+  <text x="425" y="350" class="small" fill="#8a5a10">TLS 인증서 경로 직접 지정 가능</text>
 
   <!-- Limitations -->
   <rect x="50" y="370" width="700" height="0" class="box" fill="none"/>

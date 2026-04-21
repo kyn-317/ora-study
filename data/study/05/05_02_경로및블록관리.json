@@ -52,11 +52,11 @@
       "visuals": [
         {
           "id": "v6",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>데이터 파일 이동 방식</b>\"]:::amber\n  B[\"<b>온라인 이동</b><br/>ALTER DATABASE MOVE DATAFILE\"]:::green\n  C[\"<b>오프라인 이동</b><br/>RENAME FILE / RENAME DATAFILE\"]:::blue\n  B1[\"<b>서비스 중단</b><br/>불필요 (DML 계속 가능)\"]:::green\n  B2[\"<b>파일 복사</b><br/>Oracle 자동 수행 (섀도 복사)\"]:::green\n  B3[\"<b>원본 삭제</b><br/>기본적으로 자동 삭제<br/>(KEEP 옵션으로 유지 가능)\"]:::green\n  B4[\"<b>최소 버전</b><br/>Oracle 12c 이상\"]:::green\n  C1[\"<b>서비스 중단</b><br/>테이블스페이스 오프라인 필요\"]:::blue\n  C2[\"<b>파일 복사</b><br/>DBA가 OS 레벨에서 수동 복사\"]:::blue\n  C3[\"<b>원본 삭제</b><br/>DBA가 수동 삭제\"]:::blue\n  C4[\"<b>지원 버전</b><br/>모든 Oracle 버전\"]:::blue\n  A -->|\"운영 중 마이그레이션\"| B\n  A -->|\"유지보수 윈도우\"| C\n  B --> B1\n  B --> B2\n  B --> B3\n  B --> B4\n  C --> C1\n  C --> C2\n  C --> C3\n  C --> C4\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "데이터 파일 이동 방식 비교 — 온라인(MOVE DATAFILE) vs 오프라인(RENAME FILE)",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/05/05_02_s01_v6_mermaid.svg"
         }
       ]
     },
@@ -119,11 +119,11 @@
       "visuals": [
         {
           "id": "v7",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>ALTER DATABASE MOVE DATAFILE</b><br/>온라인 데이터 파일 이동\"]:::amber\n  B[\"<b>구문</b><br/>MOVE DATAFILE '원본' TO '대상'\"]:::blue\n  OPT[\"<b>옵션 선택</b>\"]:::amber\n  R[\"<b>REUSE</b><br/>대상 경로에 기존 파일 있을 때<br/>덮어쓰기 허용\"]:::blue\n  K[\"<b>KEEP</b><br/>이동 완료 후<br/>원본 파일 유지\"]:::blue\n  RK[\"<b>REUSE + KEEP</b><br/>덮어쓰기 허용 + 원본 유지\"]:::blue\n  E[\"<b>섀도 복사 실행</b><br/>Oracle이 자동으로 파일 복사<br/>DML 계속 허용\"]:::green\n  F[\"<b>컨트롤 파일 경로 갱신</b><br/>새 위치로 자동 업데이트\"]:::green\n  G[\"<b>원본 파일 처리</b>\"]:::amber\n  G1[\"<b>자동 삭제</b><br/>(KEEP 미사용 기본)\"]:::red\n  G2[\"<b>원본 유지</b><br/>(KEEP 옵션)\"]:::green\n  A --> B\n  B --> OPT\n  OPT -->|\"기존 파일 존재\"| R\n  OPT -->|\"원본 보존 필요\"| K\n  OPT -->|\"복합\"| RK\n  B --> E\n  E --> F\n  F --> G\n  G -->|\"KEEP 없음\"| G1\n  G -->|\"KEEP 있음\"| G2\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "ALTER DATABASE MOVE DATAFILE 절차 — 옵션(REUSE/KEEP), 섀도 복사, 컨트롤 파일 갱신",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/05/05_02_s02_v7_mermaid.svg"
         }
       ]
     },
@@ -247,11 +247,11 @@
       "visuals": [
         {
           "id": "v8",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>비표준 블록 사이즈 테이블스페이스 사용</b>\"]:::amber\n  B[\"<b>DB_nK_CACHE_SIZE 설정 필수</b><br/>SGA에 별도 버퍼 캐시 할당\"]:::blue\n  B1[\"<b>DB_2K_CACHE_SIZE</b><br/>2KB 블록용\"]:::blue\n  B2[\"<b>DB_4K_CACHE_SIZE</b><br/>4KB 블록용\"]:::blue\n  B3[\"<b>DB_16K_CACHE_SIZE</b><br/>16KB 블록용\"]:::blue\n  B4[\"<b>DB_32K_CACHE_SIZE</b><br/>32KB 블록용\"]:::blue\n  C[\"<b>주의</b><br/>DB_BLOCK_SIZE와 동일한<br/>사이즈 설정 불가\"]:::red\n  D[\"<b>ASMM / AMM 환경</b><br/>자동 조절되지 않음<br/>명시적 설정 필수\"]:::red\n  E[\"<b>CREATE TABLESPACE ... BLOCKSIZE nK</b><br/>비표준 블록 사이즈 테이블스페이스 생성\"]:::green\n  F[\"<b>주요 사용 사례</b>\"]:::amber\n  F1[\"<b>Transportable Tablespace</b><br/>블록 사이즈 다른 DB 간 이동\"]:::green\n  F2[\"<b>DW/DSS 전용</b><br/>16KB~32KB<br/>Full Table Scan 효율\"]:::green\n  A --> B\n  B --> B1\n  B --> B2\n  B --> B3\n  B --> B4\n  B --> C\n  B --> D\n  B --> E\n  E --> F\n  F --> F1\n  F --> F2\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "비표준 블록 사이즈 사용 흐름 — DB_nK_CACHE_SIZE 설정 필수, 제한 사항, 주요 사용 사례",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/05/05_02_s06_v8_mermaid.svg"
         }
       ],
       "content": "Oracle Database에서는 표준 블록 사이즈(DB_BLOCK_SIZE) 외에 **비표준 블록 사이즈(Non-Standard Block Size / 非標準ブロック・サイズ)**를 사용하는 테이블스페이스를 생성할 수 있습니다. 이를 위해 **DB_nK_CACHE_SIZE** 파라미터를 설정하여 SGA 내에 별도의 버퍼 캐시를 할당해야 합니다.\n\n## DB_nK_CACHE_SIZE 파라미터\n\n| 파라미터 | 블록 사이즈 | 설명 |\n|---|---|---|\n| **DB_2K_CACHE_SIZE** | 2KB | 2KB 블록용 버퍼 캐시 크기 |\n| **DB_4K_CACHE_SIZE** | 4KB | 4KB 블록용 버퍼 캐시 크기 |\n| **DB_8K_CACHE_SIZE** | 8KB | 8KB 블록용 버퍼 캐시 크기 (DB_BLOCK_SIZE=8KB이면 사용 불가) |\n| **DB_16K_CACHE_SIZE** | 16KB | 16KB 블록용 버퍼 캐시 크기 |\n| **DB_32K_CACHE_SIZE** | 32KB | 32KB 블록용 버퍼 캐시 크기 |\n\n> **주의**: DB_BLOCK_SIZE와 동일한 사이즈의 DB_nK_CACHE_SIZE는 설정할 수 없습니다. 예: DB_BLOCK_SIZE=8192이면 DB_8K_CACHE_SIZE 설정 불가.\n\n## 비표준 블록 사이즈 테이블스페이스 생성\n\n```sql\n-- 16KB 블록용 버퍼 캐시 할당\nALTER SYSTEM SET DB_16K_CACHE_SIZE = 64M;\n\n-- 16KB 블록 사이즈 테이블스페이스 생성\nCREATE TABLESPACE ts_16k\n  DATAFILE '/u01/oradata/orcl/ts_16k01.dbf' SIZE 500M\n  BLOCKSIZE 16K;\n```",

@@ -107,18 +107,14 @@ export default async function Home() {
 function chapterTitleFor(id: string): string {
   const map: Record<string, string> = {
     '00': 'Introduction',
-    '01': 'Architecture',
-    '02': 'Storage Structures',
-    '03': 'User & Security',
-    '04': 'Networking',
-    '05': 'Memory Management',
-    '06': 'Performance',
-    '07': 'Backup & Recovery',
-    '08': 'Data Movement',
-    '09': 'Multitenant',
-    '10': 'Automatic Management',
-    '11': 'Upgrade & Patching',
-    '12': 'Advanced Topics',
+    '01': 'Architecture & Instance',
+    '02': 'Multitenant (CDB/PDB)',
+    '03': 'Tools & Net Services',
+    '04': 'Security & Auditing',
+    '05': 'Storage & Tablespace',
+    '06': 'UNDO Management',
+    '07': 'Data Movement',
+    '08': 'Performance & Automation',
   };
   return map[id] ?? `Chapter ${id}`;
 }
@@ -126,18 +122,14 @@ function chapterTitleFor(id: string): string {
 function chapterDescFor(id: string): string {
   const map: Record<string, string> = {
     '00': '시험 개요와 학습 가이드',
-    '01': 'Oracle DB 아키텍처의 핵심 구성 요소',
-    '02': '테이블스페이스 · 데이터파일 · 세그먼트',
-    '03': 'User · Profile · Privilege · Role 관리',
-    '04': 'Listener · Service · Network 구성',
-    '05': 'SGA · PGA · Buffer Cache 튜닝',
-    '06': 'AWR · ADDM · SQL Tuning',
-    '07': 'RMAN 기반 백업·복구 전략',
-    '08': 'Data Pump · SQL*Loader · External Table',
-    '09': 'CDB · PDB · Application Container',
-    '10': 'Autonomous · AMM · Advisor',
-    '11': 'DBCA · Upgrade · RU 패치',
-    '12': '심화 주제 및 기출 분석',
+    '01': '메모리(SGA/PGA) · 프로세스 · 저장구조 · 기동/종료 · 파라미터',
+    '02': 'CDB$ROOT · PDB$SEED · PDB 생성/관리/클론/Unplug-Plug',
+    '03': 'DBCA · SQL*Plus · EM · 리스너 · 네이밍 · DB Link',
+    '04': '사용자/인증 · 권한/롤 · 프로파일 · 통합 감사 · FGA',
+    '05': '테이블스페이스 · 블록 · ROWID · Resumable · Shrink · 압축',
+    '06': '읽기 일관성 · 롤백 · Flashback · Temp/Local UNDO',
+    '07': 'External Table · SQL*Loader · Data Pump (expdp/impdp)',
+    '08': 'AWR · ADDM · Resource Manager · 어드바이저 · AutoTask',
   };
   return map[id] ?? '챕터별 세부 주제 학습';
 }

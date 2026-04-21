@@ -1,31 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 680">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
     .step { font-size: 12px; font-weight: 700; }
   </style>
 
   <defs>
     <marker id="ap" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#4a2e78"/>
     </marker>
     <marker id="ab" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#3B82F6"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#2456a8"/>
     </marker>
     <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#10B981"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#2f6a1c"/>
     </marker>
     <marker id="ay" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#F59E0B"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#8a5a10"/>
     </marker>
     <marker id="ar" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#F43F5E"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#be123c"/>
     </marker>
   </defs>
 
@@ -34,107 +35,107 @@
   <text x="400" y="48" text-anchor="middle" class="subtitle">DML and COMMIT Processing Flow — 프로세스 간 상호작용</text>
 
   <!-- ===== DML Phase ===== -->
-  <rect x="15" y="65" width="770" height="285" class="box" fill="rgba(59,130,246,0.03)" stroke="#3B82F6" stroke-width="1" stroke-dasharray="6,3"/>
-  <text x="400" y="85" text-anchor="middle" class="label" fill="#3B82F6">DML 실행 단계 (UPDATE emp SET sal=5000 WHERE empno=7788)</text>
+  <rect x="15" y="65" width="770" height="285" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="400" y="85" text-anchor="middle" class="label" fill="#2456a8">DML 실행 단계 (UPDATE emp SET sal=5000 WHERE empno=7788)</text>
 
   <!-- Step 1: SQL Parse -->
-  <rect x="30" y="100" width="145" height="50" class="box" fill="rgba(107,107,234,0.12)" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="102" y="120" text-anchor="middle" class="step" fill="#6F6BEA">1 SQL 파싱</text>
+  <rect x="30" y="100" width="145" height="50" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="102" y="120" text-anchor="middle" class="step" fill="#4a2e78">1 SQL 파싱</text>
   <text x="102" y="140" text-anchor="middle" class="small">Server Process</text>
 
-  <line x1="175" y1="125" x2="210" y2="125" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#ap)"/>
+  <line x1="175" y1="125" x2="210" y2="125" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ap)"/>
 
   <!-- Step 2: Buffer Cache check -->
-  <rect x="210" y="100" width="145" height="50" class="box" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="282" y="118" text-anchor="middle" class="step" fill="#3B82F6">2 블록 확인</text>
+  <rect x="210" y="100" width="145" height="50" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="282" y="118" text-anchor="middle" class="step" fill="#2456a8">2 블록 확인</text>
   <text x="282" y="138" text-anchor="middle" class="small">Buffer Cache에서</text>
 
-  <line x1="355" y1="125" x2="390" y2="125" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#ab)"/>
+  <line x1="355" y1="125" x2="390" y2="125" stroke="#2456a8" stroke-width="1.5" marker-end="url(#ab)"/>
 
   <!-- Step 3: Undo -->
-  <rect x="390" y="100" width="175" height="50" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="477" y="118" text-anchor="middle" class="step" fill="#F59E0B">3 Undo 기록</text>
+  <rect x="390" y="100" width="175" height="50" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="477" y="118" text-anchor="middle" class="step" fill="#8a5a10">3 Undo 기록</text>
   <text x="477" y="138" text-anchor="middle" class="small">변경 전 이미지 (Before Image)</text>
 
-  <line x1="565" y1="125" x2="600" y2="125" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#ay)"/>
+  <line x1="565" y1="125" x2="600" y2="125" stroke="#8a5a10" stroke-width="1.5" marker-end="url(#ay)"/>
 
   <!-- Step 4: Modify Block -->
-  <rect x="600" y="100" width="170" height="50" class="box" fill="rgba(244,63,94,0.12)" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="685" y="118" text-anchor="middle" class="step" fill="#F43F5E">4 블록 변경</text>
+  <rect x="600" y="100" width="170" height="50" class="box" fill="#f5d0d0" stroke="#be123c" stroke-width="1.5"/>
+  <text x="685" y="118" text-anchor="middle" class="step" fill="#be123c">4 블록 변경</text>
   <text x="685" y="138" text-anchor="middle" class="small">Dirty Buffer 생성</text>
 
   <!-- Arrow down from step 4 -->
-  <line x1="685" y1="150" x2="685" y2="180" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="685" y1="150" x2="685" y2="180" stroke="#be123c" stroke-width="1.5" marker-end="url(#ar)"/>
 
   <!-- Step 5: Redo Entry -->
-  <rect x="390" y="180" width="380" height="55" class="box" fill="rgba(244,63,94,0.08)" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="580" y="200" text-anchor="middle" class="step" fill="#F43F5E">5 Redo Entry 생성 → Redo Log Buffer에 기록</text>
+  <rect x="390" y="180" width="380" height="55" class="box" fill="#f5d0d0" stroke="#be123c" stroke-width="1.5"/>
+  <text x="580" y="200" text-anchor="middle" class="step" fill="#be123c">5 Redo Entry 생성 → Redo Log Buffer에 기록</text>
   <text x="580" y="222" text-anchor="middle" class="small">데이터 변경 Redo + Undo 변경 Redo (Undo의 Redo)</text>
 
   <!-- SGA visualization -->
-  <rect x="30" y="250" width="750" height="85" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1"/>
-  <text x="400" y="270" text-anchor="middle" class="sublabel" fill="#3B82F6">SGA 상태 (After DML)</text>
+  <rect x="30" y="250" width="750" height="85" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1"/>
+  <text x="400" y="270" text-anchor="middle" class="sublabel" fill="#2456a8">SGA 상태 (After DML)</text>
 
-  <rect x="50" y="280" width="160" height="40" class="box" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="50" y="280" width="160" height="40" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1"/>
   <text x="130" y="300" text-anchor="middle" class="sublabel">Buffer Cache</text>
   <text x="130" y="315" text-anchor="middle" class="code">Dirty Buffer (변경됨)</text>
 
-  <rect x="230" y="280" width="160" height="40" class="box" fill="rgba(244,63,94,0.12)" stroke="#F43F5E" stroke-width="1"/>
+  <rect x="230" y="280" width="160" height="40" class="box" fill="#f5d0d0" stroke="#be123c" stroke-width="1"/>
   <text x="310" y="300" text-anchor="middle" class="sublabel">Redo Log Buffer</text>
   <text x="310" y="315" text-anchor="middle" class="code">Redo Entries 축적</text>
 
-  <rect x="410" y="280" width="160" height="40" class="box" fill="rgba(245,158,11,0.12)" stroke="#F59E0B" stroke-width="1"/>
+  <rect x="410" y="280" width="160" height="40" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1"/>
   <text x="490" y="300" text-anchor="middle" class="sublabel">Undo Segment</text>
   <text x="490" y="315" text-anchor="middle" class="code">Before Image 저장</text>
 
-  <rect x="590" y="280" width="170" height="40" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1"/>
+  <rect x="590" y="280" width="170" height="40" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1"/>
   <text x="675" y="300" text-anchor="middle" class="sublabel">Lock 획득</text>
   <text x="675" y="315" text-anchor="middle" class="code">Row-Level Lock (TX)</text>
 
   <!-- ===== COMMIT Phase ===== -->
-  <rect x="15" y="355" width="770" height="200" class="box" fill="rgba(16,185,129,0.03)" stroke="#10B981" stroke-width="1" stroke-dasharray="6,3"/>
-  <text x="400" y="378" text-anchor="middle" class="label" fill="#10B981">COMMIT 단계</text>
+  <rect x="15" y="355" width="770" height="200" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="400" y="378" text-anchor="middle" class="label" fill="#2f6a1c">COMMIT 단계</text>
 
   <!-- C1: COMMIT issued -->
-  <rect x="30" y="395" width="140" height="45" class="box" fill="rgba(107,107,234,0.12)" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="100" y="413" text-anchor="middle" class="step" fill="#6F6BEA">C1 COMMIT 실행</text>
+  <rect x="30" y="395" width="140" height="45" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="100" y="413" text-anchor="middle" class="step" fill="#4a2e78">C1 COMMIT 실행</text>
   <text x="100" y="432" text-anchor="middle" class="code">User → COMMIT;</text>
 
-  <line x1="170" y1="418" x2="210" y2="418" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#ap)"/>
+  <line x1="170" y1="418" x2="210" y2="418" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ap)"/>
 
   <!-- C2: COMMIT Redo -->
-  <rect x="210" y="395" width="170" height="45" class="box" fill="rgba(244,63,94,0.12)" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="295" y="413" text-anchor="middle" class="step" fill="#F43F5E">C2 COMMIT Redo 기록</text>
+  <rect x="210" y="395" width="170" height="45" class="box" fill="#f5d0d0" stroke="#be123c" stroke-width="1.5"/>
+  <text x="295" y="413" text-anchor="middle" class="step" fill="#be123c">C2 COMMIT Redo 기록</text>
   <text x="295" y="432" text-anchor="middle" class="small">Redo Log Buffer에</text>
 
-  <line x1="380" y1="418" x2="420" y2="418" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="380" y1="418" x2="420" y2="418" stroke="#be123c" stroke-width="1.5" marker-end="url(#ar)"/>
 
   <!-- C3: LGWR writes -->
-  <rect x="420" y="390" width="170" height="55" class="box" fill="rgba(244,63,94,0.15)" stroke="#F43F5E" stroke-width="2"/>
-  <text x="505" y="410" text-anchor="middle" class="step" fill="#F43F5E">C3 LGWR 기록</text>
+  <rect x="420" y="390" width="170" height="55" class="box" fill="#f5d0d0" stroke="#be123c" stroke-width="2"/>
+  <text x="505" y="410" text-anchor="middle" class="step" fill="#be123c">C3 LGWR 기록</text>
   <text x="505" y="428" text-anchor="middle" class="small">Redo → 온라인 Redo Log</text>
   <text x="505" y="440" text-anchor="middle" class="code">Log Force at Commit</text>
 
-  <line x1="590" y1="418" x2="630" y2="418" stroke="#10B981" stroke-width="2" marker-end="url(#ag)"/>
+  <line x1="590" y1="418" x2="630" y2="418" stroke="#2f6a1c" stroke-width="2" marker-end="url(#ag)"/>
 
   <!-- C4: Success -->
-  <rect x="630" y="395" width="140" height="45" class="box" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="2"/>
-  <text x="700" y="413" text-anchor="middle" class="step" fill="#10B981">C4 COMMIT 성공</text>
+  <rect x="630" y="395" width="140" height="45" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="2"/>
+  <text x="700" y="413" text-anchor="middle" class="step" fill="#2f6a1c">C4 COMMIT 성공</text>
   <text x="700" y="432" text-anchor="middle" class="small">사용자에게 반환</text>
 
   <!-- C5: DBWn async -->
-  <rect x="200" y="465" width="350" height="45" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="5,3"/>
-  <text x="375" y="485" text-anchor="middle" class="step" fill="#F59E0B">C5 DBWn 비동기 기록 (나중에)</text>
+  <rect x="200" y="465" width="350" height="45" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="375" y="485" text-anchor="middle" class="step" fill="#8a5a10">C5 DBWn 비동기 기록 (나중에)</text>
   <text x="375" y="502" text-anchor="middle" class="small">Dirty Buffer → 데이터 파일 (COMMIT 시점 아님!)</text>
 
-  <line x1="505" y1="445" x2="375" y2="465" stroke="#F59E0B" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ay)"/>
-  <text x="455" y="458" class="small" fill="#F59E0B">비동기</text>
+  <line x1="505" y1="445" x2="375" y2="465" stroke="#8a5a10" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ay)"/>
+  <text x="455" y="458" class="small" fill="#8a5a10">비동기</text>
 
   <!-- Key insight box -->
-  <rect x="15" y="575" width="770" height="95" class="box" fill="rgba(244,63,94,0.06)" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="400" y="600" text-anchor="middle" class="label" fill="#F43F5E">핵심: COMMIT과 데이터 파일 기록의 분리</text>
+  <rect x="15" y="575" width="770" height="95" class="box" fill="#f5d0d0" stroke="#be123c" stroke-width="1.5"/>
+  <text x="400" y="600" text-anchor="middle" class="label" fill="#be123c">핵심: COMMIT과 데이터 파일 기록의 분리</text>
 
   <text x="35" y="625" class="sublabel">COMMIT 성공 = Redo Log에 기록 완료 (LGWR)</text>
-  <text x="35" y="645" class="sublabel" fill="#F43F5E">COMMIT 성공 =/= 데이터 파일에 기록 완료 (DBWn은 나중에 비동기)</text>
-  <text x="35" y="665" class="sublabel" fill="#10B981">장애 시 복구: SMON이 Redo Log를 사용하여 Roll Forward → COMMIT된 데이터 복구 보장</text>
+  <text x="35" y="645" class="sublabel" fill="#be123c">COMMIT 성공 =/= 데이터 파일에 기록 완료 (DBWn은 나중에 비동기)</text>
+  <text x="35" y="665" class="sublabel" fill="#2f6a1c">장애 시 복구: SMON이 Redo Log를 사용하여 Roll Forward → COMMIT된 데이터 복구 보장</text>
 </svg>

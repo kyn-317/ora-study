@@ -1,41 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #94A3B8; }
-    .code { font-family: monospace; font-size: 12px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #787368; }
+    .code { font-family: monospace; font-size: 12px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .detail { font-size: 12px; }
     .conn-label { font-size: 11px; font-weight: 600; }
-    .box { fill: rgba(255,255,255,0.05); stroke: #2A2B3D; stroke-width: 1.5; rx: 8; }
-    .box-primary { fill: rgba(111,107,234,0.15); stroke: #6F6BEA; stroke-width: 2; rx: 12; }
-    .box-blue { fill: rgba(59,130,246,0.12); stroke: #3B82F6; stroke-width: 2; rx: 12; }
-    .box-yellow { fill: rgba(245,158,11,0.12); stroke: #F59E0B; stroke-width: 2; rx: 12; }
-    .box-green { fill: rgba(16,185,129,0.12); stroke: #10B981; stroke-width: 2; rx: 12; }
-    .arrow-purple { stroke: #6F6BEA; stroke-width: 2; fill: none; marker-end: url(#arr-purple); }
-    .arrow-blue { stroke: #3B82F6; stroke-width: 2; fill: none; marker-end: url(#arr-blue); }
-    .arrow-yellow { stroke: #F59E0B; stroke-width: 2; fill: none; marker-end: url(#arr-yellow); }
-    .arrow-green { stroke: #10B981; stroke-width: 2; fill: none; marker-end: url(#arr-green); }
-    .arrow-red { stroke: #EF4444; stroke-width: 1.5; fill: none; marker-end: url(#arr-red); stroke-dasharray: 6,3; }
+    .box { fill: rgba(42,42,42,0.05); stroke: #f3efe4; stroke-width: 1.5; rx: 8; }
+    .box-primary { fill: #d8cfe5; stroke: #4a2e78; stroke-width: 2; rx: 12; }
+    .box-blue { fill: #dee5f5; stroke: #2456a8; stroke-width: 2; rx: 12; }
+    .box-yellow { fill: #f0ddb3; stroke: #8a5a10; stroke-width: 2; rx: 12; }
+    .box-green { fill: #cfe1b8; stroke: #2f6a1c; stroke-width: 2; rx: 12; }
+    .arrow-purple { stroke: #4a2e78; stroke-width: 2; fill: none; marker-end: url(#arr-purple); }
+    .arrow-blue { stroke: #2456a8; stroke-width: 2; fill: none; marker-end: url(#arr-blue); }
+    .arrow-yellow { stroke: #8a5a10; stroke-width: 2; fill: none; marker-end: url(#arr-yellow); }
+    .arrow-green { stroke: #2f6a1c; stroke-width: 2; fill: none; marker-end: url(#arr-green); }
+    .arrow-red { stroke: #be123c; stroke-width: 1.5; fill: none; marker-end: url(#arr-red); stroke-dasharray: 6,3; }
     .conn-line { stroke-width: 2.5; fill: none; opacity: 0.7; }
   </style>
   <defs>
     <marker id="arr-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a2e78" />
     </marker>
     <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2456a8" />
     </marker>
     <marker id="arr-yellow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#8a5a10" />
     </marker>
     <marker id="arr-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2f6a1c" />
     </marker>
     <marker id="arr-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#EF4444" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#be123c" />
     </marker>
   </defs>
 
@@ -48,84 +49,84 @@
   <!-- 04_01: Top-left -->
   <rect x="80" y="100" width="240" height="100" class="box-primary" />
   <text x="200" y="128" text-anchor="middle" class="code">04_01</text>
-  <text x="200" y="150" text-anchor="middle" class="label" fill="#6F6BEA">사용자 및 인증 관리</text>
+  <text x="200" y="150" text-anchor="middle" class="label" fill="#4a2e78">사용자 및 인증 관리</text>
   <text x="200" y="168" text-anchor="middle" class="sublabel">User &amp; Authentication</text>
   <text x="200" y="188" text-anchor="middle" class="small">CREATE USER, 인증 방식, 패스워드 파일</text>
 
   <!-- 04_02: Top-right -->
   <rect x="480" y="100" width="240" height="100" class="box-blue" />
   <text x="600" y="128" text-anchor="middle" class="code">04_02</text>
-  <text x="600" y="150" text-anchor="middle" class="label" fill="#3B82F6">권한 계층 및 롤</text>
+  <text x="600" y="150" text-anchor="middle" class="label" fill="#2456a8">권한 계층 및 롤</text>
   <text x="600" y="168" text-anchor="middle" class="sublabel">Privileges &amp; Roles</text>
   <text x="600" y="188" text-anchor="middle" class="small">GRANT, REVOKE, ADMIN/GRANT OPTION</text>
 
   <!-- 04_03: Bottom-left -->
   <rect x="80" y="310" width="240" height="100" class="box-green" />
   <text x="200" y="338" text-anchor="middle" class="code">04_03</text>
-  <text x="200" y="360" text-anchor="middle" class="label" fill="#10B981">보안 통제 및 자원 제한</text>
+  <text x="200" y="360" text-anchor="middle" class="label" fill="#2f6a1c">보안 통제 및 자원 제한</text>
   <text x="200" y="378" text-anchor="middle" class="sublabel">Controls &amp; Resource Limits</text>
   <text x="200" y="398" text-anchor="middle" class="small">PROFILE, QUOTA, PRIVILEGE_CAPTURE</text>
 
   <!-- 04_04: Bottom-right -->
   <rect x="480" y="310" width="240" height="100" class="box-yellow" />
   <text x="600" y="338" text-anchor="middle" class="code">04_04</text>
-  <text x="600" y="360" text-anchor="middle" class="label" fill="#F59E0B">감사 체계</text>
+  <text x="600" y="360" text-anchor="middle" class="label" fill="#8a5a10">감사 체계</text>
   <text x="600" y="378" text-anchor="middle" class="sublabel">Auditing System</text>
   <text x="600" y="398" text-anchor="middle" class="small">Unified Audit, FGA, 강제 감사</text>
 
   <!-- Connection 1: 04_01 -> 04_02 (CREATE USER -> GRANT CREATE SESSION) -->
   <path d="M320,140 L480,140" class="arrow-purple" />
-  <rect x="340" y="112" width="120" height="34" rx="6" fill="rgba(111,107,234,0.2)" stroke="#6F6BEA" stroke-width="1" />
-  <text x="400" y="127" text-anchor="middle" class="conn-label" fill="#6F6BEA">연결 1</text>
-  <text x="400" y="141" text-anchor="middle" class="small" fill="#E2E8F0">사용자 → 권한 부여</text>
+  <rect x="340" y="112" width="120" height="34" rx="6" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1" />
+  <text x="400" y="127" text-anchor="middle" class="conn-label" fill="#4a2e78">연결 1</text>
+  <text x="400" y="141" text-anchor="middle" class="small" fill="#1a1a1a">사용자 → 권한 부여</text>
 
   <!-- Connection 2: 04_01 -> 04_03 (User -> Profile) -->
   <path d="M200,200 L200,310" class="arrow-green" />
-  <rect x="110" y="235" width="180" height="34" rx="6" fill="rgba(16,185,129,0.2)" stroke="#10B981" stroke-width="1" />
-  <text x="200" y="250" text-anchor="middle" class="conn-label" fill="#10B981">연결 2</text>
-  <text x="200" y="264" text-anchor="middle" class="small" fill="#E2E8F0">프로파일 → 사용자 할당</text>
+  <rect x="110" y="235" width="180" height="34" rx="6" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1" />
+  <text x="200" y="250" text-anchor="middle" class="conn-label" fill="#2f6a1c">연결 2</text>
+  <text x="200" y="264" text-anchor="middle" class="small" fill="#1a1a1a">프로파일 → 사용자 할당</text>
 
   <!-- Connection 3: 04_02 <-> 04_03 (GRANT -> PRIVILEGE_CAPTURE -> REVOKE cycle) -->
-  <path d="M480,180 C440,180 360,300 320,340" class="conn-line" stroke="#3B82F6" marker-end="url(#arr-blue)" />
-  <path d="M320,370 C360,400 440,250 480,200" class="conn-line" stroke="#EF4444" stroke-dasharray="6,3" marker-end="url(#arr-red)" />
-  <rect x="335" y="250" width="145" height="34" rx="6" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1" />
-  <text x="407" y="265" text-anchor="middle" class="conn-label" fill="#3B82F6">연결 3 (순환)</text>
-  <text x="407" y="279" text-anchor="middle" class="small" fill="#E2E8F0">GRANT ↔ 분석 ↔ REVOKE</text>
+  <path d="M480,180 C440,180 360,300 320,340" class="conn-line" stroke="#2456a8" marker-end="url(#arr-blue)" />
+  <path d="M320,370 C360,400 440,250 480,200" class="conn-line" stroke="#be123c" stroke-dasharray="6,3" marker-end="url(#arr-red)" />
+  <rect x="335" y="250" width="145" height="34" rx="6" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
+  <text x="407" y="265" text-anchor="middle" class="conn-label" fill="#2456a8">연결 3 (순환)</text>
+  <text x="407" y="279" text-anchor="middle" class="small" fill="#1a1a1a">GRANT ↔ 분석 ↔ REVOKE</text>
 
   <!-- Connection 4: All -> 04_04 (Audit covers everything) -->
   <path d="M270,200 C350,250 450,290 530,310" class="arrow-yellow" stroke-dasharray="4,4" />
   <path d="M600,200 L600,310" class="arrow-yellow" stroke-dasharray="4,4" />
   <path d="M280,410 L480,390" class="arrow-yellow" stroke-dasharray="4,4" />
 
-  <rect x="430" y="240" width="160" height="34" rx="6" fill="rgba(245,158,11,0.2)" stroke="#F59E0B" stroke-width="1" />
-  <text x="510" y="255" text-anchor="middle" class="conn-label" fill="#F59E0B">연결 4</text>
-  <text x="510" y="269" text-anchor="middle" class="small" fill="#E2E8F0">모든 활동 → 감사 추적</text>
+  <rect x="430" y="240" width="160" height="34" rx="6" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" />
+  <text x="510" y="255" text-anchor="middle" class="conn-label" fill="#8a5a10">연결 4</text>
+  <text x="510" y="269" text-anchor="middle" class="small" fill="#1a1a1a">모든 활동 → 감사 추적</text>
 
   <!-- Connection 5: Multitenant bar at bottom -->
-  <rect x="80" y="445" width="640" height="55" class="box" stroke="#6F6BEA" stroke-dasharray="6,3" />
-  <rect x="80" y="445" width="640" height="22" rx="8" fill="rgba(111,107,234,0.1)" stroke="none" />
-  <text x="400" y="461" text-anchor="middle" class="conn-label" fill="#6F6BEA">연결 5: 멀티테넌트 관통 (Multitenant Cross-Cutting)</text>
-  <text x="400" y="485" text-anchor="middle" class="detail" fill="#E2E8F0">공통 사용자(C##) + 공통 롤 + CONTAINER=ALL 권한 부여 + CDB 루트 감사 정책 → 전체 PDB 일관 적용</text>
+  <rect x="80" y="445" width="640" height="55" class="box" stroke="#4a2e78" stroke-dasharray="6,3" />
+  <rect x="80" y="445" width="640" height="22" rx="8" fill="#d8cfe5" stroke="none" />
+  <text x="400" y="461" text-anchor="middle" class="conn-label" fill="#4a2e78">연결 5: 멀티테넌트 관통 (Multitenant Cross-Cutting)</text>
+  <text x="400" y="485" text-anchor="middle" class="detail" fill="#1a1a1a">공통 사용자(C##) + 공통 롤 + CONTAINER=ALL 권한 부여 + CDB 루트 감사 정책 → 전체 PDB 일관 적용</text>
 
   <!-- Legend -->
   <rect x="80" y="525" width="640" height="80" class="box" />
   <text x="100" y="548" class="label" font-size="13">범례 (Legend)</text>
 
-  <line x1="100" y1="565" x2="140" y2="565" stroke="#6F6BEA" stroke-width="2" />
-  <text x="150" y="569" class="small" fill="#E2E8F0">사용자 → 권한 흐름</text>
+  <line x1="100" y1="565" x2="140" y2="565" stroke="#4a2e78" stroke-width="2" />
+  <text x="150" y="569" class="small" fill="#1a1a1a">사용자 → 권한 흐름</text>
 
-  <line x1="280" y1="565" x2="320" y2="565" stroke="#10B981" stroke-width="2" />
-  <text x="330" y="569" class="small" fill="#E2E8F0">프로파일 할당</text>
+  <line x1="280" y1="565" x2="320" y2="565" stroke="#2f6a1c" stroke-width="2" />
+  <text x="330" y="569" class="small" fill="#1a1a1a">프로파일 할당</text>
 
-  <line x1="460" y1="565" x2="500" y2="565" stroke="#3B82F6" stroke-width="2" />
-  <text x="510" y="569" class="small" fill="#E2E8F0">권한 분석 순환</text>
+  <line x1="460" y1="565" x2="500" y2="565" stroke="#2456a8" stroke-width="2" />
+  <text x="510" y="569" class="small" fill="#1a1a1a">권한 분석 순환</text>
 
-  <line x1="100" y1="590" x2="140" y2="590" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4,4" />
-  <text x="150" y="594" class="small" fill="#E2E8F0">감사 추적 (모든 활동)</text>
+  <line x1="100" y1="590" x2="140" y2="590" stroke="#8a5a10" stroke-width="2" stroke-dasharray="4,4" />
+  <text x="150" y="594" class="small" fill="#1a1a1a">감사 추적 (모든 활동)</text>
 
-  <line x1="320" y1="590" x2="360" y2="590" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="6,3" />
-  <text x="370" y="594" class="small" fill="#E2E8F0">REVOKE (미사용 권한 회수)</text>
+  <line x1="320" y1="590" x2="360" y2="590" stroke="#be123c" stroke-width="1.5" stroke-dasharray="6,3" />
+  <text x="370" y="594" class="small" fill="#1a1a1a">REVOKE (미사용 권한 회수)</text>
 
-  <line x1="530" y1="590" x2="570" y2="590" stroke="#6F6BEA" stroke-width="1.5" stroke-dasharray="6,3" />
-  <text x="580" y="594" class="small" fill="#E2E8F0">멀티테넌트 관통</text>
+  <line x1="530" y1="590" x2="570" y2="590" stroke="#4a2e78" stroke-width="1.5" stroke-dasharray="6,3" />
+  <text x="580" y="594" class="small" fill="#1a1a1a">멀티테넌트 관통</text>
 </svg>

@@ -85,11 +85,11 @@
       "visuals": [
         {
           "id": "v5",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>MAINTENANCE_WINDOW_GROUP</b><br/>Window Group\"]:::amber\n  B[\"<b>개별 윈도우</b><br/>MON/TUE/WED/THU/FRI<br/>(22:00, 4시간)\"]:::blue\n  C[\"<b>개별 윈도우</b><br/>SAT/SUN<br/>(06:00, 20시간)\"]:::blue\n  D[\"<b>윈도우 열림(Open)</b><br/>WINDOW_OPENED 이벤트\"]:::green\n  E[\"<b>Resource Plan 활성화</b><br/>DEFAULT_MAINTENANCE_PLAN\"]:::amber\n  F[\"<b>AutoTask Framework</b><br/>유지관리 태스크 실행\"]:::green\n  G[\"<b>Scheduler Job 생성</b><br/>DBMS_SCHEDULER 내부 실행\"]:::blue\n  H[\"<b>윈도우 닫힘(Close)</b><br/>이전 Resource Plan 복원\"]:::red\n  A --> B\n  A --> C\n  B --> D\n  C --> D\n  D --> E\n  E --> F\n  F --> G\n  G --> H\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "유지관리 윈도우 스케줄 흐름 (Window Group → 윈도우 열림 → Resource Plan 활성화 → AutoTask Job 실행)",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/08/08_02_s02_v5_mermaid.svg"
         }
       ]
     },
@@ -201,11 +201,11 @@
       "visuals": [
         {
           "id": "v6",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>CDB Root (CDB$ROOT)</b><br/>CDB Resource Plan 활성화\"]:::amber\n  B[\"<b>CDB Plan Directive</b><br/>PDB별 shares / utilization_limit<br/>MAX_IOPS / MAX_MBPS\"]:::blue\n  C[\"<b>PDB1</b><br/>shares=3 (50% CPU)\"]:::green\n  D[\"<b>PDB2</b><br/>shares=2 (33% CPU)\"]:::green\n  E[\"<b>PDB3</b><br/>shares=1 (17% CPU)\"]:::green\n  F[\"<b>PDB Resource Plan</b><br/>Consumer Group 간 배분<br/>MGMT_P1~P8\"]:::blue\n  G[\"<b>Consumer Group</b><br/>SYS_GROUP / OLTP_GROUP<br/>OTHER_GROUPS 등\"]:::amber\n  A --> B\n  B --> C\n  B --> D\n  B --> E\n  C --> F\n  D --> F\n  E --> F\n  F --> G\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "CDB/PDB 리소스 할당 2계층 흐름 (CDB Resource Plan → PDB별 할당 → PDB Resource Plan → Consumer Group)",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/08/08_02_s05_v6_mermaid.svg"
         }
       ]
     },

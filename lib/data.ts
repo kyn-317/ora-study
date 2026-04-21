@@ -6,9 +6,8 @@ import manifest from '@/data/manifest.json';
 
 export interface Visual {
   id: string;
-  type: 'svg' | 'html' | 'mermaid';
-  src?: string;
-  mermaidCode?: string;
+  type: 'svg' | 'html';
+  src: string;
   caption: string;
   placement: 'before-content' | 'after-content' | 'after-keypoints';
   width?: string;

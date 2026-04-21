@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -14,21 +15,21 @@
   <text x="400" y="50" class="subtitle" text-anchor="middle">NAMES.DIRECTORY_PATH 해석 순서와 각 방식의 특성</text>
 
   <!-- Resolution Process Flow -->
-  <rect x="30" y="70" width="200" height="45" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="30" y="70" width="200" height="45" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
   <text x="130" y="90" class="code" text-anchor="middle">sqlplus user/pwd@ORCL</text>
   <text x="130" y="107" class="small" text-anchor="middle">접속 요청</text>
 
-  <line x1="230" y1="92" x2="260" y2="92" stroke="#E2E8F0" stroke-width="2"/>
-  <polygon points="258,89 265,92 258,95" fill="#E2E8F0"/>
+  <line x1="230" y1="92" x2="260" y2="92" stroke="#1a1a1a" stroke-width="2"/>
+  <polygon points="258,89 265,92 258,95" fill="#1a1a1a"/>
 
-  <rect x="265" y="70" width="250" height="45" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="265" y="70" width="250" height="45" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
   <text x="390" y="88" class="sublabel" text-anchor="middle">sqlnet.ora 확인</text>
   <text x="390" y="107" class="code" text-anchor="middle">NAMES.DIRECTORY_PATH=(TNSNAMES,EZCONNECT)</text>
 
-  <line x1="515" y1="92" x2="545" y2="92" stroke="#E2E8F0" stroke-width="2"/>
-  <polygon points="543,89 550,92 543,95" fill="#E2E8F0"/>
+  <line x1="515" y1="92" x2="545" y2="92" stroke="#1a1a1a" stroke-width="2"/>
+  <polygon points="543,89 550,92 543,95" fill="#1a1a1a"/>
 
-  <rect x="550" y="70" width="220" height="45" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
+  <rect x="550" y="70" width="220" height="45" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
   <text x="660" y="88" class="sublabel" text-anchor="middle">순서대로 시도</text>
   <text x="660" y="107" class="small" text-anchor="middle">성공 시 이후 메서드 생략</text>
 
@@ -36,78 +37,78 @@
   <text x="400" y="140" class="label" text-anchor="middle">해석 순서 (Resolution Order)</text>
 
   <!-- 1st: TNSNAMES -->
-  <rect x="30" y="155" width="235" height="80" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
-  <circle cx="52" cy="175" r="14" fill="#6F6BEA"/>
-  <text x="52" y="179" class="label" text-anchor="middle" fill="#FFF" font-size="12">1</text>
-  <text x="150" y="178" class="label" text-anchor="middle" fill="#6F6BEA">TNSNAMES</text>
+  <rect x="30" y="155" width="235" height="80" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
+  <circle cx="52" cy="175" r="14" fill="#4a2e78"/>
+  <text x="52" y="179" class="label" text-anchor="middle" fill="#1a1a1a" font-size="12">1</text>
+  <text x="150" y="178" class="label" text-anchor="middle" fill="#4a2e78">TNSNAMES</text>
   <text x="147" y="196" class="sublabel" text-anchor="middle">tnsnames.ora 파일</text>
   <text x="147" y="212" class="small" text-anchor="middle">가장 보편적, 소~중규모</text>
   <text x="147" y="226" class="code" text-anchor="middle" font-size="10">$ORACLE_HOME/network/admin</text>
 
-  <line x1="265" y1="195" x2="282" y2="195" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <line x1="265" y1="195" x2="282" y2="195" stroke="#787368" stroke-width="1.5" stroke-dasharray="4,2"/>
   <text x="273" y="188" class="small" text-anchor="middle">실패</text>
 
   <!-- 2nd: EZCONNECT -->
-  <rect x="285" y="155" width="235" height="80" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
-  <circle cx="307" cy="175" r="14" fill="#3B82F6"/>
-  <text x="307" y="179" class="label" text-anchor="middle" fill="#FFF" font-size="12">2</text>
-  <text x="405" y="178" class="label" text-anchor="middle" fill="#3B82F6">EZCONNECT</text>
+  <rect x="285" y="155" width="235" height="80" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
+  <circle cx="307" cy="175" r="14" fill="#2456a8"/>
+  <text x="307" y="179" class="label" text-anchor="middle" fill="#1a1a1a" font-size="12">2</text>
+  <text x="405" y="178" class="label" text-anchor="middle" fill="#2456a8">EZCONNECT</text>
   <text x="402" y="196" class="sublabel" text-anchor="middle">Easy Connect 문자열</text>
   <text x="402" y="212" class="small" text-anchor="middle">설정 불필요, 개발/테스트</text>
   <text x="402" y="226" class="code" text-anchor="middle" font-size="10">host:port/service_name</text>
 
-  <line x1="520" y1="195" x2="537" y2="195" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <line x1="520" y1="195" x2="537" y2="195" stroke="#787368" stroke-width="1.5" stroke-dasharray="4,2"/>
   <text x="528" y="188" class="small" text-anchor="middle">실패</text>
 
   <!-- 3rd: LDAP -->
-  <rect x="540" y="155" width="235" height="80" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
-  <circle cx="562" cy="175" r="14" fill="#10B981"/>
-  <text x="562" y="179" class="label" text-anchor="middle" fill="#FFF" font-size="12">3</text>
-  <text x="660" y="178" class="label" text-anchor="middle" fill="#10B981">LDAP</text>
+  <rect x="540" y="155" width="235" height="80" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
+  <circle cx="562" cy="175" r="14" fill="#2f6a1c"/>
+  <text x="562" y="179" class="label" text-anchor="middle" fill="#1a1a1a" font-size="12">3</text>
+  <text x="660" y="178" class="label" text-anchor="middle" fill="#2f6a1c">LDAP</text>
   <text x="657" y="196" class="sublabel" text-anchor="middle">디렉토리 서버</text>
   <text x="657" y="212" class="small" text-anchor="middle">대규모 환경, 중앙 관리</text>
   <text x="657" y="226" class="code" text-anchor="middle" font-size="10">ldap.ora 설정 필요</text>
 
   <!-- All fail -->
-  <rect x="280" y="250" width="240" height="30" rx="4" ry="4" fill="#F43F5E" opacity="0.2" stroke="#F43F5E"/>
-  <text x="400" y="270" class="small" text-anchor="middle" fill="#F43F5E">모든 메서드 실패: ORA-12154</text>
+  <rect x="280" y="250" width="240" height="30" rx="4" ry="4" fill="#be123c" opacity="0.2" stroke="#be123c"/>
+  <text x="400" y="270" class="small" text-anchor="middle" fill="#be123c">모든 메서드 실패: ORA-12154</text>
 
   <!-- Comparison table -->
   <text x="400" y="308" class="label" text-anchor="middle">네이밍 메서드 상세 비교</text>
 
   <!-- Table header -->
-  <rect x="30" y="320" width="745" height="25" rx="4" ry="4" fill="#2A2B3D"/>
+  <rect x="30" y="320" width="745" height="25" rx="4" ry="4" fill="#f3efe4"/>
   <text x="80" y="337" class="sublabel" text-anchor="middle">기준</text>
-  <text x="220" y="337" class="label" text-anchor="middle" fill="#6F6BEA" font-size="11">로컬 네이밍</text>
-  <text x="400" y="337" class="label" text-anchor="middle" fill="#3B82F6" font-size="11">간편 접속</text>
-  <text x="580" y="337" class="label" text-anchor="middle" fill="#10B981" font-size="11">디렉토리 네이밍</text>
+  <text x="220" y="337" class="label" text-anchor="middle" fill="#4a2e78" font-size="11">로컬 네이밍</text>
+  <text x="400" y="337" class="label" text-anchor="middle" fill="#2456a8" font-size="11">간편 접속</text>
+  <text x="580" y="337" class="label" text-anchor="middle" fill="#2f6a1c" font-size="11">디렉토리 네이밍</text>
 
   <!-- Rows -->
-  <rect x="30" y="347" width="745" height="24" fill="#1E1E2E"/>
+  <rect x="30" y="347" width="745" height="24" fill="#f3efe4"/>
   <text x="80" y="363" class="small" text-anchor="middle">해석 소스</text>
   <text x="220" y="363" class="small" text-anchor="middle">tnsnames.ora</text>
   <text x="400" y="363" class="small" text-anchor="middle">접속 문자열 직접 기술</text>
   <text x="580" y="363" class="small" text-anchor="middle">LDAP 서버</text>
 
-  <rect x="30" y="371" width="745" height="24" fill="#1A1A2E"/>
+  <rect x="30" y="371" width="745" height="24" fill="#f3efe4"/>
   <text x="80" y="387" class="small" text-anchor="middle">설정 복잡도</text>
-  <text x="220" y="387" class="small" text-anchor="middle" fill="#F59E0B">중간</text>
-  <text x="400" y="387" class="small" text-anchor="middle" fill="#10B981">낮음</text>
-  <text x="580" y="387" class="small" text-anchor="middle" fill="#F43F5E">높음</text>
+  <text x="220" y="387" class="small" text-anchor="middle" fill="#8a5a10">중간</text>
+  <text x="400" y="387" class="small" text-anchor="middle" fill="#2f6a1c">낮음</text>
+  <text x="580" y="387" class="small" text-anchor="middle" fill="#be123c">높음</text>
 
-  <rect x="30" y="395" width="745" height="24" fill="#1E1E2E"/>
+  <rect x="30" y="395" width="745" height="24" fill="#f3efe4"/>
   <text x="80" y="411" class="small" text-anchor="middle">유지보수</text>
   <text x="220" y="411" class="small" text-anchor="middle">클라이언트별 파일</text>
   <text x="400" y="411" class="small" text-anchor="middle">불필요</text>
   <text x="580" y="411" class="small" text-anchor="middle">중앙 서버 관리</text>
 
-  <rect x="30" y="419" width="745" height="24" fill="#1A1A2E"/>
+  <rect x="30" y="419" width="745" height="24" fill="#f3efe4"/>
   <text x="80" y="435" class="small" text-anchor="middle">Failover/LB</text>
-  <text x="220" y="435" class="small" text-anchor="middle" fill="#10B981">지원</text>
-  <text x="400" y="435" class="small" text-anchor="middle" fill="#F59E0B">제한적</text>
-  <text x="580" y="435" class="small" text-anchor="middle" fill="#10B981">지원</text>
+  <text x="220" y="435" class="small" text-anchor="middle" fill="#2f6a1c">지원</text>
+  <text x="400" y="435" class="small" text-anchor="middle" fill="#8a5a10">제한적</text>
+  <text x="580" y="435" class="small" text-anchor="middle" fill="#2f6a1c">지원</text>
 
-  <rect x="30" y="443" width="745" height="24" fill="#1E1E2E"/>
+  <rect x="30" y="443" width="745" height="24" fill="#f3efe4"/>
   <text x="80" y="459" class="small" text-anchor="middle">접속 예시</text>
   <text x="220" y="459" class="code" text-anchor="middle" font-size="10">@ORCL</text>
   <text x="400" y="459" class="code" text-anchor="middle" font-size="10">@host:1521/svc</text>

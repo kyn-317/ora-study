@@ -1,23 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 650">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
   <defs>
     <marker id="ah" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-      <polygon points="0 0, 7 2.5, 0 5" fill="#6F6BEA" />
+      <polygon points="0 0, 7 2.5, 0 5" fill="#4a2e78" />
     </marker>
     <marker id="ah-green" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-      <polygon points="0 0, 7 2.5, 0 5" fill="#10B981" />
+      <polygon points="0 0, 7 2.5, 0 5" fill="#2f6a1c" />
     </marker>
     <marker id="ah-red" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-      <polygon points="0 0, 7 2.5, 0 5" fill="#F43F5E" />
+      <polygon points="0 0, 7 2.5, 0 5" fill="#be123c" />
     </marker>
   </defs>
 
@@ -28,88 +29,88 @@
   <!-- === Three columns comparison === -->
 
   <!-- AMM -->
-  <rect x="30" y="65" width="240" height="285" class="box" fill="rgba(16,185,129,0.06)" stroke="#10B981" stroke-width="2" />
-  <text x="150" y="90" text-anchor="middle" class="label" fill="#10B981">AMM</text>
+  <rect x="30" y="65" width="240" height="285" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="2" />
+  <text x="150" y="90" text-anchor="middle" class="label" fill="#2f6a1c">AMM</text>
   <text x="150" y="108" text-anchor="middle" class="small">Automatic Memory Management</text>
   <text x="150" y="123" text-anchor="middle" class="small">자동 메모리 관리</text>
 
   <!-- AMM diagram -->
-  <rect x="55" y="135" width="190" height="35" rx="6" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5" />
+  <rect x="55" y="135" width="190" height="35" rx="6" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.5" />
   <text x="150" y="157" text-anchor="middle" class="code">MEMORY_TARGET</text>
 
-  <line x1="150" y1="170" x2="150" y2="185" stroke="#10B981" stroke-width="1.5" />
-  <line x1="95" y1="185" x2="205" y2="185" stroke="#10B981" stroke-width="1" />
-  <line x1="95" y1="185" x2="95" y2="195" stroke="#10B981" stroke-width="1" />
-  <line x1="205" y1="185" x2="205" y2="195" stroke="#10B981" stroke-width="1" />
+  <line x1="150" y1="170" x2="150" y2="185" stroke="#2f6a1c" stroke-width="1.5" />
+  <line x1="95" y1="185" x2="205" y2="185" stroke="#2f6a1c" stroke-width="1" />
+  <line x1="95" y1="185" x2="95" y2="195" stroke="#2f6a1c" stroke-width="1" />
+  <line x1="205" y1="185" x2="205" y2="195" stroke="#2f6a1c" stroke-width="1" />
 
-  <rect x="55" y="197" width="80" height="30" rx="5" fill="rgba(111,107,234,0.1)" stroke="#6F6BEA" stroke-width="1" />
-  <text x="95" y="216" text-anchor="middle" class="small" fill="#6F6BEA">SGA</text>
-  <rect x="145" y="197" width="80" height="30" rx="5" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1" />
-  <text x="185" y="216" text-anchor="middle" class="small" fill="#3B82F6">PGA</text>
+  <rect x="55" y="197" width="80" height="30" rx="5" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1" />
+  <text x="95" y="216" text-anchor="middle" class="small" fill="#4a2e78">SGA</text>
+  <rect x="145" y="197" width="80" height="30" rx="5" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
+  <text x="185" y="216" text-anchor="middle" class="small" fill="#2456a8">PGA</text>
 
   <!-- Bidirectional arrow -->
-  <line x1="125" y1="237" x2="155" y2="237" stroke="#10B981" stroke-width="1.5" />
-  <polygon points="125,234 118,237 125,240" fill="#10B981" />
-  <polygon points="155,234 162,237 155,240" fill="#10B981" />
-  <text x="150" y="255" text-anchor="middle" class="small" fill="#10B981">자동 재분배</text>
+  <line x1="125" y1="237" x2="155" y2="237" stroke="#2f6a1c" stroke-width="1.5" />
+  <polygon points="125,234 118,237 125,240" fill="#2f6a1c" />
+  <polygon points="155,234 162,237 155,240" fill="#2f6a1c" />
+  <text x="150" y="255" text-anchor="middle" class="small" fill="#2f6a1c">자동 재분배</text>
 
   <text x="50" y="280" class="small">자동화: 최고</text>
   <text x="50" y="295" class="small">DBA 개입: 최소</text>
   <text x="50" y="310" class="small">SGA-PGA 재분배: 가능</text>
-  <text x="50" y="325" class="small" fill="#10B981">Oracle 권장</text>
+  <text x="50" y="325" class="small" fill="#2f6a1c">Oracle 권장</text>
 
   <!-- ASMM -->
-  <rect x="280" y="65" width="240" height="285" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="2" />
-  <text x="400" y="90" text-anchor="middle" class="label" fill="#3B82F6">ASMM</text>
+  <rect x="280" y="65" width="240" height="285" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="2" />
+  <text x="400" y="90" text-anchor="middle" class="label" fill="#2456a8">ASMM</text>
   <text x="400" y="108" text-anchor="middle" class="small">Automatic Shared Memory Mgmt</text>
   <text x="400" y="123" text-anchor="middle" class="small">자동 공유 메모리 관리</text>
 
   <!-- ASMM diagram -->
-  <rect x="305" y="135" width="90" height="35" rx="6" fill="rgba(111,107,234,0.12)" stroke="#6F6BEA" stroke-width="1.5" />
+  <rect x="305" y="135" width="90" height="35" rx="6" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5" />
   <text x="350" y="157" text-anchor="middle" class="code">SGA_TARGET</text>
-  <rect x="405" y="135" width="90" height="35" rx="6" fill="rgba(59,130,246,0.12)" stroke="#3B82F6" stroke-width="1.5" />
+  <rect x="405" y="135" width="90" height="35" rx="6" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
   <text x="450" y="150" text-anchor="middle" class="code" font-size="9">PGA_AGGREGATE</text>
   <text x="450" y="163" text-anchor="middle" class="code" font-size="9">_TARGET</text>
 
   <!-- SGA internal auto -->
-  <rect x="300" y="185" width="100" height="50" rx="5" fill="rgba(111,107,234,0.08)" stroke="#6F6BEA" stroke-width="1" />
-  <text x="350" y="205" text-anchor="middle" class="small" fill="#6F6BEA">SGA 내부</text>
-  <text x="350" y="220" text-anchor="middle" class="small" fill="#6F6BEA">자동 조정</text>
+  <rect x="300" y="185" width="100" height="50" rx="5" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1" />
+  <text x="350" y="205" text-anchor="middle" class="small" fill="#4a2e78">SGA 내부</text>
+  <text x="350" y="220" text-anchor="middle" class="small" fill="#4a2e78">자동 조정</text>
 
   <!-- PGA separate auto -->
-  <rect x="410" y="185" width="90" height="50" rx="5" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1" />
-  <text x="455" y="205" text-anchor="middle" class="small" fill="#3B82F6">PGA</text>
-  <text x="455" y="220" text-anchor="middle" class="small" fill="#3B82F6">별도 관리</text>
+  <rect x="410" y="185" width="90" height="50" rx="5" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
+  <text x="455" y="205" text-anchor="middle" class="small" fill="#2456a8">PGA</text>
+  <text x="455" y="220" text-anchor="middle" class="small" fill="#2456a8">별도 관리</text>
 
   <!-- X between SGA and PGA -->
-  <text x="400" y="255" text-anchor="middle" class="label" fill="#F43F5E">X</text>
-  <text x="400" y="270" text-anchor="middle" class="small" fill="#F43F5E">재분배 불가</text>
+  <text x="400" y="255" text-anchor="middle" class="label" fill="#be123c">X</text>
+  <text x="400" y="270" text-anchor="middle" class="small" fill="#be123c">재분배 불가</text>
 
   <text x="300" y="290" class="small">자동화: 중간</text>
   <text x="300" y="305" class="small">DBA 개입: 부분적</text>
   <text x="300" y="320" class="small">SGA-PGA 재분배: 불가</text>
-  <text x="300" y="335" class="small" fill="#3B82F6">SGA/PGA 비율 고정 시</text>
+  <text x="300" y="335" class="small" fill="#2456a8">SGA/PGA 비율 고정 시</text>
 
   <!-- Manual -->
-  <rect x="530" y="65" width="240" height="285" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="2" />
-  <text x="650" y="90" text-anchor="middle" class="label" fill="#F59E0B">Manual</text>
+  <rect x="530" y="65" width="240" height="285" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="2" />
+  <text x="650" y="90" text-anchor="middle" class="label" fill="#8a5a10">Manual</text>
   <text x="650" y="108" text-anchor="middle" class="small">Manual Memory Management</text>
   <text x="650" y="123" text-anchor="middle" class="small">수동 메모리 관리</text>
 
   <!-- Manual - individual params -->
-  <rect x="545" y="140" width="85" height="22" rx="4" fill="rgba(255,255,255,0.05)" stroke="#475569" stroke-width="1" />
+  <rect x="545" y="140" width="85" height="22" rx="4" fill="rgba(42,42,42,0.05)" stroke="#787368" stroke-width="1" />
   <text x="587" y="155" text-anchor="middle" class="code" font-size="9">DB_CACHE_SIZE</text>
-  <rect x="640" y="140" width="115" height="22" rx="4" fill="rgba(255,255,255,0.05)" stroke="#475569" stroke-width="1" />
+  <rect x="640" y="140" width="115" height="22" rx="4" fill="rgba(42,42,42,0.05)" stroke="#787368" stroke-width="1" />
   <text x="697" y="155" text-anchor="middle" class="code" font-size="9">SHARED_POOL_SIZE</text>
 
-  <rect x="545" y="168" width="85" height="22" rx="4" fill="rgba(255,255,255,0.05)" stroke="#475569" stroke-width="1" />
+  <rect x="545" y="168" width="85" height="22" rx="4" fill="rgba(42,42,42,0.05)" stroke="#787368" stroke-width="1" />
   <text x="587" y="183" text-anchor="middle" class="code" font-size="9">LOG_BUFFER</text>
-  <rect x="640" y="168" width="115" height="22" rx="4" fill="rgba(255,255,255,0.05)" stroke="#475569" stroke-width="1" />
+  <rect x="640" y="168" width="115" height="22" rx="4" fill="rgba(42,42,42,0.05)" stroke="#787368" stroke-width="1" />
   <text x="697" y="183" text-anchor="middle" class="code" font-size="9">LARGE_POOL_SIZE</text>
 
-  <rect x="545" y="196" width="85" height="22" rx="4" fill="rgba(255,255,255,0.05)" stroke="#475569" stroke-width="1" />
+  <rect x="545" y="196" width="85" height="22" rx="4" fill="rgba(42,42,42,0.05)" stroke="#787368" stroke-width="1" />
   <text x="587" y="211" text-anchor="middle" class="code" font-size="9">SORT_AREA_SIZE</text>
-  <rect x="640" y="196" width="115" height="22" rx="4" fill="rgba(255,255,255,0.05)" stroke="#475569" stroke-width="1" />
+  <rect x="640" y="196" width="115" height="22" rx="4" fill="rgba(42,42,42,0.05)" stroke="#787368" stroke-width="1" />
   <text x="697" y="211" text-anchor="middle" class="code" font-size="9">HASH_AREA_SIZE</text>
 
   <text x="650" y="245" text-anchor="middle" class="small">모든 파라미터를</text>
@@ -118,49 +119,49 @@
   <text x="550" y="290" class="small">자동화: 없음</text>
   <text x="550" y="305" class="small">DBA 개입: 전면적</text>
   <text x="550" y="320" class="small">SGA-PGA 재분배: 불가</text>
-  <text x="550" y="335" class="small" fill="#F59E0B">특수 환경/레거시</text>
+  <text x="550" y="335" class="small" fill="#8a5a10">특수 환경/레거시</text>
 
   <!-- === Decision Flowchart === -->
-  <rect x="30" y="380" width="740" height="255" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1" />
+  <rect x="30" y="380" width="740" height="255" class="box" fill="rgba(42,42,42,0.03)" stroke="#f3efe4" stroke-width="1" />
   <text x="50" y="407" class="label">Decision Flowchart (판단 플로차트)</text>
 
   <!-- AMM result box -->
-  <rect x="115" y="431" width="110" height="32" rx="6" fill="rgba(16,185,129,0.15)" stroke="#10B981" stroke-width="1.5" />
-  <text x="170" y="452" text-anchor="middle" class="sublabel" fill="#10B981">AMM</text>
+  <rect x="115" y="431" width="110" height="32" rx="6" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.5" />
+  <text x="170" y="452" text-anchor="middle" class="sublabel" fill="#2f6a1c">AMM</text>
 
   <!-- YES arrow: diamond up to AMM box -->
-  <line x1="170" y1="473" x2="170" y2="468" stroke="#10B981" stroke-width="1.5" marker-end="url(#ah-green)" />
-  <text x="182" y="475" class="small" fill="#10B981">YES</text>
+  <line x1="170" y1="473" x2="170" y2="468" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ah-green)" />
+  <text x="182" y="475" class="small" fill="#2f6a1c">YES</text>
 
   <!-- Decision 1: diamond -->
-  <polygon points="170,473 260,498 170,523 80,498" fill="rgba(111,107,234,0.1)" stroke="#6F6BEA" stroke-width="1.5" />
+  <polygon points="170,473 260,498 170,523 80,498" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5" />
   <text x="170" y="496" text-anchor="middle" class="code">MEMORY_TARGET</text>
   <text x="170" y="510" text-anchor="middle" class="small">&gt; 0 ?</text>
 
   <!-- NO arrow: diamond right to next diamond -->
-  <line x1="260" y1="498" x2="370" y2="498" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#ah-red)" />
-  <text x="310" y="491" text-anchor="middle" class="small" fill="#F43F5E">NO</text>
+  <line x1="260" y1="498" x2="370" y2="498" stroke="#be123c" stroke-width="1.5" marker-end="url(#ah-red)" />
+  <text x="310" y="491" text-anchor="middle" class="small" fill="#be123c">NO</text>
 
   <!-- ASMM result box -->
-  <rect x="420" y="431" width="110" height="32" rx="6" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="475" y="452" text-anchor="middle" class="sublabel" fill="#3B82F6">ASMM</text>
+  <rect x="420" y="431" width="110" height="32" rx="6" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
+  <text x="475" y="452" text-anchor="middle" class="sublabel" fill="#2456a8">ASMM</text>
 
   <!-- YES arrow: diamond up to ASMM box -->
-  <line x1="475" y1="473" x2="475" y2="468" stroke="#10B981" stroke-width="1.5" marker-end="url(#ah-green)" />
-  <text x="487" y="475" class="small" fill="#10B981">YES</text>
+  <line x1="475" y1="473" x2="475" y2="468" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ah-green)" />
+  <text x="487" y="475" class="small" fill="#2f6a1c">YES</text>
 
   <!-- Decision 2: diamond -->
-  <polygon points="475,473 565,498 475,523 385,498" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5" />
+  <polygon points="475,473 565,498 475,523 385,498" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
   <text x="475" y="496" text-anchor="middle" class="code">SGA_TARGET</text>
   <text x="475" y="510" text-anchor="middle" class="small">&gt; 0 ?</text>
 
   <!-- NO arrow: diamond right to Manual box -->
-  <line x1="565" y1="498" x2="635" y2="498" stroke="#F43F5E" stroke-width="1.5" marker-end="url(#ah-red)" />
-  <text x="595" y="491" text-anchor="middle" class="small" fill="#F43F5E">NO</text>
+  <line x1="565" y1="498" x2="635" y2="498" stroke="#be123c" stroke-width="1.5" marker-end="url(#ah-red)" />
+  <text x="595" y="491" text-anchor="middle" class="small" fill="#be123c">NO</text>
 
   <!-- Manual result box -->
-  <rect x="640" y="483" width="100" height="32" rx="6" fill="rgba(245,158,11,0.15)" stroke="#F59E0B" stroke-width="1.5" />
-  <text x="690" y="504" text-anchor="middle" class="sublabel" fill="#F59E0B">Manual</text>
+  <rect x="640" y="483" width="100" height="32" rx="6" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5" />
+  <text x="690" y="504" text-anchor="middle" class="sublabel" fill="#8a5a10">Manual</text>
 
   <!-- Bottom notes -->
   <text x="50" y="549" class="sublabel">ASMM에서 개별 파라미터 지정 시 → 해당 값이 최솟값(하한선)으로 작동</text>

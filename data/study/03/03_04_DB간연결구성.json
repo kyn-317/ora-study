@@ -80,11 +80,11 @@
       "visuals": [
         {
           "id": "v05",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>1. 권한 확인</b><br/>CREATE DATABASE LINK\"]:::amber\n  A --> B[\"<b>2. 원격 DB 접속 정보 준비</b><br/>TNS 접속 문자열 / 계정 / 비밀번호\"]:::amber\n  B --> C[\"<b>3. 링크 생성</b><br/>CREATE DATABASE LINK\"]:::blue\n  C --> D{\"<b>접속 방식 선택</b>\"}:::blue\n  D --> D1[\"<b>고정 사용자</b><br/>CONNECT TO user<br/>IDENTIFIED BY pwd\"]:::green\n  D --> D2[\"<b>연결 사용자</b><br/>인증 절 생략\"]:::green\n  D --> D3[\"<b>현재 사용자</b><br/>CONNECT TO CURRENT_USER\"]:::green\n  D1 --> E[\"<b>4. 접속 테스트</b><br/>SELECT * FROM DUAL@dblink\"]:::amber\n  D2 --> E\n  D3 --> E\n  E --> F[\"<b>원격 객체 사용</b><br/>table@dblink_name\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "Private DB Link 생성 및 사용 절차 — 권한 확인, 링크 생성, 접속 방식 선택, 테스트까지",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/03/03_04_s02_v05_mermaid.svg"
         }
       ]
     },
@@ -113,11 +113,11 @@
       "visuals": [
         {
           "id": "v6",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>Public DB 링크 생성</b><br/>CREATE PUBLIC DATABASE LINK\"]:::amber\n  A --> B[\"<b>필요 권한</b><br/>CREATE PUBLIC DATABASE LINK\"]:::blue\n  B --> C[\"<b>원격 접속 정보 지정</b><br/>CONNECT TO user IDENTIFIED BY pwd\"]:::green\n  C --> D[\"<b>USING 절</b><br/>TNS 서비스 이름<br/>또는 접속 디스크립터\"]:::green\n  D --> E[\"<b>모든 사용자 사용 가능</b><br/>이름 해석: Private 없으면 Public 우선\"]:::blue\n  E --> F{\"<b>보안 고려사항</b>\"}:::amber\n  F --> G[\"<b>원격 계정 최소 권한</b><br/>필요한 객체에만 SELECT\"]:::green\n  F --> H[\"<b>감사(Audit) 정책</b><br/>DB 링크 사용 내역 모니터링\"]:::green\n  F --> I[\"<b>불필요 링크 즉시 삭제</b><br/>DROP PUBLIC DATABASE LINK\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "Public DB 링크 생성 흐름 — 권한 확인, 원격 접속 정보 지정, 모든 사용자 공유, 보안 고려사항",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/03/03_04_s03_v6_mermaid.svg"
         }
       ]
     },
@@ -177,11 +177,11 @@
       "visuals": [
         {
           "id": "v7",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>DB 링크 사용</b><br/>@dblink_name 접미사\"]:::amber\n  A --> B[\"<b>원격 테이블 조회</b><br/>SELECT * FROM table@dblink\"]:::blue\n  A --> C[\"<b>원격 테이블 DML</b><br/>INSERT / UPDATE / DELETE\"]:::blue\n  A --> D[\"<b>분산 조인</b><br/>local_t JOIN remote_t@dblink\"]:::blue\n  A --> E[\"<b>원격 프로시저 호출</b><br/>EXEC procedure@dblink\"]:::blue\n  D --> F[\"<b>DRIVING_SITE 힌트</b><br/>실행 사이트 지정<br/>네트워크 트래픽 최적화\"]:::green\n  A --> G[\"<b>동의어(Synonym) 활용</b><br/>CREATE SYNONYM syn<br/>FOR table@dblink\"]:::amber\n  G --> H[\"<b>위치 투명성</b><br/>@dblink_name 불필요<br/>syn으로 투명한 접근\"]:::green\n  A --> I[\"<b>불가: 원격 DDL</b><br/>CREATE TABLE 등 DDL\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "DB 링크 사용 방법 — 조회/DML/분산 조인/프로시저 호출, 동의어를 통한 위치 투명성, 불가 작업",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/03/03_04_s05_v7_mermaid.svg"
         }
       ]
     },
@@ -253,11 +253,11 @@
       "visuals": [
         {
           "id": "v8",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>DB 링크 관리 작업</b>\"]:::amber\n  A --> B[\"<b>DROP DATABASE LINK</b><br/>링크 정의 영구 삭제\"]:::red\n  A --> C[\"<b>ALTER SESSION CLOSE<br/>DATABASE LINK</b><br/>현재 세션 연결만 닫기\"]:::blue\n  A --> D[\"<b>상태 확인</b>\"]:::blue\n  B --> B1[\"<b>조건: 열린 트랜잭션 없어야 함</b><br/>COMMIT / ROLLBACK 먼저\"]:::amber\n  C --> C1[\"<b>DBMS_SESSION.<br/>CLOSE_DATABASE_LINK</b><br/>PL/SQL 프로그래밍 방식\"]:::green\n  D --> D1[\"<b>DBA_DB_LINKS</b><br/>OWNER = 'PUBLIC' → Public 링크\"]:::green\n  D --> D2[\"<b>V$DBLINK</b><br/>현재 세션의 열린 링크 확인\"]:::green\n  D --> D3[\"<b>USER_DB_LINKS</b><br/>현재 사용자의 Private 링크\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "DB 링크 관리 — DROP(영구 삭제)과 CLOSE(세션 연결 닫기) 차이, 상태 확인 뷰(DBA_DB_LINKS/V$DBLINK)",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/03/03_04_s07_v8_mermaid.svg"
         }
       ]
     },

@@ -1,24 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
   <defs>
     <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6" fill="#6F6BEA"/>
+      <path d="M0,0 L8,3 L0,6" fill="#4a2e78"/>
     </marker>
     <marker id="arrGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6" fill="#10B981"/>
+      <path d="M0,0 L8,3 L0,6" fill="#2f6a1c"/>
     </marker>
     <marker id="arrRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6" fill="#F43F5E"/>
+      <path d="M0,0 L8,3 L0,6" fill="#be123c"/>
     </marker>
   </defs>
 
@@ -27,85 +28,85 @@
   <text x="400" y="50" class="subtitle" text-anchor="middle">ALTER SYSTEM SET and SCOPE Options Flow</text>
 
   <!-- ALTER SYSTEM command box -->
-  <rect x="240" y="70" width="320" height="40" class="box" fill="#6F6BEA" fill-opacity="0.2" stroke="#6F6BEA" stroke-width="2"/>
-  <text x="400" y="95" class="code" text-anchor="middle" fill="#E2E8F0" font-size="13">ALTER SYSTEM SET param = value</text>
+  <rect x="240" y="70" width="320" height="40" class="box" fill="#4a2e78" fill-opacity="0.2" stroke="#4a2e78" stroke-width="2"/>
+  <text x="400" y="95" class="code" text-anchor="middle" fill="#1a1a1a" font-size="13">ALTER SYSTEM SET param = value</text>
 
   <!-- Three branches -->
   <!-- SCOPE=MEMORY -->
-  <line x1="280" y1="110" x2="130" y2="155" stroke="#3B82F6" stroke-width="2" marker-end="url(#arr)"/>
-  <rect x="30" y="155" width="200" height="40" class="box" fill="#3B82F6" fill-opacity="0.2" stroke="#3B82F6" stroke-width="2"/>
-  <text x="130" y="180" class="label" text-anchor="middle" fill="#3B82F6">SCOPE=MEMORY</text>
+  <line x1="280" y1="110" x2="130" y2="155" stroke="#2456a8" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="30" y="155" width="200" height="40" class="box" fill="#2456a8" fill-opacity="0.2" stroke="#2456a8" stroke-width="2"/>
+  <text x="130" y="180" class="label" text-anchor="middle" fill="#2456a8">SCOPE=MEMORY</text>
 
   <!-- SCOPE=BOTH -->
-  <line x1="400" y1="110" x2="400" y2="155" stroke="#6F6BEA" stroke-width="2" marker-end="url(#arr)"/>
-  <rect x="300" y="155" width="200" height="40" class="box" fill="#6F6BEA" fill-opacity="0.2" stroke="#6F6BEA" stroke-width="2"/>
-  <text x="400" y="180" class="label" text-anchor="middle" fill="#6F6BEA">SCOPE=BOTH</text>
-  <text x="400" y="210" class="small" text-anchor="middle" fill="#F59E0B">SPFILE 환경 기본값</text>
+  <line x1="400" y1="110" x2="400" y2="155" stroke="#4a2e78" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="300" y="155" width="200" height="40" class="box" fill="#4a2e78" fill-opacity="0.2" stroke="#4a2e78" stroke-width="2"/>
+  <text x="400" y="180" class="label" text-anchor="middle" fill="#4a2e78">SCOPE=BOTH</text>
+  <text x="400" y="210" class="small" text-anchor="middle" fill="#8a5a10">SPFILE 환경 기본값</text>
 
   <!-- SCOPE=SPFILE -->
-  <line x1="520" y1="110" x2="670" y2="155" stroke="#10B981" stroke-width="2" marker-end="url(#arr)"/>
-  <rect x="570" y="155" width="200" height="40" class="box" fill="#10B981" fill-opacity="0.2" stroke="#10B981" stroke-width="2"/>
-  <text x="670" y="180" class="label" text-anchor="middle" fill="#10B981">SCOPE=SPFILE</text>
+  <line x1="520" y1="110" x2="670" y2="155" stroke="#2f6a1c" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="570" y="155" width="200" height="40" class="box" fill="#2f6a1c" fill-opacity="0.2" stroke="#2f6a1c" stroke-width="2"/>
+  <text x="670" y="180" class="label" text-anchor="middle" fill="#2f6a1c">SCOPE=SPFILE</text>
 
   <!-- Memory target -->
-  <rect x="130" y="250" width="180" height="70" class="box" fill="none" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="130" y="250" width="180" height="70" class="box" fill="none" stroke="#2456a8" stroke-width="1.5"/>
   <text x="220" y="275" class="sublabel" text-anchor="middle">Instance Memory</text>
   <text x="220" y="293" class="sublabel" text-anchor="middle">(인스턴스 메모리)</text>
   <text x="220" y="310" class="small" text-anchor="middle">즉시 적용, 재기동 시 소멸</text>
 
   <!-- SPFILE target -->
-  <rect x="490" y="250" width="180" height="70" class="box" fill="none" stroke="#10B981" stroke-width="1.5"/>
+  <rect x="490" y="250" width="180" height="70" class="box" fill="none" stroke="#2f6a1c" stroke-width="1.5"/>
   <text x="580" y="275" class="sublabel" text-anchor="middle">SPFILE</text>
   <text x="580" y="293" class="sublabel" text-anchor="middle">(서버 파라미터 파일)</text>
   <text x="580" y="310" class="small" text-anchor="middle">다음 기동 시 적용</text>
 
   <!-- MEMORY arrows -->
-  <line x1="130" y1="195" x2="200" y2="250" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="130" y1="195" x2="200" y2="250" stroke="#2456a8" stroke-width="1.5" marker-end="url(#arr)"/>
 
   <!-- BOTH arrows -->
-  <line x1="360" y1="195" x2="270" y2="250" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#arr)"/>
-  <line x1="440" y1="195" x2="530" y2="250" stroke="#6F6BEA" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="360" y1="195" x2="270" y2="250" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="440" y1="195" x2="530" y2="250" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#arr)"/>
 
   <!-- SPFILE arrows -->
-  <line x1="670" y1="195" x2="610" y2="250" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrGreen)"/>
+  <line x1="670" y1="195" x2="610" y2="250" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#arrGreen)"/>
 
   <!-- X marks for MEMORY not going to SPFILE -->
-  <text x="130" y="247" class="small" text-anchor="middle" fill="#F43F5E">SPFILE 반영 X</text>
+  <text x="130" y="247" class="small" text-anchor="middle" fill="#be123c">SPFILE 반영 X</text>
   <!-- X marks for SPFILE not going to Memory -->
-  <text x="670" y="247" class="small" text-anchor="middle" fill="#F43F5E">메모리 반영 X</text>
+  <text x="670" y="247" class="small" text-anchor="middle" fill="#be123c">메모리 반영 X</text>
 
   <!-- Static vs Dynamic constraint section -->
-  <rect x="40" y="350" width="720" height="185" class="box" fill="#2A2B3D" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="40" y="350" width="720" height="185" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
   <text x="400" y="375" class="label" text-anchor="middle">파라미터 유형별 SCOPE 사용 가능 여부</text>
   <text x="400" y="393" class="subtitle" text-anchor="middle">SCOPE Availability by Parameter Type</text>
 
   <!-- Dynamic row -->
-  <rect x="70" y="408" width="140" height="40" class="box" fill="#10B981" fill-opacity="0.15" stroke="#10B981" stroke-width="1.5"/>
-  <text x="140" y="425" class="sublabel" text-anchor="middle" fill="#10B981">동적 파라미터</text>
+  <rect x="70" y="408" width="140" height="40" class="box" fill="#2f6a1c" fill-opacity="0.15" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="140" y="425" class="sublabel" text-anchor="middle" fill="#2f6a1c">동적 파라미터</text>
   <text x="140" y="441" class="small" text-anchor="middle">Dynamic Parameter</text>
 
-  <rect x="240" y="408" width="140" height="40" class="box" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="1"/>
-  <text x="310" y="432" class="sublabel" text-anchor="middle" fill="#10B981">MEMORY  O</text>
+  <rect x="240" y="408" width="140" height="40" class="box" fill="#2f6a1c" fill-opacity="0.1" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="310" y="432" class="sublabel" text-anchor="middle" fill="#2f6a1c">MEMORY  O</text>
 
-  <rect x="410" y="408" width="140" height="40" class="box" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="1"/>
-  <text x="480" y="432" class="sublabel" text-anchor="middle" fill="#10B981">SPFILE  O</text>
+  <rect x="410" y="408" width="140" height="40" class="box" fill="#2f6a1c" fill-opacity="0.1" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="480" y="432" class="sublabel" text-anchor="middle" fill="#2f6a1c">SPFILE  O</text>
 
-  <rect x="580" y="408" width="140" height="40" class="box" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="1"/>
-  <text x="650" y="432" class="sublabel" text-anchor="middle" fill="#10B981">BOTH  O (기본)</text>
+  <rect x="580" y="408" width="140" height="40" class="box" fill="#2f6a1c" fill-opacity="0.1" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="650" y="432" class="sublabel" text-anchor="middle" fill="#2f6a1c">BOTH  O (기본)</text>
 
   <!-- Static row -->
-  <rect x="70" y="462" width="140" height="40" class="box" fill="#F43F5E" fill-opacity="0.15" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="140" y="479" class="sublabel" text-anchor="middle" fill="#F43F5E">정적 파라미터</text>
+  <rect x="70" y="462" width="140" height="40" class="box" fill="#be123c" fill-opacity="0.15" stroke="#be123c" stroke-width="1.5"/>
+  <text x="140" y="479" class="sublabel" text-anchor="middle" fill="#be123c">정적 파라미터</text>
   <text x="140" y="495" class="small" text-anchor="middle">Static Parameter</text>
 
-  <rect x="240" y="462" width="140" height="40" class="box" fill="#F43F5E" fill-opacity="0.1" stroke="#F43F5E" stroke-width="1"/>
-  <text x="310" y="486" class="sublabel" text-anchor="middle" fill="#F43F5E">MEMORY  X</text>
+  <rect x="240" y="462" width="140" height="40" class="box" fill="#be123c" fill-opacity="0.1" stroke="#be123c" stroke-width="1"/>
+  <text x="310" y="486" class="sublabel" text-anchor="middle" fill="#be123c">MEMORY  X</text>
 
-  <rect x="410" y="462" width="140" height="40" class="box" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="1"/>
-  <text x="480" y="486" class="sublabel" text-anchor="middle" fill="#10B981">SPFILE  O</text>
+  <rect x="410" y="462" width="140" height="40" class="box" fill="#2f6a1c" fill-opacity="0.1" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="480" y="486" class="sublabel" text-anchor="middle" fill="#2f6a1c">SPFILE  O</text>
 
-  <rect x="580" y="462" width="140" height="40" class="box" fill="#F43F5E" fill-opacity="0.1" stroke="#F43F5E" stroke-width="1"/>
-  <text x="650" y="486" class="sublabel" text-anchor="middle" fill="#F43F5E">BOTH  X</text>
+  <rect x="580" y="462" width="140" height="40" class="box" fill="#be123c" fill-opacity="0.1" stroke="#be123c" stroke-width="1"/>
+  <text x="650" y="486" class="sublabel" text-anchor="middle" fill="#be123c">BOTH  X</text>
 
   <!-- Note -->
   <text x="400" y="525" class="small" text-anchor="middle">정적 파라미터는 SCOPE=SPFILE만 가능 -- 메모리 변경 시도 시 ORA-02095 오류</text>

@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" fill="none">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .subtitle { font-size: 12px; fill: #787368; }
     .label { font-size: 13px; font-weight: 600; }
-    .desc { font-size: 11px; fill: #94A3B8; }
+    .desc { font-size: 11px; fill: #787368; }
     .mono { font-family: 'Consolas', monospace; font-size: 10px; }
     .box { rx: 8; ry: 8; }
   </style>
@@ -13,74 +14,74 @@
   <text x="400" y="52" text-anchor="middle" class="subtitle">Optimizer Statistics Management Process (DBMS_STATS)</text>
 
   <!-- Statistics Types -->
-  <rect x="30" y="75" width="740" height="110" fill="#1E1F2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
+  <rect x="30" y="75" width="740" height="110" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" class="box"/>
   <text x="400" y="98" text-anchor="middle" class="label">옵티마이저 통계 유형 (Statistics Types)</text>
 
-  <rect x="50" y="110" width="155" height="60" rx="6" fill="#3B82F6" opacity="0.1" stroke="#3B82F6" stroke-width="1"/>
-  <text x="127" y="130" text-anchor="middle" class="label" fill="#3B82F6">테이블 통계</text>
+  <rect x="50" y="110" width="155" height="60" rx="6" fill="#2456a8" opacity="0.1" stroke="#2456a8" stroke-width="1"/>
+  <text x="127" y="130" text-anchor="middle" class="label" fill="#2456a8">테이블 통계</text>
   <text x="60" y="148" class="desc">행 수, 블록 수, 평균 행</text>
   <text x="60" y="162" class="desc">길이, 마지막 분석 시간</text>
 
-  <rect x="220" y="110" width="155" height="60" rx="6" fill="#10B981" opacity="0.1" stroke="#10B981" stroke-width="1"/>
-  <text x="297" y="130" text-anchor="middle" class="label" fill="#10B981">컬럼 통계</text>
+  <rect x="220" y="110" width="155" height="60" rx="6" fill="#2f6a1c" opacity="0.1" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="297" y="130" text-anchor="middle" class="label" fill="#2f6a1c">컬럼 통계</text>
   <text x="230" y="148" class="desc">NDV, NULL 수, 최소/최대</text>
   <text x="230" y="162" class="desc">히스토그램 (데이터 분포)</text>
 
-  <rect x="390" y="110" width="155" height="60" rx="6" fill="#F59E0B" opacity="0.1" stroke="#F59E0B" stroke-width="1"/>
-  <text x="467" y="130" text-anchor="middle" class="label" fill="#F59E0B">인덱스 통계</text>
+  <rect x="390" y="110" width="155" height="60" rx="6" fill="#8a5a10" opacity="0.1" stroke="#8a5a10" stroke-width="1"/>
+  <text x="467" y="130" text-anchor="middle" class="label" fill="#8a5a10">인덱스 통계</text>
   <text x="400" y="148" class="desc">Leaf 블록, 레벨, 클러</text>
   <text x="400" y="162" class="desc">스터링 팩터, Distinct Keys</text>
 
-  <rect x="560" y="110" width="195" height="60" rx="6" fill="#6F6BEA" opacity="0.1" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="657" y="130" text-anchor="middle" class="label" fill="#6F6BEA">시스템 통계</text>
+  <rect x="560" y="110" width="195" height="60" rx="6" fill="#4a2e78" opacity="0.1" stroke="#4a2e78" stroke-width="1"/>
+  <text x="657" y="130" text-anchor="middle" class="label" fill="#4a2e78">시스템 통계</text>
   <text x="570" y="148" class="desc">CPU 속도, I/O 속도</text>
   <text x="570" y="162" class="desc">Multi-block 읽기 속도</text>
 
   <!-- Collection Methods -->
-  <rect x="30" y="200" width="355" height="130" fill="#1E1F2E" stroke="#10B981" stroke-width="2" class="box"/>
-  <text x="207" y="223" text-anchor="middle" class="label" fill="#10B981">자동 통계 수집 (Auto Collection)</text>
-  <text x="50" y="248" class="mono" fill="#10B981">auto optimizer stats collection</text>
+  <rect x="30" y="200" width="355" height="130" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2" class="box"/>
+  <text x="207" y="223" text-anchor="middle" class="label" fill="#2f6a1c">자동 통계 수집 (Auto Collection)</text>
+  <text x="50" y="248" class="mono" fill="#2f6a1c">auto optimizer stats collection</text>
   <text x="50" y="266" class="desc">유지 관리 윈도우 내 자동 실행</text>
   <text x="50" y="284" class="desc">노후화 기준: DML 변경량 &gt; STALE_PERCENT(10%)</text>
   <text x="50" y="302" class="desc">DBA_TAB_MODIFICATIONS로 변경량 확인</text>
   <text x="50" y="320" class="desc">우선순위: 변경량 많은 테이블부터 수집</text>
 
-  <rect x="415" y="200" width="355" height="130" fill="#1E1F2E" stroke="#F59E0B" stroke-width="2" class="box"/>
-  <text x="592" y="223" text-anchor="middle" class="label" fill="#F59E0B">수동 통계 수집 (Manual Collection)</text>
-  <text x="435" y="248" class="mono" fill="#F59E0B">DBMS_STATS.GATHER_TABLE_STATS</text>
-  <text x="435" y="266" class="mono" fill="#F59E0B">DBMS_STATS.GATHER_SCHEMA_STATS</text>
-  <text x="435" y="284" class="mono" fill="#F59E0B">DBMS_STATS.GATHER_DATABASE_STATS</text>
+  <rect x="415" y="200" width="355" height="130" fill="#f3efe4" stroke="#8a5a10" stroke-width="2" class="box"/>
+  <text x="592" y="223" text-anchor="middle" class="label" fill="#8a5a10">수동 통계 수집 (Manual Collection)</text>
+  <text x="435" y="248" class="mono" fill="#8a5a10">DBMS_STATS.GATHER_TABLE_STATS</text>
+  <text x="435" y="266" class="mono" fill="#8a5a10">DBMS_STATS.GATHER_SCHEMA_STATS</text>
+  <text x="435" y="284" class="mono" fill="#8a5a10">DBMS_STATS.GATHER_DATABASE_STATS</text>
   <text x="435" y="302" class="desc">estimate_percent: AUTO_SAMPLE_SIZE (기본)</text>
   <text x="435" y="320" class="desc">method_opt: FOR ALL COLUMNS SIZE AUTO</text>
 
   <!-- Advanced Features -->
-  <rect x="30" y="350" width="740" height="155" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="1.5" class="box"/>
-  <text x="400" y="375" text-anchor="middle" class="label" fill="#6F6BEA">고급 통계 관리 기능</text>
+  <rect x="30" y="350" width="740" height="155" fill="#f3efe4" stroke="#4a2e78" stroke-width="1.5" class="box"/>
+  <text x="400" y="375" text-anchor="middle" class="label" fill="#4a2e78">고급 통계 관리 기능</text>
 
   <!-- Incremental Stats -->
-  <rect x="50" y="390" width="210" height="100" rx="6" fill="#3B82F6" opacity="0.06" stroke="#3B82F6" stroke-width="1"/>
-  <text x="155" y="410" text-anchor="middle" class="label" fill="#3B82F6">증분 통계</text>
+  <rect x="50" y="390" width="210" height="100" rx="6" fill="#2456a8" opacity="0.06" stroke="#2456a8" stroke-width="1"/>
+  <text x="155" y="410" text-anchor="middle" class="label" fill="#2456a8">증분 통계</text>
   <text x="155" y="425" text-anchor="middle" class="desc">Incremental Statistics</text>
   <text x="60" y="445" class="desc">파티션 테이블 전용</text>
   <text x="60" y="460" class="desc">변경 파티션만 재분석</text>
   <text x="60" y="475" class="desc">Synopsis 기반 NDV 계산</text>
-  <text x="60" y="488" class="mono" fill="#3B82F6">INCREMENTAL=TRUE</text>
+  <text x="60" y="488" class="mono" fill="#2456a8">INCREMENTAL=TRUE</text>
 
   <!-- Pending Stats -->
-  <rect x="285" y="390" width="210" height="100" rx="6" fill="#F59E0B" opacity="0.06" stroke="#F59E0B" stroke-width="1"/>
-  <text x="390" y="410" text-anchor="middle" class="label" fill="#F59E0B">보류 통계</text>
+  <rect x="285" y="390" width="210" height="100" rx="6" fill="#8a5a10" opacity="0.06" stroke="#8a5a10" stroke-width="1"/>
+  <text x="390" y="410" text-anchor="middle" class="label" fill="#8a5a10">보류 통계</text>
   <text x="390" y="425" text-anchor="middle" class="desc">Pending Statistics</text>
   <text x="295" y="445" class="desc">수집 후 즉시 미반영</text>
   <text x="295" y="460" class="desc">보류 영역에서 테스트</text>
   <text x="295" y="475" class="desc">PUBLISH / DELETE 선택</text>
-  <text x="295" y="488" class="mono" fill="#F59E0B">PUBLISH=FALSE</text>
+  <text x="295" y="488" class="mono" fill="#8a5a10">PUBLISH=FALSE</text>
 
   <!-- Preferences -->
-  <rect x="520" y="390" width="230" height="100" rx="6" fill="#10B981" opacity="0.06" stroke="#10B981" stroke-width="1"/>
-  <text x="635" y="410" text-anchor="middle" class="label" fill="#10B981">통계 기본 설정</text>
+  <rect x="520" y="390" width="230" height="100" rx="6" fill="#2f6a1c" opacity="0.06" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="635" y="410" text-anchor="middle" class="label" fill="#2f6a1c">통계 기본 설정</text>
   <text x="635" y="425" text-anchor="middle" class="desc">Statistics Preferences</text>
   <text x="530" y="445" class="desc">우선순위:</text>
-  <text x="530" y="460" class="mono" fill="#10B981">Global &lt; Database &lt; Schema &lt; Table</text>
+  <text x="530" y="460" class="mono" fill="#2f6a1c">Global &lt; Database &lt; Schema &lt; Table</text>
   <text x="530" y="478" class="desc">STALE_PERCENT, ESTIMATE_PERCENT</text>
   <text x="530" y="492" class="desc">CASCADE, DEGREE 등 제어</text>
 </svg>

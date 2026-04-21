@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,18 +16,18 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">Multitenant Architecture Overview — Oracle 26ai</text>
 
   <!-- CDB Outer Box -->
-  <rect x="40" y="70" width="720" height="420" rx="12" ry="12" fill="none" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="6,3"/>
-  <text x="60" y="95" class="label" fill="#6F6BEA">CDB (Container Database)</text>
+  <rect x="40" y="70" width="720" height="420" rx="12" ry="12" fill="none" stroke="#4a2e78" stroke-width="2" stroke-dasharray="6,3"/>
+  <text x="60" y="95" class="label" fill="#4a2e78">CDB (Container Database)</text>
 
   <!-- Oracle Instance -->
-  <rect x="60" y="110" width="680" height="70" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="400" y="135" text-anchor="middle" class="label" fill="#3B82F6">Oracle Instance (단일 인스턴스)</text>
+  <rect x="60" y="110" width="680" height="70" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="400" y="135" text-anchor="middle" class="label" fill="#2456a8">Oracle Instance (단일 인스턴스)</text>
   <text x="400" y="155" text-anchor="middle" class="sublabel">SGA (Shared Pool + Buffer Cache + Redo Log Buffer) + Background Processes</text>
   <text x="400" y="170" text-anchor="middle" class="small">모든 PDB가 하나의 인스턴스를 공유 — Shared Memory &amp; Processes</text>
 
   <!-- CDB$ROOT -->
-  <rect x="60" y="200" width="200" height="140" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="160" y="225" text-anchor="middle" class="label" fill="#F59E0B">CDB$ROOT</text>
+  <rect x="60" y="200" width="200" height="140" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="160" y="225" text-anchor="middle" class="label" fill="#8a5a10">CDB$ROOT</text>
   <text x="160" y="245" text-anchor="middle" class="sublabel">루트 컨테이너</text>
   <text x="160" y="245" text-anchor="middle" class="sublabel">Root Container</text>
   <text x="75" y="270" class="small">CON_ID = 1</text>
@@ -35,8 +36,8 @@
   <text x="75" y="320" class="small">패치/업그레이드 기준점</text>
 
   <!-- PDB$SEED -->
-  <rect x="280" y="200" width="200" height="140" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
-  <text x="380" y="225" text-anchor="middle" class="label" fill="#10B981">PDB$SEED</text>
+  <rect x="280" y="200" width="200" height="140" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="380" y="225" text-anchor="middle" class="label" fill="#2f6a1c">PDB$SEED</text>
   <text x="380" y="245" text-anchor="middle" class="sublabel">시드 컨테이너 (Seed)</text>
   <text x="295" y="270" class="small">CON_ID = 2</text>
   <text x="295" y="288" class="small">READ ONLY 전용</text>
@@ -44,13 +45,13 @@
   <text x="295" y="320" class="small">삭제 불가</text>
 
   <!-- Arrow from SEED to PDBs -->
-  <line x1="480" y1="270" x2="510" y2="270" stroke="#10B981" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <polygon points="508,265 518,270 508,275" fill="#10B981"/>
-  <text x="495" y="260" class="small" fill="#10B981">복사</text>
+  <line x1="480" y1="270" x2="510" y2="270" stroke="#2f6a1c" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="508,265 518,270 508,275" fill="#2f6a1c"/>
+  <text x="495" y="260" class="small" fill="#2f6a1c">복사</text>
 
   <!-- User PDBs -->
-  <rect x="520" y="200" width="200" height="140" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="620" y="225" text-anchor="middle" class="label" fill="#6F6BEA">사용자 PDBs</text>
+  <rect x="520" y="200" width="200" height="140" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="620" y="225" text-anchor="middle" class="label" fill="#4a2e78">사용자 PDBs</text>
   <text x="620" y="245" text-anchor="middle" class="sublabel">User Pluggable Databases</text>
   <text x="535" y="270" class="small">CON_ID = 3, 4, 5 ...</text>
   <text x="535" y="288" class="small">독립적 데이터 딕셔너리</text>
@@ -58,16 +59,16 @@
   <text x="535" y="320" class="small">최대 4,098개 (26ai)</text>
 
   <!-- Shared Resources -->
-  <rect x="60" y="360" width="340" height="110" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="1"/>
-  <text x="230" y="385" text-anchor="middle" class="label" fill="#3B82F6">공유 자원 (Shared Resources)</text>
+  <rect x="60" y="360" width="340" height="110" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="1"/>
+  <text x="230" y="385" text-anchor="middle" class="label" fill="#2456a8">공유 자원 (Shared Resources)</text>
   <text x="75" y="405" class="small">Control Files — CDB 전체 공유</text>
   <text x="75" y="422" class="small">Redo Log Files — CDB 전체 공유</text>
   <text x="75" y="439" class="small">UNDO Tablespace — 공유 또는 Local Undo</text>
   <text x="75" y="456" class="small">Background Processes — LGWR, DBWn, PMON 공유</text>
 
   <!-- Per-PDB Resources -->
-  <rect x="420" y="360" width="320" height="110" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1"/>
-  <text x="580" y="385" text-anchor="middle" class="label" fill="#F43F5E">PDB별 전용 자원 (Per-PDB)</text>
+  <rect x="420" y="360" width="320" height="110" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="1"/>
+  <text x="580" y="385" text-anchor="middle" class="label" fill="#be123c">PDB별 전용 자원 (Per-PDB)</text>
   <text x="435" y="405" class="small">SYSTEM Tablespace — PDB별 별도</text>
   <text x="435" y="422" class="small">SYSAUX Tablespace — PDB별 별도</text>
   <text x="435" y="439" class="small">사용자 Tablespace — PDB별 별도</text>

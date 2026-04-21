@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,19 +16,19 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">Multitenant in RAC Environment — Instance-level PDB Management</text>
 
   <!-- Node 1 -->
-  <rect x="40" y="70" width="340" height="240" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
-  <rect x="40" y="70" width="340" height="28" rx="8" ry="8" fill="#3B82F6" opacity="0.15"/>
-  <text x="210" y="90" text-anchor="middle" class="label" fill="#3B82F6">Node 1 — Instance 1</text>
+  <rect x="40" y="70" width="340" height="240" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
+  <rect x="40" y="70" width="340" height="28" rx="8" ry="8" fill="#2456a8" opacity="0.15"/>
+  <text x="210" y="90" text-anchor="middle" class="label" fill="#2456a8">Node 1 — Instance 1</text>
   <text x="210" y="110" text-anchor="middle" class="small">SGA + Background Processes</text>
 
-  <rect x="60" y="125" width="140" height="35" class="box" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1"/>
-  <text x="130" y="147" text-anchor="middle" class="sublabel" fill="#10B981">PDB1 OPEN (RW)</text>
-  <rect x="220" y="125" width="140" height="35" class="box" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1"/>
-  <text x="290" y="147" text-anchor="middle" class="sublabel" fill="#10B981">PDB2 OPEN (RW)</text>
-  <rect x="60" y="170" width="140" height="35" class="box" fill="#F43F5E" opacity="0.15" stroke="#F43F5E" stroke-width="1"/>
-  <text x="130" y="192" text-anchor="middle" class="sublabel" fill="#F43F5E">PDB3 CLOSE</text>
-  <rect x="220" y="170" width="140" height="35" class="box" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1"/>
-  <text x="290" y="192" text-anchor="middle" class="sublabel" fill="#10B981">PDB4 OPEN (RO)</text>
+  <rect x="60" y="125" width="140" height="35" class="box" fill="#2f6a1c" opacity="0.2" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="130" y="147" text-anchor="middle" class="sublabel" fill="#2f6a1c">PDB1 OPEN (RW)</text>
+  <rect x="220" y="125" width="140" height="35" class="box" fill="#2f6a1c" opacity="0.2" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="290" y="147" text-anchor="middle" class="sublabel" fill="#2f6a1c">PDB2 OPEN (RW)</text>
+  <rect x="60" y="170" width="140" height="35" class="box" fill="#be123c" opacity="0.15" stroke="#be123c" stroke-width="1"/>
+  <text x="130" y="192" text-anchor="middle" class="sublabel" fill="#be123c">PDB3 CLOSE</text>
+  <rect x="220" y="170" width="140" height="35" class="box" fill="#2f6a1c" opacity="0.2" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="290" y="192" text-anchor="middle" class="sublabel" fill="#2f6a1c">PDB4 OPEN (RO)</text>
 
   <text x="210" y="228" text-anchor="middle" class="code">INSTANCES=('inst1')</text>
   <text x="210" y="248" text-anchor="middle" class="small">srvctl로 서비스 관리</text>
@@ -35,19 +36,19 @@
   <text x="210" y="282" text-anchor="middle" class="small">available: PDB3 서비스 (failover)</text>
 
   <!-- Node 2 -->
-  <rect x="420" y="70" width="340" height="240" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
-  <rect x="420" y="70" width="340" height="28" rx="8" ry="8" fill="#6F6BEA" opacity="0.15"/>
-  <text x="590" y="90" text-anchor="middle" class="label" fill="#6F6BEA">Node 2 — Instance 2</text>
+  <rect x="420" y="70" width="340" height="240" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
+  <rect x="420" y="70" width="340" height="28" rx="8" ry="8" fill="#4a2e78" opacity="0.15"/>
+  <text x="590" y="90" text-anchor="middle" class="label" fill="#4a2e78">Node 2 — Instance 2</text>
   <text x="590" y="110" text-anchor="middle" class="small">SGA + Background Processes</text>
 
-  <rect x="440" y="125" width="140" height="35" class="box" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1"/>
-  <text x="510" y="147" text-anchor="middle" class="sublabel" fill="#10B981">PDB1 OPEN (RW)</text>
-  <rect x="600" y="125" width="140" height="35" class="box" fill="#F43F5E" opacity="0.15" stroke="#F43F5E" stroke-width="1"/>
-  <text x="670" y="147" text-anchor="middle" class="sublabel" fill="#F43F5E">PDB2 CLOSE</text>
-  <rect x="440" y="170" width="140" height="35" class="box" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1"/>
-  <text x="510" y="192" text-anchor="middle" class="sublabel" fill="#10B981">PDB3 OPEN (RW)</text>
-  <rect x="600" y="170" width="140" height="35" class="box" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1"/>
-  <text x="670" y="192" text-anchor="middle" class="sublabel" fill="#10B981">PDB4 OPEN (RO)</text>
+  <rect x="440" y="125" width="140" height="35" class="box" fill="#2f6a1c" opacity="0.2" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="510" y="147" text-anchor="middle" class="sublabel" fill="#2f6a1c">PDB1 OPEN (RW)</text>
+  <rect x="600" y="125" width="140" height="35" class="box" fill="#be123c" opacity="0.15" stroke="#be123c" stroke-width="1"/>
+  <text x="670" y="147" text-anchor="middle" class="sublabel" fill="#be123c">PDB2 CLOSE</text>
+  <rect x="440" y="170" width="140" height="35" class="box" fill="#2f6a1c" opacity="0.2" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="510" y="192" text-anchor="middle" class="sublabel" fill="#2f6a1c">PDB3 OPEN (RW)</text>
+  <rect x="600" y="170" width="140" height="35" class="box" fill="#2f6a1c" opacity="0.2" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="670" y="192" text-anchor="middle" class="sublabel" fill="#2f6a1c">PDB4 OPEN (RO)</text>
 
   <text x="590" y="228" text-anchor="middle" class="code">INSTANCES=('inst2')</text>
   <text x="590" y="248" text-anchor="middle" class="small">srvctl로 서비스 관리</text>
@@ -55,14 +56,14 @@
   <text x="590" y="282" text-anchor="middle" class="small">available: PDB1 서비스 (failover)</text>
 
   <!-- Interconnect -->
-  <line x1="380" y1="150" x2="420" y2="150" stroke="#F59E0B" stroke-width="2"/>
-  <line x1="380" y1="190" x2="420" y2="190" stroke="#F59E0B" stroke-width="2"/>
-  <text x="400" y="175" text-anchor="middle" class="small" fill="#F59E0B">Cache</text>
-  <text x="400" y="200" text-anchor="middle" class="small" fill="#F59E0B">Fusion</text>
+  <line x1="380" y1="150" x2="420" y2="150" stroke="#8a5a10" stroke-width="2"/>
+  <line x1="380" y1="190" x2="420" y2="190" stroke="#8a5a10" stroke-width="2"/>
+  <text x="400" y="175" text-anchor="middle" class="small" fill="#8a5a10">Cache</text>
+  <text x="400" y="200" text-anchor="middle" class="small" fill="#8a5a10">Fusion</text>
 
   <!-- Shared Storage -->
-  <rect x="100" y="330" width="600" height="80" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
-  <text x="400" y="355" text-anchor="middle" class="label" fill="#F59E0B">Shared Storage (ASM / Shared Filesystem)</text>
+  <rect x="100" y="330" width="600" height="80" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="2"/>
+  <text x="400" y="355" text-anchor="middle" class="label" fill="#8a5a10">Shared Storage (ASM / Shared Filesystem)</text>
   <text x="170" y="380" text-anchor="middle" class="small">Control Files</text>
   <text x="300" y="380" text-anchor="middle" class="small">Redo Logs</text>
   <text x="430" y="380" text-anchor="middle" class="small">Data Files (PDB별)</text>
@@ -70,14 +71,14 @@
   <text x="400" y="400" text-anchor="middle" class="code">Local Undo → UNDO TS 수 = 인스턴스 수 x PDB 수</text>
 
   <!-- Connecting lines to storage -->
-  <line x1="210" y1="310" x2="210" y2="330" stroke="#94A3B8" stroke-width="1"/>
-  <line x1="590" y1="310" x2="590" y2="330" stroke="#94A3B8" stroke-width="1"/>
+  <line x1="210" y1="310" x2="210" y2="330" stroke="#787368" stroke-width="1"/>
+  <line x1="590" y1="310" x2="590" y2="330" stroke="#787368" stroke-width="1"/>
 
   <!-- Key Features -->
-  <rect x="40" y="425" width="720" height="80" class="box" fill="#2A2B3D" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="40" y="425" width="720" height="80" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
   <text x="400" y="448" text-anchor="middle" class="label">RAC + 멀티테넌트 핵심 기능</text>
-  <text x="60" y="470" class="small" fill="#10B981">PDB별 인스턴스 독립 Open/Close: INSTANCES 절</text>
-  <text x="420" y="470" class="small" fill="#3B82F6">GV$ 뷰: 전체 인스턴스 통합 모니터링</text>
-  <text x="60" y="490" class="small" fill="#F59E0B">PDB Relocate: CDB 간 라이브 마이그레이션 (26ai 다운타임 최소화)</text>
-  <text x="420" y="490" class="small" fill="#F43F5E">Cache Fusion (GCS/GES): PDB 블록도 노드 간 공유</text>
+  <text x="60" y="470" class="small" fill="#2f6a1c">PDB별 인스턴스 독립 Open/Close: INSTANCES 절</text>
+  <text x="420" y="470" class="small" fill="#2456a8">GV$ 뷰: 전체 인스턴스 통합 모니터링</text>
+  <text x="60" y="490" class="small" fill="#8a5a10">PDB Relocate: CDB 간 라이브 마이그레이션 (26ai 다운타임 최소화)</text>
+  <text x="420" y="490" class="small" fill="#be123c">Cache Fusion (GCS/GES): PDB 블록도 노드 간 공유</text>
 </svg>

@@ -1,17 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" fill="none">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 12px; fill: #94A3B8; }
+    .subtitle { font-size: 12px; fill: #787368; }
     .label { font-size: 13px; font-weight: 600; }
-    .desc { font-size: 11px; fill: #94A3B8; }
+    .desc { font-size: 11px; fill: #787368; }
     .mono { font-family: 'Consolas', monospace; font-size: 11px; }
     .box { rx: 8; ry: 8; }
-    .arrow { stroke: #6F6BEA; stroke-width: 2; marker-end: url(#ah9); }
+    .arrow { stroke: #4a2e78; stroke-width: 2; marker-end: url(#ah9); }
   </style>
   <defs>
     <marker id="ah9" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#6F6BEA"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#4a2e78"/>
     </marker>
   </defs>
 
@@ -19,50 +20,50 @@
   <text x="400" y="52" text-anchor="middle" class="subtitle">Oracle Recommended Performance Tuning Methodology</text>
 
   <!-- Step 1 -->
-  <rect x="30" y="75" width="740" height="50" fill="#F43F5E" fill-opacity="0.08" stroke="#F43F5E" stroke-width="2" class="box"/>
-  <rect x="30" y="75" width="50" height="50" fill="#F43F5E" fill-opacity="0.2" rx="8" ry="8"/>
-  <text x="55" y="105" text-anchor="middle" class="label" fill="#F43F5E">1</text>
-  <text x="95" y="98" class="label" fill="#F43F5E">ADDM 실행 및 분석</text>
+  <rect x="30" y="75" width="740" height="50" fill="#be123c" fill-opacity="0.08" stroke="#be123c" stroke-width="2" class="box"/>
+  <rect x="30" y="75" width="50" height="50" fill="#be123c" fill-opacity="0.2" rx="8" ry="8"/>
+  <text x="55" y="105" text-anchor="middle" class="label" fill="#be123c">1</text>
+  <text x="95" y="98" class="label" fill="#be123c">ADDM 실행 및 분석</text>
   <text x="95" y="116" class="desc">ADDM 보고서 확인 → Finding(Problem)과 Recommendation 검토 → 가장 큰 Impact부터 처리</text>
 
   <line x1="400" y1="125" x2="400" y2="140" class="arrow"/>
 
   <!-- Step 2 -->
-  <rect x="30" y="143" width="740" height="50" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-width="2" class="box"/>
-  <rect x="30" y="143" width="50" height="50" fill="#F59E0B" fill-opacity="0.2" rx="8" ry="8"/>
-  <text x="55" y="173" text-anchor="middle" class="label" fill="#F59E0B">2</text>
-  <text x="95" y="166" class="label" fill="#F59E0B">OS 자원 확인</text>
+  <rect x="30" y="143" width="740" height="50" fill="#8a5a10" fill-opacity="0.08" stroke="#8a5a10" stroke-width="2" class="box"/>
+  <rect x="30" y="143" width="50" height="50" fill="#8a5a10" fill-opacity="0.2" rx="8" ry="8"/>
+  <text x="55" y="173" text-anchor="middle" class="label" fill="#8a5a10">2</text>
+  <text x="95" y="166" class="label" fill="#8a5a10">OS 자원 확인</text>
   <text x="95" y="184" class="desc">CPU, 메모리, I/O, 네트워크 병목 확인 → 하드웨어 자원 부족 시 증설 또는 자원 배분 조정</text>
 
   <line x1="400" y1="193" x2="400" y2="208" class="arrow"/>
 
   <!-- Step 3 -->
-  <rect x="30" y="211" width="740" height="50" fill="#3B82F6" fill-opacity="0.08" stroke="#3B82F6" stroke-width="2" class="box"/>
-  <rect x="30" y="211" width="50" height="50" fill="#3B82F6" fill-opacity="0.2" rx="8" ry="8"/>
-  <text x="55" y="241" text-anchor="middle" class="label" fill="#3B82F6">3</text>
-  <text x="95" y="234" class="label" fill="#3B82F6">메모리 구성 최적화</text>
+  <rect x="30" y="211" width="740" height="50" fill="#2456a8" fill-opacity="0.08" stroke="#2456a8" stroke-width="2" class="box"/>
+  <rect x="30" y="211" width="50" height="50" fill="#2456a8" fill-opacity="0.2" rx="8" ry="8"/>
+  <text x="55" y="241" text-anchor="middle" class="label" fill="#2456a8">3</text>
+  <text x="95" y="234" class="label" fill="#2456a8">메모리 구성 최적화</text>
   <text x="95" y="252" class="desc">SGA/PGA 크기 적정성 확인 → Buffer Cache, Shared Pool, PGA_AGGREGATE_TARGET 조정</text>
 
   <line x1="400" y1="261" x2="400" y2="276" class="arrow"/>
 
   <!-- Step 4 -->
-  <rect x="30" y="279" width="740" height="50" fill="#10B981" fill-opacity="0.08" stroke="#10B981" stroke-width="2" class="box"/>
-  <rect x="30" y="279" width="50" height="50" fill="#10B981" fill-opacity="0.2" rx="8" ry="8"/>
-  <text x="55" y="309" text-anchor="middle" class="label" fill="#10B981">4</text>
-  <text x="95" y="302" class="label" fill="#10B981">I/O 성능 최적화</text>
+  <rect x="30" y="279" width="740" height="50" fill="#2f6a1c" fill-opacity="0.08" stroke="#2f6a1c" stroke-width="2" class="box"/>
+  <rect x="30" y="279" width="50" height="50" fill="#2f6a1c" fill-opacity="0.2" rx="8" ry="8"/>
+  <text x="55" y="309" text-anchor="middle" class="label" fill="#2f6a1c">4</text>
+  <text x="95" y="302" class="label" fill="#2f6a1c">I/O 성능 최적화</text>
   <text x="95" y="320" class="desc">데이터 파일 분산, ASM 리밸런싱, Redo Log 크기 조정, I/O 대역폭 확인</text>
 
   <line x1="400" y1="329" x2="400" y2="344" class="arrow"/>
 
   <!-- Step 5 -->
-  <rect x="30" y="347" width="740" height="50" fill="#6F6BEA" fill-opacity="0.08" stroke="#6F6BEA" stroke-width="2" class="box"/>
-  <rect x="30" y="347" width="50" height="50" fill="#6F6BEA" fill-opacity="0.2" rx="8" ry="8"/>
-  <text x="55" y="377" text-anchor="middle" class="label" fill="#6F6BEA">5</text>
-  <text x="95" y="370" class="label" fill="#6F6BEA">SQL 튜닝</text>
+  <rect x="30" y="347" width="740" height="50" fill="#4a2e78" fill-opacity="0.08" stroke="#4a2e78" stroke-width="2" class="box"/>
+  <rect x="30" y="347" width="50" height="50" fill="#4a2e78" fill-opacity="0.2" rx="8" ry="8"/>
+  <text x="55" y="377" text-anchor="middle" class="label" fill="#4a2e78">5</text>
+  <text x="95" y="370" class="label" fill="#4a2e78">SQL 튜닝</text>
   <text x="95" y="388" class="desc">SQL Tuning Advisor 실행 → SQL Profile/Plan Baseline 적용 → 고부하 SQL 개선</text>
 
   <!-- Note -->
-  <rect x="30" y="412" width="740" height="38" fill="#1E1F2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
+  <rect x="30" y="412" width="740" height="38" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" class="box"/>
   <text x="400" y="432" text-anchor="middle" class="desc">튜닝 순서: 구조적 문제(아키텍처/OS) → 인스턴스 구성(메모리/I/O) → 개별 SQL 최적화 (하향식 접근)</text>
   <text x="400" y="446" text-anchor="middle" class="desc">각 단계 적용 후 변경 효과를 AWR/ADDM으로 검증 → 반복적 개선 사이클</text>
 </svg>

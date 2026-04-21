@@ -1,18 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
   <defs>
     <marker id="arrDown" markerWidth="8" markerHeight="6" refX="4" refY="6" orient="auto">
-      <path d="M0,0 L4,6 L8,0" fill="#6F6BEA"/>
+      <path d="M0,0 L4,6 L8,0" fill="#4a2e78"/>
     </marker>
   </defs>
 
@@ -21,86 +22,86 @@
   <text x="400" y="50" class="subtitle" text-anchor="middle">Memory Management Modes: AMM vs ASMM vs Manual</text>
 
   <!-- AMM -->
-  <rect x="30" y="75" width="230" height="280" class="box" fill="none" stroke="#6F6BEA" stroke-width="2"/>
-  <rect x="30" y="75" width="230" height="36" rx="8" ry="0" fill="#6F6BEA" fill-opacity="0.25"/>
-  <text x="145" y="98" class="label" text-anchor="middle" fill="#E2E8F0">AMM</text>
+  <rect x="30" y="75" width="230" height="280" class="box" fill="none" stroke="#4a2e78" stroke-width="2"/>
+  <rect x="32" y="77" width="226" height="34" rx="6" ry="6" fill="#4a2e78" fill-opacity="0.25"/>
+  <text x="145" y="98" class="label" text-anchor="middle" fill="#1a1a1a">AMM</text>
   <text x="145" y="124" class="small" text-anchor="middle">Automatic Memory Mgmt</text>
 
   <!-- MEMORY_TARGET outer box -->
-  <rect x="50" y="140" width="190" height="195" class="box" fill="#6F6BEA" fill-opacity="0.08" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="50" y="140" width="190" height="195" class="box" fill="#4a2e78" fill-opacity="0.08" stroke="#4a2e78" stroke-width="1"/>
   <text x="145" y="160" class="code" text-anchor="middle">MEMORY_TARGET</text>
   <text x="145" y="176" class="small" text-anchor="middle">SGA + PGA 총괄 자동 관리</text>
 
   <!-- SGA portion -->
-  <rect x="65" y="188" width="160" height="55" class="box" fill="#3B82F6" fill-opacity="0.1" stroke="#3B82F6" stroke-width="1"/>
-  <text x="145" y="208" class="sublabel" text-anchor="middle" fill="#3B82F6">SGA</text>
+  <rect x="65" y="188" width="160" height="55" class="box" fill="#2456a8" fill-opacity="0.1" stroke="#2456a8" stroke-width="1"/>
+  <text x="145" y="208" class="sublabel" text-anchor="middle" fill="#2456a8">SGA</text>
   <text x="145" y="228" class="small" text-anchor="middle">자동 분배</text>
 
   <!-- PGA portion -->
-  <rect x="65" y="253" width="160" height="55" class="box" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="1"/>
-  <text x="145" y="273" class="sublabel" text-anchor="middle" fill="#10B981">PGA</text>
+  <rect x="65" y="253" width="160" height="55" class="box" fill="#2f6a1c" fill-opacity="0.1" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="145" y="273" class="sublabel" text-anchor="middle" fill="#2f6a1c">PGA</text>
   <text x="145" y="293" class="small" text-anchor="middle">자동 분배</text>
 
   <!-- Upper limit -->
-  <text x="145" y="345" class="small" text-anchor="middle" fill="#F59E0B">MEMORY_MAX_TARGET (상한)</text>
+  <text x="145" y="345" class="small" text-anchor="middle" fill="#8a5a10">MEMORY_MAX_TARGET (상한)</text>
 
   <!-- ASMM -->
-  <rect x="285" y="75" width="230" height="280" class="box" fill="none" stroke="#3B82F6" stroke-width="2"/>
-  <rect x="285" y="75" width="230" height="36" rx="8" ry="0" fill="#3B82F6" fill-opacity="0.25"/>
-  <text x="400" y="98" class="label" text-anchor="middle" fill="#E2E8F0">ASMM</text>
+  <rect x="285" y="75" width="230" height="280" class="box" fill="none" stroke="#2456a8" stroke-width="2"/>
+  <rect x="287" y="77" width="226" height="34" rx="6" ry="6" fill="#2456a8" fill-opacity="0.25"/>
+  <text x="400" y="98" class="label" text-anchor="middle" fill="#1a1a1a">ASMM</text>
   <text x="400" y="124" class="small" text-anchor="middle">Automatic Shared Memory Mgmt</text>
 
   <!-- SGA_TARGET -->
-  <rect x="305" y="140" width="190" height="105" class="box" fill="#3B82F6" fill-opacity="0.08" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="305" y="140" width="190" height="105" class="box" fill="#2456a8" fill-opacity="0.08" stroke="#2456a8" stroke-width="1"/>
   <text x="400" y="160" class="code" text-anchor="middle">SGA_TARGET</text>
   <text x="400" y="178" class="small" text-anchor="middle">SGA 내부 자동 관리</text>
   <text x="400" y="196" class="small" text-anchor="middle">Buffer Cache, Shared Pool 등</text>
   <text x="400" y="214" class="small" text-anchor="middle">자동 크기 조정</text>
-  <text x="400" y="232" class="small" text-anchor="middle" fill="#F59E0B">SGA_MAX_SIZE (상한)</text>
+  <text x="400" y="232" class="small" text-anchor="middle" fill="#8a5a10">SGA_MAX_SIZE (상한)</text>
 
   <!-- PGA_AGGREGATE_TARGET -->
-  <rect x="305" y="255" width="190" height="55" class="box" fill="#10B981" fill-opacity="0.08" stroke="#10B981" stroke-width="1"/>
+  <rect x="305" y="255" width="190" height="55" class="box" fill="#2f6a1c" fill-opacity="0.08" stroke="#2f6a1c" stroke-width="1"/>
   <text x="400" y="275" class="code" text-anchor="middle">PGA_AGGREGATE_TARGET</text>
   <text x="400" y="293" class="small" text-anchor="middle">PGA 자동 관리</text>
 
   <text x="400" y="345" class="small" text-anchor="middle">개별 SGA 값 = 최소값(Floor)</text>
 
   <!-- Manual -->
-  <rect x="540" y="75" width="230" height="280" class="box" fill="none" stroke="#F59E0B" stroke-width="2"/>
-  <rect x="540" y="75" width="230" height="36" rx="8" ry="0" fill="#F59E0B" fill-opacity="0.25"/>
-  <text x="655" y="98" class="label" text-anchor="middle" fill="#E2E8F0">Manual</text>
+  <rect x="540" y="75" width="230" height="280" class="box" fill="none" stroke="#8a5a10" stroke-width="2"/>
+  <rect x="542" y="77" width="226" height="34" rx="6" ry="6" fill="#8a5a10" fill-opacity="0.25"/>
+  <text x="655" y="98" class="label" text-anchor="middle" fill="#1a1a1a">Manual</text>
   <text x="655" y="124" class="small" text-anchor="middle">수동 관리</text>
 
   <!-- Individual components -->
-  <rect x="555" y="140" width="200" height="30" class="box" fill="#3B82F6" fill-opacity="0.1" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="555" y="140" width="200" height="30" class="box" fill="#2456a8" fill-opacity="0.1" stroke="#2456a8" stroke-width="1"/>
   <text x="655" y="160" class="code" text-anchor="middle">DB_CACHE_SIZE</text>
 
-  <rect x="555" y="178" width="200" height="30" class="box" fill="#3B82F6" fill-opacity="0.1" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="555" y="178" width="200" height="30" class="box" fill="#2456a8" fill-opacity="0.1" stroke="#2456a8" stroke-width="1"/>
   <text x="655" y="198" class="code" text-anchor="middle">SHARED_POOL_SIZE</text>
 
-  <rect x="555" y="216" width="200" height="30" class="box" fill="#3B82F6" fill-opacity="0.1" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="555" y="216" width="200" height="30" class="box" fill="#2456a8" fill-opacity="0.1" stroke="#2456a8" stroke-width="1"/>
   <text x="655" y="236" class="code" text-anchor="middle">LARGE_POOL_SIZE</text>
 
-  <rect x="555" y="254" width="200" height="30" class="box" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="1"/>
+  <rect x="555" y="254" width="200" height="30" class="box" fill="#2f6a1c" fill-opacity="0.1" stroke="#2f6a1c" stroke-width="1"/>
   <text x="655" y="274" class="code" text-anchor="middle">PGA_AGGREGATE_TARGET</text>
 
-  <rect x="555" y="292" width="200" height="30" class="box" fill="#F59E0B" fill-opacity="0.1" stroke="#F59E0B" stroke-width="1"/>
+  <rect x="555" y="292" width="200" height="30" class="box" fill="#8a5a10" fill-opacity="0.1" stroke="#8a5a10" stroke-width="1"/>
   <text x="655" y="312" class="code" text-anchor="middle">...</text>
 
   <text x="655" y="345" class="small" text-anchor="middle">DBA가 각각 수동 설정</text>
 
   <!-- Automation level bar -->
-  <rect x="30" y="380" width="740" height="4" rx="2" ry="2" fill="#2A2B3D"/>
-  <rect x="30" y="380" width="230" height="4" rx="2" ry="2" fill="#6F6BEA"/>
-  <rect x="285" y="380" width="230" height="4" rx="2" ry="2" fill="#3B82F6"/>
-  <rect x="540" y="380" width="230" height="4" rx="2" ry="2" fill="#F59E0B"/>
+  <rect x="30" y="380" width="740" height="4" rx="2" ry="2" fill="#f3efe4"/>
+  <rect x="30" y="380" width="230" height="4" rx="2" ry="2" fill="#4a2e78"/>
+  <rect x="285" y="380" width="230" height="4" rx="2" ry="2" fill="#2456a8"/>
+  <rect x="540" y="380" width="230" height="4" rx="2" ry="2" fill="#8a5a10"/>
 
   <text x="30" y="400" class="small">자동화 높음</text>
   <text x="770" y="400" class="small" text-anchor="end">자동화 낮음</text>
 
   <!-- COMPATIBLE parameter note -->
-  <rect x="60" y="420" width="680" height="80" class="box" fill="#F43F5E" fill-opacity="0.05" stroke="#F43F5E" stroke-width="1"/>
-  <text x="400" y="445" class="label" text-anchor="middle" fill="#F43F5E">COMPATIBLE 파라미터 주의</text>
+  <rect x="60" y="420" width="680" height="80" class="box" fill="#be123c" fill-opacity="0.05" stroke="#be123c" stroke-width="1"/>
+  <text x="400" y="445" class="label" text-anchor="middle" fill="#be123c">COMPATIBLE 파라미터 주의</text>
   <text x="400" y="465" class="sublabel" text-anchor="middle">호환성 수준을 결정하는 정적 파라미터. 한 번 올리면 되돌릴 수 없음 (불가역적)</text>
   <text x="400" y="485" class="small" text-anchor="middle">변경 전 반드시 백업 수행 + 테스트 환경 검증. Oracle 26ai 신기능 사용 시 COMPATIBLE = '26.0.0' 필요</text>
 </svg>

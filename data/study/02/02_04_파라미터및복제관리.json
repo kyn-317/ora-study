@@ -19,11 +19,11 @@
       "visuals": [
         {
           "id": "v07",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>PDB 관리 두 축</b>\"]:::amber\n\n  B[\"<b>PDB 파라미터 관리</b><br/>PDB별 독립 시스템 설정\"]:::blue\n  B1[\"<b>ISPDB_MODIFIABLE=TRUE</b><br/>PDB 수준 독립 설정 가능\"]:::blue\n  B2[\"<b>ISPDB_MODIFIABLE=FALSE</b><br/>CDB 루트에서만 변경 가능\"]:::red\n  B3[\"<b>Lockdown Profile</b><br/>보안 제한 프로파일\"]:::blue\n\n  C[\"<b>PDB 복제 (Cloning)</b><br/>PDB의 사본 생성\"]:::green\n  C1[\"<b>로컬 클론</b><br/>동일 CDB · 1회성\"]:::green\n  C2[\"<b>원격 클론</b><br/>다른 CDB · DB Link\"]:::green\n  C3[\"<b>Refreshable Clone</b><br/>주기적 동기화\"]:::green\n  C4[\"<b>Snapshot Copy</b><br/>Copy-on-Write · 즉시\"]:::green\n  C5[\"<b>PDB Relocate</b><br/>무중단 이관\"]:::green\n\n  A --> B\n  A --> C\n  B --> B1\n  B --> B2\n  B --> B3\n  C --> C1\n  C --> C2\n  C --> C3\n  C --> C4\n  C --> C5\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "PDB 파라미터 관리와 PDB 복제의 두 축 — ISPDB_MODIFIABLE 분류, Lockdown Profile, 복제 5가지 방법",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/02/02_04_s01_v07_mermaid.svg"
         }
       ],
       "subsections": []
@@ -173,11 +173,11 @@
       "visuals": [
         {
           "id": "v06",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  subgraph SRC[\"소스 CDB (Server A)\"]\n    A[\"<b>공통 사용자 생성</b><br/>CREATE USER c##clone_user\"]:::amber\n    B[\"<b>권한 부여</b><br/>CREATE SESSION<br/>CREATE PLUGGABLE DATABASE\"]:::amber\n    C[\"<b>소스 PDB</b><br/>READ ONLY 또는<br/>READ WRITE (핫 클론)\"]:::green\n  end\n\n  subgraph DST[\"대상 CDB (Server B)\"]\n    D[\"<b>DB Link 생성</b><br/>CREATE DATABASE LINK\"]:::blue\n    E[\"<b>원격 클론 실행</b><br/>CREATE PLUGGABLE DATABASE<br/>... FROM pdb_src@dblink\"]:::blue\n    F[\"<b>Oracle Net 데이터 전송</b><br/>블록 단위 네트워크 전송\"]:::blue\n    G[\"<b>새 PDB 생성</b><br/>FILE_NAME_CONVERT 적용\"]:::green\n    H[\"<b>새 PDB OPEN</b><br/>ALTER PLUGGABLE DATABASE OPEN\"]:::green\n  end\n\n  A --> B\n  B --> C\n  D --> E\n  C -- DB Link --> D\n  E --> F\n  F --> G\n  G --> H\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "원격 클론 아키텍처 — 소스 CDB 공통 사용자/권한 설정, DB Link 생성, Oracle Net을 통한 PDB 복제 흐름",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/02/02_04_s05_v06_mermaid.svg"
         }
       ],
       "subsections": [
@@ -283,11 +283,11 @@
       "visuals": [
         {
           "id": "v08",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>DBCA 실행</b><br/>dbca 명령\"]:::amber\n  B[\"<b>Manage Pluggable Databases</b><br/>작업 선택\"]:::amber\n  C[\"<b>Clone a PDB</b><br/>PDB 작업 선택\"]:::amber\n  D[\"<b>소스 데이터베이스 선택</b><br/>소스 CDB · PDB 지정\"]:::blue\n  E[\"<b>클론 PDB 정보 입력</b><br/>새 PDB 이름 · 관리자 자격증명<br/>데이터 파일 위치\"]:::blue\n  F[\"<b>스토리지 옵션 설정</b><br/>FILE_NAME_CONVERT 또는 OMF\"]:::blue\n  G[\"<b>확인 및 실행</b>\"]:::green\n  H[\"<b>클론 완료</b><br/>새 PDB 생성\"]:::green\n\n  SI[\"<b>Silent 모드 (자동화)</b><br/>dbca -silent<br/>-createPluggableDatabase\"]:::blue\n\n  A --> B --> C --> D --> E --> F --> G --> H\n  A -.-> SI\n  SI -.-> H\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "DBCA GUI 모드 PDB 클론 7단계 절차와 Silent 모드 자동화 경로",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/02/02_04_s08_v08_mermaid.svg"
         }
       ],
       "subsections": [

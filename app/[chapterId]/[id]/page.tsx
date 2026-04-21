@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getStudyData, StudySection, Visual } from '../../../lib/data';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import MermaidDiagram from '../../../components/MermaidDiagram';
+import VisualFigure from '../../../components/VisualFigure';
 
 export default async function DetailPage({ params }: { params: Promise<{ chapterId: string, id: string }> }) {
   const { chapterId, id } = await params;
@@ -78,46 +78,7 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, margin: '18px 0' }}>
         {filtered.map(v => (
-          <figure key={v.id} style={{ margin: 0, textAlign: 'center' }}>
-            {v.type === 'svg' && (
-              <img
-                src={v.src}
-                alt={v.caption}
-                style={{
-                  width: v.width || '100%',
-                  maxWidth: '100%',
-                  border: '1px solid var(--rule)',
-                  background: '#111827',
-                  borderRadius: 8,
-                  padding: 16,
-                }}
-              />
-            )}
-            {v.type === 'html' && (
-              <iframe
-                src={v.src}
-                title={v.caption}
-                style={{
-                  width: v.width || '100%',
-                  minHeight: 300,
-                  border: '1px solid var(--rule)',
-                  background: 'var(--paper)',
-                }}
-              />
-            )}
-            {v.type === 'mermaid' && v.mermaidCode && (
-              <MermaidDiagram code={v.mermaidCode} />
-            )}
-            <figcaption style={{
-              color: 'var(--ink-3)',
-              fontSize: 12,
-              marginTop: 8,
-              fontFamily: 'var(--font-mono)',
-              letterSpacing: '0.04em',
-            }}>
-              {v.caption}
-            </figcaption>
-          </figure>
+          <VisualFigure key={v.id} visual={v} />
         ))}
       </div>
     );

@@ -53,11 +53,11 @@
       "visuals": [
         {
           "id": "v4",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  DB[\"<b>데이터베이스 (디스크)</b>\"]:::amber\n  DB --> PF[\"<b>물리적 파일 3종</b>\"]:::blue\n  PF --> CF[\"<b>컨트롤 파일</b><br/>DB 전체 구조 메타데이터 저장<br/>손상 시: MOUNT 불가\"]:::red\n  PF --> RL[\"<b>온라인 Redo Log</b><br/>모든 변경 사항 기록<br/>손상 시: 복구 불가, 데이터 유실 위험\"]:::red\n  PF --> DF[\"<b>데이터 파일</b><br/>실제 사용자 데이터 저장<br/>손상 시: 해당 테이블스페이스 접근 불가\"]:::red\n  DB --> LS[\"<b>논리적 저장 계층</b>\"]:::green\n  LS --> TS[\"<b>Tablespace</b><br/>SYSTEM / SYSAUX / UNDOTBS1 / TEMP / USERS\"]:::green\n  TS --> SEG[\"<b>Segment</b><br/>Table, Index 등\"]:::green\n  SEG --> EXT[\"<b>Extent</b><br/>연속된 블록 집합\"]:::green\n  EXT --> BLK[\"<b>Data Block</b><br/>최소 I/O 단위 (기본 8KB)\"]:::green\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "물리적 파일 3종(컨트롤 파일·온라인 Redo Log·데이터 파일)과 논리적 저장 계층(Tablespace → Segment → Extent → Data Block)의 관계도",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_00_s03_v4_mermaid.svg"
         }
       ],
       "subsections": []
@@ -70,11 +70,11 @@
       "visuals": [
         {
           "id": "v5",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  SD[\"<b>SHUTDOWN</b>\"]:::red\n  NM[\"<b>① NOMOUNT</b><br/>파라미터 파일 읽기<br/>SGA 할당 · 백그라운드 프로세스 기동\"]:::amber\n  MT[\"<b>② MOUNT</b><br/>컨트롤 파일 열기<br/>파일 위치 정보 인식\"]:::amber\n  OP[\"<b>③ OPEN</b><br/>데이터 파일 + Redo Log 열기<br/>SCN 검증 · 일반 사용자 접속 가능\"]:::green\n  SD -->|\"STARTUP NOMOUNT\"| NM\n  NM -->|\"ALTER DATABASE MOUNT\"| MT\n  MT -->|\"ALTER DATABASE OPEN\"| OP\n  OP -.->|\"SHUTDOWN\"| SD\n  subgraph 종료_4모드\n    SN[\"<b>NORMAL</b><br/>사용자 로그아웃까지 무한 대기\"]:::blue\n    ST[\"<b>TRANSACTIONAL</b><br/>활성 트랜잭션 완료까지 대기\"]:::blue\n    SI[\"<b>IMMEDIATE</b><br/>대기 없음 · 자동 롤백 · 체크포인트\"]:::blue\n    SA[\"<b>ABORT</b><br/>대기 없음 · 롤백 안함 · 체크포인트 X<br/>→ 인스턴스 복구 필요\"]:::red\n  end\n  OP --> SN & ST & SI & SA\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "기동 3단계(SHUTDOWN → NOMOUNT → MOUNT → OPEN)와 종료 4모드(NORMAL · TRANSACTIONAL · IMMEDIATE · ABORT) 흐름도",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_00_s04_v5_mermaid.svg"
         }
       ],
       "subsections": []
@@ -87,11 +87,11 @@
       "visuals": [
         {
           "id": "v6",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  AS[\"<b>ALTER SYSTEM SET param=value</b>\"]:::amber\n  AS --> SC{\"SCOPE\"}\n  SC -- \"MEMORY\" --> M[\"<b>메모리만 반영</b><br/>테스트/일시적 변경\"]:::blue\n  SC -- \"SPFILE\" --> SP[\"<b>SPFILE만 반영</b><br/>정적 파라미터 변경<br/>재기동 후 적용\"]:::blue\n  SC -- \"BOTH\" --> BT[\"<b>메모리 + SPFILE 반영</b><br/>영구 변경 (SPFILE 환경 기본값)\"]:::green\n  PF[\"<b>파라미터 파일</b>\"]:::amber\n  PF --> PFILE[\"<b>PFILE (init.ora)</b><br/>텍스트 형식<br/>텍스트 에디터로 직접 수정\"]:::blue\n  PF --> SPFILE[\"<b>SPFILE (spfile.ora)</b><br/>바이너리 형식<br/>ALTER SYSTEM으로만 변경 — Oracle 기본 권장\"]:::green\n  PC[\"<b>파라미터 분류</b>\"]:::amber\n  PC --> DYN[\"<b>동적 파라미터</b><br/>ALTER SYSTEM으로 실행 중 변경 가능\"]:::green\n  PC --> STA[\"<b>정적 파라미터</b><br/>재기동 필요 — SCOPE=SPFILE만 가능\"]:::red\n  PC --> BAS[\"<b>기본(Basic) 파라미터</b><br/>DBA가 반드시 검토해야 할 약 30개 핵심 파라미터\"]:::blue\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "PFILE vs SPFILE 차이, ALTER SYSTEM SCOPE 옵션(MEMORY·SPFILE·BOTH), 파라미터 분류(동적·정적·기본) 관계도",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_00_s05_v6_mermaid.svg"
         }
       ],
       "subsections": []
@@ -104,11 +104,11 @@
       "visuals": [
         {
           "id": "v7",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  FA[\"<b>장애 발생</b>\"]:::red\n  FA --> RT{\"복구 유형\"}\n  RT -- \"SHUTDOWN ABORT / 정전 / 크래시\" --> IR[\"<b>인스턴스 복구</b><br/>수행 주체: SMON 자동 / DBA 개입 불필요\"]:::amber\n  RT -- \"디스크 장애 / 파일 손상\" --> MR[\"<b>미디어 복구</b><br/>수행 주체: RMAN / DBA 수동 / DBA 개입 필요\"]:::blue\n  IR --> RF[\"<b>① Roll Forward (Redo 적용)</b><br/>Online Redo Log의 변경 사항을 데이터 파일에 재적용\"]:::green\n  RF --> OPEN[\"<b>DB OPEN</b><br/>사용자 서비스 재개\"]:::green\n  OPEN --> RB[\"<b>② Roll Back (UNDO 적용)</b><br/>커밋되지 않은 트랜잭션을 UNDO 데이터로 롤백<br/>백그라운드에서 수행 — 빠른 서비스 재개\"]:::amber\n  MR --> PRE[\"<b>미디어 복구 전제 조건</b><br/>ARCHIVELOG 모드 + 유효한 백업\"]:::blue\n  PRE --> MRT{\"복구 범위\"}\n  MRT -- \"최신 상태\" --> FULL[\"<b>완전 복구</b>\"]:::green\n  MRT -- \"특정 시점\" --> INC[\"<b>불완전 복구</b><br/>→ OPEN RESETLOGS 수행\"]:::amber\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "복구 2가지 유형(인스턴스 복구 vs 미디어 복구)과 인스턴스 복구 2단계(Roll Forward → DB OPEN → Roll Back) 흐름도",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/01/01_00_s06_v7_mermaid.svg"
         }
       ],
       "subsections": []
@@ -133,17 +133,55 @@
   ],
   "sql_examples": [],
   "keywords": [
-    "SGA", "PGA", "인스턴스", "Instance", "Database",
-    "Buffer Cache", "Shared Pool", "Redo Log Buffer",
-    "DBWn", "LGWR", "CKPT", "SMON", "PMON", "ARCn",
-    "컨트롤 파일", "Online Redo Log", "데이터 파일",
-    "테이블스페이스", "세그먼트", "익스텐트", "데이터 블록",
-    "STARTUP", "SHUTDOWN", "NOMOUNT", "MOUNT", "OPEN",
-    "PFILE", "SPFILE", "ALTER SYSTEM", "SCOPE",
-    "인스턴스 복구", "미디어 복구", "체크포인트", "Roll Forward", "Roll Back",
-    "ARCHIVELOG", "FRA", "UNDO", "SCN",
-    "AMM", "ASMM", "MEMORY_TARGET", "SGA_TARGET",
-    "Dedicated Server", "Shared Server", "DRCP",
-    "CDB", "PDB", "멀티테넌트", "SAVE STATE"
+    "SGA",
+    "PGA",
+    "인스턴스",
+    "Instance",
+    "Database",
+    "Buffer Cache",
+    "Shared Pool",
+    "Redo Log Buffer",
+    "DBWn",
+    "LGWR",
+    "CKPT",
+    "SMON",
+    "PMON",
+    "ARCn",
+    "컨트롤 파일",
+    "Online Redo Log",
+    "데이터 파일",
+    "테이블스페이스",
+    "세그먼트",
+    "익스텐트",
+    "데이터 블록",
+    "STARTUP",
+    "SHUTDOWN",
+    "NOMOUNT",
+    "MOUNT",
+    "OPEN",
+    "PFILE",
+    "SPFILE",
+    "ALTER SYSTEM",
+    "SCOPE",
+    "인스턴스 복구",
+    "미디어 복구",
+    "체크포인트",
+    "Roll Forward",
+    "Roll Back",
+    "ARCHIVELOG",
+    "FRA",
+    "UNDO",
+    "SCN",
+    "AMM",
+    "ASMM",
+    "MEMORY_TARGET",
+    "SGA_TARGET",
+    "Dedicated Server",
+    "Shared Server",
+    "DRCP",
+    "CDB",
+    "PDB",
+    "멀티테넌트",
+    "SAVE STATE"
   ]
 }

@@ -245,11 +245,11 @@
       "visuals": [
         {
           "id": "v7",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>VALID (USABLE)</b><br/>인덱스 세그먼트 존재<br/>DML 유지관리됨, 쿼리 사용 가능\"]:::green\n  B[\"<b>ALTER INDEX ... UNUSABLE</b><br/>세그먼트 삭제, 공간 회수\"]:::amber\n  C[\"<b>UNUSABLE</b><br/>세그먼트 삭제됨<br/>DML 유지관리 없음\"]:::red\n  D[\"<b>SKIP_UNUSABLE_INDEXES 확인</b>\"]:::amber\n  D1[\"<b>TRUE (기본값)</b><br/>DML 정상 수행<br/>UNUSABLE 인덱스 건너뜀\"]:::green\n  D2[\"<b>FALSE</b><br/>ORA-01502 오류\"]:::red\n  E[\"<b>ALTER INDEX ... REBUILD</b><br/>테이블 스캔 후 인덱스 재구성\"]:::blue\n  E1[\"<b>REBUILD ONLINE</b><br/>DML 동시 수행 가능\"]:::green\n  E2[\"<b>REBUILD TABLESPACE</b><br/>다른 테이블스페이스에 재구성\"]:::blue\n  F[\"<b>VALID (USABLE)</b><br/>인덱스 세그먼트 새로 생성\"]:::green\n  A -->|\"대량 DML 전 또는 공간 회수\"| B\n  B --> C\n  C --> D\n  D --> D1\n  D --> D2\n  C -->|\"REBUILD 시점\"| E\n  E --> E1\n  E --> E2\n  E --> F\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "인덱스 상태 전이 — VALID → UNUSABLE(세그먼트 삭제·공간 회수) → REBUILD → VALID",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/05/05_04_s07_v7_mermaid.svg"
         }
       ],
       "content": "인덱스를 UNUSABLE 상태로 설정하면 인덱스의 세그먼트(물리적 저장 공간)가 삭제되어 디스크 공간이 회수됩니다. UNUSABLE 인덱스는 DML 시 유지관리되지 않아 오버헤드가 제거되며, 필요 시 REBUILD로 복구할 수 있습니다.\n\n## 인덱스 상태 종류\n\n| 상태 | 설명 | 세그먼트 | DML 유지 | 쿼리 사용 |\n|---|---|---|---|---|\n| **VALID (USABLE)** | 정상 상태 | 존재 | 예 | 예 |\n| **UNUSABLE** | 사용 불가 상태, 세그먼트 삭제됨 | 삭제 | 아니오 | 불가 |\n| **INVISIBLE** | 옵티마이저에 보이지 않으나 유지관리됨 | 존재 | 예 | 기본 불가 (힌트로 가능) |\n\n## UNUSABLE로 인한 세그먼트 삭제\n\n```\n[USABLE 상태]\nIndex Segment: |■■■■■■■■| (인덱스 데이터 저장, 공간 점유)\n\n[ALTER INDEX ... UNUSABLE 실행 후]\nIndex Segment: (삭제됨, 공간 회수)\nData Dictionary: 인덱스 메타데이터만 유지 (구조 정의, 열 정보 등)\n\n[ALTER INDEX ... REBUILD 실행 후]\nIndex Segment: |■■■■■■■■| (새로 생성, 데이터 재구성)\n```\n\n## UNUSABLE 인덱스와 DML 관계\n\nUNUSABLE 상태의 인덱스가 있을 때 DML을 수행하면, SKIP_UNUSABLE_INDEXES 파라미터에 따라 동작이 달라집니다.\n\n| SKIP_UNUSABLE_INDEXES | DML 동작 | 설명 |\n|---|---|---|\n| **TRUE (기본값)** | DML 정상 수행 | UNUSABLE 인덱스를 건너뛰고 DML 실행 |\n| **FALSE** | ORA-01502 오류 | UNUSABLE 인덱스가 있으면 DML 실패 |",

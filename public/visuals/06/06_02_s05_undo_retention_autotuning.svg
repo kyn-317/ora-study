@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" fill="none">
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
-    .title { font-size: 18px; font-weight: 700; fill: #6F6BEA; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
+    .title { font-size: 18px; font-weight: 700; fill: #4a2e78; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 13px; font-weight: 600; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .small { font-size: 11px; fill: #787368; }
     .mono { font-family: 'Consolas', monospace; font-size: 11px; }
   </style>
 
@@ -12,69 +12,69 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">AUTOEXTEND ON 시 자동 조정 / OFF 시 수동 설정값 사용</text>
 
   <!-- Parameter Box -->
-  <rect x="250" y="65" width="300" height="55" rx="8" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="2"/>
-  <text x="400" y="87" text-anchor="middle" class="label" fill="#6F6BEA">UNDO_RETENTION</text>
+  <rect x="250" y="65" width="300" height="55" rx="8" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
+  <text x="400" y="87" text-anchor="middle" class="label" fill="#4a2e78">UNDO_RETENTION</text>
   <text x="400" y="107" text-anchor="middle" class="mono">기본값: 900초 (15분) | 동적 변경 가능</text>
 
   <!-- Two paths -->
-  <path d="M330 120 L200 155" stroke="#10B981" stroke-width="1.5" marker-end="url(#ag2)"/>
-  <path d="M470 120 L600 155" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#ay2)"/>
+  <path d="M330 120 L200 155" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ag2)"/>
+  <path d="M470 120 L600 155" stroke="#8a5a10" stroke-width="1.5" marker-end="url(#ay2)"/>
 
   <!-- AUTOEXTEND ON path -->
-  <rect x="30" y="155" width="340" height="260" rx="10" fill="#0F1019" stroke="#10B981" stroke-width="1.5"/>
-  <text x="200" y="178" text-anchor="middle" class="label" fill="#10B981">AUTOEXTEND ON</text>
+  <rect x="30" y="155" width="340" height="260" rx="10" fill="#faf8f3" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="200" y="178" text-anchor="middle" class="label" fill="#2f6a1c">AUTOEXTEND ON</text>
   <text x="200" y="195" text-anchor="middle" class="small">Auto-Tuning 활성화</text>
 
-  <rect x="50" y="208" width="300" height="35" rx="5" fill="#1E1F2E" stroke="#3B82F6" stroke-width="1"/>
+  <rect x="50" y="208" width="300" height="35" rx="5" fill="#f3efe4" stroke="#2456a8" stroke-width="1"/>
   <text x="200" y="225" text-anchor="middle" class="small">1) V$UNDOSTAT 통계 분석</text>
-  <text x="200" y="237" text-anchor="middle" class="mono" fill="#3B82F6">UNDO 소비율, 쿼리 실행 시간</text>
+  <text x="200" y="237" text-anchor="middle" class="mono" fill="#2456a8">UNDO 소비율, 쿼리 실행 시간</text>
 
-  <path d="M200 243 L200 250" stroke="#94A3B8" stroke-width="1"/>
+  <path d="M200 243 L200 250" stroke="#787368" stroke-width="1"/>
 
-  <rect x="50" y="252" width="300" height="35" rx="5" fill="#1E1F2E" stroke="#10B981" stroke-width="1"/>
+  <rect x="50" y="252" width="300" height="35" rx="5" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1"/>
   <text x="200" y="269" text-anchor="middle" class="small">2) 최장 쿼리 시간(MAXQUERYLEN) 기준</text>
-  <text x="200" y="281" text-anchor="middle" class="mono" fill="#10B981">최적 retention 자동 계산</text>
+  <text x="200" y="281" text-anchor="middle" class="mono" fill="#2f6a1c">최적 retention 자동 계산</text>
 
-  <path d="M200 287 L200 294" stroke="#94A3B8" stroke-width="1"/>
+  <path d="M200 287 L200 294" stroke="#787368" stroke-width="1"/>
 
-  <rect x="50" y="296" width="300" height="35" rx="5" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="1"/>
+  <rect x="50" y="296" width="300" height="35" rx="5" fill="#f3efe4" stroke="#4a2e78" stroke-width="1"/>
   <text x="200" y="313" text-anchor="middle" class="small">3) UNDO_RETENTION은 최소 하한(Floor)</text>
-  <text x="200" y="325" text-anchor="middle" class="mono" fill="#6F6BEA">계산값 > 파라미터 → 자동 적용</text>
+  <text x="200" y="325" text-anchor="middle" class="mono" fill="#4a2e78">계산값 > 파라미터 → 자동 적용</text>
 
-  <path d="M200 331 L200 338" stroke="#94A3B8" stroke-width="1"/>
+  <path d="M200 331 L200 338" stroke="#787368" stroke-width="1"/>
 
-  <rect x="50" y="340" width="300" height="35" rx="5" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="1"/>
-  <text x="200" y="357" text-anchor="middle" class="small" fill="#10B981">4) 데이터 파일 자동 확장으로 공간 확보</text>
-  <text x="200" y="369" text-anchor="middle" class="mono" fill="#10B981">MAXSIZE까지 자동 확장</text>
+  <rect x="50" y="340" width="300" height="35" rx="5" fill="#2f6a1c" fill-opacity="0.12" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="200" y="357" text-anchor="middle" class="small" fill="#2f6a1c">4) 데이터 파일 자동 확장으로 공간 확보</text>
+  <text x="200" y="369" text-anchor="middle" class="mono" fill="#2f6a1c">MAXSIZE까지 자동 확장</text>
 
-  <rect x="50" y="385" width="300" height="22" rx="4" fill="#10B981" fill-opacity="0.08"/>
-  <text x="200" y="400" text-anchor="middle" class="mono" fill="#10B981">TUNED_UNDORETENTION (V$UNDOSTAT)</text>
+  <rect x="50" y="385" width="300" height="22" rx="4" fill="#2f6a1c" fill-opacity="0.08"/>
+  <text x="200" y="400" text-anchor="middle" class="mono" fill="#2f6a1c">TUNED_UNDORETENTION (V$UNDOSTAT)</text>
 
   <!-- AUTOEXTEND OFF path -->
-  <rect x="430" y="155" width="340" height="260" rx="10" fill="#0F1019" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="600" y="178" text-anchor="middle" class="label" fill="#F59E0B">AUTOEXTEND OFF</text>
+  <rect x="430" y="155" width="340" height="260" rx="10" fill="#faf8f3" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="600" y="178" text-anchor="middle" class="label" fill="#8a5a10">AUTOEXTEND OFF</text>
   <text x="600" y="195" text-anchor="middle" class="small">Auto-Tuning 비활성화</text>
 
-  <rect x="450" y="208" width="300" height="45" rx="5" fill="#1E1F2E" stroke="#F59E0B" stroke-width="1"/>
+  <rect x="450" y="208" width="300" height="45" rx="5" fill="#f3efe4" stroke="#8a5a10" stroke-width="1"/>
   <text x="600" y="228" text-anchor="middle" class="small">UNDO_RETENTION 파라미터 값 고정 사용</text>
-  <text x="600" y="245" text-anchor="middle" class="mono" fill="#F59E0B">수동 변경만 가능</text>
+  <text x="600" y="245" text-anchor="middle" class="mono" fill="#8a5a10">수동 변경만 가능</text>
 
-  <rect x="450" y="265" width="300" height="45" rx="5" fill="#1E1F2E" stroke="#F43F5E" stroke-width="1"/>
+  <rect x="450" y="265" width="300" height="45" rx="5" fill="#f3efe4" stroke="#be123c" stroke-width="1"/>
   <text x="600" y="285" text-anchor="middle" class="small">고정 크기 내에서 관리</text>
-  <text x="600" y="302" text-anchor="middle" class="small" fill="#F43F5E">공간 부족 시 Unexpired 재사용 가능</text>
+  <text x="600" y="302" text-anchor="middle" class="small" fill="#be123c">공간 부족 시 Unexpired 재사용 가능</text>
 
-  <rect x="450" y="322" width="300" height="45" rx="5" fill="#1E1F2E" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="450" y="322" width="300" height="45" rx="5" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
   <text x="600" y="342" text-anchor="middle" class="small">디스크 공간 엄격 제한 환경에 적합</text>
-  <text x="600" y="359" text-anchor="middle" class="small" fill="#F59E0B">DBA가 워크로드 분석 후 수동 조정</text>
+  <text x="600" y="359" text-anchor="middle" class="small" fill="#8a5a10">DBA가 워크로드 분석 후 수동 조정</text>
 
-  <rect x="450" y="385" width="300" height="22" rx="4" fill="#F59E0B" fill-opacity="0.08"/>
-  <text x="600" y="400" text-anchor="middle" class="mono" fill="#F59E0B">ALTER SYSTEM SET UNDO_RETENTION = N;</text>
+  <rect x="450" y="385" width="300" height="22" rx="4" fill="#8a5a10" fill-opacity="0.08"/>
+  <text x="600" y="400" text-anchor="middle" class="mono" fill="#8a5a10">ALTER SYSTEM SET UNDO_RETENTION = N;</text>
 
   <!-- Bottom comparison -->
-  <text x="400" y="435" text-anchor="middle" class="small" fill="#6F6BEA">권장: AUTOEXTEND ON + Auto-Tuning 활용 (대부분의 운영 환경)</text>
+  <text x="400" y="435" text-anchor="middle" class="small" fill="#4a2e78">권장: AUTOEXTEND ON + Auto-Tuning 활용 (대부분의 운영 환경)</text>
 
   <defs>
-    <marker id="ag2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#10B981"/></marker>
-    <marker id="ay2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#F59E0B"/></marker>
+    <marker id="ag2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2f6a1c"/></marker>
+    <marker id="ay2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#8a5a10"/></marker>
   </defs>
 </svg>

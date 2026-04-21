@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,102 +16,102 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">N개 인스턴스 : 1개 데이터베이스 (N:1 관계)</text>
 
   <!-- Node 1 -->
-  <rect x="40" y="75" width="220" height="180" class="box" fill="none" stroke="#6F6BEA" stroke-width="2"/>
-  <rect x="40" y="75" width="220" height="28" rx="8" ry="8" fill="#6F6BEA" opacity="0.2"/>
-  <text x="150" y="94" text-anchor="middle" class="label" fill="#6F6BEA">Node 1</text>
+  <rect x="40" y="75" width="220" height="180" class="box" fill="none" stroke="#4a2e78" stroke-width="2"/>
+  <rect x="40" y="75" width="220" height="28" rx="8" ry="8" fill="#4a2e78" opacity="0.2"/>
+  <text x="150" y="94" text-anchor="middle" class="label" fill="#4a2e78">Node 1</text>
 
-  <rect x="60" y="115" width="180" height="55" class="box" fill="none" stroke="#3B82F6" stroke-width="1"/>
-  <text x="150" y="135" text-anchor="middle" class="sublabel" style="fill:#3B82F6">Instance 1</text>
+  <rect x="60" y="115" width="180" height="55" class="box" fill="none" stroke="#2456a8" stroke-width="1"/>
+  <text x="150" y="135" text-anchor="middle" class="sublabel" style="fill:#2456a8">Instance 1</text>
   <text x="150" y="152" text-anchor="middle" class="small">SGA + 백그라운드 프로세스</text>
   <text x="150" y="165" text-anchor="middle" class="code">ORACLE_SID = orcl1</text>
 
-  <rect x="60" y="180" width="180" height="30" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="60" y="180" width="180" height="30" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
   <text x="150" y="200" text-anchor="middle" class="small">Redo Thread 1</text>
 
-  <rect x="60" y="218" width="180" height="28" class="box" fill="none" stroke="#10B981" stroke-width="1"/>
-  <text x="150" y="237" text-anchor="middle" class="small" style="fill:#10B981">Oracle Clusterware</text>
+  <rect x="60" y="218" width="180" height="28" class="box" fill="none" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="150" y="237" text-anchor="middle" class="small" style="fill:#2f6a1c">Oracle Clusterware</text>
 
   <!-- Node 2 -->
-  <rect x="290" y="75" width="220" height="180" class="box" fill="none" stroke="#6F6BEA" stroke-width="2"/>
-  <rect x="290" y="75" width="220" height="28" rx="8" ry="8" fill="#6F6BEA" opacity="0.2"/>
-  <text x="400" y="94" text-anchor="middle" class="label" fill="#6F6BEA">Node 2</text>
+  <rect x="290" y="75" width="220" height="180" class="box" fill="none" stroke="#4a2e78" stroke-width="2"/>
+  <rect x="290" y="75" width="220" height="28" rx="8" ry="8" fill="#4a2e78" opacity="0.2"/>
+  <text x="400" y="94" text-anchor="middle" class="label" fill="#4a2e78">Node 2</text>
 
-  <rect x="310" y="115" width="180" height="55" class="box" fill="none" stroke="#3B82F6" stroke-width="1"/>
-  <text x="400" y="135" text-anchor="middle" class="sublabel" style="fill:#3B82F6">Instance 2</text>
+  <rect x="310" y="115" width="180" height="55" class="box" fill="none" stroke="#2456a8" stroke-width="1"/>
+  <text x="400" y="135" text-anchor="middle" class="sublabel" style="fill:#2456a8">Instance 2</text>
   <text x="400" y="152" text-anchor="middle" class="small">SGA + 백그라운드 프로세스</text>
   <text x="400" y="165" text-anchor="middle" class="code">ORACLE_SID = orcl2</text>
 
-  <rect x="310" y="180" width="180" height="30" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="310" y="180" width="180" height="30" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
   <text x="400" y="200" text-anchor="middle" class="small">Redo Thread 2</text>
 
-  <rect x="310" y="218" width="180" height="28" class="box" fill="none" stroke="#10B981" stroke-width="1"/>
-  <text x="400" y="237" text-anchor="middle" class="small" style="fill:#10B981">Oracle Clusterware</text>
+  <rect x="310" y="218" width="180" height="28" class="box" fill="none" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="400" y="237" text-anchor="middle" class="small" style="fill:#2f6a1c">Oracle Clusterware</text>
 
   <!-- Node N -->
-  <rect x="540" y="75" width="220" height="180" class="box" fill="none" stroke="#6F6BEA" stroke-width="2" stroke-dasharray="5,3"/>
-  <rect x="540" y="75" width="220" height="28" rx="8" ry="8" fill="#6F6BEA" opacity="0.1"/>
-  <text x="650" y="94" text-anchor="middle" class="label" fill="#6F6BEA">Node N</text>
+  <rect x="540" y="75" width="220" height="180" class="box" fill="none" stroke="#4a2e78" stroke-width="2" stroke-dasharray="5,3"/>
+  <rect x="540" y="75" width="220" height="28" rx="8" ry="8" fill="#4a2e78" opacity="0.1"/>
+  <text x="650" y="94" text-anchor="middle" class="label" fill="#4a2e78">Node N</text>
 
-  <rect x="560" y="115" width="180" height="55" class="box" fill="none" stroke="#3B82F6" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="650" y="135" text-anchor="middle" class="sublabel" style="fill:#3B82F6">Instance N</text>
+  <rect x="560" y="115" width="180" height="55" class="box" fill="none" stroke="#2456a8" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="650" y="135" text-anchor="middle" class="sublabel" style="fill:#2456a8">Instance N</text>
   <text x="650" y="152" text-anchor="middle" class="small">SGA + 백그라운드 프로세스</text>
   <text x="650" y="165" text-anchor="middle" class="code">ORACLE_SID = orclN</text>
 
-  <rect x="560" y="180" width="180" height="30" class="box" fill="none" stroke="#2A2B3D" stroke-width="1" stroke-dasharray="4,3"/>
+  <rect x="560" y="180" width="180" height="30" class="box" fill="none" stroke="#f3efe4" stroke-width="1" stroke-dasharray="4,3"/>
   <text x="650" y="200" text-anchor="middle" class="small">Redo Thread N</text>
 
-  <rect x="560" y="218" width="180" height="28" class="box" fill="none" stroke="#10B981" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="650" y="237" text-anchor="middle" class="small" style="fill:#10B981">Oracle Clusterware</text>
+  <rect x="560" y="218" width="180" height="28" class="box" fill="none" stroke="#2f6a1c" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="650" y="237" text-anchor="middle" class="small" style="fill:#2f6a1c">Oracle Clusterware</text>
 
   <!-- Interconnect -->
-  <rect x="40" y="270" width="720" height="36" class="box" fill="none" stroke="#F59E0B" stroke-width="2"/>
-  <text x="400" y="293" text-anchor="middle" class="label" fill="#F59E0B">Interconnect (Private Network) — Cache Fusion</text>
+  <rect x="40" y="270" width="720" height="36" class="box" fill="none" stroke="#8a5a10" stroke-width="2"/>
+  <text x="400" y="293" text-anchor="middle" class="label" fill="#8a5a10">Interconnect (Private Network) — Cache Fusion</text>
   <text x="150" y="293" text-anchor="middle" class="small">노드 간 메모리 블록 전송</text>
 
   <!-- Arrows from nodes to interconnect -->
-  <line x1="150" y1="255" x2="150" y2="270" stroke="#F59E0B" stroke-width="1.5"/>
-  <line x1="400" y1="255" x2="400" y2="270" stroke="#F59E0B" stroke-width="1.5"/>
-  <line x1="650" y1="255" x2="650" y2="270" stroke="#F59E0B" stroke-width="1.5"/>
+  <line x1="150" y1="255" x2="150" y2="270" stroke="#8a5a10" stroke-width="1.5"/>
+  <line x1="400" y1="255" x2="400" y2="270" stroke="#8a5a10" stroke-width="1.5"/>
+  <line x1="650" y1="255" x2="650" y2="270" stroke="#8a5a10" stroke-width="1.5"/>
 
   <!-- Arrows from interconnect to storage -->
-  <line x1="400" y1="306" x2="400" y2="340" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowDown)"/>
+  <line x1="400" y1="306" x2="400" y2="340" stroke="#787368" stroke-width="2" marker-end="url(#arrowDown)"/>
 
   <!-- Shared Storage -->
-  <rect x="100" y="342" width="600" height="140" class="box" fill="none" stroke="#10B981" stroke-width="2"/>
-  <rect x="100" y="342" width="600" height="28" rx="8" ry="8" fill="#10B981" opacity="0.15"/>
-  <text x="400" y="361" text-anchor="middle" class="label" fill="#10B981">공유 스토리지 (Shared Storage / ASM)</text>
+  <rect x="100" y="342" width="600" height="140" class="box" fill="none" stroke="#2f6a1c" stroke-width="2"/>
+  <rect x="100" y="342" width="600" height="28" rx="8" ry="8" fill="#2f6a1c" opacity="0.15"/>
+  <text x="400" y="361" text-anchor="middle" class="label" fill="#2f6a1c">공유 스토리지 (Shared Storage / ASM)</text>
 
-  <rect x="125" y="382" width="130" height="40" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="125" y="382" width="130" height="40" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
   <text x="190" y="400" text-anchor="middle" class="sublabel">데이터 파일</text>
   <text x="190" y="415" text-anchor="middle" class="small">Data Files</text>
 
-  <rect x="270" y="382" width="130" height="40" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="270" y="382" width="130" height="40" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
   <text x="335" y="400" text-anchor="middle" class="sublabel">제어파일</text>
   <text x="335" y="415" text-anchor="middle" class="small">Control Files</text>
 
-  <rect x="415" y="382" width="130" height="40" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="415" y="382" width="130" height="40" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
   <text x="480" y="400" text-anchor="middle" class="sublabel">Redo Log</text>
   <text x="480" y="415" text-anchor="middle" class="small">Online Redo Logs</text>
 
-  <rect x="560" y="382" width="120" height="40" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="560" y="382" width="120" height="40" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
   <text x="620" y="400" text-anchor="middle" class="sublabel">SPFILE</text>
   <text x="620" y="415" text-anchor="middle" class="small">공유 파라미터</text>
 
   <text x="400" y="465" text-anchor="middle" class="small">모든 노드가 동일한 데이터베이스 파일에 접근 (1개 Database)</text>
 
   <!-- Key concepts at bottom -->
-  <rect x="40" y="490" width="220" height="24" class="box" fill="none" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="150" y="507" text-anchor="middle" class="small" style="fill:#6F6BEA">3대 필수: 공유스토리지 + 인터커넥트 + Clusterware</text>
+  <rect x="40" y="490" width="220" height="24" class="box" fill="none" stroke="#4a2e78" stroke-width="1"/>
+  <text x="150" y="507" text-anchor="middle" class="small" style="fill:#4a2e78">3대 필수: 공유스토리지 + 인터커넥트 + Clusterware</text>
 
-  <rect x="280" y="490" width="240" height="24" class="box" fill="none" stroke="#10B981" stroke-width="1"/>
-  <text x="400" y="507" text-anchor="middle" class="small" style="fill:#10B981">장점: 노드 장애 시 다른 노드에서 서비스 계속</text>
+  <rect x="280" y="490" width="240" height="24" class="box" fill="none" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="400" y="507" text-anchor="middle" class="small" style="fill:#2f6a1c">장점: 노드 장애 시 다른 노드에서 서비스 계속</text>
 
-  <rect x="540" y="490" width="220" height="24" class="box" fill="none" stroke="#F59E0B" stroke-width="1"/>
-  <text x="650" y="507" text-anchor="middle" class="small" style="fill:#F59E0B">RAC 노드 수 제한 없음 (4노드 제한 X)</text>
+  <rect x="540" y="490" width="220" height="24" class="box" fill="none" stroke="#8a5a10" stroke-width="1"/>
+  <text x="650" y="507" text-anchor="middle" class="small" style="fill:#8a5a10">RAC 노드 수 제한 없음 (4노드 제한 X)</text>
 
   <defs>
     <marker id="arrowDown" markerWidth="10" markerHeight="7" refX="5" refY="7" orient="auto">
-      <polygon points="0 0, 10 0, 5 7" fill="#94A3B8"/>
+      <polygon points="0 0, 10 0, 5 7" fill="#787368"/>
     </marker>
   </defs>
 </svg>

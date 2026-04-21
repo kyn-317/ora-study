@@ -1,18 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
-    .arrow-line { stroke: #6F6BEA; stroke-width: 2; fill: none; }
+    .arrow-line { stroke: #4a2e78; stroke-width: 2; fill: none; }
   </style>
   <defs>
     <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a2e78" />
     </marker>
   </defs>
 
@@ -21,24 +22,24 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">컨트롤 파일 기반 vs 테이블 DDL 자동 유추 (Oracle 26ai 강화)</text>
 
   <!-- Standard Mode -->
-  <rect x="30" y="75" width="355" height="310" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="1.5" />
-  <text x="207" y="100" text-anchor="middle" class="label" fill="#3B82F6">Standard Mode (기본 모드)</text>
+  <rect x="30" y="75" width="355" height="310" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
+  <text x="207" y="100" text-anchor="middle" class="label" fill="#2456a8">Standard Mode (기본 모드)</text>
   <text x="207" y="118" text-anchor="middle" class="small">컨트롤 파일(.ctl) 필수</text>
 
   <!-- Standard Mode Flow -->
-  <rect x="55" y="135" width="300" height="35" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1" />
+  <rect x="55" y="135" width="300" height="35" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
   <text x="205" y="157" text-anchor="middle" class="code">sqlldr userid=hr/hr control=load.ctl</text>
 
   <line x1="205" y1="170" x2="205" y2="190" class="arrow-line" marker-end="url(#ah)" />
 
-  <rect x="55" y="192" width="300" height="55" class="box" fill="rgba(42,43,61,0.5)" stroke="#2A2B3D" stroke-width="1" />
+  <rect x="55" y="192" width="300" height="55" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" />
   <text x="75" y="212" class="code">LOAD DATA</text>
   <text x="75" y="227" class="code">INFILE 'data.csv'</text>
   <text x="75" y="242" class="code">INTO TABLE emp FIELDS TERMINATED BY ','</text>
 
   <line x1="205" y1="247" x2="205" y2="265" class="arrow-line" marker-end="url(#ah)" />
 
-  <rect x="55" y="267" width="300" height="35" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1" />
+  <rect x="55" y="267" width="300" height="35" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1" />
   <text x="205" y="289" text-anchor="middle" class="sublabel">컨트롤 파일의 규칙에 따라 데이터 로드</text>
 
   <text x="55" y="330" class="small">장점: 세밀한 제어 (WHEN, 다중 테이블, 변환)</text>
@@ -46,24 +47,24 @@
   <text x="55" y="366" class="small">사용: 복잡한 데이터 매핑, 조건부 로드</text>
 
   <!-- Express Mode -->
-  <rect x="415" y="75" width="355" height="310" class="box" fill="rgba(245,158,11,0.06)" stroke="#F59E0B" stroke-width="1.5" />
-  <text x="592" y="100" text-anchor="middle" class="label" fill="#F59E0B">Express Mode</text>
+  <rect x="415" y="75" width="355" height="310" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5" />
+  <text x="592" y="100" text-anchor="middle" class="label" fill="#8a5a10">Express Mode</text>
   <text x="592" y="118" text-anchor="middle" class="small">컨트롤 파일 불필요 (Oracle 26ai 강화)</text>
 
   <!-- Express Mode Flow -->
-  <rect x="440" y="135" width="305" height="35" class="box" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" />
+  <rect x="440" y="135" width="305" height="35" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" />
   <text x="592" y="157" text-anchor="middle" class="code">sqlldr userid=hr/hr table=emp data=emp.csv</text>
 
   <line x1="592" y1="170" x2="592" y2="190" class="arrow-line" marker-end="url(#ah)" />
 
-  <rect x="440" y="192" width="305" height="55" class="box" fill="rgba(42,43,61,0.5)" stroke="#2A2B3D" stroke-width="1" />
+  <rect x="440" y="192" width="305" height="55" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" />
   <text x="460" y="212" class="sublabel">테이블 DDL에서 자동으로</text>
   <text x="460" y="230" class="sublabel">컬럼명, 데이터 타입, 순서를 유추</text>
   <text x="460" y="242" class="code">CSV 헤더와 컬럼명 자동 매칭</text>
 
   <line x1="592" y1="247" x2="592" y2="265" class="arrow-line" marker-end="url(#ah)" />
 
-  <rect x="440" y="267" width="305" height="35" class="box" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1" />
+  <rect x="440" y="267" width="305" height="35" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1" />
   <text x="592" y="289" text-anchor="middle" class="sublabel">테이블 정의에 맞춰 자동 데이터 로드</text>
 
   <text x="440" y="330" class="small">장점: 간편함, .ctl 불필요, 빠른 시작</text>

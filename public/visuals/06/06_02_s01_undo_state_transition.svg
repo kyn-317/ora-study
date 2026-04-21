@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" fill="none">
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
-    .title { font-size: 18px; font-weight: 700; fill: #6F6BEA; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
+    .title { font-size: 18px; font-weight: 700; fill: #4a2e78; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 13px; font-weight: 600; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .small { font-size: 11px; fill: #787368; }
     .mono { font-family: 'Consolas', monospace; font-size: 11px; }
   </style>
 
@@ -12,77 +12,77 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">ACTIVE → UNEXPIRED → EXPIRED: 트랜잭션 생명주기에 따른 상태 변화</text>
 
   <!-- ACTIVE State -->
-  <rect x="50" y="80" width="200" height="140" rx="12" fill="#1E1F2E" stroke="#F43F5E" stroke-width="2.5"/>
-  <circle cx="80" cy="105" r="12" fill="#F43F5E" opacity="0.3"/>
-  <circle cx="80" cy="105" r="6" fill="#F43F5E"/>
-  <text x="150" y="108" text-anchor="middle" class="label" fill="#F43F5E">ACTIVE (활성)</text>
-  <line x1="65" y1="120" x2="235" y2="120" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="50" y="80" width="200" height="140" rx="12" fill="#f3efe4" stroke="#be123c" stroke-width="2.5"/>
+  <circle cx="80" cy="105" r="12" fill="#be123c" opacity="0.3"/>
+  <circle cx="80" cy="105" r="6" fill="#be123c"/>
+  <text x="150" y="108" text-anchor="middle" class="label" fill="#be123c">ACTIVE (활성)</text>
+  <line x1="65" y1="120" x2="235" y2="120" stroke="#f3efe4" stroke-width="1"/>
   <text x="150" y="138" text-anchor="middle" class="small">트랜잭션 진행 중 (미커밋)</text>
-  <text x="150" y="156" text-anchor="middle" class="small" fill="#F43F5E">덮어쓰기: 절대 불가</text>
+  <text x="150" y="156" text-anchor="middle" class="small" fill="#be123c">덮어쓰기: 절대 불가</text>
   <text x="150" y="174" text-anchor="middle" class="small">롤백, 읽기 일관성, 복구</text>
   <text x="150" y="192" text-anchor="middle" class="small">인스턴스 복구에 필수</text>
-  <text x="150" y="210" text-anchor="middle" class="mono" fill="#F43F5E">V$TRANSACTION 모니터링</text>
+  <text x="150" y="210" text-anchor="middle" class="mono" fill="#be123c">V$TRANSACTION 모니터링</text>
 
   <!-- Arrow ACTIVE → UNEXPIRED -->
-  <path d="M250 150 L310 150" stroke="#E2E8F0" stroke-width="2.5" marker-end="url(#aw)"/>
-  <text x="280" y="138" text-anchor="middle" class="small" fill="#E2E8F0">COMMIT</text>
-  <text x="280" y="165" text-anchor="middle" class="small" fill="#E2E8F0">ROLLBACK</text>
+  <path d="M250 150 L310 150" stroke="#1a1a1a" stroke-width="2.5" marker-end="url(#aw)"/>
+  <text x="280" y="138" text-anchor="middle" class="small" fill="#1a1a1a">COMMIT</text>
+  <text x="280" y="165" text-anchor="middle" class="small" fill="#1a1a1a">ROLLBACK</text>
 
   <!-- UNEXPIRED State -->
-  <rect x="315" y="80" width="200" height="140" rx="12" fill="#1E1F2E" stroke="#F59E0B" stroke-width="2.5"/>
-  <circle cx="345" cy="105" r="12" fill="#F59E0B" opacity="0.3"/>
-  <circle cx="345" cy="105" r="6" fill="#F59E0B"/>
-  <text x="415" y="108" text-anchor="middle" class="label" fill="#F59E0B">UNEXPIRED (미만료)</text>
-  <line x1="330" y1="120" x2="500" y2="120" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="315" y="80" width="200" height="140" rx="12" fill="#f3efe4" stroke="#8a5a10" stroke-width="2.5"/>
+  <circle cx="345" cy="105" r="12" fill="#8a5a10" opacity="0.3"/>
+  <circle cx="345" cy="105" r="6" fill="#8a5a10"/>
+  <text x="415" y="108" text-anchor="middle" class="label" fill="#8a5a10">UNEXPIRED (미만료)</text>
+  <line x1="330" y1="120" x2="500" y2="120" stroke="#f3efe4" stroke-width="1"/>
   <text x="415" y="138" text-anchor="middle" class="small">COMMIT 후 RETENTION 이내</text>
-  <text x="415" y="156" text-anchor="middle" class="small" fill="#F59E0B">덮어쓰기: 공간 부족 시 가능</text>
+  <text x="415" y="156" text-anchor="middle" class="small" fill="#8a5a10">덮어쓰기: 공간 부족 시 가능</text>
   <text x="415" y="174" text-anchor="middle" class="small">읽기 일관성, Flashback 보장</text>
   <text x="415" y="192" text-anchor="middle" class="small">NOGUARANTEE: 강제 재사용 가능</text>
-  <text x="415" y="210" text-anchor="middle" class="mono" fill="#F59E0B">DBA_UNDO_EXTENTS 확인</text>
+  <text x="415" y="210" text-anchor="middle" class="mono" fill="#8a5a10">DBA_UNDO_EXTENTS 확인</text>
 
   <!-- Arrow UNEXPIRED → EXPIRED -->
-  <path d="M515 150 L575 150" stroke="#E2E8F0" stroke-width="2.5" marker-end="url(#aw)"/>
-  <text x="545" y="138" text-anchor="middle" class="small" fill="#E2E8F0">RETENTION</text>
-  <text x="545" y="165" text-anchor="middle" class="small" fill="#E2E8F0">경과</text>
+  <path d="M515 150 L575 150" stroke="#1a1a1a" stroke-width="2.5" marker-end="url(#aw)"/>
+  <text x="545" y="138" text-anchor="middle" class="small" fill="#1a1a1a">RETENTION</text>
+  <text x="545" y="165" text-anchor="middle" class="small" fill="#1a1a1a">경과</text>
 
   <!-- EXPIRED State -->
-  <rect x="580" y="80" width="190" height="140" rx="12" fill="#1E1F2E" stroke="#10B981" stroke-width="2.5"/>
-  <circle cx="610" cy="105" r="12" fill="#10B981" opacity="0.3"/>
-  <circle cx="610" cy="105" r="6" fill="#10B981"/>
-  <text x="675" y="108" text-anchor="middle" class="label" fill="#10B981">EXPIRED (만료)</text>
-  <line x1="595" y1="120" x2="755" y2="120" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="580" y="80" width="190" height="140" rx="12" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2.5"/>
+  <circle cx="610" cy="105" r="12" fill="#2f6a1c" opacity="0.3"/>
+  <circle cx="610" cy="105" r="6" fill="#2f6a1c"/>
+  <text x="675" y="108" text-anchor="middle" class="label" fill="#2f6a1c">EXPIRED (만료)</text>
+  <line x1="595" y1="120" x2="755" y2="120" stroke="#f3efe4" stroke-width="1"/>
   <text x="675" y="138" text-anchor="middle" class="small">RETENTION 기간 경과</text>
-  <text x="675" y="156" text-anchor="middle" class="small" fill="#10B981">덮어쓰기: 자유롭게 가능</text>
+  <text x="675" y="156" text-anchor="middle" class="small" fill="#2f6a1c">덮어쓰기: 자유롭게 가능</text>
   <text x="675" y="174" text-anchor="middle" class="small">우선적 재사용 대상</text>
   <text x="675" y="192" text-anchor="middle" class="small">SMON이 인접 Extent 합병</text>
-  <text x="675" y="210" text-anchor="middle" class="mono" fill="#10B981">재사용 1순위</text>
+  <text x="675" y="210" text-anchor="middle" class="mono" fill="#2f6a1c">재사용 1순위</text>
 
   <!-- Loop arrow: EXPIRED → new transaction -->
-  <path d="M675 220 C675 260, 150 260, 150 220" stroke="#10B981" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#ag)"/>
-  <text x="400" y="255" text-anchor="middle" class="small" fill="#10B981">새 트랜잭션에 의해 재사용 → ACTIVE</text>
+  <path d="M675 220 C675 260, 150 260, 150 220" stroke="#2f6a1c" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#ag)"/>
+  <text x="400" y="255" text-anchor="middle" class="small" fill="#2f6a1c">새 트랜잭션에 의해 재사용 → ACTIVE</text>
 
   <!-- GUARANTEE vs NOGUARANTEE comparison -->
-  <rect x="50" y="285" width="700" height="130" rx="10" fill="#0F1019" stroke="#2A2B3D" stroke-width="1.5"/>
+  <rect x="50" y="285" width="700" height="130" rx="10" fill="#faf8f3" stroke="#f3efe4" stroke-width="1.5"/>
   <text x="400" y="307" text-anchor="middle" class="label">RETENTION GUARANTEE vs NOGUARANTEE 동작 비교</text>
 
   <!-- NOGUARANTEE -->
-  <rect x="70" y="318" width="320" height="83" rx="6" fill="#1E1F2E" stroke="#F59E0B" stroke-width="1"/>
-  <text x="230" y="337" text-anchor="middle" class="label" fill="#F59E0B">NOGUARANTEE (기본)</text>
+  <rect x="70" y="318" width="320" height="83" rx="6" fill="#f3efe4" stroke="#8a5a10" stroke-width="1"/>
+  <text x="230" y="337" text-anchor="middle" class="label" fill="#8a5a10">NOGUARANTEE (기본)</text>
   <text x="230" y="357" text-anchor="middle" class="small">UNEXPIRED → 공간 부족 시 강제 EXPIRED 전환</text>
-  <text x="230" y="373" text-anchor="middle" class="small" fill="#F43F5E">ORA-01555 위험 높음</text>
-  <text x="230" y="389" text-anchor="middle" class="small" fill="#10B981">ORA-30036 위험 낮음</text>
+  <text x="230" y="373" text-anchor="middle" class="small" fill="#be123c">ORA-01555 위험 높음</text>
+  <text x="230" y="389" text-anchor="middle" class="small" fill="#2f6a1c">ORA-30036 위험 낮음</text>
 
   <!-- GUARANTEE -->
-  <rect x="410" y="318" width="320" height="83" rx="6" fill="#1E1F2E" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="570" y="337" text-anchor="middle" class="label" fill="#6F6BEA">GUARANTEE</text>
+  <rect x="410" y="318" width="320" height="83" rx="6" fill="#f3efe4" stroke="#4a2e78" stroke-width="1"/>
+  <text x="570" y="337" text-anchor="middle" class="label" fill="#4a2e78">GUARANTEE</text>
   <text x="570" y="357" text-anchor="middle" class="small">UNEXPIRED → 절대 재사용 불가</text>
-  <text x="570" y="373" text-anchor="middle" class="small" fill="#10B981">ORA-01555 위험 낮음</text>
-  <text x="570" y="389" text-anchor="middle" class="small" fill="#F43F5E">ORA-30036 위험 높음 (DML 실패)</text>
+  <text x="570" y="373" text-anchor="middle" class="small" fill="#2f6a1c">ORA-01555 위험 낮음</text>
+  <text x="570" y="389" text-anchor="middle" class="small" fill="#be123c">ORA-30036 위험 높음 (DML 실패)</text>
 
-  <text x="400" y="425" text-anchor="middle" class="small" fill="#94A3B8">ALTER TABLESPACE undotbs1 RETENTION GUARANTEE; / ALTER TABLESPACE undotbs1 RETENTION NOGUARANTEE;</text>
+  <text x="400" y="425" text-anchor="middle" class="small" fill="#787368">ALTER TABLESPACE undotbs1 RETENTION GUARANTEE; / ALTER TABLESPACE undotbs1 RETENTION NOGUARANTEE;</text>
 
   <defs>
-    <marker id="aw" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#E2E8F0"/></marker>
-    <marker id="ag" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#10B981"/></marker>
+    <marker id="aw" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#1a1a1a"/></marker>
+    <marker id="ag" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#2f6a1c"/></marker>
   </defs>
 </svg>

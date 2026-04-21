@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,91 +16,91 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">Shared Memory &amp; Process Architecture in CDB</text>
 
   <!-- SGA Block -->
-  <rect x="40" y="65" width="720" height="220" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
-  <text x="400" y="88" text-anchor="middle" class="label" fill="#6F6BEA">SGA (System Global Area) — 모든 PDB 공유</text>
+  <rect x="40" y="65" width="720" height="220" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
+  <text x="400" y="88" text-anchor="middle" class="label" fill="#4a2e78">SGA (System Global Area) — 모든 PDB 공유</text>
 
   <!-- Shared Pool -->
-  <rect x="60" y="100" width="160" height="60" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1"/>
-  <text x="140" y="122" text-anchor="middle" class="sublabel" fill="#3B82F6">Shared Pool</text>
+  <rect x="60" y="100" width="160" height="60" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="1"/>
+  <text x="140" y="122" text-anchor="middle" class="sublabel" fill="#2456a8">Shared Pool</text>
   <text x="140" y="140" text-anchor="middle" class="small">SQL/Dictionary Cache</text>
 
   <!-- Buffer Cache -->
-  <rect x="235" y="100" width="160" height="60" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1"/>
-  <text x="315" y="122" text-anchor="middle" class="sublabel" fill="#3B82F6">Buffer Cache</text>
+  <rect x="235" y="100" width="160" height="60" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="1"/>
+  <text x="315" y="122" text-anchor="middle" class="sublabel" fill="#2456a8">Buffer Cache</text>
   <text x="315" y="140" text-anchor="middle" class="small">데이터 블록 캐시</text>
 
   <!-- Redo Log Buffer -->
-  <rect x="410" y="100" width="160" height="60" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1"/>
-  <text x="490" y="122" text-anchor="middle" class="sublabel" fill="#3B82F6">Redo Log Buffer</text>
+  <rect x="410" y="100" width="160" height="60" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="1"/>
+  <text x="490" y="122" text-anchor="middle" class="sublabel" fill="#2456a8">Redo Log Buffer</text>
   <text x="490" y="140" text-anchor="middle" class="small">변경 로그 버퍼</text>
 
   <!-- Other Pools -->
-  <rect x="585" y="100" width="160" height="60" class="box" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1"/>
-  <text x="665" y="122" text-anchor="middle" class="sublabel" fill="#3B82F6">Large/Java Pool</text>
+  <rect x="585" y="100" width="160" height="60" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="1"/>
+  <text x="665" y="122" text-anchor="middle" class="sublabel" fill="#2456a8">Large/Java Pool</text>
   <text x="665" y="140" text-anchor="middle" class="small">기타 메모리 풀</text>
 
   <!-- PDB Memory Controls -->
-  <rect x="60" y="175" width="340" height="95" class="box" fill="#2A2B3D" stroke="#F59E0B" stroke-width="1"/>
-  <text x="230" y="195" text-anchor="middle" class="sublabel" fill="#F59E0B">PDB별 메모리 제어 파라미터</text>
+  <rect x="60" y="175" width="340" height="95" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="1"/>
+  <text x="230" y="195" text-anchor="middle" class="sublabel" fill="#8a5a10">PDB별 메모리 제어 파라미터</text>
   <text x="75" y="215" class="code">SGA_TARGET     = PDB별 SGA 최대</text>
   <text x="75" y="232" class="code">SGA_MIN_SIZE   = PDB별 SGA 최소 보장</text>
   <text x="75" y="249" class="code">PGA_AGGREGATE_LIMIT  = PDB별 PGA 상한</text>
   <text x="75" y="266" class="code">PGA_AGGREGATE_TARGET = PDB별 PGA 목표</text>
 
   <!-- Constraint -->
-  <rect x="415" y="175" width="330" height="95" class="box" fill="#2A2B3D" stroke="#F43F5E" stroke-width="1"/>
-  <text x="580" y="195" text-anchor="middle" class="sublabel" fill="#F43F5E">제약 조건</text>
+  <rect x="415" y="175" width="330" height="95" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="1"/>
+  <text x="580" y="195" text-anchor="middle" class="sublabel" fill="#be123c">제약 조건</text>
   <text x="430" y="215" class="small">SGA_MIN_SIZE 합계</text>
-  <text x="430" y="233" class="small" fill="#F43F5E">  &lt;= CDB SGA_TARGET x 50%</text>
+  <text x="430" y="233" class="small" fill="#be123c">  &lt;= CDB SGA_TARGET x 50%</text>
   <text x="430" y="255" class="small">각 PDB SGA_TARGET</text>
-  <text x="430" y="273" class="small" fill="#F43F5E">  &lt;= CDB SGA_TARGET</text>
+  <text x="430" y="273" class="small" fill="#be123c">  &lt;= CDB SGA_TARGET</text>
 
   <!-- Background Processes -->
-  <rect x="40" y="300" width="350" height="130" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="1.5"/>
-  <text x="215" y="325" text-anchor="middle" class="label" fill="#10B981">백그라운드 프로세스 (CDB 공유)</text>
+  <rect x="40" y="300" width="350" height="130" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="215" y="325" text-anchor="middle" class="label" fill="#2f6a1c">백그라운드 프로세스 (CDB 공유)</text>
 
-  <rect x="55" y="338" width="70" height="24" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="0.5"/>
-  <text x="90" y="355" text-anchor="middle" class="small" fill="#10B981">LGWR</text>
-  <rect x="135" y="338" width="70" height="24" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="0.5"/>
-  <text x="170" y="355" text-anchor="middle" class="small" fill="#10B981">DBWn</text>
-  <rect x="215" y="338" width="70" height="24" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="0.5"/>
-  <text x="250" y="355" text-anchor="middle" class="small" fill="#10B981">PMON</text>
-  <rect x="295" y="338" width="70" height="24" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="0.5"/>
-  <text x="330" y="355" text-anchor="middle" class="small" fill="#10B981">SMON</text>
+  <rect x="55" y="338" width="70" height="24" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="0.5"/>
+  <text x="90" y="355" text-anchor="middle" class="small" fill="#2f6a1c">LGWR</text>
+  <rect x="135" y="338" width="70" height="24" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="0.5"/>
+  <text x="170" y="355" text-anchor="middle" class="small" fill="#2f6a1c">DBWn</text>
+  <rect x="215" y="338" width="70" height="24" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="0.5"/>
+  <text x="250" y="355" text-anchor="middle" class="small" fill="#2f6a1c">PMON</text>
+  <rect x="295" y="338" width="70" height="24" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="0.5"/>
+  <text x="330" y="355" text-anchor="middle" class="small" fill="#2f6a1c">SMON</text>
 
-  <rect x="55" y="370" width="70" height="24" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="0.5"/>
-  <text x="90" y="387" text-anchor="middle" class="small" fill="#10B981">CKPT</text>
-  <rect x="135" y="370" width="70" height="24" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="0.5"/>
-  <text x="170" y="387" text-anchor="middle" class="small" fill="#10B981">ARCn</text>
-  <rect x="215" y="370" width="70" height="24" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="0.5"/>
-  <text x="250" y="387" text-anchor="middle" class="small" fill="#10B981">MMON</text>
-  <rect x="295" y="370" width="70" height="24" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="0.5"/>
-  <text x="330" y="387" text-anchor="middle" class="small" fill="#10B981">CJQ0</text>
+  <rect x="55" y="370" width="70" height="24" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="0.5"/>
+  <text x="90" y="387" text-anchor="middle" class="small" fill="#2f6a1c">CKPT</text>
+  <rect x="135" y="370" width="70" height="24" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="0.5"/>
+  <text x="170" y="387" text-anchor="middle" class="small" fill="#2f6a1c">ARCn</text>
+  <rect x="215" y="370" width="70" height="24" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="0.5"/>
+  <text x="250" y="387" text-anchor="middle" class="small" fill="#2f6a1c">MMON</text>
+  <rect x="295" y="370" width="70" height="24" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="0.5"/>
+  <text x="330" y="387" text-anchor="middle" class="small" fill="#2f6a1c">CJQ0</text>
 
   <text x="215" y="418" text-anchor="middle" class="small">CDB 단위 1세트만 기동 → 자원 절약</text>
 
   <!-- Server Processes (Per-PDB) -->
-  <rect x="410" y="300" width="350" height="130" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="585" y="325" text-anchor="middle" class="label" fill="#F59E0B">서버 프로세스 (세션별 전용)</text>
+  <rect x="410" y="300" width="350" height="130" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="585" y="325" text-anchor="middle" class="label" fill="#8a5a10">서버 프로세스 (세션별 전용)</text>
 
-  <rect x="425" y="340" width="100" height="40" rx="4" ry="4" fill="#6F6BEA" opacity="0.15" stroke="#6F6BEA" stroke-width="0.5"/>
-  <text x="475" y="357" text-anchor="middle" class="small" fill="#6F6BEA">PDB1 세션</text>
+  <rect x="425" y="340" width="100" height="40" rx="4" ry="4" fill="#4a2e78" opacity="0.15" stroke="#4a2e78" stroke-width="0.5"/>
+  <text x="475" y="357" text-anchor="middle" class="small" fill="#4a2e78">PDB1 세션</text>
   <text x="475" y="372" text-anchor="middle" class="small">PGA</text>
 
-  <rect x="535" y="340" width="100" height="40" rx="4" ry="4" fill="#3B82F6" opacity="0.15" stroke="#3B82F6" stroke-width="0.5"/>
-  <text x="585" y="357" text-anchor="middle" class="small" fill="#3B82F6">PDB2 세션</text>
+  <rect x="535" y="340" width="100" height="40" rx="4" ry="4" fill="#2456a8" opacity="0.15" stroke="#2456a8" stroke-width="0.5"/>
+  <text x="585" y="357" text-anchor="middle" class="small" fill="#2456a8">PDB2 세션</text>
   <text x="585" y="372" text-anchor="middle" class="small">PGA</text>
 
-  <rect x="645" y="340" width="100" height="40" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981" stroke-width="0.5"/>
-  <text x="695" y="357" text-anchor="middle" class="small" fill="#10B981">PDB3 세션</text>
+  <rect x="645" y="340" width="100" height="40" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c" stroke-width="0.5"/>
+  <text x="695" y="357" text-anchor="middle" class="small" fill="#2f6a1c">PDB3 세션</text>
   <text x="695" y="372" text-anchor="middle" class="small">PGA</text>
 
   <text x="585" y="404" text-anchor="middle" class="small">클라이언트 연결마다 개별 서버 프로세스 생성</text>
   <text x="585" y="420" text-anchor="middle" class="code">ALTER SESSION SET CONTAINER 로 전환 가능</text>
 
   <!-- Resource Manager -->
-  <rect x="40" y="445" width="720" height="60" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="1.5"/>
-  <text x="400" y="468" text-anchor="middle" class="label" fill="#F43F5E">Resource Manager — PDB 간 자원 제어</text>
+  <rect x="40" y="445" width="720" height="60" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="1.5"/>
+  <text x="400" y="468" text-anchor="middle" class="label" fill="#be123c">Resource Manager — PDB 간 자원 제어</text>
   <text x="120" y="490" text-anchor="middle" class="small">CPU Shares</text>
   <text x="260" y="490" text-anchor="middle" class="small">CPU Utilization Limit</text>
   <text x="420" y="490" text-anchor="middle" class="small">MAX_IOPS</text>
@@ -107,7 +108,7 @@
   <text x="680" y="490" text-anchor="middle" class="small">Parallel Limit</text>
 
   <!-- UNDO note -->
-  <rect x="40" y="520" width="720" height="48" class="box" fill="#2A2B3D" stroke="#F59E0B" stroke-width="1"/>
-  <text x="400" y="540" text-anchor="middle" class="sublabel" fill="#F59E0B">UNDO Tablespace: Shared (기존) vs Local (26ai 기본값)</text>
+  <rect x="40" y="520" width="720" height="48" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="1"/>
+  <text x="400" y="540" text-anchor="middle" class="sublabel" fill="#8a5a10">UNDO Tablespace: Shared (기존) vs Local (26ai 기본값)</text>
   <text x="400" y="558" text-anchor="middle" class="small">Local Undo → PDB별 독립 Flashback/PITR 가능 | TEMP_UNDO_ENABLED → GTT UNDO를 임시 TS에 저장</text>
 </svg>

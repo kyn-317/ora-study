@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,112 +16,112 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">CDB STARTUP 후 PDB는 별도 OPEN 필요</text>
 
   <!-- Phase 1: CDB STARTUP -->
-  <rect x="30" y="70" width="350" height="240" class="box" fill="none" stroke="#6F6BEA" stroke-width="2"/>
-  <rect x="30" y="70" width="350" height="30" rx="8" ry="8" fill="#6F6BEA" opacity="0.2"/>
-  <text x="50" y="90" class="label" fill="#6F6BEA">Phase 1: CDB STARTUP</text>
+  <rect x="30" y="70" width="350" height="240" class="box" fill="none" stroke="#4a2e78" stroke-width="2"/>
+  <rect x="30" y="70" width="350" height="30" rx="8" ry="8" fill="#4a2e78" opacity="0.2"/>
+  <text x="50" y="90" class="label" fill="#4a2e78">Phase 1: CDB STARTUP</text>
 
   <!-- CDB$ROOT -->
-  <rect x="55" y="115" width="300" height="40" class="box" fill="none" stroke="#10B981" stroke-width="1.5"/>
-  <circle cx="75" cy="135" r="8" fill="#10B981"/>
-  <text x="75" y="139" text-anchor="middle" font-size="10" font-weight="700" fill="#1a1a2e">1</text>
+  <rect x="55" y="115" width="300" height="40" class="box" fill="none" stroke="#2f6a1c" stroke-width="1.5"/>
+  <circle cx="75" cy="135" r="8" fill="#2f6a1c"/>
+  <text x="75" y="139" text-anchor="middle" font-size="10" font-weight="700" fill="#f3efe4">1</text>
   <text x="95" y="131" class="sublabel">CDB$ROOT</text>
   <text x="95" y="147" class="small">자동 OPEN (READ WRITE)</text>
   <text x="330" y="139" text-anchor="end" class="code">CON_ID = 1</text>
 
   <!-- PDB$SEED -->
-  <rect x="55" y="165" width="300" height="40" class="box" fill="none" stroke="#3B82F6" stroke-width="1.5"/>
-  <circle cx="75" cy="185" r="8" fill="#3B82F6"/>
-  <text x="75" y="189" text-anchor="middle" font-size="10" font-weight="700" fill="#1a1a2e">2</text>
+  <rect x="55" y="165" width="300" height="40" class="box" fill="none" stroke="#2456a8" stroke-width="1.5"/>
+  <circle cx="75" cy="185" r="8" fill="#2456a8"/>
+  <text x="75" y="189" text-anchor="middle" font-size="10" font-weight="700" fill="#f3efe4">2</text>
   <text x="95" y="181" class="sublabel">PDB$SEED</text>
   <text x="95" y="197" class="small">자동 READ ONLY</text>
   <text x="330" y="189" text-anchor="end" class="code">CON_ID = 2</text>
 
   <!-- User PDBs - MOUNTED -->
-  <rect x="55" y="215" width="300" height="40" class="box" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="5,3"/>
-  <circle cx="75" cy="235" r="8" fill="#F59E0B"/>
-  <text x="75" y="239" text-anchor="middle" font-size="10" font-weight="700" fill="#1a1a2e">3</text>
+  <rect x="55" y="215" width="300" height="40" class="box" fill="none" stroke="#8a5a10" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <circle cx="75" cy="235" r="8" fill="#8a5a10"/>
+  <text x="75" y="239" text-anchor="middle" font-size="10" font-weight="700" fill="#f3efe4">3</text>
   <text x="95" y="231" class="sublabel">사용자 PDB (PDB1, PDB2...)</text>
-  <text x="95" y="247" class="small" style="fill:#F59E0B">MOUNTED 상태 (접근 불가)</text>
+  <text x="95" y="247" class="small" style="fill:#8a5a10">MOUNTED 상태 (접근 불가)</text>
   <text x="330" y="239" text-anchor="end" class="code">CON_ID = 3+</text>
 
   <text x="205" y="283" text-anchor="middle" class="small">PDB를 사용하려면 별도 OPEN 명령 필요!</text>
 
   <!-- Arrow from Phase 1 to Phase 2 -->
-  <line x1="380" y1="235" x2="418" y2="235" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrowY)"/>
+  <line x1="380" y1="235" x2="418" y2="235" stroke="#8a5a10" stroke-width="2" marker-end="url(#arrowY)"/>
 
   <!-- Phase 2: PDB OPEN -->
-  <rect x="420" y="70" width="360" height="240" class="box" fill="none" stroke="#10B981" stroke-width="2"/>
-  <rect x="420" y="70" width="360" height="30" rx="8" ry="8" fill="#10B981" opacity="0.2"/>
-  <text x="440" y="90" class="label" fill="#10B981">Phase 2: PDB OPEN (수동)</text>
+  <rect x="420" y="70" width="360" height="240" class="box" fill="none" stroke="#2f6a1c" stroke-width="2"/>
+  <rect x="420" y="70" width="360" height="30" rx="8" ry="8" fill="#2f6a1c" opacity="0.2"/>
+  <text x="440" y="90" class="label" fill="#2f6a1c">Phase 2: PDB OPEN (수동)</text>
 
   <!-- Method 1 -->
-  <rect x="440" y="112" width="320" height="36" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="440" y="112" width="320" height="36" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
   <text x="450" y="128" class="code">ALTER PLUGGABLE DATABASE pdb1 OPEN;</text>
   <text x="750" y="142" text-anchor="end" class="small">특정 PDB 열기</text>
 
   <!-- Method 2 -->
-  <rect x="440" y="156" width="320" height="36" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="440" y="156" width="320" height="36" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
   <text x="450" y="172" class="code">ALTER PLUGGABLE DATABASE ALL OPEN;</text>
   <text x="750" y="186" text-anchor="end" class="small">모든 PDB 열기</text>
 
   <!-- Method 3 -->
-  <rect x="440" y="200" width="320" height="36" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="440" y="200" width="320" height="36" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
   <text x="450" y="216" class="code">ALTER SESSION SET CONTAINER=pdb1;</text>
   <text x="450" y="231" class="code">STARTUP;</text>
 
   <!-- Method 4: SAVE STATE -->
-  <rect x="440" y="248" width="320" height="48" class="box" fill="none" stroke="#6F6BEA" stroke-width="1.5"/>
+  <rect x="440" y="248" width="320" height="48" class="box" fill="none" stroke="#4a2e78" stroke-width="1.5"/>
   <text x="450" y="268" class="code">ALTER PLUGGABLE DATABASE ALL SAVE STATE;</text>
-  <text x="600" y="288" text-anchor="middle" class="small" style="fill:#6F6BEA">CDB 재기동 시 자동 복원!</text>
+  <text x="600" y="288" text-anchor="middle" class="small" style="fill:#4a2e78">CDB 재기동 시 자동 복원!</text>
 
   <!-- PDB States section -->
-  <rect x="30" y="330" width="750" height="100" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="30" y="330" width="750" height="100" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
   <text x="50" y="355" class="label">PDB 상태 (PDB States)</text>
 
   <!-- MOUNTED -->
-  <rect x="55" y="370" width="130" height="44" class="box" fill="none" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="120" y="390" text-anchor="middle" class="sublabel" style="fill:#F59E0B">MOUNTED</text>
+  <rect x="55" y="370" width="130" height="44" class="box" fill="none" stroke="#8a5a10" stroke-width="1.5"/>
+  <text x="120" y="390" text-anchor="middle" class="sublabel" style="fill:#8a5a10">MOUNTED</text>
   <text x="120" y="405" text-anchor="middle" class="small">접근 불가</text>
 
-  <line x1="185" y1="392" x2="218" y2="392" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrowS)"/>
+  <line x1="185" y1="392" x2="218" y2="392" stroke="#787368" stroke-width="1.5" marker-end="url(#arrowS)"/>
 
   <!-- READ WRITE -->
-  <rect x="220" y="370" width="130" height="44" class="box" fill="none" stroke="#10B981" stroke-width="1.5"/>
-  <text x="285" y="390" text-anchor="middle" class="sublabel" style="fill:#10B981">READ WRITE</text>
+  <rect x="220" y="370" width="130" height="44" class="box" fill="none" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="285" y="390" text-anchor="middle" class="sublabel" style="fill:#2f6a1c">READ WRITE</text>
   <text x="285" y="405" text-anchor="middle" class="small">정상 운영</text>
 
-  <line x1="350" y1="392" x2="383" y2="392" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrowS)"/>
+  <line x1="350" y1="392" x2="383" y2="392" stroke="#787368" stroke-width="1.5" marker-end="url(#arrowS)"/>
 
   <!-- READ ONLY -->
-  <rect x="385" y="370" width="130" height="44" class="box" fill="none" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="450" y="390" text-anchor="middle" class="sublabel" style="fill:#3B82F6">READ ONLY</text>
+  <rect x="385" y="370" width="130" height="44" class="box" fill="none" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="450" y="390" text-anchor="middle" class="sublabel" style="fill:#2456a8">READ ONLY</text>
   <text x="450" y="405" text-anchor="middle" class="small">읽기 전용</text>
 
-  <line x1="515" y1="392" x2="548" y2="392" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrowS)"/>
+  <line x1="515" y1="392" x2="548" y2="392" stroke="#787368" stroke-width="1.5" marker-end="url(#arrowS)"/>
 
   <!-- MIGRATE -->
-  <rect x="550" y="370" width="130" height="44" class="box" fill="none" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="615" y="390" text-anchor="middle" class="sublabel" style="fill:#6F6BEA">MIGRATE</text>
+  <rect x="550" y="370" width="130" height="44" class="box" fill="none" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="615" y="390" text-anchor="middle" class="sublabel" style="fill:#4a2e78">MIGRATE</text>
   <text x="615" y="405" text-anchor="middle" class="small">업그레이드용</text>
 
   <!-- SAVE STATE explanation -->
-  <rect x="30" y="450" width="750" height="96" class="box" fill="none" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="50" y="475" class="label" fill="#6F6BEA">SAVE STATE / DISCARD STATE</text>
+  <rect x="30" y="450" width="750" height="96" class="box" fill="none" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="50" y="475" class="label" fill="#4a2e78">SAVE STATE / DISCARD STATE</text>
 
-  <rect x="55" y="490" width="340" height="44" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
-  <text x="65" y="509" class="sublabel" style="fill:#10B981">SAVE STATE 설정 시</text>
+  <rect x="55" y="490" width="340" height="44" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
+  <text x="65" y="509" class="sublabel" style="fill:#2f6a1c">SAVE STATE 설정 시</text>
   <text x="65" y="525" class="small">CDB 재기동 후 PDB 자동으로 이전 상태 복원</text>
 
-  <rect x="415" y="490" width="340" height="44" class="box" fill="none" stroke="#2A2B3D" stroke-width="1"/>
-  <text x="425" y="509" class="sublabel" style="fill:#F43F5E">SAVE STATE 미설정 시</text>
+  <rect x="415" y="490" width="340" height="44" class="box" fill="none" stroke="#f3efe4" stroke-width="1"/>
+  <text x="425" y="509" class="sublabel" style="fill:#be123c">SAVE STATE 미설정 시</text>
   <text x="425" y="525" class="small">CDB 재기동 후 모든 PDB는 MOUNTED (수동 OPEN 필요)</text>
 
   <defs>
     <marker id="arrowY" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B"/>
+      <polygon points="0 0, 10 3.5, 0 7" fill="#8a5a10"/>
     </marker>
     <marker id="arrowS" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#94A3B8"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#787368"/>
     </marker>
   </defs>
 </svg>

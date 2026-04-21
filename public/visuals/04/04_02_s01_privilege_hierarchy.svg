@@ -1,17 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
   <defs>
     <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6" fill="#94A3B8"/>
+      <path d="M0,0 L8,3 L0,6" fill="#787368"/>
     </marker>
   </defs>
 
@@ -19,18 +20,18 @@
   <text x="400" y="52" class="subtitle" text-anchor="middle">시스템 권한, 객체 권한, 롤의 관계와 GRANT/REVOKE 흐름</text>
 
   <!-- Oracle Privilege System -->
-  <rect x="280" y="70" width="240" height="40" class="box" fill="#6F6BEA" stroke="none"/>
-  <text x="400" y="95" class="label" text-anchor="middle" fill="#FFF">Oracle 권한 체계 (Privilege System)</text>
+  <rect x="280" y="70" width="240" height="40" class="box" fill="#4a2e78" stroke="none"/>
+  <text x="400" y="95" class="label" text-anchor="middle" fill="#1a1a1a">Oracle 권한 체계 (Privilege System)</text>
 
   <!-- Three branches -->
-  <line x1="340" y1="110" x2="140" y2="145" stroke="#3B82F6" stroke-width="1.5"/>
-  <line x1="400" y1="110" x2="400" y2="145" stroke="#10B981" stroke-width="1.5"/>
-  <line x1="460" y1="110" x2="660" y2="145" stroke="#F59E0B" stroke-width="1.5"/>
+  <line x1="340" y1="110" x2="140" y2="145" stroke="#2456a8" stroke-width="1.5"/>
+  <line x1="400" y1="110" x2="400" y2="145" stroke="#2f6a1c" stroke-width="1.5"/>
+  <line x1="460" y1="110" x2="660" y2="145" stroke="#8a5a10" stroke-width="1.5"/>
 
   <!-- System Privileges -->
-  <rect x="30" y="145" width="220" height="180" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
-  <rect x="30" y="145" width="220" height="28" rx="8" ry="8" fill="#3B82F6"/>
-  <text x="140" y="164" class="label" text-anchor="middle" fill="#FFF">시스템 권한 (System)</text>
+  <rect x="30" y="145" width="220" height="180" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
+  <rect x="30" y="145" width="220" height="28" rx="8" ry="8" fill="#2456a8"/>
+  <text x="140" y="164" class="label" text-anchor="middle" fill="#1a1a1a">시스템 권한 (System)</text>
 
   <text x="50" y="195" class="sublabel">DDL/DML 실행 권한</text>
   <text x="50" y="215" class="code">CREATE TABLE</text>
@@ -42,9 +43,9 @@
   <text x="50" y="318" class="small">부여자 미추적</text>
 
   <!-- Object Privileges -->
-  <rect x="270" y="145" width="260" height="180" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
-  <rect x="270" y="145" width="260" height="28" rx="8" ry="8" fill="#10B981"/>
-  <text x="400" y="164" class="label" text-anchor="middle" fill="#FFF">객체 권한 (Object)</text>
+  <rect x="270" y="145" width="260" height="180" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
+  <rect x="270" y="145" width="260" height="28" rx="8" ry="8" fill="#2f6a1c"/>
+  <text x="400" y="164" class="label" text-anchor="middle" fill="#1a1a1a">객체 권한 (Object)</text>
 
   <text x="290" y="195" class="sublabel">특정 객체 접근/조작 권한</text>
   <text x="290" y="215" class="code">SELECT ON hr.employees</text>
@@ -56,9 +57,9 @@
   <text x="290" y="318" class="small">부여자 추적 (GRANTOR)</text>
 
   <!-- Roles -->
-  <rect x="550" y="145" width="220" height="180" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
-  <rect x="550" y="145" width="220" height="28" rx="8" ry="8" fill="#F59E0B"/>
-  <text x="660" y="164" class="label" text-anchor="middle" fill="#1E1E2E">롤 (Role)</text>
+  <rect x="550" y="145" width="220" height="180" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="2"/>
+  <rect x="550" y="145" width="220" height="28" rx="8" ry="8" fill="#8a5a10"/>
+  <text x="660" y="164" class="label" text-anchor="middle" fill="#1a1a1a">롤 (Role)</text>
 
   <text x="570" y="195" class="sublabel">명명된 권한 그룹</text>
   <text x="570" y="215" class="code">DBA</text>
@@ -71,19 +72,19 @@
   <text x="570" y="315" class="small">GRANT OPTION 부여 불가</text>
 
   <!-- GRANT/REVOKE flow -->
-  <line x1="140" y1="325" x2="140" y2="360" stroke="#3B82F6" stroke-width="1" marker-end="url(#arr)"/>
-  <line x1="400" y1="325" x2="400" y2="360" stroke="#10B981" stroke-width="1" marker-end="url(#arr)"/>
-  <line x1="660" y1="325" x2="660" y2="360" stroke="#F59E0B" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="140" y1="325" x2="140" y2="360" stroke="#2456a8" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="400" y1="325" x2="400" y2="360" stroke="#2f6a1c" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="660" y1="325" x2="660" y2="360" stroke="#8a5a10" stroke-width="1" marker-end="url(#arr)"/>
 
   <text x="400" y="350" class="label" text-anchor="middle">GRANT / REVOKE</text>
 
   <!-- User/Role target -->
-  <rect x="150" y="365" width="500" height="50" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1.5"/>
+  <rect x="150" y="365" width="500" height="50" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="1.5"/>
   <text x="400" y="387" class="label" text-anchor="middle">사용자 (User) 또는 롤 (Role) 또는 PUBLIC</text>
   <text x="400" y="405" class="small" text-anchor="middle">PUBLIC에 부여 시 모든 현재/미래 사용자에게 적용 (보안 주의)</text>
 
   <!-- Session effective privileges -->
-  <rect x="30" y="435" width="740" height="70" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1.5"/>
+  <rect x="30" y="435" width="740" height="70" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1.5"/>
   <text x="50" y="455" class="sublabel">세션의 최종 유효 권한 = 직접 부여 권한 + 활성 롤 권한 + PUBLIC 권한</text>
 
   <text x="50" y="478" class="code">DBA_SYS_PRIVS</text>

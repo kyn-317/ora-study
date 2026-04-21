@@ -1,17 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
-    .header { font-size: 12px; font-weight: 600; fill: #E2E8F0; }
-    .cell { font-size: 11px; fill: #CBD5E1; }
-    .yes { font-size: 11px; fill: #10B981; font-weight: 600; }
-    .no { font-size: 11px; fill: #F43F5E; font-weight: 600; }
+    .header { font-size: 12px; font-weight: 600; fill: #1a1a1a; }
+    .cell { font-size: 11px; fill: #4a4a46; }
+    .yes { font-size: 11px; fill: #2f6a1c; font-weight: 600; }
+    .no { font-size: 11px; fill: #be123c; font-weight: 600; }
   </style>
 
   <!-- Title -->
@@ -19,18 +20,18 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">데이터 로드 유틸리티 비교 - 상황별 최적 도구 선택 가이드</text>
 
   <!-- Table -->
-  <rect x="30" y="68" width="740" height="32" class="box" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1" />
+  <rect x="30" y="68" width="740" height="32" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1" />
   <text x="130" y="89" text-anchor="middle" class="header">비교 항목</text>
-  <text x="310" y="89" text-anchor="middle" class="header" fill="#3B82F6">SQL*Loader</text>
-  <text x="490" y="89" text-anchor="middle" class="header" fill="#F59E0B">External Table</text>
-  <text x="670" y="89" text-anchor="middle" class="header" fill="#10B981">Data Pump</text>
+  <text x="310" y="89" text-anchor="middle" class="header" fill="#2456a8">SQL*Loader</text>
+  <text x="490" y="89" text-anchor="middle" class="header" fill="#8a5a10">External Table</text>
+  <text x="670" y="89" text-anchor="middle" class="header" fill="#2f6a1c">Data Pump</text>
 
-  <line x1="220" y1="68" x2="220" y2="340" stroke="#2A2B3D" stroke-width="1" />
-  <line x1="400" y1="68" x2="400" y2="340" stroke="#2A2B3D" stroke-width="1" />
-  <line x1="580" y1="68" x2="580" y2="340" stroke="#2A2B3D" stroke-width="1" />
+  <line x1="220" y1="68" x2="220" y2="340" stroke="#f3efe4" stroke-width="1" />
+  <line x1="400" y1="68" x2="400" y2="340" stroke="#f3efe4" stroke-width="1" />
+  <line x1="580" y1="68" x2="580" y2="340" stroke="#f3efe4" stroke-width="1" />
 
   <!-- Rows -->
-  <rect x="30" y="100" width="740" height="27" fill="rgba(42,43,61,0.3)" />
+  <rect x="30" y="100" width="740" height="27" fill="#f3efe4" />
   <text x="50" y="118" class="cell">실행 위치</text>
   <text x="310" y="118" text-anchor="middle" class="cell">클라이언트 측</text>
   <text x="490" y="118" text-anchor="middle" class="cell">서버 측</text>
@@ -42,7 +43,7 @@
   <text x="490" y="145" text-anchor="middle" class="cell">플랫 파일 + Parquet</text>
   <text x="670" y="145" text-anchor="middle" class="cell">Oracle .dmp 파일</text>
 
-  <rect x="30" y="154" width="740" height="27" fill="rgba(42,43,61,0.3)" />
+  <rect x="30" y="154" width="740" height="27" fill="#f3efe4" />
   <text x="50" y="172" class="cell">Direct Path</text>
   <text x="310" y="172" text-anchor="middle" class="yes">DIRECT=TRUE</text>
   <text x="490" y="172" text-anchor="middle" class="no">미지원</text>
@@ -54,7 +55,7 @@
   <text x="490" y="199" text-anchor="middle" class="yes">SQL 기반 전체 처리</text>
   <text x="670" y="199" text-anchor="middle" class="cell">REMAP 기능</text>
 
-  <rect x="30" y="208" width="740" height="27" fill="rgba(42,43,61,0.3)" />
+  <rect x="30" y="208" width="740" height="27" fill="#f3efe4" />
   <text x="50" y="226" class="cell">물리적 로드</text>
   <text x="310" y="226" text-anchor="middle" class="yes">테이블에 적재</text>
   <text x="490" y="226" text-anchor="middle" class="no">실시간 읽기 (적재 없음)</text>
@@ -66,7 +67,7 @@
   <text x="490" y="253" text-anchor="middle" class="no">N/A</text>
   <text x="670" y="253" text-anchor="middle" class="yes">Master Table 자동</text>
 
-  <rect x="30" y="262" width="740" height="27" fill="rgba(42,43,61,0.3)" />
+  <rect x="30" y="262" width="740" height="27" fill="#f3efe4" />
   <text x="50" y="280" class="cell">병렬 처리</text>
   <text x="310" y="280" text-anchor="middle" class="cell">PARALLEL=TRUE</text>
   <text x="490" y="280" text-anchor="middle" class="cell">Parallel Query</text>
@@ -78,22 +79,22 @@
   <text x="490" y="307" text-anchor="middle" class="no">데이터만</text>
   <text x="670" y="307" text-anchor="middle" class="yes">데이터 + DDL + 권한</text>
 
-  <rect x="30" y="316" width="740" height="27" fill="rgba(42,43,61,0.3)" />
+  <rect x="30" y="316" width="740" height="27" fill="#f3efe4" />
   <text x="50" y="334" class="cell">주요 사용 사례</text>
   <text x="310" y="334" text-anchor="middle" class="cell">대량 초기 로드</text>
   <text x="490" y="334" text-anchor="middle" class="cell">ETL, 임시 조회, 검증</text>
   <text x="670" y="334" text-anchor="middle" class="cell">DB 이관, 백업/복구</text>
 
   <!-- Best use case boxes -->
-  <rect x="30" y="360" width="230" height="50" class="box" fill="rgba(59,130,246,0.08)" stroke="#3B82F6" stroke-width="1" />
-  <text x="145" y="382" text-anchor="middle" class="sublabel" fill="#3B82F6">SQL*Loader 추천</text>
+  <rect x="30" y="360" width="230" height="50" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1" />
+  <text x="145" y="382" text-anchor="middle" class="sublabel" fill="#2456a8">SQL*Loader 추천</text>
   <text x="145" y="400" text-anchor="middle" class="small">대량 데이터 초기 적재 + 변환</text>
 
-  <rect x="285" y="360" width="230" height="50" class="box" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1" />
-  <text x="400" y="382" text-anchor="middle" class="sublabel" fill="#F59E0B">External Table 추천</text>
+  <rect x="285" y="360" width="230" height="50" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" />
+  <text x="400" y="382" text-anchor="middle" class="sublabel" fill="#8a5a10">External Table 추천</text>
   <text x="400" y="400" text-anchor="middle" class="small">SQL 기반 ETL + 내부 데이터 조인</text>
 
-  <rect x="540" y="360" width="230" height="50" class="box" fill="rgba(16,185,129,0.08)" stroke="#10B981" stroke-width="1" />
-  <text x="655" y="382" text-anchor="middle" class="sublabel" fill="#10B981">Data Pump 추천</text>
+  <rect x="540" y="360" width="230" height="50" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1" />
+  <text x="655" y="382" text-anchor="middle" class="sublabel" fill="#2f6a1c">Data Pump 추천</text>
   <text x="655" y="400" text-anchor="middle" class="small">DB 간 이관 + 스키마/전체 백업</text>
 </svg>

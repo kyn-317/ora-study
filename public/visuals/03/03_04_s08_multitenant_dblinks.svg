@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -14,76 +15,76 @@
   <text x="400" y="50" class="subtitle" text-anchor="middle">PDB 로컬 링크 vs CDB 공통 링크, PDB 원격 복제</text>
 
   <!-- CDB Container -->
-  <rect x="30" y="70" width="370" height="220" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
-  <text x="215" y="92" class="label" text-anchor="middle" fill="#6F6BEA">CDB (Local)</text>
+  <rect x="30" y="70" width="370" height="220" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
+  <text x="215" y="92" class="label" text-anchor="middle" fill="#4a2e78">CDB (Local)</text>
 
   <!-- CDB$ROOT -->
-  <rect x="50" y="105" width="330" height="40" rx="4" ry="4" fill="#6F6BEA" opacity="0.15" stroke="#6F6BEA"/>
-  <text x="70" y="125" class="sublabel" fill="#6F6BEA">CDB$ROOT</text>
+  <rect x="50" y="105" width="330" height="40" rx="4" ry="4" fill="#4a2e78" opacity="0.15" stroke="#4a2e78"/>
+  <text x="70" y="125" class="sublabel" fill="#4a2e78">CDB$ROOT</text>
   <text x="200" y="125" class="code" font-size="10">공통 DB 링크 (Common Link)</text>
   <text x="200" y="140" class="small">CDB 전체 PDB에서 사용 가능</text>
 
   <!-- PDB1 -->
-  <rect x="50" y="155" width="155" height="55" rx="4" ry="4" fill="#3B82F6" opacity="0.15" stroke="#3B82F6"/>
+  <rect x="50" y="155" width="155" height="55" rx="4" ry="4" fill="#2456a8" opacity="0.15" stroke="#2456a8"/>
   <text x="127" y="175" class="sublabel" text-anchor="middle">PDB1</text>
   <text x="127" y="193" class="code" text-anchor="middle" font-size="9">로컬 링크 A</text>
   <text x="127" y="205" class="small" text-anchor="middle">PDB1 내에서만 사용</text>
 
   <!-- PDB2 -->
-  <rect x="225" y="155" width="155" height="55" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981"/>
+  <rect x="225" y="155" width="155" height="55" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c"/>
   <text x="302" y="175" class="sublabel" text-anchor="middle">PDB2</text>
   <text x="302" y="193" class="code" text-anchor="middle" font-size="9">로컬 링크 B</text>
   <text x="302" y="205" class="small" text-anchor="middle">PDB2 내에서만 사용</text>
 
   <!-- PDB link usage note -->
-  <rect x="50" y="220" width="330" height="55" rx="4" ry="4" fill="#1A1A2E" stroke="#2A2B3D"/>
-  <text x="65" y="238" class="sublabel" fill="#F59E0B">DB 링크 범위 구분</text>
+  <rect x="50" y="220" width="330" height="55" rx="4" ry="4" fill="#f3efe4" stroke="#f3efe4"/>
+  <text x="65" y="238" class="sublabel" fill="#8a5a10">DB 링크 범위 구분</text>
   <text x="65" y="256" class="small">로컬 링크: 생성된 PDB 내에서만 사용 가능</text>
   <text x="65" y="270" class="small">공통 링크: CDB$ROOT에 생성, 모든 PDB에서 접근</text>
 
   <!-- Remote CDB -->
-  <rect x="440" y="70" width="330" height="130" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
-  <text x="605" y="92" class="label" text-anchor="middle" fill="#10B981">Remote CDB</text>
+  <rect x="440" y="70" width="330" height="130" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
+  <text x="605" y="92" class="label" text-anchor="middle" fill="#2f6a1c">Remote CDB</text>
 
-  <rect x="460" y="105" width="130" height="40" rx="4" ry="4" fill="#10B981" opacity="0.15" stroke="#10B981"/>
+  <rect x="460" y="105" width="130" height="40" rx="4" ry="4" fill="#2f6a1c" opacity="0.15" stroke="#2f6a1c"/>
   <text x="525" y="125" class="sublabel" text-anchor="middle">Remote PDB1</text>
   <text x="525" y="142" class="small" text-anchor="middle">원격 데이터 소스</text>
 
-  <rect x="610" y="105" width="140" height="40" rx="4" ry="4" fill="#F59E0B" opacity="0.15" stroke="#F59E0B"/>
+  <rect x="610" y="105" width="140" height="40" rx="4" ry="4" fill="#8a5a10" opacity="0.15" stroke="#8a5a10"/>
   <text x="680" y="125" class="sublabel" text-anchor="middle">Remote PDB2</text>
   <text x="680" y="142" class="small" text-anchor="middle">복제 소스 PDB</text>
 
   <!-- DB Link arrows -->
-  <line x1="400" y1="130" x2="440" y2="130" stroke="#F59E0B" stroke-width="2"/>
-  <polygon points="438,127 445,130 438,133" fill="#F59E0B"/>
+  <line x1="400" y1="130" x2="440" y2="130" stroke="#8a5a10" stroke-width="2"/>
+  <polygon points="438,127 445,130 438,133" fill="#8a5a10"/>
   <text x="420" y="122" class="code" text-anchor="middle" font-size="8">@link</text>
 
-  <line x1="400" y1="180" x2="440" y2="155" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="4,2"/>
-  <polygon points="438,152 445,155 438,158" fill="#3B82F6"/>
+  <line x1="400" y1="180" x2="440" y2="155" stroke="#2456a8" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <polygon points="438,152 445,155 438,158" fill="#2456a8"/>
 
   <!-- PDB Remote Clone -->
-  <rect x="440" y="215" width="330" height="80" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
-  <text x="605" y="238" class="label" text-anchor="middle" fill="#F59E0B">PDB 원격 복제 (Remote Clone)</text>
+  <rect x="440" y="215" width="330" height="80" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="2"/>
+  <text x="605" y="238" class="label" text-anchor="middle" fill="#8a5a10">PDB 원격 복제 (Remote Clone)</text>
   <text x="460" y="258" class="code" font-size="10">CREATE PLUGGABLE DATABASE new_pdb</text>
   <text x="460" y="274" class="code" font-size="10">  FROM remote_pdb@dblink_name;</text>
   <text x="460" y="290" class="small">DB 링크를 통해 원격 PDB를 복제</text>
 
   <!-- Key points -->
-  <rect x="30" y="310" width="740" height="95" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="30" y="310" width="740" height="95" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
   <text x="50" y="332" class="label" font-size="12">멀티테넌트 DB 링크 핵심 요약</text>
 
-  <rect x="50" y="345" width="220" height="45" rx="4" ry="4" fill="#6F6BEA" opacity="0.1" stroke="#6F6BEA"/>
-  <text x="160" y="362" class="sublabel" text-anchor="middle" fill="#6F6BEA">공통 링크 (Common)</text>
+  <rect x="50" y="345" width="220" height="45" rx="4" ry="4" fill="#4a2e78" opacity="0.1" stroke="#4a2e78"/>
+  <text x="160" y="362" class="sublabel" text-anchor="middle" fill="#4a2e78">공통 링크 (Common)</text>
   <text x="160" y="380" class="small" text-anchor="middle">CDB$ROOT에 생성</text>
   <text x="160" y="392" class="small" text-anchor="middle">모든 PDB에서 접근 가능</text>
 
-  <rect x="290" y="345" width="220" height="45" rx="4" ry="4" fill="#3B82F6" opacity="0.1" stroke="#3B82F6"/>
-  <text x="400" y="362" class="sublabel" text-anchor="middle" fill="#3B82F6">로컬 링크 (Local)</text>
+  <rect x="290" y="345" width="220" height="45" rx="4" ry="4" fill="#2456a8" opacity="0.1" stroke="#2456a8"/>
+  <text x="400" y="362" class="sublabel" text-anchor="middle" fill="#2456a8">로컬 링크 (Local)</text>
   <text x="400" y="380" class="small" text-anchor="middle">특정 PDB 내에 생성</text>
   <text x="400" y="392" class="small" text-anchor="middle">해당 PDB에서만 사용</text>
 
-  <rect x="530" y="345" width="220" height="45" rx="4" ry="4" fill="#F59E0B" opacity="0.1" stroke="#F59E0B"/>
-  <text x="640" y="362" class="sublabel" text-anchor="middle" fill="#F59E0B">PDB 원격 복제</text>
+  <rect x="530" y="345" width="220" height="45" rx="4" ry="4" fill="#8a5a10" opacity="0.1" stroke="#8a5a10"/>
+  <text x="640" y="362" class="sublabel" text-anchor="middle" fill="#8a5a10">PDB 원격 복제</text>
   <text x="640" y="380" class="small" text-anchor="middle">DB 링크로 원격 PDB 복제</text>
   <text x="640" y="392" class="small" text-anchor="middle">정적 리스너 등록 필요</text>
 </svg>

@@ -36,11 +36,11 @@
       "visuals": [
         {
           "id": "v4",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>Oracle DB 관리 목적</b>\"]:::amber\n  A --> B[\"<b>DBCA</b><br/>DB 생성·삭제·구성<br/>GUI / CLI\"]:::blue\n  A --> C[\"<b>SQL*Plus</b><br/>SQL 실행<br/>STARTUP / SHUTDOWN\"]:::blue\n  A --> D[\"<b>EM Cloud Control</b><br/>종합 모니터링·관리<br/>웹 GUI\"]:::blue\n  A --> E[\"<b>RMAN</b><br/>백업/복구 전문<br/>CLI\"]:::blue\n  A --> F[\"<b>SQL Developer</b><br/>SQL 개발·객체 관리<br/>GUI (데스크톱)\"]:::blue\n  B --> G[\"<b>응답 파일 (.rsp)</b><br/>사일런트 모드 자동화\"]:::green\n  C --> H[\"<b>SQL 스크립트 (@)</b><br/>SYSDBA / SYSOPER\"]:::green\n  D --> I[\"<b>Job 시스템</b><br/>Agent → OMS → Repository\"]:::green\n  E --> J[\"<b>RMAN 스크립트</b><br/>Recovery Catalog\"]:::green\n  F --> K[\"<b>JDBC Thin Driver</b><br/>DB 기동/종료 불가\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "5대 DBA 관리 툴 — 각 도구의 주요 용도, 인터페이스, 자동화 방식 한눈에 비교",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/03/03_00_s02_v4_mermaid.svg"
         }
       ],
       "subsections": []
@@ -53,11 +53,11 @@
       "visuals": [
         {
           "id": "v5",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>네트워크 도구 3단계 워크플로우</b>\"]:::amber\n  A --> B[\"<b>구성 단계</b><br/>NETCA / NETMGR\"]:::blue\n  B --> B1[\"<b>listener.ora</b><br/>tnsnames.ora<br/>sqlnet.ora 생성/편집\"]:::green\n  B --> B2[\"<b>불가: 리스너 런타임 시작/중지</b>\"]:::red\n  A --> C[\"<b>제어 단계</b><br/>lsnrctl\"]:::blue\n  C --> C1[\"<b>START / STOP / STATUS<br/>RELOAD / SERVICES</b>\"]:::green\n  C --> C2[\"<b>불가: tnsnames.ora 편집</b>\"]:::red\n  A --> D[\"<b>진단 단계</b><br/>tnsping\"]:::blue\n  D --> D1[\"<b>리스너 도달 가능성 테스트<br/>TNS 응답 시간(ms) 확인</b>\"]:::green\n  D --> D2[\"<b>불가: DB 구동 여부<br/>서비스 등록 상태 확인</b>\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "네트워크 도구 3단계 워크플로우 — 구성(NETCA/NETMGR) → 제어(lsnrctl) → 진단(tnsping), 각 도구의 역할 범위와 한계",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/03/03_00_s03_v5_mermaid.svg"
         }
       ],
       "subsections": []
@@ -87,11 +87,11 @@
       "visuals": [
         {
           "id": "v6",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>데이터베이스 링크</b><br/>Local DB → Remote DB\"]:::amber\n  A --> B[\"<b>Private</b><br/>CREATE DATABASE LINK<br/>소유자만 사용\"]:::blue\n  A --> C[\"<b>Public</b><br/>CREATE PUBLIC DATABASE LINK<br/>DB 내 모든 사용자\"]:::blue\n  A --> D[\"<b>Global</b><br/>Oracle Net (LDAP)<br/>네트워크 전체\"]:::blue\n  B --> E{\"<b>접속 방식</b>\"}:::amber\n  C --> E\n  D --> E\n  E --> F[\"<b>고정 사용자</b><br/>CONNECT TO user<br/>IDENTIFIED BY pwd\"]:::green\n  E --> G[\"<b>연결 사용자</b><br/>인증 절 생략\"]:::green\n  E --> H[\"<b>현재 사용자</b><br/>CONNECT TO CURRENT_USER\"]:::green\n  F --> I[\"<b>원격 객체 사용</b><br/>table@dblink_name\"]:::green\n  G --> I\n  H --> I\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "데이터베이스 링크 유형(Private/Public/Global)과 3가지 접속 방식 — 원격 객체 사용까지의 흐름",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/03/03_00_s05_v6_mermaid.svg"
         }
       ],
       "subsections": []
@@ -116,23 +116,55 @@
   ],
   "sql_examples": [],
   "keywords": [
-    "DBCA", "SQL*Plus", "RMAN", "Enterprise Manager Cloud Control", "SQL Developer",
-    "사일런트 모드 (Silent Mode)", "응답 파일 (Response File)", "SYSDBA",
-    "tnsping", "lsnrctl", "NETCA", "NETMGR",
-    "Oracle Net Services", "Oracle Net Listener",
-    "listener.ora", "tnsnames.ora", "sqlnet.ora", "TNS_ADMIN",
-    "동적 등록 (Dynamic Registration)", "정적 등록 (Static Registration)",
-    "LREG 프로세스", "LOCAL_LISTENER",
-    "접속 디스크립터 (Connect Descriptor)", "NAMES.DIRECTORY_PATH",
-    "Easy Connect", "SERVICE_NAMES", "DB_DOMAIN", "DBMS_SERVICE",
-    "FAILOVER", "LOAD_BALANCE",
-    "ORA-12154", "ORA-12514", "ORA-12541",
-    "Database Link", "Private Database Link", "Public Database Link",
-    "CREATE DATABASE LINK", "CONNECT TO CURRENT_USER",
-    "분산 트랜잭션 (Distributed Transaction)", "Two-Phase Commit",
-    "DRIVING_SITE", "GLOBAL_NAMES", "Synonym",
-    "DBA_DB_LINKS", "V$DBLINK",
-    "ADR (Automatic Diagnostic Repository)", "ADRCI",
-    "Dedicated Server", "Shared Server", "DRCP"
+    "DBCA",
+    "SQL*Plus",
+    "RMAN",
+    "Enterprise Manager Cloud Control",
+    "SQL Developer",
+    "사일런트 모드 (Silent Mode)",
+    "응답 파일 (Response File)",
+    "SYSDBA",
+    "tnsping",
+    "lsnrctl",
+    "NETCA",
+    "NETMGR",
+    "Oracle Net Services",
+    "Oracle Net Listener",
+    "listener.ora",
+    "tnsnames.ora",
+    "sqlnet.ora",
+    "TNS_ADMIN",
+    "동적 등록 (Dynamic Registration)",
+    "정적 등록 (Static Registration)",
+    "LREG 프로세스",
+    "LOCAL_LISTENER",
+    "접속 디스크립터 (Connect Descriptor)",
+    "NAMES.DIRECTORY_PATH",
+    "Easy Connect",
+    "SERVICE_NAMES",
+    "DB_DOMAIN",
+    "DBMS_SERVICE",
+    "FAILOVER",
+    "LOAD_BALANCE",
+    "ORA-12154",
+    "ORA-12514",
+    "ORA-12541",
+    "Database Link",
+    "Private Database Link",
+    "Public Database Link",
+    "CREATE DATABASE LINK",
+    "CONNECT TO CURRENT_USER",
+    "분산 트랜잭션 (Distributed Transaction)",
+    "Two-Phase Commit",
+    "DRIVING_SITE",
+    "GLOBAL_NAMES",
+    "Synonym",
+    "DBA_DB_LINKS",
+    "V$DBLINK",
+    "ADR (Automatic Diagnostic Repository)",
+    "ADRCI",
+    "Dedicated Server",
+    "Shared Server",
+    "DRCP"
   ]
 }

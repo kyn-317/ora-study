@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,67 +16,67 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">System Change Number를 기준으로 복구 필요 여부와 유형을 결정</text>
 
   <!-- SCN Sources -->
-  <rect x="30" y="70" width="740" height="100" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
-  <text x="400" y="92" text-anchor="middle" class="label" fill="#6F6BEA">SCN 기록 위치 SCN Locations</text>
+  <rect x="30" y="70" width="740" height="100" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" class="box"/>
+  <text x="400" y="92" text-anchor="middle" class="label" fill="#4a2e78">SCN 기록 위치 SCN Locations</text>
 
   <!-- Control File -->
-  <rect x="50" y="105" width="200" height="50" fill="#2A2B3D" stroke="#3B82F6" stroke-width="1" class="box"/>
-  <text x="150" y="125" text-anchor="middle" class="sublabel" fill="#3B82F6">Control File</text>
+  <rect x="50" y="105" width="200" height="50" fill="#f3efe4" stroke="#2456a8" stroke-width="1" class="box"/>
+  <text x="150" y="125" text-anchor="middle" class="sublabel" fill="#2456a8">Control File</text>
   <text x="150" y="143" text-anchor="middle" class="code">Checkpoint SCN: 10500</text>
 
   <!-- Data File Header -->
-  <rect x="300" y="105" width="200" height="50" fill="#2A2B3D" stroke="#F59E0B" stroke-width="1" class="box"/>
-  <text x="400" y="125" text-anchor="middle" class="sublabel" fill="#F59E0B">Data File Header</text>
+  <rect x="300" y="105" width="200" height="50" fill="#f3efe4" stroke="#8a5a10" stroke-width="1" class="box"/>
+  <text x="400" y="125" text-anchor="middle" class="sublabel" fill="#8a5a10">Data File Header</text>
   <text x="400" y="143" text-anchor="middle" class="code">Header SCN: 10500</text>
 
   <!-- Last Redo SCN -->
-  <rect x="550" y="105" width="200" height="50" fill="#2A2B3D" stroke="#10B981" stroke-width="1" class="box"/>
-  <text x="650" y="125" text-anchor="middle" class="sublabel" fill="#10B981">Online Redo Log</text>
+  <rect x="550" y="105" width="200" height="50" fill="#f3efe4" stroke="#2f6a1c" stroke-width="1" class="box"/>
+  <text x="650" y="125" text-anchor="middle" class="sublabel" fill="#2f6a1c">Online Redo Log</text>
   <text x="650" y="143" text-anchor="middle" class="code">Last Redo SCN: 10800</text>
 
   <!-- Decision Flow -->
-  <rect x="30" y="190" width="740" height="210" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1" class="box"/>
+  <rect x="30" y="190" width="740" height="210" fill="#f3efe4" stroke="#f3efe4" stroke-width="1" class="box"/>
   <text x="400" y="215" text-anchor="middle" class="label">복구 판단 Decision Flow</text>
 
   <!-- Decision 1: Instance Recovery check -->
-  <rect x="240" y="230" width="320" height="35" fill="#6F6BEA" fill-opacity="0.15" stroke="#6F6BEA" stroke-width="1" class="box"/>
-  <text x="400" y="252" text-anchor="middle" class="sublabel" fill="#6F6BEA">Checkpoint SCN &lt; Last Redo SCN ?</text>
+  <rect x="240" y="230" width="320" height="35" fill="#4a2e78" fill-opacity="0.15" stroke="#4a2e78" stroke-width="1" class="box"/>
+  <text x="400" y="252" text-anchor="middle" class="sublabel" fill="#4a2e78">Checkpoint SCN &lt; Last Redo SCN ?</text>
 
   <!-- Yes branch -->
-  <line x1="310" y1="265" x2="310" y2="285" stroke="#10B981" stroke-width="1.5"/>
-  <polygon points="306,283 314,283 310,289" fill="#10B981"/>
-  <text x="280" y="280" class="small" fill="#10B981">YES</text>
+  <line x1="310" y1="265" x2="310" y2="285" stroke="#2f6a1c" stroke-width="1.5"/>
+  <polygon points="306,283 314,283 310,289" fill="#2f6a1c"/>
+  <text x="280" y="280" class="small" fill="#2f6a1c">YES</text>
 
-  <rect x="200" y="290" width="220" height="35" fill="#3B82F6" fill-opacity="0.15" stroke="#3B82F6" stroke-width="1" class="box"/>
-  <text x="310" y="312" text-anchor="middle" class="sublabel" fill="#3B82F6">인스턴스 복구 필요 (SMON 자동)</text>
+  <rect x="200" y="290" width="220" height="35" fill="#2456a8" fill-opacity="0.15" stroke="#2456a8" stroke-width="1" class="box"/>
+  <text x="310" y="312" text-anchor="middle" class="sublabel" fill="#2456a8">인스턴스 복구 필요 (SMON 자동)</text>
 
   <!-- No branch -->
-  <line x1="490" y1="265" x2="490" y2="285" stroke="#94A3B8" stroke-width="1.5"/>
-  <polygon points="486,283 494,283 490,289" fill="#94A3B8"/>
+  <line x1="490" y1="265" x2="490" y2="285" stroke="#787368" stroke-width="1.5"/>
+  <polygon points="486,283 494,283 490,289" fill="#787368"/>
   <text x="500" y="280" class="small">NO</text>
 
-  <rect x="430" y="290" width="180" height="35" fill="#2A2B3D" stroke="#94A3B8" stroke-width="1" class="box"/>
+  <rect x="430" y="290" width="180" height="35" fill="#f3efe4" stroke="#787368" stroke-width="1" class="box"/>
   <text x="520" y="312" text-anchor="middle" class="small">인스턴스 복구 불필요</text>
 
   <!-- Decision 2: Media Recovery check -->
-  <rect x="60" y="340" width="330" height="35" fill="#F59E0B" fill-opacity="0.15" stroke="#F59E0B" stroke-width="1" class="box"/>
-  <text x="225" y="362" text-anchor="middle" class="sublabel" fill="#F59E0B">Data File Header SCN &lt; Control File Checkpoint SCN ?</text>
+  <rect x="60" y="340" width="330" height="35" fill="#8a5a10" fill-opacity="0.15" stroke="#8a5a10" stroke-width="1" class="box"/>
+  <text x="225" y="362" text-anchor="middle" class="sublabel" fill="#8a5a10">Data File Header SCN &lt; Control File Checkpoint SCN ?</text>
 
   <!-- Yes -->
-  <rect x="430" y="340" width="150" height="35" fill="#F43F5E" fill-opacity="0.15" stroke="#F43F5E" stroke-width="1" class="box"/>
-  <text x="505" y="357" text-anchor="middle" class="sublabel" fill="#F43F5E">YES → 미디어 복구</text>
-  <text x="505" y="370" text-anchor="middle" class="small" fill="#F43F5E">(DBA 수동 개입 필요)</text>
+  <rect x="430" y="340" width="150" height="35" fill="#be123c" fill-opacity="0.15" stroke="#be123c" stroke-width="1" class="box"/>
+  <text x="505" y="357" text-anchor="middle" class="sublabel" fill="#be123c">YES → 미디어 복구</text>
+  <text x="505" y="370" text-anchor="middle" class="small" fill="#be123c">(DBA 수동 개입 필요)</text>
 
   <!-- No -->
-  <rect x="610" y="340" width="140" height="35" fill="#2A2B3D" stroke="#94A3B8" stroke-width="1" class="box"/>
+  <rect x="610" y="340" width="140" height="35" fill="#f3efe4" stroke="#787368" stroke-width="1" class="box"/>
   <text x="680" y="362" text-anchor="middle" class="small">NO → 정상 상태</text>
 
   <!-- Arrow from decision 2 to yes/no -->
-  <line x1="390" y1="357" x2="428" y2="357" stroke="#F43F5E" stroke-width="1.5"/>
-  <polygon points="426,354 426,360 432,357" fill="#F43F5E"/>
-  <text x="410" y="352" class="small" fill="#F43F5E">YES</text>
+  <line x1="390" y1="357" x2="428" y2="357" stroke="#be123c" stroke-width="1.5"/>
+  <polygon points="426,354 426,360 432,357" fill="#be123c"/>
+  <text x="410" y="352" class="small" fill="#be123c">YES</text>
 
-  <line x1="390" y1="357" x2="400" y2="357" stroke="#94A3B8" stroke-width="0" stroke-dasharray="3,2"/>
+  <line x1="390" y1="357" x2="400" y2="357" stroke="#787368" stroke-width="0" stroke-dasharray="3,2"/>
 
   <!-- Bottom summary -->
   <rect x="30" y="405" width="740" height="10" fill="transparent"/>

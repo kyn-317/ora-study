@@ -202,11 +202,11 @@
       "visuals": [
         {
           "id": "v07",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>OS 사용자</b><br/>sqlplus / as sysdba 실행\"]:::amber\n  B{\"<b>로컬 접속인가?</b>\"}:::blue\n  C[\"<b>OS 그룹 멤버십 확인</b><br/>dba / oper / backupdba 등\"]:::blue\n  D{\"<b>그룹 소속 여부</b>\"}:::blue\n  E[\"<b>인증 성공</b><br/>패스워드 입력 불필요\"]:::green\n  F[\"<b>인증 실패</b>\"]:::red\n  G[\"<b>원격 접속</b><br/>REMOTE_OS_AUTHENT 확인\"]:::amber\n  H{\"<b>REMOTE_OS_AUTHENT</b><br/>= TRUE?\"}:::blue\n  I[\"<b>인증 성공</b><br/>⚠ 보안 위험 Deprecated\"]:::red\n\n  A --> B\n  B -- \"Yes\" --> C\n  C --> D\n  D -- \"소속\" --> E\n  D -- \"미소속\" --> F\n  B -- \"No\" --> G\n  G --> H\n  H -- \"TRUE 비권장\" --> I\n  H -- \"FALSE 기본값\" --> F\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "OS 인증 흐름 - 로컬 접속 시 OS 그룹 멤버십 기반 인증, 원격 접속 시 REMOTE_OS_AUTHENT 파라미터 분기",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/04/04_01_s05_v07_mermaid.svg"
         }
       ]
     },
@@ -279,11 +279,11 @@
       "visuals": [
         {
           "id": "v08",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>기본 계정 보안 점검 시작</b>\"]:::amber\n  A --> B[\"<b>1. 불필요한 계정 잠금 확인</b><br/>사용하지 않는 계정은 LOCKED 상태 유지\"]:::blue\n  B --> C[\"<b>2. 기본 패스워드 변경</b><br/>SYS, SYSTEM 등 활성 계정 패스워드 강력한 값으로 변경\"]:::red\n  C --> D[\"<b>3. 샘플 스키마 삭제</b><br/>운영 환경에서는 HR, SH 등 샘플 스키마 삭제 권장\"]:::red\n  D --> E[\"<b>4. 프로파일 적용</b><br/>모든 활성 사용자에게 적절한 패스워드 프로파일 할당\"]:::blue\n  E --> F[\"<b>5. 감사 활성화</b><br/>관리자 계정의 접속 및 작업에 대한 감사 설정\"]:::green\n  F --> G[\"<b>점검 완료</b>\"]:::amber\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "기본 계정 보안 점검 5단계 — 계정 잠금 확인, 패스워드 변경, 샘플 스키마 삭제, 프로파일 적용, 감사 활성화",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/04/04_01_s07_v08_mermaid.svg"
         }
       ]
     },

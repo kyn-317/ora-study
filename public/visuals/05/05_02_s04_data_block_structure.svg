@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,59 +16,59 @@
   <text x="400" y="48" text-anchor="middle" class="subtitle">DB_BLOCK_SIZE (기본 8KB) — I/O 작업의 최소 단위</text>
 
   <!-- Block outer -->
-  <rect x="80" y="65" width="340" height="440" class="box" fill="rgba(255,255,255,0.03)" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="80" y="65" width="340" height="440" class="box" fill="rgba(42,42,42,0.03)" stroke="#4a2e78" stroke-width="2"/>
 
   <!-- Block Header -->
-  <rect x="95" y="80" width="310" height="110" fill="rgba(111,107,234,0.15)" stroke="#6F6BEA" stroke-width="1.5" rx="6"/>
-  <text x="250" y="100" text-anchor="middle" class="label" fill="#6F6BEA">Block Header (블록 헤더)</text>
+  <rect x="95" y="80" width="310" height="110" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5" rx="6"/>
+  <text x="250" y="100" text-anchor="middle" class="label" fill="#4a2e78">Block Header (블록 헤더)</text>
 
   <!-- Fixed Header -->
-  <rect x="110" y="108" width="280" height="24" fill="rgba(111,107,234,0.25)" stroke="#6F6BEA" stroke-width="1" rx="4"/>
+  <rect x="110" y="108" width="280" height="24" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1" rx="4"/>
   <text x="250" y="125" text-anchor="middle" class="sublabel">Fixed Header — 블록 주소, 세그먼트 유형, SCN</text>
 
   <!-- Variable Header (ITL) -->
-  <rect x="110" y="137" width="280" height="24" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1" rx="4"/>
+  <rect x="110" y="137" width="280" height="24" fill="#dee5f5" stroke="#2456a8" stroke-width="1" rx="4"/>
   <text x="250" y="154" text-anchor="middle" class="sublabel">Variable Header — 트랜잭션 슬롯 (ITL: Interested Transaction List)</text>
 
   <!-- Table Directory -->
-  <rect x="110" y="166" width="280" height="18" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1" rx="4"/>
+  <rect x="110" y="166" width="280" height="18" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" rx="4"/>
   <text x="250" y="180" text-anchor="middle" class="small">Table Directory — 클러스터 테이블용</text>
 
   <!-- Row Directory -->
-  <rect x="95" y="200" width="310" height="40" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5" rx="6"/>
-  <text x="250" y="218" text-anchor="middle" class="label" fill="#10B981">Row Directory (행 디렉토리)</text>
+  <rect x="95" y="200" width="310" height="40" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.5" rx="6"/>
+  <text x="250" y="218" text-anchor="middle" class="label" fill="#2f6a1c">Row Directory (행 디렉토리)</text>
   <text x="250" y="234" text-anchor="middle" class="small">각 행의 오프셋(위치) 정보 포인터</text>
 
   <!-- Free Space -->
-  <rect x="95" y="250" width="310" height="100" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1.5" rx="6" stroke-dasharray="6,3"/>
-  <text x="250" y="285" text-anchor="middle" class="label" fill="#F59E0B">Free Space (여유 공간)</text>
+  <rect x="95" y="250" width="310" height="100" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5" rx="6" stroke-dasharray="6,3"/>
+  <text x="250" y="285" text-anchor="middle" class="label" fill="#8a5a10">Free Space (여유 공간)</text>
   <text x="250" y="305" text-anchor="middle" class="small">새 행 삽입 / 기존 행 UPDATE 용</text>
   <text x="250" y="325" text-anchor="middle" class="code">PCTFREE에 의해 예약</text>
   <text x="250" y="340" text-anchor="middle" class="small">위에서 아래로 성장 (↓)</text>
 
   <!-- Row Data -->
-  <rect x="95" y="360" width="310" height="130" fill="rgba(244,63,94,0.1)" stroke="#F43F5E" stroke-width="1.5" rx="6"/>
-  <text x="250" y="385" text-anchor="middle" class="label" fill="#F43F5E">Row Data (행 데이터)</text>
+  <rect x="95" y="360" width="310" height="130" fill="#f5d0d0" stroke="#be123c" stroke-width="1.5" rx="6"/>
+  <text x="250" y="385" text-anchor="middle" class="label" fill="#be123c">Row Data (행 데이터)</text>
 
   <!-- Row pieces -->
-  <rect x="110" y="395" width="280" height="22" fill="rgba(244,63,94,0.15)" stroke="#F43F5E" stroke-width="1" rx="3"/>
+  <rect x="110" y="395" width="280" height="22" fill="#f5d0d0" stroke="#be123c" stroke-width="1" rx="3"/>
   <text x="250" y="411" text-anchor="middle" class="code">Row 1: col1 | col2 | col3 | ...</text>
 
-  <rect x="110" y="422" width="280" height="22" fill="rgba(244,63,94,0.15)" stroke="#F43F5E" stroke-width="1" rx="3"/>
+  <rect x="110" y="422" width="280" height="22" fill="#f5d0d0" stroke="#be123c" stroke-width="1" rx="3"/>
   <text x="250" y="438" text-anchor="middle" class="code">Row 2: col1 | col2 | col3 | ...</text>
 
-  <rect x="110" y="449" width="280" height="22" fill="rgba(244,63,94,0.15)" stroke="#F43F5E" stroke-width="1" rx="3"/>
+  <rect x="110" y="449" width="280" height="22" fill="#f5d0d0" stroke="#be123c" stroke-width="1" rx="3"/>
   <text x="250" y="465" text-anchor="middle" class="code">Row N: col1 | col2 | ...</text>
 
   <text x="250" y="487" text-anchor="middle" class="small">아래에서 위로 성장 (↑)</text>
 
   <!-- Right side: PCTFREE/PCTUSED explanation -->
-  <rect x="460" y="65" width="310" height="200" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="460" y="65" width="310" height="200" class="box" fill="rgba(42,42,42,0.03)" stroke="#f3efe4" stroke-width="1"/>
   <text x="615" y="88" text-anchor="middle" class="label">PCTFREE / PCTUSED</text>
 
   <!-- PCTFREE bar -->
-  <rect x="480" y="100" width="270" height="30" fill="rgba(255,255,255,0.05)" stroke="#2A2B3D" stroke-width="1" rx="4"/>
-  <rect x="480" y="100" width="54" height="30" fill="rgba(245,158,11,0.2)" stroke="#F59E0B" stroke-width="1" rx="4"/>
+  <rect x="480" y="100" width="270" height="30" fill="rgba(42,42,42,0.05)" stroke="#f3efe4" stroke-width="1" rx="4"/>
+  <rect x="480" y="100" width="54" height="30" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" rx="4"/>
   <text x="507" y="120" text-anchor="middle" class="code">20%</text>
   <text x="620" y="120" text-anchor="middle" class="sublabel">PCTFREE = 20 (기본)</text>
 
@@ -76,8 +77,8 @@
   <text x="480" y="182" class="small">새 행 INSERT를 허용</text>
 
   <!-- PCTUSED bar (MSSM only) -->
-  <rect x="480" y="195" width="270" height="30" fill="rgba(255,255,255,0.05)" stroke="#2A2B3D" stroke-width="1" rx="4"/>
-  <rect x="480" y="195" width="108" height="30" fill="rgba(16,185,129,0.2)" stroke="#10B981" stroke-width="1" rx="4"/>
+  <rect x="480" y="195" width="270" height="30" fill="rgba(42,42,42,0.05)" stroke="#f3efe4" stroke-width="1" rx="4"/>
+  <rect x="480" y="195" width="108" height="30" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1" rx="4"/>
   <text x="534" y="215" text-anchor="middle" class="code">40%</text>
   <text x="620" y="215" text-anchor="middle" class="sublabel">PCTUSED = 40 (MSSM)</text>
 
@@ -85,15 +86,15 @@
   <text x="480" y="263" class="small">이 값 아래로 떨어지면 Freelist에 복귀</text>
 
   <!-- ASSM vs MSSM -->
-  <rect x="460" y="285" width="310" height="100" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="460" y="285" width="310" height="100" class="box" fill="rgba(42,42,42,0.03)" stroke="#f3efe4" stroke-width="1"/>
   <text x="615" y="308" text-anchor="middle" class="label">ASSM vs MSSM 공간 관리</text>
-  <text x="480" y="328" class="sublabel" fill="#10B981">ASSM (자동): 비트맵 블록으로 관리</text>
+  <text x="480" y="328" class="sublabel" fill="#2f6a1c">ASSM (자동): 비트맵 블록으로 관리</text>
   <text x="480" y="346" class="small">PCTFREE만 사용 / 높은 동시성</text>
-  <text x="480" y="366" class="sublabel" fill="#F59E0B">MSSM (수동): Freelist로 관리</text>
+  <text x="480" y="366" class="sublabel" fill="#8a5a10">MSSM (수동): Freelist로 관리</text>
   <text x="480" y="384" class="small">PCTFREE + PCTUSED 사용 / 경합 가능</text>
 
   <!-- Block size info -->
-  <rect x="460" y="400" width="310" height="100" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="460" y="400" width="310" height="100" class="box" fill="rgba(42,42,42,0.03)" stroke="#f3efe4" stroke-width="1"/>
   <text x="615" y="422" text-anchor="middle" class="label">블록 사이즈 (DB_BLOCK_SIZE)</text>
   <text x="480" y="442" class="code">2KB  4KB  8KB  16KB  32KB</text>
   <text x="480" y="460" class="small">기본값: 8KB (DB 생성 후 변경 불가)</text>

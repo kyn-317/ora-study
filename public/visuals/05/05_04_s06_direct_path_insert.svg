@@ -1,20 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
   <defs>
     <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#6F6BEA" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a2e78" />
     </marker>
     <marker id="ah-g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2f6a1c" />
     </marker>
   </defs>
 
@@ -23,64 +24,64 @@
   <text x="400" y="48" text-anchor="middle" class="subtitle">일반 삽입 vs 직접 경로 삽입 — 내부 동작 비교</text>
 
   <!-- Conventional Insert -->
-  <rect x="30" y="65" width="355" height="280" class="box" fill="rgba(59,130,246,0.06)" stroke="#3B82F6" stroke-width="2"/>
-  <text x="207" y="88" text-anchor="middle" class="label" fill="#3B82F6">Conventional Insert (일반 삽입)</text>
+  <rect x="30" y="65" width="355" height="280" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="2"/>
+  <text x="207" y="88" text-anchor="middle" class="label" fill="#2456a8">Conventional Insert (일반 삽입)</text>
 
   <!-- SGA Buffer Cache -->
-  <rect x="50" y="105" width="315" height="80" class="box" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5"/>
-  <text x="207" y="125" text-anchor="middle" class="sublabel" fill="#3B82F6">SGA — Buffer Cache</text>
-  <rect x="65" y="135" width="65" height="35" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1" rx="3"/>
+  <rect x="50" y="105" width="315" height="80" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5"/>
+  <text x="207" y="125" text-anchor="middle" class="sublabel" fill="#2456a8">SGA — Buffer Cache</text>
+  <rect x="65" y="135" width="65" height="35" fill="#dee5f5" stroke="#2456a8" stroke-width="1" rx="3"/>
   <text x="97" y="157" text-anchor="middle" class="small">Block</text>
-  <rect x="140" y="135" width="65" height="35" fill="rgba(59,130,246,0.2)" stroke="#3B82F6" stroke-width="1" rx="3"/>
+  <rect x="140" y="135" width="65" height="35" fill="#dee5f5" stroke="#2456a8" stroke-width="1" rx="3"/>
   <text x="172" y="157" text-anchor="middle" class="small">Block</text>
-  <rect x="215" y="135" width="65" height="35" fill="rgba(245,158,11,0.2)" stroke="#F59E0B" stroke-width="1" rx="3"/>
-  <text x="247" y="157" text-anchor="middle" class="small" fill="#F59E0B">Free</text>
-  <rect x="290" y="135" width="65" height="35" fill="rgba(245,158,11,0.2)" stroke="#F59E0B" stroke-width="1" rx="3"/>
-  <text x="322" y="157" text-anchor="middle" class="small" fill="#F59E0B">Free</text>
+  <rect x="215" y="135" width="65" height="35" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" rx="3"/>
+  <text x="247" y="157" text-anchor="middle" class="small" fill="#8a5a10">Free</text>
+  <rect x="290" y="135" width="65" height="35" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" rx="3"/>
+  <text x="322" y="157" text-anchor="middle" class="small" fill="#8a5a10">Free</text>
 
   <!-- Arrow: find free space -->
-  <path d="M 207 185 L 207 210" stroke="#3B82F6" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+  <path d="M 207 185 L 207 210" stroke="#2456a8" stroke-width="2" fill="none" marker-end="url(#ah)"/>
   <text x="215" y="203" class="small">Freelist/비트맵 검색</text>
 
   <!-- Datafile -->
-  <rect x="50" y="215" width="315" height="55" class="box" fill="rgba(255,255,255,0.04)" stroke="#2A2B3D" stroke-width="1.5"/>
+  <rect x="50" y="215" width="315" height="55" class="box" fill="rgba(42,42,42,0.04)" stroke="#f3efe4" stroke-width="1.5"/>
   <text x="207" y="237" text-anchor="middle" class="sublabel">Datafile — HWM 아래 빈 블록에 삽입</text>
   <text x="207" y="255" text-anchor="middle" class="small">Redo Log + Undo 생성</text>
 
   <!-- Characteristics -->
-  <text x="50" y="288" class="small" fill="#10B981">HWM 아래 여유 공간 재활용</text>
+  <text x="50" y="288" class="small" fill="#2f6a1c">HWM 아래 여유 공간 재활용</text>
   <text x="50" y="304" class="small">Redo Log 생성 (복구 가능)</text>
   <text x="50" y="320" class="small">Undo 생성 (ROLLBACK 가능)</text>
   <text x="50" y="336" class="small">Buffer Cache 경유 → DBWR가 후에 기록</text>
 
   <!-- Direct-Path Insert -->
-  <rect x="415" y="65" width="355" height="280" class="box" fill="rgba(16,185,129,0.06)" stroke="#10B981" stroke-width="2"/>
-  <text x="592" y="88" text-anchor="middle" class="label" fill="#10B981">Direct-Path Insert (직접 경로 삽입)</text>
+  <rect x="415" y="65" width="355" height="280" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="2"/>
+  <text x="592" y="88" text-anchor="middle" class="label" fill="#2f6a1c">Direct-Path Insert (직접 경로 삽입)</text>
 
   <!-- Bypass SGA -->
-  <rect x="435" y="105" width="315" height="80" class="box" fill="rgba(255,255,255,0.02)" stroke="#2A2B3D" stroke-width="1" stroke-dasharray="5,3"/>
-  <text x="592" y="125" text-anchor="middle" class="sublabel" fill="#94A3B8">SGA — Buffer Cache (우회!)</text>
-  <line x1="480" y1="140" x2="700" y2="170" stroke="#F43F5E" stroke-width="2" opacity="0.5"/>
-  <line x1="480" y1="170" x2="700" y2="140" stroke="#F43F5E" stroke-width="2" opacity="0.5"/>
-  <text x="592" y="157" text-anchor="middle" class="label" fill="#F43F5E">BYPASS</text>
+  <rect x="435" y="105" width="315" height="80" class="box" fill="rgba(42,42,42,0.02)" stroke="#f3efe4" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="592" y="125" text-anchor="middle" class="sublabel" fill="#787368">SGA — Buffer Cache (우회!)</text>
+  <line x1="480" y1="140" x2="700" y2="170" stroke="#be123c" stroke-width="2" opacity="0.5"/>
+  <line x1="480" y1="170" x2="700" y2="140" stroke="#be123c" stroke-width="2" opacity="0.5"/>
+  <text x="592" y="157" text-anchor="middle" class="label" fill="#be123c">BYPASS</text>
 
   <!-- Direct write to Datafile -->
-  <rect x="435" y="215" width="315" height="55" class="box" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5"/>
-  <text x="592" y="237" text-anchor="middle" class="sublabel" fill="#10B981">Datafile — HWM 위에 직접 기록</text>
+  <rect x="435" y="215" width="315" height="55" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.5"/>
+  <text x="592" y="237" text-anchor="middle" class="sublabel" fill="#2f6a1c">Datafile — HWM 위에 직접 기록</text>
   <text x="592" y="255" text-anchor="middle" class="small">PGA에서 직접 디스크로 기록</text>
 
   <!-- Arrow direct -->
-  <path d="M 592 95 Q 760 150 592 213" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#ah-g)"/>
-  <text x="720" y="145" class="small" fill="#10B981">직접!</text>
+  <path d="M 592 95 Q 760 150 592 213" stroke="#2f6a1c" stroke-width="2" fill="none" marker-end="url(#ah-g)"/>
+  <text x="720" y="145" class="small" fill="#2f6a1c">직접!</text>
 
   <!-- Characteristics -->
-  <text x="435" y="288" class="small" fill="#10B981">HWM 위에 새 블록 할당 (빈 블록 무시)</text>
-  <text x="435" y="304" class="small" fill="#F59E0B">Redo 최소화 (NOLOGGING 시 거의 0)</text>
-  <text x="435" y="320" class="small" fill="#F43F5E">Undo 미생성 → ROLLBACK 제한</text>
+  <text x="435" y="288" class="small" fill="#2f6a1c">HWM 위에 새 블록 할당 (빈 블록 무시)</text>
+  <text x="435" y="304" class="small" fill="#8a5a10">Redo 최소화 (NOLOGGING 시 거의 0)</text>
+  <text x="435" y="320" class="small" fill="#be123c">Undo 미생성 → ROLLBACK 제한</text>
   <text x="435" y="336" class="small">Buffer Cache 우회 → 대량 적재에 고속</text>
 
   <!-- Trigger methods -->
-  <rect x="30" y="360" width="740" height="50" class="box" fill="rgba(255,255,255,0.03)" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="30" y="360" width="740" height="50" class="box" fill="rgba(42,42,42,0.03)" stroke="#f3efe4" stroke-width="1"/>
   <text x="50" y="380" class="sublabel">Direct-Path 활성화 방법:</text>
   <text x="50" y="398" class="code">INSERT /*+ APPEND */ INTO ...</text>
   <text x="300" y="398" class="code">CREATE TABLE ... AS SELECT</text>

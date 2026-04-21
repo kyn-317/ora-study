@@ -35,11 +35,11 @@
       "visuals": [
         {
           "id": "v4",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>UNDO 데이터</b><br/>DML 변경 전 이미지(Before Image)\"]:::amber\n  A --> B[\"<b>읽기 일관성</b><br/>Query SCN과 Block SCN 비교<br/>→ CR 블록 생성\"]:::blue\n  A --> C[\"<b>트랜잭션 롤백</b><br/>ROLLBACK 시<br/>UNDO 레코드 역순 적용\"]:::green\n  A --> D[\"<b>Flashback</b><br/>AS OF SCN/TIMESTAMP<br/>VERSIONS BETWEEN\"]:::green\n  B --> E[\"<b>ORA-01555</b><br/>CR 블록 생성에 필요한<br/>UNDO 덮어쓰여진 경우 발생\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "UNDO 데이터(Before Image)의 3대 핵심 기능과 ORA-01555 발생 조건",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/06/06_00_s02_v4_mermaid.svg"
         }
       ],
       "subsections": []
@@ -69,11 +69,11 @@
       "visuals": [
         {
           "id": "v5",
-          "type": "mermaid",
-          "mermaidCode": "flowchart TD\n  A[\"<b>GTT DML 발생</b><br/>TEMP_UNDO_ENABLED = TRUE\"]:::amber\n  A --> B[\"<b>UNDO 데이터</b><br/>Temp Tablespace 내<br/>Temporary Undo Segment에 저장\"]:::blue\n  B --> C[\"<b>Redo 기록 생략</b><br/>I/O 대폭 감소\"]:::green\n  D[\"<b>Shared UNDO</b><br/>CDB$ROOT 단일 테이블스페이스 공유<br/>PDB 간 공간 경합·격리성 낮음\"]:::red\n  E[\"<b>Local UNDO</b><br/>각 PDB 독립 테이블스페이스 보유<br/>Hot Clone·Relocate·Flashback PDB 가능\"]:::green\n  F[\"<b>UNDO 모드 전환</b><br/>STARTUP UPGRADE 모드<br/>CDB 다운타임 필수\"]:::amber\n  F --> D\n  F --> E\n  E --> G[\"<b>Oracle 26ai 기본값·권장</b>\"]:::green\n  D --> H[\"<b>레거시 호환만 유지</b><br/>Deprecated\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "type": "svg",
           "caption": "Temporary UNDO 흐름(GTT → Temp Tablespace → Redo 생략)과 Shared/Local UNDO 모드 전환 방향",
           "placement": "before-content",
-          "width": "100%"
+          "width": "100%",
+          "src": "/visuals/06/06_00_s04_v5_mermaid.svg"
         }
       ],
       "subsections": []
@@ -98,23 +98,55 @@
   ],
   "sql_examples": [],
   "keywords": [
-    "UNDO Data", "Before Image", "UNDO Segment", "UNDO Tablespace",
-    "UNDO Record", "Transaction Table",
-    "Read Consistency", "CR Block", "SCN", "ITL", "UBA",
-    "Rollback", "SAVEPOINT",
-    "ACTIVE", "UNEXPIRED", "EXPIRED",
-    "UNDO_RETENTION", "Auto-Tuning", "TUNED_UNDORETENTION",
+    "UNDO Data",
+    "Before Image",
+    "UNDO Segment",
+    "UNDO Tablespace",
+    "UNDO Record",
+    "Transaction Table",
+    "Read Consistency",
+    "CR Block",
+    "SCN",
+    "ITL",
+    "UBA",
+    "Rollback",
+    "SAVEPOINT",
+    "ACTIVE",
+    "UNEXPIRED",
+    "EXPIRED",
+    "UNDO_RETENTION",
+    "Auto-Tuning",
+    "TUNED_UNDORETENTION",
     "RETENTION GUARANTEE",
-    "UNDO_MANAGEMENT", "UNDO_TABLESPACE",
-    "ORA-01555", "Snapshot Too Old", "ORA-30036",
-    "Flashback Query", "Flashback Version Query", "Flashback Transaction Query", "Flashback Table",
-    "V$UNDOSTAT", "V$TRANSACTION", "V$ROLLSTAT", "DBA_UNDO_EXTENTS",
+    "UNDO_MANAGEMENT",
+    "UNDO_TABLESPACE",
+    "ORA-01555",
+    "Snapshot Too Old",
+    "ORA-30036",
+    "Flashback Query",
+    "Flashback Version Query",
+    "Flashback Transaction Query",
+    "Flashback Table",
+    "V$UNDOSTAT",
+    "V$TRANSACTION",
+    "V$ROLLSTAT",
+    "DBA_UNDO_EXTENTS",
     "UNDO Advisor",
-    "Temporary UNDO", "TEMP_UNDO_ENABLED", "V$TEMPUNDOSTAT",
-    "Global Temporary Table", "GTT",
-    "Local UNDO Mode", "Shared UNDO Mode",
-    "CDB", "PDB", "Multitenant",
-    "Hot Clone", "PDB Relocate", "Flashback PDB",
-    "Block Cleanout", "Dead Transaction Recovery", "SMON"
+    "Temporary UNDO",
+    "TEMP_UNDO_ENABLED",
+    "V$TEMPUNDOSTAT",
+    "Global Temporary Table",
+    "GTT",
+    "Local UNDO Mode",
+    "Shared UNDO Mode",
+    "CDB",
+    "PDB",
+    "Multitenant",
+    "Hot Clone",
+    "PDB Relocate",
+    "Flashback PDB",
+    "Block Cleanout",
+    "Dead Transaction Recovery",
+    "SMON"
   ]
 }

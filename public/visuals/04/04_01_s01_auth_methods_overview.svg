@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,21 +16,21 @@
   <text x="400" y="52" class="subtitle" text-anchor="middle">5가지 인증 방식의 인증 주체, 사용 사례, 설정 방법 비교</text>
 
   <!-- Central User -->
-  <rect x="310" y="75" width="180" height="50" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="2"/>
+  <rect x="310" y="75" width="180" height="50" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
   <text x="400" y="97" class="label" text-anchor="middle">사용자 접속 요청</text>
   <text x="400" y="113" class="small" text-anchor="middle">User Connection Request</text>
 
   <!-- Lines from center -->
-  <line x1="330" y1="125" x2="100" y2="170" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="4"/>
-  <line x1="370" y1="125" x2="250" y2="170" stroke="#10B981" stroke-width="1.5" stroke-dasharray="4"/>
-  <line x1="400" y1="125" x2="400" y2="170" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4"/>
-  <line x1="430" y1="125" x2="550" y2="170" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="4"/>
-  <line x1="470" y1="125" x2="700" y2="170" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="4"/>
+  <line x1="330" y1="125" x2="100" y2="170" stroke="#2456a8" stroke-width="1.5" stroke-dasharray="4"/>
+  <line x1="370" y1="125" x2="250" y2="170" stroke="#2f6a1c" stroke-width="1.5" stroke-dasharray="4"/>
+  <line x1="400" y1="125" x2="400" y2="170" stroke="#8a5a10" stroke-width="1.5" stroke-dasharray="4"/>
+  <line x1="430" y1="125" x2="550" y2="170" stroke="#be123c" stroke-width="1.5" stroke-dasharray="4"/>
+  <line x1="470" y1="125" x2="700" y2="170" stroke="#4a2e78" stroke-width="1.5" stroke-dasharray="4"/>
 
   <!-- Password Auth -->
-  <rect x="20" y="170" width="160" height="175" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
-  <rect x="20" y="170" width="160" height="28" rx="8" ry="8" fill="#3B82F6"/>
-  <text x="100" y="189" class="label" text-anchor="middle" fill="#FFF">패스워드 인증</text>
+  <rect x="20" y="170" width="160" height="175" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
+  <rect x="20" y="170" width="160" height="28" rx="8" ry="8" fill="#2456a8"/>
+  <text x="100" y="189" class="label" text-anchor="middle" fill="#1a1a1a">패스워드 인증</text>
   <text x="100" y="214" class="sublabel" text-anchor="middle">Password Auth</text>
   <text x="100" y="234" class="small" text-anchor="middle">인증 주체: 데이터 딕셔너리</text>
   <text x="100" y="252" class="small" text-anchor="middle">USER$ 테이블 해시 비교</text>
@@ -39,9 +40,9 @@
   <text x="100" y="335" class="small" text-anchor="middle">가장 일반적인 방식</text>
 
   <!-- OS Auth -->
-  <rect x="195" y="170" width="150" height="175" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
-  <rect x="195" y="170" width="150" height="28" rx="8" ry="8" fill="#10B981"/>
-  <text x="270" y="189" class="label" text-anchor="middle" fill="#FFF">OS 인증</text>
+  <rect x="195" y="170" width="150" height="175" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
+  <rect x="195" y="170" width="150" height="28" rx="8" ry="8" fill="#2f6a1c"/>
+  <text x="270" y="189" class="label" text-anchor="middle" fill="#1a1a1a">OS 인증</text>
   <text x="270" y="214" class="sublabel" text-anchor="middle">OS Authentication</text>
   <text x="270" y="234" class="small" text-anchor="middle">인증 주체: 운영체제</text>
   <text x="270" y="252" class="small" text-anchor="middle">OS 그룹 멤버십 확인</text>
@@ -51,9 +52,9 @@
   <text x="270" y="335" class="small" text-anchor="middle">패스워드 입력 불필요</text>
 
   <!-- Privileged Auth -->
-  <rect x="360" y="170" width="160" height="175" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
-  <rect x="360" y="170" width="160" height="28" rx="8" ry="8" fill="#F59E0B"/>
-  <text x="440" y="189" class="label" text-anchor="middle" fill="#1E1E2E">특권 인증</text>
+  <rect x="360" y="170" width="160" height="175" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="2"/>
+  <rect x="360" y="170" width="160" height="28" rx="8" ry="8" fill="#8a5a10"/>
+  <text x="440" y="189" class="label" text-anchor="middle" fill="#1a1a1a">특권 인증</text>
   <text x="440" y="214" class="sublabel" text-anchor="middle">Privileged Auth</text>
   <text x="440" y="234" class="small" text-anchor="middle">인증: 패스워드파일/OS</text>
   <text x="440" y="252" class="small" text-anchor="middle">SYSDBA/SYSOPER 접속</text>
@@ -63,9 +64,9 @@
   <text x="440" y="335" class="small" text-anchor="middle">필수 감사 대상</text>
 
   <!-- External Auth -->
-  <rect x="535" y="170" width="150" height="175" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="2"/>
-  <rect x="535" y="170" width="150" height="28" rx="8" ry="8" fill="#F43F5E"/>
-  <text x="610" y="189" class="label" text-anchor="middle" fill="#FFF">외부 인증</text>
+  <rect x="535" y="170" width="150" height="175" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="2"/>
+  <rect x="535" y="170" width="150" height="28" rx="8" ry="8" fill="#be123c"/>
+  <text x="610" y="189" class="label" text-anchor="middle" fill="#1a1a1a">외부 인증</text>
   <text x="610" y="214" class="sublabel" text-anchor="middle">External Auth</text>
   <text x="610" y="234" class="small" text-anchor="middle">인증: 네트워크 서비스</text>
   <text x="610" y="252" class="small" text-anchor="middle">Kerberos, SSL/TLS</text>
@@ -75,9 +76,9 @@
   <text x="610" y="335" class="small" text-anchor="middle">REMOTE_OS_AUTHENT</text>
 
   <!-- Global Auth -->
-  <rect x="700" y="170" width="90" height="175" class="box" fill="#1E1E2E" stroke="#8B5CF6" stroke-width="2"/>
-  <rect x="700" y="170" width="90" height="28" rx="8" ry="8" fill="#8B5CF6"/>
-  <text x="745" y="189" class="label" text-anchor="middle" fill="#FFF">글로벌</text>
+  <rect x="700" y="170" width="90" height="175" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="2"/>
+  <rect x="700" y="170" width="90" height="28" rx="8" ry="8" fill="#4a2e78"/>
+  <text x="745" y="189" class="label" text-anchor="middle" fill="#1a1a1a">글로벌</text>
   <text x="745" y="214" class="sublabel" text-anchor="middle">Global</text>
   <text x="745" y="234" class="small" text-anchor="middle">LDAP</text>
   <text x="745" y="252" class="small" text-anchor="middle">디렉토리</text>
@@ -86,12 +87,12 @@
   <text x="745" y="315" class="small" text-anchor="middle">Entra ID</text>
 
   <!-- User-Schema Relationship -->
-  <rect x="30" y="380" width="740" height="55" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1.5"/>
+  <rect x="30" y="380" width="740" height="55" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1.5"/>
   <text x="400" y="400" class="label" text-anchor="middle">사용자(User) = 스키마(Schema) 1:1 대응</text>
   <text x="400" y="420" class="small" text-anchor="middle">CREATE USER 실행 시 동일 이름의 스키마 자동 생성 | Schema-Only Account: NO AUTHENTICATION (로그인 불가, 스키마만 존재)</text>
 
   <!-- Key Views -->
-  <rect x="30" y="450" width="740" height="55" class="box" fill="#1E1E2E" stroke="#2A2B3D" stroke-width="1"/>
+  <rect x="30" y="450" width="740" height="55" class="box" fill="#f3efe4" stroke="#f3efe4" stroke-width="1"/>
   <text x="50" y="470" class="code">DBA_USERS</text>
   <text x="155" y="470" class="small">사용자 정보</text>
   <text x="255" y="470" class="code">V$SESSION</text>

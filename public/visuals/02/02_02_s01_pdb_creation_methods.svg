@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480">
+  <rect x="0" y="0" width="100%" height="100%" fill="#faf8f3" />
   <style>
-    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #E2E8F0; }
+    text { font-family: 'Pretendard', 'Segoe UI', sans-serif; fill: #1a1a1a; }
     .title { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 13px; fill: #94A3B8; }
+    .subtitle { font-size: 13px; fill: #787368; }
     .label { font-size: 14px; font-weight: 600; }
-    .sublabel { font-size: 12px; fill: #CBD5E1; }
-    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #F59E0B; }
-    .small { font-size: 11px; fill: #94A3B8; }
+    .sublabel { font-size: 12px; fill: #4a4a46; }
+    .code { font-family: 'Consolas', monospace; font-size: 11px; fill: #8a5a10; }
+    .small { font-size: 11px; fill: #787368; }
     .box { rx: 8; ry: 8; }
   </style>
 
@@ -15,88 +16,88 @@
   <text x="400" y="50" text-anchor="middle" class="subtitle">PDB Creation Methods Overview — 4가지 핵심 방법</text>
 
   <!-- Method 1: PDB$SEED -->
-  <rect x="40" y="70" width="350" height="120" class="box" fill="#1E1E2E" stroke="#10B981" stroke-width="2"/>
-  <circle cx="65" cy="95" r="15" fill="#10B981" opacity="0.3" stroke="#10B981" stroke-width="1"/>
-  <text x="65" y="100" text-anchor="middle" class="label" fill="#10B981">1</text>
-  <text x="90" y="95" class="label" fill="#10B981">PDB$SEED에서 생성</text>
+  <rect x="40" y="70" width="350" height="120" class="box" fill="#f3efe4" stroke="#2f6a1c" stroke-width="2"/>
+  <circle cx="65" cy="95" r="15" fill="#2f6a1c" opacity="0.3" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="65" y="100" text-anchor="middle" class="label" fill="#2f6a1c">1</text>
+  <text x="90" y="95" class="label" fill="#2f6a1c">PDB$SEED에서 생성</text>
   <text x="90" y="112" class="sublabel">From Seed — 가장 기본적인 방법</text>
   <text x="55" y="135" class="code">CREATE PLUGGABLE DATABASE pdb1</text>
   <text x="55" y="150" class="code">  ADMIN USER admin IDENTIFIED BY pw;</text>
-  <text x="55" y="170" class="small" fill="#10B981">빈 PDB 생성 | 빠름 | 가장 일반적</text>
+  <text x="55" y="170" class="small" fill="#2f6a1c">빈 PDB 생성 | 빠름 | 가장 일반적</text>
   <text x="55" y="183" class="small">소스: PDB$SEED (CON_ID=2)</text>
 
   <!-- Method 2: Clone -->
-  <rect x="410" y="70" width="350" height="120" class="box" fill="#1E1E2E" stroke="#3B82F6" stroke-width="2"/>
-  <circle cx="435" cy="95" r="15" fill="#3B82F6" opacity="0.3" stroke="#3B82F6" stroke-width="1"/>
-  <text x="435" y="100" text-anchor="middle" class="label" fill="#3B82F6">2</text>
-  <text x="460" y="95" class="label" fill="#3B82F6">기존 PDB 클론</text>
+  <rect x="410" y="70" width="350" height="120" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="2"/>
+  <circle cx="435" cy="95" r="15" fill="#2456a8" opacity="0.3" stroke="#2456a8" stroke-width="1"/>
+  <text x="435" y="100" text-anchor="middle" class="label" fill="#2456a8">2</text>
+  <text x="460" y="95" class="label" fill="#2456a8">기존 PDB 클론</text>
   <text x="460" y="112" class="sublabel">Clone — 기존 PDB 복제</text>
   <text x="425" y="135" class="code">CREATE PLUGGABLE DATABASE pdb_clone</text>
   <text x="425" y="150" class="code">  FROM source_pdb;</text>
-  <text x="425" y="170" class="small" fill="#3B82F6">데이터 포함 복제 | 테스트/개발 환경</text>
+  <text x="425" y="170" class="small" fill="#2456a8">데이터 포함 복제 | 테스트/개발 환경</text>
   <text x="425" y="183" class="small">핫 클론 가능 (12.2+): READ WRITE 상태에서</text>
 
   <!-- Method 3: Plug In -->
-  <rect x="40" y="210" width="350" height="120" class="box" fill="#1E1E2E" stroke="#F59E0B" stroke-width="2"/>
-  <circle cx="65" cy="235" r="15" fill="#F59E0B" opacity="0.3" stroke="#F59E0B" stroke-width="1"/>
-  <text x="65" y="240" text-anchor="middle" class="label" fill="#F59E0B">3</text>
-  <text x="90" y="235" class="label" fill="#F59E0B">PDB Plugging</text>
+  <rect x="40" y="210" width="350" height="120" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="2"/>
+  <circle cx="65" cy="235" r="15" fill="#8a5a10" opacity="0.3" stroke="#8a5a10" stroke-width="1"/>
+  <text x="65" y="240" text-anchor="middle" class="label" fill="#8a5a10">3</text>
+  <text x="90" y="235" class="label" fill="#8a5a10">PDB Plugging</text>
   <text x="90" y="252" class="sublabel">Plug In — 다른 CDB에서 PDB 이전</text>
   <text x="55" y="275" class="code">CREATE PLUGGABLE DATABASE pdb_new</text>
   <text x="55" y="290" class="code">  USING '/path/manifest.xml';</text>
-  <text x="55" y="310" class="small" fill="#F59E0B">CDB 간 이동 | 빠름(파일 복사 제외)</text>
+  <text x="55" y="310" class="small" fill="#8a5a10">CDB 간 이동 | 빠름(파일 복사 제외)</text>
   <text x="55" y="323" class="small">XML (.xml) 또는 아카이브 (.pdb) 방식</text>
 
   <!-- Method 4: Non-CDB Convert -->
-  <rect x="410" y="210" width="350" height="120" class="box" fill="#1E1E2E" stroke="#F43F5E" stroke-width="2"/>
-  <circle cx="435" cy="235" r="15" fill="#F43F5E" opacity="0.3" stroke="#F43F5E" stroke-width="1"/>
-  <text x="435" y="240" text-anchor="middle" class="label" fill="#F43F5E">4</text>
-  <text x="460" y="235" class="label" fill="#F43F5E">Non-CDB를 PDB로 변환</text>
+  <rect x="410" y="210" width="350" height="120" class="box" fill="#f3efe4" stroke="#be123c" stroke-width="2"/>
+  <circle cx="435" cy="235" r="15" fill="#be123c" opacity="0.3" stroke="#be123c" stroke-width="1"/>
+  <text x="435" y="240" text-anchor="middle" class="label" fill="#be123c">4</text>
+  <text x="460" y="235" class="label" fill="#be123c">Non-CDB를 PDB로 변환</text>
   <text x="460" y="252" class="sublabel">Migration — 레거시 DB 전환</text>
   <text x="425" y="275" class="code">-- Non-CDB 생성 후 Plug In</text>
   <text x="425" y="290" class="code">-- noncdb_to_pdb.sql 실행</text>
-  <text x="425" y="310" class="small" fill="#F43F5E">마이그레이션 | 데이터 크기에 비례</text>
+  <text x="425" y="310" class="small" fill="#be123c">마이그레이션 | 데이터 크기에 비례</text>
   <text x="425" y="323" class="small">Oracle 12c 이후 지원</text>
 
   <!-- Common Process Flow -->
-  <rect x="40" y="350" width="720" height="115" class="box" fill="#1E1E2E" stroke="#6F6BEA" stroke-width="1.5"/>
-  <text x="400" y="375" text-anchor="middle" class="label" fill="#6F6BEA">공통 생성 프로세스 (Common Steps)</text>
+  <rect x="40" y="350" width="720" height="115" class="box" fill="#f3efe4" stroke="#4a2e78" stroke-width="1.5"/>
+  <text x="400" y="375" text-anchor="middle" class="label" fill="#4a2e78">공통 생성 프로세스 (Common Steps)</text>
 
   <!-- Steps -->
-  <rect x="55" y="390" width="100" height="30" rx="15" ry="15" fill="#6F6BEA" opacity="0.2" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="105" y="410" text-anchor="middle" class="small" fill="#6F6BEA">CDB$ROOT</text>
-  <text x="105" y="425" text-anchor="middle" class="small" fill="#6F6BEA">접속</text>
+  <rect x="55" y="390" width="100" height="30" rx="15" ry="15" fill="#4a2e78" opacity="0.2" stroke="#4a2e78" stroke-width="1"/>
+  <text x="105" y="410" text-anchor="middle" class="small" fill="#4a2e78">CDB$ROOT</text>
+  <text x="105" y="425" text-anchor="middle" class="small" fill="#4a2e78">접속</text>
 
-  <line x1="155" y1="405" x2="175" y2="405" stroke="#94A3B8" stroke-width="1"/>
-  <polygon points="173,400 183,405 173,410" fill="#94A3B8"/>
+  <line x1="155" y1="405" x2="175" y2="405" stroke="#787368" stroke-width="1"/>
+  <polygon points="173,400 183,405 173,410" fill="#787368"/>
 
-  <rect x="183" y="390" width="100" height="30" rx="15" ry="15" fill="#6F6BEA" opacity="0.2" stroke="#6F6BEA" stroke-width="1"/>
-  <text x="233" y="410" text-anchor="middle" class="small" fill="#6F6BEA">권한 확인</text>
+  <rect x="183" y="390" width="100" height="30" rx="15" ry="15" fill="#4a2e78" opacity="0.2" stroke="#4a2e78" stroke-width="1"/>
+  <text x="233" y="410" text-anchor="middle" class="small" fill="#4a2e78">권한 확인</text>
 
-  <line x1="283" y1="405" x2="303" y2="405" stroke="#94A3B8" stroke-width="1"/>
-  <polygon points="301,400 311,405 301,410" fill="#94A3B8"/>
+  <line x1="283" y1="405" x2="303" y2="405" stroke="#787368" stroke-width="1"/>
+  <polygon points="301,400 311,405 301,410" fill="#787368"/>
 
-  <rect x="311" y="390" width="100" height="30" rx="15" ry="15" fill="#F59E0B" opacity="0.2" stroke="#F59E0B" stroke-width="1"/>
-  <text x="361" y="410" text-anchor="middle" class="small" fill="#F59E0B">CREATE PDB</text>
+  <rect x="311" y="390" width="100" height="30" rx="15" ry="15" fill="#8a5a10" opacity="0.2" stroke="#8a5a10" stroke-width="1"/>
+  <text x="361" y="410" text-anchor="middle" class="small" fill="#8a5a10">CREATE PDB</text>
 
-  <line x1="411" y1="405" x2="431" y2="405" stroke="#94A3B8" stroke-width="1"/>
-  <polygon points="429,400 439,405 429,410" fill="#94A3B8"/>
+  <line x1="411" y1="405" x2="431" y2="405" stroke="#787368" stroke-width="1"/>
+  <polygon points="429,400 439,405 429,410" fill="#787368"/>
 
-  <rect x="439" y="390" width="100" height="30" rx="15" ry="15" fill="#F43F5E" opacity="0.2" stroke="#F43F5E" stroke-width="1"/>
-  <text x="489" y="410" text-anchor="middle" class="small" fill="#F43F5E">MOUNTED</text>
+  <rect x="439" y="390" width="100" height="30" rx="15" ry="15" fill="#be123c" opacity="0.2" stroke="#be123c" stroke-width="1"/>
+  <text x="489" y="410" text-anchor="middle" class="small" fill="#be123c">MOUNTED</text>
 
-  <line x1="539" y1="405" x2="559" y2="405" stroke="#94A3B8" stroke-width="1"/>
-  <polygon points="557,400 567,405 557,410" fill="#94A3B8"/>
+  <line x1="539" y1="405" x2="559" y2="405" stroke="#787368" stroke-width="1"/>
+  <polygon points="557,400 567,405 557,410" fill="#787368"/>
 
-  <rect x="567" y="390" width="100" height="30" rx="15" ry="15" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1"/>
-  <text x="617" y="410" text-anchor="middle" class="small" fill="#10B981">OPEN (RW)</text>
+  <rect x="567" y="390" width="100" height="30" rx="15" ry="15" fill="#2f6a1c" opacity="0.2" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="617" y="410" text-anchor="middle" class="small" fill="#2f6a1c">OPEN (RW)</text>
 
-  <line x1="667" y1="405" x2="687" y2="405" stroke="#94A3B8" stroke-width="1"/>
-  <polygon points="685,400 695,405 685,410" fill="#94A3B8"/>
+  <line x1="667" y1="405" x2="687" y2="405" stroke="#787368" stroke-width="1"/>
+  <polygon points="685,400 695,405 685,410" fill="#787368"/>
 
-  <rect x="695" y="390" width="55" height="30" rx="15" ry="15" fill="#10B981" opacity="0.2" stroke="#10B981" stroke-width="1"/>
-  <text x="722" y="410" text-anchor="middle" class="small" fill="#10B981">SAVE</text>
-  <text x="722" y="425" text-anchor="middle" class="small" fill="#10B981">STATE</text>
+  <rect x="695" y="390" width="55" height="30" rx="15" ry="15" fill="#2f6a1c" opacity="0.2" stroke="#2f6a1c" stroke-width="1"/>
+  <text x="722" y="410" text-anchor="middle" class="small" fill="#2f6a1c">SAVE</text>
+  <text x="722" y="425" text-anchor="middle" class="small" fill="#2f6a1c">STATE</text>
 
   <text x="400" y="455" text-anchor="middle" class="code">필수 권한: CREATE PLUGGABLE DATABASE | CDB는 READ WRITE OPEN 상태</text>
 </svg>
