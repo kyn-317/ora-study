@@ -41,7 +41,6 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
   const [restored, setRestored] = useState(false);
   const [shuffleSeed, setShuffleSeed] = useState<number | null>(null);
 
-  // seed 기반으로 결정론적 셔플 — 새로고침/재방문해도 같은 배치 유지
   const shuffledQuestions = useMemo(() => {
     if (shuffleSeed === null) return questions;
     return questions.map((q, i) =>
@@ -49,7 +48,6 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     );
   }, [questions, shuffleSeed]);
 
-  // Copy feedback state
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -59,14 +57,12 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
       setCopiedIndex(idx);
       copyTimeoutRef.current = setTimeout(() => setCopiedIndex(null), 2000);
-    }).catch(() => { /* clipboard permission denied */ });
+    }).catch(() => {});
   }, []);
 
-  // Study Panel state
   const [studyItems, setStudyItems] = useState<StudyPanelItem[]>([]);
   const [showStudyPanel, setShowStudyPanel] = useState(false);
 
-  // 패널 드래그 리사이즈
   const [panelWidth, setPanelWidth] = useState(480);
   const isDragging = useRef(false);
   const dragStartX = useRef(0);
@@ -103,7 +99,6 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
   }, []);
 
   const handleStudySelect = useCallback(async (keyword: string, entry: KeywordEntry) => {
-    // 중복 체크 — 이미 있으면 패널만 다시 표시
     const exists = studyItems.some(item => item.keyword === keyword && item.studyId === entry.studyId);
     if (exists) {
       setShowStudyPanel(true);
@@ -124,7 +119,6 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     setShowStudyPanel(true);
 
     try {
-      // keyword-study가 있으면 간결한 전용 데이터 우선 사용
       if (entry.hasKeywordStudy) {
         const ksRes = await fetch(
           `/api/keyword-study/${entry.chapterId}/${entry.studyId}?keyword=${encodeURIComponent(keyword)}`
@@ -141,7 +135,6 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
           return;
         }
       }
-      // fallback: 기존 전체 study 데이터
       const res = await fetch(`/api/study/${entry.chapterId}/${entry.studyId}`);
       if (res.ok) {
         const data: StudyContentData = await res.json();
@@ -153,9 +146,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
           )
         );
       }
-    } catch {
-      // fetch 실패 시 item은 content/keywordStudy null 상태 유지
-    }
+    } catch {}
   }, [studyItems]);
 
   const handleStudyRemove = useCallback((keyword: string, studyId: string) => {
@@ -170,7 +161,6 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     setShowStudyPanel(false);
   }, []);
 
-  // 모바일 판별
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -186,7 +176,6 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // Restore from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem(getStorageKey(storagePrefix, chapterId, setId));
@@ -197,7 +186,6 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
         setSubmitted(data.submitted ?? {});
         setScore(data.score ?? 0);
         setMode(data.mode ?? 'taking');
-        // seed 없는 구버전 저장본은 셔플 없이 복원(답안 letter 매칭 유지)
         setShuffleSeed(typeof data.shuffleSeed === 'number' ? data.shuffleSeed : null);
       } else {
         setShuffleSeed(generateSeed());
@@ -208,14 +196,13 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     setRestored(true);
   }, [chapterId, setId, storagePrefix]);
 
-  // Save to localStorage
   useEffect(() => {
     if (!restored) return;
     try {
       localStorage.setItem(getStorageKey(storagePrefix, chapterId, setId), JSON.stringify({
         currentIndex, answers, submitted, score, mode, shuffleSeed,
       }));
-    } catch { /* ignore */ }
+    } catch {}
   }, [currentIndex, answers, submitted, score, mode, shuffleSeed, restored, chapterId, setId, storagePrefix]);
 
   const question = shuffledQuestions[currentIndex];
@@ -223,7 +210,6 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
   const selectedAnswers = answers[currentIndex] ?? [];
   const isSubmitted = submitted[currentIndex] ?? false;
 
-  // Extract required selection count from title (e.g., "2つ選択")
   const requiredCount = (() => {
     const match = question?.title.match(/(\d+)つ選択/);
     return match ? parseInt(match[1]) : (isMultiSelect ? question?.answer.length : 1);
@@ -283,7 +269,7 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     setShuffleSeed(generateSeed());
     try {
       localStorage.removeItem(getStorageKey(storagePrefix, chapterId, setId));
-    } catch { /* ignore */ }
+    } catch {}
   }, [chapterId, setId, storagePrefix]);
 
   const defaultBackHref = backHref ?? `/quiz/${chapterId}`;
@@ -293,22 +279,16 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     return match ? match[1] : '';
   };
 
+  const stripOptionLetter = (option: string) => {
+    return option.replace(/^[A-E]\)\s*/, '');
+  };
+
   const allSubmitted = shuffledQuestions.every((_, i) => submitted[i]);
 
   if (!restored) return null;
 
-  // 해설 렌더링 헬퍼
   const renderExplanation = (explanationText: string) => (
-    <div style={{
-      marginTop: '1rem',
-      padding: '1.5rem',
-      background: 'rgba(44, 62, 80, 0.06)',
-      borderRadius: '12px',
-      borderLeft: '4px solid var(--color-3)',
-      color: 'var(--foreground)',
-      fontSize: '0.9rem',
-      lineHeight: 1.7,
-    }}>
+    <div className="explanation">
       {keywordIndex ? (
         <ExplanationWithKeywords
           text={explanationText}
@@ -321,31 +301,23 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
     </div>
   );
 
-  // StudyPanel 렌더 (공통)
   const studyPanelElement = showStudyPanel && (
     <div style={{ width: isMobile ? '100%' : panelWidth, display: 'flex' }}>
-      {/* 드래그 핸들 — PC만 표시 */}
       {!isMobile && (
         <div
           onPointerDown={handleDragStart}
           style={{
             flex: '0 0 6px',
             cursor: 'col-resize',
-            background: 'transparent',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             transition: 'background 0.15s',
           }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(41, 128, 185, 0.15)')}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-bg)')}
           onMouseLeave={e => { if (!isDragging.current) e.currentTarget.style.background = 'transparent'; }}
         >
-          <div style={{
-            width: '2px',
-            height: '40px',
-            borderRadius: '1px',
-            background: 'var(--glass-border)',
-          }} />
+          <div style={{ width: '2px', height: '40px', background: 'var(--rule)' }} />
         </div>
       )}
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -361,143 +333,113 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
   // ===== REVIEW MODE =====
   if (mode === 'review') {
     const percentage = Math.round((score / shuffledQuestions.length) * 100);
+    const passed = percentage >= 70;
 
     const reviewContent = (
-      <div style={{ flex: '1 1 0%', minWidth: 0, padding: '4rem 2rem', maxWidth: showStudyPanel ? 'none' : '900px', margin: showStudyPanel ? '0' : '0 auto' }}>
-        <Link href={defaultBackHref} style={{ color: 'var(--color-4)', marginBottom: '2rem', display: 'inline-block' }}>
-          &larr; Back
-        </Link>
+      <div style={{
+        flex: '1 1 0%',
+        minWidth: 0,
+        padding: showStudyPanel ? '32px 24px' : '48px 32px 96px',
+        maxWidth: showStudyPanel ? 'none' : 960,
+        margin: showStudyPanel ? '0' : '0 auto',
+        width: showStudyPanel ? 'auto' : '100%',
+      }}>
+        <Link href={defaultBackHref} className="back-link">← Back</Link>
 
-        {/* Score Summary */}
-        <div className="glass" style={{
-          padding: '3rem',
-          borderRadius: '20px',
-          textAlign: 'center',
-          marginBottom: '3rem',
-          borderColor: percentage >= 70 ? '#059669' : '#DC2626',
-        }}>
-          <div style={{ fontSize: '4rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            <span style={{ color: percentage >= 70 ? '#059669' : '#DC2626' }}>{score}</span>
-            <span style={{ color: 'var(--text-muted)', fontSize: '2rem' }}> / {shuffledQuestions.length}</span>
+        <header className="masthead">
+          <div>
+            <div className="tag">Result · 채점 결과</div>
+            <h1>
+              <span style={{ color: passed ? 'var(--correct)' : 'var(--wrong)' }}>{score}</span>
+              <span style={{ color: 'var(--ink-3)', fontSize: '0.6em' }}> / {shuffledQuestions.length}</span>
+            </h1>
+            <p className="subtitle">{percentage}% · {passed ? 'PASS' : 'FAIL'}</p>
           </div>
-          <div style={{ fontSize: '1.5rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-            {percentage}%
-          </div>
-          <div style={{
-            display: 'inline-block',
-            padding: '0.5rem 1.5rem',
-            borderRadius: '999px',
-            fontWeight: 600,
-            background: percentage >= 70 ? 'rgba(5, 150, 105, 0.08)' : 'rgba(220, 38, 38, 0.08)',
-            color: percentage >= 70 ? '#059669' : '#DC2626',
-          }}>
-            {percentage >= 70 ? 'PASS' : 'FAIL'}
-          </div>
-          <div style={{ marginTop: '2rem' }}>
-            <button onClick={handleRetry} style={{
-              padding: '0.75rem 2rem',
-              borderRadius: '10px',
-              border: 'none',
-              background: 'var(--color-4)',
-              color: 'white',
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}>
+          <div className="meta">
+            <div><strong>Chapter</strong>   {chapterId}</div>
+            <div><strong>Set</strong>   {setId}</div>
+            <button onClick={handleRetry} className="btn btn-accent" style={{ marginTop: 10 }}>
               Retry Quiz
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* Question Review */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          {shuffledQuestions.map((q, idx) => {
-            const userAns = answers[idx] ?? [];
-            const isCorrect =
-              userAns.length === q.answer.length &&
-              [...userAns].sort().every((v, i) => v === [...q.answer].sort()[i]);
+        <section className="section">
+          <div className="section-label">Question Review</div>
+          <h2 className="section-title">문항별 풀이 내역</h2>
+        </section>
 
-            return (
-              <div key={idx} className="glass" style={{
-                padding: '2rem',
-                borderRadius: '16px',
-                borderColor: isCorrect ? '#059669' : '#DC2626',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <span style={{ fontWeight: 600, color: 'var(--color-4)' }}>{q.number}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleCopyQuestion(q, idx); }}
-                      title="Copy question"
-                      style={{
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '6px',
-                        border: '1px solid var(--glass-border)',
-                        background: copiedIndex === idx ? 'rgba(5, 150, 105, 0.08)' : 'var(--glass-bg)',
-                        color: copiedIndex === idx ? '#059669' : 'var(--text-muted)',
-                        cursor: 'pointer',
-                        fontSize: '0.7rem',
-                        fontWeight: 600,
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      {copiedIndex === idx ? '✓ Copied' : 'Copy'}
-                    </button>
-                    <span style={{
-                      padding: '0.2rem 0.75rem',
-                      borderRadius: '999px',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      background: isCorrect ? 'rgba(5, 150, 105, 0.08)' : 'rgba(220, 38, 38, 0.08)',
-                      color: isCorrect ? '#059669' : '#DC2626',
-                    }}>
-                      {isCorrect ? 'Correct' : 'Incorrect'}
-                    </span>
-                  </div>
-                </div>
-                <p style={{ marginBottom: '1rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{q.title}</p>
+        {shuffledQuestions.map((q, idx) => {
+          const userAns = answers[idx] ?? [];
+          const isCorrect =
+            userAns.length === q.answer.length &&
+            [...userAns].sort().every((v, i) => v === [...q.answer].sort()[i]);
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+          return (
+            <article key={idx} className="qa-card">
+              <div className="qa-head">
+                <span><span className="num">Q {String(idx + 1).padStart(2, '0')}</span> · {q.number}</span>
+                <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleCopyQuestion(q, idx); }}
+                    className="btn"
+                    style={{ padding: '3px 10px', fontSize: 10 }}
+                    title="Copy question"
+                  >
+                    {copiedIndex === idx ? '✓ Copied' : 'Copy'}
+                  </button>
+                  <span className={`tag-chip ${isCorrect ? 'correct' : 'wrong'}`}>
+                    {isCorrect ? 'CORRECT' : 'INCORRECT'}
+                  </span>
+                </span>
+              </div>
+              <div className="qa-body">
+                <p className="question">{q.title}</p>
+                <ul className="options">
                   {q.options.map(opt => {
                     const letter = getOptionLetter(opt);
                     const wasSelected = userAns.includes(letter);
                     const isAnswer = q.answer.includes(letter);
-                    let className = 'option-card';
-                    if (isAnswer) className += ' option-correct';
-                    else if (wasSelected) className += ' option-incorrect';
-
+                    let cls = 'static';
+                    if (isAnswer) cls += ' correct';
+                    else if (wasSelected) cls += ' mine';
                     return (
-                      <div key={letter} className={className} style={{ cursor: 'default' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          {wasSelected && !isAnswer && <span style={{ color: '#DC2626' }}>✗</span>}
-                          {isAnswer && <span style={{ color: '#059669' }}>✓</span>}
-                          {opt}
+                      <li key={letter} className={cls}>
+                        <span className="k">{letter}</span>
+                        <span>{stripOptionLetter(opt)}</span>
+                        <span className="mark">
+                          {isAnswer ? 'CORRECT' : wasSelected ? 'MY' : ''}
                         </span>
-                      </div>
+                      </li>
                     );
                   })}
-                </div>
-
+                </ul>
                 {showExplanation && q.explanation && (
-                  <details>
-                    <summary style={{ color: 'var(--color-5)', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>
-                      View Explanation
+                  <details style={{ marginTop: 14 }}>
+                    <summary style={{
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      color: 'var(--accent)',
+                      fontWeight: 600,
+                    }}>
+                      View Explanation ▾
                     </summary>
                     {renderExplanation(q.explanation)}
                   </details>
                 )}
               </div>
-            );
-          })}
-        </div>
+            </article>
+          );
+        })}
       </div>
     );
 
-    // 패널 없으면 기존 레이아웃 유지
     if (!showStudyPanel) {
       return <main>{reviewContent}</main>;
     }
-
     return (
       <main className="quiz-layout-with-panel">
         {reviewContent}
@@ -508,29 +450,35 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
 
   // ===== TAKING MODE =====
   const takingContent = (
-    <div style={{ flex: '1 1 0%', minWidth: 0, padding: '2rem', maxWidth: showStudyPanel ? 'none' : '900px', margin: showStudyPanel ? '0' : '0 auto' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <Link href={defaultBackHref} style={{ color: 'var(--color-4)', fontSize: '0.9rem' }}>
-          &larr; Back
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Score: <span style={{ color: '#059669', fontWeight: 700 }}>{score}</span> / {shuffledQuestions.length}
-          </span>
+    <div style={{
+      flex: '1 1 0%',
+      minWidth: 0,
+      padding: showStudyPanel ? '28px 20px' : '40px 32px 96px',
+      maxWidth: showStudyPanel ? 'none' : 960,
+      margin: showStudyPanel ? '0' : '0 auto',
+      width: showStudyPanel ? 'auto' : '100%',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Link href={defaultBackHref} className="back-link" style={{ marginBottom: 0 }}>← Back</Link>
+        <div style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 12,
+          color: 'var(--ink-3)',
+          letterSpacing: '0.04em',
+        }}>
+          Score <strong style={{ color: 'var(--correct)', fontWeight: 600 }}>{score}</strong>
+          <span style={{ color: 'var(--ink-4)' }}> / {shuffledQuestions.length}</span>
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="quiz-progress-bar" style={{ marginBottom: '2rem' }}>
+      <div className="quiz-progress-bar" style={{ marginBottom: 24 }}>
         <div
           className="quiz-progress-bar-fill"
           style={{ width: `${((currentIndex + 1) / shuffledQuestions.length) * 100}%` }}
         />
       </div>
 
-      {/* Question Number Navigation */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+      <div className="qnav" style={{ marginBottom: 28 }}>
         {shuffledQuestions.map((_, idx) => {
           const isDone = submitted[idx];
           const isCurrent = idx === currentIndex;
@@ -540,211 +488,102 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
             userAns.length === q.answer.length &&
             [...userAns].sort().every((v, i) => v === [...q.answer].sort()[i]);
 
+          const cls = [
+            isCurrent && 'current',
+            isDone && (isCorrect ? 'done-correct' : 'done-wrong'),
+          ].filter(Boolean).join(' ');
+
           return (
-            <button
-              key={idx}
-              onClick={() => setCurrentIndex(idx)}
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                border: isCurrent ? '2px solid var(--color-4)' : '1px solid var(--glass-border)',
-                background: isDone
-                  ? (isCorrect ? 'rgba(5, 150, 105, 0.15)' : 'rgba(220, 38, 38, 0.15)')
-                  : 'var(--glass-bg)',
-                color: isCurrent ? 'var(--color-4)' : 'var(--foreground)',
-                cursor: 'pointer',
-                fontWeight: isCurrent ? 700 : 400,
-                fontSize: '0.85rem',
-              }}
-            >
+            <button key={idx} className={cls} onClick={() => setCurrentIndex(idx)}>
               {idx + 1}
             </button>
           );
         })}
       </div>
 
-      {/* Question Card */}
-      <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <span style={{ color: 'var(--color-4)', fontWeight: 600, fontSize: '0.9rem' }}>
-            {question.number}
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <article className="qa-card">
+        <div className="qa-head">
+          <span>
+            <span className="num">Q {String(currentIndex + 1).padStart(2, '0')}</span>
+            {' · '}{question.number}
             {isMultiSelect && (
-              <span style={{
-                background: 'rgba(142, 68, 173, 0.1)',
-                color: 'var(--color-5)',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '999px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-              }}>
-                Select {requiredCount}
-              </span>
+              <span style={{ marginLeft: 10 }} className="tag-chip info">Select {requiredCount}</span>
             )}
-            <button
-              onClick={(e) => { e.stopPropagation(); handleCopyQuestion(question, currentIndex); }}
-              title="Copy question"
-              style={{
-                padding: '0.3rem 0.6rem',
-                borderRadius: '6px',
-                border: '1px solid var(--glass-border)',
-                background: copiedIndex === currentIndex ? 'rgba(5, 150, 105, 0.08)' : 'var(--glass-bg)',
-                color: copiedIndex === currentIndex ? '#059669' : 'var(--text-muted)',
-                cursor: 'pointer',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.3rem',
-              }}
-            >
-              {copiedIndex === currentIndex ? '✓ Copied' : 'Copy'}
-            </button>
-          </div>
+          </span>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleCopyQuestion(question, currentIndex); }}
+            className="btn"
+            style={{ padding: '3px 10px', fontSize: 10 }}
+            title="Copy question"
+          >
+            {copiedIndex === currentIndex ? '✓ Copied' : 'Copy'}
+          </button>
         </div>
 
-        <p style={{ fontSize: '1.1rem', lineHeight: 1.7, marginBottom: '2rem', whiteSpace: 'pre-wrap' }}>
-          {question.title}
-        </p>
+        <div className="qa-body">
+          <p className="question">{question.title}</p>
 
-        {/* Options */}
-        <div style={{
-          border: '1px solid var(--glass-border)',
-          borderRadius: '16px',
-          padding: '1rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-        }}>
-          {question.options.map(opt => {
-            const letter = getOptionLetter(opt);
-            const isSelected = selectedAnswers.includes(letter);
-            const isAnswer = question.answer.includes(letter);
+          <ul className="options">
+            {question.options.map(opt => {
+              const letter = getOptionLetter(opt);
+              const isSelected = selectedAnswers.includes(letter);
+              const isAnswer = question.answer.includes(letter);
 
-            let className = 'option-card';
-            if (isSubmitted) {
-              if (isAnswer) className += ' option-correct';
-              else if (isSelected) className += ' option-incorrect';
-            } else if (isSelected) {
-              className += ' option-selected';
-            }
+              let cls = '';
+              if (isSubmitted) {
+                cls = 'static ';
+                if (isAnswer) cls += 'correct';
+                else if (isSelected) cls += 'mine';
+              } else if (isSelected) {
+                cls = 'selected';
+              }
 
-            return (
-              <div
-                key={letter}
-                className={className}
-                onClick={() => handleOptionClick(letter)}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  {/* Checkbox / Radio indicator */}
-                  <span style={{
-                    width: '22px',
-                    height: '22px',
-                    minWidth: '22px',
-                    borderRadius: isMultiSelect ? '4px' : '50%',
-                    border: isSubmitted
-                      ? (isAnswer ? '2px solid #059669' : isSelected ? '2px solid #DC2626' : '2px solid var(--glass-border)')
-                      : isSelected ? '2px solid var(--color-4)' : '2px solid var(--glass-border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: isSubmitted
-                      ? (isAnswer ? 'rgba(5, 150, 105, 0.2)' : isSelected ? 'rgba(220, 38, 38, 0.2)' : 'transparent')
-                      : isSelected ? 'rgba(41, 128, 185, 0.2)' : 'transparent',
-                    transition: 'all 0.2s ease',
-                    fontSize: '0.7rem',
-                    color: 'white',
-                    fontWeight: 700,
-                  }}>
-                    {isSubmitted && isAnswer && '✓'}
-                    {isSubmitted && isSelected && !isAnswer && '✗'}
-                    {!isSubmitted && isSelected && '●'}
+              return (
+                <li key={letter} className={cls.trim()} onClick={() => handleOptionClick(letter)}>
+                  <span className="k">{letter}</span>
+                  <span>{stripOptionLetter(opt)}</span>
+                  <span className="mark">
+                    {isSubmitted
+                      ? (isAnswer ? 'CORRECT' : isSelected ? 'MY' : '')
+                      : (isSelected ? '●' : '')}
                   </span>
-                  <span>{opt}</span>
-                </span>
-              </div>
-            );
-          })}
+                </li>
+              );
+            })}
+          </ul>
+
+          {isSubmitted && showExplanation && question.explanation && renderExplanation(question.explanation)}
         </div>
+      </article>
 
-        {/* Explanation after submit */}
-        {isSubmitted && showExplanation && question.explanation && renderExplanation(question.explanation)}
-      </div>
-
-      {/* Action Buttons */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginTop: 20 }}>
         <button
           onClick={handlePrev}
           disabled={currentIndex === 0}
-          style={{
-            padding: '0.75rem 1.5rem',
-            borderRadius: '10px',
-            border: '1px solid var(--glass-border)',
-            background: 'var(--glass-bg)',
-            color: currentIndex === 0 ? 'var(--text-muted)' : 'var(--foreground)',
-            cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
-            fontWeight: 600,
-            opacity: currentIndex === 0 ? 0.5 : 1,
-          }}
+          className="btn btn-ghost"
         >
-          Prev
+          ← Prev
         </button>
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: 10 }}>
           {!isSubmitted && (
             <button
               onClick={handleSubmit}
               disabled={selectedAnswers.length === 0}
-              style={{
-                padding: '0.75rem 2rem',
-                borderRadius: '10px',
-                border: 'none',
-                background: selectedAnswers.length === 0
-                  ? 'rgba(0,0,0,0.06)'
-                  : 'var(--color-4)',
-                color: 'white',
-                cursor: selectedAnswers.length === 0 ? 'not-allowed' : 'pointer',
-                fontWeight: 600,
-                opacity: selectedAnswers.length === 0 ? 0.5 : 1,
-              }}
+              className="btn btn-primary"
             >
               Check Answer
             </button>
           )}
 
           {isSubmitted && currentIndex < shuffledQuestions.length - 1 && (
-            <button
-              onClick={handleNext}
-              style={{
-                padding: '0.75rem 2rem',
-                borderRadius: '10px',
-                border: 'none',
-                background: 'var(--color-4)',
-                color: 'white',
-                cursor: 'pointer',
-                fontWeight: 600,
-              }}
-            >
-              Next
+            <button onClick={handleNext} className="btn btn-primary">
+              Next →
             </button>
           )}
 
           {isSubmitted && currentIndex === shuffledQuestions.length - 1 && allSubmitted && (
-            <button
-              onClick={handleFinish}
-              style={{
-                padding: '0.75rem 2rem',
-                borderRadius: '10px',
-                border: 'none',
-                background: '#059669',
-                color: 'white',
-                cursor: 'pointer',
-                fontWeight: 600,
-              }}
-            >
+            <button onClick={handleFinish} className="btn btn-success">
               View Results
             </button>
           )}
@@ -753,28 +592,17 @@ export default function QuizClient({ questions, chapterId, setId, backHref, stor
         <button
           onClick={handleNext}
           disabled={currentIndex === shuffledQuestions.length - 1}
-          style={{
-            padding: '0.75rem 1.5rem',
-            borderRadius: '10px',
-            border: '1px solid var(--glass-border)',
-            background: 'var(--glass-bg)',
-            color: currentIndex === shuffledQuestions.length - 1 ? 'var(--text-muted)' : 'var(--foreground)',
-            cursor: currentIndex === shuffledQuestions.length - 1 ? 'not-allowed' : 'pointer',
-            fontWeight: 600,
-            opacity: currentIndex === shuffledQuestions.length - 1 ? 0.5 : 1,
-          }}
+          className="btn btn-ghost"
         >
-          Next
+          Next →
         </button>
       </div>
     </div>
   );
 
-  // 패널 없으면 기존 레이아웃 유지
   if (!showStudyPanel) {
     return <main>{takingContent}</main>;
   }
-
   return (
     <main className="quiz-layout-with-panel">
       {takingContent}

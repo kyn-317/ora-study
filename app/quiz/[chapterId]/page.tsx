@@ -6,47 +6,30 @@ export default async function QuizChapterPage({ params }: { params: Promise<{ ch
   const sets = await getQuizSetsForChapter(chapterId);
 
   return (
-    <main style={{ padding: '4rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <Link href="/quiz" style={{ color: 'var(--color-4)', marginBottom: '2rem', display: 'inline-block' }}>
-        &larr; Back to Quiz Home
-      </Link>
+    <main className="app-shell">
+      <Link href="/quiz" className="back-link">← Back to Quiz Home</Link>
 
-      <div style={{ marginBottom: '4rem' }}>
-        <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
-          Chapter {chapterId}
-        </h1>
-        {sets.length > 0 && (
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>{sets[0].chapterName}</p>
-        )}
-      </div>
+      <header className="masthead">
+        <div>
+          <div className="tag">Chapter {chapterId}</div>
+          <h1>{sets.length > 0 ? sets[0].chapterName : `Chapter ${chapterId}`}</h1>
+          <p className="subtitle">세트를 선택하여 연습을 시작하세요.</p>
+        </div>
+        <div className="meta">
+          <div><strong>Sets</strong>   {sets.length}</div>
+          <div><strong>Questions</strong>   {sets.reduce((s, x) => s + x.questionCount, 0)}</div>
+        </div>
+      </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+      <div className="entry-grid">
         {sets.map(set => (
-          <Link href={`/quiz/${chapterId}/${set.setId}`} key={set.setId}>
-            <div className="glass card-hover-alt" style={{
-              padding: '2rem',
-              borderRadius: '16px',
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem',
-              height: '100%',
-            }}>
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--foreground)' }}>Set {set.setId}</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-                {set.questionCount} questions
-              </p>
-              <div style={{
-                marginTop: 'auto',
-                padding: '0.5rem 1rem',
-                background: 'var(--color-4)',
-                borderRadius: '8px',
-                textAlign: 'center',
-                fontWeight: 600,
-                fontSize: '0.9rem',
-              }}>
-                Start Quiz
-              </div>
+          <Link href={`/quiz/${chapterId}/${set.setId}`} key={set.setId} className="entry-card">
+            <span className="arrow">→</span>
+            <div className="kicker">Set {set.setId}</div>
+            <div className="title">문제 세트 {set.setId}</div>
+            <p className="desc">{set.questionCount}문항으로 구성된 연습 세트.</p>
+            <div className="chips">
+              <span className="tag-chip accent">{set.questionCount} questions</span>
             </div>
           </Link>
         ))}

@@ -50,7 +50,16 @@
       "title": "PDB 만들기 — 생성 및 템플릿 (PDB Creation & Templates, 02_02)",
       "sqlExamplesIds": [],
       "content": "### PDB 생성 4가지 방법\n\n| 생성 방법 | 소스 | 주요 용도 | 소요 시간 |\n|---|---|---|---|\n| **PDB$SEED에서 생성** | PDB$SEED | 새로운 빈 PDB 생성 | 빠름 |\n| **기존 PDB 클론** | 기존 PDB | 동일 데이터를 가진 PDB 복제 | 데이터 크기 비례 |\n| **PDB Plugging** | XML/아카이브 + 데이터 파일 | 다른 CDB에서 PDB 이전 | 빠름 (파일 복사 제외) |\n| **Non-CDB → PDB 변환** | Non-CDB | 기존 Non-CDB의 멀티테넌트 전환 | 데이터 크기 비례 |\n\n### PDB$SEED에서 생성 핵심 포인트\n\n- PDB$SEED(CON_ID=2)는 항상 **READ ONLY** — 새 PDB 생성 시 데이터 파일이 복사됨\n- `CREATE PLUGGABLE DATABASE` 구문 사용\n- **ADMIN USER** 절로 PDB 관리자 계정 설정\n- **FILE_NAME_CONVERT** 또는 **CREATE_FILE_DEST**(OMF)로 파일 경로 지정\n- **STORAGE** 절로 PDB별 스토리지 제한 설정 (MAXSIZE, MAX_SHARED_TEMP_SIZE)\n\n### 생성 공통 프로세스\n\n```\nConnect to CDB$ROOT (Common User)\n  +-- CREATE PLUGGABLE DATABASE\n       +-- New PDB: Created in MOUNTED state\n            +-- ALTER PLUGGABLE DATABASE ... OPEN\n                 +-- SAVE STATE (optional)\n```\n\n### Application Container\n\n- 여러 Application PDB가 공유하는 메타데이터/공통 데이터를 **Application Root**에서 관리\n- Application Seed를 통해 Application PDB를 표준화된 템플릿으로 생성\n- DBCA GUI 또는 Silent 모드로도 PDB 생성 가능",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>PDB 생성 시작</b><br/>CDB$ROOT 공통 사용자로 접속\"]:::amber\n  B{\"생성 방법 선택\"}:::amber\n  C[\"<b>PDB$SEED에서 생성</b><br/>새로운 빈 PDB\"]:::blue\n  D[\"<b>기존 PDB 클론</b><br/>동일 데이터 복제\"]:::blue\n  E[\"<b>PDB Plugging</b><br/>XML + 데이터 파일 이전\"]:::blue\n  F[\"<b>Non-CDB 변환</b><br/>멀티테넌트 전환\"]:::blue\n  G[\"<b>CREATE PLUGGABLE DATABASE</b><br/>ADMIN USER · FILE_NAME_CONVERT\"]:::green\n  H[\"<b>MOUNTED 상태로 생성</b><br/>STATUS = NEW\"]:::green\n  I[\"<b>ALTER PLUGGABLE DATABASE OPEN</b><br/>최초 오픈 시 딕셔너리 완성\"]:::green\n  J[\"<b>SAVE STATE (선택)</b><br/>CDB 재시작 시 자동 복원\"]:::green\n  K[\"<b>Application Container</b><br/>Application Seed 활용 가능\"]:::blue\n\n  A --> B\n  B --> C\n  B --> D\n  B --> E\n  B --> F\n  C --> G\n  D --> G\n  E --> G\n  F --> G\n  G --> H\n  H --> I\n  I --> J\n  C -.-> K\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "PDB 생성 4가지 방법과 공통 프로세스 흐름 — 생성 방법 선택부터 SAVE STATE까지",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -58,7 +67,16 @@
       "title": "열고 닫고 옮기기 — PDB 상태 관리 및 분리 (State Management & Unplugging, 02_03)",
       "sqlExamplesIds": [],
       "content": "### PDB 오픈 모드 3가지\n\n| 모드 | 허용 작업 | 주요 용도 |\n|---|---|---|\n| **READ WRITE** | 모든 DML/DDL | 운영 환경 (기본 운영 모드) |\n| **READ ONLY** | SELECT만 | 보고서 전용, 데이터 보호, Standby |\n| **MOUNTED** | 관리 작업만 (복구, Unplug 등) | CDB 시작 후 PDB 기본 상태 |\n\n### 상태 전환 핵심 구문\n\n```\nALTER PLUGGABLE DATABASE pdb_name OPEN;                    -- READ WRITE\nALTER PLUGGABLE DATABASE pdb_name OPEN READ ONLY;          -- READ ONLY\nALTER PLUGGABLE DATABASE pdb_name CLOSE IMMEDIATE;         -- MOUNTED\nALTER PLUGGABLE DATABASE pdb_name OPEN READ WRITE FORCE;   -- 모드 직접 전환\n```\n\n### CDB 재시작 시 PDB 자동 오픈\n\n| 방법 | 설명 | 권장 여부 |\n|---|---|---|\n| **SAVE STATE** | PDB별 오픈 상태를 저장, 재시작 시 자동 복원 | **권장** |\n| **AFTER STARTUP 트리거** | CDB 레벨 트리거로 모든 PDB 일괄 오픈 | 대안 |\n| **수동 오픈** | DBA가 직접 ALTER PLUGGABLE DATABASE 실행 | 비권장 (운영) |\n\n### Unplug / Plug In\n\n| 단계 | 설명 |\n|---|---|\n| **Unplug** | PDB를 CLOSE → XML 메타데이터 또는 **.pdb 아카이브 파일**로 분리 |\n| **호환성 검사** | `DBMS_PDB.CHECK_PLUG_COMPATIBILITY` 함수로 대상 CDB 호환성 확인 |\n| **Plug In** | `CREATE PLUGGABLE DATABASE ... USING '...'`로 다른 CDB에 연결 |\n| **PDB_PLUG_IN_VIOLATIONS** | Plug In 후 위반 사항 확인 뷰 (26ai: AUTO_FIXABLE 컬럼 추가) |\n\n### PDB 삭제\n\n- `DROP PLUGGABLE DATABASE pdb_name INCLUDING DATAFILES` — 데이터 파일까지 삭제\n- `DROP PLUGGABLE DATABASE pdb_name KEEP DATAFILES` — 메타데이터만 삭제, 파일 보존\n- PDB는 반드시 **MOUNTED(CLOSE)** 상태에서만 삭제 가능",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>PDB 오픈 모드</b>\"]:::amber\n  B[\"<b>READ WRITE</b><br/>모든 DML/DDL<br/>운영 환경 기본 모드\"]:::green\n  C[\"<b>READ ONLY</b><br/>SELECT만 허용<br/>보고서·Standby\"]:::blue\n  D[\"<b>MOUNTED</b><br/>관리 작업만<br/>CDB 시작 후 기본 상태\"]:::amber\n\n  A --> B\n  A --> C\n  A --> D\n\n  E[\"<b>CDB 재시작 시 PDB 자동 오픈 방법</b>\"]:::amber\n  F[\"<b>SAVE STATE</b><br/>PDB별 상태 저장<br/>(권장)\"]:::green\n  G[\"<b>AFTER STARTUP 트리거</b><br/>CDB 레벨 일괄 오픈<br/>(대안)\"]:::blue\n  H[\"<b>수동 오픈</b><br/>DBA가 직접 실행<br/>(비권장)\"]:::red\n\n  E --> F\n  E --> G\n  E --> H\n\n  I[\"<b>Unplug / Plug In 단계</b>\"]:::amber\n  J[\"<b>Unplug</b><br/>PDB CLOSE<br/>XML 또는 .pdb 아카이브\"]:::blue\n  K[\"<b>호환성 검사</b><br/>DBMS_PDB.CHECK_PLUG_COMPATIBILITY\"]:::blue\n  L[\"<b>Plug In</b><br/>CREATE PLUGGABLE DATABASE<br/>... USING '...'\"]:::green\n  M[\"<b>PDB_PLUG_IN_VIOLATIONS</b><br/>위반 사항 확인\"]:::blue\n\n  I --> J --> K --> L --> M\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "PDB 오픈 모드 3가지, CDB 재시작 시 자동 오픈 3가지 방법, Unplug/Plug In 4단계 흐름",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -66,7 +84,16 @@
       "title": "설정과 복제 — 파라미터 및 복제 관리 (Parameters & Cloning, 02_04)",
       "sqlExamplesIds": [],
       "content": "### PDB별 파라미터 관리\n\n| 항목 | 설명 |\n|---|---|\n| **ISPDB_MODIFIABLE=TRUE** | PDB 수준에서 독립 설정 가능한 파라미터 (OPEN_CURSORS, OPTIMIZER_MODE 등) |\n| **ISPDB_MODIFIABLE=FALSE** | CDB 루트에서만 변경 가능 (SGA_TARGET, DB_BLOCK_SIZE 등) |\n| **CONTAINER=CURRENT** | 현재 PDB에만 파라미터 적용 |\n| **CONTAINER=ALL** | CDB 루트 + 모든 PDB에 적용 (CDB$ROOT에서만 사용) |\n| **ALTER SYSTEM RESET** | PDB 파라미터를 CDB 기본값으로 복원 |\n\n### 파라미터 우선순위\n\n```\n1st: ALTER SESSION SET (Session Level)\n  +-- 2nd: PDB-Level ALTER SYSTEM SET\n       +-- 3rd: CDB Root ALTER SYSTEM SET\n            +-- 4th: Oracle Default\n```\n\n> **핵심**: CONTAINER=ALL로 변경해도 PDB에 명시적 설정이 있으면 덮어쓰지 않습니다.\n\n### Lockdown Profile\n\n- PDB에서 실행 가능한 작업을 제한하는 보안 프로파일\n- 네트워크 접근, OS 명령 실행, 특정 SQL 기능을 정밀하게 제한\n- `PDB_LOCKDOWN` 파라미터로 적용\n\n### PDB 복제(클론) 방법 비교\n\n| 복제 방법 | 소스 위치 | 동기화 | 주요 용도 |\n|---|---|---|---|\n| **로컬 클론** | 동일 CDB | 1회성 | 개발/테스트 환경 구축 |\n| **원격 클론** | 다른 CDB (DB Link) | 1회성 | 크로스 서버 복제 |\n| **Refreshable Clone** | 동일/다른 CDB | 주기적 동기화 | 준 실시간 DR, 보고용 |\n| **Snapshot Copy** | 동일 CDB | 1회성 (Copy-on-Write) | 빠른 프로비저닝, 테스트 |\n| **PDB Relocate** | 다른 CDB | 이관 완료 시 삭제 | 무중단 PDB 이관 |",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>파라미터 우선순위</b>\"]:::amber\n  B[\"<b>1st: ALTER SESSION SET</b><br/>세션 레벨\"]:::green\n  C[\"<b>2nd: PDB-Level ALTER SYSTEM SET</b><br/>PDB 명시적 설정\"]:::blue\n  D[\"<b>3rd: CDB Root ALTER SYSTEM SET</b><br/>CDB 루트 기본값\"]:::amber\n  E[\"<b>4th: Oracle Default</b><br/>Oracle 내장 기본값\"]:::red\n  F[\"<b>CONTAINER=ALL로 변경 시</b><br/>PDB 명시적 설정이 있으면<br/>덮어쓰지 않음\"]:::red\n\n  A --> B --> C --> D --> E\n  D -.-> F\n\n  G[\"<b>PDB 복제 방법 선택</b>\"]:::amber\n  H[\"<b>로컬 클론</b><br/>동일 CDB · 1회성\"]:::blue\n  I[\"<b>원격 클론</b><br/>다른 CDB · DB Link · 1회성\"]:::blue\n  J[\"<b>Refreshable Clone</b><br/>주기적 동기화\"]:::green\n  K[\"<b>Snapshot Copy</b><br/>Copy-on-Write · 즉시\"]:::green\n  L[\"<b>PDB Relocate</b><br/>무중단 이관 · 이관 후 삭제\"]:::blue\n\n  G --> H\n  G --> I\n  G --> J\n  G --> K\n  G --> L\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "PDB 파라미터 우선순위 4계층과 PDB 복제 5가지 방법 분기 흐름",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {

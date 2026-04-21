@@ -11,14 +11,39 @@
     {
       "sectionId": "s01",
       "title": "UNDO 데이터 상태 개요 (UNDO Data States Overview)",
-      "sqlExamplesIds": ["sql01"],
+      "sqlExamplesIds": [
+        "sql01"
+      ],
       "content": "Oracle의 UNDO 테이블스페이스 내 Extent는 트랜잭션 생명주기에 따라 3가지 상태 중 하나를 가집니다. 이 상태를 이해하는 것은 UNDO 공간 관리, 읽기 일관성(Read Consistency) 보장, ORA-01555(Snapshot Too Old) 방지의 핵심입니다.\n\n## UNDO Extent 상태 전환 흐름\n\n## 3가지 상태 비교표\n\n| 상태 | 설명 | 덮어쓰기 가능 여부 | 트랜잭션 상태 | UNDO_RETENTION과의 관계 |\n|---|---|---|---|---|\n| **ACTIVE** | 활성 트랜잭션이 사용 중 | 절대 불가 | 진행 중 (미커밋) | 무관 |\n| **UNEXPIRED** | 트랜잭션 완료, 보존 기간 내 | 공간 부족 시 가능 (NOGUARANTEE) | 완료 (커밋/롤백) | UNDO_RETENTION 기간 이내 |\n| **EXPIRED** | 보존 기간 경과 | 자유롭게 재사용 가능 | 완료 (커밋/롤백) | UNDO_RETENTION 기간 초과 |\n\n이 상태들은 **DBA_UNDO_EXTENTS** 뷰의 `STATUS` 컬럼을 통해 확인할 수 있으며, UNDO 공간 관리 전략의 기초가 됩니다.",
-      "subsections": []
+      "subsections": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/06/06_02_s01_undo_state_transition.svg",
+          "caption": "UNDO Extent 상태 전이 다이어그램: ACTIVE → UNEXPIRED → EXPIRED 및 GUARANTEE/NOGUARANTEE 비교",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s01"
+        },
+        {
+          "id": "v06",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>ACTIVE</b><br/>활성 트랜잭션 사용 중<br/>덮어쓰기 절대 불가\"]:::red\n  A -- \"트랜잭션 COMMIT / ROLLBACK\" --> B[\"<b>UNEXPIRED</b><br/>트랜잭션 완료<br/>UNDO_RETENTION 기간 이내<br/>공간 부족 시 재사용 가능(NOGUARANTEE)\"]\n  B:::amber\n  B -- \"UNDO_RETENTION 기간 경과\" --> C[\"<b>EXPIRED</b><br/>보존 기간 초과<br/>자유롭게 재사용 가능\"]\n  C:::green\n  C -- \"새 트랜잭션에 재할당\" --> A\n  B -- \"공간 부족 + NOGUARANTEE<br/>강제 전환\" --> C\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "UNDO Extent 상태 전이: ACTIVE → UNEXPIRED → EXPIRED 및 NOGUARANTEE 강제 전환 경로",
+          "placement": "before-content",
+          "width": "100%",
+          "sectionId": "s01"
+        }
+      ]
     },
     {
       "sectionId": "s02",
       "title": "ACTIVE 상태 (Active UNDO Extents)",
-      "sqlExamplesIds": ["sql01", "sql02"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02"
+      ],
       "content": "**ACTIVE** 상태의 UNDO Extent는 현재 진행 중인(미커밋) 트랜잭션이 사용하고 있는 UNDO 데이터를 포함합니다.",
       "subsections": [
         {
@@ -38,7 +63,10 @@
     {
       "sectionId": "s03",
       "title": "UNEXPIRED 상태 (Unexpired UNDO Extents)",
-      "sqlExamplesIds": ["sql01", "sql03"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql03"
+      ],
       "content": "**UNEXPIRED** 상태의 UNDO Extent는 트랜잭션이 완료되었으나 UNDO_RETENTION 기간이 아직 경과하지 않은 UNDO 데이터를 포함합니다.",
       "subsections": [
         {
@@ -58,7 +86,9 @@
     {
       "sectionId": "s04",
       "title": "EXPIRED 상태 (Expired UNDO Extents)",
-      "sqlExamplesIds": ["sql01"],
+      "sqlExamplesIds": [
+        "sql01"
+      ],
       "content": "**EXPIRED** 상태의 UNDO Extent는 UNDO_RETENTION 기간이 경과하여 자유롭게 재사용 가능한 UNDO 데이터를 포함합니다.",
       "subsections": [
         {
@@ -72,12 +102,27 @@
             "모든 공간 확보 수단이 소진되면 ORA-30036 에러 발생"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/06/06_02_s04_undo_space_reuse_priority.svg",
+          "caption": "UNDO 공간 재사용 우선순위: NOGUARANTEE(5단계) vs GUARANTEE(4단계) 공간 확보 전략",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s04"
+        }
       ]
     },
     {
       "sectionId": "s05",
       "title": "UNDO_RETENTION 파라미터 (UNDO_RETENTION Parameter)",
-      "sqlExamplesIds": ["sql04", "sql05", "sql06"],
+      "sqlExamplesIds": [
+        "sql04",
+        "sql05",
+        "sql06"
+      ],
       "content": "**UNDO_RETENTION**은 UNDO 데이터의 최소 보존 시간(초)을 지정하는 초기화 파라미터입니다. 이 파라미터는 UNEXPIRED → EXPIRED 전환 시점을 결정하며, 읽기 일관성과 Flashback 기능의 가용 범위를 결정합니다.",
       "subsections": [
         {
@@ -114,12 +159,26 @@
             "Flashback Query를 안정적으로 사용하려면 GUARANTEE 설정 권장"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/06/06_02_s05_undo_retention_autotuning.svg",
+          "caption": "UNDO_RETENTION 및 Auto-Tuning 메커니즘: AUTOEXTEND ON(자동 조정) vs OFF(수동 고정)",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s05"
+        }
       ]
     },
     {
       "sectionId": "s06",
       "title": "UNDO 테이블스페이스 크기 산정 (UNDO Space Sizing)",
-      "sqlExamplesIds": ["sql07", "sql08"],
+      "sqlExamplesIds": [
+        "sql07",
+        "sql08"
+      ],
       "content": "UNDO 테이블스페이스의 적절한 크기를 산정하는 것은 ORA-01555와 ORA-30036 에러를 예방하고, 안정적인 트랜잭션 처리를 보장하는 데 핵심적입니다.",
       "subsections": [
         {
@@ -134,12 +193,28 @@
             "AUTOEXTEND ON 설정 시 데이터 파일 최대 크기(MAXSIZE)도 함께 고려"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/06/06_02_s06_undo_space_sizing.svg",
+          "caption": "UNDO 테이블스페이스 크기 산정 공식: UR × UPS × DB_BLOCK_SIZE 및 모니터링 임계값",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s06"
+        }
       ]
     },
     {
       "sectionId": "s07",
       "title": "DBA_UNDO_EXTENTS 뷰 (DBA_UNDO_EXTENTS View)",
-      "sqlExamplesIds": ["sql01", "sql02", "sql03", "sql09"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02",
+        "sql03",
+        "sql09"
+      ],
       "content": "**DBA_UNDO_EXTENTS** 뷰는 UNDO 테이블스페이스 내의 모든 Extent에 대한 상태 정보를 제공하는 데이터 딕셔너리 뷰입니다.",
       "subsections": [
         {
@@ -158,7 +233,12 @@
     {
       "sectionId": "s08",
       "title": "V$UNDOSTAT 통계 분석 (V$UNDOSTAT Statistics Analysis)",
-      "sqlExamplesIds": ["sql05", "sql07", "sql08", "sql10"],
+      "sqlExamplesIds": [
+        "sql05",
+        "sql07",
+        "sql08",
+        "sql10"
+      ],
       "content": "**V$UNDOSTAT**는 UNDO 사용 통계를 10분 간격으로 수집하여 제공하는 동적 성능 뷰로, UNDO 관리 최적화의 핵심 정보원입니다.",
       "subsections": [
         {
@@ -179,7 +259,11 @@
     {
       "sectionId": "s09",
       "title": "UNDO 관련 에러와 대응 (UNDO Errors and Troubleshooting)",
-      "sqlExamplesIds": ["sql10", "sql11", "sql12"],
+      "sqlExamplesIds": [
+        "sql10",
+        "sql11",
+        "sql12"
+      ],
       "content": "UNDO 공간 관리에서 발생하는 주요 에러와 그 원인, 대응 방법을 다룹니다.",
       "subsections": [
         {
@@ -214,6 +298,17 @@
             "V$UNDOSTAT의 UNXPSTEALCNT, SSOLDERRCNT, NOSPACEERRCNT로 공간 압박 상황 모니터링",
             "EXPIRED 비율이 10% 미만이면 사전 공간 확장 권장"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/06/06_02_s09_ora01555_vs_ora30036_tradeoff.svg",
+          "caption": "ORA-01555 vs ORA-30036 트레이드오프: 읽기 보호와 쓰기 보호의 균형 전략",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s09"
         }
       ]
     }
@@ -290,53 +385,6 @@
       "title": "UNDO 테이블스페이스 데이터 파일 확장 및 추가",
       "sql": "-- 기존 데이터 파일 크기 확장\nALTER DATABASE DATAFILE '/u01/app/oracle/oradata/orcl/undotbs01.dbf' RESIZE 4G;\n\n-- 새 데이터 파일 추가 (AUTOEXTEND ON)\nALTER TABLESPACE undotbs1 \nADD DATAFILE '/u01/app/oracle/oradata/orcl/undotbs02.dbf' \nSIZE 2G AUTOEXTEND ON NEXT 256M MAXSIZE 8G;\n\n-- AUTOEXTEND 설정 변경\nALTER DATABASE DATAFILE '/u01/app/oracle/oradata/orcl/undotbs01.dbf'\nAUTOEXTEND ON NEXT 256M MAXSIZE 8G;",
       "description": "ORA-30036 에러 발생 시 즉시 대응으로 UNDO 테이블스페이스의 데이터 파일을 확장하거나 추가하는 방법입니다. AUTOEXTEND ON 설정과 적절한 MAXSIZE 지정이 중요합니다."
-    }
-  ],
-  "visuals": [
-    {
-      "id": "v01",
-      "type": "svg",
-      "src": "/visuals/06/06_02_s01_undo_state_transition.svg",
-      "caption": "UNDO Extent 상태 전이 다이어그램: ACTIVE → UNEXPIRED → EXPIRED 및 GUARANTEE/NOGUARANTEE 비교",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s01"
-    },
-    {
-      "id": "v02",
-      "type": "svg",
-      "src": "/visuals/06/06_02_s04_undo_space_reuse_priority.svg",
-      "caption": "UNDO 공간 재사용 우선순위: NOGUARANTEE(5단계) vs GUARANTEE(4단계) 공간 확보 전략",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s04"
-    },
-    {
-      "id": "v03",
-      "type": "svg",
-      "src": "/visuals/06/06_02_s05_undo_retention_autotuning.svg",
-      "caption": "UNDO_RETENTION 및 Auto-Tuning 메커니즘: AUTOEXTEND ON(자동 조정) vs OFF(수동 고정)",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s05"
-    },
-    {
-      "id": "v04",
-      "type": "svg",
-      "src": "/visuals/06/06_02_s06_undo_space_sizing.svg",
-      "caption": "UNDO 테이블스페이스 크기 산정 공식: UR × UPS × DB_BLOCK_SIZE 및 모니터링 임계값",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s06"
-    },
-    {
-      "id": "v05",
-      "type": "svg",
-      "src": "/visuals/06/06_02_s09_ora01555_vs_ora30036_tradeoff.svg",
-      "caption": "ORA-01555 vs ORA-30036 트레이드오프: 읽기 보호와 쓰기 보호의 균형 전략",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s09"
     }
   ],
   "keywords": [

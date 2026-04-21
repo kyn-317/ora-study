@@ -172,6 +172,16 @@
         "sql08"
       ],
       "content": "외부 테이블의 가장 강력한 기능 중 하나는 데이터를 물리적으로 로드하지 않고도 내부 테이블과 **조인(Join)**하여 통합 분석을 수행할 수 있다는 것입니다. 이를 통해 ETL의 'Load' 단계를 건너뛰고 바로 'Transform' 단계로 진입할 수 있습니다.",
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>외부 파일</b><br/>(OS 파일 시스템)\"]:::amber\n  B[\"<b>External Table</b><br/>(ORACLE_LOADER/<br/>ORACLE_DATAPUMP)\"]:::blue\n  C[\"<b>내부 테이블</b><br/>(hr.employees 등)\"]:::green\n  D[\"<b>JOIN / 서브쿼리</b><br/>SQL 조인 수행\"]:::blue\n  E[\"<b>결과 반환</b><br/>통합 분석\"]:::green\n  F[\"<b>INSERT INTO … SELECT</b><br/>내부 테이블에 적재\"]:::amber\n  G[\"<b>CTAS / MERGE</b><br/>변환·갱신 적재\"]:::amber\n  A -->|\"쿼리 시점 실시간 읽기\"| B\n  B -->|\"Full Table Scan\"| D\n  C -->|\"일반 접근\"| D\n  D --> E\n  E -->|\"반복 조회 필요 시\"| F\n  E -->|\"초기 로드·증분 갱신\"| G\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "External Table JOIN 흐름 — 외부 파일을 쿼리 시점에 읽어 내부 테이블과 조인하고, 결과를 INSERT/CTAS/MERGE로 내부 테이블에 적재하는 데이터 로드 전략",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": [
         {
           "title": "로드 불필요 접근과 조인 전략 (Load-Free Access and Join Strategies)",

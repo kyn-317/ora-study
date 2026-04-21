@@ -108,6 +108,16 @@
       "sectionId": "s02",
       "title": "컨트롤 파일 구조와 문법 (Control File Structure and Syntax)",
       "content": "SQL*Loader **컨트롤 파일(Control File)**은 데이터 로드의 모든 규칙을 정의하는 텍스트 파일로, 데이터 파일의 위치, 형식, 대상 테이블, 필드 매핑, 로드 조건 등을 기술한다. 확장자는 관례적으로 `.ctl`을 사용한다.",
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>LOAD DATA</b><br/>컨트롤 파일 시작\"]:::amber\n  B[\"<b>INFILE</b><br/>데이터 파일 경로 지정<br/>(INFILE * = 인라인 데이터)\"]:::blue\n  C[\"<b>BADFILE / DISCARDFILE</b><br/>오류·폐기 레코드 파일 경로\"]:::red\n  D[\"<b>로드 모드</b><br/>INSERT / APPEND<br/>REPLACE / TRUNCATE\"]:::amber\n  E[\"<b>INTO TABLE</b><br/>대상 테이블 지정\"]:::green\n  F[\"<b>WHEN 절</b><br/>조건부 로드 (선택)\"]:::blue\n  G[\"<b>FIELDS TERMINATED BY</b><br/>필드 구분자·감싸기 문자 정의\"]:::blue\n  H[\"<b>컬럼 정의 목록</b><br/>이름·데이터타입·NULL처리<br/>POSITION / SQL 함수\"]:::green\n  A --> B\n  B --> C\n  C --> D\n  D --> E\n  E --> F\n  F --> G\n  G --> H\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "SQL*Loader 컨트롤 파일 구성 요소 — LOAD DATA → INFILE → BADFILE/DISCARDFILE → 로드 모드 → INTO TABLE → WHEN → FIELDS → 컬럼 정의 순서",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "sqlExamplesIds": [
         "sql03",
         "sql04",

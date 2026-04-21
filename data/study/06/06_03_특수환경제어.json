@@ -12,14 +12,34 @@
     {
       "sectionId": "s01",
       "title": "특수 환경 제어 개요 (Overview of Special Environment Control)",
-      "sqlExamplesIds": ["sql01", "sql02"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02"
+      ],
       "content": "Oracle UNDO 관리에서 **특수 환경 제어**란 기본적인 UNDO 테이블스페이스 운영을 넘어, 특수한 워크로드나 아키텍처 환경에 맞춰 UNDO 동작을 최적화하는 기법을 의미합니다.\n\n## 특수 환경 제어의 두 가지 축\n\n| 영역 | 대상 | 핵심 목적 | 주요 파라미터 |\n|---|---|---|---|\n| **임시 UNDO (Temporary UNDO)** | Global Temporary Table (GTT) 작업 | UNDO/REDO 쓰기량 감소로 성능 최적화 | `TEMP_UNDO_ENABLED` |\n| **멀티테넌트 UNDO 모드** | CDB/PDB 환경 | PDB 이동성 확보 및 운영 효율화 | `UNDO_TABLESPACE`, `UNDO_MODE` |\n\n## 전체 아키텍처 맥락\n\n## 일반 UNDO vs 특수 환경 UNDO 비교\n\n| 구분 | 일반 UNDO | Temporary UNDO | 멀티테넌트 UNDO |\n|---|---|---|---|\n| **저장 위치** | UNDO 테이블스페이스 | Temp 테이블스페이스 | UNDO 테이블스페이스 (Shared/Local) |\n| **REDO 기록** | 필수 | 불필요 | 필수 |\n| **적용 대상** | 영구 테이블 DML | GTT DML | CDB/PDB 환경 전체 |\n| **복구 가능성** | 인스턴스 복구 시 사용 | 인스턴스 복구 불필요 | 모드에 따라 다름 |\n| **Flashback Query** | 지원 | 세션 내에서만 지원 | 지원 |",
-      "subsections": []
+      "subsections": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/06/06_03_s01_special_env_overview.svg",
+          "caption": "UNDO 특수 환경 제어 전체 구조: Temporary UNDO + 멀티테넌트 UNDO 모드 (Shared/Local)",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s01"
+        }
+      ]
     },
     {
       "sectionId": "s02",
       "title": "임시 UNDO (Temporary UNDO)",
-      "sqlExamplesIds": ["sql01", "sql02", "sql03", "sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02",
+        "sql03",
+        "sql04",
+        "sql05"
+      ],
       "content": "**임시 UNDO(Temporary UNDO)**는 Global Temporary Table(GTT) 및 임시 테이블에 대한 DML 작업 시 생성되는 UNDO 데이터를 **UNDO 테이블스페이스가 아닌 임시 테이블스페이스(Temporary Tablespace)**에 저장하는 메커니즘입니다.\n\n## Temporary UNDO의 핵심 이점\n\n| 항목 | 기존 방식 (Temp UNDO 비활성) | Temp UNDO 활성 시 |\n|---|---|---|\n| **UNDO 저장 위치** | UNDO 테이블스페이스 | Temp 테이블스페이스 |\n| **REDO 생성** | UNDO 데이터에 대한 REDO 생성 | REDO 생성 없음 |\n| **UNDO 테이블스페이스 부하** | GTT 작업도 UNDO 공간 사용 | GTT 작업은 UNDO 공간 미사용 |\n| **인스턴스 복구** | GTT UNDO도 복구 대상 | GTT UNDO는 복구 불필요 |\n| **성능 영향** | REDO/UNDO I/O 발생 | I/O 대폭 감소 |",
       "subsections": [
         {
@@ -71,12 +91,26 @@
             "SAVEPOINT를 통한 부분 롤백도 Temporary UNDO에서 정상 지원"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/06/06_03_s02_temp_undo_flow.svg",
+          "caption": "Temporary UNDO 동작 흐름 비교: 기존(6단계) vs Temp UNDO(2단계) — REDO I/O 완전 생략",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s02"
+        }
       ]
     },
     {
       "sectionId": "s03",
       "title": "멀티테넌트 환경의 UNDO 모드 개요 (Multitenant UNDO Mode Overview)",
-      "sqlExamplesIds": ["sql06", "sql07"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07"
+      ],
       "content": "**멀티테넌트 아키텍처(Multitenant Architecture)**에서 UNDO 관리는 **공유 UNDO 모드(Shared UNDO Mode)**와 **로컬 UNDO 모드(Local UNDO Mode)**의 두 가지 방식으로 나뉩니다. 이 선택은 CDB 전체의 UNDO 관리 방식, PDB 이동성, 그리고 운영 전략에 큰 영향을 미칩니다.\n\n## 두 가지 UNDO 모드 비교\n\n| 비교 항목 | Shared UNDO Mode | Local UNDO Mode |\n|---|---|---|\n| **UNDO 테이블스페이스 위치** | CDB$ROOT에 1개 | 각 PDB마다 1개 |\n| **UNDO 관리 주체** | CDB 관리자 | PDB 관리자 (독립 관리 가능) |\n| **PDB 이동성** | 제한적 | 높음 (자체 UNDO 포함) |\n| **Hot Clone 지원** | 불가 | 가능 |\n| **PDB Relocate 지원** | 불가 | 가능 |\n| **Flashback PDB 지원** | 불가 | 가능 |\n| **UNDO 공간 격리** | 미격리 (PDB 간 경합 가능) | 완전 격리 |\n| **관리 복잡성** | 단순 | 상대적으로 복잡 |\n| **Oracle 21c+ 기본값** | 아니오 | **예 (기본값)** |\n| **Oracle 26ai 권장** | 레거시 호환만 | **권장** |\n\n## 아키텍처 비교 다이어그램\n\n## UNDO 모드 확인 방법\n\nCDB의 현재 UNDO 모드는 `DATABASE_PROPERTIES` 딕셔너리 뷰 또는 `V$PARAMETER`에서 확인할 수 있습니다.",
       "subsections": [
         {
@@ -90,12 +124,27 @@
             "각 PDB의 UNDO 사용량을 독립적으로 모니터링하고 제한할 수 있어야 효율적 운영 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/06/06_03_s03_shared_vs_local_undo.svg",
+          "caption": "멀티테넌트 UNDO: Shared vs Local 아키텍처 비교 — 기능, 격리성, 모드 전환",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s03"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "공유 UNDO 모드 (Shared UNDO Mode)",
-      "sqlExamplesIds": ["sql06", "sql07", "sql08"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07",
+        "sql08"
+      ],
       "content": "**공유 UNDO 모드(Shared UNDO Mode)**는 CDB 전체가 **CDB$ROOT에 위치한 하나의 UNDO 테이블스페이스를 공유**하는 방식입니다. Oracle 12c에서 멀티테넌트가 처음 도입되었을 때의 기본 모드였습니다.",
       "subsections": [
         {
@@ -120,12 +169,29 @@
             "PDB 이동성이 필요 없는 소규모 환경이나 레거시 호환 목적으로만 권장"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>Shared UNDO 모드</b><br/>CDB$ROOT에 1개의 UNDO 테이블스페이스\"]:::amber\n  A --> P1[\"<b>PDB1</b><br/>UNDO 테이블스페이스 없음\"]:::blue\n  A --> P2[\"<b>PDB2</b><br/>UNDO 테이블스페이스 없음\"]:::blue\n  A --> P3[\"<b>CDB\\$ROOT</b><br/>UNDOTBS1 공유\"]:::amber\n  B[\"<b>Local UNDO 모드</b><br/>각 PDB가 독립적인 UNDO 테이블스페이스 보유\"]:::green\n  B --> Q1[\"<b>PDB1</b><br/>UNDOTBS_PDB1\"]:::green\n  B --> Q2[\"<b>PDB2</b><br/>UNDOTBS_PDB2\"]:::green\n  B --> Q3[\"<b>CDB\\$ROOT</b><br/>UNDOTBS_ROOT\"]:::green\n  A -. \"Oracle 21c+ 기본<br/>Hot Clone·Relocate·Flashback PDB 지원\" .-> B\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "Shared UNDO(CDB$ROOT 단일 공유) vs Local UNDO(각 PDB 독립 보유) 아키텍처 비교",
+          "placement": "before-content",
+          "width": "100%",
+          "sectionId": "s04"
+        }
       ]
     },
     {
       "sectionId": "s05",
       "title": "로컬 UNDO 모드 (Local UNDO Mode)",
-      "sqlExamplesIds": ["sql06", "sql07", "sql09", "sql10", "sql11"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07",
+        "sql09",
+        "sql10",
+        "sql11"
+      ],
       "content": "**로컬 UNDO 모드(Local UNDO Mode)**는 각 PDB(및 CDB$ROOT)가 **자체적인 UNDO 테이블스페이스를 보유**하는 방식입니다. Oracle 21c 이후 CDB의 기본 UNDO 모드이며, Oracle 26ai에서 권장되는 표준 구성입니다.",
       "subsections": [
         {
@@ -163,12 +229,27 @@
             "활성 상태의 UNDO 테이블스페이스는 삭제할 수 없음"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v7",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>PDB 생성</b><br/>Local UNDO 모드\"]:::amber\n  A --> B[\"<b>UNDO 테이블스페이스 자동 생성</b><br/>PDB 내 독립 테이블스페이스\"]:::blue\n  B --> C[\"<b>UNDO_TABLESPACE 독립 설정</b><br/>PDB 레벨에서 전환 가능\"]:::blue\n  C --> D[\"<b>UNDO_RETENTION 독립 설정</b><br/>PDB별 워크로드 맞춤 조정\"]:::blue\n  D --> E[\"<b>PDB 이동 시</b><br/>UNDO 테이블스페이스 함께 이동\"]:::green\n  D --> F[\"<b>Hot Clone / Relocate 지원</b>\"]:::green\n  D --> G[\"<b>Flashback PDB 지원</b>\"]:::green\n  D --> H[\"<b>UNDO 공간 완전 격리</b><br/>PDB 간 경합 방지\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "로컬 UNDO 모드: PDB 생성부터 독립 UNDO 관리 및 지원 기능까지의 흐름",
+          "placement": "before-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s06",
       "title": "UNDO 모드 전환 (UNDO Mode Switching)",
-      "sqlExamplesIds": ["sql09", "sql10", "sql11", "sql12"],
+      "sqlExamplesIds": [
+        "sql09",
+        "sql10",
+        "sql11",
+        "sql12"
+      ],
       "content": "CDB의 UNDO 모드를 **Shared에서 Local로**, 또는 **Local에서 Shared로** 전환할 수 있습니다. 전환 작업은 CDB를 재시작해야 하며, 신중한 계획이 필요합니다.",
       "subsections": [
         {
@@ -204,12 +285,37 @@
             "전환 전 Hot Clone, Relocate, Flashback PDB 사용 여부를 반드시 확인"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/06/06_03_s06_undo_mode_switch_procedure.svg",
+          "caption": "UNDO 모드 전환 절차: Shared→Local(권장) vs Local→Shared(비권장) 단계별 비교",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s06"
+        },
+        {
+          "id": "v06",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>현재 UNDO 모드 확인</b><br/>DATABASE_PROPERTIES 조회\"]:::blue\n  A --> B[\"<b>CDB 종료</b><br/>SHUTDOWN IMMEDIATE\"]:::red\n  B --> C[\"<b>UPGRADE 모드로 시작</b><br/>STARTUP UPGRADE\"]:::amber\n  C --> D[\"<b>Local UNDO 활성화</b><br/>ALTER DATABASE LOCAL UNDO ON\"]:::amber\n  D --> E[\"<b>모든 PDB UPGRADE 모드 OPEN</b><br/>ALTER PLUGGABLE DATABASE ALL OPEN UPGRADE\"]:::amber\n  E --> F[\"<b>CDB 재시작</b><br/>SHUTDOWN IMMEDIATE → STARTUP\"]:::red\n  F --> G[\"<b>모든 PDB OPEN</b><br/>ALTER PLUGGABLE DATABASE ALL OPEN\"]:::green\n  G --> H[\"<b>전환 확인</b><br/>LOCAL_UNDO_ENABLED = TRUE\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "Shared → Local UNDO 모드 전환 절차: STARTUP UPGRADE → ALTER DATABASE LOCAL UNDO ON → 재시작",
+          "placement": "before-content",
+          "width": "100%",
+          "sectionId": "s06"
+        }
       ]
     },
     {
       "sectionId": "s07",
       "title": "CDB/PDB에서의 UNDO 관련 뷰 조회 (UNDO Views in CDB/PDB)",
-      "sqlExamplesIds": ["sql06", "sql07", "sql08", "sql13"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07",
+        "sql08",
+        "sql13"
+      ],
       "content": "멀티테넌트 환경에서 UNDO 관련 뷰를 조회할 때는 **조회 위치(CDB$ROOT vs PDB)**와 **UNDO 모드(Shared vs Local)**에 따라 결과가 달라집니다. 이를 정확히 이해하는 것이 멀티테넌트 UNDO 운영의 핵심입니다.\n\n## 뷰 조회 결과 비교\n\n| 뷰 | CDB$ROOT에서 조회 | PDB 내에서 조회 | Shared UNDO | Local UNDO |\n|---|---|---|---|---|\n| **V$UNDOSTAT** | CDB 전체 UNDO 통계 | 해당 PDB의 UNDO 통계 | CDB 통합 | PDB별 독립 |\n| **V$ROLLSTAT** | CDB$ROOT의 롤백 세그먼트 | 해당 PDB의 롤백 세그먼트 | CDB 통합 | PDB별 독립 |\n| **V$TRANSACTION** | 모든 PDB의 활성 트랜잭션 | 해당 PDB의 활성 트랜잭션 | CDB 통합 | PDB별 독립 |\n| **DBA_UNDO_EXTENTS** | CDB$ROOT의 UNDO 익스텐트 | 해당 PDB의 UNDO 익스텐트 | CDB 통합 | PDB별 독립 |\n| **CDB_UNDO_EXTENTS** | 모든 PDB의 UNDO 익스텐트 | 사용 불가 | CDB 통합 | PDB별 통합 조회 |\n| **V$TEMPUNDOSTAT** | CDB 전체 Temp UNDO 통계 | 해당 PDB의 Temp UNDO 통계 | CDB 통합 | PDB별 독립 |\n\n## CDB_ 접두사 뷰 활용\n\nCDB$ROOT에서 `CDB_` 접두사 뷰를 사용하면 모든 PDB의 정보를 **CON_ID 컬럼**으로 구분하여 통합 조회할 수 있습니다:\n\n```sql\n-- CDB$ROOT에서 모든 PDB의 UNDO 테이블스페이스 조회\nSELECT con_id, tablespace_name, status, contents\nFROM CDB_TABLESPACES\nWHERE contents = 'UNDO'\nORDER BY con_id;\n```",
       "subsections": [
         {
@@ -223,6 +329,16 @@
             "Local UNDO 모드에서는 PDB 내 조회 시 해당 PDB 통계만 표시되어 정확한 모니터링 가능",
             "CDB$ROOT에서 CDB_ 접두사 뷰 또는 CONTAINERS() 함수로 전체 PDB 통합 조회 가능"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v8",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>UNDO 뷰 조회</b><br/>조회 위치 선택\"]:::amber\n  A --> B[\"<b>CDB$ROOT에서 조회</b>\"]:::blue\n  A --> C[\"<b>PDB 내에서 조회</b>\"]:::green\n  B --> D[\"<b>Shared UNDO</b><br/>V$UNDOSTAT: CDB 전체 통계\"]:::blue\n  B --> E[\"<b>Local UNDO</b><br/>V$UNDOSTAT: CDB$ROOT 통계만\"]:::blue\n  B --> F[\"<b>CDB_UNDO_EXTENTS</b><br/>모든 PDB 통합 조회(CON_ID)\"]:::blue\n  C --> G[\"<b>Shared UNDO</b><br/>V$UNDOSTAT: CDB 전체 통계<br/>(PDB별 구분 어려움)\"]:::red\n  C --> H[\"<b>Local UNDO</b><br/>V$UNDOSTAT: 해당 PDB 통계만\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "UNDO 뷰 조회 결과: 조회 위치(CDB$ROOT vs PDB)와 UNDO 모드(Shared vs Local)에 따른 차이",
+          "placement": "before-content",
+          "width": "100%"
         }
       ]
     }
@@ -305,44 +421,6 @@
       "title": "UNDO 관련 종합 모니터링 쿼리",
       "sql": "-- 1. UNDO 테이블스페이스 사용률\nSELECT tablespace_name,\n       SUM(CASE WHEN status = 'ACTIVE' THEN bytes ELSE 0 END)/1024/1024 AS active_mb,\n       SUM(CASE WHEN status = 'UNEXPIRED' THEN bytes ELSE 0 END)/1024/1024 AS unexpired_mb,\n       SUM(CASE WHEN status = 'EXPIRED' THEN bytes ELSE 0 END)/1024/1024 AS expired_mb\nFROM DBA_UNDO_EXTENTS\nGROUP BY tablespace_name;\n\n-- 2. ORA-01555 및 공간 부족 에러 확인\nSELECT begin_time, end_time,\n       undoblks, txncount,\n       ssolderrcnt AS ora_01555_cnt,\n       nospaceerrcnt AS no_space_cnt\nFROM V$UNDOSTAT\nWHERE ssolderrcnt > 0 OR nospaceerrcnt > 0\nORDER BY begin_time DESC;\n\n-- 3. 현재 활성 트랜잭션의 UNDO 사용량\nSELECT t.xidusn, t.xidslot, t.xidsqn,\n       t.used_ublk AS undo_blocks_used,\n       t.used_urec AS undo_records,\n       s.username, s.program\nFROM V$TRANSACTION t\nJOIN V$SESSION s ON t.ses_addr = s.saddr\nORDER BY t.used_ublk DESC;",
       "description": "UNDO 관련 종합 모니터링 쿼리입니다. UNDO 익스텐트 상태별 사용량, ORA-01555/공간 부족 에러 이력, 활성 트랜잭션의 UNDO 사용량을 종합적으로 확인합니다."
-    }
-  ],
-  "visuals": [
-    {
-      "id": "v01",
-      "type": "svg",
-      "src": "/visuals/06/06_03_s01_special_env_overview.svg",
-      "caption": "UNDO 특수 환경 제어 전체 구조: Temporary UNDO + 멀티테넌트 UNDO 모드 (Shared/Local)",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s01"
-    },
-    {
-      "id": "v02",
-      "type": "svg",
-      "src": "/visuals/06/06_03_s02_temp_undo_flow.svg",
-      "caption": "Temporary UNDO 동작 흐름 비교: 기존(6단계) vs Temp UNDO(2단계) — REDO I/O 완전 생략",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s02"
-    },
-    {
-      "id": "v03",
-      "type": "svg",
-      "src": "/visuals/06/06_03_s03_shared_vs_local_undo.svg",
-      "caption": "멀티테넌트 UNDO: Shared vs Local 아키텍처 비교 — 기능, 격리성, 모드 전환",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s03"
-    },
-    {
-      "id": "v04",
-      "type": "svg",
-      "src": "/visuals/06/06_03_s06_undo_mode_switch_procedure.svg",
-      "caption": "UNDO 모드 전환 절차: Shared→Local(권장) vs Local→Shared(비권장) 단계별 비교",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s06"
     }
   ],
   "keywords": [

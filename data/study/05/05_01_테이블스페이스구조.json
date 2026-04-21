@@ -107,6 +107,16 @@
             "대용량 환경에서는 데이터 파일 관리 복잡성이 높아지므로 BIGFILE 테이블스페이스 검토 필요"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v6",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>SMALLFILE 테이블스페이스</b><br/>Oracle 기본 타입\"]:::amber\n  B[\"<b>데이터 파일 수</b><br/>최대 1,022개\"]:::blue\n  C[\"<b>ROWID 파일 번호</b><br/>10비트\"]:::blue\n  D[\"<b>ROWID 블록 번호</b><br/>22비트 → 약 4백만 블록\"]:::blue\n  E[\"<b>8KB 블록 기준</b><br/>파일 최대 32GB\"]:::green\n  F[\"<b>TS 최대 크기</b><br/>1,022 파일 × 32GB ≈ 32TB\"]:::green\n  G[\"<b>ADD/DROP DATAFILE</b><br/>가능\"]:::amber\n  H[\"<b>크기 변경 단위</b><br/>데이터 파일 레벨\"]:::amber\n  A --> B\n  A --> C\n  C --> D\n  D --> E\n  B --> F\n  E --> F\n  A --> G\n  A --> H\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "SMALLFILE 테이블스페이스 핵심 특성 — 파일 수, ROWID 구조, 크기 한계, 관리 방식",
+          "placement": "before-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -152,6 +162,16 @@
             "BIGFILE에서는 ADD DATAFILE / DROP DATAFILE 명령 사용 불가",
             "RMAN에서 BIGFILE 단일 대용량 파일은 멀티섹션 백업(Multisection Backup)으로 병렬 처리 가능"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v7",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>테이블스페이스 타입 선택</b>\"]:::amber\n  B[\"<b>SMALLFILE</b><br/>Oracle 기본 타입\"]:::blue\n  C[\"<b>BIGFILE</b><br/>Oracle 10g 도입\"]:::green\n  B1[\"<b>데이터 파일 수</b><br/>최대 1,022개\"]:::blue\n  B2[\"<b>파일당 최대 크기</b><br/>8KB 블록 기준 32GB\"]:::blue\n  B3[\"<b>ROWID 블록 번호</b><br/>22비트\"]:::blue\n  B4[\"<b>ADD/DROP DATAFILE</b><br/>가능\"]:::blue\n  B5[\"<b>권장 환경</b><br/>일반 파일 시스템\"]:::blue\n  C1[\"<b>데이터 파일 수</b><br/>정확히 1개\"]:::green\n  C2[\"<b>파일 최대 크기</b><br/>8KB 블록 기준 32TB\"]:::green\n  C3[\"<b>ROWID 블록 번호</b><br/>32비트 (10비트 재할당)\"]:::green\n  C4[\"<b>ADD/DROP DATAFILE</b><br/>불가\"]:::red\n  C5[\"<b>권장 환경</b><br/>ASM + OMF\"]:::green\n  A -->|\"SMALLFILE\"| B\n  A -->|\"BIGFILE\"| C\n  B --> B1\n  B --> B2\n  B --> B3\n  B --> B4\n  B --> B5\n  C --> C1\n  C --> C2\n  C --> C3\n  C --> C4\n  C --> C5\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "BIGFILE vs SMALLFILE 테이블스페이스 특성 비교 — 파일 수, ROWID 비트, 크기 한계, 권장 환경",
+          "placement": "before-content",
+          "width": "100%"
         }
       ]
     },
@@ -253,11 +273,31 @@
             "SMALLFILE은 DATAFILE 절에 여러 파일을 쉼표로 구분하여 동시 생성 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v8",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>CREATE TABLESPACE</b><br/>테이블스페이스 생성\"]:::amber\n  T[\"<b>타입 선택</b><br/>SMALLFILE / BIGFILE<br/>(미지정 시 DB 기본 타입)\"]:::amber\n  D[\"<b>DATAFILE 지정</b><br/>경로 SIZE<br/>(OMF 환경에서는 SIZE만 가능)\"]:::blue\n  AE[\"<b>AUTOEXTEND</b><br/>ON NEXT·MAXSIZE<br/>/ OFF\"]:::blue\n  EM[\"<b>EXTENT MANAGEMENT LOCAL</b>\"]:::green\n  EM1[\"<b>AUTOALLOCATE</b><br/>Oracle 자동 결정 (기본)\"]:::green\n  EM2[\"<b>UNIFORM SIZE</b><br/>균등 크기 익스텐트\"]:::green\n  SS[\"<b>SEGMENT SPACE MANAGEMENT</b>\"]:::blue\n  SS1[\"<b>AUTO (ASSM)</b><br/>비트맵 방식, 동시성 우수 (기본)\"]:::blue\n  SS2[\"<b>MANUAL (Freelist)</b><br/>구버전 호환\"]:::amber\n  OPT[\"<b>추가 옵션</b><br/>BLOCKSIZE / LOGGING / ONLINE\"]:::amber\n  A --> T\n  T --> D\n  D --> AE\n  AE --> EM\n  EM -->|\"자동\"| EM1\n  EM -->|\"균등\"| EM2\n  AE --> SS\n  SS -->|\"기본\"| SS1\n  SS -->|\"구버전\"| SS2\n  AE --> OPT\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "CREATE TABLESPACE 주요 옵션 분기 — 타입, AUTOEXTEND, EXTENT MANAGEMENT, SEGMENT SPACE MANAGEMENT",
+          "placement": "before-content",
+          "width": "100%"
+        }
       ]
     },
     {
       "sectionId": "s07",
       "title": "기본 테이블스페이스 설정 (Default Tablespace Configuration)",
+      "visuals": [
+        {
+          "id": "v9",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>사용자 기본 테이블스페이스 결정</b>\"]:::amber\n  U[\"<b>사용자 레벨 설정</b><br/>ALTER USER ... DEFAULT TABLESPACE\"]:::green\n  C[\"<b>CREATE USER 시 명시</b><br/>CREATE USER ... DEFAULT TABLESPACE\"]:::green\n  D[\"<b>DB 레벨 기본 설정</b><br/>ALTER DATABASE DEFAULT TABLESPACE\"]:::blue\n  S[\"<b>SYSTEM 테이블스페이스</b><br/>모든 설정이 없을 때 최종 기본값\"]:::red\n  T[\"<b>DB 기본 TS 타입</b><br/>ALTER DATABASE SET DEFAULT<br/>BIGFILE / SMALLFILE TABLESPACE\"]:::amber\n  T1[\"<b>CREATE TABLESPACE 시 적용</b><br/>SMALLFILE / BIGFILE 미지정 시\"]:::blue\n  T2[\"<b>확인</b><br/>DATABASE_PROPERTIES<br/>DEFAULT_TBS_TYPE\"]:::blue\n  A -->|\"최우선\"| U\n  A -->|\"생성 시점\"| C\n  A -->|\"미지정 시\"| D\n  A -->|\"최종 기본값\"| S\n  T --> T1 --> T2\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "기본 테이블스페이스 설정 우선순위 — 사용자 레벨 > CREATE USER > DB 레벨 > SYSTEM",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "content": "Oracle Database에서는 **사용자의 기본 테이블스페이스(DEFAULT TABLESPACE)**와 **데이터베이스 레벨의 기본 테이블스페이스 타입(BIGFILE/SMALLFILE)**을 설정할 수 있습니다. 이 설정은 새 사용자 생성 시 및 테이블스페이스 생성 시 기본 동작에 영향을 줍니다.\n\n## 기본 설정 유형\n\n| 설정 유형 | 설명 | 변경 구문 |\n|---|---|---|\n| **DB 기본 영구 TS** | 사용자의 기본 영구 테이블스페이스 | ALTER DATABASE DEFAULT TABLESPACE |\n| **DB 기본 임시 TS** | 사용자의 기본 임시 테이블스페이스 | ALTER DATABASE DEFAULT TEMPORARY TABLESPACE |\n| **DB 기본 TS 타입** | SMALLFILE 또는 BIGFILE | ALTER DATABASE SET DEFAULT [BIGFILE|SMALLFILE] TABLESPACE |\n| **사용자별 기본 TS** | 개별 사용자의 기본 테이블스페이스 | ALTER USER ... DEFAULT TABLESPACE |",
       "sqlExamplesIds": [
         "sql10",

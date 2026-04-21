@@ -179,6 +179,16 @@
             "컬럼 레벨 REVOKE는 지원되지 않으며, 테이블 전체 권한을 취소 후 재부여해야 함"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  G[\"<b>Grantor</b><br/>권한 부여자\"]:::amber\n  GE[\"<b>Grantee</b><br/>권한 피부여자\"]:::blue\n  OPT{\"<b>WITH GRANT OPTION?</b><br/>객체 권한 재부여 가능\"}:::blue\n  OPT2{\"<b>WITH ADMIN OPTION?</b><br/>시스템 권한/롤 재부여 가능\"}:::blue\n  RE[\"<b>재부여 가능</b><br/>Grantee → 제3자 GRANT\"]:::green\n  NRE[\"<b>재부여 불가</b><br/>Grantee만 사용\"]:::red\n  RV_OBJ[\"<b>REVOKE (객체 권한)</b><br/>연쇄 취소 발생\"]:::red\n  RV_SYS[\"<b>REVOKE (시스템 권한/롤)</b><br/>연쇄 취소 없음\"]:::amber\n\n  G -- \"GRANT obj_priv ON obj TO\" --> GE\n  G -- \"GRANT sys_priv / role TO\" --> GE\n  GE --> OPT\n  GE --> OPT2\n  OPT -- \"있음\" --> RE\n  OPT -- \"없음\" --> NRE\n  OPT2 -- \"있음\" --> RE\n  OPT2 -- \"없음\" --> NRE\n  G -- \"REVOKE obj_priv\" --> RV_OBJ\n  G -- \"REVOKE sys_priv/role\" --> RV_SYS\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "GRANT 흐름 - Grantor에서 Grantee로 권한 부여 시 WITH GRANT OPTION / WITH ADMIN OPTION 분기 및 REVOKE 연쇄 여부",
+          "placement": "before-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -255,6 +265,16 @@
             "ANY 권한은 보안 위험이 매우 높으므로 DBA 외에는 부여를 최소화해야 함",
             "스키마 레벨 권한은 ANY 권한보다 범위가 제한적이어서 최소 권한 원칙에 더 적합"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  PUB[\"<b>PUBLIC</b><br/>모든 사용자에게 자동 적용\"]:::amber\n  ROLE[\"<b>롤 (Role)</b><br/>권한의 논리적 집합\"]:::blue\n  USER[\"<b>사용자 (User)</b><br/>세션의 주체\"]:::green\n  DIR_SYS[\"<b>직접 부여 시스템 권한</b><br/>DBA_SYS_PRIVS\"]:::green\n  DIR_OBJ[\"<b>직접 부여 객체 권한</b><br/>DBA_TAB_PRIVS\"]:::green\n  ROLE_PRIV[\"<b>롤 기반 권한</b><br/>Active Roles 통해 적용\"]:::blue\n  PUB_PRIV[\"<b>PUBLIC 권한</b><br/>모든 사용자에게 유효\"]:::amber\n  SESSION[\"<b>세션 유효 권한</b><br/>Effective Privileges\"]:::green\n\n  PUB -- \"PUBLIC 부여\" --> PUB_PRIV\n  ROLE -- \"롤 부여\" --> USER\n  USER -- \"직접 GRANT\" --> DIR_SYS\n  USER -- \"직접 GRANT\" --> DIR_OBJ\n  ROLE -- \"롤 활성화\" --> ROLE_PRIV\n  DIR_SYS --> SESSION\n  DIR_OBJ --> SESSION\n  ROLE_PRIV --> SESSION\n  PUB_PRIV --> SESSION\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "권한 계층 및 상속 - 직접 부여 권한, 롤 기반 권한, PUBLIC 권한이 결합되어 세션의 유효 권한(Effective Privileges)을 형성하는 구조",
+          "placement": "before-content",
+          "width": "100%"
         }
       ]
     }

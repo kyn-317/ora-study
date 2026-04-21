@@ -50,7 +50,16 @@
       "title": "자동으로 돌아가는 관리 — 자동화 기반 태스크 (Automated Maintenance Tasks, 08_02)",
       "sqlExamplesIds": [],
       "content": "### 사전 정의된 자동 유지관리 태스크 3종\n\n| 태스크 | 역할 | 우선순위 |\n|---|---|---|\n| **auto optimizer stats collection** | 옵티마이저 통계 자동 수집 | HIGH (최우선) |\n| **sql tuning advisor** | SQL 프로파일 자동 생성/적용 | MEDIUM |\n| **auto space advisor** | 세그먼트 공간 분석/권고 | MEDIUM |\n\n### Maintenance Window 구조\n\n| 요일 | 기본 시간 | 기본 시간 길이 |\n|---|---|---|\n| 월~금 | 22:00 ~ 02:00 | 4시간 |\n| 토~일 | 06:00 ~ 다음날 02:00 | 20시간 |\n\n- 윈도우가 열리면 **resource_plan** 속성의 Resource Plan이 자동 활성화\n- **MAINTENANCE_WINDOW_GROUP**에 속한 윈도우만 AutoTask 실행 대상\n- **DBMS_AUTO_TASK_ADMIN**으로 클라이언트 · 윈도우 단위의 세밀한 제어 가능\n\n### Resource Manager 핵심 구조\n\n```\nResource Plan ---- Plan Directive ---- Consumer Group ---- Session\n     |                  |                    |\n  1 Active per      CPU/IO/Parallel     Sessions grouped\n  Instance          Resource Rules      by same policy\n```\n\n| 핵심 개념 | 설명 |\n|---|---|\n| **Resource Plan** | 인스턴스당 1개만 활성, RESOURCE_MANAGER_PLAN 파라미터로 설정 |\n| **Plan Directive** | Consumer Group에 CPU(MGMT_P1~P8), IO, 병렬, 세션 규칙 정의 |\n| **Consumer Group** | 매핑 규칙으로 세션 자동 할당, SWITCH_TIME으로 자동 전환 |\n| **Pending Area** | 설정 변경을 트랜잭션처럼 관리 (생성→정의→검증→제출) |\n| **DBRM** | Resource Manager의 실제 집행 엔진 (백그라운드 프로세스) |\n\n### CDB/PDB 2계층 리소스 관리\n\n| 계층 | 제어 대상 | 핵심 속성 |\n|---|---|---|\n| **CDB Resource Plan** | PDB 간 리소스 배분 | shares, utilization_limit, MAX_IOPS, MAX_MBPS |\n| **PDB Resource Plan** | PDB 내부 Consumer Group 간 배분 | MGMT_P1~P8, SWITCH_TIME |",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>Maintenance Window</b><br/>월~금 22:00·토~일 06:00\"]:::amber\n  B[\"<b>AutoTask Framework</b><br/>MAINTENANCE_WINDOW_GROUP\"]:::blue\n  C[\"<b>auto optimizer stats collection</b><br/>옵티마이저 통계 자동 수집<br/>우선순위: HIGH\"]:::green\n  D[\"<b>sql tuning advisor</b><br/>SQL 프로파일 자동 생성·적용<br/>우선순위: MEDIUM\"]:::green\n  E[\"<b>auto space advisor</b><br/>세그먼트 공간 분석·권고<br/>우선순위: MEDIUM\"]:::green\n  F[\"<b>Resource Plan 자동 활성화</b><br/>resource_plan 속성 연동\"]:::amber\n  A --> B\n  A --> F\n  B --> C\n  B --> D\n  B --> E\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "자동화 기반 태스크 구조 — Maintenance Window → AutoTask → 3종 자동 태스크",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -58,7 +67,16 @@
       "title": "문제를 찾아 해결하기 — 문제 해결 어드바이저 (Problem Resolution Advisors, 08_03)",
       "sqlExamplesIds": [],
       "content": "### 어드바이저 프레임워크 공통 구조\n\n```\nDBMS_ADVISOR (Common Interface)\n  +-- CREATE_TASK -> SET_TASK_PARAMETER -> EXECUTE_TASK -> GET_TASK_REPORT\n       |\n       +-- Result Hierarchy: Task -> Execution -> Finding -> Recommendation -> Action\n```\n\n### 5대 어드바이저 한눈에 보기\n\n| 어드바이저 | 목적 | 핵심 패키지 | 주요 결과물 |\n|---|---|---|---|\n| **세그먼트 어드바이저** | 공간 낭비 식별/회수 | DBMS_SPACE, DBMS_ADVISOR | Shrink/Reorganize 권고 |\n| **SQL 튜닝 어드바이저** | 개별 SQL 최적화 | DBMS_SQLTUNE | SQL Profile, 인덱스/통계 권고 |\n| **SQL 액세스 어드바이저** | 스키마 구조 최적화 | DBMS_ADVISOR | 인덱스, MV, 파티션 권고 |\n| **옵티마이저 통계 어드바이저** | 통계 수집 전략 진단 | DBMS_STATS | 통계 관리 개선안 |\n| **SQL 퍼포먼스 애널라이저 (SPA)** | 변경 전후 성능 비교 | DBMS_SQLPA | Regressed/Improved SQL 분류 |\n\n### 옵티마이저 통계 관리 핵심\n\n| 항목 | 기본값/설정 | 설명 |\n|---|---|---|\n| 수집 도구 | **DBMS_STATS** (ANALYZE 대체) | Oracle 공식 권장 |\n| 샘플링 비율 | AUTO_SAMPLE_SIZE (자동) | 옵티마이저가 최적 비율 결정 |\n| 히스토그램 | FOR ALL COLUMNS SIZE AUTO | 워크로드 기반 자동 판단 |\n| 노후화 기준 | STALE_PERCENT=10% | 데이터 10% 이상 변경 시 |\n| 증분 통계 | INCREMENTAL=TRUE | 파티션 테이블 효율적 통계 수집 |\n| 보류 통계 | PUBLISH=FALSE 후 수집 | 적용 전 테스트 가능 |\n\n### SQL 튜닝 어드바이저 vs SQL 액세스 어드바이저 vs SPA\n\n| 비교 항목 | SQL 튜닝 어드바이저 | SQL 액세스 어드바이저 | SPA |\n|---|---|---|---|\n| 초점 | 개별 SQL 최적화 | 스키마 구조 최적화 | 변경 영향도 평가 |\n| 입력 | SQL ID / SQL 텍스트 / STS | STS / 현재 워크로드 | STS |\n| 주요 결과 | SQL Profile | 인덱스/MV/파티션 DDL | Regressed/Improved 분류 |\n| 자동 실행 | SYS_AUTO_SQL_TUNING_TASK | 수동 실행 필요 | 수동 실행 필요 |",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>DBMS_ADVISOR</b><br/>공통 인터페이스\"]:::amber\n  B[\"<b>CREATE_TASK</b>\"]:::blue\n  C[\"<b>SET_TASK_PARAMETER</b>\"]:::blue\n  D[\"<b>EXECUTE_TASK</b>\"]:::blue\n  E[\"<b>GET_TASK_REPORT</b>\"]:::blue\n  F[\"<b>세그먼트 어드바이저</b><br/>공간 낭비 식별·회수\"]:::green\n  G[\"<b>SQL 튜닝 어드바이저</b><br/>개별 SQL 최적화\"]:::green\n  H[\"<b>SQL 액세스 어드바이저</b><br/>스키마 구조 최적화\"]:::green\n  I[\"<b>옵티마이저 통계 어드바이저</b><br/>통계 수집 전략 진단\"]:::green\n  J[\"<b>SQL 퍼포먼스 애널라이저</b><br/>변경 전후 성능 비교\"]:::green\n  A --> B --> C --> D --> E\n  A --> F\n  A --> G\n  A --> H\n  A --> I\n  A --> J\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "어드바이저 프레임워크 — DBMS_ADVISOR 공통 워크플로우와 5대 어드바이저",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -66,7 +84,16 @@
       "title": "자동 성능 진단 — ADDM (Diagnostic Monitor, 08_04)",
       "sqlExamplesIds": [],
       "content": "### ADDM 핵심 개념\n\n> **ADDM = AWR 스냅샷 기반의 자동 성능 진단 엔진**\n>\n> MMON 프로세스가 매 AWR 스냅샷 후 자동 실행하여 **DB Time**을 핵심 메트릭으로 하향식(Top-Down) 분석 수행\n\n### ADDM 분석 흐름\n\n```\nAWR Snapshot (MMON)\n       |\n       v\nADDM Auto-Analysis Trigger\n       |\n       v\nDB Time Decomposition (CPU Time + Wait Time)\n       |\n       v\nFinding (Problem / Symptom / Information)\n       |\n       v\nRecommendation (Hardware / Configuration / Schema / Application)\n       |\n       v\nAction + Rationale + Benefit\n```\n\n### ADDM 결과 구조\n\n| 구성요소 | 설명 |\n|---|---|\n| **Finding** | 식별된 문제 — Problem(근본 원인), Symptom(증상), Information(정보) |\n| **Impact** | 전체 DB Time 대비 비율(%)과 절대 시간(초)으로 정량화 |\n| **Recommendation** | 4대 유형: Hardware, Configuration, Schema, Application |\n| **Action** | 구체적 조치 사항 (SQL 튜닝, 파라미터 변경, 인덱스 생성 등) |\n| **Benefit** | 예상 DB Time 절약량 — 우선순위 정렬 기준 |\n\n### ADDM 필수 파라미터\n\n| 파라미터 | 필수값 | 설명 |\n|---|---|---|\n| STATISTICS_LEVEL | TYPICAL 이상 | BASIC이면 AWR/ADDM 비활성화 |\n| CONTROL_MANAGEMENT_PACK_ACCESS | DIAGNOSTIC+TUNING | Diagnostic Pack 라이선스 제어 |\n| DBTIME_THRESHOLD | 기본 1% | DB Time의 이 비율 이상만 보고 |\n\n### PDB 레벨 ADDM\n\n- Oracle 26ai: **AWR_PDB_AUTOFLUSH_ENABLED=TRUE 기본** → PDB ADDM 자동 활성화\n- PDB ADDM은 해당 PDB 워크로드만 분석, CDB 공유 자원(SGA, CPU) 분석은 제한적\n- DBMS_ADDM 패키지로 PDB 컨텍스트에서 직접 태스크 생성 및 분석 가능\n\n### Oracle 권장 성능 튜닝 방법론\n\n```\n1) Application/SQL Tuning  <- Top Priority (Max Impact)\n       |\n       v\n2) Instance Tuning (Memory, I/O, Concurrency)\n       |\n       v\n3) OS/Hardware Tuning  <- Last Resort\n```\n\n- ADDM의 **하향식 DB Time 분해 분석**이 이 방법론과 자연스럽게 일치\n- 대부분의 성능 문제는 **비효율적 SQL이나 부적절한 애플리케이션 설계**에서 기인",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>AWR Snapshot</b><br/>MMON 프로세스\"]:::blue\n  B[\"<b>ADDM 자동 분석 트리거</b><br/>매 스냅샷 후 자동 실행\"]:::amber\n  C[\"<b>DB Time 분해</b><br/>CPU Time + Wait Time\"]:::amber\n  D[\"<b>Finding</b><br/>Problem·Symptom·Information\"]:::red\n  E[\"<b>Recommendation</b><br/>Hardware·Configuration<br/>Schema·Application\"]:::green\n  F[\"<b>Action + Benefit</b><br/>구체적 조치·예상 DB Time 절약량\"]:::green\n  A --> B --> C --> D --> E --> F\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "ADDM 분석 흐름 — AWR 스냅샷에서 DB Time 분해·Finding·Recommendation·Action까지",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -89,23 +116,55 @@
   ],
   "sql_examples": [],
   "keywords": [
-    "V$ Views", "V$SESSION", "V$SQL", "V$ACTIVE_SESSION_HISTORY (ASH)",
-    "데이터 딕셔너리 (Data Dictionary)", "DBA_ Views", "CDB_ Views",
-    "ADR (Automatic Diagnostic Repository)", "ADRCI", "Alert Log", "Trace Files",
-    "AWR (Automatic Workload Repository)", "AWR Snapshot", "AWR Baseline",
-    "MMON", "STATISTICS_LEVEL", "CONTROL_MANAGEMENT_PACK_ACCESS",
-    "AWR_PDB_AUTOFLUSH_ENABLED", "DB Time",
-    "Maintenance Window", "DBMS_AUTO_TASK_ADMIN",
-    "Resource Manager", "Resource Plan", "Consumer Group",
-    "CDB Resource Plan", "MAX_IOPS", "MAX_MBPS",
-    "DBMS_ADVISOR", "Segment Advisor", "Online Segment Shrink",
-    "SQL Tuning Advisor", "DBMS_SQLTUNE", "SQL Profile",
-    "SQL Access Advisor", "SQL Tuning Set (STS)",
-    "DBMS_STATS", "Optimizer Statistics", "Incremental Statistics",
-    "SQL Performance Analyzer (SPA)", "DBMS_SQLPA",
-    "ADDM (Automatic Database Diagnostic Monitor)", "DBMS_ADDM",
-    "Finding", "Recommendation", "Impact", "Benefit",
-    "Top-Down Analysis", "Real-Time ADDM", "Performance Hub",
+    "V$ Views",
+    "V$SESSION",
+    "V$SQL",
+    "V$ACTIVE_SESSION_HISTORY (ASH)",
+    "데이터 딕셔너리 (Data Dictionary)",
+    "DBA_ Views",
+    "CDB_ Views",
+    "ADR (Automatic Diagnostic Repository)",
+    "ADRCI",
+    "Alert Log",
+    "Trace Files",
+    "AWR (Automatic Workload Repository)",
+    "AWR Snapshot",
+    "AWR Baseline",
+    "MMON",
+    "STATISTICS_LEVEL",
+    "CONTROL_MANAGEMENT_PACK_ACCESS",
+    "AWR_PDB_AUTOFLUSH_ENABLED",
+    "DB Time",
+    "Maintenance Window",
+    "DBMS_AUTO_TASK_ADMIN",
+    "Resource Manager",
+    "Resource Plan",
+    "Consumer Group",
+    "CDB Resource Plan",
+    "MAX_IOPS",
+    "MAX_MBPS",
+    "DBMS_ADVISOR",
+    "Segment Advisor",
+    "Online Segment Shrink",
+    "SQL Tuning Advisor",
+    "DBMS_SQLTUNE",
+    "SQL Profile",
+    "SQL Access Advisor",
+    "SQL Tuning Set (STS)",
+    "DBMS_STATS",
+    "Optimizer Statistics",
+    "Incremental Statistics",
+    "SQL Performance Analyzer (SPA)",
+    "DBMS_SQLPA",
+    "ADDM (Automatic Database Diagnostic Monitor)",
+    "DBMS_ADDM",
+    "Finding",
+    "Recommendation",
+    "Impact",
+    "Benefit",
+    "Top-Down Analysis",
+    "Real-Time ADDM",
+    "Performance Hub",
     "SYS_AUTO_SQL_TUNING_TASK"
   ]
 }

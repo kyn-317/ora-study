@@ -212,6 +212,16 @@
             "MV 권고를 받으려면 QUERY_REWRITE_ENABLED 파라미터가 TRUE로 설정되어 있어야 함"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v5",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>Input: 워크로드 소스</b><br/>STS (SQL Tuning Set)<br/>현재 활동(CURRENT)\"]:::amber\n  B[\"<b>태스크 생성</b><br/>DBMS_ADVISOR.CREATE_TASK<br/>advisor_name='SQL Access Advisor'\"]:::blue\n  C[\"<b>파라미터 설정</b><br/>ANALYSIS_SCOPE: INDEX,MV<br/>MODE: COMPREHENSIVE\"]:::blue\n  D[\"<b>태스크 실행</b><br/>DBMS_ADVISOR.EXECUTE_TASK<br/>인덱스·MV·파티션 분석\"]:::green\n  E[\"<b>권고 검토</b><br/>DBA_ADVISOR_RECOMMENDATIONS<br/>인덱스/MV 생성·삭제 권고\"]:::amber\n  F[\"<b>구현 스크립트 생성</b><br/>DBMS_ADVISOR.GET_TASK_SCRIPT<br/>DDL 스크립트 (CLOB)\"]:::green\n  A --> B\n  B --> C\n  C --> D\n  D --> E\n  E --> F\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "SQL 액세스 어드바이저 분석 흐름 (Input 워크로드 → 태스크 생성·실행 → 권고 검토 → 구현 스크립트)",
+          "placement": "before-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -233,6 +243,16 @@
             "UseAutoJob, CompleteAutoJob, UseIncremental 등의 분석 규칙을 통해 모범 사례 준수 여부를 검증",
             "Oracle 26ai에서 머신러닝 기반 통계 노후화 예측과 연계되어 보다 정밀한 통계 관리 전략 권고가 가능"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v7",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>AUTO_STATS_ADVISOR_TASK</b><br/>자동 실행 태스크\"]:::amber\n  B[\"<b>통계 수집 설정 분석</b><br/>수집 Preferences 적절성 평가\"]:::blue\n  C[\"<b>누락된 통계 식별</b><br/>통계 미수집 객체\"]:::blue\n  D[\"<b>오래된 통계 감지</b><br/>Stale 통계 현황\"]:::blue\n  E[\"<b>비효율적 설정 탐지</b><br/>샘플링 비율·히스토그램 설정\"]:::blue\n  F[\"<b>규칙 검증</b><br/>UseAutoJob·CompleteAutoJob<br/>UseIncremental·UseConcurrent\"]:::green\n  G[\"<b>권고 사항 생성</b><br/>DBMS_STATS.REPORT_ADVISOR_TASK\"]:::green\n  H[\"<b>보고서</b><br/>규칙·위반사항·권고·근거\"]:::amber\n  A --> B\n  A --> C\n  A --> D\n  A --> E\n  B --> F\n  C --> F\n  D --> F\n  E --> F\n  F --> G --> H\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "옵티마이저 통계 어드바이저 진단 흐름 — 4가지 진단 항목 → 규칙 검증 → 권고 보고서",
+          "placement": "before-content",
+          "width": "100%"
         }
       ]
     },
@@ -256,6 +276,16 @@
             "퇴보(Regressed) SQL에 대해서는 SQL Plan Baseline, SQL Tuning Advisor, SQL Patch 등으로 대응 가능",
             "DB 업그레이드, 파라미터 변경, 스키마 변경, 통계 변경 등 주요 시스템 변경 전 필수적인 사전 평가 도구"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v6",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>STS 준비</b><br/>SQL Tuning Set 캡처<br/>분석 대상 워크로드\"]:::amber\n  B[\"<b>분석 태스크 생성</b><br/>DBMS_SQLPA.CREATE_ANALYSIS_TASK<br/>STS를 입력으로 지정\"]:::blue\n  C[\"<b>변경 전 Trial (Before)</b><br/>EXECUTE_ANALYSIS_TASK<br/>execution_type='TEST EXECUTE'\"]:::green\n  D[\"<b>시스템 변경 적용</b><br/>DB 업그레이드 / 파라미터 변경<br/>스키마·통계 변경\"]:::red\n  E[\"<b>변경 후 Trial (After)</b><br/>EXECUTE_ANALYSIS_TASK<br/>execution_type='TEST EXECUTE'\"]:::green\n  F[\"<b>비교 분석</b><br/>EXECUTE_ANALYSIS_TASK<br/>execution_type='COMPARE PERFORMANCE'\"]:::blue\n  G[\"<b>비교 보고서</b><br/>REPORT_ANALYSIS_TASK<br/>Improved / Regressed / Unchanged\"]:::amber\n  A --> B\n  B --> C\n  C --> D\n  D --> E\n  E --> F\n  F --> G\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "SPA 실행 흐름 (STS 준비 → Before Trial → 시스템 변경 → After Trial → 비교 분석 → 보고서)",
+          "placement": "before-content",
+          "width": "100%"
         }
       ]
     }

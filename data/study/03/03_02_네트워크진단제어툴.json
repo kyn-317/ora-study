@@ -160,6 +160,16 @@
             "고급 설정은 NETCA로 불가능하며, NETMGR 또는 수동 편집이 필요"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>NETCA 실행</b><br/>netca / Silent 모드\"]:::amber\n  A --> B{\"<b>마법사 유형 선택</b>\"}:::blue\n  B --> C[\"<b>리스너 구성</b><br/>추가 / 재구성 / 삭제 / 이름 변경\"]:::green\n  B --> D[\"<b>네이밍 방법 구성</b><br/>NAMES.DIRECTORY_PATH 순서 설정\"]:::green\n  B --> E[\"<b>로컬 네트 서비스 이름</b><br/>tnsnames.ora 연결 디스크립터 추가\"]:::green\n  B --> F[\"<b>디렉토리 서비스 구성</b><br/>LDAP 접속 설정\"]:::green\n  C --> G[\"<b>listener.ora</b><br/>생성 / 수정\"]:::red\n  D --> H[\"<b>sqlnet.ora</b><br/>생성 / 수정\"]:::red\n  E --> I[\"<b>tnsnames.ora</b><br/>생성 / 수정\"]:::red\n  F --> J[\"<b>ldap.ora</b><br/>생성 / 수정\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "NETCA 4가지 구성 마법사 흐름 — 마법사 유형 선택부터 생성/수정되는 구성 파일까지",
+          "placement": "before-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -179,6 +189,16 @@
             "로컬 $ORACLE_HOME/network/admin의 파일만 편집 가능 (원격 파일 직접 편집 불가)",
             "Oracle 23ai 이후 레거시 도구로 분류, Cloud 환경에서는 CLI 기반 관리 권장"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v6",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>NETMGR 실행</b><br/>netmgr (GUI 전용)\"]:::amber\n  A --> B{\"<b>관리 영역 선택</b>\"}:::blue\n  B --> C[\"<b>프로파일 (Profile)</b><br/>sqlnet.ora 설정 관리\"]:::green\n  B --> D[\"<b>서비스 네이밍</b><br/>tnsnames.ora 관리\"]:::green\n  B --> E[\"<b>리스너 (Listeners)</b><br/>listener.ora 관리\"]:::green\n  C --> C1[\"<b>네이밍 · 보안 · 추적<br/>암호화 · 무결성 설정</b>\"]:::blue\n  D --> D1[\"<b>주소 · SERVICE_NAME<br/>Failover · Load Balancing</b>\"]:::blue\n  E --> E1[\"<b>수신 주소 · SID_LIST<br/>로깅 · 인증 설정</b>\"]:::blue\n  A --> F[\"<b>불가</b><br/>리스너 런타임 시작/중지<br/>Silent 모드 없음\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "NETMGR 3개 관리 영역 — 프로파일(sqlnet.ora), 서비스 네이밍(tnsnames.ora), 리스너(listener.ora)와 불가 동작",
+          "placement": "before-content",
+          "width": "100%"
         }
       ]
     },
@@ -204,6 +224,16 @@
             "TNS-12514(서비스 미발견), TNS-12519(핸들러 없음) 등 주요 오류 패턴 파악이 중요",
             "lsnrctl set trc_level 명령으로 리스너 재시작 없이 추적 레벨 동적 변경 가능"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v7",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>리스너 로그 발생</b><br/>연결 요청 · 오류 · 관리 명령\"]:::amber\n  A --> B[\"<b>ADR (Automatic Diagnostic Repository)</b><br/>$ADR_BASE/diag/tnslsnr/<br/>hostname/listener_name/\"]:::blue\n  B --> C[\"<b>alert/log.xml</b><br/>XML 형식 (ADR 표준)\"]:::green\n  B --> D[\"<b>trace/listener.log</b><br/>텍스트 형식 (사람이 읽기 용이)\"]:::green\n  B --> E[\"<b>ADRCI 조회</b><br/>show alert / show incident\"]:::blue\n  A --> F{\"<b>추적 레벨 설정</b><br/>lsnrctl set trc_level\"}:::amber\n  F --> F1[\"<b>OFF</b><br/>추적 비활성화\"]:::green\n  F --> F2[\"<b>USER</b><br/>사용자 수준\"]:::green\n  F --> F3[\"<b>ADMIN</b><br/>관리자 수준\"]:::green\n  F --> F4[\"<b>SUPPORT</b><br/>최대 상세\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "리스너 로그 ADR 저장 구조와 추적 레벨(OFF→USER→ADMIN→SUPPORT) 설정 흐름",
+          "placement": "before-content",
+          "width": "100%"
         }
       ]
     }

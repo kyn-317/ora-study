@@ -33,7 +33,16 @@
       "title": "보안의 출발점 — 사용자 및 인증 관리 (User and Authentication Management, 04_01)",
       "sqlExamplesIds": [],
       "content": "Oracle Database 보안의 가장 기본적인 공식:\n\n> **보안 = 사용자(누구인가) + 인증(어떻게 검증하는가) + 권한(무엇을 허용하는가)**\n\n### 사용자 유형\n\n| 유형 | 설명 | 이름 규칙 | 존재 범위 |\n|---|---|---|---|\n| **로컬 사용자** | 특정 PDB에서만 존재 | 제한 없음 | 해당 PDB만 |\n| **공통 사용자** | CDB 루트와 모든 PDB에 걸쳐 존재 | **C## 접두사** 필수 | CDB 전체 |\n| **관리자 사용자** | SYS, SYSTEM 등 사전 정의 계정 | 고정 | CDB 전체 |\n\n### 인증 방식 비교\n\n| 인증 방식 | 인증 주체 | 사용 사례 |\n|---|---|---|\n| **패스워드 인증** | 데이터베이스 (데이터 딕셔너리) | 일반 사용자 접속 |\n| **OS 인증** | 운영체제 (OS 그룹 멤버십) | 로컬 관리자 접속 |\n| **특권 인증** | 패스워드 파일 또는 OS | SYSDBA/SYSOPER 접속 |\n| **외부 인증** | OS 또는 네트워크 서비스 | SSO, Kerberos |\n| **글로벌 인증** | 디렉토리 서비스 (LDAP) | 중앙 집중 인증 |\n\n### 관리자 사용자와 특수 권한\n\n| 관리자 권한 | 용도 | 접속 구문 |\n|---|---|---|\n| **SYSDBA** | 최상위 관리 (기동/종료, 백업/복구) | AS SYSDBA |\n| **SYSOPER** | 기동/종료, 아카이브 로그 관리 | AS SYSOPER |\n| **SYSBACKUP** | 백업/복구 전용 | AS SYSBACKUP |\n| **SYSDG** | Data Guard 관리 전용 | AS SYSDG |\n| **SYSKM** | 암호화 키 관리 전용 | AS SYSKM |\n\n### 스키마와 사용자\n\n- **사용자(User) = 스키마(Schema)**: 1:1 대응, 사용자 생성 시 스키마 자동 생성\n- **Schema-Only Account**: NO AUTHENTICATION으로 생성하여 로그인 불가, 스키마만 존재하는 계정\n- **패스워드 파일**: orapwd 유틸리티로 생성, REMOTE_LOGIN_PASSWORDFILE 파라미터로 관리",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>접속 시도</b>\"]:::amber\n  A --> B{\"<b>인증 주체</b>\"}\n  B -->|\"데이터베이스\"| C[\"<b>패스워드 인증</b><br/>일반 사용자 접속\"]:::blue\n  B -->|\"운영체제\"| D[\"<b>OS 인증</b><br/>로컬 관리자 접속\"]:::blue\n  B -->|\"패스워드 파일 또는 OS\"| E[\"<b>특권 인증</b><br/>SYSDBA/SYSOPER 접속\"]:::red\n  B -->|\"OS 또는 네트워크 서비스\"| F[\"<b>외부 인증</b><br/>SSO, Kerberos\"]:::green\n  B -->|\"디렉토리 서비스 (LDAP)\"| G[\"<b>글로벌 인증</b><br/>중앙 집중 인증\"]:::green\n  C --> H[\"<b>접속 허용</b><br/>권한 확인 단계로 이동\"]:::amber\n  D --> H\n  E --> H\n  F --> H\n  G --> H\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "Oracle 5가지 인증 방식 분기 흐름 — 인증 주체에 따른 패스워드/OS/특권/외부/글로벌 인증 선택 경로",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -58,7 +67,16 @@
       "title": "통제와 제한 — 보안 통제 및 자원 제한 (Security Controls and Resource Limits, 04_03)",
       "sqlExamplesIds": [],
       "content": "### 권한 분석 (Privilege Analysis)\n\n**DBMS_PRIVILEGE_CAPTURE** 패키지를 사용하여 실제 사용되는 권한과 미사용 권한을 식별합니다.\n\n```\nCREATE_CAPTURE --> ENABLE_CAPTURE --> Run Workload --> DISABLE_CAPTURE --> GENERATE_RESULT\n(Create Policy)   (Start Capture)   (Normal Work)   (Stop Capture)     (Generate Result)\n                                                                              |\n                                                                              v\n                                                          DBA_USED_PRIVS / DBA_UNUSED_PRIVS Query\n```\n\n| 캡처 유형 | 설명 |\n|---|---|\n| **DATABASE** | 전체 데이터베이스 권한 캡처 (동시 1개만 가능) |\n| **ROLE** | 특정 역할의 권한 사용 여부 캡처 |\n| **CONTEXT** | SYS_CONTEXT 조건별 선택적 캡처 |\n| **ROLE_AND_CONTEXT** | 역할 + 조건 결합 캡처 |\n\n### 프로파일을 통한 자원 제한\n\n| 구분 | 자원 제한 파라미터 | 비밀번호 관리 파라미터 |\n|---|---|---|\n| **핵심 항목** | CPU_PER_SESSION, CONNECT_TIME, IDLE_TIME, SESSIONS_PER_USER | PASSWORD_LIFE_TIME, FAILED_LOGIN_ATTEMPTS, PASSWORD_LOCK_TIME |\n| **활성화 조건** | RESOURCE_LIMIT=TRUE 필요 | **항상 활성** (별도 설정 불필요) |\n| **기본 프로파일** | DEFAULT 프로파일 (모든 사용자 기본 적용) | DEFAULT 프로파일 |\n\n### 비밀번호 관리 핵심\n\n| 파라미터 | 기능 |\n|---|---|\n| **PASSWORD_LIFE_TIME** | 비밀번호 유효 기간 (일) |\n| **PASSWORD_GRACE_TIME** | 만료 후 유예 기간 (일) |\n| **FAILED_LOGIN_ATTEMPTS** | 연속 실패 허용 횟수 → 초과 시 계정 잠금 |\n| **PASSWORD_LOCK_TIME** | 잠금 해제까지 대기 시간 (일) |\n| **PASSWORD_VERIFY_FUNCTION** | 비밀번호 복잡성 검증 함수 |\n| **INACTIVE_ACCOUNT_TIME** | 미사용 계정 자동 잠금 기간 (일) |\n\n### 테이블스페이스 쿼터 (Quota)\n\n- **QUOTA n{K|M|G|T} ON tablespace**: 특정 테이블스페이스 사용 한도 설정\n- **UNLIMITED TABLESPACE**: 시스템 권한으로 모든 테이블스페이스 무제한 사용 (쿼터 무시)\n- **DBA_TS_QUOTAS**: 쿼터 할당 현황 모니터링",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>CREATE_CAPTURE</b><br/>Create Policy\"]:::amber\n  A --> B[\"<b>ENABLE_CAPTURE</b><br/>Start Capture\"]:::blue\n  B --> C[\"<b>Run Workload</b><br/>Normal Work\"]:::green\n  C --> D[\"<b>DISABLE_CAPTURE</b><br/>Stop Capture\"]:::blue\n  D --> E[\"<b>GENERATE_RESULT</b><br/>Generate Result\"]:::amber\n  E --> F[\"<b>DBA_USED_PRIVS</b><br/>실제 사용 권한 조회\"]:::green\n  E --> G[\"<b>DBA_UNUSED_PRIVS</b><br/>미사용 권한 조회\"]:::red\n  G --> H[\"<b>REVOKE</b><br/>미사용 권한 취소\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "DBMS_PRIVILEGE_CAPTURE 5단계 워크플로우 — 정책 생성부터 미사용 권한 취소까지",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -66,7 +84,16 @@
       "title": "활동 기록 — 감사 체계 (Auditing System, 04_04)",
       "sqlExamplesIds": [],
       "content": "### 감사 유형 분류\n\n| 감사 유형 | 설명 | 비활성화 가능 |\n|---|---|---|\n| **통합 감사 (Unified Auditing)** | 정책 기반 단일 감사 프레임워크 (12c~, 권장 방식) | O |\n| **강제 감사 (Mandatory Auditing)** | SYSDBA/SYSOPER 접속, DB 기동/종료 등 필수 항목 | **X (항상 활성)** |\n| **파인 그레인 감사 (FGA)** | 열/행 수준의 조건부 세밀 감사 | O |\n\n### 통합 감사 아키텍처\n\n```\nCREATE AUDIT POLICY --> AUDIT POLICY (Enable) --> User Activity\n                                                        |\n                                                        v\n                                               Audit Policy Evaluation\n                                                        |\n                                                        v\n                                            Write to SGA Audit Buffer\n                                                        |\n                                                        v\n                                        Flush to AUDSYS.AUD$UNIFIED\n                                                        |\n                                                        v\n                                        Query via UNIFIED_AUDIT_TRAIL View\n```\n\n### 감사 정책 유형\n\n| 정책 유형 | 감사 대상 | 예시 |\n|---|---|---|\n| **권한 감사** | 시스템 권한 사용 | PRIVILEGES CREATE TABLE, ALTER USER |\n| **액션 감사** | 특정 객체에 대한 DML/DDL | ACTIONS SELECT ON hr.employees |\n| **롤 감사** | 롤에 포함된 권한 사용 | ROLES dba, resource |\n| **조건부 감사** | WHEN 절로 조건 지정 | WHEN 'SYS_CONTEXT(...)' != 'appserver' |\n\n### 사전 정의 감사 정책\n\n| 정책 | 감사 대상 |\n|---|---|\n| **ORA_SECURECONFIG** | 보안 관련 설정 변경 (ALTER SYSTEM, CREATE USER 등) |\n| **ORA_LOGON_FAILURES** | 로그인 실패 이벤트 |\n\n### 파인 그레인 감사 (FGA)\n\n- **DBMS_FGA.ADD_POLICY**로 정책 생성\n- SELECT 문 감사 가능 (통합 감사에서는 불가능한 세밀한 조건 지정)\n- **핸들러 프로시저** 지정으로 감사 이벤트 발생 시 자동 처리 가능\n- **ALL_COLUMNS**: 지정된 모든 열이 참조될 때만 감사\n- **ANY_COLUMNS**: 지정된 열 중 하나라도 참조되면 감사\n\n### 감사 관리\n\n| 관리 항목 | 도구/뷰 |\n|---|---|\n| 정책 생성/삭제 | CREATE/DROP AUDIT POLICY |\n| 정책 활성화/비활성화 | AUDIT/NOAUDIT POLICY |\n| 트레일 관리 | DBMS_AUDIT_MGMT (아카이브, 정리) |\n| 트레일 조회 | UNIFIED_AUDIT_TRAIL, DBA_FGA_AUDIT_TRAIL |\n| 관리 롤 | AUDIT_ADMIN (전체 관리), AUDIT_VIEWER (조회만) |",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>CREATE AUDIT POLICY</b>\"]:::amber\n  A --> B[\"<b>AUDIT POLICY (Enable)</b>\"]:::amber\n  B --> C[\"<b>User Activity</b>\"]:::blue\n  C --> D[\"<b>Audit Policy Evaluation</b>\"]:::blue\n  D --> E[\"<b>Write to SGA Audit Buffer</b>\"]:::green\n  E --> F[\"<b>Flush to AUDSYS.AUD$UNIFIED</b>\"]:::green\n  F --> G[\"<b>Query via UNIFIED_AUDIT_TRAIL View</b>\"]:::amber\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "통합 감사 아키텍처 — 정책 생성부터 SGA 버퍼 기록·AUDSYS 저장·UNIFIED_AUDIT_TRAIL 조회까지",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {

@@ -50,7 +50,16 @@
       "title": "데이터의 집 — 물리적/논리적 저장 구조 (Storage Structures, 01_03)",
       "sqlExamplesIds": [],
       "content": "### 물리적 파일 3종\n\n| 파일 | 역할 | 손상 시 영향 |\n|---|---|---|\n| **컨트롤 파일** | DB 전체 구조 메타데이터 저장 | MOUNT 불가 → DB 접근 불가 |\n| **온라인 Redo Log** | 모든 변경 사항 기록 | 복구 불가, 데이터 유실 위험 |\n| **데이터 파일** | 실제 사용자 데이터 저장 | 해당 테이블스페이스 접근 불가 |\n\n### 논리적 저장 계층\n\n```\nTablespace\n  +-- Segment (Table, Index, etc.)\n       +-- Extent (contiguous blocks)\n            +-- Data Block (min I/O unit, default 8KB)\n```\n\n- **테이블스페이스**: 기본 5종 — SYSTEM, SYSAUX, UNDOTBS1, TEMP, USERS\n- **UNDO 테이블스페이스**: DML 변경 전 데이터(Before Image) 저장 → 롤백, 읽기 일관성, 복구에 활용\n- **CDB 환경**: 로컬 UNDO 모드(21c 이후 기본)에서 각 PDB가 자체 UNDO 테이블스페이스 보유",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v4",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  DB[\"<b>데이터베이스 (디스크)</b>\"]:::amber\n  DB --> PF[\"<b>물리적 파일 3종</b>\"]:::blue\n  PF --> CF[\"<b>컨트롤 파일</b><br/>DB 전체 구조 메타데이터 저장<br/>손상 시: MOUNT 불가\"]:::red\n  PF --> RL[\"<b>온라인 Redo Log</b><br/>모든 변경 사항 기록<br/>손상 시: 복구 불가, 데이터 유실 위험\"]:::red\n  PF --> DF[\"<b>데이터 파일</b><br/>실제 사용자 데이터 저장<br/>손상 시: 해당 테이블스페이스 접근 불가\"]:::red\n  DB --> LS[\"<b>논리적 저장 계층</b>\"]:::green\n  LS --> TS[\"<b>Tablespace</b><br/>SYSTEM / SYSAUX / UNDOTBS1 / TEMP / USERS\"]:::green\n  TS --> SEG[\"<b>Segment</b><br/>Table, Index 등\"]:::green\n  SEG --> EXT[\"<b>Extent</b><br/>연속된 블록 집합\"]:::green\n  EXT --> BLK[\"<b>Data Block</b><br/>최소 I/O 단위 (기본 8KB)\"]:::green\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "물리적 파일 3종(컨트롤 파일·온라인 Redo Log·데이터 파일)과 논리적 저장 계층(Tablespace → Segment → Extent → Data Block)의 관계도",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -58,7 +67,16 @@
       "title": "켜고 끄기 — 인스턴스 기동과 종료 (Startup & Shutdown, 01_04)",
       "sqlExamplesIds": [],
       "content": "### 기동 3단계\n\n```\nSHUTDOWN --> NOMOUNT --> MOUNT --> OPEN\n              (1)         (2)       (3)\n```\n\n| 단계 | 수행 내용 | 사용 가능한 작업 |\n|---|---|---|\n| **① NOMOUNT** | 파라미터 파일 읽기 → SGA 할당 → 백그라운드 프로세스 기동 | DB 생성, 컨트롤 파일 재생성 |\n| **② MOUNT** | 컨트롤 파일 열기 → 파일 위치 정보 인식 | 아카이브 모드 변경, 복구 작업 |\n| **③ OPEN** | 데이터 파일 + Redo Log 열기 → SCN 검증 → 인스턴스 복구(필요 시) | 일반 사용자 접속 가능 |\n\n### 종료 4모드\n\n| 모드 | 대기 | 롤백 | 체크포인트 | 인스턴스 복구 |\n|---|---|---|---|---|\n| **NORMAL** | 사용자 로그아웃까지 무한 대기 | 불필요 | O | 불필요 |\n| **TRANSACTIONAL** | 활성 트랜잭션 완료까지 대기 | 불필요 | O | 불필요 |\n| **IMMEDIATE** | 대기 없음 | 자동 롤백 | O | 불필요 |\n| **ABORT** | 대기 없음 | 수행 안함 | X | **필요** |\n\n### 멀티테넌트 주의사항\n\n- CDB 기동 시 사용자 PDB는 기본 **MOUNTED** 상태 → 별도 OPEN 필요\n- **ALTER PLUGGABLE DATABASE ... SAVE STATE** → CDB 재기동 시 PDB 자동 OPEN\n- PDB$SEED(CON_ID=2)는 항상 READ ONLY — 새 PDB 생성의 템플릿",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v5",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  SD[\"<b>SHUTDOWN</b>\"]:::red\n  NM[\"<b>① NOMOUNT</b><br/>파라미터 파일 읽기<br/>SGA 할당 · 백그라운드 프로세스 기동\"]:::amber\n  MT[\"<b>② MOUNT</b><br/>컨트롤 파일 열기<br/>파일 위치 정보 인식\"]:::amber\n  OP[\"<b>③ OPEN</b><br/>데이터 파일 + Redo Log 열기<br/>SCN 검증 · 일반 사용자 접속 가능\"]:::green\n  SD -->|\"STARTUP NOMOUNT\"| NM\n  NM -->|\"ALTER DATABASE MOUNT\"| MT\n  MT -->|\"ALTER DATABASE OPEN\"| OP\n  OP -.->|\"SHUTDOWN\"| SD\n  subgraph 종료_4모드\n    SN[\"<b>NORMAL</b><br/>사용자 로그아웃까지 무한 대기\"]:::blue\n    ST[\"<b>TRANSACTIONAL</b><br/>활성 트랜잭션 완료까지 대기\"]:::blue\n    SI[\"<b>IMMEDIATE</b><br/>대기 없음 · 자동 롤백 · 체크포인트\"]:::blue\n    SA[\"<b>ABORT</b><br/>대기 없음 · 롤백 안함 · 체크포인트 X<br/>→ 인스턴스 복구 필요\"]:::red\n  end\n  OP --> SN & ST & SI & SA\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "기동 3단계(SHUTDOWN → NOMOUNT → MOUNT → OPEN)와 종료 4모드(NORMAL · TRANSACTIONAL · IMMEDIATE · ABORT) 흐름도",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -66,7 +84,16 @@
       "title": "설정의 핵심 — 초기화 파라미터 파일 (Parameter Files, 01_05)",
       "sqlExamplesIds": [],
       "content": "### PFILE vs SPFILE\n\n| 항목 | PFILE (init.ora) | SPFILE (spfile.ora) |\n|---|---|---|\n| 형식 | 텍스트 | 바이너리 |\n| 편집 | 텍스트 에디터로 직접 수정 | ALTER SYSTEM으로만 변경 |\n| 동적 변경 | 불가 (파일 수동 편집 후 재기동) | ALTER SYSTEM SCOPE=BOTH |\n| 기본 사용 | 수동 지정 시 | Oracle 기본 권장 |\n\n### ALTER SYSTEM SCOPE 옵션\n\n| SCOPE | 메모리 반영 | SPFILE 반영 | 용도 |\n|---|---|---|---|\n| MEMORY | O | X | 테스트/일시적 변경 |\n| SPFILE | X | O | 정적 파라미터 변경 (재기동 후 적용) |\n| BOTH | O | O | 영구 변경 (SPFILE 환경 기본값) |\n\n### 파라미터 분류\n\n- **동적 파라미터**: ALTER SYSTEM으로 실행 중 변경 가능 (IMMEDIATE/DEFERRED)\n- **정적 파라미터**: 재기동 필요 (SCOPE=SPFILE만 가능)\n- **기본(Basic)**: DBA가 반드시 검토해야 할 약 30개 핵심 파라미터\n- **숨겨진(_) 파라미터**: Oracle Support 권고 없이 변경 금지\n\n### 멀티테넌트 파라미터 관리\n\n- ISPDB_MODIFIABLE='TRUE'인 파라미터만 PDB 레벨에서 독립 설정 가능\n- PDB 미설정 파라미터는 CDB$ROOT 값을 상속\n- PDB 레벨 설정은 Unplug/Plug 후에도 유지됨",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v6",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  AS[\"<b>ALTER SYSTEM SET param=value</b>\"]:::amber\n  AS --> SC{\"SCOPE\"}\n  SC -- \"MEMORY\" --> M[\"<b>메모리만 반영</b><br/>테스트/일시적 변경\"]:::blue\n  SC -- \"SPFILE\" --> SP[\"<b>SPFILE만 반영</b><br/>정적 파라미터 변경<br/>재기동 후 적용\"]:::blue\n  SC -- \"BOTH\" --> BT[\"<b>메모리 + SPFILE 반영</b><br/>영구 변경 (SPFILE 환경 기본값)\"]:::green\n  PF[\"<b>파라미터 파일</b>\"]:::amber\n  PF --> PFILE[\"<b>PFILE (init.ora)</b><br/>텍스트 형식<br/>텍스트 에디터로 직접 수정\"]:::blue\n  PF --> SPFILE[\"<b>SPFILE (spfile.ora)</b><br/>바이너리 형식<br/>ALTER SYSTEM으로만 변경 — Oracle 기본 권장\"]:::green\n  PC[\"<b>파라미터 분류</b>\"]:::amber\n  PC --> DYN[\"<b>동적 파라미터</b><br/>ALTER SYSTEM으로 실행 중 변경 가능\"]:::green\n  PC --> STA[\"<b>정적 파라미터</b><br/>재기동 필요 — SCOPE=SPFILE만 가능\"]:::red\n  PC --> BAS[\"<b>기본(Basic) 파라미터</b><br/>DBA가 반드시 검토해야 할 약 30개 핵심 파라미터\"]:::blue\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "PFILE vs SPFILE 차이, ALTER SYSTEM SCOPE 옵션(MEMORY·SPFILE·BOTH), 파라미터 분류(동적·정적·기본) 관계도",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -74,7 +101,16 @@
       "title": "장애 대비 — 복구 기초 (Recovery Fundamentals, 01_06)",
       "sqlExamplesIds": [],
       "content": "### 복구의 2가지 유형\n\n| 유형 | 원인 | 수행 주체 | DBA 개입 |\n|---|---|---|---|\n| **인스턴스 복구** | SHUTDOWN ABORT, 정전, 크래시 | SMON 자동 | 불필요 |\n| **미디어 복구** | 디스크 장애, 파일 손상 | RMAN / DBA 수동 | 필요 |\n\n### 인스턴스 복구 2단계\n\n```\n장애 발생 → 재기동 → SMON 자동 수행:\n\n  ① Roll Forward (Redo 적용)\n     Online Redo Log의 변경 사항을 데이터 파일에 재적용\n     → 커밋 여부와 관계없이 모든 변경을 복원\n\n  ② Roll Back (UNDO 적용)\n     커밋되지 않은 트랜잭션을 UNDO 데이터로 롤백\n     → DB OPEN 후 백그라운드에서 수행 (빠른 서비스 재개)\n```\n\n### 체크포인트의 역할\n\n- **Buffer Cache ↔ 데이터 파일** 동기화 이벤트\n- FAST_START_MTTR_TARGET으로 복구 목표 시간(초) 설정\n- Incremental Checkpoint가 지속적으로 Dirty Buffer를 기록 → 복구 시간 단축\n\n### 미디어 복구 전제 조건\n\n- **ARCHIVELOG 모드** 필수 (Online Redo Log를 아카이브 로그로 보관)\n- 유효한 **백업** 필수\n- 완전 복구(최신 상태) vs 불완전 복구(특정 시점) 선택\n- 불완전 복구 후 반드시 **OPEN RESETLOGS** 수행\n\n### Fast Recovery Area (FRA)\n\n- 아카이브 로그, 백업, Flashback 로그 등 복구 관련 파일을 중앙 관리\n- DB_RECOVERY_FILE_DEST, DB_RECOVERY_FILE_DEST_SIZE로 설정\n- 공간 부족 시 Retention Policy에 따라 자동 정리",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v7",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  FA[\"<b>장애 발생</b>\"]:::red\n  FA --> RT{\"복구 유형\"}\n  RT -- \"SHUTDOWN ABORT / 정전 / 크래시\" --> IR[\"<b>인스턴스 복구</b><br/>수행 주체: SMON 자동 / DBA 개입 불필요\"]:::amber\n  RT -- \"디스크 장애 / 파일 손상\" --> MR[\"<b>미디어 복구</b><br/>수행 주체: RMAN / DBA 수동 / DBA 개입 필요\"]:::blue\n  IR --> RF[\"<b>① Roll Forward (Redo 적용)</b><br/>Online Redo Log의 변경 사항을 데이터 파일에 재적용\"]:::green\n  RF --> OPEN[\"<b>DB OPEN</b><br/>사용자 서비스 재개\"]:::green\n  OPEN --> RB[\"<b>② Roll Back (UNDO 적용)</b><br/>커밋되지 않은 트랜잭션을 UNDO 데이터로 롤백<br/>백그라운드에서 수행 — 빠른 서비스 재개\"]:::amber\n  MR --> PRE[\"<b>미디어 복구 전제 조건</b><br/>ARCHIVELOG 모드 + 유효한 백업\"]:::blue\n  PRE --> MRT{\"복구 범위\"}\n  MRT -- \"최신 상태\" --> FULL[\"<b>완전 복구</b>\"]:::green\n  MRT -- \"특정 시점\" --> INC[\"<b>불완전 복구</b><br/>→ OPEN RESETLOGS 수행\"]:::amber\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "복구 2가지 유형(인스턴스 복구 vs 미디어 복구)과 인스턴스 복구 2단계(Roll Forward → DB OPEN → Roll Back) 흐름도",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {

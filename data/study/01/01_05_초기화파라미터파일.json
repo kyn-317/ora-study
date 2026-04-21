@@ -56,6 +56,16 @@
             "SPFILE 문제 시: CREATE PFILE → 텍스트 편집 → CREATE SPFILE 워크플로우로 복구"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v8",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A([\"<b>파라미터 파일 선택</b>\"]):::amber\n  A --> B{\"SPFILE 존재?<br/>spfile&lt;SID&gt;.ora\"}\n  B -- \"존재\" --> C[\"<b>SPFILE 사용 (권장)</b><br/>spfile&lt;SID&gt;.ora (바이너리)\"]:::green\n  C --> C1[\"ALTER SYSTEM으로 영구 반영<br/>SCOPE=BOTH / SCOPE=SPFILE\"]:::green\n  B -- \"없음\" --> D[\"<b>PFILE 사용 (레거시)</b><br/>init&lt;SID&gt;.ora (텍스트)\"]:::blue\n  D --> D1[\"텍스트 에디터로 직접 편집\"]:::blue\n  D1 --> D2[\"변경 후 인스턴스 재기동 필요\"]:::blue\n  D --> E[\"<b>PFILE → SPFILE 전환</b><br/>CREATE SPFILE FROM PFILE\"]:::amber\n  E --> F{\"기존 SPFILE 존재?\"}\n  F -- \"존재\" --> G[\"기존 파일 이동 또는 삭제\"]:::red\n  G --> H[\"CREATE SPFILE FROM PFILE 실행\"]:::green\n  F -- \"없음\" --> H\n  H --> C\n  A --> I[\"<b>STARTUP PFILE='경로'</b><br/>명시적 PFILE 지정 가능\"]:::amber\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "PFILE vs SPFILE 선택 흐름: SPFILE 존재 여부에 따른 사용 방식, PFILE에서 SPFILE 전환 절차(CREATE SPFILE FROM PFILE), 명시적 PFILE 지정(STARTUP PFILE=)",
+          "placement": "before-content",
+          "width": "100%"
+        }
       ]
     },
     {

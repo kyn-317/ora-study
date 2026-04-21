@@ -187,6 +187,16 @@
         "sql10",
         "sql11"
       ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>Unplug된 PDB</b><br/>XML 또는 .pdb 아카이브\"]:::amber\n  B[\"<b>호환성 검사</b><br/>DBMS_PDB.CHECK_PLUG_COMPATIBILITY\"]:::blue\n  C{\"호환성 결과\"}:::amber\n  D[\"<b>ERROR 위반</b><br/>Plug In 차단<br/>원인 해결 후 재시도\"]:::red\n  E[\"<b>WARNING 위반</b><br/>Plug In 가능<br/>오픈 후 자동 해결 가능\"]:::amber\n  F[\"<b>CREATE PLUGGABLE DATABASE</b><br/>... USING XML/.pdb<br/>FILE_NAME_CONVERT 지정\"]:::blue\n  G[\"<b>MOUNTED 상태 생성</b><br/>메타데이터 CDB 딕셔너리 등록<br/>DBID/GUID 새로 할당\"]:::green\n  H[\"<b>PDB OPEN</b><br/>ALTER PLUGGABLE DATABASE OPEN\"]:::blue\n  I[\"<b>딕셔너리 동기화</b><br/>CDB$ROOT와 자동 동기화<br/>패치/업그레이드 적용\"]:::green\n  J[\"<b>PDB_PLUG_IN_VIOLATIONS 확인</b><br/>PENDING 상태 WARNING 확인\"]:::amber\n  K[\"<b>Plug In 완료</b><br/>READ WRITE로 운영 가능\"]:::green\n\n  A --> B\n  B --> C\n  C -- ERROR --> D\n  D --> B\n  C -- 통과/WARNING --> E\n  E --> F\n  F --> G\n  G --> H\n  H --> I\n  I --> J\n  J --> K\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "PDB Plug In 절차 — 호환성 검사(DBMS_PDB.CHECK_PLUG_COMPATIBILITY)부터 딕셔너리 동기화까지",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": [
         {
           "title": "호환성 검사 (Compatibility Check with DBMS_PDB)",

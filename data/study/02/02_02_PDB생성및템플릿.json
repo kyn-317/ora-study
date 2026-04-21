@@ -182,6 +182,16 @@
             "Application Root에서 애플리케이션 업그레이드 시 ALTER PLUGGABLE DATABASE APPLICATION SYNC로 전파"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  CDB[\"<b>CDB$ROOT</b><br/>CON_ID=1\"]:::amber\n  SEED[\"<b>PDB$SEED</b><br/>CON_ID=2 · READ ONLY\"]:::amber\n  REG[\"<b>Regular PDBs</b><br/>일반 사용자 PDB\"]:::blue\n\n  APPROOT[\"<b>Application Root</b><br/>공통 애플리케이션 정의 저장<br/>READ WRITE\"]:::green\n  APPSEED[\"<b>Application Seed</b><br/>Application PDB 생성 템플릿<br/>READ ONLY\"]:::green\n  APPPDB1[\"<b>Application PDB 1</b><br/>테넌트 데이터 격리\"]:::blue\n  APPPDB2[\"<b>Application PDB 2</b><br/>테넌트 데이터 격리\"]:::blue\n\n  CDB --> SEED\n  CDB --> REG\n  CDB --> APPROOT\n  APPROOT --> APPSEED\n  APPROOT --> APPPDB1\n  APPROOT --> APPPDB2\n  APPSEED -. \"템플릿으로 사용\" .-> APPPDB1\n  APPSEED -. \"템플릿으로 사용\" .-> APPPDB2\n\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "Application Container 계층 구조 — CDB$ROOT, Application Root, Application Seed, Application PDB 관계",
+          "placement": "before-content",
+          "width": "100%"
+        }
       ]
     },
     {

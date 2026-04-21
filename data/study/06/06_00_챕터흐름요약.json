@@ -32,7 +32,16 @@
       "title": "UNDO의 구조와 핵심 기능 — 기능 및 목적 (Functions and Purpose, 06_01)",
       "sqlExamplesIds": [],
       "content": "Oracle Database의 가장 기본적인 UNDO 공식:\n\n> **UNDO 데이터 = DML 변경 전 이미지(Before Image)**\n>\n> - UNDO 데이터 → UNDO 세그먼트에 저장 → UNDO 테이블스페이스에 격납\n> - 읽기 일관성, 트랜잭션 롤백, Flashback 기능의 3가지 핵심 역할 수행\n\n### UNDO 3대 기능 요약\n\n| 기능 | 설명 | 핵심 메커니즘 |\n|---|---|---|\n| **읽기 일관성** | 다른 세션의 변경과 무관하게 쿼리 시작 시점의 일관된 데이터 제공 | Query SCN과 Block SCN 비교 → CR 블록 생성 |\n| **트랜잭션 롤백** | ROLLBACK 시 변경 전 상태로 복원 | UNDO 레코드를 역순 적용 |\n| **Flashback** | 과거 시점 데이터 조회/복원 | AS OF SCN/TIMESTAMP, VERSIONS BETWEEN |\n\n### UNDO 계층 구조\n\n```\nUNDO Tablespace\n  +-- UNDO Segment (_SYSSMU<N>_<hash>$)\n       +-- Segment Header (Transaction Table)\n       +-- Extent 1~N (Circular Reuse)\n            +-- UNDO Record (Before Image)\n```\n\n### DML별 UNDO 저장 내용\n\n| DML 유형 | UNDO에 저장되는 내용 |\n|---|---|\n| **INSERT** | 삽입된 행의 ROWID |\n| **UPDATE** | 변경 전 컬럼 값 (Before Image) |\n| **DELETE** | 삭제 전 전체 행 데이터 |\n| **MERGE** | INSERT/UPDATE에 따라 해당 UNDO 생성 |\n\n### UNDO vs Redo 비교\n\n| 구분 | UNDO | Redo |\n|---|---|---|\n| **저장 내용** | 변경 전 이미지 (Before Image) | 변경 내역 (Change Vector) |\n| **주요 목적** | 읽기 일관성, 롤백, Flashback | 장애 복구 (Instance/Media Recovery) |\n| **COMMIT 후** | UNDO_RETENTION 기간 동안 보존 | 영구 보존 (Archive 시) |\n\n### ORA-01555와 Flashback\n\n- **ORA-01555**: CR 블록 생성에 필요한 UNDO가 덮어쓰여진 경우 발생 → UNDO 크기 확장, RETENTION GUARANTEE 설정으로 대응\n- **Flashback Query/Version Query/Transaction Query/Flashback Table**: 모두 UNDO 기반 → UNDO_RETENTION 범위 내에서만 동작\n- **Flashback Drop**(Recycle Bin)과 **Flashback Database**(Flashback Log)는 UNDO와 무관",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v4",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>UNDO 데이터</b><br/>DML 변경 전 이미지(Before Image)\"]:::amber\n  A --> B[\"<b>읽기 일관성</b><br/>Query SCN과 Block SCN 비교<br/>→ CR 블록 생성\"]:::blue\n  A --> C[\"<b>트랜잭션 롤백</b><br/>ROLLBACK 시<br/>UNDO 레코드 역순 적용\"]:::green\n  A --> D[\"<b>Flashback</b><br/>AS OF SCN/TIMESTAMP<br/>VERSIONS BETWEEN\"]:::green\n  B --> E[\"<b>ORA-01555</b><br/>CR 블록 생성에 필요한<br/>UNDO 덮어쓰여진 경우 발생\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "UNDO 데이터(Before Image)의 3대 핵심 기능과 ORA-01555 발생 조건",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {
@@ -57,7 +66,16 @@
       "title": "Temporary UNDO와 멀티테넌트 UNDO — 특수 환경 제어 (Special Environment, 06_03)",
       "sqlExamplesIds": [],
       "content": "### Temporary UNDO\n\n**Temporary UNDO**는 Global Temporary Table(GTT) 작업 시 UNDO 데이터를 Temp 테이블스페이스에 저장하여 **UNDO 테이블스페이스 I/O와 Redo 로그 기록을 모두 제거**하는 성능 최적화 기능입니다.\n\n| 항목 | 설명 |\n|---|---|\n| **대상** | GTT, Private Temporary Table, 임시 LOB |\n| **파라미터** | TEMP_UNDO_ENABLED (Oracle 21c 이후 기본 TRUE) |\n| **저장 위치** | Temp Tablespace 내 Temporary Undo Segment |\n| **Redo 기록** | 생략됨 → I/O 대폭 감소 |\n| **모니터링** | V$TEMPUNDOSTAT (10분 간격 통계) |\n| **제한사항** | 분산 트랜잭션 미지원, Standby 비전파, 타 세션 GTT Flashback 불가 |\n\n### 멀티테넌트 UNDO 모드 비교\n\n| 항목 | Shared UNDO | Local UNDO |\n|---|---|---|\n| **UNDO 위치** | CDB$ROOT의 단일 테이블스페이스 공유 | 각 PDB가 독립 테이블스페이스 보유 |\n| **UNDO_RETENTION 설정** | CDB 레벨에서만 적용 | PDB별 독립 설정 가능 |\n| **PDB 격리성** | 낮음 (PDB 간 공간 경합) | 높음 (완전 격리) |\n| **Hot Clone / Relocate** | 불가 | 가능 |\n| **Flashback PDB** | 불가 | 가능 |\n| **Oracle 26ai 위치** | 레거시 호환 | **기본값, 권장** |\n\n### UNDO 모드 전환\n\n```\nShared UNDO -> Local UNDO: STARTUP UPGRADE -> ALTER DATABASE LOCAL UNDO ON\nLocal UNDO -> Shared UNDO: STARTUP UPGRADE -> ALTER DATABASE LOCAL UNDO OFF (Not Recommended)\n```\n\n- 양방향 전환 모두 **CDB 다운타임 필수** (STARTUP UPGRADE 모드)\n- Shared → Local 전환 시 각 PDB에 UNDO 테이블스페이스 자동 생성 (추가 디스크 필요)\n- Local → Shared 전환 시 PDB의 기존 UNDO 테이블스페이스 수동 삭제 필요\n- Oracle 21c 이후 Shared UNDO로의 전환은 **Deprecated** → Local UNDO 유지 권장",
-      "visuals": [],
+      "visuals": [
+        {
+          "id": "v5",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>GTT DML 발생</b><br/>TEMP_UNDO_ENABLED = TRUE\"]:::amber\n  A --> B[\"<b>UNDO 데이터</b><br/>Temp Tablespace 내<br/>Temporary Undo Segment에 저장\"]:::blue\n  B --> C[\"<b>Redo 기록 생략</b><br/>I/O 대폭 감소\"]:::green\n  D[\"<b>Shared UNDO</b><br/>CDB$ROOT 단일 테이블스페이스 공유<br/>PDB 간 공간 경합·격리성 낮음\"]:::red\n  E[\"<b>Local UNDO</b><br/>각 PDB 독립 테이블스페이스 보유<br/>Hot Clone·Relocate·Flashback PDB 가능\"]:::green\n  F[\"<b>UNDO 모드 전환</b><br/>STARTUP UPGRADE 모드<br/>CDB 다운타임 필수\"]:::amber\n  F --> D\n  F --> E\n  E --> G[\"<b>Oracle 26ai 기본값·권장</b>\"]:::green\n  D --> H[\"<b>레거시 호환만 유지</b><br/>Deprecated\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "Temporary UNDO 흐름(GTT → Temp Tablespace → Redo 생략)과 Shared/Local UNDO 모드 전환 방향",
+          "placement": "before-content",
+          "width": "100%"
+        }
+      ],
       "subsections": []
     },
     {

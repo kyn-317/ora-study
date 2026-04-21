@@ -109,6 +109,16 @@
             "STATISTICS_LEVEL 변경은 동적(ALTER SYSTEM)으로 즉시 적용되며 기존 데이터는 보존"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v6",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>STATISTICS_LEVEL</b><br/>TYPICAL(기본) / ALL → 활성화<br/>BASIC → ADDM 비활성화\"]:::amber\n  B[\"<b>CONTROL_MANAGEMENT_PACK_ACCESS</b><br/>DIAGNOSTIC+TUNING → 활성화<br/>NONE → ADDM 비활성화\"]:::amber\n  C[\"<b>ADDM 활성화 상태</b><br/>AWR 스냅샷 수집<br/>MMON 자동 실행\"]:::green\n  D[\"<b>AWR 스냅샷 설정</b><br/>간격: 기본 1시간<br/>보존: 기본 8일\"]:::blue\n  E[\"<b>태스크 파라미터 조정</b><br/>DBMS_ADVISOR.SET_DEFAULT_TASK_PARAMETER<br/>DBTIME_THRESHOLD(기본 1%)\"]:::blue\n  F[\"<b>ADDM 분석 수행</b><br/>스냅샷 간격마다 자동 실행<br/>Finding·Recommendation 생성\"]:::green\n  A --> C\n  B --> C\n  C --> D\n  D --> F\n  E --> F\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "ADDM 활성화·제어 구조 (STATISTICS_LEVEL·팩 접근 설정 → 활성화 → AWR 스냅샷 설정 → 분석 수행)",
+          "placement": "before-content",
+          "width": "100%"
+        }
       ]
     },
     {
@@ -201,6 +211,16 @@
             "AWR 보존 기간이 지난 스냅샷은 분석 불가하므로 중요한 스냅샷은 보존 기간을 연장하거나 별도 보관",
             "수동 스냅샷(CREATE_SNAPSHOT)을 생성한 직후 분석하면 현재 상태를 즉시 진단 가능"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v7",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>AWR 스냅샷 ID 확인</b><br/>DBA_HIST_SNAPSHOT<br/>분석 범위 결정\"]:::amber\n  B[\"<b>태스크 생성</b><br/>DBMS_ADVISOR.CREATE_TASK<br/>('ADDM', task_name)\"]:::blue\n  C[\"<b>분석 범위 설정</b><br/>SET_TASK_PARAMETER<br/>START_SNAPSHOT / END_SNAPSHOT\"]:::blue\n  D[\"<b>태스크 실행</b><br/>DBMS_ADVISOR.EXECUTE_TASK<br/>또는 DBMS_ADDM.ANALYZE_DB\"]:::green\n  E[\"<b>결과 조회</b><br/>DBA_ADVISOR_FINDINGS<br/>DBA_ADVISOR_RECOMMENDATIONS\"]:::amber\n  F[\"<b>보고서 생성</b><br/>DBMS_ADVISOR.GET_TASK_REPORT<br/>TEXT / HTML / XML\"]:::green\n  A --> B\n  B --> C\n  C --> D\n  D --> E\n  E --> F\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "수동 ADDM 분석 흐름 (AWR 스냅샷 확인 → 태스크 생성 → 범위 설정 → 실행 → 결과 조회 → 보고서)",
+          "placement": "before-content",
+          "width": "100%"
         }
       ]
     },

@@ -15,12 +15,35 @@
       "title": "UNDO 개요 및 전체 구성 (UNDO Overview and Architecture)",
       "sqlExamplesIds": [],
       "content": "**UNDO 데이터(UNDO Data)**는 Oracle Database에서 DML(INSERT, UPDATE, DELETE, MERGE) 작업이 수행될 때, 변경 **이전의 데이터 이미지(Before Image)**를 저장한 것입니다. UNDO 데이터는 Oracle의 데이터 무결성과 동시성 제어(Concurrency Control)를 가능하게 하는 핵심 인프라입니다.\n\n## UNDO 데이터의 3대 핵심 기능\n\n| 기능 | 설명 |\n|---|---|\n| **읽기 일관성 (Read Consistency)** | 다른 세션이 변경 중인 데이터를 읽을 때, 변경 전의 일관된 이미지를 제공 |\n| **트랜잭션 롤백 (Transaction Rollback)** | ROLLBACK 명령 시 변경 전 데이터를 이용하여 원래 상태로 복원 |\n| **Flashback 기능** | 과거 시점의 데이터를 조회하거나 복원하기 위해 UNDO 데이터를 활용 |\n\n## UNDO 관련 핵심 구성요소\n\n| 구성요소 | 계층 | 설명 |\n|---|---|---|\n| **UNDO 데이터 (UNDO Data)** | 데이터 | DML 변경 전의 이미지 (Before Image) |\n| **UNDO 세그먼트 (UNDO Segment)** | 세그먼트 | UNDO 데이터를 저장하는 세그먼트. 트랜잭션에 할당됨 |\n| **UNDO 테이블스페이스 (UNDO Tablespace)** | 테이블스페이스 | UNDO 세그먼트만을 포함하는 전용 테이블스페이스 |\n| **UNDO 레코드 (UNDO Record)** | 레코드 | 개별 변경에 대한 UNDO 정보 단위 |\n| **트랜잭션 테이블 (Transaction Table)** | 구조 | UNDO 세그먼트 헤더 블록 내 트랜잭션 관리 구조 |\n\n## UNDO 데이터 흐름 개요\n\n## UNDO vs Redo 비교\n\n| 구분 | UNDO | Redo |\n|---|---|---|\n| **저장 내용** | 변경 전 이미지 (Before Image) | 변경 내역 (Change Vector) |\n| **주요 목적** | 읽기 일관성, 롤백, Flashback | 장애 복구 (Instance/Media Recovery) |\n| **저장 위치** | UNDO 테이블스페이스 | Online Redo Log 파일, Archive Log |\n| **관리 주체** | 서버 프로세스 → DBWn | 서버 프로세스 → LGWR |\n| **COMMIT 후** | UNDO_RETENTION 기간 동안 보존 후 덮어쓰기 가능 | 영구 보존 (Archive 시) |\n| **ROLLBACK 시** | 사용하여 원래 상태로 복원 | 사용하지 않음 |",
-      "subsections": []
+      "subsections": [],
+      "visuals": [
+        {
+          "id": "v01",
+          "type": "svg",
+          "src": "/visuals/06/06_01_s01_undo_architecture_overview.svg",
+          "caption": "UNDO 전체 아키텍처 개요: DML → UNDO 세그먼트 → 3대 핵심 기능 (읽기 일관성, 롤백, Flashback)",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s01"
+        },
+        {
+          "id": "v08",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>UNDO 테이블스페이스</b><br/>UNDO Tablespace\"]:::blue\n  A --> B[\"<b>UNDO 세그먼트</b><br/>UNDO Segment\"]\n  B:::blue\n  B --> C[\"<b>Extent</b>\"]\n  C:::amber\n  C --> D[\"<b>UNDO 블록</b><br/>UNDO Block\"]\n  D:::amber\n  D --> E[\"<b>UNDO 레코드</b><br/>Before Image\"]\n  E:::green\n  A --> F[\"<b>읽기 일관성</b><br/>Read Consistency\"]:::green\n  A --> G[\"<b>트랜잭션 롤백</b><br/>Transaction Rollback\"]:::amber\n  A --> H[\"<b>Flashback 기능</b><br/>Flashback\"]:::red\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "UNDO 구성요소 계층: UNDO 테이블스페이스 → 세그먼트 → Extent → 블록 → 레코드 및 3대 핵심 기능",
+          "placement": "before-content",
+          "width": "100%",
+          "sectionId": "s01"
+        }
+      ]
     },
     {
       "sectionId": "s02",
       "title": "UNDO 데이터와 UNDO 레코드 (UNDO Data and UNDO Records)",
-      "sqlExamplesIds": ["sql01", "sql02"],
+      "sqlExamplesIds": [
+        "sql01",
+        "sql02"
+      ],
       "content": "UNDO 데이터는 DML 작업 시 생성되는 **변경 전 이미지(Before Image)**이며, UNDO 레코드라는 단위로 UNDO 세그먼트에 저장됩니다.",
       "subsections": [
         {
@@ -35,12 +58,27 @@
             "UNDO 데이터 변경도 Redo Log에 기록되어 장애 복구 시 UNDO 세그먼트도 복구 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v02",
+          "type": "svg",
+          "src": "/visuals/06/06_01_s02_undo_data_lifecycle.svg",
+          "caption": "UNDO 데이터 생명주기: DML 유형별 UNDO 생성 → Active → Unexpired → Expired 상태 전이",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s02"
+        }
       ]
     },
     {
       "sectionId": "s03",
       "title": "UNDO 세그먼트 (UNDO Segments)",
-      "sqlExamplesIds": ["sql03", "sql04", "sql05"],
+      "sqlExamplesIds": [
+        "sql03",
+        "sql04",
+        "sql05"
+      ],
       "content": "UNDO 세그먼트는 UNDO 데이터를 물리적으로 저장하는 데이터베이스 세그먼트입니다. 각 트랜잭션은 하나의 UNDO 세그먼트에 할당되며, 하나의 UNDO 세그먼트는 여러 트랜잭션을 동시에 서비스할 수 있습니다.",
       "subsections": [
         {
@@ -56,12 +94,26 @@
             "SYSTEM 테이블스페이스에는 시스템 전용 UNDO 세그먼트가 별도로 존재"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v03",
+          "type": "svg",
+          "src": "/visuals/06/06_01_s03_undo_segment_structure.svg",
+          "caption": "UNDO 세그먼트 구조: 헤더 블록, 트랜잭션 테이블, 순환적 Extent 할당 메커니즘",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s03"
+        }
       ]
     },
     {
       "sectionId": "s04",
       "title": "UNDO 테이블스페이스 (UNDO Tablespace)",
-      "sqlExamplesIds": ["sql06", "sql07"],
+      "sqlExamplesIds": [
+        "sql06",
+        "sql07"
+      ],
       "content": "UNDO 테이블스페이스는 UNDO 세그먼트만을 포함하는 전용 테이블스페이스로, Oracle이 자동으로 UNDO 세그먼트를 생성하고 관리합니다.",
       "subsections": [
         {
@@ -82,7 +134,10 @@
     {
       "sectionId": "s05",
       "title": "읽기 일관성 메커니즘 (Read Consistency Mechanism)",
-      "sqlExamplesIds": ["sql08", "sql09"],
+      "sqlExamplesIds": [
+        "sql08",
+        "sql09"
+      ],
       "content": "Oracle Database의 가장 강력한 특징 중 하나인 **읽기 일관성(Read Consistency)**은 UNDO 데이터를 활용하여 구현됩니다. 읽기 작업(SELECT)이 쓰기 작업(DML)에 의해 차단되지 않으며, 쓰기 작업도 읽기 작업에 의해 차단되지 않습니다.",
       "subsections": [
         {
@@ -98,12 +153,34 @@
             "consistent gets 통계로 CR 블록을 통한 논리적 읽기 횟수 확인 가능"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v04",
+          "type": "svg",
+          "src": "/visuals/06/06_01_s05_read_consistency_cr_block.svg",
+          "caption": "읽기 일관성과 CR 블록 생성 과정: Query SCN vs Block SCN 비교 → UNDO 역적용",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s05"
+        },
+        {
+          "id": "v09",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>쿼리 시작</b><br/>Query SCN 기록\"]:::blue\n  A --> B{\"Block SCN<br/>vs Query SCN\"}\n  B:::amber\n  B -- \"Block SCN ≤ Query SCN\" --> C[\"<b>Current Block 그대로 읽음</b><br/>변경이 쿼리 전 커밋\"]:::green\n  B -- \"Block SCN > Query SCN\" --> D[\"<b>Current Block 복사본 생성</b><br/>Clone\"]:::red\n  D --> E[\"<b>ITL에서 UBA 참조</b><br/>UNDO 레코드 위치 확인\"]:::amber\n  E --> F[\"<b>UNDO 레코드를 역순 적용</b><br/>Before Image 복원\"]:::amber\n  F --> G{\"복원된 Block SCN<br/>≤ Query SCN?\"}\n  G:::amber\n  G -- \"아니오\" --> F\n  G -- \"예\" --> H[\"<b>CR 블록 완성</b><br/>Consistent Read Block\"]:::green\n  H --> I[\"<b>데이터 반환</b>\"]:::blue\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "CR 블록 생성 흐름: Query SCN vs Block SCN 비교 → UNDO 레코드 역순 적용 → Consistent Read Block 완성",
+          "placement": "before-content",
+          "width": "100%",
+          "sectionId": "s05"
+        }
       ]
     },
     {
       "sectionId": "s06",
       "title": "트랜잭션 롤백 메커니즘 (Transaction Rollback Mechanism)",
-      "sqlExamplesIds": ["sql10"],
+      "sqlExamplesIds": [
+        "sql10"
+      ],
       "content": "트랜잭션 롤백은 UNDO 데이터를 이용하여 DML 변경 사항을 원래 상태로 되돌리는 메커니즘입니다. 사용자 명시적 롤백, 시스템 롤백, SMON에 의한 Dead Transaction Recovery 등 여러 유형이 있습니다.",
       "subsections": [
         {
@@ -119,12 +196,35 @@
             "FAST_START_PARALLEL_ROLLBACK 파라미터로 병렬 롤백 서버 수 제어"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v05",
+          "type": "svg",
+          "src": "/visuals/06/06_01_s06_rollback_types_process.svg",
+          "caption": "트랜잭션 롤백 유형 및 인스턴스 복구 2단계 프로세스 (Roll Forward → Roll Back)",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s06"
+        },
+        {
+          "id": "v10",
+          "type": "mermaid",
+          "mermaidCode": "flowchart TD\n  A[\"<b>ROLLBACK 명령</b>\"]:::red\n  A --> B[\"<b>마지막 UNDO 레코드 찾기</b><br/>UBA 체인 이용\"]:::amber\n  B --> C[\"<b>Before Image를 역순으로 적용</b><br/>데이터 블록 복원\"]:::amber\n  C --> D[\"<b>롤백 작업도 Redo 로그에 기록</b>\"]:::blue\n  D --> E{\"모든 UNDO 레코드<br/>적용 완료?\"}\n  E:::amber\n  E -- \"아니오\" --> C\n  E -- \"예\" --> F[\"<b>트랜잭션 테이블 상태 변경</b><br/>COMMITTED(롤백 완료)\"]:::green\n  F --> G[\"<b>UNDO 공간 재사용 가능</b>\"]:::green\n  classDef amber fill:#f0e6d2,stroke:#b8894a,stroke-width:1.5px,color:#2a2a2a\n  classDef blue  fill:#e0e8ec,stroke:#5a7a8a,stroke-width:1.5px,color:#2a2a2a\n  classDef green fill:#e8ede0,stroke:#6b8e5a,stroke-width:1.5px,color:#2a2a2a\n  classDef red   fill:#f0e0dc,stroke:#a85a4a,stroke-width:1.5px,color:#2a2a2a",
+          "caption": "트랜잭션 롤백 내부 흐름: UNDO 레코드 역순 적용 → Redo 기록 → 트랜잭션 테이블 완료 처리",
+          "placement": "before-content",
+          "width": "100%",
+          "sectionId": "s06"
+        }
       ]
     },
     {
       "sectionId": "s07",
       "title": "ORA-01555: Snapshot Too Old 에러 (ORA-01555 Error)",
-      "sqlExamplesIds": ["sql11", "sql12"],
+      "sqlExamplesIds": [
+        "sql11",
+        "sql12"
+      ],
       "content": "ORA-01555는 Oracle에서 가장 대표적인 UNDO 관련 에러로, 읽기 일관성을 유지하기 위해 필요한 UNDO 데이터가 이미 덮어쓰여진 경우 발생합니다.",
       "subsections": [
         {
@@ -139,12 +239,27 @@
             "UNDO Advisor(DBMS_UNDO_ADV 패키지)로 최적 UNDO 크기와 RETENTION 산정"
           ]
         }
+      ],
+      "visuals": [
+        {
+          "id": "v06",
+          "type": "svg",
+          "src": "/visuals/06/06_01_s07_ora01555_mechanism.svg",
+          "caption": "ORA-01555 Snapshot Too Old 발생 메커니즘: 타임라인, 원인, 대응 방안",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s07"
+        }
       ]
     },
     {
       "sectionId": "s08",
       "title": "Flashback 기능과 UNDO (Flashback Features and UNDO)",
-      "sqlExamplesIds": ["sql13", "sql14", "sql15"],
+      "sqlExamplesIds": [
+        "sql13",
+        "sql14",
+        "sql15"
+      ],
       "content": "Oracle의 Flashback 기능은 UNDO 데이터를 활용하여 과거 시점의 데이터를 조회하거나 복원하는 강력한 기능입니다.",
       "subsections": [
         {
@@ -159,6 +274,17 @@
             "Flashback Table은 ROW MOVEMENT 활성화가 필수 전제 조건",
             "모든 UNDO 기반 Flashback은 UNDO_RETENTION 범위 내에서만 동작"
           ]
+        }
+      ],
+      "visuals": [
+        {
+          "id": "v07",
+          "type": "svg",
+          "src": "/visuals/06/06_01_s08_flashback_features_undo.svg",
+          "caption": "Flashback 기능 분류: UNDO 기반(Query, Version, Transaction, Table) vs 비-UNDO 기반(Drop, Database)",
+          "placement": "after-content",
+          "width": "100%",
+          "sectionId": "s08"
         }
       ]
     }
@@ -253,71 +379,6 @@
       "title": "Flashback Transaction Query — 트랜잭션별 변경 내역 및 UNDO SQL 조회",
       "sql": "SELECT xid, start_scn, commit_scn,\n       operation, table_name, table_owner,\n       undo_sql\nFROM flashback_transaction_query\nWHERE table_owner = 'HR'\n  AND table_name = 'EMPLOYEES'\n  AND commit_scn > (SELECT current_scn - 10000 FROM v$database)\nORDER BY commit_scn DESC;",
       "description": "HR.EMPLOYEES 테이블에 대한 최근 트랜잭션의 변경 내역과 자동 생성된 UNDO SQL을 조회합니다. UNDO SQL을 실행하면 해당 변경을 되돌릴 수 있습니다."
-    }
-  ],
-  "visuals": [
-    {
-      "id": "v01",
-      "type": "svg",
-      "src": "/visuals/06/06_01_s01_undo_architecture_overview.svg",
-      "caption": "UNDO 전체 아키텍처 개요: DML → UNDO 세그먼트 → 3대 핵심 기능 (읽기 일관성, 롤백, Flashback)",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s01"
-    },
-    {
-      "id": "v02",
-      "type": "svg",
-      "src": "/visuals/06/06_01_s02_undo_data_lifecycle.svg",
-      "caption": "UNDO 데이터 생명주기: DML 유형별 UNDO 생성 → Active → Unexpired → Expired 상태 전이",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s02"
-    },
-    {
-      "id": "v03",
-      "type": "svg",
-      "src": "/visuals/06/06_01_s03_undo_segment_structure.svg",
-      "caption": "UNDO 세그먼트 구조: 헤더 블록, 트랜잭션 테이블, 순환적 Extent 할당 메커니즘",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s03"
-    },
-    {
-      "id": "v04",
-      "type": "svg",
-      "src": "/visuals/06/06_01_s05_read_consistency_cr_block.svg",
-      "caption": "읽기 일관성과 CR 블록 생성 과정: Query SCN vs Block SCN 비교 → UNDO 역적용",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s05"
-    },
-    {
-      "id": "v05",
-      "type": "svg",
-      "src": "/visuals/06/06_01_s06_rollback_types_process.svg",
-      "caption": "트랜잭션 롤백 유형 및 인스턴스 복구 2단계 프로세스 (Roll Forward → Roll Back)",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s06"
-    },
-    {
-      "id": "v06",
-      "type": "svg",
-      "src": "/visuals/06/06_01_s07_ora01555_mechanism.svg",
-      "caption": "ORA-01555 Snapshot Too Old 발생 메커니즘: 타임라인, 원인, 대응 방안",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s07"
-    },
-    {
-      "id": "v07",
-      "type": "svg",
-      "src": "/visuals/06/06_01_s08_flashback_features_undo.svg",
-      "caption": "Flashback 기능 분류: UNDO 기반(Query, Version, Transaction, Table) vs 비-UNDO 기반(Drop, Database)",
-      "placement": "after-content",
-      "width": "100%",
-      "sectionId": "s08"
     }
   ],
   "keywords": [

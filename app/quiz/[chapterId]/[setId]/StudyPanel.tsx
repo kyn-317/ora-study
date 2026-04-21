@@ -46,51 +46,64 @@ interface StudyPanelProps {
 
 function KeywordStudyRenderer({ data, keyword }: { data: KeywordStudyData; keyword: string }) {
   return (
-    <div style={{ fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--foreground)' }}>
-      {/* Definition */}
+    <div>
       <div style={{
-        padding: '0.75rem 1rem',
-        background: 'rgba(41, 128, 185, 0.06)',
-        borderRadius: '10px',
-        marginBottom: '0.75rem',
-        borderLeft: '3px solid var(--color-4)',
+        padding: '10px 14px',
+        background: 'var(--accent-bg)',
+        borderLeft: '2px solid var(--accent)',
+        marginBottom: 10,
       }}>
-        <strong style={{ color: 'var(--color-4)', fontSize: '0.8rem' }}>{keyword}</strong>
-        <p style={{ margin: '0.35rem 0 0', color: 'var(--foreground)' }}>{data.definition}</p>
+        <div style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 10,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: 'var(--accent)',
+          marginBottom: 4,
+          fontWeight: 600,
+        }}>
+          {keyword}
+        </div>
+        <p style={{ margin: 0, color: 'var(--ink)', fontSize: 13, lineHeight: 1.6 }}>{data.definition}</p>
       </div>
 
-      {/* Key Points */}
       <div style={{
-        padding: '0.75rem 1rem',
-        background: 'rgba(44, 62, 80, 0.06)',
-        borderRadius: '10px',
-        marginBottom: '0.75rem',
-        borderLeft: '3px solid var(--color-3)',
+        padding: '10px 14px',
+        background: 'var(--paper-2)',
+        borderLeft: '2px solid var(--ink-2)',
+        marginBottom: 10,
       }}>
-        <strong style={{ color: 'var(--color-3)', fontSize: '0.8rem' }}>핵심 포인트</strong>
-        <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.25rem' }}>
+        <div style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 10,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: 'var(--ink-2)',
+          marginBottom: 6,
+          fontWeight: 600,
+        }}>
+          핵심 포인트
+        </div>
+        <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--ink)', fontSize: 13, lineHeight: 1.65 }}>
           {data.keyPoints.map((kp, i) => (
-            <li key={i} style={{ marginBottom: '0.25rem' }}>{kp}</li>
+            <li key={i} style={{ marginBottom: 3 }}>{kp}</li>
           ))}
         </ul>
       </div>
 
-      {/* Related Keywords */}
       {data.relatedKeywords.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginRight: '0.25rem', lineHeight: '24px' }}>관련:</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 10,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--ink-3)',
+          }}>
+            Related
+          </span>
           {data.relatedKeywords.map((rk, i) => (
-            <span key={i} style={{
-              display: 'inline-block',
-              padding: '0.1rem 0.5rem',
-              borderRadius: '6px',
-              fontSize: '0.73rem',
-              background: 'rgba(41, 128, 185, 0.08)',
-              color: 'var(--color-4)',
-              border: '1px solid rgba(41, 128, 185, 0.15)',
-            }}>
-              {rk}
-            </span>
+            <span key={i} className="tag-chip accent">{rk}</span>
           ))}
         </div>
       )}
@@ -100,31 +113,50 @@ function KeywordStudyRenderer({ data, keyword }: { data: KeywordStudyData; keywo
 
 function SectionRenderer({ section, level = 0 }: { section: StudySectionData; level?: number }) {
   return (
-    <div style={{ marginBottom: '1rem' }}>
+    <div style={{ marginBottom: 14 }}>
       <h4 style={{
-        fontSize: level === 0 ? '1rem' : '0.9rem',
-        color: level === 0 ? 'var(--color-2)' : 'var(--color-1)',
-        marginBottom: '0.5rem',
-        paddingLeft: level > 0 ? '0.75rem' : 0,
-        borderLeft: level > 0 ? '2px solid var(--color-1)' : 'none',
+        fontFamily: level === 0 ? 'var(--font-serif)' : 'var(--font-sans)',
+        fontSize: level === 0 ? 14 : 13,
+        fontWeight: level === 0 ? 500 : 600,
+        color: 'var(--ink)',
+        margin: '0 0 6px',
+        paddingLeft: level > 0 ? 10 : 0,
+        borderLeft: level > 0 ? '2px solid var(--accent-soft)' : 'none',
       }}>
         {section.title}
       </h4>
-      <div className="markdown-content" style={{ fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--foreground)' }}>
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ table: ({ children, ...props }) => (<div className="table-wrapper"><table {...props}>{children}</table></div>) }}>{section.content}</ReactMarkdown>
+      <div className="markdown-content" style={{ fontSize: 12.5, lineHeight: 1.7 }}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            table: ({ children, ...props }) => (
+              <div className="table-wrapper"><table {...props}>{children}</table></div>
+            ),
+          }}
+        >
+          {section.content}
+        </ReactMarkdown>
       </div>
       {section.key_points && section.key_points.length > 0 && (
         <div style={{
-          marginTop: '0.75rem',
-          padding: '0.75rem',
-          background: 'rgba(44, 62, 80, 0.08)',
-          borderRadius: '8px',
-          borderLeft: '3px solid var(--color-3)',
-          fontSize: '0.8rem',
+          marginTop: 8,
+          padding: '8px 12px',
+          background: 'var(--note-bg)',
+          borderLeft: '2px solid var(--note)',
         }}>
-          <strong style={{ color: 'var(--color-3)' }}>핵심</strong>
-          <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.25rem' }}>
-            {section.key_points.map((kp, i) => <li key={i} style={{ marginBottom: '0.15rem' }}>{kp}</li>)}
+          <div style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 10,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--note)',
+            marginBottom: 4,
+            fontWeight: 600,
+          }}>
+            핵심
+          </div>
+          <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12.5, lineHeight: 1.6 }}>
+            {section.key_points.map((kp, i) => <li key={i} style={{ marginBottom: 2 }}>{kp}</li>)}
           </ul>
         </div>
       )}
@@ -138,7 +170,6 @@ function SectionRenderer({ section, level = 0 }: { section: StudySectionData; le
 export default function StudyPanel({ items, onRemove, onClose }: StudyPanelProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
-  // 새 아이템 추가 시 자동 확장
   useEffect(() => {
     if (items.length > 0) {
       const lastItem = items[items.length - 1];
@@ -160,43 +191,49 @@ export default function StudyPanel({ items, onRemove, onClose }: StudyPanelProps
 
   return (
     <div style={{
-      background: 'var(--surface)',
-      borderLeft: '2px solid var(--color-4)',
-      borderRadius: '16px',
+      background: 'var(--paper)',
+      border: '1px solid var(--rule)',
       overflow: 'hidden',
     }}>
-      {/* Header */}
       <div style={{
         position: 'sticky',
         top: 0,
-        padding: '1rem 1.25rem',
-        background: 'var(--surface)',
-        borderBottom: '1px solid var(--glass-border)',
+        padding: '10px 14px',
+        background: 'var(--paper-2)',
+        borderBottom: '1px solid var(--rule)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 10,
       }}>
-        <span style={{ fontWeight: 700, color: 'var(--color-4)', fontSize: '0.95rem' }}>
-          학습 자료 ({items.length})
+        <span style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'var(--accent)',
+          fontWeight: 600,
+        }}>
+          Study · {items.length}
         </span>
         <button
           onClick={onClose}
           style={{
             background: 'none',
             border: 'none',
-            color: 'var(--text-muted)',
+            color: 'var(--ink-3)',
             cursor: 'pointer',
-            fontSize: '1.2rem',
-            padding: '0.25rem 0.5rem',
+            fontSize: 16,
+            padding: '2px 6px',
+            lineHeight: 1,
           }}
+          title="Close panel"
         >
           ✕
         </button>
       </div>
 
-      {/* Items */}
-      <div style={{ padding: '0.75rem' }}>
+      <div style={{ padding: 10 }}>
         {items.map((item) => {
           const itemKey = `${item.keyword}-${item.studyId}`;
           const isExpanded = expandedItems.has(itemKey);
@@ -205,81 +242,84 @@ export default function StudyPanel({ items, onRemove, onClose }: StudyPanelProps
             <div
               key={itemKey}
               style={{
-                marginBottom: '0.75rem',
-                border: '1px solid var(--glass-border)',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                background: 'var(--glass-bg)',
+                marginBottom: 10,
+                border: '1px solid var(--rule)',
+                background: 'var(--paper)',
               }}
             >
-              {/* Item Header */}
               <div
                 onClick={() => toggleExpand(itemKey)}
                 style={{
-                  padding: '0.75rem 1rem',
+                  padding: '10px 12px',
                   cursor: 'pointer',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  background: isExpanded ? 'rgba(41, 128, 185, 0.06)' : 'transparent',
+                  background: isExpanded ? 'var(--accent-bg)' : 'transparent',
+                  transition: 'background 0.15s',
                 }}
               >
-                <div>
-                  <span style={{
-                    display: 'inline-block',
-                    padding: '0.15rem 0.5rem',
-                    borderRadius: '6px',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    background: 'rgba(41, 128, 185, 0.1)',
-                    color: 'var(--color-4)',
-                    marginRight: '0.5rem',
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+                    <span className="tag-chip accent" style={{ fontSize: 10 }}>{item.keyword}</span>
+                    <span style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 10,
+                      color: 'var(--ink-3)',
+                      letterSpacing: '0.06em',
+                    }}>
+                      Ch.{item.chapterId} · {item.studyId}
+                    </span>
+                  </div>
+                  <div style={{
+                    fontSize: 13,
+                    color: 'var(--ink)',
+                    lineHeight: 1.4,
                   }}>
-                    {item.keyword}
-                  </span>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--foreground)' }}>
                     {item.title}
-                  </span>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                    Ch.{item.chapterId} &middot; {item.studyId}
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, marginLeft: 10 }}>
                   <button
                     onClick={(e) => { e.stopPropagation(); onRemove(item.keyword, item.studyId); }}
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: 'var(--text-muted)',
+                      color: 'var(--ink-3)',
                       cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      padding: '0.1rem 0.3rem',
+                      fontSize: 12,
+                      padding: '2px 4px',
                     }}
+                    title="Remove"
                   >
                     ✕
                   </button>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>
+                  <span style={{
+                    color: 'var(--ink-3)',
+                    fontSize: 10,
+                    fontFamily: 'var(--font-mono)',
+                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)',
+                    transition: 'transform 0.2s',
+                  }}>
                     ▼
                   </span>
                 </div>
               </div>
 
-              {/* Item Content */}
               {isExpanded && item.keywordStudy && (
-                <div style={{
-                  padding: '1rem',
-                  borderTop: '1px solid var(--glass-border)',
-                }}>
+                <div style={{ padding: 12, borderTop: '1px solid var(--rule)' }}>
                   <KeywordStudyRenderer data={item.keywordStudy} keyword={item.keyword} />
                 </div>
               )}
 
               {isExpanded && !item.keywordStudy && item.content && (
-                <div style={{
-                  padding: '1rem',
-                  borderTop: '1px solid var(--glass-border)',
-                }}>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: 1.5 }}>
+                <div style={{ padding: 12, borderTop: '1px solid var(--rule)' }}>
+                  <p style={{
+                    fontSize: 12.5,
+                    color: 'var(--ink-2)',
+                    marginBottom: 12,
+                    lineHeight: 1.6,
+                  }}>
                     {item.content.description}
                   </p>
                   {item.content.sections.map(sec => (
@@ -289,8 +329,17 @@ export default function StudyPanel({ items, onRemove, onClose }: StudyPanelProps
               )}
 
               {isExpanded && !item.keywordStudy && !item.content && (
-                <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  Loading...
+                <div style={{
+                  padding: '18px 14px',
+                  textAlign: 'center',
+                  color: 'var(--ink-3)',
+                  fontSize: 12,
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  borderTop: '1px solid var(--rule)',
+                }}>
+                  Loading…
                 </div>
               )}
             </div>
