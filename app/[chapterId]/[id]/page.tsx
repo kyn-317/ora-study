@@ -87,7 +87,8 @@ export default async function DetailPage({ params }: { params: Promise<{ chapter
                   width: v.width || '100%',
                   maxWidth: '100%',
                   border: '1px solid var(--rule)',
-                  background: 'var(--paper)',
+                  background: '#111827',
+                  borderRadius: 8,
                   padding: 16,
                 }}
               />
