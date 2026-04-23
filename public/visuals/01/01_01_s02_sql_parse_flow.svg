@@ -29,14 +29,14 @@
   <rect x="310" y="70" width="180" height="40" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5" />
   <text x="400" y="95" text-anchor="middle" class="label" fill="#4a2e78">SQL 문장 제출</text>
 
-  <line x1="400" y1="110" x2="400" y2="130" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
+  <line x1="400" y1="110" x2="400" y2="135" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
 
   <!-- Step 2: Syntax Check -->
   <rect x="310" y="135" width="180" height="45" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
   <text x="400" y="155" text-anchor="middle" class="sublabel">1. Syntax Check</text>
   <text x="400" y="172" text-anchor="middle" class="small">구문 분석 (문법 검사)</text>
 
-  <line x1="400" y1="180" x2="400" y2="200" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
+  <line x1="400" y1="180" x2="400" y2="205" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
 
   <!-- Step 3: Semantic Check -->
   <rect x="310" y="205" width="180" height="45" class="box" fill="#dee5f5" stroke="#2456a8" stroke-width="1.5" />
@@ -44,11 +44,11 @@
   <text x="400" y="242" text-anchor="middle" class="small">의미 분석 (객체/권한 확인)</text>
 
   <!-- Data Dictionary Cache reference -->
-  <line x1="490" y1="228" x2="560" y2="228" stroke="#8a5a10" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ah)" />
+  <line x1="490" y1="228" x2="565" y2="228" stroke="#8a5a10" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ah)" />
   <rect x="565" y="210" width="160" height="35" rx="6" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1" />
   <text x="645" y="232" text-anchor="middle" class="small" fill="#8a5a10">Data Dictionary Cache</text>
 
-  <line x1="400" y1="250" x2="400" y2="270" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
+  <line x1="400" y1="250" x2="400" y2="275" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
 
   <!-- Step 4: Shared Pool Check (Decision Diamond) -->
   <polygon points="400,275 510,315 400,355 290,315" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5" />
@@ -56,7 +56,7 @@
   <text x="400" y="328" text-anchor="middle" class="small">동일 SQL 존재?</text>
 
   <!-- Soft Parse path (YES - left) -->
-  <line x1="290" y1="315" x2="180" y2="315" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ah-green)" />
+  <line x1="290" y1="315" x2="175" y2="315" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ah-green)" />
   <text x="235" y="305" text-anchor="middle" class="sublabel" fill="#2f6a1c">YES</text>
 
   <rect x="50" y="290" width="125" height="50" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.5" />
@@ -64,7 +64,7 @@
   <text x="112" y="330" text-anchor="middle" class="small">실행 계획 재사용</text>
 
   <!-- Soft Parse arrow down to execution (drawn BEFORE tips box so box covers it) -->
-  <line x1="112" y1="340" x2="112" y2="528" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ah-green)" />
+  <line x1="112" y1="340" x2="112" y2="533" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ah-green)" />
 
   <!-- Optimization tips box (opaque bg, covers the arrow behind it) -->
   <rect x="35" y="357" width="245" height="124" class="box" fill="#faf8f3" stroke="#2f6a1c" stroke-width="1" />
@@ -76,7 +76,7 @@
   <text x="58" y="463" class="small">3. 표준 SQL 코딩 규칙 적용</text>
 
   <!-- Hard Parse path (NO - down) -->
-  <line x1="400" y1="355" x2="400" y2="388" stroke="#be123c" stroke-width="1.5" marker-end="url(#ah-red)" />
+  <line x1="400" y1="355" x2="400" y2="393" stroke="#be123c" stroke-width="1.5" marker-end="url(#ah-red)" />
   <text x="418" y="375" class="sublabel" fill="#be123c">NO</text>
 
   <!-- Hard Parse label -->
@@ -89,14 +89,14 @@
   <text x="400" y="412" text-anchor="middle" class="sublabel">4. Optimization</text>
   <text x="400" y="428" text-anchor="middle" class="small">CBO 최적 실행 계획 생성</text>
 
-  <line x1="400" y1="435" x2="400" y2="458" stroke="#be123c" stroke-width="1.5" marker-end="url(#ah-red)" />
+  <line x1="400" y1="435" x2="400" y2="463" stroke="#be123c" stroke-width="1.5" marker-end="url(#ah-red)" />
 
   <!-- Step 6: Row Source Generation -->
   <rect x="310" y="463" width="180" height="42" class="box" fill="#f5d0d0" stroke="#be123c" stroke-width="1.5" />
   <text x="400" y="482" text-anchor="middle" class="sublabel">5. Row Source Generation</text>
   <text x="400" y="498" text-anchor="middle" class="small">행 소스 트리 변환</text>
 
-  <line x1="400" y1="505" x2="400" y2="528" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
+  <line x1="400" y1="505" x2="400" y2="533" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
 
   <!-- Execution -->
   <rect x="100" y="533" width="500" height="40" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5" />

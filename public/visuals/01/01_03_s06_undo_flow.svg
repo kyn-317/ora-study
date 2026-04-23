@@ -39,7 +39,7 @@
   <text x="115" y="118" text-anchor="middle" class="code">UPDATE emp SET sal=5000</text>
 
   <!-- Arrow 1→2 -->
-  <line x1="200" y1="102" x2="250" y2="102" stroke="#2456a8" stroke-width="2" marker-end="url(#arrB)"/>
+  <line x1="200" y1="102" x2="260" y2="102" stroke="#2456a8" stroke-width="2" marker-end="url(#arrB)"/>
 
   <!-- Step 2: Before Image to UNDO -->
   <rect x="260" y="75" width="200" height="55" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1.5"/>
@@ -47,7 +47,7 @@
   <text x="360" y="118" text-anchor="middle" class="sublabel">이전 값(sal=3000) → UNDO 세그먼트</text>
 
   <!-- Arrow 2→3 -->
-  <line x1="460" y1="102" x2="510" y2="102" stroke="#4a2e78" stroke-width="2" marker-end="url(#arrP)"/>
+  <line x1="460" y1="102" x2="520" y2="102" stroke="#4a2e78" stroke-width="2" marker-end="url(#arrP)"/>
 
   <!-- Step 3: Redo for UNDO -->
   <rect x="520" y="75" width="240" height="55" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="1.5"/>
@@ -67,7 +67,7 @@
   <line x1="230" y1="192" x2="298" y2="192" stroke="#2f6a1c" stroke-width="2" marker-end="url(#arrG)"/>
 
   <!-- COMMIT path -->
-  <line x1="400" y1="220" x2="200" y2="280" stroke="#2f6a1c" stroke-width="2" marker-end="url(#arrG)"/>
+  <line x1="400" y1="220" x2="200" y2="275" stroke="#2f6a1c" stroke-width="2" marker-end="url(#arrG)"/>
   <text x="270" y="258" class="sublabel" fill="#2f6a1c">COMMIT</text>
 
   <rect x="50" y="275" width="300" height="80" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.2"/>
@@ -76,7 +76,7 @@
   <text x="200" y="338" text-anchor="middle" class="code">UNDO_RETENTION(기본 900초) 동안 보존</text>
 
   <!-- ROLLBACK path -->
-  <line x1="400" y1="220" x2="600" y2="280" stroke="#be123c" stroke-width="2" marker-end="url(#arrR)"/>
+  <line x1="400" y1="220" x2="600" y2="275" stroke="#be123c" stroke-width="2" marker-end="url(#arrR)"/>
   <text x="530" y="258" class="sublabel" fill="#be123c">ROLLBACK</text>
 
   <rect x="450" y="275" width="310" height="80" class="box" fill="#f5d0d0" stroke="#be123c" stroke-width="1.2"/>
@@ -94,7 +94,7 @@
   <text x="165" y="458" text-anchor="middle" class="small" fill="#be123c">(COMMIT 전)</text>
 
   <!-- Arrow -->
-  <line x1="275" y1="445" x2="335" y2="445" stroke="#4a2e78" stroke-width="2" marker-end="url(#arrP)"/>
+  <line x1="275" y1="445" x2="340" y2="445" stroke="#4a2e78" stroke-width="2" marker-end="url(#arrP)"/>
   <text x="305" y="438" text-anchor="middle" class="small" fill="#4a2e78">UNDO</text>
 
   <!-- UNDO provides CR copy -->
@@ -103,7 +103,7 @@
   <text x="420" y="458" text-anchor="middle" class="code">Before Image: sal=3000</text>
 
   <!-- Arrow -->
-  <line x1="500" y1="445" x2="540" y2="445" stroke="#2f6a1c" stroke-width="2" marker-end="url(#arrG)"/>
+  <line x1="500" y1="445" x2="545" y2="445" stroke="#2f6a1c" stroke-width="2" marker-end="url(#arrG)"/>
   <text x="520" y="438" text-anchor="middle" class="small" fill="#2f6a1c">CR Copy</text>
 
   <!-- Session B -->
@@ -121,7 +121,7 @@
   <text x="150" y="583" text-anchor="middle" class="small" fill="#be123c">활성 트랜잭션 — 삭제 불가</text>
 
   <!-- Arrow -->
-  <line x1="230" y1="570" x2="280" y2="570" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrB)"/>
+  <line x1="230" y1="570" x2="285" y2="570" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrB)"/>
   <text x="255" y="562" text-anchor="middle" class="small">COMMIT</text>
 
   <!-- UNEXPIRED -->
@@ -130,7 +130,7 @@
   <text x="380" y="583" text-anchor="middle" class="small" fill="#8a5a10">보존 기간 중 — 가능하면 보존</text>
 
   <!-- Arrow -->
-  <line x1="475" y1="570" x2="525" y2="570" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrG)"/>
+  <line x1="475" y1="570" x2="530" y2="570" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrG)"/>
   <text x="500" y="562" text-anchor="middle" class="small">시간 경과</text>
 
   <!-- EXPIRED -->

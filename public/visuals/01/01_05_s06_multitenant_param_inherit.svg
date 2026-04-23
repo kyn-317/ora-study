@@ -46,9 +46,9 @@
   <text x="495" y="196" class="small" text-anchor="middle" fill="#2f6a1c">ISPDB_MODIFIABLE = TRUE</text>
 
   <!-- Inheritance arrows -->
-  <line x1="400" y1="200" x2="200" y2="260" stroke="#2f6a1c" stroke-width="1.5" stroke-dasharray="6" marker-end="url(#arrVGreen)"/>
-  <line x1="400" y1="200" x2="400" y2="260" stroke="#2f6a1c" stroke-width="1.5" stroke-dasharray="6" marker-end="url(#arrVGreen)"/>
-  <line x1="400" y1="200" x2="600" y2="260" stroke="#2f6a1c" stroke-width="1.5" stroke-dasharray="6" marker-end="url(#arrVGreen)"/>
+  <line x1="400" y1="200" x2="200" y2="265" stroke="#2f6a1c" stroke-width="1.5" stroke-dasharray="6" marker-end="url(#arrVGreen)"/>
+  <line x1="400" y1="200" x2="400" y2="265" stroke="#2f6a1c" stroke-width="1.5" stroke-dasharray="6" marker-end="url(#arrVGreen)"/>
+  <line x1="400" y1="200" x2="600" y2="265" stroke="#2f6a1c" stroke-width="1.5" stroke-dasharray="6" marker-end="url(#arrVGreen)"/>
 
   <text x="400" y="240" class="small" text-anchor="middle" fill="#2f6a1c">값 상속 (미설정 시 CDB 값 사용)</text>
 

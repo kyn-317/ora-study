@@ -41,7 +41,7 @@
   <text x="80" y="217" class="code">모든 관리 작업의 출발점</text>
 
   <!-- Arrow from Step 1 to Step 2 -->
-  <line x1="360" y1="180" x2="430" y2="180" stroke="#4a2e78" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="360" y1="180" x2="440" y2="180" stroke="#4a2e78" stroke-width="2" marker-end="url(#arrowhead)"/>
   <text x="395" y="173" class="small" text-anchor="middle">접속</text>
   <text x="395" y="185" class="small" text-anchor="middle">필요</text>
 
@@ -68,7 +68,7 @@
   <text x="80" y="377" class="code">클라이언트 접속 메커니즘</text>
 
   <!-- Arrow from Step 3 to Step 4 -->
-  <line x1="360" y1="340" x2="430" y2="340" stroke="#2456a8" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <line x1="360" y1="340" x2="440" y2="340" stroke="#2456a8" stroke-width="2" marker-end="url(#arrowBlue)"/>
   <text x="395" y="333" class="small" text-anchor="middle">규약</text>
   <text x="395" y="345" class="small" text-anchor="middle">활용</text>
 

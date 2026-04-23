@@ -55,7 +55,13 @@ interface DemoTestClientProps {
   chapters: ChapterInfo[];
 }
 
-const QUESTION_COUNTS = [10, 20, 30];
+const QUESTION_COUNTS: Array<{ value: number; label: string }> = [
+  { value: 10, label: '10' },
+  { value: 20, label: '20' },
+  { value: 30, label: '30' },
+  { value: 60, label: '60' },
+  { value: 0, label: 'All' },
+];
 
 export default function DemoTestClient({ chapters }: DemoTestClientProps) {
   const [phase, setPhase] = useState<Phase>('setup');
@@ -104,7 +110,10 @@ export default function DemoTestClient({ chapters }: DemoTestClientProps) {
 
       // Shuffle and pick
       const shuffled = shuffleArray(allQuestions);
-      const picked = shuffled.slice(0, Math.min(questionCount, shuffled.length));
+      const targetCount = questionCount === 0
+        ? shuffled.length
+        : Math.min(questionCount, shuffled.length);
+      const picked = shuffled.slice(0, targetCount);
       const withShuffledOptions = picked.map(shuffleOptions);
 
       setQuestions(withShuffledOptions);
@@ -306,13 +315,13 @@ export default function DemoTestClient({ chapters }: DemoTestClientProps) {
         <div className="glass" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
           <h2 style={{ color: 'var(--color-4)', fontSize: '1.3rem', marginBottom: '1.5rem' }}>Question Count</h2>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {QUESTION_COUNTS.map((count) => {
-              const isActive = questionCount === count;
-              const isDisabled = totalAvailable > 0 && totalAvailable < count;
+            {QUESTION_COUNTS.map(({ value, label }) => {
+              const isActive = questionCount === value;
+              const isDisabled = value !== 0 && totalAvailable > 0 && totalAvailable < value;
               return (
                 <button
-                  key={count}
-                  onClick={() => !isDisabled && setQuestionCount(count)}
+                  key={value}
+                  onClick={() => !isDisabled && setQuestionCount(value)}
                   style={{
                     padding: '1rem 2.5rem',
                     borderRadius: '12px',
@@ -325,7 +334,7 @@ export default function DemoTestClient({ chapters }: DemoTestClientProps) {
                     transition: 'all 0.2s ease',
                   }}
                 >
-                  {count}
+                  {value === 0 && totalAvailable > 0 ? `${label} (${totalAvailable})` : label}
                 </button>
               );
             })}

@@ -32,7 +32,7 @@
   <rect x="55" y="125" width="80" height="35" rx="6" fill="#d8cfe5" stroke="#4a2e78" stroke-width="1" />
   <text x="95" y="147" text-anchor="middle" class="sublabel">Client</text>
 
-  <line x1="135" y1="142" x2="160" y2="142" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
+  <line x1="135" y1="142" x2="165" y2="142" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
 
   <!-- Server Process + PGA -->
   <rect x="165" y="120" width="200" height="260" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="1.5" />

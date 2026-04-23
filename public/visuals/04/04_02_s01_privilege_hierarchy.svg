@@ -72,9 +72,9 @@
   <text x="570" y="315" class="small">GRANT OPTION 부여 불가</text>
 
   <!-- GRANT/REVOKE flow -->
-  <line x1="140" y1="325" x2="140" y2="360" stroke="#2456a8" stroke-width="1" marker-end="url(#arr)"/>
-  <line x1="400" y1="325" x2="400" y2="360" stroke="#2f6a1c" stroke-width="1" marker-end="url(#arr)"/>
-  <line x1="660" y1="325" x2="660" y2="360" stroke="#8a5a10" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="140" y1="325" x2="140" y2="435" stroke="#2456a8" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="400" y1="325" x2="400" y2="365" stroke="#2f6a1c" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="660" y1="325" x2="660" y2="435" stroke="#8a5a10" stroke-width="1" marker-end="url(#arr)"/>
 
   <text x="400" y="350" class="label" text-anchor="middle">GRANT / REVOKE</text>
 

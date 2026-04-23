@@ -33,9 +33,9 @@
   <text x="400" y="118" text-anchor="middle" class="sublabel">MOUNT 단계에서 컨트롤 파일 읽기</text>
 
   <!-- Synchronous write arrows -->
-  <line x1="310" y1="140" x2="150" y2="195" stroke="#be123c" stroke-width="2" marker-end="url(#aR)"/>
-  <line x1="400" y1="140" x2="400" y2="195" stroke="#be123c" stroke-width="2" marker-end="url(#aR)"/>
-  <line x1="490" y1="140" x2="650" y2="195" stroke="#be123c" stroke-width="2" marker-end="url(#aR)"/>
+  <line x1="310" y1="140" x2="155" y2="210" stroke="#be123c" stroke-width="2" marker-end="url(#aR)"/>
+  <line x1="400" y1="140" x2="400" y2="200" stroke="#be123c" stroke-width="2" marker-end="url(#aR)"/>
+  <line x1="490" y1="140" x2="655" y2="210" stroke="#be123c" stroke-width="2" marker-end="url(#aR)"/>
 
   <!-- Sync label -->
   <rect x="310" y="160" width="180" height="22" rx="11" ry="11" fill="#f5d0d0" stroke="#be123c" stroke-width="0.6"/>

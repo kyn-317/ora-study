@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 type MatchType = 'title' | 'keyword' | 'content' | 'sql';
 
@@ -54,7 +55,7 @@ export default function HomeSearch() {
   const [filter, setFilter] = useState<MatchType | 'all'>('all');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(-1);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -104,7 +105,8 @@ export default function HomeSearch() {
 
   const handleChange = (v: string) => {
     setQuery(v);
-    setActive(0);
+    setActive(-1);
+    setOpen(true);
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       setDebounced(v);
@@ -117,7 +119,7 @@ export default function HomeSearch() {
     setDebounced('');
     setResults([]);
     setTotal(0);
-    setActive(0);
+    setActive(-1);
     inputRef.current?.focus();
   };
 
@@ -143,14 +145,15 @@ export default function HomeSearch() {
       setActive(i => Math.min(i + 1, preview.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setActive(i => Math.max(i - 1, 0));
+      setActive(i => Math.max(i - 1, -1));
     } else if (e.key === 'Enter') {
-      if (preview[active]) {
+      if (active >= 0 && preview[active]) {
         const r = preview[active];
         router.push(`/${r.chapterId}/${r.studyId}`);
         setOpen(false);
       } else if (query.trim().length >= 2) {
         router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+        setOpen(false);
       }
     }
   };
@@ -209,11 +212,12 @@ export default function HomeSearch() {
                   {items.map((r) => {
                     const idx = preview.indexOf(r);
                     return (
-                      <a
+                      <Link
                         key={`${r.chapterId}-${r.studyId}-${idx}`}
                         href={`/${r.chapterId}/${r.studyId}`}
                         className={`row${idx === active ? ' active' : ''}`}
                         onMouseEnter={() => setActive(idx)}
+                        onClick={() => setOpen(false)}
                       >
                         <div className="row-main">
                           <div className="row-title">{highlight(r.title, query)}</div>
@@ -225,15 +229,19 @@ export default function HomeSearch() {
                           </div>
                         </div>
                         <span className={`kind ${r.matchType}`}>{r.matchType}</span>
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
               ))}
               {total > preview.length && (
-                <a className="more" href={`/search?q=${encodeURIComponent(query.trim())}`}>
+                <Link
+                  className="more"
+                  href={`/search?q=${encodeURIComponent(query.trim())}`}
+                  onClick={() => setOpen(false)}
+                >
                   전체 {total}건 결과 보기 →
-                </a>
+                </Link>
               )}
             </>
           )}

@@ -29,7 +29,7 @@
   <text x="140" y="210" text-anchor="middle" class="small">클라이언트 애플리케이션</text>
 
   <!-- Arrow: Client to Server -->
-  <line x1="250" y1="135" x2="330" y2="135" stroke="#4a2e78" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <line x1="250" y1="135" x2="345" y2="135" stroke="#4a2e78" stroke-width="2" marker-end="url(#arrowPurple)"/>
   <text x="290" y="125" text-anchor="middle" class="small">Oracle Net</text>
   <text x="290" y="155" text-anchor="middle" class="small">(네트워크)</text>
 

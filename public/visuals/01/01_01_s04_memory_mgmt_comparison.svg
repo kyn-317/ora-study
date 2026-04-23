@@ -130,7 +130,7 @@
   <text x="170" y="452" text-anchor="middle" class="sublabel" fill="#2f6a1c">AMM</text>
 
   <!-- YES arrow: diamond up to AMM box -->
-  <line x1="170" y1="473" x2="170" y2="468" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ah-green)" />
+  <line x1="170" y1="473" x2="170" y2="463" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ah-green)" />
   <text x="182" y="475" class="small" fill="#2f6a1c">YES</text>
 
   <!-- Decision 1: diamond -->
@@ -147,7 +147,7 @@
   <text x="475" y="452" text-anchor="middle" class="sublabel" fill="#2456a8">ASMM</text>
 
   <!-- YES arrow: diamond up to ASMM box -->
-  <line x1="475" y1="473" x2="475" y2="468" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ah-green)" />
+  <line x1="475" y1="473" x2="475" y2="463" stroke="#2f6a1c" stroke-width="1.5" marker-end="url(#ah-green)" />
   <text x="487" y="475" class="small" fill="#2f6a1c">YES</text>
 
   <!-- Decision 2: diamond -->
@@ -156,7 +156,7 @@
   <text x="475" y="510" text-anchor="middle" class="small">&gt; 0 ?</text>
 
   <!-- NO arrow: diamond right to Manual box -->
-  <line x1="565" y1="498" x2="635" y2="498" stroke="#be123c" stroke-width="1.5" marker-end="url(#ah-red)" />
+  <line x1="565" y1="498" x2="640" y2="498" stroke="#be123c" stroke-width="1.5" marker-end="url(#ah-red)" />
   <text x="595" y="491" text-anchor="middle" class="small" fill="#be123c">NO</text>
 
   <!-- Manual result box -->

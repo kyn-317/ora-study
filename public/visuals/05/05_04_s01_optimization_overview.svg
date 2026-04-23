@@ -31,7 +31,7 @@
   <text x="40" y="195" class="small">유지보수 윈도우 자동실행</text>
 
   <!-- Arrow -->
-  <line x1="200" y1="135" x2="225" y2="135" stroke="#4a2e78" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+  <line x1="200" y1="135" x2="230" y2="135" stroke="#4a2e78" stroke-width="2" fill="none" marker-end="url(#ah)"/>
 
   <!-- Step 2: Analyze -->
   <rect x="230" y="70" width="170" height="130" class="box" fill="#f0ddb3" stroke="#8a5a10" stroke-width="2"/>
@@ -44,7 +44,7 @@
   <text x="240" y="195" class="small">단편화 수준 측정</text>
 
   <!-- Arrow -->
-  <line x1="400" y1="135" x2="425" y2="135" stroke="#4a2e78" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+  <line x1="400" y1="135" x2="430" y2="135" stroke="#4a2e78" stroke-width="2" fill="none" marker-end="url(#ah)"/>
 
   <!-- Step 3: Choose -->
   <rect x="430" y="70" width="170" height="130" class="box" fill="#d8cfe5" stroke="#4a2e78" stroke-width="2"/>
@@ -57,7 +57,7 @@
   <text x="440" y="195" class="small">전체 삭제? → TRUNCATE</text>
 
   <!-- Arrow -->
-  <line x1="600" y1="135" x2="625" y2="135" stroke="#4a2e78" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+  <line x1="600" y1="135" x2="630" y2="135" stroke="#4a2e78" stroke-width="2" fill="none" marker-end="url(#ah)"/>
 
   <!-- Step 4: Execute -->
   <rect x="630" y="70" width="140" height="130" class="box" fill="#cfe1b8" stroke="#2f6a1c" stroke-width="2"/>

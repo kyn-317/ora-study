@@ -33,7 +33,7 @@
   <text x="130" y="118" class="small" text-anchor="middle">Client Application</text>
 
   <!-- Arrow to Naming -->
-  <line x1="210" y1="105" x2="270" y2="105" stroke="#4a2e78" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="210" y1="105" x2="280" y2="105" stroke="#4a2e78" stroke-width="2" marker-end="url(#arr)"/>
   <text x="240" y="97" class="code" text-anchor="middle">@서비스명</text>
 
   <!-- Naming Methods Box -->
@@ -54,7 +54,7 @@
   <text x="395" y="206" class="code" text-anchor="middle">NAMES.DIRECTORY_PATH</text>
 
   <!-- Arrow to Connect Descriptor -->
-  <line x1="510" y1="138" x2="570" y2="138" stroke="#2456a8" stroke-width="2" marker-end="url(#arrBlue)"/>
+  <line x1="510" y1="138" x2="580" y2="138" stroke="#2456a8" stroke-width="2" marker-end="url(#arrBlue)"/>
 
   <!-- Connect Descriptor Box -->
   <rect x="580" y="75" width="180" height="130" class="box" fill="#f3efe4" stroke="#8a5a10" stroke-width="2"/>
@@ -67,7 +67,7 @@
   <text x="600" y="184" class="code">SERVICE_NAME = orcl</text>
 
   <!-- Arrow down to Listener -->
-  <line x1="670" y1="205" x2="670" y2="250" stroke="#8a5a10" stroke-width="2" marker-end="url(#arrYellow)"/>
+  <line x1="670" y1="205" x2="670" y2="260" stroke="#8a5a10" stroke-width="2" marker-end="url(#arrYellow)"/>
 
   <!-- Server Side Section -->
   <rect x="40" y="240" width="720" height="200" class="box" fill="rgba(42,42,42,0.02)" stroke="#f3efe4" stroke-width="1" stroke-dasharray="6,3"/>
@@ -84,10 +84,10 @@
   <rect x="300" y="275" width="200" height="50" class="box" fill="#f3efe4" stroke="#2456a8" stroke-width="1.5"/>
   <text x="400" y="298" class="sublabel" text-anchor="middle">LREG 프로세스 (동적 등록)</text>
   <text x="400" y="314" class="small" text-anchor="middle">Dynamic Registration</text>
-  <line x1="500" y1="300" x2="530" y2="300" stroke="#2456a8" stroke-width="1.5" marker-end="url(#arrBlue)"/>
+  <line x1="500" y1="300" x2="540" y2="300" stroke="#2456a8" stroke-width="1.5" marker-end="url(#arrBlue)"/>
 
   <!-- Arrow to Server Process -->
-  <line x1="640" y1="340" x2="640" y2="360" stroke="#4a2e78" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="640" y1="340" x2="640" y2="365" stroke="#4a2e78" stroke-width="2" marker-end="url(#arr)"/>
   <text x="655" y="355" class="small">세션 할당</text>
 
   <!-- Server Process -->
@@ -105,7 +105,7 @@
   <path d="M 170 350 L 170 300 L 290 300" fill="none" stroke="#2456a8" stroke-width="1.5" stroke-dasharray="5,3"/>
 
   <!-- Arrow from Server Process to DB -->
-  <line x1="560" y1="392" x2="270" y2="392" stroke="#4a2e78" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <line x1="560" y1="392" x2="260" y2="392" stroke="#4a2e78" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
   <text x="415" y="387" class="small" text-anchor="middle">SQL 실행</text>
 
   <!-- Error Codes -->

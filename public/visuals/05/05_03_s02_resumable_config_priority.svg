@@ -38,7 +38,7 @@
   <text x="450" y="176" class="small">ALTER SESSION DISABLE RESUMABLE → 강제 비활성</text>
 
   <!-- Priority arrow -->
-  <line x1="430" y1="130" x2="385" y2="130" stroke="#8a5a10" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+  <line x1="430" y1="130" x2="370" y2="130" stroke="#8a5a10" stroke-width="2" fill="none" marker-end="url(#ah)"/>
   <text x="395" y="122" class="small" fill="#8a5a10">우선</text>
 
   <!-- Priority tree -->

@@ -69,7 +69,7 @@ export default async function Home() {
         <div>
           <div className="mode-kicker">Demo Test</div>
           <h3 className="mode-title">랜덤 데모 테스트</h3>
-          <p className="mode-desc">10 · 20 · 30문항 · 원하는 챕터를 조합한 빠른 연습.</p>
+          <p className="mode-desc">10 · 20 · 30 · 60 · All · 원하는 챕터를 조합한 빠른 연습.</p>
         </div>
         <span className="mode-arrow">→</span>
       </Link>

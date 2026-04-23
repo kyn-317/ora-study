@@ -71,7 +71,7 @@
   <text x="695" y="120" text-anchor="middle" class="sublabel" fill="#2456a8">Cold End (LRU)</text>
 
   <!-- Arrow showing direction -->
-  <line x1="155" y1="135" x2="165" y2="135" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
+  <line x1="155" y1="135" x2="170" y2="135" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
   <line x1="620" y1="135" x2="635" y2="135" stroke="#4a2e78" stroke-width="1.5" marker-end="url(#ah)" />
 
   <!-- Touch Count explanation -->
@@ -113,7 +113,7 @@
   <text x="602" y="332" text-anchor="middle" class="small" fill="#be123c">Dirty 3</text>
 
   <!-- Arrow to DBWn -->
-  <line x1="585" y1="355" x2="585" y2="375" stroke="#be123c" stroke-width="1.5" marker-end="url(#ah-red)" />
+  <line x1="585" y1="355" x2="585" y2="415" stroke="#be123c" stroke-width="1.5" marker-end="url(#ah-red)" />
   <text x="420" y="390" class="sublabel">DBWn → 데이터 파일에 기록</text>
 
   <!-- === Buffer Pool Types === -->
